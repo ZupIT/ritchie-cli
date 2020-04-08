@@ -32,19 +32,16 @@ func (l loginCmd) RunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("Starting login...")
 		secret := security.Passcode(s)
 		if err := l.Login(secret); err != nil {
 			return err
 		}
-		fmt.Println("Login successful!")
 
-		fmt.Println("Loading repositories...")
 		if err := l.Load(); err != nil {
 			return err
 		}
-		fmt.Println("Done.")
 
+		fmt.Println("Session created successfully!")
 		return nil
 	}
 }

@@ -100,7 +100,7 @@ func buildCommands(ritchieHomePath string) *cobra.Command {
 	formulaRunner := formula.NewRunner(ritchieHomePath, envResolvers, http.DefaultClient, treeManager)
 	formulaCreator := formula.NewCreator(ritchieHomePath, treeManager)
 
-	rootCmd := cmd.NewRootCmd(workspaceManager, loginManager, sessionValidator)
+	rootCmd := cmd.NewRootCmd(workspaceManager, loginManager, repoManager, sessionValidator)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()

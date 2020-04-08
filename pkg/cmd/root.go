@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -42,12 +43,13 @@ var (
 type rootCmd struct {
 	workspaceManager workspace.Checker
 	loginManager     security.LoginManager
+	repoLoader       formula.RepoLoader
 	sessionValidator session.Validator
 }
 
 // NewRootCmd creates the root for all ritchie commands.
-func NewRootCmd(wm workspace.Checker, l security.LoginManager, sv session.Validator) *cobra.Command {
-	o := &rootCmd{wm, l, sv}
+func NewRootCmd(wm workspace.Checker, l security.LoginManager, r formula.RepoLoader, sv session.Validator) *cobra.Command {
+	o := &rootCmd{wm, l, r, sv}
 
 	return &cobra.Command{
 		Use:               cmdUse,
@@ -57,10 +59,6 @@ func NewRootCmd(wm workspace.Checker, l security.LoginManager, sv session.Valida
 		PersistentPreRunE: o.PreRunFunc(),
 		SilenceErrors:     true,
 	}
-}
-
-func version() string {
-	return fmt.Sprintf(versionMsg, Version, env.Edition, BuildDate, runtime.Version())
 }
 
 func (o *rootCmd) PreRunFunc() CommandRunnerFunc {
@@ -94,6 +92,10 @@ func (o *rootCmd) checkSession(commandPath string) error {
 			return err
 		}
 
+		if err := o.repoLoader.Load(); err != nil {
+			return err
+		}
+
 		fmt.Println("Session created successfully!")
 		os.Exit(0)
 	}
@@ -119,4 +121,8 @@ func sessionPrompt() (security.Passcode, error) {
 	}
 
 	return security.Passcode(passcode), nil
+}
+
+func version() string {
+	return fmt.Sprintf(versionMsg, Version, env.Edition, BuildDate, runtime.Version())
 }
