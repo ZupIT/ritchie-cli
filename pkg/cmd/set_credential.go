@@ -1,0 +1,166 @@
+package cmd
+
+import (
+	"errors"
+	"fmt"
+	"log"
+	"strings"
+
+	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
+
+// setCredentialCmd type for set credential command
+type setCredentialCmd struct {
+	credential.Setter
+	credential.Settings
+}
+
+// NewSetCredentialCmd creates a new cmd instance
+func NewSetCredentialCmd(setter credential.Setter, settings credential.Settings) *cobra.Command {
+	s := &setCredentialCmd{setter, settings}
+
+	return &cobra.Command{
+		Use:   "credential",
+		Short: "Set credential",
+		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
+		RunE:  s.RunFunc(),
+	}
+}
+
+func (s setCredentialCmd) RunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		cred, err := s.PromptResolver()
+		if err != nil {
+			return err
+		}
+
+		if err := s.Set(cred); err != nil {
+			return err
+		}
+
+		log.Println(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		return nil
+	}
+}
+
+func (s setCredentialCmd) PromptResolver() (credential.Detail, error) {
+	switch env.Edition {
+	case env.Single:
+		return s.singlePrompt()
+	case env.Team:
+		return s.teamPrompt()
+	default:
+		return credential.Detail{}, errors.New("invalid CLI build, no edition defined")
+	}
+}
+
+func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
+	var credDetail credential.Detail
+
+	provider, err := prompt.String("Provider: ", true)
+	if err != nil {
+		return credDetail, err
+	}
+
+	validate := func(pair []string) string {
+		if len(pair) < 2 {
+			return "Invalid key value credential"
+		}
+
+		if strings.TrimSpace(pair[0]) == "" {
+			return "The key must not be empty."
+		}
+
+		if strings.TrimSpace(pair[1]) == "" {
+			return "The value must not be empty."
+		}
+
+		return ""
+	}
+
+	cred := credential.Credential{}
+	addMore := true
+	for addMore {
+		kv, err := prompt.String("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+		if err != nil {
+			return credDetail, err
+		}
+
+		pair := strings.Split(kv, "=")
+		if s := validate(pair); s != "" {
+			fmt.Println(s)
+			continue
+		}
+
+		cred[pair[0]] = pair[1]
+
+		addMore, err = prompt.ListBool("Add more fields?", []string{"yes", "no"})
+		if err != nil {
+			return credDetail, err
+		}
+	}
+
+	credDetail.Service = provider
+	credDetail.Credential = cred
+
+	return credDetail, nil
+}
+
+func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
+	var credDetail credential.Detail
+
+	cfg, err := s.Fields()
+	if err != nil {
+		return credDetail, err
+	}
+	providers := make([]string, 0, len(cfg))
+	for k := range cfg {
+		providers = append(providers, k)
+	}
+
+	typ, err := prompt.List("Profile: ", []string{credential.Me, credential.Other})
+	if err != nil {
+		return credDetail, err
+	}
+
+	username := "me"
+	if typ == credential.Other {
+		username, err = prompt.String("Username: ", true)
+		if err != nil {
+			return credDetail, err
+		}
+	}
+
+	service, err := prompt.List("Provider: ", providers)
+	if err != nil {
+		return credDetail, err
+	}
+
+	credentials := make(map[string]string)
+	fields := cfg[service]
+	for _, f := range fields {
+		var val string
+		var err error
+		field := strings.ToLower(f.Name)
+		lab := fmt.Sprintf("%s %s: ", strings.Title(service), f.Name)
+		if f.Type == prompt.PasswordType {
+			val, err = prompt.Password(lab)
+		} else {
+			val, err = prompt.String(lab, true)
+		}
+		if err != nil {
+			return credDetail, err
+		}
+		credentials[field] = val
+	}
+
+	credDetail.Username = username
+	credDetail.Credential = credentials
+	credDetail.Service = service
+
+	return credDetail, nil
+}

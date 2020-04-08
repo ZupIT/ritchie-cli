@@ -1,0 +1,58 @@
+{
+  "commands": [
+    {
+      "usage": "scaffold",
+      "help": "Generate objects from some type",
+      "parent": "root"
+    },
+    {
+      "usage": "generate",
+      "help": "Generates a scaffold by some template",
+      "parent": "root_scaffold"
+    },
+    {
+      "usage": "init",
+      "help": "Initialize a working directory",
+      "parent": "root"
+    },
+    {
+      "usage": "set",
+      "help": "Set objects",
+      "parent": "root"
+    },
+    {
+      "usage": "login",
+      "help": "User login",
+      "parent": "root"
+    },
+    {
+      "usage": "completion",
+      "help": "Add autocomplete for terminal",
+      "parent": "root"
+    },
+    {
+      "usage": "credential",
+      "help": "Set provider credential",
+      "parent": "root_set"
+    },
+    {
+      "usage": "coffee-go",
+      "help": "Generates a project by coffee template",
+      "formula": {
+        "path": "scaffold/coffee-go",
+        "bin": "coffee-${so}"
+      },
+      "parent": "root_scaffold_generate"
+    },
+    {
+      "usage": "spring-iti",
+      "help": "Generates a project for kotlin/java",
+      "formula": {
+        "path": "scaffold/spring-iti",
+        "bin": "spring-iti-${so}"
+      },
+      "parent": "root_generate_scaffold"
+    }
+  ],
+  "version": "1.0.1"
+}
