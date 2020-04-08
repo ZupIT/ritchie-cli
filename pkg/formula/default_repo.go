@@ -183,8 +183,12 @@ func (dm RepoManager) Delete(name string) error {
 
 func (dm RepoManager) List() ([]Repository, error) {
 	f, err := dm.loadReposFromDisk()
-	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {
+
+	if fileutil.IsNotExistErr(err) {
 		return nil, ErrNoRepoToShow
+	}
+	if len(f.Values) == 0 {
+		return []Repository{}, nil
 	}
 
 	sort.Sort(ByPriority(f.Values))

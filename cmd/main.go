@@ -34,7 +34,7 @@ const (
 )
 
 func main() {
-	homePath := ritchieHomePath()
+	homePath := ritchieHomeDir()
 	rootCmd := buildCommands(homePath)
 
 	if err := rootCmd.Execute(); err != nil {
@@ -43,12 +43,16 @@ func main() {
 	}
 }
 
-func ritchieHomePath() string {
+func homeDir() string {
 	usr, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
-	return fmt.Sprintf(ritchieHomePattern, usr.HomeDir)
+	return usr.HomeDir
+}
+
+func ritchieHomeDir() string {
+	return fmt.Sprintf(ritchieHomePattern, homeDir())
 }
 
 func buildCommands(ritchieHomePath string) *cobra.Command {
@@ -98,7 +102,7 @@ func buildCommands(ritchieHomePath string) *cobra.Command {
 	envResolvers[env.Credential] = credResolver
 
 	formulaRunner := formula.NewRunner(ritchieHomePath, envResolvers, http.DefaultClient, treeManager)
-	formulaCreator := formula.NewCreator(ritchieHomePath, treeManager)
+	formulaCreator := formula.NewCreator(homeDir(), treeManager)
 
 	rootCmd := cmd.NewRootCmd(workspaceManager, loginManager, repoManager, sessionValidator)
 
