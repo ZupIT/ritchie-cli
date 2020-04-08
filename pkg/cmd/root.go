@@ -92,8 +92,10 @@ func (o *rootCmd) checkSession(commandPath string) error {
 			return err
 		}
 
-		if err := o.repoLoader.Load(); err != nil {
-			return err
+		if env.Edition == env.Team {
+			if err := o.repoLoader.Load(); err != nil {
+				return err
+			}
 		}
 
 		fmt.Println("Session created successfully!")
