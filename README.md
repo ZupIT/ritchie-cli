@@ -7,7 +7,7 @@ This tool uses tree decisions, so that you can create your own commands and exec
 
 This repository contains the CLI core, which can execute formulas stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas).
 
-[Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/contributing/CONTRIBUTING.md)
+[Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
 
 
 ## Documentation
