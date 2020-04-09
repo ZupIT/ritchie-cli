@@ -45,7 +45,9 @@ type rootCmd struct {
 	loginManager     security.LoginManager
 	repoLoader       formula.RepoLoader
 	sessionValidator session.Validator
-	edition api.Edition
+	edition          api.Edition
+	prompt.InputText
+	prompt.InputPassword
 }
 
 // NewRootCmd creates the root for all ritchie commands.
@@ -53,13 +55,17 @@ func NewRootCmd(wm workspace.Checker,
 	l security.LoginManager,
 	r formula.RepoLoader,
 	sv session.Validator,
-	e api.Edition) *cobra.Command {
+	e api.Edition,
+	it prompt.InputText,
+	ip prompt.InputPassword) *cobra.Command {
 	o := &rootCmd{
 		wm,
 		l,
 		r,
 		sv,
 		e,
+		it,
+		ip,
 	}
 
 	return &cobra.Command{
@@ -120,11 +126,11 @@ func (o *rootCmd) sessionPrompt() (security.Passcode, error) {
 	var passcode string
 	var err error
 
-	switch o.edition  {
+	switch o.edition {
 	case api.Single:
-		passcode, err = prompt.Password("Define a passphrase for the session: ")
+		passcode, err = o.Password("Define a passphrase for the session: ")
 	case api.Team:
-		passcode, err = prompt.String("Enter your organization: ", true)
+		passcode, err = o.Text("Enter your organization: ", true)
 	default:
 		err = errors.New("invalid Ritchie build, no edition defined")
 	}

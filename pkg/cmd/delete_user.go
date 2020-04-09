@@ -9,10 +9,15 @@ import (
 
 type deleteUserCmd struct {
 	userManager security.UserManager
+	prompt.InputBool
+	prompt.InputText
 }
 
-func NewDeleteUserCmd(userManager security.UserManager) *cobra.Command {
-	d := &deleteUserCmd{userManager}
+func NewDeleteUserCmd(
+	um security.UserManager,
+	ib prompt.InputBool,
+	it prompt.InputText) *cobra.Command {
+	d := &deleteUserCmd{um, ib, it}
 
 	return &cobra.Command{
 		Use:   "user",
@@ -24,17 +29,17 @@ func NewDeleteUserCmd(userManager security.UserManager) *cobra.Command {
 
 func (d deleteUserCmd) RunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		un, err := prompt.String("Username: ", true)
+		un, err := d.Text("Username: ", true)
 		if err != nil {
 			return err
 		}
 
-		e, err := prompt.String("Email: ", true)
+		e, err := d.Text("Email: ", true)
 		if err != nil {
 			return err
 		}
 
-		if d, err := prompt.ListBool("Are you sure want to delete this user?", []string{"yes", "no"}); err != nil {
+		if d, err := d.Bool("Are you sure want to delete this user?", []string{"yes", "no"}); err != nil {
 			return err
 		} else if !d {
 			return nil

@@ -18,24 +18,38 @@ type setCredentialCmd struct {
 	credential.Setter
 	credential.Settings
 	edition api.Edition
+	prompt.InputText
+	prompt.InputBool
+	prompt.InputList
+	prompt.InputPassword
 }
 
 // NewSingleSetCredentialCmd creates a new cmd instance
-func NewSingleSetCredentialCmd(st credential.Setter) *cobra.Command {
-	s := &setCredentialCmd{Setter: st, edition: api.Single}
+func NewSingleSetCredentialCmd(
+	st credential.Setter,
+	it prompt.InputText,
+	ib prompt.InputBool,
+	il prompt.InputList,
+	ip prompt.InputPassword) *cobra.Command {
+	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip}
 
-	return &cobra.Command{
-		Use:   "credential",
-		Short: "Set credential",
-		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE:  s.RunFunc(),
-	}
+	return newCmd(s)
 }
 
 // NewTeamSetCredentialCmd creates a new cmd instance
-func NewTeamSetCredentialCmd(st credential.Setter, si credential.Settings) *cobra.Command {
-	s := &setCredentialCmd{Setter: st, Settings: si, edition: api.Team}
+func NewTeamSetCredentialCmd(
+	st credential.Setter,
+	si credential.Settings,
+	it prompt.InputText,
+	ib prompt.InputBool,
+	il prompt.InputList,
+	ip prompt.InputPassword) *cobra.Command {
+	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip}
 
+	return newCmd(s)
+}
+
+func newCmd(s *setCredentialCmd) *cobra.Command {
 	return &cobra.Command{
 		Use:   "credential",
 		Short: "Set credential",
@@ -74,7 +88,7 @@ func (s setCredentialCmd) PromptResolver() (credential.Detail, error) {
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	var credDetail credential.Detail
 
-	provider, err := prompt.String("Provider: ", true)
+	provider, err := s.Text("Provider: ", true)
 	if err != nil {
 		return credDetail, err
 	}
@@ -98,7 +112,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	cred := credential.Credential{}
 	addMore := true
 	for addMore {
-		kv, err := prompt.String("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+		kv, err := s.Text("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
 		if err != nil {
 			return credDetail, err
 		}
@@ -111,7 +125,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 		cred[pair[0]] = pair[1]
 
-		addMore, err = prompt.ListBool("Add more fields?", []string{"yes", "no"})
+		addMore, err = s.Bool("Add more fields?", []string{"yes", "no"})
 		if err != nil {
 			return credDetail, err
 		}
@@ -135,20 +149,20 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		providers = append(providers, k)
 	}
 
-	typ, err := prompt.List("Profile: ", []string{credential.Me, credential.Other})
+	typ, err := s.List("Profile: ", []string{credential.Me, credential.Other})
 	if err != nil {
 		return credDetail, err
 	}
 
 	username := "me"
 	if typ == credential.Other {
-		username, err = prompt.String("Username: ", true)
+		username, err = s.Text("Username: ", true)
 		if err != nil {
 			return credDetail, err
 		}
 	}
 
-	service, err := prompt.List("Provider: ", providers)
+	service, err := s.List("Provider: ", providers)
 	if err != nil {
 		return credDetail, err
 	}
@@ -161,9 +175,9 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		field := strings.ToLower(f.Name)
 		lab := fmt.Sprintf("%s %s: ", strings.Title(service), f.Name)
 		if f.Type == prompt.PasswordType {
-			val, err = prompt.Password(lab)
+			val, err = s.Password(lab)
 		} else {
-			val, err = prompt.String(lab, true)
+			val, err = s.Text(lab, true)
 		}
 		if err != nil {
 			return credDetail, err

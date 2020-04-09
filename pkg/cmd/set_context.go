@@ -13,10 +13,15 @@ const newCtx = "Type new context?"
 
 type setContextCmd struct {
 	rcontext.FindSetter
+	prompt.InputText
+	prompt.InputList
 }
 
-func NewSetContextCmd(fs rcontext.FindSetter) *cobra.Command {
-	s := setContextCmd{fs}
+func NewSetContextCmd(
+	fs rcontext.FindSetter,
+	it prompt.InputText,
+	il prompt.InputList) *cobra.Command {
+	s := setContextCmd{fs, it, il}
 
 	return &cobra.Command{
 		Use:     "context",
@@ -35,13 +40,13 @@ func (s setContextCmd) RunFunc() CommandRunnerFunc {
 
 		ctxHolder.All = append(ctxHolder.All, rcontext.DefaultCtx)
 		ctxHolder.All = append(ctxHolder.All, newCtx)
-		ctx, err := prompt.List("All:", ctxHolder.All)
+		ctx, err := s.List("All:", ctxHolder.All)
 		if err != nil {
 			return err
 		}
 
 		if ctx == newCtx {
-			ctx, err = prompt.String("New context: ", true)
+			ctx, err = s.Text("New context: ", true)
 			if err != nil {
 				return err
 			}

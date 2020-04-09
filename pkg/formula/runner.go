@@ -28,10 +28,27 @@ type DefaultRunner struct {
 	envResolvers env.Resolvers
 	client       *http.Client
 	treeManager  TreeManager
+	prompt.InputList
+	prompt.InputText
+	prompt.InputBool
 }
 
-func NewRunner(ritchieHome string, er env.Resolvers, hc *http.Client, tm TreeManager) DefaultRunner {
-	return DefaultRunner{ritchieHome: ritchieHome, envResolvers: er, client: hc, treeManager: tm}
+func NewRunner(
+	ritchieHome string,
+	er env.Resolvers,
+	hc *http.Client,
+	tm TreeManager,
+	il prompt.InputList,
+	it prompt.InputText,
+	ib prompt.InputBool) DefaultRunner {
+	return DefaultRunner{
+		ritchieHome,
+		er,
+		hc,
+		tm,
+		il,
+		it,
+		ib}
 }
 
 // Run default implementation of function Manager.Run
@@ -105,13 +122,13 @@ func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config)
 				inputVal, err = d.loadInputValList(items, input)
 			} else {
 				validate := input.Default == ""
-				inputVal, err = prompt.String(input.Label, validate)
+				inputVal, err = d.Text(input.Label, validate)
 				if inputVal == "" {
 					inputVal = input.Default
 				}
 			}
 		case "bool":
-			valBool, err = prompt.ListBool(input.Label, items)
+			valBool, err = d.Bool(input.Label, items)
 			inputVal = strconv.FormatBool(valBool)
 		default:
 			inputVal, err = d.resolveIfReserved(input)
@@ -175,10 +192,10 @@ func (d DefaultRunner) loadInputValList(items []string, input Input) (string, er
 		}
 		items = append(items, newLabel)
 	}
-	inputVal, err := prompt.List(input.Label, items)
+	inputVal, err := d.List(input.Label, items)
 	if inputVal == newLabel {
 		validate := len(input.Default) == 0
-		inputVal, err = prompt.String(input.Label, validate)
+		inputVal, err = d.Text(input.Label, validate)
 		if len(inputVal) == 0 {
 			inputVal = input.Default
 		}
