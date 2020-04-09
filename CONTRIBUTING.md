@@ -14,26 +14,11 @@ let you know so that you can rebase it.
 
 ## New features for the project
 
-Ritchie is composed of 3 projects which release at different times. **If, and only if,
-your pull request relates to a currently unreleased feature of a project, base
-your work on that project's `vnext` branch.** 
+Ritchie is composed of 3 projects which release at different times. 
 
-These branches were created bycloning `master` and then importing a project's `master` branch's 
-implementation into it, in a way that preserved the commit history. 
+**Always base your work on the project's `master` branch, naming your new branch according to the following guide :**
 
-When a project has a release, its `vnext` branch will be merged into `master`.
-
-- **[vnext-cli](https://github.com/ZupIT/ritchie-cli/tree/vnext-cli):**
-  implementation for upcoming features in the [ritchie/cli](https://github.com/ZupIT/ritchie-cli)
-  project
-
-- **[vnext-server](https://github.com/ZupIT/ritchie-cli/tree/vnext-server):**
-  implementation for upcoming features in the [ritchie/server](https://github.com/ZupIT/ritchie-server)
-  project
-  
-- **[vnext-formulas](https://github.com/ZupIT/ritchie-cli/tree/vnext-formulas):**
-  implementation for upcoming features in the [ritchie/formulas](https://github.com/ZupIT/ritchie-formulas)
-  project
+<img class="special-img-class" src="/docs/img/git-branchs.png" /> 
 
 ## Collaborate on a pull request
 
