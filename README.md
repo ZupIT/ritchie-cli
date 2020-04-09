@@ -19,9 +19,9 @@ This repository contains the CLI core, which can execute formulas stored inside 
 
 ## How to install Ritchie
 
-- [Windows](https://docs.ritchiecli.io/v/doc-english/primeiros-passos/instalacao-do-ritchie/windows)
+- [Windows](https://docs.ritchiecli.io/get-started/installation/windows)
 
-- [Linux / Mac](https://docs.ritchiecli.io/v/doc-english/primeiros-passos/instalacao-do-ritchie/linux-mac)
+- [Linux / Mac](https://docs.ritchiecli.io/get-started/installation/linux-mac)
 
 
 ## License
