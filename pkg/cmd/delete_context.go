@@ -11,22 +11,27 @@ import (
 
 type deleteContextCmd struct {
 	rcontext.FindRemover
+	prompt.InputBool
+	prompt.InputList
 }
 
-func NewDeleteContextCmd(fr rcontext.FindRemover) *cobra.Command {
-	c := deleteContextCmd{fr}
+func NewDeleteContextCmd(
+	fr rcontext.FindRemover,
+	ib prompt.InputBool,
+	il prompt.InputList) *cobra.Command {
+	d := deleteContextCmd{fr, ib, il}
 
 	return &cobra.Command{
 		Use:     "context",
 		Short:   "Delete context for Ritchie-cli",
 		Example: "rit delete context",
-		RunE:    c.RunFunc(),
+		RunE:    d.RunFunc(),
 	}
 }
 
-func (c deleteContextCmd) RunFunc() CommandRunnerFunc {
+func (d deleteContextCmd) RunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		ctxHolder, err := c.Find()
+		ctxHolder, err := d.Find()
 		if err != nil {
 			return err
 		}
@@ -42,18 +47,18 @@ func (c deleteContextCmd) RunFunc() CommandRunnerFunc {
 			}
 		}
 
-		ctx, err := prompt.List("All:", ctxHolder.All)
+		ctx, err := d.List("All:", ctxHolder.All)
 		if err != nil {
 			return err
 		}
 
-		if b, err := prompt.ListBool("Are you sure want to delete this context?", []string{"yes", "no"}); err != nil {
+		if b, err := d.Bool("Are you sure want to delete this context?", []string{"yes", "no"}); err != nil {
 			return err
 		} else if !b {
 			return nil
 		}
 
-		if _, err := c.Remove(ctx); err != nil {
+		if _, err := d.Remove(ctx); err != nil {
 			return err
 		}
 

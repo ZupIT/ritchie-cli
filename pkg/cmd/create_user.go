@@ -11,11 +11,18 @@ import (
 // createUserCmd type for create user command
 type createUserCmd struct {
 	security.UserManager
+	prompt.InputText
+	prompt.InputEmail
+	prompt.InputPassword
 }
 
 // NewCreateUserCmd creates a new cmd instance
-func NewCreateUserCmd(userManager security.UserManager) *cobra.Command {
-	c := &createUserCmd{userManager}
+func NewCreateUserCmd(
+	um security.UserManager,
+	it prompt.InputText,
+	ie prompt.InputEmail,
+	ip prompt.InputPassword) *cobra.Command {
+	c := &createUserCmd{um, it, ie, ip}
 
 	return &cobra.Command{
 		Use:   "user",
@@ -27,27 +34,27 @@ func NewCreateUserCmd(userManager security.UserManager) *cobra.Command {
 
 func (c createUserCmd) RunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		org, err := prompt.String("Organization: ", true)
+		org, err := c.Text("Organization: ", true)
 		if err != nil {
 			return err
 		}
-		fn, err := prompt.String("First name: ", true)
+		fn, err := c.Text("First name: ", true)
 		if err != nil {
 			return err
 		}
-		ln, err := prompt.String("Last name: ", true)
+		ln, err := c.Text("Last name: ", true)
 		if err != nil {
 			return err
 		}
-		e, err := prompt.Email("Email: ")
+		e, err := c.Email("Email: ")
 		if err != nil {
 			return err
 		}
-		un, err := prompt.String("Username: ", true)
+		un, err := c.Text("Username: ", true)
 		if err != nil {
 			return err
 		}
-		p, err := prompt.Password("Password: ")
+		p, err := c.Password("Password: ")
 		if err != nil {
 			return err
 		}

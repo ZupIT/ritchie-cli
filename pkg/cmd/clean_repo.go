@@ -10,11 +10,12 @@ import (
 // cleanRepoCmd type for clean repo command
 type cleanRepoCmd struct {
 	formula.RepoCleaner
+	prompt.InputText
 }
 
 // NewCleanRepoCmd creates a new cmd instance
-func NewCleanRepoCmd(cl formula.RepoCleaner) *cobra.Command {
-	c := &cleanRepoCmd{cl}
+func NewCleanRepoCmd(cl formula.RepoCleaner, it prompt.InputText) *cobra.Command {
+	c := &cleanRepoCmd{cl, it}
 
 	cmd := &cobra.Command{
 		Use:     "repo",
@@ -28,7 +29,7 @@ func NewCleanRepoCmd(cl formula.RepoCleaner) *cobra.Command {
 
 func (c cleanRepoCmd) RunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		n, err := prompt.String("Name of the repository: ", true)
+		n, err := c.Text("Name of the repository: ", true)
 		if err != nil {
 			return err
 		}

@@ -10,11 +10,12 @@ import (
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
 	formula.Creator
+	prompt.InputText
 }
 
 // CreateFormulaCmd creates a new cmd instance
-func NewCreateFormulaCmd(cf formula.Creator) *cobra.Command {
-	c := createFormulaCmd{cf}
+func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText) *cobra.Command {
+	c := createFormulaCmd{cf, it}
 	return &cobra.Command{
 		Use:     "formula",
 		Short:   "Create a new formula",
@@ -26,7 +27,7 @@ func NewCreateFormulaCmd(cf formula.Creator) *cobra.Command {
 func (c createFormulaCmd) RunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Creating Formula ...")
-		fCmd, err := prompt.String("New formula's command ? [ex.: rit group verb <noun>]", true)
+		fCmd, err := c.Text("New formula's command ? [ex.: rit group verb <noun>]", true)
 		if err != nil {
 			return err
 		}

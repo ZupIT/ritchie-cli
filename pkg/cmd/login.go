@@ -12,11 +12,15 @@ import (
 type loginCmd struct {
 	security.LoginManager
 	formula.RepoLoader
+	prompt.InputText
 }
 
 // NewLoginCmd creates new cmd instance
-func NewLoginCmd(lm security.LoginManager, rm formula.RepoLoader) *cobra.Command {
-	l := loginCmd{lm, rm}
+func NewLoginCmd(
+	lm security.LoginManager,
+	rm formula.RepoLoader,
+	it prompt.InputText) *cobra.Command {
+	l := loginCmd{lm, rm, it}
 	return &cobra.Command{
 		Use:   "login",
 		Short: "User login",
@@ -27,12 +31,12 @@ func NewLoginCmd(lm security.LoginManager, rm formula.RepoLoader) *cobra.Command
 
 func (l loginCmd) RunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		s, err := prompt.String("Enter your organization: ", true)
+		org, err := l.Text("Enter your organization: ", true)
 		if err != nil {
 			return err
 		}
 
-		secret := security.Passcode(s)
+		secret := security.Passcode(org)
 		if err := l.Login(secret); err != nil {
 			return err
 		}

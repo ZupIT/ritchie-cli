@@ -10,11 +10,12 @@ import (
 // deleteRepoCmd type for delete repo command
 type deleteRepoCmd struct {
 	formula.RepoDeleter
+	prompt.InputText
 }
 
 // NewDeleteRepoCmd delete repository instance
-func NewDeleteRepoCmd(dl formula.RepoDeleter) *cobra.Command {
-	d := &deleteRepoCmd{dl}
+func NewDeleteRepoCmd(dl formula.RepoDeleter, it prompt.InputText) *cobra.Command {
+	d := &deleteRepoCmd{dl, it}
 
 	return &cobra.Command{
 		Use:     "repo [NAME_REPOSITORY]",
@@ -26,7 +27,7 @@ func NewDeleteRepoCmd(dl formula.RepoDeleter) *cobra.Command {
 
 func (d deleteRepoCmd) RunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		n, err := prompt.String("Name of the repository: ", true)
+		n, err := d.Text("Name of the repository: ", true)
 		if err != nil {
 			return err
 		}
