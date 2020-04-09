@@ -12,7 +12,7 @@ This repository contains the CLI core, which can execute formulas stored inside 
 
 ## Documentation
 
-- [Gitbook](https://docs.ritchiecli.io/v/doc-english/)
+- [Gitbook](https://docs.ritchiecli.io)
 
 - [Zup Products](https://www.zup.com.br/en/about) 
 
