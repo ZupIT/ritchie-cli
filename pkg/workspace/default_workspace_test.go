@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 )
 
 var (
@@ -13,7 +11,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	env.Edition = env.Single
 	home = fmt.Sprintf("%s/.rit", os.TempDir())
 	os.Exit(m.Run())
 }
