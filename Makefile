@@ -86,11 +86,10 @@ test-v:
 	$(GOTOOLCOVER) -func=$(BIN)/cov.out
 
 release:
-	envsubst < "Release.md.template" > "Release.md"
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_USER)"
 	git add .
-	git commit -m "release"
+	git commit --allow-empty -m "release"
 	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
 	git tag -a $(RELEASE_VERSION) -m "release"
 	git push $(GIT_REMOTE) $(RELEASE_VERSION)
