@@ -31,6 +31,7 @@ var (
 		{Parent: "root_set", Usage: "credential"},
 		{Parent: "root", Usage: "show"},
 		{Parent: "root_show", Usage: "context"},
+		{Parent: "root", Usage: "create"},
 		{Parent: "root_create", Usage: "formula"},
 		{Parent: "root", Usage: "update"},
 		{Parent: "root_update", Usage: "repo"},
@@ -43,7 +44,6 @@ var (
 	TeamCoreCmds = append(
 		CoreCmds,
 		[]Command{
-			{Parent: "root", Usage: "create"},
 			{Parent: "root_create", Usage: "user"},
 			{Parent: "root_delete", Usage: "user"},
 			{Parent: "root", Usage: "login"},
@@ -82,4 +82,3 @@ func UserHomeDir() string {
 func RitchieHomeDir() string {
 	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
 }
-
