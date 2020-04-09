@@ -46,7 +46,7 @@ Help us review your PRs more quickly by following these guidelines.
   editing for other reasons. Make sure your text editor is not configured to
   automatically reformat the whole file when saving.
 
-- Reviewers will check the staging site for problems.
+- Reviewers will check the staging site and contact you to fix eventual problems.
 
 If you can think of other ways we could streamline the review process, let us
 know.
