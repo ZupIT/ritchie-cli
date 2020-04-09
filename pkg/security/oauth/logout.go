@@ -63,17 +63,19 @@ const (
 type LogoutManager struct {
 	Resp chan security.ChanResponse
 	Org  string
+	serverURL string
 }
 
-func NewLogoutManager(org string, resp chan security.ChanResponse) *LogoutManager {
+func NewLogoutManager(org string, resp chan security.ChanResponse, serverURL string) *LogoutManager {
 	return &LogoutManager{
 		Resp: resp,
 		Org:  org,
+		serverURL: serverURL,
 	}
 }
 
 func (l *LogoutManager) Logout() error {
-	providerConfig, err := providerConfig(l.Org)
+	providerConfig, err := providerConfig(l.Org, l.serverURL)
 	if err != nil {
 		l.Resp <- security.ChanResponse{Error: err}
 		return nil

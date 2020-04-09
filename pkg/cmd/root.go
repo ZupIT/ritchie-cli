@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 )
@@ -45,15 +45,26 @@ type rootCmd struct {
 	loginManager     security.LoginManager
 	repoLoader       formula.RepoLoader
 	sessionValidator session.Validator
+	edition api.Edition
 }
 
 // NewRootCmd creates the root for all ritchie commands.
-func NewRootCmd(wm workspace.Checker, l security.LoginManager, r formula.RepoLoader, sv session.Validator) *cobra.Command {
-	o := &rootCmd{wm, l, r, sv}
+func NewRootCmd(wm workspace.Checker,
+	l security.LoginManager,
+	r formula.RepoLoader,
+	sv session.Validator,
+	e api.Edition) *cobra.Command {
+	o := &rootCmd{
+		wm,
+		l,
+		r,
+		sv,
+		e,
+	}
 
 	return &cobra.Command{
 		Use:               cmdUse,
-		Version:           version(),
+		Version:           o.version(),
 		Short:             cmdShortDescription,
 		Long:              cmdDescription,
 		PersistentPreRunE: o.PreRunFunc(),
@@ -83,7 +94,7 @@ func (o *rootCmd) checkSession(commandPath string) error {
 	err := o.sessionValidator.Validate()
 	if err != nil {
 		fmt.Print("To use this command, you need to start a session on Ritchie\n\n")
-		secret, err := sessionPrompt()
+		secret, err := o.sessionPrompt()
 		if err != nil {
 			return err
 		}
@@ -92,7 +103,7 @@ func (o *rootCmd) checkSession(commandPath string) error {
 			return err
 		}
 
-		if env.Edition == env.Team {
+		if o.edition == api.Team {
 			if err := o.repoLoader.Load(); err != nil {
 				return err
 			}
@@ -105,14 +116,14 @@ func (o *rootCmd) checkSession(commandPath string) error {
 	return nil
 }
 
-func sessionPrompt() (security.Passcode, error) {
+func (o *rootCmd) sessionPrompt() (security.Passcode, error) {
 	var passcode string
 	var err error
 
-	switch env.Edition {
-	case env.Single:
+	switch o.edition  {
+	case api.Single:
 		passcode, err = prompt.Password("Define a passphrase for the session: ")
-	case env.Team:
+	case api.Team:
 		passcode, err = prompt.String("Enter your organization: ", true)
 	default:
 		err = errors.New("invalid Ritchie build, no edition defined")
@@ -125,6 +136,6 @@ func sessionPrompt() (security.Passcode, error) {
 	return security.Passcode(passcode), nil
 }
 
-func version() string {
-	return fmt.Sprintf(versionMsg, Version, env.Edition, BuildDate, runtime.Version())
+func (o *rootCmd) version() string {
+	return fmt.Sprintf(versionMsg, Version, o.edition, BuildDate, runtime.Version())
 }

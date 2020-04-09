@@ -8,10 +8,11 @@ import (
 type LogoutManager struct {
 	provider       security.AuthProvider
 	sessionManager session.Manager
+	serverURL string
 }
 
-func NewLogoutManager(p security.AuthProvider, sm session.Manager) LogoutManager {
-	return LogoutManager{provider: p, sessionManager: sm}
+func NewLogoutManager(p security.AuthProvider, sm session.Manager, serverURL string) LogoutManager {
+	return LogoutManager{provider: p, sessionManager: sm, serverURL: serverURL}
 }
 
 func (l LogoutManager) Logout() error {
@@ -20,7 +21,7 @@ func (l LogoutManager) Logout() error {
 		return err
 	}
 
-	cr, err := logoutChannelProvider(l.provider, session.Organization)
+	cr, err := logoutChannelProvider(l.provider, session.Organization, l.serverURL)
 	if err != nil {
 		return err
 	}

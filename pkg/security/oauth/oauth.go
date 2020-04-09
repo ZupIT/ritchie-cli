@@ -3,7 +3,6 @@ package oauth
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"io/ioutil"
 	"net/http"
 	"os/exec"
@@ -27,9 +26,9 @@ func callbackURL() string {
 	return fmt.Sprintf(callbackURLPattern, callbackPath)
 }
 
-func providerConfig(organization string) (ProviderConfig, error) {
+func providerConfig(organization, serverURL string) (ProviderConfig, error) {
 	var provideConfig ProviderConfig
-	url := fmt.Sprintf(providerURLPattern, env.ServerURL)
+	url := fmt.Sprintf(providerURLPattern, serverURL)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return provideConfig, fmt.Errorf("Failed to providerConfig for org %s. \n%v", organization, err)

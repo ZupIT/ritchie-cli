@@ -30,7 +30,7 @@ func NewLoginManager(
 
 func (l LoginManager) Login(p security.Passcode) error {
 	org := p.String()
-	cr, err := loginChannelProvider(l.provider, org)
+	cr, err := loginChannelProvider(l.provider, org, l.serverURL)
 	if err != nil {
 		return err
 	}
