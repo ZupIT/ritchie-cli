@@ -24,7 +24,6 @@ import (
 )
 
 func main() {
-	println("ServerURL: ", cmd.ServerURL)
 	if cmd.ServerURL == "" {
 		panic("The env cmd.ServerURL is required")
 	}
