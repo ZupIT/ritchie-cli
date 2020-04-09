@@ -46,11 +46,7 @@ Help us review your PRs more quickly by following these guidelines.
   editing for other reasons. Make sure your text editor is not configured to
   automatically reformat the whole file when saving.
 
-- A Jenkins pipeline runs for each PR that is against one of our long-lived
-  branches like `master` and the `vnext` branches, and deploys the result of
-  your PR to a staging site. The URL will be available at the bottom of the PR
-  in the **Conversation** view. Check the staging site for problems and fix them
-  if necessary. Reviewers will check the staging site too.
+- Reviewers will check the staging site for problems.
 
 If you can think of other ways we could streamline the review process, let us
 know.
