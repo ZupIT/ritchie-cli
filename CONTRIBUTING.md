@@ -20,6 +20,8 @@ Ritchie is composed of 3 projects which release at different times.
 
 <img class="special-img-class" src="/docs/img/git-branchs.png" /> 
 
+**Examples : `feature/name` or `fix/name`**
+
 ## Collaborate on a pull request
 
 Unless the PR author specifically disables it, you can push commits into another
