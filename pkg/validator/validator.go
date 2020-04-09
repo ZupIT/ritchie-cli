@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"log"
 	"net/http"
@@ -69,8 +68,8 @@ func IsValidEmail(email string) error {
 }
 
 //IsValidVersion Validate version with server
-func IsValidVersion(version, org string) {
-	url := fmt.Sprintf(urlPatternVersion, env.ServerURL)
+func IsValidVersion(version, org, serverURL string) {
+	url := fmt.Sprintf(urlPatternVersion, serverURL)
 	client := &http.Client{Timeout: 2 * time.Second}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("x-org", org)

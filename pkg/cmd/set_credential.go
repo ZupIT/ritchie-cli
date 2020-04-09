@@ -3,13 +3,13 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -17,11 +17,24 @@ import (
 type setCredentialCmd struct {
 	credential.Setter
 	credential.Settings
+	edition api.Edition
 }
 
-// NewSetCredentialCmd creates a new cmd instance
-func NewSetCredentialCmd(setter credential.Setter, settings credential.Settings) *cobra.Command {
-	s := &setCredentialCmd{setter, settings}
+// NewSingleSetCredentialCmd creates a new cmd instance
+func NewSingleSetCredentialCmd(st credential.Setter) *cobra.Command {
+	s := &setCredentialCmd{Setter: st, edition: api.Single}
+
+	return &cobra.Command{
+		Use:   "credential",
+		Short: "Set credential",
+		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
+		RunE:  s.RunFunc(),
+	}
+}
+
+// NewTeamSetCredentialCmd creates a new cmd instance
+func NewTeamSetCredentialCmd(st credential.Setter, si credential.Settings) *cobra.Command {
+	s := &setCredentialCmd{Setter: st, Settings: si, edition: api.Team}
 
 	return &cobra.Command{
 		Use:   "credential",
@@ -48,10 +61,10 @@ func (s setCredentialCmd) RunFunc() CommandRunnerFunc {
 }
 
 func (s setCredentialCmd) PromptResolver() (credential.Detail, error) {
-	switch env.Edition {
-	case env.Single:
+	switch s.edition {
+	case api.Single:
 		return s.singlePrompt()
-	case env.Team:
+	case api.Team:
 		return s.teamPrompt()
 	default:
 		return credential.Detail{}, errors.New("invalid CLI build, no edition defined")

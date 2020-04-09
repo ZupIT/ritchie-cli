@@ -1,4 +1,6 @@
 # Go parameters
+TEAM=team
+SINGLE=single
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
@@ -6,10 +8,9 @@ GOTEST=$(GOCMD) test
 GOTOOLCOVER=$(GOCMD) tool cover
 GOGET=$(GOCMD) get
 BINARY_NAME=rit
-CMD_PATH=./cmd/main.go
+SINGLE_CMD_PATH=./cmd/$(SINGLE)/main.go
+TEAM_CMD_PATH=./cmd/$(TEAM)/main.go
 BIN=bin
-TEAM=team
-SINGLE=single
 DIST=dist
 DIST_MAC=$(DIST)/mac
 DIST_MAC_TEAM=$(DIST_MAC)/$(TEAM)
@@ -31,17 +32,17 @@ RITCHIE_ENV=$(shell VERSION=$(VERSION) ./ritchie_env.sh)
 build:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
 	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=$(RITCHIE_SERVER) ' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
 	#LINUX SINGLE
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.Edition=$(SINGLE) -X $(MODULE)/pkg/env.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
 	#MAC SINGLE
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.Edition=$(SINGLE) -X $(MODULE)/pkg/env.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
 	#WINDOWS 64 SINGLE
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.Edition=$(SINGLE) -X $(MODULE)/pkg/env.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(SINGLE_CMD_PATH)
 ifneq "$(BUCKET)" ""
 	echo $(BUCKET)
 	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
@@ -54,26 +55,26 @@ endif
 build-qa:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
 	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
 	#LINUX SINGLE
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=https://ritchie-server.itiaws.dev -X $(MODULE)/pkg/env.Edition=$(SINGLE)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
 	#MAC SINGLE
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=https://ritchie-server.itiaws.dev -X $(MODULE)/pkg/env.Edition=$(SINGLE)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
 	#WINDOWS 64 SINGLE
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=https://ritchie-server.itiaws.dev -X $(MODULE)/pkg/env.Edition=$(SINGLE)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(SINGLE_CMD_PATH)
 
 build-team-local:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM)
 	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=http://localhost:8080' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=http://localhost:8080' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=http://localhost:8080' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=http://localhost:8080' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/env.ServerURL=http://localhost:8080' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=http://localhost:8080' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
 
 test:
 	mkdir -p $(BIN)

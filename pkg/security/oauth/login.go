@@ -66,17 +66,19 @@ const (
 
 type LoginManager struct {
 	Resp chan security.ChanResponse
+	serverURL string
 }
 
-func NewLoginManager(resp chan security.ChanResponse) *LoginManager {
+func NewLoginManager(resp chan security.ChanResponse, serverURL string) *LoginManager {
 	return &LoginManager{
 		Resp: resp,
+		serverURL: serverURL,
 	}
 }
 
 // Process login oauth
 func (l *LoginManager) Login(org string) error {
-	providerConfig, err := providerConfig(org)
+	providerConfig, err := providerConfig(org, l.serverURL)
 	if err != nil {
 		l.Resp <- security.ChanResponse{Error: err}
 		return nil

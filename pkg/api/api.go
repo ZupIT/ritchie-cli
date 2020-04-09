@@ -1,5 +1,18 @@
 package api
 
+import (
+	"fmt"
+	"os/user"
+)
+
+const (
+	ritchieHomePattern = "%s/.rit"
+	// Team version
+	Team = Edition("team")
+	// Single version
+	Single = Edition("single")
+)
+
 var (
 	CoreCmds = []Command{
 		{Parent: "root", Usage: "add"},
@@ -54,3 +67,19 @@ type Formula struct {
 	Config  string `json:"config"`
 	RepoURL string `json:"repoUrl"`
 }
+
+// Edition type that represents Single or Team.
+type Edition string
+
+func UserHomeDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	return usr.HomeDir
+}
+
+func RitchieHomeDir() string {
+	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
+}
+
