@@ -31,13 +31,13 @@ func NewAddRepoCmd(
 		Use:     "repo",
 		Short:   "Add a repository.",
 		Example: "rit add repo ",
-		RunE:    a.RunFunc(),
+		RunE:    a.runFunc(),
 	}
 
 	return cmd
 }
 
-func (a addRepoCmd) RunFunc() CommandRunnerFunc {
+func (a addRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		rn, err := a.Text("Name of the repository: ", true)
 		if err != nil {

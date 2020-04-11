@@ -22,13 +22,13 @@ func NewCleanRepoCmd(cl formula.RepoCleaner, it prompt.InputText) *cobra.Command
 		Use:     "repo",
 		Short:   "clean a repository.",
 		Example: "rit clean repo ",
-		RunE:    c.RunFunc(),
+		RunE:    c.runFunc(),
 	}
 
 	return cmd
 }
 
-func (c cleanRepoCmd) RunFunc() CommandRunnerFunc {
+func (c cleanRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		n, err := c.Text("Name of the repository: ", true)
 		if err != nil {
