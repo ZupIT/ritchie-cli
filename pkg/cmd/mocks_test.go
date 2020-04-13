@@ -98,3 +98,15 @@ type repoListerMock struct{}
 func (repoListerMock) List() ([]formula.Repository, error) {
 	return []formula.Repository{}, nil
 }
+
+type repoLoaderMock struct{}
+
+func (repoLoaderMock) Load() error {
+	return nil
+}
+
+type loginManagerMock struct{}
+
+func (loginManagerMock) Login(p security.Passcode) error {
+	return nil
+}
