@@ -4,11 +4,10 @@ import (
 	"testing"
 )
 
-func TestNewCleanRepoCmd(t *testing.T) {
-	cmd := NewCleanRepoCmd(repoCleaner{}, inputTextMock{})
+func TestNewUpdateRepoCmd(t *testing.T) {
+	cmd := NewUpdateRepoCmd(repoUpdaterMock{})
 	if cmd == nil {
-		t.Errorf("NewCleanRepoCmd got %v", cmd)
-
+		t.Errorf("NewUpdateRepoCmd got %v", cmd)
 	}
 
 	if err := cmd.Execute(); err != nil {

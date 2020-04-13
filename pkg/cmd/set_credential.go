@@ -61,7 +61,7 @@ func newCmd(s *setCredentialCmd) *cobra.Command {
 
 func (s setCredentialCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		cred, err := s.PromptResolver()
+		cred, err := s.promptResolver()
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func (s setCredentialCmd) runFunc() CommandRunnerFunc {
 	}
 }
 
-func (s setCredentialCmd) PromptResolver() (credential.Detail, error) {
+func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 	switch s.edition {
 	case api.Single:
 		return s.singlePrompt()

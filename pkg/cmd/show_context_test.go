@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-func TestNewCleanRepoCmd(t *testing.T) {
-	cmd := NewCleanRepoCmd(repoCleaner{}, inputTextMock{})
+func TestNewShowContextCmd(t *testing.T) {
+	cmd := NewShowContextCmd(ctxFinderMock{})
 	if cmd == nil {
-		t.Errorf("NewCleanRepoCmd got %v", cmd)
+		t.Errorf("NewShowContextCmd got %v", cmd)
 
 	}
 

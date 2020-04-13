@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -58,6 +59,12 @@ func (inputListMock) List(name string, items []string) (string, error) {
 type repoAdder struct{}
 
 func (repoAdder) Add(d formula.Repository) error {
+	return nil
+}
+
+type repoCleaner struct{}
+
+func (repoCleaner) Clean(name string) error {
 	return nil
 }
 
@@ -130,6 +137,12 @@ func (repoLoaderMock) Load() error {
 	return nil
 }
 
+type repoUpdaterMock struct{}
+
+func (repoUpdaterMock) Update() error {
+	return nil
+}
+
 type loginManagerMock struct{}
 
 func (loginManagerMock) Login(p security.Passcode) error {
@@ -140,4 +153,16 @@ type logoutManagerMock struct{}
 
 func (logoutManagerMock) Logout() error {
 	return nil
+}
+
+type credSetterMock struct{}
+
+func (credSetterMock) Set(d credential.Detail) error {
+	return nil
+}
+
+type credSettingsMock struct{}
+
+func (credSettingsMock) Fields() (credential.Fields, error) {
+	return credential.Fields{}, nil
 }
