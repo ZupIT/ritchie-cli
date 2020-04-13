@@ -92,3 +92,9 @@ type repoDeleterMock struct{}
 func (repoDeleterMock) Delete(name string) error {
 	return nil
 }
+
+type repoListerMock struct{}
+
+func (repoListerMock) List() ([]formula.Repository, error) {
+	return []formula.Repository{}, nil
+}
