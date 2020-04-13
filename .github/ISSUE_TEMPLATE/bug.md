@@ -1,5 +1,5 @@
 <!--
-Customized from the template (https://github.com/kubernetes/kubernetes/edit/master/.github/ISSUE_TEMPLATE/enhancement.md)
+Customized from the template (https://github.com/kubernetes/kubernetes/edit/master/.github/ISSUE_TEMPLATE/bug-report.md)
 Please answer these questions before submitting your issue. Thanks!
 -->
 
