@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"log"
@@ -88,6 +89,19 @@ func (d DefaultRunner) Run(def Definition) error {
 		}
 	}
 
+	//TMP for execution
+	cPwd, _ := os.Getwd()
+	fmt.Println("Current pwd: ", cPwd)
+	u := uuid.New().String()
+	tdPath := def.TmpWorkDirPath(d.ritchieHome, u)
+
+	fileutil.CreateDirIfNotExists(tdPath, 0755)
+
+	fileutil.CopyDirectory(bPath, tdPath) //Diff
+
+	os.Chdir(tdPath)
+	bFilePath = def.BinFilePath(tdPath, bName)
+
 	cmd := exec.Command(bFilePath)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -104,6 +118,10 @@ func (d DefaultRunner) Run(def Definition) error {
 	if err := cmd.Wait(); err != nil {
 		return err
 	}
+
+	//realizo o diff
+	//Copio a diferenca para o pwd
+	//deleto o temp dir
 
 	return nil
 }

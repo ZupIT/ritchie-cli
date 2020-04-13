@@ -25,7 +25,7 @@ import (
 )
 
 func main() {
-	if cmd.ServerURL == "" {
+	if cmd.ServerURL == "https://ritchie-server.itiaws.dev" {
 		panic("The env cmd.ServerURL is required")
 	}
 

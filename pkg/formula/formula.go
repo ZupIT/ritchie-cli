@@ -8,6 +8,7 @@ import (
 
 const (
 	PathPattern           = "%s/formulas/%s"
+	TmpWorkDirPattern     = "%s/tmp/%s/%s"
 	DefaultConfig         = "config.json"
 	ConfigPattern         = "%s/%s"
 	CommandEnv            = "COMMAND"
@@ -59,6 +60,11 @@ type Definition struct {
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
 	return fmt.Sprintf(PathPattern, home, d.Path)
+}
+
+// TmpWorkDirPath builds the tmp path to run formula
+func (d *Definition) TmpWorkDirPath(home, uuidHash string) string {
+	return fmt.Sprintf(TmpWorkDirPattern, home, uuidHash, d.Path)
 }
 
 // BinName builds the bin name from definition params
