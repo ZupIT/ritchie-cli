@@ -77,14 +77,39 @@ func (userManagerMock) Delete(u security.User) error {
 	return nil
 }
 
-type findRemoverMock struct{}
+type ctxSetterMock struct{}
 
-func (findRemoverMock) Find() (rcontext.ContextHolder, error) {
+func (ctxSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
 	return rcontext.ContextHolder{}, nil
 }
 
-func (findRemoverMock) Remove(ctx string) (rcontext.ContextHolder, error) {
+type ctxFinderMock struct{}
+
+func (ctxFinderMock) Find() (rcontext.ContextHolder, error) {
 	return rcontext.ContextHolder{}, nil
+}
+
+type ctxFindRemoverMock struct{}
+
+func (ctxFindRemoverMock) Find() (rcontext.ContextHolder, error) {
+	f := ctxFinderMock{}
+	return f.Find()
+}
+
+func (ctxFindRemoverMock) Remove(ctx string) (rcontext.ContextHolder, error) {
+	return rcontext.ContextHolder{}, nil
+}
+
+type ctxFindSetterMock struct{}
+
+func (ctxFindSetterMock) Find() (rcontext.ContextHolder, error) {
+	f := ctxFinderMock{}
+	return f.Find()
+}
+
+func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
+	s := ctxSetterMock{}
+	return s.Set(ctx)
 }
 
 type repoDeleterMock struct{}
