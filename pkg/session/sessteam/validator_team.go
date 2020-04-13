@@ -3,11 +3,17 @@ package sessteam
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"strings"
 	"time"
 )
+
+var (
+	ErrInvalidToken = errors.New("the access token is invalid. please, you need to start a session")
+	ErrExpiredToken = errors.New("the access token has expired. please, you need to start a session")
+)
+
 
 type Validator struct {
 	manager session.Manager
@@ -26,12 +32,12 @@ func (t Validator) Validate() error {
 	parts := strings.Split(sess.AccessToken, ".")
 	size := len(parts)
 	if size < 2 {
-		return fmt.Errorf("oidc: malformed jwt, expected 3 parts got %d", size)
+		return ErrInvalidToken
 	}
 
 	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
-		return fmt.Errorf("oidc: malformed jwt payload: %v", err)
+		return err
 	}
 
 	type Token struct {
@@ -40,12 +46,12 @@ func (t Validator) Validate() error {
 	var token Token
 	err = json.Unmarshal(payload, &token)
 	if err != nil {
-		return fmt.Errorf("error unmarshal token: %v", err)
+		return err
 	}
 
 	tokenTime := time.Unix(token.Exp, 0)
 	if time.Since(tokenTime).Seconds() > 0 {
-		return fmt.Errorf("token expired, time token: %v", token.Exp)
+		return ErrExpiredToken
 	}
 
 	return nil
