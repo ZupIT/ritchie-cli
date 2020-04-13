@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 )
 
@@ -42,6 +43,18 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName) (string, error) {
 	return "autocomplete", nil
 }
 
+type inputBoolMock struct{}
+
+func (inputBoolMock) Bool(name string, items []string) (bool, error) {
+	return true, nil
+}
+
+type inputListMock struct{}
+
+func (inputListMock) List(name string, items []string) (string, error) {
+	return "item-mocked", nil
+}
+
 type repoAdder struct{}
 
 func (repoAdder) Add(d formula.Repository) error {
@@ -62,4 +75,14 @@ func (userManagerMock) Create(u security.User) error {
 
 func (userManagerMock) Delete(u security.User) error {
 	return nil
+}
+
+type findRemoverMock struct{}
+
+func (findRemoverMock) Find() (rcontext.ContextHolder, error) {
+	return rcontext.ContextHolder{}, nil
+}
+
+func (findRemoverMock) Remove(ctx string) (rcontext.ContextHolder, error) {
+	return rcontext.ContextHolder{}, nil
 }
