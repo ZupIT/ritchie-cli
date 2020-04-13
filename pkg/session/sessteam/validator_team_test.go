@@ -2,11 +2,13 @@ package sessteam
 
 import (
 	"errors"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"github.com/dgrijalva/jwt-go"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 var (

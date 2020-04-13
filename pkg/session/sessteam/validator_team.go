@@ -4,16 +4,16 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"strings"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 var (
 	ErrInvalidToken = errors.New("the access token is invalid. please, you need to start a session")
 	ErrExpiredToken = errors.New("the access token has expired. please, you need to start a session")
 )
-
 
 type Validator struct {
 	manager session.Manager
