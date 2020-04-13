@@ -86,3 +86,9 @@ func (findRemoverMock) Find() (rcontext.ContextHolder, error) {
 func (findRemoverMock) Remove(ctx string) (rcontext.ContextHolder, error) {
 	return rcontext.ContextHolder{}, nil
 }
+
+type repoDeleterMock struct{}
+
+func (repoDeleterMock) Delete(name string) error {
+	return nil
+}
