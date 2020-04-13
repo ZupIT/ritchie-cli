@@ -110,3 +110,9 @@ type loginManagerMock struct{}
 func (loginManagerMock) Login(p security.Passcode) error {
 	return nil
 }
+
+type logoutManagerMock struct{}
+
+func (logoutManagerMock) Logout() error {
+	return nil
+}
