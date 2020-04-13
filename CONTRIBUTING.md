@@ -9,7 +9,7 @@ help. If a reviewer realizes you have based your work on the wrong branch, we'll
 let you know so that you can rebase it.
 
 >**Note**: To contribute code to Ritchie projects, see the
-[Ritchie community guidelines](https://docs.ritchiecli.io/v/doc-english/community) as well as the 
+[Ritchie community guidelines](https://docs.ritchiecli.io/community) as well as the 
 [Open source contribution guidelines](https://opensource.guide/how-to-contribute/).
 
 ## New features for the project
