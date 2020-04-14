@@ -35,6 +35,7 @@ var (
 	whitelist = []string{
 		fmt.Sprintf("%s login", cmdUse),
 		fmt.Sprintf("%s logout", cmdUse),
+		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
 	}
