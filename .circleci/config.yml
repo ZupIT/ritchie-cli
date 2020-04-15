@@ -4,7 +4,7 @@ version: 2.1
 executors:
   ritchie-executor:
     docker:
-      - image: circleci/golang:1.14.1
+      - image: cimg/go:1.14
         user: root
     working_directory: /workspace
 
