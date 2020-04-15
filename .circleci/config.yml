@@ -38,7 +38,8 @@ jobs:
             - windows
 
   delivery:
-    executor: ritchie-executor
+    docker:
+      - image: circleci/python:2.7-stretch
     steps:
       - checkout
       - attach_workspace:
@@ -46,6 +47,7 @@ jobs:
       - run:
           name: Running build
           command: |
+            apk --no-cache add py-pip
             pip install awscli
             AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} make toto
 
