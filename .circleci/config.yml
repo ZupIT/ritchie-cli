@@ -6,6 +6,7 @@ jobs:
   test:
     docker:
       - image: circleci/golang:1.14.1
+      - user: root
     steps:
       - checkout
       - run:
