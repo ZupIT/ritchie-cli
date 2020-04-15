@@ -2,71 +2,26 @@
 version: 2.1
 
 jobs:
-  builder:
-    docker:
-      - image: golang:1.13-alpine
-    steps:
-      - setup_remote_docker
-      - run:
-          name: install dependencies
-          command: |
-            echo "7224aa97-1f94-4679-917d-9c7bb10074ab" > /etc/machine-id
-            apk update && apk add \
-                alpine-sdk \
-                gettext \
-                curl \
-                python \
-                py-pip \
-                jq \
-                git \
-                && pip install --no-cache-dir awscli==1.16.310 \
-                && apk del py-pip \
-                && rm -rf /var/cache/apk/* /root/.cache/pip/* /usr/lib/python2.7/site-packages/awscli/examples
 
   test:
     docker:
-      - image: golang:1.13-alpine
+      - image: circleci/golang:1.14.1
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: Running test
           command: |
             echo "7224aa97-1f94-4679-917d-9c7bb10074ab" > /etc/machine-id
-            apk update && apk add \
-            alpine-sdk \
-            gettext \
-            curl \
-            python \
-            py-pip \
-            jq \
-            git \
-            pip install --no-cache-dir awscli==1.16.310
-            apk del py-pip
-            rm -rf /var/cache/apk/* /root/.cache/pip/* /usr/lib/python2.7/site-packages/awscli/examples
             make test
 
   build:
     docker:
-      - image: golang:1.13-alpine
+      - image: circleci/golang:1.14.1
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: Running build
           command: |
-            echo "7224aa97-1f94-4679-917d-9c7bb10074ab" > /etc/machine-id
-            apk update && apk add \
-            alpine-sdk \
-            gettext \
-            curl \
-            python \
-            py-pip \
-            jq \
-            git \
-            pip install --no-cache-dir awscli==1.16.310
-            apk del py-pip
-            rm -rf /var/cache/apk/* /root/.cache/pip/* /usr/lib/python2.7/site-packages/awscli/examples
             make build
 
 workflows:
