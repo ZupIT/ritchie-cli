@@ -28,6 +28,7 @@ jobs:
       - image: golang:1.13-alpine
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Running test
           command: |
@@ -50,6 +51,7 @@ jobs:
       - image: golang:1.13-alpine
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Running build
           command: |
