@@ -8,7 +8,6 @@ executors:
         user: root
     working_directory: /workspace
 
-
 jobs:
 
   test:
@@ -20,7 +19,6 @@ jobs:
           command: |
             echo "7224aa97-1f94-4679-917d-9c7bb10074ab" > /etc/machine-id
             make test
-
 
   build:
     executor: ritchie-executor
@@ -41,12 +39,11 @@ jobs:
     executor: ritchie-executor
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/dist
       - run:
           name: Running build
           command: |
             ls dist
-
 
 workflows:
   build_and_test:
