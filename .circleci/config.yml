@@ -40,7 +40,7 @@ jobs:
     executor: ritchie-executor
     steps:
       - attach_workspace:
-          at: /tmp/dist
+          at: /workspace/dist
       - run:
           name: Running build
           command: |
