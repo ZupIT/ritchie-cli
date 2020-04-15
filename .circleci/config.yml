@@ -10,6 +10,12 @@ executors:
         user: root
     working_directory: /workspace
 
+  delivery-executor:
+    docker:
+      - image: circleci/python:2.7-stretch
+        user: root
+    working_directory: /workspace
+
 jobs:
 
   test:
@@ -38,8 +44,7 @@ jobs:
             - windows
 
   delivery:
-    docker:
-      - image: circleci/python:2.7-stretch
+    executor: delivery-executor
     steps:
       - checkout
       - attach_workspace:
