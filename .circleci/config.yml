@@ -5,7 +5,8 @@ executors:
   ritchie-executor:
     docker:
       - image: circleci/golang:1.14.1
-    working_directory: /tmp
+        user: root
+    working_directory: /workspace
 
 
 jobs:
