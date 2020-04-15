@@ -52,7 +52,6 @@ jobs:
       - run:
           name: Running build
           command: |
-            apk --no-cache add py-pip
             pip install awscli
             AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} make toto
 
