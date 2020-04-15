@@ -25,6 +25,17 @@ jobs:
           command: |
             make build
 
+  delivery:
+    docker:
+      - image: circleci/golang:1.14.1
+    steps:
+      - checkout
+      - run:
+          name: Running build
+          command: |
+            ls
+
+
 workflows:
   build_and_test:
     jobs:
@@ -32,3 +43,6 @@ workflows:
       - build:
           requires:
             - test
+      - delivery:
+          requires:
+            - build
