@@ -43,7 +43,7 @@ jobs:
       - run:
           name: Running build
           command: |
-            ls dist
+            ls
 
 workflows:
   build_and_test:
