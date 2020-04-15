@@ -38,6 +38,7 @@ jobs:
   delivery:
     executor: ritchie-executor
     steps:
+      - checkout
       - attach_workspace:
           at: /workspace/dist
       - run:
