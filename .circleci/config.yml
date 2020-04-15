@@ -24,13 +24,18 @@ jobs:
                 && rm -rf /var/cache/apk/* /root/.cache/pip/* /usr/lib/python2.7/site-packages/awscli/examples
 
   test:
+    docker:
+      - image: golang:1.13-alpine
     steps:
       - checkout
       - run:
           name: Running test
           command: make test
   build:
+    docker:
+      - image: golang:1.13-alpine
     steps:
+      - checkout
       - run:
           name: Running build
           command: make build
