@@ -28,6 +28,7 @@ jobs:
           name: Running build
           command: |
             make build
+            ls dist
       - persist_to_workspace:
           root: dist
           paths:
