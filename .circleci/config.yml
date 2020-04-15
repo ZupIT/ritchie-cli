@@ -28,7 +28,6 @@ jobs:
           name: Running build
           command: |
             make build
-            ls dist
       - persist_to_workspace:
           root: dist
           paths:
@@ -44,7 +43,9 @@ jobs:
       - run:
           name: Running build
           command: |
-            ls
+            apt-get install python3-pip
+            pip3 install awscli --upgrade --user
+            AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} make toto
 
 workflows:
   build_and_test:

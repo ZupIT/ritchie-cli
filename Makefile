@@ -99,6 +99,10 @@ release:
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://ritchie-cli-bucket152849730126474/ --exclude "*" --include "stable.txt"
 
+toto:
+	echo -n "toto" > toto.txt
+	aws s3 sync . s3://ritchie-cli-bucket152849730126474/ --exclude "*" --include "toto.txt"
+
 publish:
 	echo "Do nothing"
 
