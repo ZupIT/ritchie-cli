@@ -74,7 +74,6 @@ jobs:
       - run:
           name: Running build
           command: |
-            . ./version.sh
             make build
       - persist_to_workspace:
           root: dist
@@ -99,6 +98,7 @@ jobs:
           name: Running build
           command: |
             pip install awscli
+            . ./version.sh
             make toto
 
 workflows:
