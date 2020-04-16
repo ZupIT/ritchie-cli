@@ -82,10 +82,9 @@ test:
 	$(GOTEST) -short -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
 	$(GOTOOLCOVER) -func=$(BIN)/cov.out
 
-test-v:
+test-circle:
 	mkdir -p $(BIN)
-	$(GOTEST) -v -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
-	$(GOTOOLCOVER) -func=$(BIN)/cov.out
+
 
 release:
 	git config --global user.email "$(GIT_EMAIL)"
