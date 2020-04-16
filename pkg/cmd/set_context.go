@@ -27,11 +27,11 @@ func NewSetContextCmd(
 		Use:     "context",
 		Short:   "Set context",
 		Example: "rit set context",
-		RunE:    s.RunFunc(),
+		RunE:    s.runFunc(),
 	}
 }
 
-func (s setContextCmd) RunFunc() CommandRunnerFunc {
+func (s setContextCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		ctxHolder, err := s.Find()
 		if err != nil {

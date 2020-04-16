@@ -19,11 +19,11 @@ func NewShowContextCmd(f rcontext.Finder) *cobra.Command {
 		Use:     "context",
 		Short:   "Show current context",
 		Example: "rit show context",
-		RunE:    s.RunFunc(),
+		RunE:    s.runFunc(),
 	}
 }
 
-func (s showContextCmd) RunFunc() CommandRunnerFunc {
+func (s showContextCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx, err := s.Find()
 		if err != nil {

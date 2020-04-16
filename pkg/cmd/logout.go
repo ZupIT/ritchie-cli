@@ -19,11 +19,11 @@ func NewLogoutCmd(lm security.LogoutManager) *cobra.Command {
 		Short:   "User logout",
 		Long:    "Destroy the user session of the organization",
 		Example: "rit logout",
-		RunE:    l.RunFunc(),
+		RunE:    l.runFunc(),
 	}
 }
 
-func (l logoutCmd) RunFunc() CommandRunnerFunc {
+func (l logoutCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := l.Logout(); err != nil {
 			return err

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -20,11 +21,11 @@ func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText) *cobra.Command
 		Use:     "formula",
 		Short:   "Create a new formula",
 		Example: "rit create formula",
-		RunE:    c.RunFunc(),
+		RunE:    c.runFunc(),
 	}
 }
 
-func (c createFormulaCmd) RunFunc() CommandRunnerFunc {
+func (c createFormulaCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Creating Formula ...")
 		fCmd, err := c.Text("New formula's command ? [ex.: rit group verb <noun>]", true)

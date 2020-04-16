@@ -18,13 +18,13 @@ func NewUpdateRepoCmd(up formula.RepoUpdater) *cobra.Command {
 		Use:     "repo",
 		Short:   "Update all repositories",
 		Example: "rit update repo",
-		RunE:    u.RunFunc(),
+		RunE:    u.runFunc(),
 	}
 
 	return cmd
 }
 
-func (u updateRepoCmd) RunFunc() CommandRunnerFunc {
+func (u updateRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := u.Update(); err != nil {
 			return err
