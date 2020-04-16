@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/viniciusramosdefaria/ritchie-cli/tree/circleci-project-setup.svg?style=svg)](https://circleci.com/gh/viniciusramosdefaria/ritchie-cli)
+
 <img class="special-img-class" src="/docs/img/ritchie-banner.png" />
 
 ## Ritchie
