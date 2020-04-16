@@ -28,6 +28,7 @@ DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
 RITCHIE_SERVER=$(shell VERSION=$(VERSION) ./ritchie_server.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./ritchie_env.sh)
+S3_ARTIFACT_BUCKET=$(S3_ARTIFACT_BUCKET)
 
 build:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
@@ -101,7 +102,7 @@ release:
 
 toto:
 	echo -n "toto" > toto.txt
-	aws s3 sync . s3://ritchie-cli-bucket152849730126474/ --exclude "*" --include "toto.txt"
+	aws s3 sync . s3://$(S3_ARTIFACT_BUCKET)/ --exclude "*" --include "toto.txt"
 
 
 publish:
