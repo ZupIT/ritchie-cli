@@ -5,8 +5,12 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
 
+  paths:
+    test-results: &TEST_RESULTS_DIR bin
+
   environment: &ENVIRONMENT
     S3_ARTIFACT_BUCKET: ritchie-cli-bucket152849730126474
+    TEST_RESULTS_DIR: *TEST_RESULTS_DIR
 
   filters: &FILTERS
     branches:
@@ -38,6 +42,14 @@ jobs:
           command: |
             echo "7224aa97-1f94-4679-917d-9c7bb10074ab" > /etc/machine-id
             make test
+      - store_test_results:
+          path: *TEST_RESULTS_DIR
+      - store_artifacts:
+          path: *TEST_RESULTS_DIR
+      - run:
+          name: codecov upload
+          when: always
+          command: bash <(curl -s https://codecov.io/bash)
 
   build:
     executor: ritchie-executor
@@ -54,6 +66,17 @@ jobs:
             - linux
             - darwin
             - windows
+      - store_test_results:
+          path: *TEST_RESULTS_DIR
+          - store_artifacts:
+              path: *TEST_RESULTS_DIR
+          - run: &codecov_upload
+              name: codecov upload
+              when: always
+              # The -C flag shouldn't be necessary, but it fails to find the commit
+              # without it.
+              command: bash <(curl -s https://codecov.io/bash) -C "$CIRCLE_SHA1"
+
 
   delivery:
     executor: delivery-executor
