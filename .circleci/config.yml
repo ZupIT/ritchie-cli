@@ -99,6 +99,7 @@ jobs:
           command: |
             pip install awscli
             . ./version.sh
+            . ./credentials.sh
             make toto
 
 workflows:
