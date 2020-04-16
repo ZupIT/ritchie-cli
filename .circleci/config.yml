@@ -77,6 +77,7 @@ jobs:
       - run:
           name: Running build
           command: |
+            . ./version.sh
             make build
       - persist_to_workspace:
           root: dist
