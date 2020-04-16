@@ -107,12 +107,7 @@ workflows:
       - test:
           filters:
             <<: *FILTERS
-      - build_qa:
-          filters:
-            <<: *FILTERS_QA
-          requires:
-            - test
-      - build_release:
+      - build:
           filters:
             <<: *FILTERS
           requires:
