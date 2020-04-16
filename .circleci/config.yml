@@ -102,6 +102,7 @@ jobs:
           command: |
             pip install awscli
             . ./version.sh
+            . ./bucket.sh
             . ./credentials.sh
             make delivery
 
@@ -113,8 +114,7 @@ jobs:
           name: Releasing
           command: |
             . ./version.sh
-            . ./credentials.sh
-            make delivery
+            make release
 
 
 workflows:
