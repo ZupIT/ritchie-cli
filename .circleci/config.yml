@@ -8,9 +8,10 @@ references:
   environment: &ENVIRONMENT
     S3_ARTIFACT_BUCKET: ritchie-cli-bucket152849730126474
 
-  branches: &BRANCHES
-    only:
-      - master
+  filters: &FILTERS
+    branches:
+      only:
+        - master
 
 executors:
   ritchie-executor:
@@ -29,8 +30,6 @@ jobs:
 
   test:
     executor: ritchie-executor
-    branches:
-      <<: *BRANCHES
     steps:
       - checkout
       - run:
@@ -42,7 +41,6 @@ jobs:
   build:
     executor: ritchie-executor
     branches:
-      <<: *BRANCHES
     steps:
       - checkout
       - run:
@@ -60,8 +58,6 @@ jobs:
     executor: delivery-executor
     environment:
       <<: *ENVIRONMENT
-    branches:
-      <<: *BRANCHES
     steps:
       - checkout
       - attach_workspace:
@@ -75,10 +71,16 @@ jobs:
 workflows:
   build_and_test:
     jobs:
-      - test
+      - test:
+          filters:
+            <<: *FILTERS
       - build:
+          filters:
+            <<: *FILTERS
           requires:
             - test
       - delivery:
+          filters:
+            <<: *FILTERS
           requires:
             - build
