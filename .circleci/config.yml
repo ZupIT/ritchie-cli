@@ -100,21 +100,22 @@ jobs:
             pip install awscli
             . ./version.sh
             . ./credentials.sh
+            env
             make toto
 
 workflows:
   build_and_test:
     jobs:
-      - test:
-          filters:
-            <<: *FILTERS
-      - build:
-          filters:
-            <<: *FILTERS
-          requires:
-            - test
+#      - test:
+#          filters:
+#            <<: *FILTERS
+#      - build:
+#          filters:
+#            <<: *FILTERS
+#          requires:
+#            - test
       - delivery:
           filters:
             <<: *FILTERS
-          requires:
-            - build
+#          requires:
+#            - build
