@@ -1,10 +1,5 @@
 version: 2.1
 
-general:
-  branches:
-    only:
-      - master
-
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
@@ -12,6 +7,10 @@ references:
 
   environment: &ENVIRONMENT
     S3_ARTIFACT_BUCKET: ritchie-cli-bucket152849730126474
+
+  branches: &BRANCHES
+    only:
+      - master
 
 executors:
   ritchie-executor:
@@ -30,6 +29,8 @@ jobs:
 
   test:
     executor: ritchie-executor
+    branches:
+      <<: *BRANCHES
     steps:
       - checkout
       - run:
@@ -40,6 +41,8 @@ jobs:
 
   build:
     executor: ritchie-executor
+    branches:
+      <<: *BRANCHES
     steps:
       - checkout
       - run:
@@ -57,6 +60,8 @@ jobs:
     executor: delivery-executor
     environment:
       <<: *ENVIRONMENT
+    branches:
+      <<: *BRANCHES
     steps:
       - checkout
       - attach_workspace:
