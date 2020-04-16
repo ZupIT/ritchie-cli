@@ -6,8 +6,8 @@ references:
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
 
   environment: &ENVIRONMENT
-    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
 
 executors:
   ritchie-executor:
