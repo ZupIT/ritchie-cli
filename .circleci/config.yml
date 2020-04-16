@@ -107,6 +107,8 @@ jobs:
             make delivery
 
   release:
+    environment:
+      <<: *ENVIRONMENT
     executor: delivery-executor
     steps:
       - checkout
