@@ -12,6 +12,7 @@ references:
     branches:
       only:
         - master
+        - circleci-project-setup
 
 executors:
   ritchie-executor:
