@@ -9,19 +9,22 @@ references:
     test-results: &TEST_RESULTS_DIR bin
 
   environment: &ENVIRONMENT
-    S3_ARTIFACT_BUCKET: ritchie-cli-bucket152849730126474
     TEST_RESULTS_DIR: *TEST_RESULTS_DIR
+    GIT_EMAIL : "viniciusramosdefaria@gmail.com"
+    GIT_USERNAME: "viniciusramosdefaria"
+    GIT_NAME: "Vinicius Ramos de Faria"
 
   filters: &FILTERS
     branches:
       only:
         - master
-        - circleci-project-setup
+        - /^release-.*/
+        - qa
 
-  filters_qa: &FILTERS_QA
+  filters-release: &FILTERS_RELEASE
     branches:
       only:
-        - /^qa-.*/
+        - /^release-.*/
 
 executors:
   ritchie-executor:
@@ -95,27 +98,43 @@ jobs:
       - attach_workspace:
           at: /workspace/dist
       - run:
-          name: Running build
+          name: Delivering cli binary
           command: |
             pip install awscli
             . ./version.sh
             . ./credentials.sh
-            env
-            make toto
+            make delivery
+
+  release:
+    executor: delivery-executor
+    steps:
+      - checkout
+      - run:
+          name: Releasing
+          command: |
+            . ./version.sh
+            . ./credentials.sh
+            make delivery
+
 
 workflows:
   build_and_test:
     jobs:
-#      - test:
-#          filters:
-#            <<: *FILTERS
-#      - build:
-#          filters:
-#            <<: *FILTERS
-#          requires:
-#            - test
+      - test:
+          filters:
+            <<: *FILTERS
+      - build:
+          filters:
+            <<: *FILTERS
+          requires:
+            - test
       - delivery:
           filters:
             <<: *FILTERS
-#          requires:
-#            - build
+          requires:
+            - build
+      - release:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build

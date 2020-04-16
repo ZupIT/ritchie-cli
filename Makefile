@@ -22,7 +22,7 @@ DIST_WIN=$(DIST)/windows
 DIST_WIN_TEAM=$(DIST_WIN)/$(TEAM)
 DIST_WIN_SINGLE=$(DIST_WIN)/$(SINGLE)
 VERSION=$(RELEASE_VERSION)
-GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
+GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/viniciusramosdefaria/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
@@ -75,25 +75,20 @@ test:
 
 release:
 	git config --global user.email "$(GIT_EMAIL)"
-	git config --global user.name "$(GIT_USER)"
+	git config --global user.name "$(GIT_NAME)"
 	git add .
 	git commit --allow-empty -m "release"
 	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
 	git tag -a $(RELEASE_VERSION) -m "release"
 	git push $(GIT_REMOTE) $(RELEASE_VERSION)
 	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
-	aws s3 sync dist s3://ritchie-cli-bucket152849730126474/$(RELEASE_VERSION) --include "*"
-	echo -n "$(RELEASE_VERSION)" > stable.txt
-	aws s3 sync . s3://ritchie-cli-bucket152849730126474/ --exclude "*" --include "stable.txt"
 
-toto:
+delivery:
 ifneq "$(BUCKET)" ""
-#	echo $(BUCKET)
-#	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
-#	echo -n "$(RELEASE_VERSION)" > stable.txt
-#	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
-	echo -n "toto" > toto.txt
-	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "toto.txt"
+	echo $(BUCKET)
+	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 else
 	echo "NOT GONNA PUBLISH"
 endif
