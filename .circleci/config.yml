@@ -18,6 +18,11 @@ references:
         - master
         - circleci-project-setup
 
+  filters_qa: &FILTERS_QA
+    branches:
+      only:
+        - /^qa-.*/
+
 executors:
   ritchie-executor:
     docker:
@@ -69,6 +74,7 @@ jobs:
       - run:
           name: Running build
           command: |
+            . ./version.sh
             make build
       - persist_to_workspace:
           root: dist
@@ -101,7 +107,12 @@ workflows:
       - test:
           filters:
             <<: *FILTERS
-      - build:
+      - build_qa:
+          filters:
+            <<: *FILTERS_QA
+          requires:
+            - test
+      - build_release:
           filters:
             <<: *FILTERS
           requires:
