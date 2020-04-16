@@ -70,6 +70,6 @@ workflows:
       - build:
           requires:
             - test
-      - delivery
+      - delivery:
           requires:
             - build
