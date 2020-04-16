@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
@@ -20,13 +21,13 @@ func NewListRepoCmd(ls formula.RepoLister) *cobra.Command {
 		Use:     "repo",
 		Short:   "List all repositories.",
 		Example: "rit list repo",
-		RunE:    l.RunFunc(),
+		RunE:    l.runFunc(),
 	}
 
 	return cmd
 }
 
-func (l listRepoCmd) RunFunc() CommandRunnerFunc {
+func (l listRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		rr, err := l.List()
 		if err != nil {

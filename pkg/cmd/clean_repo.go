@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -21,13 +22,13 @@ func NewCleanRepoCmd(cl formula.RepoCleaner, it prompt.InputText) *cobra.Command
 		Use:     "repo",
 		Short:   "clean a repository.",
 		Example: "rit clean repo ",
-		RunE:    c.RunFunc(),
+		RunE:    c.runFunc(),
 	}
 
 	return cmd
 }
 
-func (c cleanRepoCmd) RunFunc() CommandRunnerFunc {
+func (c cleanRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		n, err := c.Text("Name of the repository: ", true)
 		if err != nil {

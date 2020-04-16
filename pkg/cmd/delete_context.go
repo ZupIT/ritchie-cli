@@ -25,11 +25,11 @@ func NewDeleteContextCmd(
 		Use:     "context",
 		Short:   "Delete context for Ritchie-cli",
 		Example: "rit delete context",
-		RunE:    d.RunFunc(),
+		RunE:    d.runFunc(),
 	}
 }
 
-func (d deleteContextCmd) RunFunc() CommandRunnerFunc {
+func (d deleteContextCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		ctxHolder, err := d.Find()
 		if err != nil {
