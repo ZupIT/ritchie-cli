@@ -74,8 +74,8 @@ test:
 	$(GOTOOLCOVER) -func=$(BIN)/cov.out
 
 release:
-	git config --global user.email $(GIT_EMAIL)
-	git config --global user.name $(GIT_NAME)
+	git config --global user.email "$(GIT_EMAIL)"
+	git config --global user.name "$(GIT_NAME)"
 	git add .
 	git commit --allow-empty -m "release"
 	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
