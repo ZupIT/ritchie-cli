@@ -35,6 +35,8 @@ jobs:
 
   test:
     executor: ritchie-executor
+    environment:
+      <<: *ENVIRONMENT
     steps:
       - checkout
       - run:
