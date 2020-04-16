@@ -1,5 +1,10 @@
 version: 2.1
 
+general:
+  branches:
+    only:
+      - master
+
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
