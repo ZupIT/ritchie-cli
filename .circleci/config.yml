@@ -78,7 +78,7 @@ jobs:
           name: Running build
           command: |
             . ./version.sh
-            make build
+            make build-circle
       - persist_to_workspace:
           root: dist
           paths:
