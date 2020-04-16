@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if expr "$CIRCLE_BRANCH" : 'circleci-project-setup' >/dev/null; then
+if expr "$CIRCLE_BRANCH" : 'qa' >/dev/null; then
   export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID_QA"
   export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY_QA"
 
