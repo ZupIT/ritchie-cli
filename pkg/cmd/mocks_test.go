@@ -14,6 +14,12 @@ func (inputTextMock) Text(name string, required bool) (string, error) {
 	return "mocked text", nil
 }
 
+type inputSecretMock struct{}
+
+func (inputSecretMock) Text(name string, required bool) (string, error) {
+	return "username=ritchie", nil
+}
+
 type inputURLMock struct{}
 
 func (inputURLMock) URL(name, defaultValue string) (string, error) {
@@ -44,16 +50,28 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName) (string, error) {
 	return "autocomplete", nil
 }
 
-type inputBoolMock struct{}
+type inputTrueMock struct{}
 
-func (inputBoolMock) Bool(name string, items []string) (bool, error) {
+func (inputTrueMock) Bool(name string, items []string) (bool, error) {
 	return true, nil
+}
+
+type inputFalseMock struct{}
+
+func (inputFalseMock) Bool(name string, items []string) (bool, error) {
+	return false, nil
 }
 
 type inputListMock struct{}
 
 func (inputListMock) List(name string, items []string) (string, error) {
 	return "item-mocked", nil
+}
+
+type inputListCredMock struct{}
+
+func (inputListCredMock) List(name string, items []string) (string, error) {
+	return "me", nil
 }
 
 type repoAdder struct{}
@@ -164,5 +182,16 @@ func (credSetterMock) Set(d credential.Detail) error {
 type credSettingsMock struct{}
 
 func (credSettingsMock) Fields() (credential.Fields, error) {
-	return credential.Fields{}, nil
+	return credential.Fields{
+		"github": []credential.Field{
+			{
+				Name: "username",
+				Type: "text",
+			},
+			{
+				Name: "token",
+				Type: "password",
+			},
+		},
+	}, nil
 }
