@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/viniciusramosdefaria/ritchie-cli/tree/circleci-project-setup.svg?style=svg)](https://circleci.com/gh/viniciusramosdefaria/ritchie-cli) [![codecov](https://codecov.io/gh/viniciusramosdefaria/ritchie-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/viniciusramosdefaria/ritchie-cli)
+[![CircleCI](https://circleci.com/gh/viniciusramosdefaria/ritchie-cli/tree/circleci-project-setup.svg?style=svg)](https://circleci.com/gh/viniciusramosdefaria/ritchie-cli) [![codecov](https://codecov.io/gh/viniciusramosdefaria/ritchie-cli/branch/circleci-project-setup/graph/badge.svg)](https://codecov.io/gh/viniciusramosdefaria/ritchie-cli)
 
 
 
