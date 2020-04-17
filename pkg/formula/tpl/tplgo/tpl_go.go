@@ -151,22 +151,22 @@ test-local:
 ifneq ("$(FORM)", "")
 	@echo "Using form true: "  $(FORM_TO_UPPER)
 	$(MAKE) bin FORMULAS=$(FORM)
-	mkdir -p ~/.rit/formulas
-	rm -rf ~/.rit/formulas/$(FORM)
+	mkdir -p $(HOME)/.rit/formulas
+	rm -rf $(HOME)/.rit/formulas/$(FORM)
 	./unzip-bin-configs.sh
-	cp -r formulas/* ~/.rit/formulas
+	cp -r formulas/* $(HOME)/.rit/formulas
 	rm -rf formulas
 else
 	@echo "Use make test-local form=NAME_FORMULA for specific formula."
 	@echo "form false: ALL FORMULAS"
 	$(MAKE) bin
-	rm -rf ~/.rit/formulas
+	rm -rf $(HOME)/.rit/formulas
 	./unzip-bin-configs.sh
-	mv formulas ~/.rit
+	mv formulas $(HOME)/.rit
 endif
-	mkdir -p ~/.rit/repo/local
-	rm -rf ~/.rit/repo/local/tree.json
-	cp tree/tree.json  ~/.rit/repo/local/tree.json
+	mkdir -p $(HOME)/.rit/repo/local
+	rm -rf $(HOME)/.rit/repo/local/tree.json
+	cp tree/tree.json  $(HOME)/.rit/repo/local/tree.json
 `
 	TemplatePkg = `package {{nameModule}}
 
