@@ -10,9 +10,9 @@ references:
 
   environment: &ENVIRONMENT
     TEST_RESULTS_DIR: *TEST_RESULTS_DIR
-    GIT_EMAIL : "ernelio.junior@zup.com.br"
-    GIT_USERNAME: "erneliojuniorzup"
-    GIT_NAME: "Ernelio Junior"
+    GIT_EMAIL : "viniciusramosdefaria@gmail.com"
+    GIT_USERNAME: "viniciusramosdefaria"
+    GIT_NAME: "Vinicius Ramos de Faria"
 
   filters: &FILTERS
     branches:
