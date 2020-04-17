@@ -1,22 +1,22 @@
 package main
 
 import (
-"bufio"
-"bytes"
-"fmt"
-"io"
-"log"
-"os"
-"os/exec"
-"time"
+	"bufio"
+	"bytes"
+	"fmt"
+	"io"
+	"log"
+	"os"
+	"os/exec"
+	"time"
 )
 
 type Inputs struct {
-	args []string
+	args   []string
 	prompt []string
 }
 
-func commandInit(cmd *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader){
+func commandInit(cmd *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader) {
 	stdin, err = cmd.StdinPipe()
 	if err != nil {
 		return nil, err, nil
@@ -33,7 +33,7 @@ func commandInit(cmd *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader)
 	return stdin, nil, stdout
 }
 
-func (i *Inputs) RunRit() (error, string) {
+func (i *Inputs) RunRit() (string, error) {
 	args := i.args
 	cmd := exec.Command("rit", args...)
 
@@ -43,11 +43,11 @@ func (i *Inputs) RunRit() (error, string) {
 		log.Panic(err)
 	}
 
-	for _, s := range i.prompt{
+	for _, s := range i.prompt {
 		time.Sleep(1000 * time.Millisecond)
 		_, err = io.Copy(stdin, bytes.NewBuffer([]byte(s)))
 		if err != nil {
-			log.Printf("Error when giving inputs: %q",err)
+			log.Printf("Error when giving inputs: %q", err)
 			os.Exit(1)
 		}
 	}
@@ -64,10 +64,9 @@ func (i *Inputs) RunRit() (error, string) {
 
 	err = cmd.Wait()
 	if err != nil {
-		log.Printf("Error while running: %q",err)
+		log.Printf("Error while running: %q", err)
 		os.Exit(1)
 	}
 
-	return nil, resp
+	return resp, nil
 }
-

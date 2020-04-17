@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/spf13/cobra"
@@ -63,6 +64,8 @@ func (a addRepoCmd) RunFunc() CommandRunnerFunc {
 		if err = a.Add(r); err != nil {
 			return err
 		}
+
+		fmt.Printf("%q has been added to your repositories.\n", rn)
 
 		return err
 	}
