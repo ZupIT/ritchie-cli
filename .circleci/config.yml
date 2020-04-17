@@ -40,7 +40,32 @@ executors:
     working_directory: /workspace
 
 jobs:
-
+  # Runs Go linters
+  lint:
+    docker:
+      - image: *GOLANG_IMAGE
+    environment:
+      GOTAGS: "" # No tags for OSS but there are for enterprise
+    steps:
+      - checkout
+      - run:
+          name: Install golangci-lint
+          command: |
+            download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
+            wget -O- -q $download | sh -s -- -b /go/bin/ v1.23.6
+      - run: go mod download
+      - run:
+          name: lint
+          command: &lintcmd |
+            golangci-lint run --build-tags="$GOTAGS" -v --concurrency 2
+      - run:
+          name: lint api
+          working_directory: api
+          command: *lintcmd
+      - run:
+          name: lint sdk
+          working_directory: sdk
+          command: *lintcmd
   test:
     executor: ritchie-executor
     environment:
