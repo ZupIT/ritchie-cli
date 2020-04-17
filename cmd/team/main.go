@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
+
 	"net/http"
 	"os"
 	"time"
@@ -57,6 +59,7 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
+	serverSetter := server.Setter(ritchieHomeDir)
 	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, cmd.ServerURL, http.DefaultClient, sessionManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
@@ -121,6 +124,7 @@ func buildCommands() *cobra.Command {
 	deleteUserCmd := cmd.NewDeleteUserCmd(userManager, inputBool, inputText)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
+	setServerCmd := cmd.NewSetServerCmd(serverSetter, inputURL)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
@@ -137,7 +141,7 @@ func buildCommands() *cobra.Command {
 	createCmd.AddCommand(createUserCmd, createFormulaCmd)
 	deleteCmd.AddCommand(deleteUserCmd, deleteRepoCmd, deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
+	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setServerCmd)
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 
