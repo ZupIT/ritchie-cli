@@ -52,26 +52,49 @@ func NewRunner(
 		ib}
 }
 
-// Run default implementation of function Manager.Run
-func (d DefaultRunner) Run(def Definition) error {
+func (d DefaultRunner) loadConfig(def Definition) (Config, error) {
 	fPath := def.FormulaPath(d.ritchieHome)
-
-	var config *Config
+	var config Config
 	cName := def.ConfigName()
 	cPath := def.ConfigPath(fPath, cName)
 	if !fileutil.Exists(cPath) {
 		if err := d.downloadConfig(def.ConfigUrl(cName), fPath, cName); err != nil {
-			return err
+			return Config{}, err
 		}
 	}
 
 	configFile, err := ioutil.ReadFile(cPath)
 	if err != nil {
-		return err
+		return Config{}, err
 	}
 
-	config = &Config{}
-	if err := json.Unmarshal(configFile, config); err != nil {
+	if err := json.Unmarshal(configFile, &config); err != nil {
+		return Config{}, err
+	}
+	return config, nil
+}
+
+func (d DefaultRunner) createWorkDir(def Definition) (string, string, error) {
+	fPath := def.FormulaPath(d.ritchieHome)
+	u := uuid.New().String()
+	tDir, tBDir := def.TmpWorkDirPath(d.ritchieHome, u)
+
+	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
+		return "", "", err
+	}
+
+	if err := fileutil.CopyDirectory(def.BinPath(fPath), tBDir); err != nil {
+		return "", "", err
+	}
+	return tDir, tBDir, nil
+}
+
+// Run default implementation of function Manager.Run
+func (d DefaultRunner) Run(def Definition) error {
+	cPwd, _ := os.Getwd()
+	fPath := def.FormulaPath(d.ritchieHome)
+	config, err := d.loadConfig(def)
+	if err != nil {
 		return err
 	}
 
@@ -88,26 +111,20 @@ func (d DefaultRunner) Run(def Definition) error {
 			return err
 		}
 	}
-
-	//TMP for execution
-	cPwd, _ := os.Getwd()
-	fmt.Println("Current pwd: ", cPwd)
-	u := uuid.New().String()
-	tdPath := def.TmpWorkDirPath(d.ritchieHome, u)
-
-	fileutil.CreateDirIfNotExists(tdPath, 0755)
-
-	fileutil.CopyDirectory(bPath, tdPath) //Diff
-
-	os.Chdir(tdPath)
-	bFilePath = def.BinFilePath(tdPath, bName)
+	tDir, tBDir, err := d.createWorkDir(def)
+	if err != nil {
+		return err
+	}
+	defer fileutil.RemoveDir(tDir)
+	os.Chdir(tBDir)
+	bFilePath = def.BinFilePath(tBDir, bName)
 
 	cmd := exec.Command(bFilePath)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := d.inputs(cmd, fPath, config); err != nil {
+	if err := d.inputs(cmd, fPath, &config); err != nil {
 		return err
 	}
 
@@ -119,10 +136,13 @@ func (d DefaultRunner) Run(def Definition) error {
 		return err
 	}
 
-	//realizo o diff
-	//Copio a diferenca para o pwd
-	//deleto o temp dir
-
+	df, err := fileutil.ListNewFiles(bPath, tBDir)
+	if err != nil {
+		return err
+	}
+	if err = fileutil.MoveFiles(tBDir, cPwd, df); err != nil {
+		return err
+	}
 	return nil
 }
 

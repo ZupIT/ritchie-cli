@@ -8,7 +8,8 @@ import (
 
 const (
 	PathPattern           = "%s/formulas/%s"
-	TmpWorkDirPattern     = "%s/tmp/%s/%s"
+	TmpDirPattern         = "%s/tmp/%s"
+	TmpBinDirPattern      = "%s/tmp/%s/%s"
 	DefaultConfig         = "config.json"
 	ConfigPattern         = "%s/%s"
 	CommandEnv            = "COMMAND"
@@ -62,9 +63,12 @@ func (d *Definition) FormulaPath(home string) string {
 	return fmt.Sprintf(PathPattern, home, d.Path)
 }
 
-// TmpWorkDirPath builds the tmp path to run formula
-func (d *Definition) TmpWorkDirPath(home, uuidHash string) string {
-	return fmt.Sprintf(TmpWorkDirPattern, home, uuidHash, d.Path)
+// TmpWorkDirPath builds the tmp paths to run formula, first parameter is tmpDir created
+// second parameter is tmpBinDir
+func (d *Definition) TmpWorkDirPath(home, uuidHash string) (string, string) {
+	tmpDir := fmt.Sprintf(TmpDirPattern, home, uuidHash)
+	tmpBinDir := fmt.Sprintf(TmpBinDirPattern, home, uuidHash, d.Path)
+	return tmpDir, tmpBinDir
 }
 
 // BinName builds the bin name from definition params
