@@ -10,9 +10,9 @@ references:
 
   environment: &ENVIRONMENT
     TEST_RESULTS_DIR: *TEST_RESULTS_DIR
-    GIT_EMAIL : "viniciusramosdefaria@gmail.com"
-    GIT_USERNAME: "viniciusramosdefaria"
-    GIT_NAME: "Vinicius Ramos de Faria"
+    GIT_EMAIL : "zup-ci@zup.com.br"
+    GIT_USERNAME: "zup-ci"
+    GIT_NAME: "Zup CI"
 
   filters: &FILTERS
     branches:
@@ -53,7 +53,7 @@ jobs:
       - run: go mod download
       - run:
           name: lint
-          command: &lintcmd |
+          command: |
             /go/bin/golangci-lint run
   test:
     executor: ritchie-executor
