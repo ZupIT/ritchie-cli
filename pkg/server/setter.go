@@ -1,4 +1,4 @@
-package setter
+package server
 
 import (
 	"fmt"
@@ -8,19 +8,23 @@ import (
 
 const serverFilePattern = "%s/server"
 
-type Setter struct {
+type SetterManager struct {
 	serverFile string
 }
 
 func NewSetter(ritchieHomeDir string) Setter {
-	return Setter{
+	return SetterManager{
 		serverFile: fmt.Sprintf(serverFilePattern, ritchieHomeDir),
 	}
 }
 
-func (s Setter) Set(url string) error {
-	if err := fileutil.WriteFile(s.serverFile, []byte(url)); err != nil {
-		return err
+func (s SetterManager) Set(url string) error {
+	if url != "" {
+		if err := fileutil.WriteFile(s.serverFile, []byte(url)); err != nil {
+			return err
+		}
+	} else {
+		panic("Incorrect server URL")
 	}
 	return nil
 }
