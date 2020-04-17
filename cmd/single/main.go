@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/spf13/cobra"
 	"net/http"
 	"os"
+
+	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -74,6 +76,7 @@ func buildCommands() *cobra.Command {
 		workspaceManager,
 		loginManager,
 		repoManager,
+		nil,
 		sessionValidator,
 		api.Single,
 		inputText,
