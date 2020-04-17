@@ -119,10 +119,13 @@ func CreateDirIfNotExists(dir string, perm os.FileMode) error {
 }
 
 // CreateFileIfNotExist creates file if not exists
-func CreateFileIfNotExist(file string, content []byte) {
+func CreateFileIfNotExist(file string, content []byte) error {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		WriteFile(file, content)
+		if err := WriteFile(file, content); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // RemoveDir removes path and any children it contains.
@@ -198,7 +201,7 @@ func Unzip(src string, dest string) error {
 
 		if file.FileInfo().IsDir() {
 			log.Println("Directory Created:", extractedFilePath)
-			os.MkdirAll(extractedFilePath, file.Mode())
+			_ = os.MkdirAll(extractedFilePath, file.Mode())
 		} else {
 			log.Println("File extracted:", file.Name)
 

@@ -10,7 +10,9 @@ func loginChannelProvider(p security.AuthProvider, org, serverURL string) (chan 
 	switch p {
 	case security.OAuthProvider:
 		oauthCli := oauth.NewLoginManager(cr, serverURL)
-		go oauthCli.Login(org)
+		go func() {
+			_ = oauthCli.Login(org)
+		}()
 	default:
 		return nil, security.ErrUnknownProvider
 	}
@@ -22,7 +24,9 @@ func logoutChannelProvider(p security.AuthProvider, org, serverURL string) (chan
 	switch p {
 	case security.OAuthProvider:
 		oauthCli := oauth.NewLogoutManager(org, cr, serverURL)
-		go oauthCli.Logout()
+		go func() {
+			_ = oauthCli.Logout()
+		}()
 	default:
 		return nil, security.ErrUnknownProvider
 	}

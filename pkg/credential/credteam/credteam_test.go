@@ -59,6 +59,6 @@ func TestMain(m *testing.M) {
 func mockServer(status int, body []byte) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(status)
-		rw.Write(body)
+		_, _ = rw.Write(body)
 	}))
 }

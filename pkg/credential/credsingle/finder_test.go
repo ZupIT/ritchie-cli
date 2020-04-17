@@ -11,7 +11,7 @@ import (
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
 	setter := NewSetter(tmp, ctxFinder, sessManager)
-	setter.Set(githubCred)
+	_ = setter.Set(githubCred)
 	finder := NewFinder(tmp, ctxFinder, sessManager)
 
 	type out struct {

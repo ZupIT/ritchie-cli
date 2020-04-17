@@ -12,8 +12,8 @@ func TestRemove(t *testing.T) {
 	setter := NewSetter(tmp, finder)
 	remover := NewRemover(tmp, finder)
 
-	setter.Set(dev)
-	setter.Set(qa)
+	_, _ = setter.Set(dev)
+	_, _ = setter.Set(qa)
 
 	type out struct {
 		want ContextHolder

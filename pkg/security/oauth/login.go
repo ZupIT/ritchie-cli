@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"net/http"
+
 	"github.com/coreos/go-oidc"
 	"golang.org/x/oauth2"
-	"net/http"
+
+	"github.com/ZupIT/ritchie-cli/pkg/security"
 )
 
 const (
@@ -65,13 +67,13 @@ const (
 )
 
 type LoginManager struct {
-	Resp chan security.ChanResponse
+	Resp      chan security.ChanResponse
 	serverURL string
 }
 
 func NewLoginManager(resp chan security.ChanResponse, serverURL string) *LoginManager {
 	return &LoginManager{
-		Resp: resp,
+		Resp:      resp,
 		serverURL: serverURL,
 	}
 }
@@ -146,8 +148,8 @@ func (l LoginManager) handlerLogin(provider *oidc.Provider, state string, oauth2
 			Email    string `json:"email"`
 			Username string `json:"preferred_username"`
 		}{}
-		idToken.Claims(&user)
-		w.Write([]byte(htmlLogin))
+		_ = idToken.Claims(&user)
+		_, _ = w.Write([]byte(htmlLogin))
 		l.Resp <- security.ChanResponse{
 			Token:    token,
 			Username: user.Username,

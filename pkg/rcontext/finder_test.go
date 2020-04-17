@@ -52,7 +52,7 @@ func TestFind(t *testing.T) {
 
 			in := tt.in
 			if in != nil {
-				setter.Set(in.ctx)
+				_, _ = setter.Set(in.ctx)
 			}
 
 			out := tt.out

@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/gofrs/flock"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/gofrs/flock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
@@ -47,7 +49,9 @@ func (d DefaultChecker) Check() error {
 	defer cancel()
 	locked, err := lock.TryLockContext(lockCtx, time.Second)
 	if locked {
-		defer lock.Unlock()
+		defer func() {
+			_ = lock.Unlock()
+		}()
 	}
 
 	if err != nil {
@@ -58,7 +62,10 @@ func (d DefaultChecker) Check() error {
 	if err != nil {
 		return err
 	}
-	fileutil.WriteFile(repoFile, b)
+	err = fileutil.WriteFile(repoFile, b)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
