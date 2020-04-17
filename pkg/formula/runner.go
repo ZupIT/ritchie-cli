@@ -52,43 +52,6 @@ func NewRunner(
 		ib}
 }
 
-func (d DefaultRunner) loadConfig(def Definition) (Config, error) {
-	fPath := def.FormulaPath(d.ritchieHome)
-	var config Config
-	cName := def.ConfigName()
-	cPath := def.ConfigPath(fPath, cName)
-	if !fileutil.Exists(cPath) {
-		if err := d.downloadConfig(def.ConfigUrl(cName), fPath, cName); err != nil {
-			return Config{}, err
-		}
-	}
-
-	configFile, err := ioutil.ReadFile(cPath)
-	if err != nil {
-		return Config{}, err
-	}
-
-	if err := json.Unmarshal(configFile, &config); err != nil {
-		return Config{}, err
-	}
-	return config, nil
-}
-
-func (d DefaultRunner) createWorkDir(def Definition) (string, string, error) {
-	fPath := def.FormulaPath(d.ritchieHome)
-	u := uuid.New().String()
-	tDir, tBDir := def.TmpWorkDirPath(d.ritchieHome, u)
-
-	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
-		return "", "", err
-	}
-
-	if err := fileutil.CopyDirectory(def.BinPath(fPath), tBDir); err != nil {
-		return "", "", err
-	}
-	return tDir, tBDir, nil
-}
-
 // Run default implementation of function Manager.Run
 func (d DefaultRunner) Run(def Definition) error {
 	cPwd, _ := os.Getwd()
@@ -194,6 +157,43 @@ func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config)
 		cmd.Env = append(cmd.Env, command)
 	}
 	return nil
+}
+
+func (d DefaultRunner) loadConfig(def Definition) (Config, error) {
+	fPath := def.FormulaPath(d.ritchieHome)
+	var config Config
+	cName := def.ConfigName()
+	cPath := def.ConfigPath(fPath, cName)
+	if !fileutil.Exists(cPath) {
+		if err := d.downloadConfig(def.ConfigUrl(cName), fPath, cName); err != nil {
+			return Config{}, err
+		}
+	}
+
+	configFile, err := ioutil.ReadFile(cPath)
+	if err != nil {
+		return Config{}, err
+	}
+
+	if err := json.Unmarshal(configFile, &config); err != nil {
+		return Config{}, err
+	}
+	return config, nil
+}
+
+func (d DefaultRunner) createWorkDir(def Definition) (string, string, error) {
+	fPath := def.FormulaPath(d.ritchieHome)
+	u := uuid.New().String()
+	tDir, tBDir := def.TmpWorkDirPath(d.ritchieHome, u)
+
+	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
+		return "", "", err
+	}
+
+	if err := fileutil.CopyDirectory(def.BinPath(fPath), tBDir); err != nil {
+		return "", "", err
+	}
+	return tDir, tBDir, nil
 }
 
 func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, items []string) {
