@@ -21,7 +21,7 @@ func (v ValidatorManager) Validate() error {
 	}
 
 	if serverUrl == "" {
-		return fmt.Errorf("No server URL found ! Please set a server URL.")
+		return fmt.Errorf("No server URL found ! Please set a server URL\n")
 	}
 
 	return nil
