@@ -10,6 +10,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -18,15 +19,15 @@ const urlGetPattern = "%s/credentials/me/%s"
 var ErrNotFoundCredential = errors.New("credential not found")
 
 type Finder struct {
-	serverURL      string
+	serverFinder   server.Finder
 	httpClient     *http.Client
 	sessionManager session.Manager
 	ctxFinder      rcontext.Finder
 }
 
-func NewFinder(serverURL string, hc *http.Client, sm session.Manager, cf rcontext.Finder) Finder {
+func NewFinder(serverFinder server.Finder, hc *http.Client, sm session.Manager, cf rcontext.Finder) Finder {
 	return Finder{
-		serverURL:      serverURL,
+		serverFinder:   serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
 		ctxFinder:      cf,
@@ -44,7 +45,12 @@ func (f Finder) Find(provider string) (credential.Detail, error) {
 		return credential.Detail{}, err
 	}
 
-	url := fmt.Sprintf(urlGetPattern, f.serverURL, provider)
+	serverUrl, err := f.serverFinder.Find()
+	if err != nil {
+		return credential.Detail{}, err
+	}
+
+	url := fmt.Sprintf(urlGetPattern, serverUrl, provider)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return credential.Detail{}, err

@@ -5,18 +5,24 @@ import (
 )
 
 type ValidatorManager struct {
-	serverUrl string
+	serverFinder Finder
 }
 
-func NewValidator(serverUrl string) Validator{
+func NewValidator(serverFinder Finder) Validator{
 	return ValidatorManager{
-		serverUrl: serverUrl,
+		serverFinder: serverFinder,
 	}
 }
 
 func (v ValidatorManager) Validate() error {
-	if v.serverUrl == "" {
+	serverUrl, err := v.serverFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	if serverUrl == "" {
 		return fmt.Errorf("No server URL found ! Please set a server URL.")
 	}
+
 	return nil
 }

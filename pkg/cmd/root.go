@@ -3,17 +3,17 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
+	"runtime"
+
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"os"
-	"runtime"
-	"strings"
-
-	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
@@ -90,10 +90,9 @@ func (o *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if "TEAM" == strings.ToUpper(o.version()) {
-			if err := o.checkServer(cmd.CommandPath()); err != nil {
-				return err
-			}
+
+		if err := o.checkServer(cmd.CommandPath()); err != nil {
+			return err
 		}
 		if err := o.checkSession(cmd.CommandPath()); err != nil {
 			return err
@@ -104,10 +103,11 @@ func (o *rootCmd) PreRunFunc() CommandRunnerFunc {
 }
 
 func (o *rootCmd) checkServer(commandPath string) error {
-	err := o.serverValidator.Validate()
-	if err != nil {
-		fmt.Print("To use this command on the Team version, you need to inform the server URL first. \n Command : rit set server\n")
-		os.Exit(0)
+	if o.edition == api.Team {
+		if err := o.serverValidator.Validate(); err != nil {
+			fmt.Print("To use this command on the Team version, you need to inform the server URL first\n Command : rit set server\n")
+			os.Exit(0)
+		}
 	}
 	return nil
 }
@@ -117,8 +117,7 @@ func (o *rootCmd) checkSession(commandPath string) error {
 		return nil
 	}
 
-	err := o.sessionValidator.Validate()
-	if err != nil {
+	if err := o.sessionValidator.Validate(); err != nil {
 		fmt.Print("To use this command, you need to start a session on Ritchie\n\n")
 		secret, err := o.sessionPrompt()
 		if err != nil {

@@ -10,6 +10,7 @@ const serverFilePattern = "%s/server"
 
 type SetterManager struct {
 	serverFile string
+	finder Finder
 }
 
 func NewSetter(ritchieHomeDir string) Setter {
@@ -23,8 +24,6 @@ func (s SetterManager) Set(url string) error {
 		if err := fileutil.WriteFile(s.serverFile, []byte(url)); err != nil {
 			return err
 		}
-	} else {
-		panic("Incorrect server URL")
 	}
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -21,15 +22,16 @@ var (
 )
 
 type Settings struct {
+	serverFinder server.Finder
 	configURL      string
 	httpClient     *http.Client
 	sessionManager session.Manager
 	ctxFinder      rcontext.Finder
 }
 
-func NewSettings(serverURL string, hc *http.Client, sm session.Manager, cf rcontext.Finder) Settings {
+func NewSettings(serverFinder server.Finder, hc *http.Client, sm session.Manager, cf rcontext.Finder) Settings {
 	return Settings{
-		configURL:      fmt.Sprintf(urlConfigPattern, serverURL),
+		serverFinder:   serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
 		ctxFinder:      cf,
@@ -47,7 +49,12 @@ func (s Settings) Fields() (credential.Fields, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodGet, s.configURL, nil)
+	serverUrl, err := s.serverFinder.Find()
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(urlConfigPattern, serverUrl), nil)
 	if err != nil {
 		return nil, err
 	}

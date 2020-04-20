@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -23,13 +24,17 @@ type CmdUse struct {
 }
 
 type Sender struct {
-	serverURL      string
+	serverFinder   server.Finder
 	httpClient     *http.Client
 	sessionManager session.Manager
 }
 
-func NewSender(serverURL string, hc *http.Client, sm session.Manager) Sender {
-	return Sender{serverURL: fmt.Sprintf(urlPattern, serverURL), httpClient: hc, sessionManager: sm}
+func NewSender(serverFinder server.Finder, hc *http.Client, sm session.Manager) Sender {
+	return Sender{
+		serverFinder: serverFinder,
+		httpClient: hc,
+		sessionManager: sm,
+	}
 }
 
 func (s Sender) SendCommand() {
@@ -48,7 +53,12 @@ func (s Sender) SendCommand() {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, s.serverURL, bytes.NewBuffer(b))
+	serverUrl, err := s.serverFinder.Find()
+	if err != nil {
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPost,  fmt.Sprintf(urlPattern, serverUrl), bytes.NewBuffer(b))
 	if err != nil {
 		return
 	}

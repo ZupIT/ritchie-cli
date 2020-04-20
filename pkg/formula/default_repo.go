@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/gofrs/flock"
 	"io/ioutil"
@@ -37,7 +38,7 @@ type RepoManager struct {
 	homePath       string
 	httpClient     *http.Client
 	sessionManager session.Manager
-	serverURL string
+	serverFinder server.Finder
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -58,12 +59,12 @@ func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) 
 	}
 }
 
-func NewTeamRepoManager(homePath string, serverURL string, hc *http.Client, sm session.Manager) RepoManager {
+func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Client, sm session.Manager) RepoManager {
 	return RepoManager{
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
-		serverURL : serverURL,
+		serverFinder : 	serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
 	}
@@ -213,7 +214,12 @@ func (dm RepoManager) Load() error {
 		return err
 	}
 
-	url := fmt.Sprintf(providerPath, dm.serverURL)
+	serverUrl, err := dm.serverFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf(providerPath, serverUrl)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err

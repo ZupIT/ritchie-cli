@@ -28,10 +28,6 @@ import (
 )
 
 func main() {
-	if cmd.ServerURL == "" {
-		panic("The env cmd.ServerURL is required")
-	}
-
 	rootCmd := buildCommands()
 	if err := rootCmd.Execute(); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %+v\n", err)
@@ -55,26 +51,27 @@ func buildCommands() *cobra.Command {
 	//deps
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
+	srvFinder := server.NewFinder(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	serverSetter := server.NewSetter(ritchieHomeDir)
-	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, cmd.ServerURL, http.DefaultClient, sessionManager)
-	serverValidator := server.NewValidator(cmd.ServerURL)
+	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, srvFinder, http.DefaultClient, sessionManager)
+	serverValidator := server.NewValidator(srvFinder)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		ritchieHomeDir,
-		cmd.ServerURL,
+		srvFinder,
 		security.OAuthProvider,
 		http.DefaultClient,
 		sessionManager)
-	logoutManager := secteam.NewLogoutManager(security.OAuthProvider, sessionManager, cmd.ServerURL)
-	userManager := secteam.NewUserManager(cmd.ServerURL, http.DefaultClient, sessionManager)
-	credSetter := credteam.NewSetter(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
-	credFinder := credteam.NewFinder(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
-	credSettings := credteam.NewSettings(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
+	logoutManager := secteam.NewLogoutManager(security.OAuthProvider, sessionManager, srvFinder)
+	userManager := secteam.NewUserManager(srvFinder, http.DefaultClient, sessionManager)
+	credSetter := credteam.NewSetter(srvFinder, http.DefaultClient, sessionManager, ctxFinder)
+	credFinder := credteam.NewFinder(srvFinder, http.DefaultClient, sessionManager, ctxFinder)
+	credSettings := credteam.NewSettings(srvFinder, http.DefaultClient, sessionManager, ctxFinder)
 	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
@@ -172,6 +169,7 @@ func buildCommands() *cobra.Command {
 }
 
 func sendMetrics(sm session.DefaultManager) {
-	metricsManager := metrics.NewSender(cmd.ServerURL, &http.Client{Timeout: 2 * time.Second}, sm)
+	srvFinder := server.NewFinder(api.RitchieHomeDir())
+	metricsManager := metrics.NewSender(srvFinder, &http.Client{Timeout: 2 * time.Second}, sm)
 	go metricsManager.SendCommand()
 }
