@@ -5,17 +5,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type SetterManager struct {
 	ctxFile string
 	finder  Finder
+	writer  stream.FileWriter
 }
 
-func NewSetter(homePath string, f Finder) Setter {
-	return SetterManager{ctxFile: fmt.Sprintf(ContextPath, homePath), finder: f}
+func NewSetter(homePath string, f Finder, w stream.FileWriter) Setter {
+	return SetterManager{
+		ctxFile: fmt.Sprintf(ContextPath, homePath),
+		finder:  f,
+		writer:  w,
+	}
 }
 
 func (s SetterManager) Set(ctx string) (ContextHolder, error) {
@@ -39,7 +44,7 @@ func (s SetterManager) Set(ctx string) (ContextHolder, error) {
 	if err != nil {
 		return ContextHolder{}, err
 	}
-	if err := fileutil.WriteFilePerm(s.ctxFile, b, 0600); err != nil {
+	if err := s.writer.Write(s.ctxFile, b); err != nil {
 		return ContextHolder{}, err
 	}
 

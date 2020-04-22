@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/crypto/cryptoutil"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 var (
@@ -15,12 +16,14 @@ var (
 type DefaultManager struct {
 	sessionFile    string
 	passphraseFile string
+	file           stream.FileWriteReadExistRemover
 }
 
-func NewManager(homePath string) DefaultManager {
+func NewManager(homePath string, file stream.FileWriteReadExistRemover) DefaultManager {
 	return DefaultManager{
 		sessionFile:    fmt.Sprintf(sessionFilePattern, homePath),
 		passphraseFile: fmt.Sprintf(passphraseFilePattern, homePath),
+		file:           file,
 	}
 }
 
@@ -29,7 +32,7 @@ func (d DefaultManager) Create(session Session) error {
 	passphrase := cryptoutil.EncodeHash(sh)
 	session.Secret = passphrase
 
-	if err := fileutil.WriteFile(d.passphraseFile, []byte(passphrase)); err != nil {
+	if err := d.file.Write(d.passphraseFile, []byte(passphrase)); err != nil {
 		return err
 	}
 
@@ -43,7 +46,7 @@ func (d DefaultManager) Create(session Session) error {
 		return err
 	}
 	cipher := cryptoutil.Encrypt(hash, string(sb))
-	if err := fileutil.WriteFilePerm(d.sessionFile, []byte(cipher), 0600); err != nil {
+	if err := d.file.Write(d.sessionFile, []byte(cipher)); err != nil {
 		return err
 	}
 
@@ -51,11 +54,11 @@ func (d DefaultManager) Create(session Session) error {
 }
 
 func (d DefaultManager) Destroy() error {
-	if err := fileutil.RemoveFile(d.sessionFile); err != nil {
+	if err := d.file.Remove(d.sessionFile); err != nil {
 		return err
 	}
 
-	if err := fileutil.RemoveFile(d.passphraseFile); err != nil {
+	if err := d.file.Remove(d.passphraseFile); err != nil {
 		return err
 	}
 
@@ -63,11 +66,11 @@ func (d DefaultManager) Destroy() error {
 }
 
 func (d DefaultManager) Current() (Session, error) {
-	if !fileutil.Exists(d.sessionFile) || !fileutil.Exists(d.passphraseFile) {
+	if !d.file.Exists(d.sessionFile) || !d.file.Exists(d.passphraseFile) {
 		return Session{}, ErrNoSession
 	}
 
-	pb, err := fileutil.ReadFile(d.passphraseFile)
+	pb, err := d.file.Read(d.passphraseFile)
 	if err != nil {
 		return Session{}, err
 	}
@@ -78,7 +81,7 @@ func (d DefaultManager) Current() (Session, error) {
 		return Session{}, err
 	}
 
-	sb, err := fileutil.ReadFile(d.sessionFile)
+	sb, err := d.file.Read(d.sessionFile)
 	if err != nil {
 		return Session{}, err
 	}

@@ -5,11 +5,14 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestSet(t *testing.T) {
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, ctxFinder, sessManager)
+	file := stream.NewFileWriter()
+	dir := stream.NewDirCreater()
+	setter := NewSetter(tmp, ctxFinder, sessManager, dir, file)
 
 	tests := []struct {
 		name string

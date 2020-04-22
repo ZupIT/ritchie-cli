@@ -6,13 +6,16 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, ctxFinder, sessManager)
+	dir := stream.NewDirCreater()
+	file := stream.NewFileWriter()
+	setter := NewSetter(tmp, ctxFinder, sessManager, dir, file)
 	setter.Set(githubCred)
-	finder := NewFinder(tmp, ctxFinder, sessManager)
+	finder := NewFinder(tmp, ctxFinder, sessManager, stream.NewFileReader())
 
 	type out struct {
 		cred credential.Detail

@@ -3,10 +3,11 @@ package formula
 import (
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -22,12 +23,13 @@ func (repoListerMock) List() ([]Repository, error) {
 }
 
 func cleanForm() {
-	_ = fileutil.RemoveDir(fmt.Sprintf(FormCreatePathPattern, os.TempDir()))
+	dir := stream.NewDirRemover()
+	_ = dir.Remove(fmt.Sprintf(FormCreatePathPattern, os.TempDir()))
 }
 
 func TestCreator(t *testing.T) {
 	cleanForm()
-	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds, stream.NewFileExister())
 
 	type in struct {
 		fCmd string
@@ -37,7 +39,12 @@ func TestCreator(t *testing.T) {
 		err error
 	}
 
-	creator := NewCreator(fmt.Sprintf(FormCreatePathPattern, os.TempDir()), treeMan)
+	fileReader := stream.NewFileReader()
+	fileWriter := stream.NewFileWriter()
+	fileExister := stream.NewFileExister()
+	fileRemover := stream.NewFileRemover(fileExister)
+	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	creator := NewCreator(fmt.Sprintf(FormCreatePathPattern, os.TempDir()), treeMan, stream.NewDirCreater(), fileManager)
 
 	tests := []struct {
 		name string

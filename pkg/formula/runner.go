@@ -14,8 +14,9 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 const (
@@ -28,6 +29,8 @@ type DefaultRunner struct {
 	envResolvers env.Resolvers
 	client       *http.Client
 	treeManager  TreeManager
+	dir          stream.DirCreater
+	file         stream.FileWriteReadExistRemover
 	prompt.InputList
 	prompt.InputText
 	prompt.InputBool
@@ -38,6 +41,8 @@ func NewRunner(
 	er env.Resolvers,
 	hc *http.Client,
 	tm TreeManager,
+	dir stream.DirCreater,
+	file stream.FileWriteReadExistRemover,
 	il prompt.InputList,
 	it prompt.InputText,
 	ib prompt.InputBool) DefaultRunner {
@@ -46,6 +51,8 @@ func NewRunner(
 		er,
 		hc,
 		tm,
+		dir,
+		file,
 		il,
 		it,
 		ib}
@@ -58,7 +65,7 @@ func (d DefaultRunner) Run(def Definition) error {
 	var config *Config
 	cName := def.ConfigName()
 	cPath := def.ConfigPath(fPath, cName)
-	if !fileutil.Exists(cPath) {
+	if !d.file.Exists(cPath) {
 		if err := d.downloadConfig(def.ConfigUrl(cName), fPath, cName); err != nil {
 			return err
 		}
@@ -77,7 +84,7 @@ func (d DefaultRunner) Run(def Definition) error {
 	bName := def.BinName()
 	bPath := def.BinPath(fPath)
 	bFilePath := def.BinFilePath(bPath, bName)
-	if !fileutil.Exists(bFilePath) {
+	if !d.file.Exists(bFilePath) {
 		zipFile, err := d.downloadFormulaBin(def.BinUrl(), bPath, bName)
 		if err != nil {
 			return err
@@ -180,7 +187,7 @@ func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, i
 			items = items[0:qtd]
 		}
 		itemsBytes, _ := json.Marshal(items)
-		fileutil.WriteFile(cachePath, itemsBytes)
+		d.file.Write(cachePath, itemsBytes)
 	}
 }
 
@@ -206,8 +213,8 @@ func (d DefaultRunner) loadInputValList(items []string, input Input) (string, er
 func (d DefaultRunner) loadItems(input Input, formulaPath string) ([]string, error) {
 	if input.Cache.Active {
 		cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
-		if fileutil.Exists(cachePath) {
-			fileBytes, err := fileutil.ReadFile(cachePath)
+		if d.file.Exists(cachePath) {
+			fileBytes, err := d.file.Read(cachePath)
 			if err != nil {
 				return nil, err
 			}
@@ -222,7 +229,7 @@ func (d DefaultRunner) loadItems(input Input, formulaPath string) ([]string, err
 			if err != nil {
 				return nil, err
 			}
-			err = fileutil.WriteFile(cachePath, itemsBytes)
+			err = d.file.Write(cachePath, itemsBytes)
 			if err != nil {
 				return nil, err
 			}
@@ -266,7 +273,7 @@ func (d DefaultRunner) downloadFormulaBin(url, destPath, binName string) (string
 
 	file := fmt.Sprintf("%s/%s.zip", destPath, binName)
 
-	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
+	if err := d.dir.Create(destPath); err != nil {
 		return "", err
 	}
 	out, err := os.Create(file)
@@ -302,7 +309,7 @@ func (d DefaultRunner) downloadConfig(url, destPath, configName string) error {
 
 	file := fmt.Sprintf("%s/%s", destPath, configName)
 
-	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
+	if err := d.dir.Create(destPath); err != nil {
 		return err
 	}
 
@@ -323,15 +330,15 @@ func (d DefaultRunner) downloadConfig(url, destPath, configName string) error {
 func (d DefaultRunner) unzipFile(filename, destPath string) error {
 	log.Println("Installing formula...")
 
-	if err := fileutil.CreateDirIfNotExists(destPath, 0655); err != nil {
+	if err := d.dir.Create(destPath); err != nil {
 		return err
 	}
 
-	if err := fileutil.Unzip(filename, destPath); err != nil {
+	if err := streams.Unzip(filename, destPath); err != nil {
 		return err
 	}
 
-	if err := fileutil.RemoveFile(filename); err != nil {
+	if err := d.file.Remove(filename); err != nil {
 		return err
 	}
 

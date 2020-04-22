@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"github.com/gofrs/flock"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -16,10 +13,15 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gofrs/flock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/session"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
-	//Files
+	// Files
 	repositoryConfFilePattern    = "%s/repo/repositories.json"
 	repositoryCacheFolderPattern = "%s/repo/cache"
 	treeCacheFilePattern         = "%s/repo/cache/%s-tree.json"
@@ -37,7 +39,9 @@ type RepoManager struct {
 	homePath       string
 	httpClient     *http.Client
 	sessionManager session.Manager
-	serverURL string
+	serverURL      string
+	dir            stream.DirCreater
+	file           stream.FileWriteReadExister
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -48,24 +52,39 @@ func (a ByPriority) Len() int           { return len(a) }
 func (a ByPriority) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByPriority) Less(i, j int) bool { return a[i].Priority < a[j].Priority }
 
-func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) RepoManager {
+func NewSingleRepoManager(
+	homePath string,
+	hc *http.Client,
+	sm session.Manager,
+	dir stream.DirCreater,
+	file stream.FileWriteReadExister) RepoManager {
 	return RepoManager{
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
 		httpClient:     hc,
 		sessionManager: sm,
+		dir:            dir,
+		file:           file,
 	}
 }
 
-func NewTeamRepoManager(homePath string, serverURL string, hc *http.Client, sm session.Manager) RepoManager {
+func NewTeamRepoManager(
+	homePath string,
+	serverURL string,
+	hc *http.Client,
+	sm session.Manager,
+	dir stream.DirCreater,
+	file stream.FileWriteReadExister) RepoManager {
 	return RepoManager{
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
-		serverURL : serverURL,
 		httpClient:     hc,
 		sessionManager: sm,
+		serverURL:      serverURL,
+		dir:            dir,
+		file:           file,
 	}
 }
 
@@ -87,15 +106,15 @@ func (dm RepoManager) Add(r Repository) error {
 		return err
 	}
 
-	if !fileutil.Exists(dm.repoFile) {
+	if !dm.file.Exists(dm.repoFile) {
 		wb, err := json.Marshal(RepositoryFile{})
 		if err != nil {
 			return err
 		}
-		fileutil.WriteFile(dm.repoFile, wb)
+		dm.file.Write(dm.repoFile, wb)
 	}
 
-	rb, err := fileutil.ReadFile(dm.repoFile)
+	rb, err := dm.file.Read(dm.repoFile)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -130,7 +149,7 @@ func (dm RepoManager) Add(r Repository) error {
 
 func (dm RepoManager) Update() error {
 	f, err := dm.loadReposFromDisk()
-	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {
+	if os.IsNotExist(err) || len(f.Values) == 0 {
 		return ErrNoRepoToShow
 	}
 
@@ -165,7 +184,7 @@ func (dm RepoManager) Clean(n string) error {
 
 func (dm RepoManager) Delete(name string) error {
 	f, err := dm.loadReposFromDisk()
-	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {
+	if os.IsNotExist(err) || len(f.Values) == 0 {
 		return ErrNoRepoToShow
 	}
 
@@ -195,7 +214,7 @@ func (dm RepoManager) Delete(name string) error {
 func (dm RepoManager) List() ([]Repository, error) {
 	f, err := dm.loadReposFromDisk()
 
-	if fileutil.IsNotExistErr(err) {
+	if os.IsNotExist(err) {
 		return nil, ErrNoRepoToShow
 	}
 	if len(f.Values) == 0 {
@@ -226,7 +245,7 @@ func (dm RepoManager) Load() error {
 		return err
 	}
 
-	body, err := fileutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
@@ -268,7 +287,7 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 		return fmt.Errorf("%d - failed to get index for %s\n", resp.StatusCode, r.TreePath)
 	}
 
-	treeFile, err := fileutil.ReadAll(resp.Body)
+	treeFile, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		return err
@@ -276,12 +295,12 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 
 	treeCacheFile := fmt.Sprintf(treeCacheFilePattern, dm.homePath, r.Name)
 	treeDir := filepath.Dir(treeCacheFile)
-	err = fileutil.CreateDirIfNotExists(treeDir, 0755)
+	err = dm.dir.Create(treeDir)
 	if err != nil {
 		return err
 	}
 
-	err = fileutil.WriteFile(treeCacheFile, treeFile)
+	err = dm.file.Write(treeCacheFile, treeFile)
 	if err != nil {
 		return err
 	}
@@ -303,7 +322,7 @@ func (dm RepoManager) loadReposFromDisk() (RepositoryFile, error) {
 }
 
 func removeRepoCache(root string) error {
-	if _, err := os.Stat(root); fileutil.IsNotExistErr(err) {
+	if _, err := os.Stat(root); os.IsNotExist(err) {
 		return nil
 	} else if err != nil {
 		return err

@@ -2,9 +2,10 @@ package rcontext
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -13,11 +14,12 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	cleanCtx()
+	remover := stream.NewFileRemover(stream.NewFileExister())
+	cleanCtx(remover)
 	e := m.Run()
 	os.Exit(e)
 }
 
-func cleanCtx() {
-	_ = fileutil.RemoveDir(fmt.Sprintf(ContextPath, os.TempDir()))
+func cleanCtx(file stream.FileRemover) {
+	_ = file.Remove(fmt.Sprintf(ContextPath, os.TempDir()))
 }

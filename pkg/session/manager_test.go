@@ -3,6 +3,8 @@ package session
 import (
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 var (
@@ -11,7 +13,12 @@ var (
 
 func TestMain(m *testing.M) {
 	homePath := os.TempDir()
-	sessionManager = NewManager(homePath)
+	fileReader := stream.NewFileReader()
+	fileWriter := stream.NewFileWriter()
+	fileExister := stream.NewFileExister()
+	fileRemover := stream.NewFileRemover(fileExister)
+	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	sessionManager = NewManager(homePath, fileManager)
 	os.Exit(m.Run())
 }
 

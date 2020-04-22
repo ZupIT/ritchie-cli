@@ -3,17 +3,23 @@ package rcontext
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type RemoveManager struct {
 	ctxFile string
 	finder  Finder
+	file    stream.FileWriter
 }
 
-func NewRemover(homePath string, f Finder) RemoveManager {
-	return RemoveManager{ctxFile: fmt.Sprintf(ContextPath, homePath), finder: f}
+func NewRemover(homePath string, f Finder, w stream.FileWriter) RemoveManager {
+	return RemoveManager{
+		ctxFile: fmt.Sprintf(ContextPath, homePath),
+		finder:  f,
+		file:    w,
+	}
 }
 
 func (r RemoveManager) Remove(ctx string) (ContextHolder, error) {
@@ -38,7 +44,7 @@ func (r RemoveManager) Remove(ctx string) (ContextHolder, error) {
 	if err != nil {
 		return ContextHolder{}, err
 	}
-	if err := fileutil.WriteFilePerm(r.ctxFile, b, 0600); err != nil {
+	if err := r.file.Write(r.ctxFile, b); err != nil {
 		return ContextHolder{}, err
 	}
 

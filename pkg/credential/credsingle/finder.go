@@ -2,11 +2,12 @@ package credsingle
 
 import (
 	"encoding/json"
+
 	"github.com/ZupIT/ritchie-cli/pkg/crypto/cryptoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
@@ -14,13 +15,15 @@ type Finder struct {
 	homePath       string
 	ctxFinder      rcontext.Finder
 	sessionManager session.Manager
+	file           stream.FileReader
 }
 
-func NewFinder(homePath string, cf rcontext.Finder, sm session.Manager) Finder {
+func NewFinder(homePath string, cf rcontext.Finder, sm session.Manager, file stream.FileReader) Finder {
 	return Finder{
 		homePath:       homePath,
 		ctxFinder:      cf,
 		sessionManager: sm,
+		file:           file,
 	}
 }
 
@@ -32,7 +35,7 @@ func (f Finder) Find(provider string) (credential.Detail, error) {
 		ctx.Current = rcontext.DefaultCtx
 	}
 
-	cb, err := fileutil.ReadFile(File(f.homePath, ctx.Current, provider))
+	cb, err := f.file.Read(File(f.homePath, ctx.Current, provider))
 	if err != nil {
 		return credential.Detail{}, err
 	}

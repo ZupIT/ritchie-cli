@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/spf13/cobra"
 	"net/http"
 	"os"
+
+	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -33,7 +36,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	//prompt
+	// prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -41,20 +44,29 @@ func buildCommands() *cobra.Command {
 	inputList := prompt.NewInputList()
 	inputURL := prompt.NewInputURL()
 
+	// stream
+	fileReader := stream.NewFileReader()
+	fileWriter := stream.NewFileWriter()
+	fileExister := stream.NewFileExister()
+	fileRemover := stream.NewFileRemover(fileExister)
+	fileReadExister := stream.NewReadExister(fileReader, fileExister)
+	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	dirCreater := stream.NewDirCreater()
+
 	// deps
-	sessionManager := session.NewManager(ritchieHomeDir)
-	workspaceManager := workspace.NewChecker(ritchieHomeDir)
-	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
-	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
-	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
-	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
-	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	repoManager := formula.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
+	sessionManager := session.NewManager(ritchieHomeDir, fileManager)
+	workspaceManager := workspace.NewChecker(ritchieHomeDir, dirCreater, fileManager)
+	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileReadExister)
+	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder, fileWriter)
+	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder, fileWriter)
+	ctxFindSetter := rcontext.NewFindSetter(ctxFinder, ctxSetter)
+	ctxFindRemover := rcontext.NewFindRemover(ctxFinder, ctxRemover)
+	repoManager := formula.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager, dirCreater, fileManager)
 	sessionValidator := sesssingle.NewValidator(sessionManager)
 	loginManager := secsingle.NewLoginManager(sessionManager)
-	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
-	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
-	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds)
+	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager, dirCreater, fileWriter)
+	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager, fileReader)
+	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds, fileExister)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
@@ -64,12 +76,14 @@ func buildCommands() *cobra.Command {
 		envResolvers,
 		http.DefaultClient,
 		treeManager,
+		dirCreater,
+		fileManager,
 		inputList,
 		inputText,
 		inputBool)
-	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
+	formulaCreator := formula.NewCreator(userHomeDir, treeManager, dirCreater, fileManager)
 
-	//commands
+	// commands
 	rootCmd := cmd.NewRootCmd(
 		workspaceManager,
 		loginManager,

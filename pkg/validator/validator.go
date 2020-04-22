@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"log"
 	"net/http"
 	"net/url"
 	"regexp"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
 	urlPatternVersion = "%s/cli-version"
 )
 
-//IsValidName validates a name of something
+// IsValidName validates a name of something
 func IsValidName(args []string) error {
 	n := len(args)
 	if n < 1 {
@@ -32,15 +33,15 @@ func IsValidName(args []string) error {
 	return nil
 }
 
-//IsValidLocation validates if location exists
-func IsValidLocation(location string) error {
-	if !fileutil.Exists(location) {
+// IsValidLocation validates if location exists
+func IsValidLocation(file stream.FileExister, location string) error {
+	if !file.Exists(location) {
 		return fmt.Errorf("%s is not a valid location", location)
 	}
 	return nil
 }
 
-//HasMinValue validates min value for string
+// HasMinValue validates min value for string
 func HasMinValue(str string, min int) error {
 	n := len(str)
 	if n < min {
@@ -49,7 +50,7 @@ func HasMinValue(str string, min int) error {
 	return nil
 }
 
-//IsValidURL validates the url format
+// IsValidURL validates the url format
 func IsValidURL(value string) error {
 	_, err := url.ParseRequestURI(value)
 	if err != nil {
@@ -58,7 +59,7 @@ func IsValidURL(value string) error {
 	return nil
 }
 
-//IsValidEmail validate the email format
+// IsValidEmail validate the email format
 func IsValidEmail(email string) error {
 	rgx := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	if !rgx.MatchString(email) {
@@ -67,7 +68,7 @@ func IsValidEmail(email string) error {
 	return nil
 }
 
-//IsValidVersion Validate version with server
+// IsValidVersion Validate version with server
 func IsValidVersion(version, org, serverURL string) {
 	url := fmt.Sprintf(urlPatternVersion, serverURL)
 	client := &http.Client{Timeout: 2 * time.Second}

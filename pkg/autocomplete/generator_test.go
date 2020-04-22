@@ -5,6 +5,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type repoListerMock struct{}
@@ -22,7 +23,7 @@ func TestGenerate(t *testing.T) {
 		err error
 	}
 
-	treeMan := formula.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+	treeMan := formula.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds, stream.NewFileExister())
 	autocomplete := NewGenerator(treeMan)
 
 	tests := []struct {

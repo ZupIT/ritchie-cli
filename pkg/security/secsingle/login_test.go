@@ -3,13 +3,20 @@ package secsingle
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+
 	"os"
 	"testing"
 )
 
 func TestLogin(t *testing.T) {
 	homePath := os.TempDir()
-	sm := session.NewManager(homePath)
+	fileWriter := stream.NewFileWriter()
+	fileReader := stream.NewFileReader()
+	fileExister := stream.NewFileExister()
+	fileRemover := stream.NewFileRemover(fileExister)
+	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	sm := session.NewManager(homePath, fileManager)
 	manager := NewLoginManager(sm)
 
 	tests := []struct {

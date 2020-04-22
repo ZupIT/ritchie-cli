@@ -5,44 +5,55 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tplgo"
-	"github.com/thoas/go-funk"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tplgo"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+
+	"github.com/thoas/go-funk"
 )
 
 type CreateManager struct {
 	formPath    string
 	treeManager TreeManager
+	dir         stream.DirCreater
+	file        stream.FileWriteReadExistRemover
 }
 
-func NewCreator(homePath string, tm TreeManager) CreateManager {
-	return CreateManager{formPath: fmt.Sprintf(FormCreatePathPattern, homePath), treeManager: tm}
+func NewCreator(
+	homePath string,
+	tm TreeManager,
+	dir stream.DirCreater,
+	file stream.FileWriteReadExistRemover) CreateManager {
+	return CreateManager{
+		formPath:    fmt.Sprintf(FormCreatePathPattern, homePath),
+		treeManager: tm,
+		dir:         dir,
+		file:        file,
+	}
 }
 
 func (c CreateManager) Create(fCmd string) error {
-	_ = fileutil.CreateDirIfNotExists(c.formPath, os.ModePerm)
+	_ = c.dir.Create(c.formPath)
 	trees, err := c.treeManager.Tree()
 	if err != nil {
 		return err
 	}
 
-	err = verifyCommand(fCmd, trees)
-	if err != nil {
+	if err := verifyCommand(fCmd, trees); err != nil {
 		return err
 	}
 
-	if fileutil.Exists(fmt.Sprintf(TreeCreatePathPattern, c.formPath)) && (fileutil.Exists(fmt.Sprintf("%s/%s", c.formPath, Makefile))) {
-		generateFormulaFiles(c.formPath, fCmd, false)
-
+	if c.file.Exists(fmt.Sprintf(TreeCreatePathPattern, c.formPath)) && (c.file.Exists(fmt.Sprintf("%s/%s", c.formPath, Makefile))) {
+		c.generateFormulaFiles(c.formPath, fCmd, false)
 	} else {
-		generateFormulaFiles(c.formPath, fCmd, true)
+		c.generateFormulaFiles(c.formPath, fCmd, true)
 	}
-	err = generateTreeJsonFile(c.formPath, fCmd)
+	err = c.generateTreeJsonFile(c.formPath, fCmd)
 	if err != nil {
 		return err
 	}
@@ -51,7 +62,7 @@ func (c CreateManager) Create(fCmd string) error {
 	return nil
 }
 
-func generateFormulaFiles(formPath, fCmd string, new bool) error {
+func (c CreateManager) generateFormulaFiles(formPath, fCmd string, new bool) error {
 	d := strings.Split(fCmd, " ")
 	dirForm := strings.Join(d[1:], "/")
 
@@ -62,7 +73,7 @@ func generateFormulaFiles(formPath, fCmd string, new bool) error {
 		if err != nil && !os.IsExist(err) {
 			return err
 		}
-		err = createMakefileMain(formPath, dirForm, d[len(d)-1])
+		err = c.createMakefileMain(formPath, dirForm, d[len(d)-1])
 		if err != nil {
 			return err
 		}
@@ -73,28 +84,28 @@ func generateFormulaFiles(formPath, fCmd string, new bool) error {
 		if err != nil && !os.IsExist(err) {
 			return err
 		}
-		err = changeMakefileMain(formPath, fCmd, d[len(d)-1])
+		err = c.changeMakefileMain(formPath, fCmd, d[len(d)-1])
 		if err != nil {
 			return err
 		}
 	}
-	err := createConfigFile(dir)
+	err := c.createConfigFile(dir)
 	if err != nil {
 		return err
 	}
-	err = createSrcFiles(dir, d[len(d)-1])
+	err = c.createSrcFiles(dir, d[len(d)-1])
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func generateTreeJsonFile(formPath, fCmd string) error {
+func (c CreateManager) generateTreeJsonFile(formPath, fCmd string) error {
 	tree := Tree{Commands: []api.Command{}}
 	dir := fmt.Sprintf(localTreeFile, formPath)
-	jsonFile, err := fileutil.ReadFile(dir)
+	jsonFile, err := c.file.Read(dir)
 	if err != nil {
-		if err := fileutil.CreateDirIfNotExists(filepath.Dir(dir), 0755); err != nil {
+		if err := c.dir.Create(filepath.Dir(dir)); err != nil {
 			return err
 		}
 	} else {
@@ -110,7 +121,7 @@ func generateTreeJsonFile(formPath, fCmd string) error {
 		return err
 	}
 
-	return fileutil.WriteFile(dir, prettyJSON.Bytes())
+	return c.file.Write(dir, prettyJSON.Bytes())
 }
 
 func verifyCommand(fCmd string, trees map[string]Tree) error {
@@ -136,10 +147,10 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 	return nil
 }
 
-func changeMakefileMain(formPath string, fCmd, fName string) error {
+func (c CreateManager) changeMakefileMain(formPath string, fCmd, fName string) error {
 	d := strings.Split(fCmd, " ")
 	dir := fmt.Sprintf("%s/%s", formPath, Makefile)
-	tplFile, err := fileutil.ReadFile(dir)
+	tplFile, err := c.file.Read(dir)
 	if err != nil {
 		return err
 	}
@@ -148,8 +159,7 @@ func changeMakefileMain(formPath string, fCmd, fName string) error {
 	formulas := formulaValue(tplFile)
 	tplFile = []byte(strings.ReplaceAll(string(tplFile), formulas, formulas+" $("+strings.ToUpper(fName)+")"))
 
-	err = fileutil.WriteFile(dir, tplFile)
-	if err != nil {
+	if err = c.file.Write(dir, tplFile); err != nil {
 		return err
 	}
 
@@ -161,57 +171,57 @@ func formulaValue(file []byte) string {
 	return strings.Split(strings.Split(fileStr, "FORMULAS=")[1], "\n")[0]
 }
 
-func createMakefileMain(dir, dirForm, name string) error {
+func (c CreateManager) createMakefileMain(dir, dirForm, name string) error {
 	tplFile := tplgo.TemplateMakefileMain
 
 	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
 	tplFile = strings.ReplaceAll(string(tplFile), "{{formPath}}", dirForm)
 
-	err := createScripts(dir)
+	err := c.createScripts(dir)
 	if err != nil {
 		return err
 	}
 
-	return fileutil.WriteFile(dir+"/Makefile", []byte(tplFile))
+	return c.file.Write(dir+"/Makefile", []byte(tplFile))
 }
 
-func createScripts(dir string) error {
+func (c CreateManager) createScripts(dir string) error {
 	tplFile := tplgo.TemplateCopyBinConfig
 
-	err := fileutil.WriteFilePerm(dir+"/copy-bin-configs.sh", []byte(tplFile), 0755)
+	err := c.file.Write(dir+"/copy-bin-configs.sh", []byte(tplFile))
 	if err != nil {
 		return err
 	}
 
 	tplFile = tplgo.TemplateUnzipBinConfigs
 
-	return fileutil.WriteFilePerm(dir+"/unzip-bin-configs.sh", []byte(tplFile), 0755)
+	return c.file.Write(dir+"/unzip-bin-configs.sh", []byte(tplFile))
 }
 
-func createSrcFiles(dir, pkg string) error {
+func (c CreateManager) createSrcFiles(dir, pkg string) error {
 	srcDir := dir + "/src"
-	err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm)
+	err := c.dir.Create(srcDir)
 	if err != nil {
 		return err
 	}
-	err = createMainFile(srcDir, pkg)
+	err = c.createMainFile(srcDir, pkg)
 	if err != nil {
 		return err
 	}
-	err = createGoModFile(srcDir, pkg)
+	err = c.createGoModFile(srcDir, pkg)
 	if err != nil {
 		return err
 	}
-	err = createMakefileForm(srcDir, pkg, dir)
+	err = c.createMakefileForm(srcDir, pkg, dir)
 	if err != nil {
 		return err
 	}
 	pkgDir := srcDir + "/pkg/" + pkg
-	err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+	err = c.dir.Create(pkgDir)
 	if err != nil {
 		return err
 	}
-	err = createPkgFile(pkgDir, pkg)
+	err = c.createPkgFile(pkgDir, pkg)
 	if err != nil {
 		return err
 	}
@@ -219,36 +229,36 @@ func createSrcFiles(dir, pkg string) error {
 	return nil
 }
 
-func createPkgFile(dir, pkg string) error {
+func (c CreateManager) createPkgFile(dir, pkg string) error {
 	tplFile := tplgo.TemplatePkg
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
 
-	return fileutil.WriteFile(dir+"/"+pkg+".go", []byte(tplFile))
+	return c.file.Write(dir+"/"+pkg+".go", []byte(tplFile))
 }
 
-func createMakefileForm(dir string, name, pathName string) error {
+func (c CreateManager) createMakefileForm(dir string, name, pathName string) error {
 	tplFile := tplgo.TemplateMakefile
 	tplFile = strings.ReplaceAll(tplFile, "{{name}}", name)
 	tplFile = strings.ReplaceAll(tplFile, "{{form-path}}", pathName)
 
-	return fileutil.WriteFile(dir+"/Makefile", []byte(tplFile))
+	return c.file.Write(dir+"/Makefile", []byte(tplFile))
 }
 
-func createGoModFile(dir, pkg string) error {
+func (c CreateManager) createGoModFile(dir, pkg string) error {
 	tplFile := tplgo.TemplateGoMod
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
-	return fileutil.WriteFile(dir+"/go.mod", []byte(tplFile))
+	return c.file.Write(dir+"/go.mod", []byte(tplFile))
 }
 
-func createMainFile(dir, pkg string) error {
+func (c CreateManager) createMainFile(dir, pkg string) error {
 	tplFile := tplgo.TemplateMain
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
-	return fileutil.WriteFile(dir+"/main.go", []byte(tplFile))
+	return c.file.Write(dir+"/main.go", []byte(tplFile))
 }
 
-func createConfigFile(dir string) error {
+func (c CreateManager) createConfigFile(dir string) error {
 	tplFile := tplgo.TemplateConfig
-	return fileutil.WriteFile(dir+"/config.json", []byte(tplFile))
+	return c.file.Write(dir+"/config.json", []byte(tplFile))
 }
 
 func updateTree(fCmd string, t Tree, i int) Tree {

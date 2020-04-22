@@ -3,9 +3,10 @@ package formula
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"io/ioutil"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -19,10 +20,11 @@ type TreeManager struct {
 	ritchieHome string
 	repoLister  RepoLister
 	coreCmds    []api.Command
+	file        stream.FileExister
 }
 
-func NewTreeManager(ritchieHome string, rl RepoLister, coreCmds []api.Command) TreeManager {
-	return TreeManager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
+func NewTreeManager(ritchieHome string, rl RepoLister, coreCmds []api.Command, file stream.FileExister) TreeManager {
+	return TreeManager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds, file: file}
 }
 
 func (d TreeManager) Tree() (map[string]Tree, error) {
@@ -96,17 +98,17 @@ func (d TreeManager) MergedTree(core bool) Tree {
 
 func (d TreeManager) localTree() (Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeLocalCmdPattern, d.ritchieHome)
-	return loadTree(treeCmdFile)
+	return d.loadTree(treeCmdFile)
 }
 
 func (d TreeManager) treeByRepo(repo string) (Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repo)
-	return loadTree(treeCmdFile)
+	return d.loadTree(treeCmdFile)
 }
 
-func loadTree(treeCmdFile string) (Tree, error) {
+func  (d TreeManager) loadTree(treeCmdFile string) (Tree, error) {
 	tree := Tree{}
-	if !fileutil.Exists(treeCmdFile) {
+	if !d.file.Exists(treeCmdFile) {
 		return tree, nil
 	}
 

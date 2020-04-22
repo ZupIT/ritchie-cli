@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/gofrs/flock"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+
+	"github.com/gofrs/flock"
 )
 
 const (
@@ -20,25 +21,31 @@ const (
 
 type DefaultChecker struct {
 	ritchieHome string
+	dir         stream.DirCreater
+	file        stream.FileWriteReadExister
 }
 
-func NewChecker(ritchieHome string) DefaultChecker {
-	return DefaultChecker{ritchieHome: ritchieHome}
+func NewChecker(ritchieHome string, dir stream.DirCreater, file stream.FileWriteReadExister) DefaultChecker {
+	return DefaultChecker{
+		ritchieHome: ritchieHome,
+		dir:         dir,
+		file:        file,
+	}
 }
 
 func (d DefaultChecker) Check() error {
 	dirRepo := fmt.Sprintf("%s%s", d.ritchieHome, repoDir)
 	repoFile := fmt.Sprintf("%s%s", dirRepo, repoFile)
 
-	if err := fileutil.CreateDirIfNotExists(d.ritchieHome, 0755); err != nil {
+	if err := d.dir.Create(d.ritchieHome); err != nil {
 		return err
 	}
 
-	if err := fileutil.CreateDirIfNotExists(dirRepo, 0755); err != nil {
+	if err := d.dir.Create(dirRepo); err != nil {
 		return err
 	}
 
-	if fileutil.Exists(repoFile) {
+	if d.file.Exists(repoFile) {
 		return nil
 	}
 
@@ -58,7 +65,7 @@ func (d DefaultChecker) Check() error {
 	if err != nil {
 		return err
 	}
-	fileutil.WriteFile(repoFile, b)
+	d.file.Write(repoFile, b)
 
 	return nil
 }
