@@ -54,6 +54,7 @@ type Cache struct {
 type Definition struct {
 	Path    string
 	Bin     string
+	Bundle	string
 	Config  string
 	RepoUrl string
 }
@@ -86,6 +87,17 @@ func (d *Definition) BinName() string {
 	return d.Bin
 }
 
+// BinName builds the bin name from definition params
+func (d *Definition) BundleName() string {
+	if strings.Contains(d.Bundle, "${so}") {
+		so := runtime.GOOS
+		bundleSO := strings.ReplaceAll(d.Bin, "${so}", so)
+
+		return bundleSO
+	}
+	return d.Bundle
+}
+
 // BinPath builds the bin path from formula path
 func (d *Definition) BinPath(formula string) string {
 	return fmt.Sprintf(BinPathPattern, formula)
@@ -97,8 +109,8 @@ func (d *Definition) BinFilePath(binPath, binName string) string {
 }
 
 // BinUrl builds the bin url
-func (d *Definition) BinUrl() string {
-	return fmt.Sprintf("%s/bin/%s.zip", d.RepoUrl, d.BinName())
+func (d *Definition) BundleUrl() string {
+	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, d.BundleName())
 }
 
 // ConfigName resolver de config name

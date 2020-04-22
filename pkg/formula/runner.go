@@ -65,12 +65,12 @@ func (d DefaultRunner) Run(def Definition) error {
 	bPath := def.BinPath(fPath)
 	bFilePath := def.BinFilePath(bPath, bName)
 	if !fileutil.Exists(bFilePath) {
-		zipFile, err := d.downloadFormulaBin(def.BinUrl(), bPath, bName)
+		zipFile, err := d.downloadFormulaBundle(def.BundleUrl(), fPath, def.BundleName())
 		if err != nil {
 			return err
 		}
 
-		if err := d.unzipFile(zipFile, bPath); err != nil {
+		if err := d.unzipFile(zipFile, fPath); err != nil {
 			return err
 		}
 	}
@@ -280,7 +280,7 @@ func (d DefaultRunner) resolveIfReserved(input Input) (string, error) {
 	return "", nil
 }
 
-func (d DefaultRunner) downloadFormulaBin(url, destPath, binName string) (string, error) {
+func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName string) (string, error) {
 	log.Println("Download formula...")
 
 	resp, err := http.Get(url)
@@ -302,7 +302,7 @@ func (d DefaultRunner) downloadFormulaBin(url, destPath, binName string) (string
 		return "", errors.New("unknown error when downloading your formula")
 	}
 
-	file := fmt.Sprintf("%s/%s.zip", destPath, binName)
+	file := fmt.Sprintf("%s/%s", destPath, zipName)
 
 	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
 		return "", err
