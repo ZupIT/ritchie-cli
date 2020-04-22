@@ -5,8 +5,6 @@ import (
 	"os"
 )
 
-const Perm = 0755
-
 type FileExister interface {
 	Exists(path string) bool
 }
@@ -91,7 +89,7 @@ func NewFileWriter() WriteFile {
 // Write writes content to a file named by path.
 // A successful call returns err == nil
 func (w WriteFile) Write(path string, content []byte) error {
-	return ioutil.WriteFile(path, content, os.FileMode(Perm))
+	return ioutil.WriteFile(path, content, os.ModePerm)
 }
 
 // RemoveFile implements FileRemover
