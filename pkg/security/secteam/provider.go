@@ -1,6 +1,8 @@
 package secteam
 
 import (
+	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/security/oauth"
 )
@@ -11,7 +13,11 @@ func loginChannelProvider(p security.AuthProvider, org, serverURL string) (chan 
 	case security.OAuthProvider:
 		oauthCli := oauth.NewLoginManager(cr, serverURL)
 		go func() {
-			_ = oauthCli.Login(org)
+			err := oauthCli.Login(org)
+			if err != nil {
+				fmt.Sprintf("Error in Login")
+				return
+			}
 		}()
 	default:
 		return nil, security.ErrUnknownProvider
@@ -25,7 +31,11 @@ func logoutChannelProvider(p security.AuthProvider, org, serverURL string) (chan
 	case security.OAuthProvider:
 		oauthCli := oauth.NewLogoutManager(org, cr, serverURL)
 		go func() {
-			_ = oauthCli.Logout()
+			err := oauthCli.Logout()
+			if err != nil {
+				fmt.Sprintf("Error in Logout")
+				return
+			}
 		}()
 	default:
 		return nil, security.ErrUnknownProvider

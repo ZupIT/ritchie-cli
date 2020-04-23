@@ -50,7 +50,11 @@ func (d DefaultChecker) Check() error {
 	locked, err := lock.TryLockContext(lockCtx, time.Second)
 	if locked {
 		defer func() {
-			_ = lock.Unlock()
+			err := lock.Unlock()
+			if err != nil {
+				fmt.Sprintf("Error in Unlock")
+				return
+			}
 		}()
 	}
 

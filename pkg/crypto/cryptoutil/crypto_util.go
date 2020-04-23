@@ -69,8 +69,16 @@ func SumHashMachine(text string) ([]byte, error) {
 	}
 
 	hash := sha256.New()
-	_, _ = hash.Write([]byte(text))
-	_, _ = hash.Write([]byte(id))
+	_, err = hash.Write([]byte(text))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = hash.Write([]byte(id))
+	if err != nil {
+		return nil, err
+	}
+
 	sum := hash.Sum(nil)
 
 	return sum, nil

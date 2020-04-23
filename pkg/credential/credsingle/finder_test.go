@@ -1,6 +1,7 @@
 package credsingle
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -11,7 +12,11 @@ import (
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
 	setter := NewSetter(tmp, ctxFinder, sessManager)
-	_ = setter.Set(githubCred)
+	err := setter.Set(githubCred)
+	if err != nil {
+		fmt.Sprintf("Error in Set")
+		return
+	}
 	finder := NewFinder(tmp, ctxFinder, sessManager)
 
 	type out struct {

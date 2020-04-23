@@ -1,6 +1,7 @@
 package credteam
 
 import (
+	"fmt"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -59,6 +60,10 @@ func TestMain(m *testing.M) {
 func mockServer(status int, body []byte) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(status)
-		_, _ = rw.Write(body)
+		_, err := rw.Write(body)
+		if err != nil {
+			fmt.Sprintf("Error in Write")
+			return
+		}
 	}))
 }
