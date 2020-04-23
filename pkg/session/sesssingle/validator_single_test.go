@@ -15,11 +15,7 @@ var (
 
 func TestMain(m *testing.M) {
 	homePath := os.TempDir()
-	fileReader := stream.NewFileReader()
-	fileWriter := stream.NewFileWriter()
-	fileExister := stream.NewFileExister()
-	fileRemover := stream.NewFileRemover(fileExister)
-	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	fileManager := stream.NewFileManager()
 	sessionManager = session.NewManager(homePath, fileManager)
 	validator = NewValidator(sessionManager)
 	os.Exit(m.Run())

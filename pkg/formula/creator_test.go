@@ -29,7 +29,8 @@ func cleanForm() {
 
 func TestCreator(t *testing.T) {
 	cleanForm()
-	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds, stream.NewFileExister())
+	fileManager := stream.NewFileManager()
+	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds, fileManager)
 
 	type in struct {
 		fCmd string
@@ -39,11 +40,6 @@ func TestCreator(t *testing.T) {
 		err error
 	}
 
-	fileReader := stream.NewFileReader()
-	fileWriter := stream.NewFileWriter()
-	fileExister := stream.NewFileExister()
-	fileRemover := stream.NewFileRemover(fileExister)
-	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
 	creator := NewCreator(fmt.Sprintf(FormCreatePathPattern, os.TempDir()), treeMan, stream.NewDirCreater(), fileManager)
 
 	tests := []struct {

@@ -13,6 +13,7 @@ func TestFind(t *testing.T) {
 	var finder Finder
 	var setter Setter
 	tmp := os.TempDir()
+	fileManager := stream.NewFileManager()
 
 	type in struct {
 		ctx      string
@@ -90,11 +91,11 @@ func TestFind(t *testing.T) {
 			if in != nil && in.fileMock != nil {
 				finder = NewFinder(tmp, in.fileMock)
 			} else {
-				finder = NewFinder(tmp, stream.NewReadExister(stream.NewFileReader(), stream.NewFileExister()))
+				finder = NewFinder(tmp, fileManager)
 			}
 
 			if in != nil {
-				setter = NewSetter(tmp, finder, stream.NewFileWriter())
+				setter = NewSetter(tmp, finder, fileManager)
 				setter.Set(in.ctx)
 			}
 

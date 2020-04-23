@@ -14,8 +14,8 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	remover := stream.NewFileRemover(stream.NewFileExister())
-	cleanCtx(remover)
+	fileManager := stream.NewFileManager()
+	cleanCtx(fileManager)
 	e := m.Run()
 	os.Exit(e)
 }

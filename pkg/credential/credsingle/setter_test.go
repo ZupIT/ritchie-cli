@@ -10,7 +10,7 @@ import (
 
 func TestSet(t *testing.T) {
 	tmp := os.TempDir()
-	file := stream.NewFileWriter()
+	file := stream.NewFileManager()
 	dir := stream.NewDirCreater()
 	setter := NewSetter(tmp, ctxFinder, sessManager, dir, file)
 

@@ -23,7 +23,7 @@ func TestGenerate(t *testing.T) {
 		err error
 	}
 
-	treeMan := formula.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds, stream.NewFileExister())
+	treeMan := formula.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds, stream.NewFileManager())
 	autocomplete := NewGenerator(treeMan)
 
 	tests := []struct {

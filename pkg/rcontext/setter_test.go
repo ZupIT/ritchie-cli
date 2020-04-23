@@ -104,15 +104,13 @@ func TestSet(t *testing.T) {
 			if in.writeUtilMock != nil {
 				writer = in.writeUtilMock
 			} else {
-				writer = stream.NewFileWriter()
+				writer = stream.NewFileManager()
 			}
 
 			if in.finderMock != nil {
 				finder = in.finderMock
 			} else {
-				fileReader := stream.NewFileReader()
-				fileExister := stream.NewFileExister()
-				finder = NewFinder(tmp, stream.NewReadExister(fileReader, fileExister))
+				finder = NewFinder(tmp, stream.NewFileManager())
 			}
 
 			setter := NewSetter(tmp, finder, writer)

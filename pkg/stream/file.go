@@ -39,37 +39,29 @@ type FileWriteReadExistRemover interface {
 	FileRemover
 }
 
-// ReadFile implements FileReader
-type ReadFile struct {
+// FileManager implements FileWriteReadExistRemover
+type FileManager struct {
 }
 
-// NewFileReader returns a ReadFile
-func NewFileReader() ReadFile {
-	return ReadFile{}
+// NewFileManager returns a FileManage that writes from w
+// reads from r, exists from e and removes from re
+func NewFileManager() FileManager {
+	return FileManager{}
 }
 
 // Read reads the file named by path and returns the contents.
 // A successful call returns err == nil
-func (p ReadFile) Read(path string) ([]byte, error) {
-	f, err := ioutil.ReadFile(path)
+func (f FileManager) Read(path string) ([]byte, error) {
+	b, err := ioutil.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
 
-	return f, err
-}
-
-// ExistFile implements FileExister
-type ExistFile struct {
-}
-
-// NewFileExister returns an ExistFile
-func NewFileExister() ExistFile {
-	return ExistFile{}
+	return b, err
 }
 
 // Exists returns true if file path exists
-func (p ExistFile) Exists(path string) bool {
+func (f FileManager) Exists(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
 	}
@@ -77,63 +69,16 @@ func (p ExistFile) Exists(path string) bool {
 	return true
 }
 
-// WriteFile implements FileWriter
-type WriteFile struct {
-}
-
-// NewFileWriter returns a WriteFile
-func NewFileWriter() WriteFile {
-	return WriteFile{}
-}
-
 // Write writes content to a file named by path.
 // A successful call returns err == nil
-func (w WriteFile) Write(path string, content []byte) error {
+func (f FileManager) Write(path string, content []byte) error {
 	return ioutil.WriteFile(path, content, os.ModePerm)
 }
 
-// RemoveFile implements FileRemover
-type RemoveFile struct {
-	FileExister
-}
-
-// NewFileRemover returns a RemoveFile
-func NewFileRemover(e FileExister) RemoveFile {
-	return RemoveFile{e}
-}
-
 // Remove removes the named file
-func (r RemoveFile) Remove(path string) error {
-	if r.Exists(path) {
+func (f FileManager) Remove(path string) error {
+	if f.Exists(path) {
 		return os.Remove(path)
 	}
 	return nil
-}
-
-// FileManager implements FileWriteReadExistRemover
-type FileManager struct {
-	FileWriter
-	FileReader
-	FileExister
-	FileRemover
-}
-
-// NewFileManager returns a FileManager that writes from w
-// reads from r, exists from e and removes from re
-func NewFileManager(w FileWriter, r FileReader, e FileExister, re FileRemover) FileManager {
-	return FileManager{
-		FileWriter:  w,
-		FileReader:  r,
-		FileExister: e,
-		FileRemover: re,
-	}
-}
-
-type ReadExistFile struct {
-	ReadFile
-	ExistFile
-}
-
-func NewReadExister(r ReadFile, e ExistFile) ReadExistFile {
-	return ReadExistFile{r, e}
 }

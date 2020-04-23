@@ -18,11 +18,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCheckWorkingDir(t *testing.T) {
-	fileReader := stream.NewFileReader()
-	fileWriter := stream.NewFileWriter()
-	fileExister := stream.NewFileExister()
-	fileRemover := stream.NewFileRemover(fileExister)
-	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	fileManager := stream.NewFileManager()
 	dirCreater := stream.NewDirCreater()
 	workman := NewChecker(home, dirCreater, fileManager)
 	if err := workman.Check(); err != nil {

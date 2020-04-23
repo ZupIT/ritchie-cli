@@ -53,19 +53,15 @@ func buildCommands() *cobra.Command {
 	inputURL := prompt.NewInputURL()
 
 	// stream
-	fileReader := stream.NewFileReader()
-	fileWriter := stream.NewFileWriter()
-	fileExister := stream.NewFileExister()
-	fileRemover := stream.NewFileRemover(fileExister)
-	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	fileManager := stream.NewFileManager()
 	dirCreater := stream.NewDirCreater()
 
 	// deps
 	sessionManager := session.NewManager(ritchieHomeDir, fileManager)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir, dirCreater, fileManager)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
-	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder, fileWriter)
-	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder, fileWriter)
+	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder, fileManager)
+	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder, fileManager)
 	ctxFindSetter := rcontext.NewFindSetter(ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ctxFinder, ctxRemover)
 	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, cmd.ServerURL, http.DefaultClient, sessionManager, dirCreater, fileManager)
@@ -81,7 +77,7 @@ func buildCommands() *cobra.Command {
 	credSetter := credteam.NewSetter(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
 	credFinder := credteam.NewFinder(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
 	credSettings := credteam.NewSettings(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
-	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds, fileExister)
+	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds, fileManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)

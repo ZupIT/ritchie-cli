@@ -12,10 +12,10 @@ import (
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
 	dir := stream.NewDirCreater()
-	file := stream.NewFileWriter()
+	file := stream.NewFileManager()
 	setter := NewSetter(tmp, ctxFinder, sessManager, dir, file)
 	setter.Set(githubCred)
-	finder := NewFinder(tmp, ctxFinder, sessManager, stream.NewFileReader())
+	finder := NewFinder(tmp, ctxFinder, sessManager, file)
 
 	type out struct {
 		cred credential.Detail

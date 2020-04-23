@@ -11,11 +11,7 @@ import (
 
 func TestLogin(t *testing.T) {
 	homePath := os.TempDir()
-	fileWriter := stream.NewFileWriter()
-	fileReader := stream.NewFileReader()
-	fileExister := stream.NewFileExister()
-	fileRemover := stream.NewFileRemover(fileExister)
-	fileManager := stream.NewFileManager(fileWriter, fileReader, fileExister, fileRemover)
+	fileManager := stream.NewFileManager()
 	sm := session.NewManager(homePath, fileManager)
 	manager := NewLoginManager(sm)
 

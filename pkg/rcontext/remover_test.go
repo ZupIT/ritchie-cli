@@ -13,8 +13,8 @@ func TestRemove(t *testing.T) {
 	tmp := os.TempDir()
 	var write stream.FileWriter
 	var finder Finder
-	fileReadExister := stream.NewReadExister(stream.NewFileReader(), stream.NewFileExister())
-	setter := NewSetter(tmp, NewFinder(tmp, fileReadExister), stream.NewFileWriter())
+	fileManager := stream.NewFileManager()
+	setter := NewSetter(tmp, NewFinder(tmp, fileManager), fileManager)
 	setter.Set(dev)
 	setter.Set(qa)
 
@@ -90,12 +90,12 @@ func TestRemove(t *testing.T) {
 			if in.write != nil {
 				write = in.write
 			} else {
-				write = stream.NewFileWriter()
+				write = fileManager
 			}
 			if in.finder != nil {
 				finder = in.finder
 			} else {
-				finder = NewFinder(tmp, fileReadExister)
+				finder = NewFinder(tmp, fileManager)
 			}
 
 			remover := NewRemover(tmp, finder, write)
