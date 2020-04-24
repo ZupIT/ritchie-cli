@@ -2,20 +2,13 @@ package server
 
 import (
 	"os"
-	"reflect"
 	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
 	finder := NewFinder(tmp)
 	setter := NewSetter(tmp)
-
-	type in struct {
-		serverUrl string
-	}
 
 	type out struct {
 		err  error
@@ -24,26 +17,18 @@ func TestFind(t *testing.T) {
 
 	tests := []struct {
 		name string
-		in   *in
-		out  *out
+		in   string
+		out  string
 	}{
 		{
 			name: "empty server",
-			in:   nil,
-			out: &out{
-				want: "",
-				err:  nil,
-			},
+			in:   "",
+			out:  "",
 		},
 		{
 			name: "existing server",
-			in: &in{
-				serverUrl: "http://localhost/mocked",
-			},
-			out: &out{
-				want: "http://localhost/mocked",
-				err:  nil,
-			},
+			in:   "http://localhost/mocked",
+			out:  "http://localhost/mocked",
 		},
 	}
 
@@ -51,19 +36,18 @@ func TestFind(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			in := tt.in
-			if in != nil {
-				setter.Set(in.serverUrl)
-			} else {
-				fileutil.WriteFile(tmp+"/server", []byte(""))
+			out := tt.out
+
+			if in != "" {
+				setter.Set(in)
 			}
 
-			out := tt.out
 			got, err := finder.Find()
 			if err != nil {
-				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)
+				t.Errorf("Find(%s) got %v, want %v", tt.name, err, nil)
 			}
-			if !reflect.DeepEqual(out.want, got) {
-				t.Errorf("Find(%s) got %v, want %v", tt.name, got, out.want)
+			if got != out {
+				t.Errorf("Find(%s) got %v, want %v", tt.name, got, out)
 			}
 		})
 	}

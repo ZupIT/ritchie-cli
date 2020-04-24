@@ -1,71 +1,49 @@
 package server
 
 import (
-	"fmt"
-	"os"
-	"reflect"
 	"testing"
 )
 
-func TestNewValidator(t *testing.T) {
-	tmp := os.TempDir()
-	finder := NewFinder(tmp)
-	NewValidator(finder)
+type finderFoundMock struct{}
+
+func (finderFoundMock) Find() (string, error) {
+	return "http://localhost/mocked", nil
+}
+
+type finderNotFoundMock struct{}
+
+func (finderNotFoundMock) Find() (string, error) {
+	return "", nil
 }
 
 func TestValidator(t *testing.T) {
-	tmp := os.TempDir()
-	finder := NewFinder(tmp)
-	setter := NewSetter(tmp)
-
-	type in struct {
-		serverFinder Finder
-		serverUrl string
-	}
-
-	type out struct {
-		err  error
-	}
 
 	tests := []struct {
 		name string
-		in   *in
-		out  *out
+		in   Finder
+		out  error
 	}{
 		{
-			name: "empty serverUrl",
-			in:   &in {
-				serverFinder: finder,
-				serverUrl: "",
-			},
-			out: &out{
-				err:  fmt.Errorf("No server URL found ! Please set a server URL."),
-			},
+			name: "serverURL not found",
+			in:   finderNotFoundMock{},
+			out:  ErrServerURLNoFound,
 		},
 		{
-			name: "existing serverUrl",
-			in: &in{
-				serverFinder: finder,
-				serverUrl: "http://localhost/mocked",
-			},
-			out: &out{
-				err:  nil,
-			},
+			name: "serverURL found",
+			in:   finderFoundMock{},
+			out:  nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			in := tt.in
-			setter.Set(in.serverUrl)
-			validator := NewValidator(in.serverFinder)
-
 			out := tt.out
-			err := validator.Validate(); if err != nil {
-				if !reflect.DeepEqual(out.err.Error(), err.Error()) {
-					t.Errorf("Find(%s) got %v, want %v", tt.name, err.Error(), out.err)
-				}
+			validator := NewValidator(in)
+
+			got := validator.Validate()
+			if got != nil && got.Error() != out.Error() {
+				t.Errorf("Find(%s) got %v, want %v", in, got, out)
 			}
 		})
 	}
