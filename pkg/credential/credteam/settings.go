@@ -54,7 +54,8 @@ func (s Settings) Fields() (credential.Fields, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(urlConfigPattern, serverURL), nil)
+	url := fmt.Sprintf(urlConfigPattern, serverURL)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
