@@ -37,7 +37,7 @@ type RepoManager struct {
 	homePath       string
 	httpClient     *http.Client
 	sessionManager session.Manager
-	serverURL string
+	serverURL      string
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -63,7 +63,7 @@ func NewTeamRepoManager(homePath string, serverURL string, hc *http.Client, sm s
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
-		serverURL : serverURL,
+		serverURL:      serverURL,
 		httpClient:     hc,
 		sessionManager: sm,
 	}
@@ -81,7 +81,9 @@ func (dm RepoManager) Add(r Repository) error {
 	defer cancel()
 	locked, err := lock.TryLockContext(lockCtx, time.Second)
 	if locked {
-		defer lock.Unlock()
+		defer func() {
+			_ = lock.Unlock()
+		}()
 	}
 	if err != nil {
 		return err
@@ -92,7 +94,10 @@ func (dm RepoManager) Add(r Repository) error {
 		if err != nil {
 			return err
 		}
-		fileutil.WriteFile(dm.repoFile, wb)
+		err = fileutil.WriteFile(dm.repoFile, wb)
+		if err != nil {
+			return err
+		}
 	}
 
 	rb, err := fileutil.ReadFile(dm.repoFile)
@@ -247,7 +252,10 @@ func (dm RepoManager) Load() error {
 	}
 
 	for _, v := range dd {
-		dm.Add(v)
+		err = dm.Add(v)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -62,12 +61,6 @@ func (s Sender) SendCommand() {
 	}
 
 	defer resp.Body.Close()
-
-	b, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-
 }
 
 func cmd() string {
