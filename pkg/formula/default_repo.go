@@ -83,7 +83,9 @@ func (dm RepoManager) Add(r Repository) error {
 	defer cancel()
 	locked, err := lock.TryLockContext(lockCtx, time.Second)
 	if locked {
-		defer lock.Unlock()
+		defer func() {
+			_ = lock.Unlock()
+		}()
 	}
 	if err != nil {
 		return err
@@ -94,7 +96,10 @@ func (dm RepoManager) Add(r Repository) error {
 		if err != nil {
 			return err
 		}
-		fileutil.WriteFile(dm.repoFile, wb)
+		err = fileutil.WriteFile(dm.repoFile, wb)
+		if err != nil {
+			return err
+		}
 	}
 
 	rb, err := fileutil.ReadFile(dm.repoFile)
@@ -254,7 +259,10 @@ func (dm RepoManager) Load() error {
 	}
 
 	for _, v := range dd {
-		dm.Add(v)
+		err = dm.Add(v)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

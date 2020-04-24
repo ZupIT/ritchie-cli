@@ -50,7 +50,11 @@ func providerConfig(organization, serverURL string) (ProviderConfig, error) {
 		return provideConfig, fmt.Errorf("Failed parse response to body: %s\n", string(bodyBytes))
 	}
 
-	json.Unmarshal(bodyBytes, &provideConfig)
+	err = json.Unmarshal(bodyBytes, &provideConfig)
+	if err != nil {
+		return provideConfig, err
+	}
+
 	return provideConfig, nil
 }
 
