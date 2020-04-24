@@ -1,18 +1,19 @@
 package secteam
 
 import (
+	"net/http"
+
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"net/http"
 )
 
 type LoginManager struct {
-	homePath 			string
-	serverFinder 		server.Finder
-	provider            security.AuthProvider
-	httpClient          *http.Client
-	sessionManager      session.Manager
+	homePath       string
+	serverFinder   server.Finder
+	provider       security.AuthProvider
+	httpClient     *http.Client
+	sessionManager session.Manager
 }
 
 func NewLoginManager(
@@ -32,12 +33,12 @@ func NewLoginManager(
 
 func (l LoginManager) Login(p security.Passcode) error {
 	org := p.String()
-	serverUrl, err := l.serverFinder.Find()
+	serverURL, err := l.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	cr, err := loginChannelProvider(l.provider, org, serverUrl)
+	cr, err := loginChannelProvider(l.provider, org, serverURL)
 	if err != nil {
 		return err
 	}

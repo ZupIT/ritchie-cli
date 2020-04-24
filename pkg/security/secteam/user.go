@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 
@@ -30,8 +31,8 @@ type UserManager struct {
 
 func NewUserManager(serverFinder server.Finder, hc *http.Client, sm session.Manager) UserManager {
 	return UserManager{
-		serverFinder: serverFinder,
-		httpClient: hc,
+		serverFinder:   serverFinder,
+		httpClient:     hc,
 		sessionManager: sm}
 }
 
@@ -46,12 +47,13 @@ func (u UserManager) Create(user security.User) error {
 		return err
 	}
 
-	serverUrl, err := u.serverFinder.Find()
+	serverURL, err := u.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(urlPattern, serverUrl), bytes.NewBuffer(b))
+	url := fmt.Sprintf(urlPattern, serverURL)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return err
 	}
@@ -90,12 +92,13 @@ func (u UserManager) Delete(user security.User) error {
 		return err
 	}
 
-	serverUrl, err := u.serverFinder.Find()
+	serverURL, err := u.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(urlPattern, serverUrl), bytes.NewBuffer(b))
+	url := fmt.Sprintf(urlPattern, serverURL)
+	req, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(b))
 	if err != nil {
 		return err
 	}
