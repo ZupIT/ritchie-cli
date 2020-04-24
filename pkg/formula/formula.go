@@ -88,10 +88,10 @@ func (d *Definition) BinName() string {
 }
 
 // BinName builds the bin name from definition params
-func (d *Definition) BundleName() string {
+func (d *Definition) 	BundleName() string {
 	if strings.Contains(d.Bundle, "${so}") {
 		so := runtime.GOOS
-		bundleSO := strings.ReplaceAll(d.Bin, "${so}", so)
+		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", so)
 
 		return bundleSO
 	}
@@ -128,7 +128,7 @@ func (d *Definition) ConfigPath(formula, configName string) string {
 
 // ConfigUrl builds the config url
 func (d *Definition) ConfigUrl(configName string) string {
-	return fmt.Sprintf("%s/%s", d.RepoUrl, configName)
+	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, configName)
 }
 
 type Runner interface {
