@@ -36,6 +36,6 @@ If a copy of the MPL was not distributed with this file, you can obtain one at h
 * [@marcosgmgm](https://github.com/marcosgmgm) 
 * [@viniciusramosdefaria](https://github.com/viniciusramosdefaria) 
 * [@kaduartur](https://github.com/kaduartur) 
-* [@erneliojuniorzup](https://github.com/erneliojuniorzup)
+* [@ernelio](https://github.com/ernelio)
 * [@guillaumefalourd](https://github.com/guillaumefalourd)
 * [@rodrigomedeirosf](https://github.com/rodrigomedeirosf)
