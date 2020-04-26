@@ -108,28 +108,27 @@ func main() {
     }.Run()
 }`
 	TemplateMakefile = `# Go parameters
+BINARY_NAME={{name}}
 GOCMD=go
 GOBUILD=$(GOCMD) build
-BINARY_NAME={{name}}
+GOTEST=$(GOCMD) test
 CMD_PATH=./main.go
-DIST=../bin
-DIST_MAC=$(DIST)/$(BINARY_NAME)-darwin
-DIST_LINUX=$(DIST)/$(BINARY_NAME)-linux
-DIST_WIN=$(DIST)/$(BINARY_NAME)-windows.exe
-
-FORM_PATH={{form-path}}
-PWD_INITIAL=$(shell pwd)
+DIST=../dist
+DIST_MAC_DIR=$(DIST)/darwin/bin
+BIN_MAC=$(BINARY_NAME)-darwin
+DIST_LINUX_DIR=$(DIST)/linux/bin
+BIN_LINUX=$(BINARY_NAME)-linux
 
 build:
-	mkdir -p $(DIST)
+	mkdir -p $(DIST_MAC_DIR) $(DIST_LINUX_DIR) $(DIST_WIN_DIR)
 	export MODULE=$(GO111MODULE=on go list -m)
 	#LINUX
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_LINUX_DIR)/$(BIN_LINUX)' -v $(CMD_PATH)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC) -v $(CMD_PATH)
-	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN) -v $(CMD_PATH)
-`
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_MAC_DIR)/$(BIN_MAC)' -v $(CMD_PATH)
+
+test:
+	$(GOTEST) -short ` + "`go list ./... | grep -v vendor/`"
 	TemplateMakefileMain = `#Makefiles
 {{formName}}={{formPath}}
 FORMULAS=$({{formName}})
