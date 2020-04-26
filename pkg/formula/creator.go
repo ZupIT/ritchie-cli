@@ -47,7 +47,7 @@ func (c CreateManager) Create(fCmd string) error {
 		return err
 	}
 	log.Println("Formula successfully created!")
-	log.Printf("Your formula is in %s.", c.formPath)
+	log.Printf("Your formula is in %s", c.formPath)
 	return nil
 }
 
