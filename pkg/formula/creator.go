@@ -269,6 +269,7 @@ func updateTree(fCmd string, t Tree, i int) Tree {
 				Formula: api.Formula{
 					Path:   pathValue,
 					Bin:    fn + "-${so}",
+					Bundle: "${so}.zip",
 					Config: "config.json",
 				},
 				Parent: parent,

@@ -49,23 +49,26 @@ copy_config_files() {
 }
 
 copy_formula_bin() {
-  cp -rf "$formula"/bin formulas/"$formula"
+  cp -rf "$formula"/dist formulas/"$formula"
 }
 
 rm_formula_bin() {
-  rm -rf "$formula"/bin
+  rm -rf "$formula"/dist
 }
 
 create_formula_checksum() {
-  find "${formula}"/bin -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -f1 -d ' ' > formulas/"${formula}.md5"
+  find "${formula}"/dist -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -f1 -d ' ' > formulas/"${formula}.md5"
 }
 ` +
 		"\ncompact_formula_bin_and_remove_them() {\n" +
-		"for bin_dir in `find formulas \"$formula\" -type d -name \"bin\"` ; do\n" +
+		"for bin_dir in `find formulas/\"$formula\" -type d -name \"dist\"`; do\n" +
 		"for binary in `ls -1 $bin_dir`; do\n" +
-		"zip -j \"${bin_dir}/${binary}.zip\" \"${bin_dir}/${binary}\"\n" +
-		"rm \"${bin_dir}/${binary}\"\n" +
-		`done;
+		"cd  ${bin_dir}/${binary}\n" +
+		"zip -r \"${binary}.zip\" \"bin\"\n" +
+		"mv \"${binary}\".zip ../../\n" +
+		`cd - || exit
+    done;
+    rm -rf "${bin_dir}"
   done
 }
 
@@ -89,6 +92,7 @@ init
 go 1.14
 
 require github.com/fatih/color v1.9.0`
+
 	TemplateMain = `package main
 
 import (
@@ -107,6 +111,7 @@ func main() {
     	Boolean: input3,
     }.Run()
 }`
+
 	TemplateMakefile = `# Go parameters
 BINARY_NAME={{name}}
 GOCMD=go
@@ -129,6 +134,7 @@ build:
 
 test:
 	$(GOTEST) -short ` + "`go list ./... | grep -v vendor/`"
+
 	TemplateMakefileMain = `#Makefiles
 {{formName}}={{formPath}}
 FORMULAS=$({{formName}})
@@ -186,6 +192,7 @@ func(in Input)Run()  {
 	color.Red(fmt.Sprintf("You receive %s in list.", in.List ))
 	color.Yellow(fmt.Sprintf("You receive %s in boolean.", in.Boolean ))
 }`
+
 	TemplateUnzipBinConfigs = `#!/bin/sh
 find formulas -name "*.zip" | while read filename; do unzip -o -d "` + "`dirname \"$filename\"`\" \"$filename\"; rm -f \"$filename\"; done;"
 )
