@@ -1,3 +1,7 @@
+[![CircleCI](https://circleci.com/gh/ZupIT/ritchie-cli/tree/master.svg?style=svg)](https://circleci.com/gh/ZupIT/ritchie-cli) [![codecov](https://codecov.io/gh/zupit/ritchie-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/zupit/ritchie-cli) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
+
 <img class="special-img-class" src="/docs/img/ritchie-banner.png" />
 
 ## Ritchie
@@ -19,15 +23,9 @@ This repository contains the CLI core, which can execute formulas stored inside 
 
 ## How to install Ritchie
 
-- [Windows](https://docs.ritchiecli.io/get-started/installation/windows)
+- [Windows](https://docs.ritchiecli.io/v/master/get-started/installation/windows)
 
-- [Linux / Mac](https://docs.ritchiecli.io/get-started/installation/linux-mac)
-
-
-## License
-
-This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
-If a copy of the MPL was not distributed with this file, you can obtain one at https://mozilla.org/MPL/2.0/.
+- [Linux / Mac](https://docs.ritchiecli.io/v/master/get-started/installation/linux-mac)
 
 
 ## Contributors

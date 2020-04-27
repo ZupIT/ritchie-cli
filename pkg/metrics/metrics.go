@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -23,13 +23,17 @@ type CmdUse struct {
 }
 
 type Sender struct {
-	serverURL      string
 	httpClient     *http.Client
+	serverFinder   server.Finder
 	sessionManager session.Manager
 }
 
-func NewSender(serverURL string, hc *http.Client, sm session.Manager) Sender {
-	return Sender{serverURL: fmt.Sprintf(urlPattern, serverURL), httpClient: hc, sessionManager: sm}
+func NewSender(hc *http.Client, serverFinder server.Finder, sm session.Manager) Sender {
+	return Sender{
+		httpClient:     hc,
+		serverFinder:   serverFinder,
+		sessionManager: sm,
+	}
 }
 
 func (s Sender) SendCommand() {
@@ -48,7 +52,13 @@ func (s Sender) SendCommand() {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, s.serverURL, bytes.NewBuffer(b))
+	serverURL, err := s.serverFinder.Find()
+	if err != nil {
+		return
+	}
+
+	url := fmt.Sprintf(urlPattern, serverURL)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return
 	}
@@ -62,12 +72,6 @@ func (s Sender) SendCommand() {
 	}
 
 	defer resp.Body.Close()
-
-	b, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-
 }
 
 func cmd() string {

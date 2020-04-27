@@ -3,9 +3,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"log"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 
 	"github.com/spf13/cobra"
 
@@ -54,13 +55,13 @@ func newCmd(s *setCredentialCmd) *cobra.Command {
 		Use:   "credential",
 		Short: "Set credential",
 		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE:  s.RunFunc(),
+		RunE:  s.runFunc(),
 	}
 }
 
-func (s setCredentialCmd) RunFunc() CommandRunnerFunc {
+func (s setCredentialCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		cred, err := s.PromptResolver()
+		cred, err := s.promptResolver()
 		if err != nil {
 			return err
 		}
@@ -74,7 +75,7 @@ func (s setCredentialCmd) RunFunc() CommandRunnerFunc {
 	}
 }
 
-func (s setCredentialCmd) PromptResolver() (credential.Detail, error) {
+func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 	switch s.edition {
 	case api.Single:
 		return s.singlePrompt()

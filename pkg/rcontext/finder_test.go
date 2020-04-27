@@ -1,6 +1,7 @@
 package rcontext
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -52,7 +53,11 @@ func TestFind(t *testing.T) {
 
 			in := tt.in
 			if in != nil {
-				setter.Set(in.ctx)
+				_, err := setter.Set(in.ctx)
+				if err != nil {
+					fmt.Sprintf("Error in Set")
+					return
+				}
 			}
 
 			out := tt.out

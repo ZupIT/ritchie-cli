@@ -37,7 +37,7 @@ func NewAutocompleteZsh(g autocomplete.Generator) *cobra.Command {
 		Short:   "Add zsh autocomplete for terminal",
 		Long:    "Add zsh autocomplete for terminal",
 		Example: "rit completion zsh",
-		RunE:    a.RunFunc(),
+		RunE:    a.runFunc(),
 	}
 }
 
@@ -50,11 +50,11 @@ func NewAutocompleteBash(g autocomplete.Generator) *cobra.Command {
 		Short:   "Add bash autocomplete for terminal",
 		Long:    "Add bash autocomplete for terminal",
 		Example: "rit completion bash",
-		RunE:    a.RunFunc(),
+		RunE:    a.runFunc(),
 	}
 }
 
-func (a autocompleteCmd) RunFunc() CommandRunnerFunc {
+func (a autocompleteCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		s := autocomplete.ShellName(cmd.Use)
 		c, err := a.Generate(s)

@@ -1,9 +1,13 @@
 package sessteam
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 var (
@@ -20,24 +24,75 @@ func TestMain(m *testing.M) {
 
 func TestValidate(t *testing.T) {
 
+	type in struct {
+		session session.Session
+		exp     int64
+	}
+
 	tests := []struct {
 		name string
-		in   session.Session
+		in   in
 		out  error
 	}{
 		{
 			name: "team session",
-			in: session.Session{
-				AccessToken:  "SflKxwRJSM.eKKF2QT4fwpMeJf36.POk6yJV_adQssw5c",
-				Organization: "zup",
-				Username:     "dennis.ritchie",
+			in: in{
+				session: session.Session{
+					Organization: "zup",
+					Username:     "dennis.ritchie",
+				},
+				exp: time.Now().Add(time.Minute * 15).Unix(),
 			},
 			out: nil,
 		},
 		{
 			name: "no team session",
-			in:   session.Session{},
+			in:   in{},
 			out:  session.ErrNoSession,
+		},
+		{
+			name: "expired session token",
+			in: in{
+				session: session.Session{
+					Organization: "zup",
+					Username:     "dennis.ritchie",
+				},
+				exp: time.Now().Add(time.Minute*15).Unix() - 1500,
+			},
+			out: ErrExpiredToken,
+		},
+		{
+			name: "invalid access token",
+			in: in{
+				session: session.Session{
+					AccessToken:  "dasdasdasdas",
+					Organization: "zup",
+					Username:     "dennis.ritchie",
+				},
+			},
+			out: ErrInvalidToken,
+		},
+		{
+			name: "decode base64 error",
+			in: in{
+				session: session.Session{
+					AccessToken:  "ds.ds##$F/[",
+					Organization: "zup",
+					Username:     "dennis.ritchie",
+				},
+			},
+			out: ErrDecodeToken,
+		},
+		{
+			name: "unmarshall error token",
+			in: in{
+				session: session.Session{
+					AccessToken:  "eyJhbGciOiJIUzI1N.eyJzdWIilIiwiaWF0IjoxNTEIyfQ.SflKxw_adQssw5c",
+					Organization: "zup",
+					Username:     "dennis.ritchie",
+				},
+			},
+			out: ErrConvertToStruct,
 		},
 	}
 
@@ -45,20 +100,31 @@ func TestValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			_ = sessionManager.Destroy()
 
-			if tt.in.Organization != "" {
-				err := sessionManager.Create(tt.in)
+			if tt.in.session.Organization != "" {
+
+				if tt.in.session.AccessToken == "" {
+					tt.in.session.AccessToken = generateJwt(tt.in.exp)
+				}
+
+				err := sessionManager.Create(tt.in.session)
 				if err != nil {
 					t.Errorf("Create(%s) got %v, want %v", tt.name, err, tt.out)
 				}
 			}
 
-			//TODO how to mock JWT Token?
-			/*out := tt.out
+			out := tt.out
 			got := validator.Validate()
 			if got != nil && got.Error() != out.Error() {
 				t.Errorf("Validate(%s) got %v, want %v", tt.name, got, out)
-			}*/
-
+			}
 		})
 	}
+}
+
+func generateJwt(exp int64) string {
+	atClaims := jwt.MapClaims{}
+	atClaims["exp"] = exp
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	token, _ := at.SignedString([]byte("Test"))
+	return token
 }

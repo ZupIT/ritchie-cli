@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -25,11 +26,11 @@ func NewLoginCmd(
 		Use:   "login",
 		Short: "User login",
 		Long:  "Authenticates and creates a session for the user of the organization",
-		RunE:  l.RunFunc(),
+		RunE:  l.runFunc(),
 	}
 }
 
-func (l loginCmd) RunFunc() CommandRunnerFunc {
+func (l loginCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		org, err := l.Text("Enter your organization: ", true)
 		if err != nil {

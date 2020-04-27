@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/spf13/cobra"
@@ -23,11 +24,11 @@ func NewDeleteUserCmd(
 		Use:   "user",
 		Short: "Delete user",
 		Long:  `Delete user of the organization`,
-		RunE:  d.RunFunc(),
+		RunE:  d.runFunc(),
 	}
 }
 
-func (d deleteUserCmd) RunFunc() CommandRunnerFunc {
+func (d deleteUserCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		un, err := d.Text("Username: ", true)
 		if err != nil {

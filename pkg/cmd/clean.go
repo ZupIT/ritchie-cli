@@ -13,6 +13,6 @@ func NewCleanCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "clean SUBCOMMAND",
 		Short: "clean objects",
-		Long:  descAddLong,
+		Long:  descCleanLong,
 	}
 }

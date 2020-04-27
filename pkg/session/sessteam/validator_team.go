@@ -4,9 +4,19 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"strings"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/session"
+)
+
+const startSession = "please, you need to start a session"
+
+var (
+	ErrInvalidToken    = fmt.Errorf("the access token is invalid. %s", startSession)
+	ErrExpiredToken    = fmt.Errorf("the access token has expired. %s", startSession)
+	ErrDecodeToken     = fmt.Errorf("unable to decode access token. %s", startSession)
+	ErrConvertToStruct = fmt.Errorf("couldn't convert access token into the struct. %s", startSession)
 )
 
 type Validator struct {
@@ -26,12 +36,12 @@ func (t Validator) Validate() error {
 	parts := strings.Split(sess.AccessToken, ".")
 	size := len(parts)
 	if size < 2 {
-		return fmt.Errorf("oidc: malformed jwt, expected 3 parts got %d", size)
+		return ErrInvalidToken
 	}
 
 	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
-		return fmt.Errorf("oidc: malformed jwt payload: %v", err)
+		return ErrDecodeToken
 	}
 
 	type Token struct {
@@ -40,12 +50,12 @@ func (t Validator) Validate() error {
 	var token Token
 	err = json.Unmarshal(payload, &token)
 	if err != nil {
-		return fmt.Errorf("error unmarshal token: %v", err)
+		return ErrConvertToStruct
 	}
 
 	tokenTime := time.Unix(token.Exp, 0)
 	if time.Since(tokenTime).Seconds() > 0 {
-		return fmt.Errorf("token expired, time token: %v", token.Exp)
+		return ErrExpiredToken
 	}
 
 	return nil

@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"log"
 	"net/http"
 	"net/url"
 	"regexp"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
 const (
@@ -49,11 +50,14 @@ func HasMinValue(str string, min int) error {
 	return nil
 }
 
+//ErrInvalidServerURL when the URL is invalid
+var ErrInvalidServerURL = errors.New("invalid server URL")
+
 //IsValidURL validates the url format
 func IsValidURL(value string) error {
 	_, err := url.ParseRequestURI(value)
 	if err != nil {
-		return fmt.Errorf("%s is not a valid url", value)
+		return fmt.Errorf("%v: %w", value, ErrInvalidServerURL)
 	}
 	return nil
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -28,11 +29,11 @@ func NewCreateUserCmd(
 		Use:   "user",
 		Short: "Create user",
 		Long:  `Create user of the organization`,
-		RunE:  c.RunFunc(),
+		RunE:  c.runFunc(),
 	}
 }
 
-func (c createUserCmd) RunFunc() CommandRunnerFunc {
+func (c createUserCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		org, err := c.Text("Organization: ", true)
 		if err != nil {
