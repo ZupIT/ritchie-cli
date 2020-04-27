@@ -111,10 +111,8 @@ func (o *rootCmd) checkSession(commandPath string) error {
 			return err
 		}
 
-		if o.edition == api.Team {
-			if err := o.repoLoader.Load(); err != nil {
-				return err
-			}
+		if err := o.repoLoader.Load(); err != nil {
+			return err
 		}
 
 		fmt.Println("Session created successfully!")
