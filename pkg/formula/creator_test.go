@@ -3,10 +3,12 @@ package formula
 import (
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 )
 
 const (
@@ -17,8 +19,8 @@ const (
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]Repository, error) {
-	return []Repository{}, nil
+func (repoListerMock) List() ([]repo.Repository, error) {
+	return []repo.Repository{}, nil
 }
 
 func cleanForm() {

@@ -1,14 +1,15 @@
 package cmd
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 // addRepoCmd type for add repo command
 type addRepoCmd struct {
-	formula.RepoAdder
+	repo.Adder
 	prompt.InputText
 	prompt.InputURL
 	prompt.InputInt
@@ -16,7 +17,7 @@ type addRepoCmd struct {
 
 // NewRepoAddCmd creates a new cmd instance
 func NewAddRepoCmd(
-	ad formula.RepoAdder,
+	ad repo.Adder,
 	it prompt.InputText,
 	iu prompt.InputURL,
 	ii prompt.InputInt) *cobra.Command {
@@ -54,7 +55,7 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		r := formula.Repository{
+		r := repo.Repository{
 			Priority: int(pr),
 			Name:     rn,
 			TreePath: ur,

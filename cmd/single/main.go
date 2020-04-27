@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/spf13/cobra"
 	"net/http"
 	"os"
+
+	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -33,7 +36,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	//prompt
+	// prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -49,7 +52,8 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	repoManager := formula.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
+	repoManager := repo.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
+	repoLoader := repo.NewTeamLoader(cmd.ServerURL, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sesssingle.NewValidator(sessionManager)
 	loginManager := secsingle.NewLoginManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
@@ -69,11 +73,11 @@ func buildCommands() *cobra.Command {
 		inputBool)
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	//commands
+	// commands
 	rootCmd := cmd.NewRootCmd(
 		workspaceManager,
 		loginManager,
-		repoManager,
+		repoLoader,
 		sessionValidator,
 		api.Single,
 		inputText,

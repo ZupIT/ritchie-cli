@@ -3,18 +3,19 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 )
 
 // listRepoCmd type for list repo command
 type listRepoCmd struct {
-	formula.RepoLister
+	repo.Lister
 }
 
 // NewListRepoCmd creates a new cmd instance
-func NewListRepoCmd(ls formula.RepoLister) *cobra.Command {
+func NewListRepoCmd(ls repo.Lister) *cobra.Command {
 	l := &listRepoCmd{ls}
 
 	cmd := &cobra.Command{
@@ -40,7 +41,7 @@ func (l listRepoCmd) runFunc() CommandRunnerFunc {
 	}
 }
 
-func printList(rr []formula.Repository) {
+func printList(rr []repo.Repository) {
 	table := uitable.New()
 	table.AddRow("NAME", "URL")
 	for _, re := range rr {

@@ -3,13 +3,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
+	"runtime"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"os"
-	"runtime"
 
 	"github.com/spf13/cobra"
 
@@ -44,7 +45,7 @@ var (
 type rootCmd struct {
 	workspaceManager workspace.Checker
 	loginManager     security.LoginManager
-	repoLoader       formula.RepoLoader
+	repoLoader       repo.Loader
 	sessionValidator session.Validator
 	edition          api.Edition
 	prompt.InputText
@@ -54,7 +55,7 @@ type rootCmd struct {
 // NewRootCmd creates the root for all ritchie commands.
 func NewRootCmd(wm workspace.Checker,
 	l security.LoginManager,
-	r formula.RepoLoader,
+	r repo.Loader,
 	sv session.Validator,
 	e api.Edition,
 	it prompt.InputText,

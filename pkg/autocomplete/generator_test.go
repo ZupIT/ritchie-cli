@@ -5,12 +5,13 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 )
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (repoListerMock) List() ([]repo.Repository, error) {
+	return []repo.Repository{}, nil
 }
 
 func TestGenerate(t *testing.T) {

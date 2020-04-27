@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 )
@@ -76,7 +76,7 @@ func (inputListCredMock) List(name string, items []string) (string, error) {
 
 type repoAdder struct{}
 
-func (repoAdder) Add(d formula.Repository) error {
+func (repoAdder) Add(d repo.Repository) error {
 	return nil
 }
 
@@ -145,8 +145,8 @@ func (repoDeleterMock) Delete(name string) error {
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (repoListerMock) List() ([]repo.Repository, error) {
+	return []repo.Repository{}, nil
 }
 
 type repoLoaderMock struct{}

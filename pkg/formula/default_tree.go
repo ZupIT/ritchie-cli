@@ -3,9 +3,11 @@ package formula
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"io/ioutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 )
 
 const (
@@ -17,11 +19,11 @@ const (
 
 type TreeManager struct {
 	ritchieHome string
-	repoLister  RepoLister
+	repoLister  repo.Lister
 	coreCmds    []api.Command
 }
 
-func NewTreeManager(ritchieHome string, rl RepoLister, coreCmds []api.Command) TreeManager {
+func NewTreeManager(ritchieHome string, rl repo.Lister, coreCmds []api.Command) TreeManager {
 	return TreeManager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
 }
 

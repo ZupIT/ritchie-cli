@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+
+	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -21,7 +25,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/session/sessteam"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
-	"github.com/spf13/cobra"
 )
 
 func main() {
@@ -40,7 +43,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	//prompt
+	// prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -49,7 +52,7 @@ func buildCommands() *cobra.Command {
 	inputList := prompt.NewInputList()
 	inputURL := prompt.NewInputURL()
 
-	//deps
+	// deps
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
@@ -57,7 +60,8 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, cmd.ServerURL, http.DefaultClient, sessionManager)
+	repoManager := repo.NewTeamRepoManager(ritchieHomeDir, cmd.ServerURL, http.DefaultClient, sessionManager)
+	repoLoader := repo.NewTeamLoader(cmd.ServerURL, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		ritchieHomeDir,
@@ -86,11 +90,11 @@ func buildCommands() *cobra.Command {
 		inputBool)
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	//commands
+	// commands
 	rootCmd := cmd.NewRootCmd(
 		workspaceManager,
 		loginManager,
-		repoManager,
+		repoLoader,
 		sessionValidator,
 		api.Team,
 		inputText,
@@ -103,7 +107,7 @@ func buildCommands() *cobra.Command {
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(loginManager, repoManager, inputText)
+	loginCmd := cmd.NewLoginCmd(loginManager, repoLoader, inputText)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()

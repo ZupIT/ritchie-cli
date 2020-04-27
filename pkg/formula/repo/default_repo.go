@@ -1,13 +1,10 @@
-package formula
+package repo
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"github.com/gofrs/flock"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -16,10 +13,15 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gofrs/flock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 const (
-	//Files
+	// Files
 	repositoryConfFilePattern    = "%s/repo/repositories.json"
 	repositoryCacheFolderPattern = "%s/repo/cache"
 	treeCacheFilePattern         = "%s/repo/cache/%s-tree.json"
@@ -31,13 +33,13 @@ var (
 	ErrNoRepoToShow = errors.New("no repositories to show")
 )
 
-type RepoManager struct {
+type Manager struct {
 	repoFile       string
 	cacheFile      string
 	homePath       string
 	httpClient     *http.Client
-	sessionManager session.Manager
 	serverURL      string
+	sessionManager session.Manager
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -48,8 +50,8 @@ func (a ByPriority) Len() int           { return len(a) }
 func (a ByPriority) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByPriority) Less(i, j int) bool { return a[i].Priority < a[j].Priority }
 
-func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) RepoManager {
-	return RepoManager{
+func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) Manager {
+	return Manager{
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
@@ -58,8 +60,8 @@ func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) 
 	}
 }
 
-func NewTeamRepoManager(homePath string, serverURL string, hc *http.Client, sm session.Manager) RepoManager {
-	return RepoManager{
+func NewTeamRepoManager(homePath string, serverURL string, hc *http.Client, sm session.Manager) Manager {
+	return Manager{
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
@@ -69,7 +71,7 @@ func NewTeamRepoManager(homePath string, serverURL string, hc *http.Client, sm s
 	}
 }
 
-func (dm RepoManager) Add(r Repository) error {
+func (dm Manager) Add(r Repository) error {
 	err := os.MkdirAll(filepath.Dir(dm.cacheFile), os.ModePerm)
 	if err != nil && !os.IsExist(err) {
 		return err
@@ -133,7 +135,7 @@ func (dm RepoManager) Add(r Repository) error {
 	return nil
 }
 
-func (dm RepoManager) Update() error {
+func (dm Manager) Update() error {
 	f, err := dm.loadReposFromDisk()
 	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {
 		return ErrNoRepoToShow
@@ -158,7 +160,7 @@ func (dm RepoManager) Update() error {
 	return nil
 }
 
-func (dm RepoManager) Clean(n string) error {
+func (dm Manager) Clean(n string) error {
 	treeName := fmt.Sprintf(treeCacheFilePattern, dm.homePath, n)
 
 	if err := removeRepoCache(treeName); err != nil {
@@ -168,7 +170,7 @@ func (dm RepoManager) Clean(n string) error {
 	return nil
 }
 
-func (dm RepoManager) Delete(name string) error {
+func (dm Manager) Delete(name string) error {
 	f, err := dm.loadReposFromDisk()
 	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {
 		return ErrNoRepoToShow
@@ -197,7 +199,7 @@ func (dm RepoManager) Delete(name string) error {
 	return nil
 }
 
-func (dm RepoManager) List() ([]Repository, error) {
+func (dm Manager) List() ([]Repository, error) {
 	f, err := dm.loadReposFromDisk()
 
 	if fileutil.IsNotExistErr(err) {
@@ -212,56 +214,7 @@ func (dm RepoManager) List() ([]Repository, error) {
 	return f.Values, nil
 }
 
-func (dm RepoManager) Load() error {
-	session, err := dm.sessionManager.Current()
-	if err != nil {
-		return err
-	}
-
-	url := fmt.Sprintf(providerPath, dm.serverURL)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("x-org", session.Organization)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", session.AccessToken))
-	resp, err := dm.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	body, err := fileutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("%d - %s\n", resp.StatusCode, string(body))
-	}
-
-	var dd []Repository
-	if err := json.Unmarshal(body, &dd); err != nil {
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
-
-	for _, v := range dd {
-		err = dm.Add(v)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (dm RepoManager) loadTreeFile(r Repository) error {
+func (dm Manager) loadTreeFile(r Repository) error {
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {
 		return err
@@ -297,7 +250,7 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 	return nil
 }
 
-func (dm RepoManager) loadReposFromDisk() (RepositoryFile, error) {
+func (dm Manager) loadReposFromDisk() (RepositoryFile, error) {
 	path := fmt.Sprintf(repositoryConfFilePattern, dm.homePath)
 	rf := RepositoryFile{}
 
