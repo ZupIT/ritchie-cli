@@ -18,6 +18,8 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 const (
@@ -39,7 +41,7 @@ type RepoManager struct {
 	homePath       string
 	httpClient     *http.Client
 	sessionManager session.Manager
-	serverURL      string
+	serverFinder   server.Finder
 	dir            stream.DirCreater
 	file           stream.FileWriteReadExister
 }
@@ -71,7 +73,7 @@ func NewSingleRepoManager(
 
 func NewTeamRepoManager(
 	homePath string,
-	serverURL string,
+	serverFinder server.Finder,
 	hc *http.Client,
 	sm session.Manager,
 	dir stream.DirCreater,
@@ -80,9 +82,9 @@ func NewTeamRepoManager(
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
+		serverFinder:   serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
-		serverURL:      serverURL,
 		dir:            dir,
 		file:           file,
 	}
@@ -100,7 +102,9 @@ func (dm RepoManager) Add(r Repository) error {
 	defer cancel()
 	locked, err := lock.TryLockContext(lockCtx, time.Second)
 	if locked {
-		defer lock.Unlock()
+		defer func() {
+			_ = lock.Unlock()
+		}()
 	}
 	if err != nil {
 		return err
@@ -111,7 +115,9 @@ func (dm RepoManager) Add(r Repository) error {
 		if err != nil {
 			return err
 		}
-		dm.file.Write(dm.repoFile, wb)
+		if err := dm.file.Write(dm.repoFile, wb); err != nil {
+			return err
+		}
 	}
 
 	rb, err := dm.file.Read(dm.repoFile)
@@ -232,7 +238,12 @@ func (dm RepoManager) Load() error {
 		return err
 	}
 
-	url := fmt.Sprintf(providerPath, dm.serverURL)
+	serverURL, err := dm.serverFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf(providerPath, serverURL)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err
@@ -266,7 +277,10 @@ func (dm RepoManager) Load() error {
 	}
 
 	for _, v := range dd {
-		dm.Add(v)
+		err = dm.Add(v)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

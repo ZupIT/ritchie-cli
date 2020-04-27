@@ -14,7 +14,7 @@ func TestFind(t *testing.T) {
 	dir := stream.NewDirCreater()
 	file := stream.NewFileManager()
 	setter := NewSetter(tmp, ctxFinder, sessManager, dir, file)
-	setter.Set(githubCred)
+	_ = setter.Set(githubCred)
 	finder := NewFinder(tmp, ctxFinder, sessManager, file)
 
 	type out struct {

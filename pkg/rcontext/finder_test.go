@@ -96,7 +96,7 @@ func TestFind(t *testing.T) {
 
 			if in != nil {
 				setter = NewSetter(tmp, finder, fileManager)
-				setter.Set(in.ctx)
+				_, _ = setter.Set(in.ctx)
 			}
 
 			out := tt.out

@@ -187,7 +187,10 @@ func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, i
 			items = items[0:qtd]
 		}
 		itemsBytes, _ := json.Marshal(items)
-		d.file.Write(cachePath, itemsBytes)
+		if err := d.file.Write(cachePath, itemsBytes); err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }
 

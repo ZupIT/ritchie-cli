@@ -3,16 +3,20 @@ package sessteam
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
+const startSession = "please, you need to start a session"
+
 var (
-	ErrInvalidToken = errors.New("the access token is invalid. please, you need to start a session")
-	ErrExpiredToken = errors.New("the access token has expired. please, you need to start a session")
+	ErrInvalidToken    = fmt.Errorf("the access token is invalid. %s", startSession)
+	ErrExpiredToken    = fmt.Errorf("the access token has expired. %s", startSession)
+	ErrDecodeToken     = fmt.Errorf("unable to decode access token. %s", startSession)
+	ErrConvertToStruct = fmt.Errorf("couldn't convert access token into the struct. %s", startSession)
 )
 
 type Validator struct {
@@ -37,7 +41,7 @@ func (t Validator) Validate() error {
 
 	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
-		return err
+		return ErrDecodeToken
 	}
 
 	type Token struct {
@@ -46,7 +50,7 @@ func (t Validator) Validate() error {
 	var token Token
 	err = json.Unmarshal(payload, &token)
 	if err != nil {
-		return err
+		return ErrConvertToStruct
 	}
 
 	tokenTime := time.Unix(token.Exp, 0)

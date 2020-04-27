@@ -15,8 +15,8 @@ func TestRemove(t *testing.T) {
 	var finder Finder
 	fileManager := stream.NewFileManager()
 	setter := NewSetter(tmp, NewFinder(tmp, fileManager), fileManager)
-	setter.Set(dev)
-	setter.Set(qa)
+	_, _ = setter.Set(dev)
+	_, _ = setter.Set(qa)
 
 	type in struct {
 		ctx    string

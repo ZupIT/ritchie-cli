@@ -49,9 +49,13 @@ func (c CreateManager) Create(fCmd string) error {
 	}
 
 	if c.file.Exists(fmt.Sprintf(TreeCreatePathPattern, c.formPath)) && (c.file.Exists(fmt.Sprintf("%s/%s", c.formPath, Makefile))) {
-		c.generateFormulaFiles(c.formPath, fCmd, false)
+		if err := c.generateFormulaFiles(c.formPath, fCmd, false); err != nil {
+			return err
+		}
 	} else {
-		c.generateFormulaFiles(c.formPath, fCmd, true)
+		if err := c.generateFormulaFiles(c.formPath, fCmd, true); err != nil {
+			return err
+		}
 	}
 	err = c.generateTreeJsonFile(c.formPath, fCmd)
 	if err != nil {

@@ -54,7 +54,13 @@ func (d DefaultChecker) Check() error {
 	defer cancel()
 	locked, err := lock.TryLockContext(lockCtx, time.Second)
 	if locked {
-		defer lock.Unlock()
+		defer func() {
+			err := lock.Unlock()
+			if err != nil {
+				fmt.Println("Error in Unlock")
+				return
+			}
+		}()
 	}
 
 	if err != nil {
@@ -65,7 +71,9 @@ func (d DefaultChecker) Check() error {
 	if err != nil {
 		return err
 	}
-	d.file.Write(repoFile, b)
+	if err := d.file.Write(repoFile, b); err != nil {
+		return err
+	}
 
 	return nil
 }

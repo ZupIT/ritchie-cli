@@ -1,7 +1,6 @@
 package sessteam
 
 import (
-	"errors"
 	"os"
 	"testing"
 	"time"
@@ -84,7 +83,7 @@ func TestValidate(t *testing.T) {
 					Username:     "dennis.ritchie",
 				},
 			},
-			out: errors.New("illegal base64 data at input byte 2"),
+			out: ErrDecodeToken,
 		},
 		{
 			name: "unmarshall error token",
@@ -95,7 +94,7 @@ func TestValidate(t *testing.T) {
 					Username:     "dennis.ritchie",
 				},
 			},
-			out: errors.New("invalid character '\\u0094' after object key"),
+			out: ErrConvertToStruct,
 		},
 	}
 
@@ -106,11 +105,7 @@ func TestValidate(t *testing.T) {
 			if tt.in.session.Organization != "" {
 
 				if tt.in.session.AccessToken == "" {
-					atClaims := jwt.MapClaims{}
-					atClaims["exp"] = tt.in.exp
-					at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-					token, _ := at.SignedString([]byte("Test"))
-					tt.in.session.AccessToken = token
+					tt.in.session.AccessToken = generateJwt(tt.in.exp)
 				}
 
 				err := sessionManager.Create(tt.in.session)
@@ -126,4 +121,12 @@ func TestValidate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func generateJwt(exp int64) string {
+	atClaims := jwt.MapClaims{}
+	atClaims["exp"] = exp
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	token, _ := at.SignedString([]byte("Test"))
+	return token
 }
