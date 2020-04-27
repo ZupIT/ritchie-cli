@@ -11,21 +11,22 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 const urlCreatePattern = "%s/credentials/%s"
 
 type Setter struct {
-	serverURL      string
+	serverFinder   server.Finder
 	httpClient     *http.Client
 	sessionManager session.Manager
 	ctxFinder      rcontext.Finder
 }
 
-func NewSetter(serverURL string, hc *http.Client, sm session.Manager, cf rcontext.Finder) Setter {
+func NewSetter(serverFinder server.Finder, hc *http.Client, sm session.Manager, cf rcontext.Finder) Setter {
 	return Setter{
-		serverURL:      serverURL,
+		serverFinder:   serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
 		ctxFinder:      cf,
@@ -55,7 +56,12 @@ func (s Setter) Set(cred credential.Detail) error {
 		cred.Username = ""
 	}
 
-	url := fmt.Sprintf(urlCreatePattern, s.serverURL, path)
+	serverURL, err := s.serverFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf(urlCreatePattern, serverURL, path)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return err

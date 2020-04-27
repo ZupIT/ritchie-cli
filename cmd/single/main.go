@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/spf13/cobra"
 	"net/http"
 	"os"
+
+	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -14,6 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security/secsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -70,7 +71,7 @@ func buildCommands() *cobra.Command {
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	//commands
-	rootCmd := cmd.NewRootCmd(
+	rootCmd := cmd.NewSingleRootCmd(
 		workspaceManager,
 		loginManager,
 		repoManager,
