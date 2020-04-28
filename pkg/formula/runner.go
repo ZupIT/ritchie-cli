@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"log"
@@ -53,24 +54,10 @@ func NewRunner(
 
 // Run default implementation of function Manager.Run
 func (d DefaultRunner) Run(def Definition) error {
+	cPwd, _ := os.Getwd()
 	fPath := def.FormulaPath(d.ritchieHome)
-
-	var config *Config
-	cName := def.ConfigName()
-	cPath := def.ConfigPath(fPath, cName)
-	if !fileutil.Exists(cPath) {
-		if err := d.downloadConfig(def.ConfigUrl(cName), fPath, cName); err != nil {
-			return err
-		}
-	}
-
-	configFile, err := ioutil.ReadFile(cPath)
+	config, err := d.loadConfig(def)
 	if err != nil {
-		return err
-	}
-
-	config = &Config{}
-	if err := json.Unmarshal(configFile, config); err != nil {
 		return err
 	}
 
@@ -78,22 +65,29 @@ func (d DefaultRunner) Run(def Definition) error {
 	bPath := def.BinPath(fPath)
 	bFilePath := def.BinFilePath(bPath, bName)
 	if !fileutil.Exists(bFilePath) {
-		zipFile, err := d.downloadFormulaBin(def.BinUrl(), bPath, bName)
+		zipFile, err := d.downloadFormulaBundle(def.BundleUrl(), fPath, def.BundleName())
 		if err != nil {
 			return err
 		}
 
-		if err := d.unzipFile(zipFile, bPath); err != nil {
+		if err := d.unzipFile(zipFile, fPath); err != nil {
 			return err
 		}
 	}
+	tDir, tBDir, err := d.createWorkDir(def)
+	if err != nil {
+		return err
+	}
+	defer fileutil.RemoveDir(tDir)
+	os.Chdir(tBDir)
+	bFilePath = def.BinFilePath(tBDir, bName)
 
 	cmd := exec.Command(bFilePath)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := d.inputs(cmd, fPath, config); err != nil {
+	if err := d.inputs(cmd, fPath, &config); err != nil {
 		return err
 	}
 
@@ -105,6 +99,13 @@ func (d DefaultRunner) Run(def Definition) error {
 		return err
 	}
 
+	df, err := fileutil.ListNewFiles(bPath, tBDir)
+	if err != nil {
+		return err
+	}
+	if err = fileutil.MoveFiles(tBDir, cPwd, df); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -156,6 +157,43 @@ func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config)
 		cmd.Env = append(cmd.Env, command)
 	}
 	return nil
+}
+
+func (d DefaultRunner) loadConfig(def Definition) (Config, error) {
+	fPath := def.FormulaPath(d.ritchieHome)
+	var config Config
+	cName := def.ConfigName()
+	cPath := def.ConfigPath(fPath, cName)
+	if !fileutil.Exists(cPath) {
+		if err := d.downloadConfig(def.ConfigUrl(cName), fPath, cName); err != nil {
+			return Config{}, err
+		}
+	}
+
+	configFile, err := ioutil.ReadFile(cPath)
+	if err != nil {
+		return Config{}, err
+	}
+
+	if err := json.Unmarshal(configFile, &config); err != nil {
+		return Config{}, err
+	}
+	return config, nil
+}
+
+func (d DefaultRunner) createWorkDir(def Definition) (string, string, error) {
+	fPath := def.FormulaPath(d.ritchieHome)
+	u := uuid.New().String()
+	tDir, tBDir := def.TmpWorkDirPath(d.ritchieHome, u)
+
+	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
+		return "", "", err
+	}
+
+	if err := fileutil.CopyDirectory(def.BinPath(fPath), tBDir); err != nil {
+		return "", "", err
+	}
+	return tDir, tBDir, nil
 }
 
 func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, items []string) {
@@ -247,7 +285,7 @@ func (d DefaultRunner) resolveIfReserved(input Input) (string, error) {
 	return "", nil
 }
 
-func (d DefaultRunner) downloadFormulaBin(url, destPath, binName string) (string, error) {
+func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName string) (string, error) {
 	log.Println("Download formula...")
 
 	resp, err := http.Get(url)
@@ -269,7 +307,7 @@ func (d DefaultRunner) downloadFormulaBin(url, destPath, binName string) (string
 		return "", errors.New("unknown error when downloading your formula")
 	}
 
-	file := fmt.Sprintf("%s/%s.zip", destPath, binName)
+	file := fmt.Sprintf("%s/%s", destPath, zipName)
 
 	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
 		return "", err
@@ -343,3 +381,4 @@ func (d DefaultRunner) unzipFile(filename, destPath string) error {
 	log.Println("Done.")
 	return nil
 }
+
