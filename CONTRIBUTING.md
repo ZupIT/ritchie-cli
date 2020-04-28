@@ -10,7 +10,8 @@ let you know so that you can rebase it.
 
 >**Note**: To contribute code to Ritchie projects, see the
 [Ritchie community guidelines](https://docs.ritchiecli.io/community) as well as the 
-[Open source contribution guidelines](https://opensource.guide/how-to-contribute/).
+[Open source contribution guidelines](https://opensource.guide/how-to-contribute/) and our 
+[Code of Conduct](https://github.com/ZupIT/ritchie-cli/blob/master/CODE_OF_CONDUCT.md).
 
 ## New features for the project
 
