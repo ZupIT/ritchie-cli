@@ -49,23 +49,26 @@ copy_config_files() {
 }
 
 copy_formula_bin() {
-  cp -rf "$formula"/bin formulas/"$formula"
+  cp -rf "$formula"/dist formulas/"$formula"
 }
 
 rm_formula_bin() {
-  rm -rf "$formula"/bin
+  rm -rf "$formula"/dist
 }
 
 create_formula_checksum() {
-  find "${formula}"/bin -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -f1 -d ' ' > formulas/"${formula}.md5"
+  find "${formula}"/dist -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -f1 -d ' ' > formulas/"${formula}.md5"
 }
 ` +
 		"\ncompact_formula_bin_and_remove_them() {\n" +
-		"for bin_dir in `find formulas \"$formula\" -type d -name \"bin\"` ; do\n" +
+		"for bin_dir in `find formulas/\"$formula\" -type d -name \"dist\"`; do\n" +
 		"for binary in `ls -1 $bin_dir`; do\n" +
-		"zip -j \"${bin_dir}/${binary}.zip\" \"${bin_dir}/${binary}\"\n" +
-		"rm \"${bin_dir}/${binary}\"\n" +
-		`done;
+		"cd  ${bin_dir}/${binary}\n" +
+		"zip -r \"${binary}.zip\" \"bin\"\n" +
+		"mv \"${binary}\".zip ../../\n" +
+		`cd - || exit
+    done;
+    rm -rf "${bin_dir}"
   done
 }
 
@@ -89,6 +92,7 @@ init
 go 1.14
 
 require github.com/fatih/color v1.9.0`
+
 	TemplateMain = `package main
 
 import (
@@ -107,29 +111,34 @@ func main() {
     	Boolean: input3,
     }.Run()
 }`
+
 	TemplateMakefile = `# Go parameters
+BINARY_NAME={{name}}
 GOCMD=go
 GOBUILD=$(GOCMD) build
-BINARY_NAME={{name}}
+GOTEST=$(GOCMD) test
 CMD_PATH=./main.go
-DIST=../bin
-DIST_MAC=$(DIST)/$(BINARY_NAME)-darwin
-DIST_LINUX=$(DIST)/$(BINARY_NAME)-linux
-DIST_WIN=$(DIST)/$(BINARY_NAME)-windows.exe
-
-FORM_PATH={{form-path}}
-PWD_INITIAL=$(shell pwd)
+DIST=../dist
+DIST_MAC_DIR=$(DIST)/darwin/bin
+BIN_MAC=$(BINARY_NAME)-darwin
+DIST_LINUX_DIR=$(DIST)/linux/bin
+BIN_LINUX=$(BINARY_NAME)-linux
+DIST_WIN_DIR=$(DIST)/windows/bin
+BIN_WIN=$(BINARY_NAME)-windows.exe
 
 build:
-	mkdir -p $(DIST)
+	mkdir -p $(DIST_MAC_DIR) $(DIST_LINUX_DIR) $(DIST_WIN_DIR)
 	export MODULE=$(GO111MODULE=on go list -m)
 	#LINUX
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_LINUX_DIR)/$(BIN_LINUX)' -v $(CMD_PATH)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_MAC_DIR)/$(BIN_MAC)' -v $(CMD_PATH)
 	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN) -v $(CMD_PATH)
-`
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_WIN_DIR)/$(BIN_WIN)' -v $(CMD_PATH)
+
+test:
+	$(GOTEST) -short ` + "`go list ./... | grep -v vendor/`"
+
 	TemplateMakefileMain = `#Makefiles
 {{formName}}={{formPath}}
 FORMULAS=$({{formName}})
@@ -187,6 +196,7 @@ func(in Input)Run()  {
 	color.Red(fmt.Sprintf("You receive %s in list.", in.List ))
 	color.Yellow(fmt.Sprintf("You receive %s in boolean.", in.Boolean ))
 }`
+
 	TemplateUnzipBinConfigs = `#!/bin/sh
 find formulas -name "*.zip" | while read filename; do unzip -o -d "` + "`dirname \"$filename\"`\" \"$filename\"; rm -f \"$filename\"; done;"
 )

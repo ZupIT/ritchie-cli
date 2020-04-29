@@ -52,7 +52,7 @@ func (c CreateManager) Create(fCmd string) error {
 		return err
 	}
 	log.Println("Formula successfully created!")
-	log.Printf("Your formula is in %s.", c.formPath)
+	log.Printf("Your formula is in %s", c.formPath)
 	return nil
 }
 
@@ -274,6 +274,7 @@ func updateTree(fCmd string, t Tree, i int) Tree {
 				Formula: api.Formula{
 					Path:   pathValue,
 					Bin:    fn + "-${so}",
+					Bundle: "${so}.zip",
 					Config: "config.json",
 				},
 				Parent: parent,
