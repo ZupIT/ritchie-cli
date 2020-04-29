@@ -1,5 +1,6 @@
 version: 2.1
 
+
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
