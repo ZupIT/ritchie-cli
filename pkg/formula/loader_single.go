@@ -1,4 +1,4 @@
-package repo
+package formula
 
 const commons = "commons"
 

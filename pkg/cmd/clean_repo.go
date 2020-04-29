@@ -2,21 +2,21 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 // cleanRepoCmd type for clean repo command
 type cleanRepoCmd struct {
-	repo.Cleaner
+	formula.Cleaner
 	prompt.InputText
 }
 
 // NewCleanRepoCmd creates a new cmd instance
-func NewCleanRepoCmd(cl repo.Cleaner, it prompt.InputText) *cobra.Command {
+func NewCleanRepoCmd(cl formula.Cleaner, it prompt.InputText) *cobra.Command {
 	c := &cleanRepoCmd{cl, it}
 
 	cmd := &cobra.Command{

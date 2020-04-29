@@ -1,4 +1,4 @@
-package repo
+package formula
 
 type Repository struct {
 	Priority int    `json:"priority"`

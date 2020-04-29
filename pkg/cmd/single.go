@@ -1,5 +1,5 @@
 package cmd
 
-var TreeUrl = ""
+var CommonsRepoURL = ""
 
 

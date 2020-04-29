@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"net/http"
 	"os"
 	"time"
@@ -11,8 +10,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
-
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -62,8 +59,8 @@ func buildCommands() *cobra.Command {
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	serverSetter := server.NewSetter(ritchieHomeDir)
-	repoManager := repo.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
-	repoLoader := repo.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
+	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
+	repoLoader := formula.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		ritchieHomeDir,

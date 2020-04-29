@@ -1,4 +1,4 @@
-package repo
+package formula
 
 import (
 	"encoding/json"

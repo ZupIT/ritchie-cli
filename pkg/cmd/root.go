@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
@@ -16,7 +16,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 
 	"github.com/spf13/cobra"
-	)
+)
 
 const (
 	versionMsg          = "%s (%s)\n  Build date: %s\n  Built with: %s\n"
@@ -49,7 +49,7 @@ var (
 type rootCmd struct {
 	workspaceManager workspace.Checker
 	loginManager     security.LoginManager
-	repoLoader       repo.Loader
+	repoLoader       formula.Loader
 	serverValidator  server.Validator
 	sessionValidator session.Validator
 	edition          api.Edition
@@ -60,7 +60,7 @@ type rootCmd struct {
 // NewSingleRootCmd creates the root command for single edition.
 func NewSingleRootCmd(wm workspace.Checker,
 	l security.LoginManager,
-	r repo.Loader,
+	r formula.Loader,
 	sv session.Validator,
 	e api.Edition,
 	it prompt.InputText,
@@ -89,7 +89,7 @@ func NewSingleRootCmd(wm workspace.Checker,
 // NewTeamRootCmd creates the root command for team edition.
 func NewTeamRootCmd(wm workspace.Checker,
 	l security.LoginManager,
-	r repo.Loader,
+	r formula.Loader,
 	srv server.Validator,
 	sv session.Validator,
 	e api.Edition,

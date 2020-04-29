@@ -7,7 +7,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 )
 
 const (
@@ -19,11 +18,11 @@ const (
 
 type TreeManager struct {
 	ritchieHome string
-	repoLister  repo.Lister
+	repoLister  Lister
 	coreCmds    []api.Command
 }
 
-func NewTreeManager(ritchieHome string, rl repo.Lister, coreCmds []api.Command) TreeManager {
+func NewTreeManager(ritchieHome string, rl Lister, coreCmds []api.Command) TreeManager {
 	return TreeManager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
 }
 

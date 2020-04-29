@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gofrs/flock"
-
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
@@ -62,7 +61,7 @@ func (d DefaultChecker) Check() error {
 		return err
 	}
 
-	b, err := json.Marshal(repo.RepositoryFile{})
+	b, err := json.Marshal(formula.RepositoryFile{})
 	if err != nil {
 		return err
 	}
