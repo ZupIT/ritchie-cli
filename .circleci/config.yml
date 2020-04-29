@@ -1,5 +1,6 @@
 version: 2.1
 
+
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
@@ -25,6 +26,15 @@ references:
     branches:
       only:
         - /^release-.*/
+
+  filters-checks: &FILTERS_CHECK
+    branches:
+      only:
+        - master
+        - /^release-.*/
+        - qa
+        - /^feature.*/
+        - /^bug.*/
 
 executors:
   ritchie-executor:
@@ -139,10 +149,10 @@ workflows:
     jobs:
       - lint:
           filters:
-            <<: *FILTERS
+            <<: *FILTERS_CHECK
       - test:
           filters:
-            <<: *FILTERS
+            <<: *FILTERS_CHECK
       - build:
           filters:
             <<: *FILTERS
