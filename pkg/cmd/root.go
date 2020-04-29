@@ -83,6 +83,7 @@ func NewSingleRootCmd(wm workspace.Checker,
 		Short:             cmdShortDescription,
 		Long:              cmdDescription,
 		PersistentPreRunE: o.PreRunFunc(),
+		Run:               runHelp,
 		SilenceErrors:     true,
 	}
 }
@@ -197,3 +198,8 @@ func (o *rootCmd) sessionPrompt() (security.Passcode, error) {
 func (o *rootCmd) version() string {
 	return fmt.Sprintf(versionMsg, Version, o.edition, BuildDate, runtime.Version())
 }
+
+func runHelp(cmd *cobra.Command, args []string) {
+	cmd.Help()
+}
+

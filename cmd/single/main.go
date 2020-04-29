@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"k8s.io/kubectl/pkg/util/templates"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -120,21 +122,40 @@ func buildCommands() *cobra.Command {
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 
-	rootCmd.AddCommand(
-		addCmd,
-		autocompleteCmd,
-		cleanCmd,
-		createCmd,
-		deleteCmd,
-		listCmd,
-		setCmd,
-		showCmd,
-		updateCmd)
-
 	formulaCmd := cmd.NewFormulaCommand(api.SingleCoreCmds, treeManager, formulaRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}
+
+	groups := templates.CommandGroups{
+		{
+			Message: "core commands:",
+			Commands: []*cobra.Command{
+				addCmd,
+				autocompleteCmd,
+				cleanCmd,
+				createCmd,
+				deleteCmd,
+				listCmd,
+				setCmd,
+				showCmd,
+				updateCmd,
+			},
+		},
+	}
+
+	cmds := rootCmd.Commands()
+	for _, c := range cmds {
+		cg := templates.CommandGroup{
+			Message:  c.Annotations[cmd.Group],
+			Commands: c.Commands(),
+		}
+		groups = append(groups, cg)
+	}
+
+	rootCmd.ResetCommands()
+	groups.Add(rootCmd)
+	templates.ActsAsRootCommand(rootCmd, nil, groups...)
 
 	return rootCmd
 }
