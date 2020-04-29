@@ -17,6 +17,7 @@ import (
 	"github.com/gofrs/flock"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -40,6 +41,8 @@ type Manager struct {
 	httpClient     *http.Client
 	serverURL      string
 	sessionManager session.Manager
+	serverFinder   server.Finder
+
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -60,12 +63,14 @@ func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) 
 	}
 }
 
-func NewTeamRepoManager(homePath string, serverURL string, hc *http.Client, sm session.Manager) Manager {
+
+func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Client, sm session.Manager) Manager {
 	return Manager{
+
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
-		serverURL:      serverURL,
+		serverFinder:   serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
 	}
@@ -215,6 +220,7 @@ func (dm Manager) List() ([]Repository, error) {
 }
 
 func (dm Manager) loadTreeFile(r Repository) error {
+
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {
 		return err

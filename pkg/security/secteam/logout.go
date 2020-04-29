@@ -2,17 +2,22 @@ package secteam
 
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 type LogoutManager struct {
 	provider       security.AuthProvider
 	sessionManager session.Manager
-	serverURL string
+	serverFinder   server.Finder
 }
 
-func NewLogoutManager(p security.AuthProvider, sm session.Manager, serverURL string) LogoutManager {
-	return LogoutManager{provider: p, sessionManager: sm, serverURL: serverURL}
+func NewLogoutManager(p security.AuthProvider, sm session.Manager, serverFinder server.Finder) LogoutManager {
+	return LogoutManager{
+		provider:       p,
+		sessionManager: sm,
+		serverFinder:   serverFinder,
+	}
 }
 
 func (l LogoutManager) Logout() error {
@@ -21,7 +26,12 @@ func (l LogoutManager) Logout() error {
 		return err
 	}
 
-	cr, err := logoutChannelProvider(l.provider, session.Organization, l.serverURL)
+	serverURL, err := l.serverFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	cr, err := logoutChannelProvider(l.provider, session.Organization, serverURL)
 	if err != nil {
 		return err
 	}

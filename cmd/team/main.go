@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -28,10 +31,6 @@ import (
 )
 
 func main() {
-	if cmd.ServerURL == "" {
-		panic("The env cmd.ServerURL is required")
-	}
-
 	rootCmd := buildCommands()
 	if err := rootCmd.Execute(); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %+v\n", err)
@@ -43,7 +42,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	// prompt
+	//prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -52,28 +51,31 @@ func buildCommands() *cobra.Command {
 	inputList := prompt.NewInputList()
 	inputURL := prompt.NewInputURL()
 
-	// deps
+	//deps
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
+	serverFinder := server.NewFinder(ritchieHomeDir)
+	serverValidator := server.NewValidator(serverFinder)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	repoManager := repo.NewTeamRepoManager(ritchieHomeDir, cmd.ServerURL, http.DefaultClient, sessionManager)
-	repoLoader := repo.NewTeamLoader(cmd.ServerURL, http.DefaultClient, sessionManager, repoManager)
+	serverSetter := server.NewSetter(ritchieHomeDir)
+	repoManager := repo.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
+	repoLoader := repo.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		ritchieHomeDir,
-		cmd.ServerURL,
+		serverFinder,
 		security.OAuthProvider,
 		http.DefaultClient,
 		sessionManager)
-	logoutManager := secteam.NewLogoutManager(security.OAuthProvider, sessionManager, cmd.ServerURL)
-	userManager := secteam.NewUserManager(cmd.ServerURL, http.DefaultClient, sessionManager)
-	credSetter := credteam.NewSetter(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
-	credFinder := credteam.NewFinder(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
-	credSettings := credteam.NewSettings(cmd.ServerURL, http.DefaultClient, sessionManager, ctxFinder)
+	logoutManager := secteam.NewLogoutManager(security.OAuthProvider, sessionManager, serverFinder)
+	userManager := secteam.NewUserManager(serverFinder, http.DefaultClient, sessionManager)
+	credSetter := credteam.NewSetter(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
+	credFinder := credteam.NewFinder(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
+	credSettings := credteam.NewSettings(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
 	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
@@ -90,11 +92,12 @@ func buildCommands() *cobra.Command {
 		inputBool)
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	// commands
-	rootCmd := cmd.NewRootCmd(
+	//commands
+	rootCmd := cmd.NewTeamRootCmd(
 		workspaceManager,
 		loginManager,
 		repoLoader,
+		serverValidator,
 		sessionValidator,
 		api.Team,
 		inputText,
@@ -125,6 +128,7 @@ func buildCommands() *cobra.Command {
 	deleteUserCmd := cmd.NewDeleteUserCmd(userManager, inputBool, inputText)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
+	setServerCmd := cmd.NewSetServerCmd(serverSetter, inputURL)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
@@ -141,7 +145,7 @@ func buildCommands() *cobra.Command {
 	createCmd.AddCommand(createUserCmd, createFormulaCmd)
 	deleteCmd.AddCommand(deleteUserCmd, deleteRepoCmd, deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
+	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setServerCmd)
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 
@@ -163,12 +167,13 @@ func buildCommands() *cobra.Command {
 		panic(err)
 	}
 
-	sendMetrics(sessionManager)
+	sendMetrics(sessionManager, serverFinder)
 
 	return rootCmd
 }
 
-func sendMetrics(sm session.DefaultManager) {
-	metricsManager := metrics.NewSender(cmd.ServerURL, &http.Client{Timeout: 2 * time.Second}, sm)
+func sendMetrics(sm session.DefaultManager, sf server.Finder) {
+	hc := &http.Client{Timeout: 2 * time.Second}
+	metricsManager := metrics.NewSender(hc, sf, sm)
 	go metricsManager.SendCommand()
 }

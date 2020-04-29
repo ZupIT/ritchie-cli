@@ -6,22 +6,23 @@ import (
 	"net/http"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 type TeamLoader struct {
-	serverUrl string
-	client    *http.Client
-	session   session.Manager
+	serverFinder server.Finder
+	client       *http.Client
+	session      session.Manager
 	Adder
 }
 
-func NewTeamLoader(serverUrl string, client *http.Client, session session.Manager, adder Adder) TeamLoader {
+func NewTeamLoader(serverFinder server.Finder, client *http.Client, session session.Manager, adder Adder) TeamLoader {
 	return TeamLoader{
-		serverUrl: serverUrl,
-		client:    client,
-		session:   session,
-		Adder:     adder,
+		serverFinder: serverFinder,
+		client:       client,
+		session:      session,
+		Adder:        adder,
 	}
 }
 
@@ -31,7 +32,12 @@ func (dm TeamLoader) Load() error {
 		return err
 	}
 
-	url := fmt.Sprintf(providerPath, dm.serverUrl)
+	serverUrl, err := dm.serverFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf(providerPath, serverUrl)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err

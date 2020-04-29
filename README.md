@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/ZupIT/ritchie-cli/tree/master.svg?style=svg)](https://circleci.com/gh/zupit/ritchie-cli) [![codecov](https://codecov.io/gh/zupit/ritchie-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/zupit/ritchie-cli) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/ZupIT/ritchie-cli/tree/master.svg?style=svg)](https://circleci.com/gh/ZupIT/ritchie-cli) [![codecov](https://codecov.io/gh/zupit/ritchie-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/zupit/ritchie-cli) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 
@@ -34,6 +34,6 @@ This repository contains the CLI core, which can execute formulas stored inside 
 * [@marcosgmgm](https://github.com/marcosgmgm) 
 * [@viniciusramosdefaria](https://github.com/viniciusramosdefaria) 
 * [@kaduartur](https://github.com/kaduartur) 
-* [@erneliojuniorzup](https://github.com/erneliojuniorzup)
+* [@ernelio](https://github.com/ernelio)
 * [@guillaumefalourd](https://github.com/guillaumefalourd)
 * [@rodrigomedeirosf](https://github.com/rodrigomedeirosf)

@@ -26,10 +26,9 @@ GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
-RITCHIE_SERVER=$(shell VERSION=$(VERSION) ./ritchie_server.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./ritchie_env.sh)
 COMMONS_REPO_URL=http://ritchie-cli-bucket152849730126474.s3-website-sa-east-1.amazonaws.com/tree/tree.json
-COMMONS_REPO_URL_QA=https://ritchie-cli-bucket234376412767550.s3-sa-east-1.amazonaws.com/tree/tree.json
+
 build:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
 	#LINUX
@@ -53,49 +52,20 @@ else
 	echo "NOT GONNA PUBLISH"
 endif
 
-build-qa:
-	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
-	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
-	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
-	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=https://ritchie-server.itiaws.dev' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
-	#LINUX SINGLE
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.TreeUrl=$(COMMONS_REPO_URL_QA)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
-	#MAC SINGLE
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.TreeUrl=$(COMMONS_REPO_URL_QA)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
-	#WINDOWS 64 SINGLE
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=qa -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.TreeUrl=$(COMMONS_REPO_URL_QA)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(SINGLE_CMD_PATH)
-
-build-team-local:
-	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM)
-	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=http://localhost:8080' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
-	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=http://localhost:8080' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
-	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=dev -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=http://localhost:8080' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
-
-test:
-	mkdir -p $(BIN)
-	$(GOTEST) -short -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
-	$(GOTOOLCOVER) -func=$(BIN)/cov.out
-
 build-circle:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
 	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
 	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.ServerURL=$(RITCHIE_SERVER)' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
 	#LINUX SINGLE
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.TreeUrl=$(COMMONS_REPO_URL)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
 	#MAC SINGLE
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.TreeUrl=$(COMMONS_REPO_URL)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
 	#WINDOWS 64 SINGLE
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(SINGLE_CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.TreeUrl=$(COMMONS_REPO_URL)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(SINGLE_CMD_PATH)
 
 release:
 	git config --global user.email "$(GIT_EMAIL)"
@@ -123,3 +93,8 @@ publish:
 clean:
 	rm -rf $(DIST)
 	rm -rf $(BIN)
+
+test:
+	mkdir -p $(BIN)
+	$(GOTEST) -short -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
+	$(GOTOOLCOVER) -func=$(BIN)/cov.out

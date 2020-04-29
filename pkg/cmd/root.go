@@ -10,13 +10,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
-
-	"github.com/spf13/cobra"
-
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
-)
+
+	"github.com/spf13/cobra"
+	)
 
 const (
 	versionMsg          = "%s (%s)\n  Build date: %s\n  Built with: %s\n"
@@ -25,6 +25,9 @@ const (
 	cmdDescription      = `A CLI that developers can build and operate
 your applications without help from the infra staff.
 Complete documentation is available at https://github.com/ZupIT/ritchie-cli`
+
+	serverCheckerDesc  = "To use this command on the Team version, you need to inform the server URL first\n Command : rit set server\n"
+	sessionCheckerDesc = "To use this command, you need to start a session on Ritchie\n\n"
 )
 
 var (
@@ -39,6 +42,7 @@ var (
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
+		fmt.Sprintf("%s set server", cmdUse),
 	}
 )
 
@@ -46,14 +50,15 @@ type rootCmd struct {
 	workspaceManager workspace.Checker
 	loginManager     security.LoginManager
 	repoLoader       repo.Loader
+	serverValidator  server.Validator
 	sessionValidator session.Validator
 	edition          api.Edition
 	prompt.InputText
 	prompt.InputPassword
 }
 
-// NewRootCmd creates the root for all ritchie commands.
-func NewRootCmd(wm workspace.Checker,
+// NewSingleRootCmd creates the root command for single edition.
+func NewSingleRootCmd(wm workspace.Checker,
 	l security.LoginManager,
 	r repo.Loader,
 	sv session.Validator,
@@ -64,6 +69,37 @@ func NewRootCmd(wm workspace.Checker,
 		wm,
 		l,
 		r,
+		nil,
+		sv,
+		e,
+		it,
+		ip,
+	}
+
+	return &cobra.Command{
+		Use:               cmdUse,
+		Version:           o.version(),
+		Short:             cmdShortDescription,
+		Long:              cmdDescription,
+		PersistentPreRunE: o.PreRunFunc(),
+		SilenceErrors:     true,
+	}
+}
+
+// NewTeamRootCmd creates the root command for team edition.
+func NewTeamRootCmd(wm workspace.Checker,
+	l security.LoginManager,
+	r repo.Loader,
+	srv server.Validator,
+	sv session.Validator,
+	e api.Edition,
+	it prompt.InputText,
+	ip prompt.InputPassword) *cobra.Command {
+	o := &rootCmd{
+		wm,
+		l,
+		r,
+		srv,
 		sv,
 		e,
 		it,
@@ -86,6 +122,14 @@ func (o *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
+		if sliceutil.Contains(whitelist, cmd.CommandPath()) {
+			return nil
+		}
+
+		if err := o.checkServer(cmd.CommandPath()); err != nil {
+			return err
+		}
+
 		if err := o.checkSession(cmd.CommandPath()); err != nil {
 			return err
 		}
@@ -94,14 +138,19 @@ func (o *rootCmd) PreRunFunc() CommandRunnerFunc {
 	}
 }
 
-func (o *rootCmd) checkSession(commandPath string) error {
-	if sliceutil.Contains(whitelist, commandPath) {
-		return nil
+func (o *rootCmd) checkServer(commandPath string) error {
+	if o.edition == api.Team {
+		if err := o.serverValidator.Validate(); err != nil {
+			fmt.Print(serverCheckerDesc)
+			os.Exit(0)
+		}
 	}
+	return nil
+}
 
-	err := o.sessionValidator.Validate()
-	if err != nil {
-		fmt.Print("To use this command, you need to start a session on Ritchie\n\n")
+func (o *rootCmd) checkSession(commandPath string) error {
+	if err := o.sessionValidator.Validate(); err != nil {
+		fmt.Print(sessionCheckerDesc)
 		secret, err := o.sessionPrompt()
 		if err != nil {
 			return err
