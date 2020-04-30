@@ -92,7 +92,7 @@ func (d *Definition) BinName() string {
 		}
 	case linux:
 		if d.LBin != "" {
-			bName = d.MBin
+			bName = d.LBin
 		}
 	default:
 		bName = d.Bin
