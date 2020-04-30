@@ -55,7 +55,7 @@ func TestFind(t *testing.T) {
 			if in != nil {
 				_, err := setter.Set(in.ctx)
 				if err != nil {
-					fmt.Sprintf("Error in Set")
+					fmt.Sprintln("Error in Set")
 					return
 				}
 			}

@@ -52,7 +52,7 @@ func (d DefaultChecker) Check() error {
 		defer func() {
 			err := lock.Unlock()
 			if err != nil {
-				fmt.Sprintf("Error in Unlock")
+				fmt.Sprintln("Error in Unlock")
 				return
 			}
 		}()

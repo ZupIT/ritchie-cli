@@ -62,7 +62,7 @@ func mockServer(status int, body []byte) *httptest.Server {
 		rw.WriteHeader(status)
 		_, err := rw.Write(body)
 		if err != nil {
-			fmt.Sprintf("Error in Write")
+			fmt.Sprintln("Error in Write")
 			return
 		}
 	}))
