@@ -33,9 +33,7 @@ references:
         - master
         - /^release-.*/
         - qa
-        - /^feature.*/
-        - /^bug.*/
-
+        - /^pull\/.*$/
 executors:
   ritchie-executor:
     docker:
