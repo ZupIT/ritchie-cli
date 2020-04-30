@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/ZupIT/ritchie-cli/tree/master.svg?style=svg)](https://circleci.com/gh/ernelio/ritchie-cli) [![codecov](https://codecov.io/gh/zupit/ritchie-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/zupit/ritchie-cli) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CircleCI](https://circleci.com/gh/ernelio/ritchie-cli/tree/master.svg?style=svg)](https://circleci.com/gh/ernelio/ritchie-cli) [![codecov](https://codecov.io/gh/ernelio/ritchie-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/ernelio/ritchie-cli) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 
