@@ -1,50 +1,31 @@
 package server
 
 import (
+	"errors"
 	"os"
-	"reflect"
 	"testing"
-)
 
-func TestNewSetter(t *testing.T) {
-	NewSetter(os.TempDir())
-}
+	"github.com/ZupIT/ritchie-cli/pkg/validator"
+)
 
 func TestSet(t *testing.T) {
 
 	s := NewSetter(os.TempDir())
 
-	type in struct {
-		serverURL string
-	}
-
-	type out struct {
-		err  error
-		want string
-	}
-
 	tests := []struct {
 		name string
-		in   *in
-		out  *out
+		in   string
+		out  error
 	}{
 		{
-			name: "empty serverUrl",
-			in:   &in {
-				serverURL: "",
-			},
-			out: &out{
-				err:  nil,
-			},
+			name: "empty serverURL",
+			in:   "",
+			out:  validator.ErrInvalidServerURL,
 		},
 		{
-			name: "existing serverUrl",
-			in: &in{
-				serverURL: "http://localhost/mocked",
-			},
-			out: &out{
-				err:  nil,
-			},
+			name: "existing serverURL",
+			in:   "http://localhost/mocked",
+			out:  nil,
 		},
 	}
 
@@ -52,9 +33,9 @@ func TestSet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			out := tt.out
-			got := s.Set(in.serverURL)
-			if !reflect.DeepEqual(out.err, got) {
-				t.Errorf("Set(%s) got %v, want %v", in.serverURL , got, nil)
+			got := s.Set(in)
+			if got != nil && errors.Unwrap(got).Error() != out.Error() {
+				t.Errorf("Set(%s) got %v, want %v", in, got, out)
 			}
 		})
 	}

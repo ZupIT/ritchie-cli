@@ -21,12 +21,12 @@ func (f FindManager) Find() (string, error) {
 		return serverURL, nil
 	}
 
-	file, err := fileutil.ReadFile(f.serverFile)
+	b, err := fileutil.ReadFile(f.serverFile)
 	if err != nil {
 		return serverURL, err
 	}
 
-	serverURL = string(file)
+	serverURL = string(b)
 
 	return serverURL, nil
 }

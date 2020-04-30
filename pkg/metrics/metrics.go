@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -24,15 +23,15 @@ type CmdUse struct {
 }
 
 type Sender struct {
-	serverFinder   server.Finder
 	httpClient     *http.Client
+	serverFinder   server.Finder
 	sessionManager session.Manager
 }
 
-func NewSender(serverFinder server.Finder, hc *http.Client, sm session.Manager) Sender {
+func NewSender(hc *http.Client, serverFinder server.Finder, sm session.Manager) Sender {
 	return Sender{
-		serverFinder: serverFinder,
-		httpClient: hc,
+		httpClient:     hc,
+		serverFinder:   serverFinder,
 		sessionManager: sm,
 	}
 }
@@ -53,12 +52,13 @@ func (s Sender) SendCommand() {
 		return
 	}
 
-	serverUrl, err := s.serverFinder.Find()
+	serverURL, err := s.serverFinder.Find()
 	if err != nil {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost,  fmt.Sprintf(urlPattern, serverUrl), bytes.NewBuffer(b))
+	url := fmt.Sprintf(urlPattern, serverURL)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return
 	}
@@ -72,12 +72,6 @@ func (s Sender) SendCommand() {
 	}
 
 	defer resp.Body.Close()
-
-	b, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-
 }
 
 func cmd() string {

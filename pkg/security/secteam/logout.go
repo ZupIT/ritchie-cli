@@ -9,14 +9,14 @@ import (
 type LogoutManager struct {
 	provider       security.AuthProvider
 	sessionManager session.Manager
-	serverFinder server.Finder
+	serverFinder   server.Finder
 }
 
 func NewLogoutManager(p security.AuthProvider, sm session.Manager, serverFinder server.Finder) LogoutManager {
 	return LogoutManager{
-		provider: p,
+		provider:       p,
 		sessionManager: sm,
-		serverFinder: serverFinder,
+		serverFinder:   serverFinder,
 	}
 }
 
@@ -26,12 +26,12 @@ func (l LogoutManager) Logout() error {
 		return err
 	}
 
-	serverUrl, err := l.serverFinder.Find()
+	serverURL, err := l.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	cr, err := logoutChannelProvider(l.provider, session.Organization, serverUrl)
+	cr, err := logoutChannelProvider(l.provider, session.Organization, serverURL)
 	if err != nil {
 		return err
 	}

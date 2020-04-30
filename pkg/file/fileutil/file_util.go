@@ -119,10 +119,13 @@ func CreateDirIfNotExists(dir string, perm os.FileMode) error {
 }
 
 // CreateFileIfNotExist creates file if not exists
-func CreateFileIfNotExist(file string, content []byte) {
+func CreateFileIfNotExist(file string, content []byte) error {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		WriteFile(file, content)
+		if err := WriteFile(file, content); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // RemoveDir removes path and any children it contains.
@@ -198,7 +201,10 @@ func Unzip(src string, dest string) error {
 
 		if file.FileInfo().IsDir() {
 			log.Println("Directory Created:", extractedFilePath)
-			os.MkdirAll(extractedFilePath, file.Mode())
+			err := os.MkdirAll(extractedFilePath, file.Mode())
+			if err != nil {
+				return err
+			}
 		} else {
 			log.Println("File extracted:", file.Name)
 
@@ -226,3 +232,51 @@ func Unzip(src string, dest string) error {
 func IsNotExistErr(err error) bool {
 	return os.IsNotExist(errors.Cause(err))
 }
+
+// Read all files and dir in current directory
+func readFilesDir(path string) ([]os.FileInfo, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	fl, err := f.Readdir(-1)
+	f.Close()
+	return fl, err
+}
+
+//Move files from oPath to nPath
+func MoveFiles(oPath, nPath string, files []string) error {
+	for _, f := range files {
+		pwdOF := fmt.Sprintf("%s/%s", oPath, f)
+		pwdNF := fmt.Sprintf("%s/%s", nPath, f)
+		if err :=  os.Rename(pwdOF, pwdNF); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// List new files in nPath differing of oPath
+func ListNewFiles(oPath, nPath string) ([]string, error) {
+	of, err := readFilesDir(oPath)
+	if err != nil {
+		return nil, err
+	}
+	nf, err := readFilesDir(nPath)
+	if err != nil {
+		return nil, err
+	}
+	control := make(map[string]int)
+	for _, file := range of {
+		control[file.Name()]++
+	}
+	var new []string
+	for _, file := range nf {
+		if control[file.Name()] == 0 {
+			new = append(new, file.Name())
+		}
+	}
+	return new, nil
+}
+
+

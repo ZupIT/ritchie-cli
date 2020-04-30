@@ -8,6 +8,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/gofrs/flock v0.7.1
+	github.com/google/uuid v1.1.1
 	github.com/gosuri/uitable v0.0.4
 	github.com/manifoldco/promptui v0.7.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect

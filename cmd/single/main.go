@@ -71,11 +71,10 @@ func buildCommands() *cobra.Command {
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	//commands
-	rootCmd := cmd.NewRootCmd(
+	rootCmd := cmd.NewSingleRootCmd(
 		workspaceManager,
 		loginManager,
 		repoManager,
-		nil,
 		sessionValidator,
 		api.Single,
 		inputText,

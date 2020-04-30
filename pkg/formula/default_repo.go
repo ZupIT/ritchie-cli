@@ -5,10 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"github.com/gofrs/flock"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -17,6 +13,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/ZupIT/ritchie-cli/pkg/session"
+	"github.com/gofrs/flock"
 )
 
 const (
@@ -38,7 +39,7 @@ type RepoManager struct {
 	homePath       string
 	httpClient     *http.Client
 	sessionManager session.Manager
-	serverFinder server.Finder
+	serverFinder   server.Finder
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -64,7 +65,7 @@ func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Cl
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
-		serverFinder : 	serverFinder,
+		serverFinder:   serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
 	}
@@ -82,7 +83,9 @@ func (dm RepoManager) Add(r Repository) error {
 	defer cancel()
 	locked, err := lock.TryLockContext(lockCtx, time.Second)
 	if locked {
-		defer lock.Unlock()
+		defer func() {
+			_ = lock.Unlock()
+		}()
 	}
 	if err != nil {
 		return err
@@ -93,7 +96,10 @@ func (dm RepoManager) Add(r Repository) error {
 		if err != nil {
 			return err
 		}
-		fileutil.WriteFile(dm.repoFile, wb)
+		err = fileutil.WriteFile(dm.repoFile, wb)
+		if err != nil {
+			return err
+		}
 	}
 
 	rb, err := fileutil.ReadFile(dm.repoFile)
@@ -214,12 +220,12 @@ func (dm RepoManager) Load() error {
 		return err
 	}
 
-	serverUrl, err := dm.serverFinder.Find()
+	serverURL, err := dm.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	url := fmt.Sprintf(providerPath, serverUrl)
+	url := fmt.Sprintf(providerPath, serverURL)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err
@@ -253,7 +259,10 @@ func (dm RepoManager) Load() error {
 	}
 
 	for _, v := range dd {
-		dm.Add(v)
+		err = dm.Add(v)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

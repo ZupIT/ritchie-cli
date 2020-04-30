@@ -1,6 +1,7 @@
 package rcontext
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -12,8 +13,16 @@ func TestRemove(t *testing.T) {
 	setter := NewSetter(tmp, finder)
 	remover := NewRemover(tmp, finder)
 
-	setter.Set(dev)
-	setter.Set(qa)
+	_, err := setter.Set(dev)
+	if err != nil {
+		fmt.Sprintln("Error in Set")
+		return
+	}
+	_, err = setter.Set(qa)
+	if err != nil {
+		fmt.Sprintln("Error in Set")
+		return
+	}
 
 	type out struct {
 		want ContextHolder

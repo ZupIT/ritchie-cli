@@ -8,6 +8,8 @@ import (
 
 const (
 	PathPattern           = "%s/formulas/%s"
+	TmpDirPattern         = "%s/tmp/%s"
+	TmpBinDirPattern      = "%s/tmp/%s/%s"
 	DefaultConfig         = "config.json"
 	ConfigPattern         = "%s/%s"
 	CommandEnv            = "COMMAND"
@@ -52,6 +54,7 @@ type Cache struct {
 type Definition struct {
 	Path    string
 	Bin     string
+	Bundle	string
 	Config  string
 	RepoUrl string
 }
@@ -59,6 +62,14 @@ type Definition struct {
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
 	return fmt.Sprintf(PathPattern, home, d.Path)
+}
+
+// TmpWorkDirPath builds the tmp paths to run formula, first parameter is tmpDir created
+// second parameter is tmpBinDir
+func (d *Definition) TmpWorkDirPath(home, uuidHash string) (string, string) {
+	tmpDir := fmt.Sprintf(TmpDirPattern, home, uuidHash)
+	tmpBinDir := fmt.Sprintf(TmpBinDirPattern, home, uuidHash, d.Path)
+	return tmpDir, tmpBinDir
 }
 
 // BinName builds the bin name from definition params
@@ -76,6 +87,17 @@ func (d *Definition) BinName() string {
 	return d.Bin
 }
 
+// BinName builds the bin name from definition params
+func (d *Definition) 	BundleName() string {
+	if strings.Contains(d.Bundle, "${so}") {
+		so := runtime.GOOS
+		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", so)
+
+		return bundleSO
+	}
+	return d.Bundle
+}
+
 // BinPath builds the bin path from formula path
 func (d *Definition) BinPath(formula string) string {
 	return fmt.Sprintf(BinPathPattern, formula)
@@ -87,8 +109,8 @@ func (d *Definition) BinFilePath(binPath, binName string) string {
 }
 
 // BinUrl builds the bin url
-func (d *Definition) BinUrl() string {
-	return fmt.Sprintf("%s/bin/%s.zip", d.RepoUrl, d.BinName())
+func (d *Definition) BundleUrl() string {
+	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, d.BundleName())
 }
 
 // ConfigName resolver de config name
@@ -106,7 +128,7 @@ func (d *Definition) ConfigPath(formula, configName string) string {
 
 // ConfigUrl builds the config url
 func (d *Definition) ConfigUrl(configName string) string {
-	return fmt.Sprintf("%s/%s", d.RepoUrl, configName)
+	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, configName)
 }
 
 type Runner interface {

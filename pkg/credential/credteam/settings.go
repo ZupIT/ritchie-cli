@@ -22,8 +22,7 @@ var (
 )
 
 type Settings struct {
-	serverFinder server.Finder
-	configURL      string
+	serverFinder   server.Finder
 	httpClient     *http.Client
 	sessionManager session.Manager
 	ctxFinder      rcontext.Finder
@@ -49,12 +48,13 @@ func (s Settings) Fields() (credential.Fields, error) {
 		return nil, err
 	}
 
-	serverUrl, err := s.serverFinder.Find()
+	serverURL, err := s.serverFinder.Find()
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(urlConfigPattern, serverUrl), nil)
+	url := fmt.Sprintf(urlConfigPattern, serverURL)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}

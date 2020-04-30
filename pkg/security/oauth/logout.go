@@ -61,15 +61,15 @@ const (
 )
 
 type LogoutManager struct {
-	Resp chan security.ChanResponse
-	Org  string
+	Resp      chan security.ChanResponse
+	Org       string
 	serverURL string
 }
 
 func NewLogoutManager(org string, resp chan security.ChanResponse, serverURL string) *LogoutManager {
 	return &LogoutManager{
-		Resp: resp,
-		Org:  org,
+		Resp:      resp,
+		Org:       org,
 		serverURL: serverURL,
 	}
 }
@@ -94,7 +94,11 @@ func (l *LogoutManager) Logout() error {
 
 func (l *LogoutManager) handlerLogout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(htmlLogout))
+		_, err := w.Write([]byte(htmlLogout))
+		if err != nil {
+			fmt.Sprintln("Error in Write")
+			return
+		}
 		l.Resp <- security.ChanResponse{}
 	}
 }
