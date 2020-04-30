@@ -150,12 +150,12 @@ func (l LoginManager) handlerLogin(provider *oidc.Provider, state string, oauth2
 		}{}
 		err = idToken.Claims(&user)
 		if err != nil {
-			fmt.Sprintf("Error in Claims")
+			fmt.Sprintln("Error in Claims")
 			return
 		}
 		_, err = w.Write([]byte(htmlLogin))
 		if err != nil {
-			fmt.Sprintf("Error in Write")
+			fmt.Sprintln("Error in Write")
 			return
 		}
 		l.Resp <- security.ChanResponse{

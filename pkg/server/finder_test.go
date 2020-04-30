@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -9,11 +10,6 @@ func TestFind(t *testing.T) {
 	tmp := os.TempDir()
 	finder := NewFinder(tmp)
 	setter := NewSetter(tmp)
-
-	type out struct {
-		err  error
-		want string
-	}
 
 	tests := []struct {
 		name string
@@ -39,7 +35,11 @@ func TestFind(t *testing.T) {
 			out := tt.out
 
 			if in != "" {
-				setter.Set(in)
+				err := setter.Set(in)
+				if err != nil {
+					fmt.Sprintln("Error in set")
+					return
+				}
 			}
 
 			got, err := finder.Find()

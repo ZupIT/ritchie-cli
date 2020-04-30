@@ -15,7 +15,7 @@ func loginChannelProvider(p security.AuthProvider, org, serverURL string) (chan 
 		go func() {
 			err := oauthCli.Login(org)
 			if err != nil {
-				fmt.Sprintf("Error in Login")
+				fmt.Sprintln("Error in Login")
 				return
 			}
 		}()
@@ -33,7 +33,7 @@ func logoutChannelProvider(p security.AuthProvider, org, serverURL string) (chan
 		go func() {
 			err := oauthCli.Logout()
 			if err != nil {
-				fmt.Sprintf("Error in Logout")
+				fmt.Sprintln("Error in Logout")
 				return
 			}
 		}()

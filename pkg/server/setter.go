@@ -11,7 +11,6 @@ const serverFilePattern = "%s/server"
 
 type SetterManager struct {
 	serverFile string
-	finder     Finder
 }
 
 func NewSetter(ritchieHomeDir string) Setter {

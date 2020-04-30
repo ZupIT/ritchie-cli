@@ -17,7 +17,7 @@ type setServerCmd struct {
 func NewSetServerCmd(
 	st server.Setter,
 	iu prompt.InputURL,
-	) *cobra.Command {
+) *cobra.Command {
 
 	o := setServerCmd{
 		Setter:   st,
@@ -25,23 +25,23 @@ func NewSetServerCmd(
 	}
 
 	return &cobra.Command{
-			Use:   "server",
-			Short: "Set server",
-			Long:  `Set organization Server url `,
-			RunE:  o.runFunc(),
+		Use:   "server",
+		Short: "Set server",
+		Long:  `Set organization Server url `,
+		RunE:  o.runFunc(),
 	}
 }
 
 func (s setServerCmd) runFunc() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error{
-		u, err := s.URL("URL of the server [http(s)://host:port]", "")
-		if err != nil { return err }
+	return func(cmd *cobra.Command, args []string) error {
+		u, err := s.URL("URL of the server [http(s)://host]", "")
+		if err != nil {
+			return err
+		}
 		if err := s.Set(u); err != nil {
 			return err
 		}
-		fmt.Sprintf("Organization server url saved!")
+		fmt.Sprintln("Organization server url saved!")
 		return nil
 	}
 }
-
-

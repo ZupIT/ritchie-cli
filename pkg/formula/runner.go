@@ -78,8 +78,17 @@ func (d DefaultRunner) Run(def Definition) error {
 	if err != nil {
 		return err
 	}
-	defer fileutil.RemoveDir(tDir)
-	os.Chdir(tBDir)
+	defer func() {
+		err := fileutil.RemoveDir(tDir)
+		if err != nil {
+			fmt.Sprintln("Error in remove dir")
+			return
+		}
+	}()
+	err = os.Chdir(tBDir)
+	if err != nil {
+		return err
+	}
 	bFilePath = def.BinFilePath(tBDir, bName)
 
 	cmd := exec.Command(bFilePath)
@@ -220,7 +229,7 @@ func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, i
 		itemsBytes, _ := json.Marshal(items)
 		err := fileutil.WriteFile(cachePath, itemsBytes)
 		if err != nil {
-			fmt.Sprintf("Error in WriteFile")
+			fmt.Sprintln("Error in WriteFile")
 			return
 		}
 
@@ -381,4 +390,3 @@ func (d DefaultRunner) unzipFile(filename, destPath string) error {
 	log.Println("Done.")
 	return nil
 }
-
