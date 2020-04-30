@@ -64,6 +64,9 @@ type Command struct {
 type Formula struct {
 	Path    string `json:"path"`
 	Bin     string `json:"bin"`
+	LBin    string `json:"linuxBin"`
+	MBin    string `json:"macBin"`
+	WBin    string `json:"windowsBin"`
 	Bundle  string `json:"bundle"`
 	Config  string `json:"config"`
 	RepoURL string `json:"repoUrl"`
