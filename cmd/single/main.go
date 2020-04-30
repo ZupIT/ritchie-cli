@@ -79,7 +79,7 @@ func buildCommands() *cobra.Command {
 		api.Single,
 		inputText,
 		inputPassword)
-
+	 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
