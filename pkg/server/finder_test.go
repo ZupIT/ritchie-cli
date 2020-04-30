@@ -14,7 +14,6 @@ func TestFind(t *testing.T) {
 
 	type out struct {
 		status int
-		err    error
 	}
 
 	tests := []struct {

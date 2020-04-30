@@ -60,7 +60,6 @@ func TestSet(t *testing.T) {
 				defer server.Close()
 				got = s.Set(server.URL)
 			} else {
-				body = []byte(out.err.Error())
 				got = s.Set(in)
 			}
 
