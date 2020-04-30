@@ -19,19 +19,19 @@ func TestFind(t *testing.T) {
 
 	tests := []struct {
 		name string
-		in   bool
+		in   string
 		out  out
 	}{
 		{
 			name: "empty server",
-			in:   false,
+			in:   "",
 			out: out{
 				status: 404,
 			},
 		},
 		{
 			name: "existing server",
-			in:   true,
+			in:   "http://localhost/mocked",
 			out: out{
 				status: 200,
 			},
@@ -45,7 +45,7 @@ func TestFind(t *testing.T) {
 			out := tt.out
 
 			var body []byte
-			if in {
+			if in != "" {
 				body, _ = json.Marshal(&in)
 				server := mockServer(out.status, body)
 				defer server.Close()
