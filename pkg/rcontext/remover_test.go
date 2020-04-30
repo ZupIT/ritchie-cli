@@ -15,12 +15,12 @@ func TestRemove(t *testing.T) {
 
 	_, err := setter.Set(dev)
 	if err != nil {
-		fmt.Sprintf("Error in Set")
+		fmt.Sprintln("Error in Set")
 		return
 	}
 	_, err = setter.Set(qa)
 	if err != nil {
-		fmt.Sprintf("Error in Set")
+		fmt.Sprintln("Error in Set")
 		return
 	}
 
