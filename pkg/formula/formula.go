@@ -79,7 +79,7 @@ func (d *Definition) TmpWorkDirPath(home, uuidHash string) (string, string) {
 
 // BinName builds the bin name from definition params
 func (d *Definition) BinName() string {
-	bName := ""
+	bName := d.Bin
 	so := runtime.GOOS
 	switch so {
 	case windows:
@@ -103,11 +103,11 @@ func (d *Definition) BinName() string {
 		if so == windows {
 			suffix = ".exe"
 		}
-		binSO := strings.ReplaceAll(d.Bin, "${so}", so)
+		binSO := strings.ReplaceAll(bName, "${so}", so)
 
 		return fmt.Sprintf(BinPattern, binSO, suffix)
 	}
-	return d.Bin
+	return bName
 }
 
 // BinName builds the bin name from definition params
