@@ -159,5 +159,5 @@ type Runner interface {
 }
 
 type Creator interface {
-	Create(formulaCmd string) error
+	Create(formulaCmd, lang string) (CreateManager, error)
 }

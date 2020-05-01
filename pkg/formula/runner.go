@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,14 +13,18 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
-	localTreeFile = "%s/tree/tree.json"
-	nameModule    = "{{nameModule}}"
+	localTreeFile     = "%s/tree/tree.json"
+	nameModule        = "{{nameModule}}"
+	nameBin           = "{{bin-name}}"
+	nameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
 type DefaultRunner struct {

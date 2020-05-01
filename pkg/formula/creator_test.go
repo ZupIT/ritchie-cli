@@ -3,16 +3,26 @@ package formula
 import (
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
 const (
-	fCmdExists    = "rit add repo"
-	fCmdCorrect   = "rit scaffold generate test"
-	fCmdIncorrect = "git scaffold generate testing"
+	fCmdExists        = "rit add repo"
+	fCmdCorrectGo     = "rit scaffold generate test-go"
+	fCmdCorrectJava   = "rit scaffold generate test-java"
+	fCmdCorrectNode   = "rit scaffold generate test-node"
+	fCmdCorrectPython = "rit scaffold generate test-python"
+	fCmdCorrectShell  = "rit scaffold generate test-shell"
+	fCmdIncorrect     = "git scaffold generate testing"
+	langGo            = "Go"
+	langJava          = "Java"
+	langNode          = "Node"
+	langPython        = "Python"
+	langShell         = "Shell"
 )
 
 type repoListerMock struct{}
@@ -31,6 +41,7 @@ func TestCreator(t *testing.T) {
 
 	type in struct {
 		fCmd string
+		lang string
 	}
 
 	type out struct {
@@ -48,24 +59,67 @@ func TestCreator(t *testing.T) {
 			name: "command exists",
 			in: &in{
 				fCmd: fCmdExists,
+				lang: langGo,
 			},
 			out: &out{
 				err: errors.New("this command already exists"),
 			},
 		},
 		{
-			name: "command correct",
+			name: "command correct-go",
 			in: &in{
-				fCmd: fCmdCorrect,
+				fCmd: fCmdCorrectGo,
+				lang: langGo,
 			},
 			out: &out{
 				err: nil,
 			},
 		},
 		{
+			name: "command correct-java",
+			in: &in{
+				fCmd: fCmdCorrectJava,
+				lang: langJava,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
+		/*		{
+					name: "command correct-node",
+					in: &in{
+						fCmd: fCmdCorrect,
+						lang: langNode,
+					},
+					out: &out{
+						err: nil,
+					},
+				},
+				{
+					name: "command correct-python",
+					in: &in{
+						fCmd: fCmdCorrect,
+						lang: langPython,
+					},
+					out: &out{
+						err: nil,
+					},
+				},
+				{
+					name: "command correct-shell",
+					in: &in{
+						fCmd: fCmdCorrect,
+						lang: langShell,
+					},
+					out: &out{
+						err: nil,
+					},
+				},*/
+		{
 			name: "command incorrect",
 			in: &in{
 				fCmd: fCmdIncorrect,
+				lang: langGo,
 			},
 			out: &out{
 				err: errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]"),
@@ -78,7 +132,7 @@ func TestCreator(t *testing.T) {
 			in := tt.in
 			out := tt.out
 
-			got := creator.Create(in.fCmd)
+			_, got := creator.Create(in.fCmd, in.lang)
 			if got != nil && got.Error() != out.err.Error() {
 				t.Errorf("Create(%s) got %v, want %v", tt.name, got, out.err)
 			}
