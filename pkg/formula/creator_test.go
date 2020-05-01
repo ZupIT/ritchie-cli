@@ -85,36 +85,36 @@ func TestCreator(t *testing.T) {
 				err: nil,
 			},
 		},
+		{
+			name: "command correct-node",
+			in: &in{
+				fCmd: fCmdCorrectNode,
+				lang: langNode,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
+		{
+			name: "command correct-python",
+			in: &in{
+				fCmd: fCmdCorrectPython,
+				lang: langPython,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
 		/*		{
-					name: "command correct-node",
-					in: &in{
-						fCmd: fCmdCorrect,
-						lang: langNode,
-					},
-					out: &out{
-						err: nil,
-					},
+				name: "command correct-shell",
+				in: &in{
+					fCmd: fCmdCorrect,
+					lang: langShell,
 				},
-				{
-					name: "command correct-python",
-					in: &in{
-						fCmd: fCmdCorrect,
-						lang: langPython,
-					},
-					out: &out{
-						err: nil,
-					},
+				out: &out{
+					err: nil,
 				},
-				{
-					name: "command correct-shell",
-					in: &in{
-						fCmd: fCmdCorrect,
-						lang: langShell,
-					},
-					out: &out{
-						err: nil,
-					},
-				},*/
+			},*/
 		{
 			name: "command incorrect",
 			in: &in{

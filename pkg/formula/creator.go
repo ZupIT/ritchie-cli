@@ -17,6 +17,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_java"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_node"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_python"
 )
 
 type CreateManager struct {
@@ -274,7 +275,23 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Python":
-		log.Println("Formula in Python")
+		err = createMainFile(srcDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
+		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = createPkgFile(pkgDir, pkg, lang)
+		if err != nil {
+			return err
+		}
 	default:
 		log.Println("Formula in Shell")
 	}
@@ -296,11 +313,13 @@ func createPkgFile(dir, pkg, lang string) error {
 		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
 		return fileutil.WriteFile(dir+"/"+fu+".java", []byte(tfj))
 	case "Node":
-		tn := tpl_node.TemplateFileNode
-		tn = strings.ReplaceAll(tn, nameBin, pkg)
-
-		return fileutil.WriteFile(dir+"/"+pkg+".js", []byte(tn))
+		tfn := tpl_node.TemplateFileNode
+		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
+		return fileutil.WriteFile(dir+"/"+pkg+".js", []byte(tfn))
 	case "Python":
+		tfp := tpl_python.TemplateFilePython
+		tfp = strings.ReplaceAll(tfp, nameBin, pkg)
+		return fileutil.WriteFile(dir+"/"+pkg+".py", []byte(tfp))
 	default:
 
 	}
@@ -313,10 +332,10 @@ func createRunTemplate(dir, lang string) error {
 		return nil
 	case "Java":
 		tj := tpl_java.TemplateRunTemplate
-		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tj), 0755)
+		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tj), 0777)
 	case "Node":
 		tn := tpl_node.TemplateRunTemplate
-		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tn), 0755)
+		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tn), 0777)
 	case "Python":
 	default:
 
@@ -337,7 +356,6 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		tfj = strings.ReplaceAll(tfj, nameBin, name)
 		fu := strings.Title(strings.ToLower(name))
 		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
-
 		return fileutil.WriteFile(dir+"/Makefile", []byte(tfj))
 	case "Node":
 		tfn := tpl_node.TemplateMakefile
@@ -349,8 +367,10 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		}
 		tfpj := tpl_node.TemplatePackageJson
 		return fileutil.WriteFile(dir+"/package.json", []byte(tfpj))
-
 	case "Python":
+		tfp := tpl_python.TemplateMakefile
+		tfp = strings.ReplaceAll(tfp, nameBin, name)
+		return fileutil.WriteFile(dir+"/Makefile", []byte(tfp))
 	default:
 
 	}
@@ -374,13 +394,15 @@ func createMainFile(dir, pkg, lang string) error {
 		tfj = strings.ReplaceAll(tfj, nameBin, pkg)
 		fu := strings.Title(strings.ToLower(pkg))
 		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
-
 		return fileutil.WriteFile(dir+"/Main.java", []byte(tfj))
 	case "Node":
 		tfn := tpl_node.TemplateIndex
 		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
 		return fileutil.WriteFile(dir+"/index.js", []byte(tfn))
 	case "Python":
+		tfp := tpl_python.TemplateMain
+		tfp = strings.ReplaceAll(tfp, nameBin, pkg)
+		return fileutil.WriteFile(dir+"/main.py", []byte(tfp))
 	default:
 
 	}
