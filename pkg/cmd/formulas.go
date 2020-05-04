@@ -101,11 +101,15 @@ func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args
 }
 
 func newSubCmd(cmd api.Command) *cobra.Command {
-	g := fmt.Sprintf("%s commands:", cmd.Usage)
+	group := ""
+	if cmd.Parent == "root" {
+		group = fmt.Sprintf("%s commands:", cmd.Repo)
+	}
+
 	return &cobra.Command{
 		Use:         cmd.Usage + subcmd,
 		Short:       cmd.Help,
 		Long:        cmd.Help,
-		Annotations: map[string]string{"group": g},
+		Annotations: map[string]string{"group": group},
 	}
 }

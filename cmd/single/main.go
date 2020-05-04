@@ -129,7 +129,7 @@ func buildCommands() *cobra.Command {
 
 	groups := templates.CommandGroups{
 		{
-			Message: "core commands:",
+			Message: api.CoreCmdsDesc,
 			Commands: []*cobra.Command{
 				addCmd,
 				autocompleteCmd,
@@ -146,11 +146,22 @@ func buildCommands() *cobra.Command {
 
 	cmds := rootCmd.Commands()
 	for _, c := range cmds {
-		cg := templates.CommandGroup{
-			Message:  c.Annotations[cmd.Group],
-			Commands: c.Commands(),
+		exists := false
+		g := c.Annotations[cmd.Group]
+		for i, v := range groups {
+			if v.Message == g {
+				v.Commands = append(v.Commands, c)
+				groups[i] = v
+				exists = true
+			}
 		}
-		groups = append(groups, cg)
+		if !exists {
+			cg := templates.CommandGroup{
+				Message:  c.Annotations[cmd.Group],
+				Commands: []*cobra.Command{c},
+			}
+			groups = append(groups, cg)
+		}
 	}
 
 	rootCmd.ResetCommands()

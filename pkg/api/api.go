@@ -11,6 +11,8 @@ const (
 	Team = Edition("team")
 	// Single version
 	Single = Edition("single")
+	// CoreCmdsDesc commands group description
+	CoreCmdsDesc = "core commands:"
 )
 
 var (
@@ -58,6 +60,7 @@ type Command struct {
 	Usage   string  `json:"usage"`
 	Help    string  `json:"help"`
 	Formula Formula `json:"formula,omitempty"`
+	Repo    string
 }
 
 // Formula type
