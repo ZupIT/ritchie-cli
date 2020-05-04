@@ -283,8 +283,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		pkgu := strings.Title(strings.ToLower(pkg))
-		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkgu)
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
 		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 		if err != nil {
 			return err
@@ -335,9 +334,8 @@ func createPkgFile(dir, pkg, lang string) error {
 		return fileutil.WriteFile(dir+"/"+pkg+".js", []byte(tfn))
 	case "Python":
 		tfp := tpl_python.TemplateFilePython
-		fu := strings.Title(strings.ToLower(pkg))
-		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(dir+"/"+fu+".py", []byte(tfp))
+		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, pkg)
+		return fileutil.WriteFile(dir+"/"+pkg+".py", []byte(tfp))
 	default:
 		tfs := tpl_shell.TemplateFileShell
 		return fileutil.WriteFile(dir+"/"+pkg+".sh", []byte(tfs))
@@ -422,8 +420,7 @@ func createMainFile(dir, pkg, lang string) error {
 		return fileutil.WriteFile(dir+"/index.js", []byte(tfn))
 	case "Python":
 		tfp := tpl_python.TemplateMain
-		fu := strings.Title(strings.ToLower(pkg))
-		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
+		tfp = strings.ReplaceAll(tfp, nameBin, pkg)
 		return fileutil.WriteFile(dir+"/main.py", []byte(tfp))
 	default:
 		tfs := tpl_shell.TemplateMain
@@ -456,9 +453,9 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
 					Formula: api.Formula{
 						Path:   pathValue,
-						Bin:    fn + ".py",
-						LBin:   fn + ".py",
-						MBin:   fn + ".py",
+						Bin:    "main.py",
+						LBin:   "main.py",
+						MBin:   "main.py",
 						WBin:   fn + ".bat",
 						Bundle: "${so}.zip",
 						Config: "config.json",
