@@ -37,7 +37,7 @@ var (
 	BuildDate = "unknown"
 
 	whitelist = []string{
-		fmt.Sprintf("%s", cmdUse),
+		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s login", cmdUse),
 		fmt.Sprintf("%s logout", cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
