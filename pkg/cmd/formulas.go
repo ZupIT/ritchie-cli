@@ -12,9 +12,9 @@ import (
 const (
 	fPath    = "fPath"
 	fBin     = "fBin"
-	fLBin     = "fLBin"
-	fMBin     = "fMBin"
-	fWBin     = "fWBin"
+	fLBin    = "fLBin"
+	fMBin    = "fMBin"
+	fWBin    = "fWBin"
 	fBundle  = "fBundle"
 	fConfig  = "fConfig"
 	fRepoURL = "fRepoURL"

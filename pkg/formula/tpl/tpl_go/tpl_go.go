@@ -1,4 +1,4 @@
-package tplgo
+package tpl_go
 
 const (
 	TemplateConfig = `{

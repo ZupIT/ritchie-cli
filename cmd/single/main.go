@@ -108,7 +108,7 @@ func buildCommands() *cobra.Command {
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
-	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
