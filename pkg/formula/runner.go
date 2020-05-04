@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,14 +13,18 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
-	localTreeFile = "%s/tree/tree.json"
-	nameModule    = "{{nameModule}}"
+	localTreeFile     = "%s/tree/tree.json"
+	nameModule        = "{{nameModule}}"
+	nameBin           = "{{bin-name}}"
+	nameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
 type DefaultRunner struct {
@@ -78,8 +81,17 @@ func (d DefaultRunner) Run(def Definition) error {
 	if err != nil {
 		return err
 	}
-	defer fileutil.RemoveDir(tDir)
-	os.Chdir(tBDir)
+	defer func() {
+		err := fileutil.RemoveDir(tDir)
+		if err != nil {
+			fmt.Sprintln("Error in remove dir")
+			return
+		}
+	}()
+	err = os.Chdir(tBDir)
+	if err != nil {
+		return err
+	}
 	bFilePath = def.BinFilePath(tBDir, bName)
 
 	cmd := exec.Command(bFilePath)
@@ -220,7 +232,7 @@ func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, i
 		itemsBytes, _ := json.Marshal(items)
 		err := fileutil.WriteFile(cachePath, itemsBytes)
 		if err != nil {
-			fmt.Sprintf("Error in WriteFile")
+			fmt.Sprintln("Error in WriteFile")
 			return
 		}
 
@@ -381,4 +393,3 @@ func (d DefaultRunner) unzipFile(filename, destPath string) error {
 	log.Println("Done.")
 	return nil
 }
-

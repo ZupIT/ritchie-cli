@@ -88,8 +88,8 @@ func (repoCleaner) Clean(name string) error {
 
 type formCreator struct{}
 
-func (formCreator) Create(formulaCmd string) error {
-	return nil
+func (formCreator) Create(formulaCmd, lang string) (formula.CreateManager, error) {
+	return formula.CreateManager{}, nil
 }
 
 type userManagerMock struct{}
