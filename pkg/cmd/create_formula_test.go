@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewCreateFormulaCmd(t *testing.T) {
-	cmd := NewCreateFormulaCmd(formCreator{}, inputTextMock{})
+	cmd := NewCreateFormulaCmd(formCreator{}, inputTextMock{}, inputListMock{})
 	if cmd == nil {
 		t.Errorf("NewCreateFormulaCmd got %v", cmd)
 

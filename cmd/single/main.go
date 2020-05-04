@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"k8s.io/kubectl/pkg/util/templates"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -34,7 +36,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	//prompt
+	// prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -51,6 +53,7 @@ func buildCommands() *cobra.Command {
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	repoManager := formula.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
+	repoLoader := formula.NewSingleLoader(cmd.CommonsRepoURL, repoManager)
 	sessionValidator := sesssingle.NewValidator(sessionManager)
 	loginManager := secsingle.NewLoginManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
@@ -70,16 +73,15 @@ func buildCommands() *cobra.Command {
 		inputBool)
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	//commands
 	rootCmd := cmd.NewSingleRootCmd(
 		workspaceManager,
 		loginManager,
-		repoManager,
+		repoLoader,
 		sessionValidator,
 		api.Single,
 		inputText,
 		inputPassword)
-
+	 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
@@ -108,7 +110,7 @@ func buildCommands() *cobra.Command {
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
-	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
@@ -120,21 +122,51 @@ func buildCommands() *cobra.Command {
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 
-	rootCmd.AddCommand(
-		addCmd,
-		autocompleteCmd,
-		cleanCmd,
-		createCmd,
-		deleteCmd,
-		listCmd,
-		setCmd,
-		showCmd,
-		updateCmd)
-
 	formulaCmd := cmd.NewFormulaCommand(api.SingleCoreCmds, treeManager, formulaRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}
+
+	groups := templates.CommandGroups{
+		{
+			Message: api.CoreCmdsDesc,
+			Commands: []*cobra.Command{
+				addCmd,
+				autocompleteCmd,
+				cleanCmd,
+				createCmd,
+				deleteCmd,
+				listCmd,
+				setCmd,
+				showCmd,
+				updateCmd,
+			},
+		},
+	}
+
+	cmds := rootCmd.Commands()
+	for _, c := range cmds {
+		exists := false
+		g := c.Annotations[cmd.Group]
+		for i, v := range groups {
+			if v.Message == g {
+				v.Commands = append(v.Commands, c)
+				groups[i] = v
+				exists = true
+			}
+		}
+		if !exists {
+			cg := templates.CommandGroup{
+				Message:  c.Annotations[cmd.Group],
+				Commands: []*cobra.Command{c},
+			}
+			groups = append(groups, cg)
+		}
+	}
+
+	rootCmd.ResetCommands()
+	groups.Add(rootCmd)
+	templates.ActsAsRootCommand(rootCmd, nil, groups...)
 
 	return rootCmd
 }

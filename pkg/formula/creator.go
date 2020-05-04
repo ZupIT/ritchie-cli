@@ -5,58 +5,63 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tplgo"
-	"github.com/thoas/go-funk"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/thoas/go-funk"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_java"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_node"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_python"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
 type CreateManager struct {
-	formPath    string
+	FormPath    string
 	treeManager TreeManager
 }
 
 func NewCreator(homePath string, tm TreeManager) CreateManager {
-	return CreateManager{formPath: fmt.Sprintf(FormCreatePathPattern, homePath), treeManager: tm}
+	return CreateManager{FormPath: fmt.Sprintf(FormCreatePathPattern, homePath), treeManager: tm}
 }
 
-func (c CreateManager) Create(fCmd string) error {
-	_ = fileutil.CreateDirIfNotExists(c.formPath, os.ModePerm)
+func (c CreateManager) Create(fCmd, lang string) (CreateManager, error) {
+	_ = fileutil.CreateDirIfNotExists(c.FormPath, os.ModePerm)
 	trees, err := c.treeManager.Tree()
 	if err != nil {
-		return err
+		return CreateManager{}, err
 	}
 
 	err = verifyCommand(fCmd, trees)
 	if err != nil {
-		return err
+		return CreateManager{}, err
 	}
 
-	if fileutil.Exists(fmt.Sprintf(TreeCreatePathPattern, c.formPath)) && (fileutil.Exists(fmt.Sprintf("%s/%s", c.formPath, Makefile))) {
-		err = generateFormulaFiles(c.formPath, fCmd, false)
+	err = generateTreeJsonFile(c.FormPath, fCmd, lang)
+	if err != nil {
+		return CreateManager{}, err
+	}
+
+	if fileutil.Exists(fmt.Sprintf(TreeCreatePathPattern, c.FormPath)) && (fileutil.Exists(fmt.Sprintf("%s/%s", c.FormPath, Makefile))) {
+		err = generateFormulaFiles(c.FormPath, fCmd, lang, false)
 		if err != nil {
-			return err
+			return CreateManager{}, err
 		}
 	} else {
-		err = generateFormulaFiles(c.formPath, fCmd, true)
+		err = generateFormulaFiles(c.FormPath, fCmd, lang, true)
 		if err != nil {
-			return err
+			return CreateManager{}, err
 		}
 	}
-	err = generateTreeJsonFile(c.formPath, fCmd)
-	if err != nil {
-		return err
-	}
-	log.Println("Formula successfully created!")
-	log.Printf("Your formula is in %s", c.formPath)
-	return nil
+
+	return c, nil
 }
 
-func generateFormulaFiles(formPath, fCmd string, new bool) error {
+func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	d := strings.Split(fCmd, " ")
 	dirForm := strings.Join(d[1:], "/")
 
@@ -87,14 +92,14 @@ func generateFormulaFiles(formPath, fCmd string, new bool) error {
 	if err != nil {
 		return err
 	}
-	err = createSrcFiles(dir, d[len(d)-1])
+	err = createSrcFiles(dir, d[len(d)-1], lang)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func generateTreeJsonFile(formPath, fCmd string) error {
+func generateTreeJsonFile(formPath, fCmd, lang string) error {
 	tree := Tree{Commands: []api.Command{}}
 	dir := fmt.Sprintf(localTreeFile, formPath)
 	jsonFile, err := fileutil.ReadFile(dir)
@@ -108,7 +113,10 @@ func generateTreeJsonFile(formPath, fCmd string) error {
 		}
 	}
 
-	tree = updateTree(fCmd, tree, 0)
+	tree, err = updateTree(fCmd, tree, lang, 0)
+	if err != nil {
+		return err
+	}
 	treeJsonFile, _ := json.Marshal(&tree)
 	var prettyJSON bytes.Buffer
 	if err := json.Indent(&prettyJSON, treeJsonFile, "", "\t"); err != nil {
@@ -167,7 +175,7 @@ func formulaValue(file []byte) string {
 }
 
 func createMakefileMain(dir, dirForm, name string) error {
-	tplFile := tplgo.TemplateMakefileMain
+	tplFile := tpl_go.TemplateMakefileMain
 
 	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
 	tplFile = strings.ReplaceAll(string(tplFile), "{{formPath}}", dirForm)
@@ -181,82 +189,255 @@ func createMakefileMain(dir, dirForm, name string) error {
 }
 
 func createScripts(dir string) error {
-	tplFile := tplgo.TemplateCopyBinConfig
+	tplFile := tpl_go.TemplateCopyBinConfig
 
 	err := fileutil.WriteFilePerm(dir+"/copy-bin-configs.sh", []byte(tplFile), 0755)
 	if err != nil {
 		return err
 	}
 
-	tplFile = tplgo.TemplateUnzipBinConfigs
+	tplFile = tpl_go.TemplateUnzipBinConfigs
 
 	return fileutil.WriteFilePerm(dir+"/unzip-bin-configs.sh", []byte(tplFile), 0755)
 }
 
-func createSrcFiles(dir, pkg string) error {
+func createSrcFiles(dir, pkg, lang string) error {
 	srcDir := dir + "/src"
 	err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	err = createMainFile(srcDir, pkg)
-	if err != nil {
-		return err
-	}
-	err = createGoModFile(srcDir, pkg)
-	if err != nil {
-		return err
-	}
-	err = createMakefileForm(srcDir, pkg, dir)
-	if err != nil {
-		return err
-	}
-	pkgDir := srcDir + "/pkg/" + pkg
-	err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	err = createPkgFile(pkgDir, pkg)
-	if err != nil {
-		return err
+	switch lang {
+	case "Go":
+		err = createMainFile(srcDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+		err = createGoModFile(srcDir, pkg)
+		if err != nil {
+			return err
+		}
+		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		pkgDir := srcDir + "/pkg/" + pkg
+		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = createPkgFile(pkgDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+	case "Java":
+		err = createMainFile(srcDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		err = createRunTemplate(srcDir, lang)
+		if err != nil {
+			return err
+		}
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
+		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = createPkgFile(pkgDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+	case "Node":
+		err = createMainFile(srcDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		err = createRunTemplate(srcDir, lang)
+		if err != nil {
+			return err
+		}
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
+		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = createPkgFile(pkgDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+	case "Python":
+		err = createMainFile(srcDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		pkgu := strings.Title(strings.ToLower(pkg))
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkgu)
+		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = createPkgFile(pkgDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+	default:
+		err = createMainFile(srcDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
+		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = createPkgFile(pkgDir, pkg, lang)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func createPkgFile(dir, pkg string) error {
-	tplFile := tplgo.TemplatePkg
-	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
+func createPkgFile(dir, pkg, lang string) error {
+	switch lang {
+	case "Go":
+		tfgo := tpl_go.TemplatePkg
+		tfgo = strings.ReplaceAll(tfgo, nameModule, pkg)
 
-	return fileutil.WriteFile(dir+"/"+pkg+".go", []byte(tplFile))
+		return fileutil.WriteFile(dir+"/"+pkg+".go", []byte(tfgo))
+	case "Java":
+		tfj := tpl_java.TemplateFileJava
+		tfj = strings.ReplaceAll(tfj, nameBin, pkg)
+		fu := strings.Title(strings.ToLower(pkg))
+		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
+		return fileutil.WriteFile(dir+"/"+fu+".java", []byte(tfj))
+	case "Node":
+		tfn := tpl_node.TemplateFileNode
+		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
+		return fileutil.WriteFile(dir+"/"+pkg+".js", []byte(tfn))
+	case "Python":
+		tfp := tpl_python.TemplateFilePython
+		fu := strings.Title(strings.ToLower(pkg))
+		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
+		return fileutil.WriteFile(dir+"/"+fu+".py", []byte(tfp))
+	default:
+		tfs := tpl_shell.TemplateFileShell
+		return fileutil.WriteFile(dir+"/"+pkg+".sh", []byte(tfs))
+	}
 }
 
-func createMakefileForm(dir string, name, pathName string) error {
-	tplFile := tplgo.TemplateMakefile
-	tplFile = strings.ReplaceAll(tplFile, "{{name}}", name)
-	tplFile = strings.ReplaceAll(tplFile, "{{form-path}}", pathName)
+func createRunTemplate(dir, lang string) error {
+	switch lang {
+	case "Go":
+		return nil
+	case "Java":
+		tj := tpl_java.TemplateRunTemplate
+		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tj), 0777)
+	case "Node":
+		tn := tpl_node.TemplateRunTemplate
+		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tn), 0777)
+	case "Python":
+	default:
 
-	return fileutil.WriteFile(dir+"/Makefile", []byte(tplFile))
+	}
+	return nil
+}
+
+func createMakefileForm(dir string, name, pathName, lang string) error {
+	switch lang {
+	case "Go":
+		tplFile := tpl_go.TemplateMakefile
+		tplFile = strings.ReplaceAll(tplFile, "{{name}}", name)
+		tplFile = strings.ReplaceAll(tplFile, "{{form-path}}", pathName)
+
+		return fileutil.WriteFile(dir+"/Makefile", []byte(tplFile))
+	case "Java":
+		tfj := tpl_java.TemplateMakefile
+		tfj = strings.ReplaceAll(tfj, nameBin, name)
+		fu := strings.Title(strings.ToLower(name))
+		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
+		return fileutil.WriteFile(dir+"/Makefile", []byte(tfj))
+	case "Node":
+		tfn := tpl_node.TemplateMakefile
+		tfn = strings.ReplaceAll(tfn, nameBin, name)
+
+		err := fileutil.WriteFile(dir+"/Makefile", []byte(tfn))
+		if err != nil {
+			return err
+		}
+		tfpj := tpl_node.TemplatePackageJson
+		return fileutil.WriteFile(dir+"/package.json", []byte(tfpj))
+	case "Python":
+		tfp := tpl_python.TemplateMakefile
+		tfp = strings.ReplaceAll(tfp, nameBin, name)
+		fu := strings.Title(strings.ToLower(name))
+		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
+		return fileutil.WriteFile(dir+"/Makefile", []byte(tfp))
+	default:
+		tfs := tpl_shell.TemplateMakefile
+		tfs = strings.ReplaceAll(tfs, nameBin, name)
+		return fileutil.WriteFile(dir+"/Makefile", []byte(tfs))
+	}
 }
 
 func createGoModFile(dir, pkg string) error {
-	tplFile := tplgo.TemplateGoMod
+	tplFile := tpl_go.TemplateGoMod
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
 	return fileutil.WriteFile(dir+"/go.mod", []byte(tplFile))
 }
 
-func createMainFile(dir, pkg string) error {
-	tplFile := tplgo.TemplateMain
-	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
-	return fileutil.WriteFile(dir+"/main.go", []byte(tplFile))
+func createMainFile(dir, pkg, lang string) error {
+	switch lang {
+	case "Go":
+		tfgo := tpl_go.TemplateMain
+		tfgo = strings.ReplaceAll(tfgo, nameModule, pkg)
+		return fileutil.WriteFile(dir+"/main.go", []byte(tfgo))
+	case "Java":
+		tfj := tpl_java.TemplateMain
+		tfj = strings.ReplaceAll(tfj, nameBin, pkg)
+		fu := strings.Title(strings.ToLower(pkg))
+		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
+		return fileutil.WriteFile(dir+"/Main.java", []byte(tfj))
+	case "Node":
+		tfn := tpl_node.TemplateIndex
+		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
+		return fileutil.WriteFile(dir+"/index.js", []byte(tfn))
+	case "Python":
+		tfp := tpl_python.TemplateMain
+		fu := strings.Title(strings.ToLower(pkg))
+		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
+		return fileutil.WriteFile(dir+"/main.py", []byte(tfp))
+	default:
+		tfs := tpl_shell.TemplateMain
+		tfs = strings.ReplaceAll(tfs, nameBin, pkg)
+		return fileutil.WriteFile(dir+"/main.sh", []byte(tfs))
+	}
 }
 
 func createConfigFile(dir string) error {
-	tplFile := tplgo.TemplateConfig
+	tplFile := tpl_go.TemplateConfig
 	return fileutil.WriteFile(dir+"/config.json", []byte(tplFile))
 }
 
-func updateTree(fCmd string, t Tree, i int) Tree {
+func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 	fc := splitFormulaCommand(fCmd)
 	parent := generateParent(fc, i)
 
@@ -268,21 +449,42 @@ func updateTree(fCmd string, t Tree, i int) Tree {
 		if len(command) == 0 {
 			pathValue := strings.Join(fc, "/")
 			fn := fc[len(fc)-1]
-			commands := append(t.Commands, api.Command{
-				Usage: fn,
-				Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-				Formula: api.Formula{
-					Path:   pathValue,
-					Bin:    fn + "-${so}",
-					Bundle: "${so}.zip",
-					Config: "config.json",
-				},
-				Parent: parent,
-			})
+			var commands []api.Command
+			if lang == "Python" {
+				commands = append(t.Commands, api.Command{
+					Usage: fn,
+					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
+					Formula: api.Formula{
+						Path:   pathValue,
+						Bin:    fn + ".py",
+						LBin:   fn + ".py",
+						MBin:   fn + ".py",
+						WBin:   fn + ".bat",
+						Bundle: "${so}.zip",
+						Config: "config.json",
+					},
+					Parent: parent,
+				})
+			} else {
+				commands = append(t.Commands, api.Command{
+					Usage: fn,
+					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
+					Formula: api.Formula{
+						Path:   pathValue,
+						Bin:    fn + ".sh",
+						LBin:   fn + ".sh",
+						MBin:   fn + ".sh",
+						WBin:   fn + ".bat",
+						Bundle: "${so}.zip",
+						Config: "config.json",
+					},
+					Parent: parent,
+				})
+			}
 			t.Commands = commands
-			return t
+			return t, nil
 		} else {
-			log.Fatal("Command already exist.")
+			return Tree{}, errors.New("Command already exist ")
 		}
 
 	} else {
@@ -296,7 +498,7 @@ func updateTree(fCmd string, t Tree, i int) Tree {
 		}
 	}
 
-	return updateTree(fCmd, t, i+1)
+	return updateTree(fCmd, t, lang, i+1)
 }
 
 func generateCommandHelp(parent string, fc []string, i int) string {

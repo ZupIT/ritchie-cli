@@ -1,6 +1,7 @@
 package secteam
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -34,7 +35,8 @@ func NewLoginManager(
 func (l LoginManager) Login(p security.Passcode) error {
 	org := p.String()
 	serverURL, err := l.serverFinder.Find()
-	if err != nil {
+	if err != nil || serverURL == "" {
+		fmt.Print("Couldn't retrieve the server URL. Please, set the server URL.\n Command : rit set server\n")
 		return err
 	}
 

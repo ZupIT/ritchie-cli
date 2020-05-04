@@ -3,9 +3,10 @@ package formula
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"io/ioutil"
 )
 
 const (
@@ -17,11 +18,11 @@ const (
 
 type TreeManager struct {
 	ritchieHome string
-	repoLister  RepoLister
+	repoLister  Lister
 	coreCmds    []api.Command
 }
 
-func NewTreeManager(ritchieHome string, rl RepoLister, coreCmds []api.Command) TreeManager {
+func NewTreeManager(ritchieHome string, rl Lister, coreCmds []api.Command) TreeManager {
 	return TreeManager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
 }
 
@@ -67,6 +68,7 @@ func (d TreeManager) MergedTree(core bool) Tree {
 		for _, v := range treeLocal.Commands {
 			key := v.Parent + "_" + v.Usage
 			if trees[key].Usage == "" {
+				v.Repo = "local"
 				trees[key] = v
 				cc = append(cc, v)
 			}
@@ -75,17 +77,18 @@ func (d TreeManager) MergedTree(core bool) Tree {
 	}
 
 	rr, _ := d.repoLister.List()
-	for _, v := range rr {
-		treeRepo, err := d.treeByRepo(v.Name)
+	for _, r := range rr {
+		treeRepo, err := d.treeByRepo(r.Name)
 		if err != nil {
 			continue
 		}
 		var cc []api.Command
-		for _, v := range treeRepo.Commands {
-			key := v.Parent + "_" + v.Usage
+		for _, c := range treeRepo.Commands {
+			key := c.Parent + "_" + c.Usage
 			if trees[key].Usage == "" {
-				trees[key] = v
-				cc = append(cc, v)
+				c.Repo = r.Name
+				trees[key] = c
+				cc = append(cc, c)
 			}
 		}
 		treeMain.Commands = append(treeMain.Commands, cc...)
