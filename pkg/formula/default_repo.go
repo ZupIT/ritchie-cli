@@ -14,14 +14,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gofrs/flock"
+
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"github.com/gofrs/flock"
 )
 
 const (
-	//Files
+	// Files
 	repositoryConfFilePattern    = "%s/repo/repositories.json"
 	repositoryCacheFolderPattern = "%s/repo/cache"
 	treeCacheFilePattern         = "%s/repo/cache/%s-tree.json"
@@ -40,6 +41,7 @@ type RepoManager struct {
 	httpClient     *http.Client
 	sessionManager session.Manager
 	serverFinder   server.Finder
+
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -60,8 +62,10 @@ func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) 
 	}
 }
 
+
 func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Client, sm session.Manager) RepoManager {
 	return RepoManager{
+
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
@@ -214,61 +218,8 @@ func (dm RepoManager) List() ([]Repository, error) {
 	return f.Values, nil
 }
 
-func (dm RepoManager) Load() error {
-	session, err := dm.sessionManager.Current()
-	if err != nil {
-		return err
-	}
-
-	serverURL, err := dm.serverFinder.Find()
-	if err != nil {
-		return err
-	}
-
-	url := fmt.Sprintf(providerPath, serverURL)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("x-org", session.Organization)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", session.AccessToken))
-	resp, err := dm.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	body, err := fileutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("%d - %s\n", resp.StatusCode, string(body))
-	}
-
-	var dd []Repository
-	if err := json.Unmarshal(body, &dd); err != nil {
-		return err
-	}
-
-	if err != nil {
-		return err
-	}
-
-	for _, v := range dd {
-		err = dm.Add(v)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (dm RepoManager) loadTreeFile(r Repository) error {
+
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {
 		return err

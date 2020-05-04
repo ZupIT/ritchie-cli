@@ -7,11 +7,11 @@ import (
 
 // updateRepoCmd type for update command
 type updateRepoCmd struct {
-	formula.RepoUpdater
+	formula.Updater
 }
 
 // NewUpdateRepoCmd creates a new cmd instance
-func NewUpdateRepoCmd(up formula.RepoUpdater) *cobra.Command {
+func NewUpdateRepoCmd(up formula.Updater) *cobra.Command {
 	u := &updateRepoCmd{up}
 
 	cmd := &cobra.Command{

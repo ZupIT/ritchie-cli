@@ -62,6 +62,7 @@ func buildCommands() *cobra.Command {
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	serverSetter := server.NewSetter(ritchieHomeDir)
 	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
+	repoLoader := formula.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		ritchieHomeDir,
@@ -94,7 +95,7 @@ func buildCommands() *cobra.Command {
 	rootCmd := cmd.NewTeamRootCmd(
 		workspaceManager,
 		loginManager,
-		repoManager,
+		repoLoader,
 		serverValidator,
 		sessionValidator,
 		api.Team,
@@ -108,7 +109,7 @@ func buildCommands() *cobra.Command {
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(loginManager, repoManager, inputText)
+	loginCmd := cmd.NewLoginCmd(loginManager, repoLoader, inputText)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
