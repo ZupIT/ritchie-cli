@@ -39,7 +39,6 @@ type RepoManager struct {
 	cacheFile      string
 	homePath       string
 	httpClient     *http.Client
-	serverURL      string
 	sessionManager session.Manager
 	serverFinder   server.Finder
 
