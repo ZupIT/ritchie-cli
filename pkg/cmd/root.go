@@ -37,6 +37,7 @@ var (
 	BuildDate = "unknown"
 
 	whitelist = []string{
+		fmt.Sprintf("%s", cmdUse),
 		fmt.Sprintf("%s login", cmdUse),
 		fmt.Sprintf("%s logout", cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
@@ -82,7 +83,7 @@ func NewSingleRootCmd(wm workspace.Checker,
 		Short:             cmdShortDescription,
 		Long:              cmdDescription,
 		PersistentPreRunE: o.PreRunFunc(),
-		Run:               runHelp,
+		RunE:              runHelp,
 		SilenceErrors:     true,
 	}
 }
@@ -113,6 +114,7 @@ func NewTeamRootCmd(wm workspace.Checker,
 		Short:             cmdShortDescription,
 		Long:              cmdDescription,
 		PersistentPreRunE: o.PreRunFunc(),
+		RunE:              runHelp,
 		SilenceErrors:     true,
 	}
 }
@@ -196,7 +198,6 @@ func (o *rootCmd) version() string {
 	return fmt.Sprintf(versionMsg, Version, o.edition, BuildDate, runtime.Version())
 }
 
-func runHelp(cmd *cobra.Command, args []string) {
-	cmd.Help()
+func runHelp(cmd *cobra.Command, args []string) error {
+	return cmd.Help()
 }
-
