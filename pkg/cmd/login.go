@@ -2,24 +2,25 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
-	"github.com/spf13/cobra"
 )
 
 // loginCmd type for init command
 type loginCmd struct {
 	security.LoginManager
-	formula.RepoLoader
+	formula.Loader
 	prompt.InputText
 }
 
 // NewLoginCmd creates new cmd instance
 func NewLoginCmd(
 	lm security.LoginManager,
-	rm formula.RepoLoader,
+	rm formula.Loader,
 	it prompt.InputText) *cobra.Command {
 	l := loginCmd{lm, rm, it}
 	return &cobra.Command{

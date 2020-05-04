@@ -34,7 +34,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	//prompt
+	// prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -51,6 +51,7 @@ func buildCommands() *cobra.Command {
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	repoManager := formula.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
+	repoLoader := formula.NewSingleLoader(cmd.CommonsRepoURL, repoManager)
 	sessionValidator := sesssingle.NewValidator(sessionManager)
 	loginManager := secsingle.NewLoginManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
@@ -70,16 +71,15 @@ func buildCommands() *cobra.Command {
 		inputBool)
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	//commands
 	rootCmd := cmd.NewSingleRootCmd(
 		workspaceManager,
 		loginManager,
-		repoManager,
+		repoLoader,
 		sessionValidator,
 		api.Single,
 		inputText,
 		inputPassword)
-
+	 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()

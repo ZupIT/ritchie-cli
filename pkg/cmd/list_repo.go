@@ -2,19 +2,19 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 )
 
 // listRepoCmd type for list repo command
 type listRepoCmd struct {
-	formula.RepoLister
+	formula.Lister
 }
 
 // NewListRepoCmd creates a new cmd instance
-func NewListRepoCmd(ls formula.RepoLister) *cobra.Command {
+func NewListRepoCmd(ls formula.Lister) *cobra.Command {
 	l := &listRepoCmd{ls}
 
 	cmd := &cobra.Command{

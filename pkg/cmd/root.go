@@ -6,17 +6,16 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/spf13/cobra"
-
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
-
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
+
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -50,7 +49,7 @@ var (
 type rootCmd struct {
 	workspaceManager workspace.Checker
 	loginManager     security.LoginManager
-	repoLoader       formula.RepoLoader
+	repoLoader       formula.Loader
 	serverValidator  server.Validator
 	sessionValidator session.Validator
 	edition          api.Edition
@@ -61,7 +60,7 @@ type rootCmd struct {
 // NewSingleRootCmd creates the root command for single edition.
 func NewSingleRootCmd(wm workspace.Checker,
 	l security.LoginManager,
-	r formula.RepoLoader,
+	r formula.Loader,
 	sv session.Validator,
 	e api.Edition,
 	it prompt.InputText,
@@ -90,7 +89,7 @@ func NewSingleRootCmd(wm workspace.Checker,
 // NewTeamRootCmd creates the root command for team edition.
 func NewTeamRootCmd(wm workspace.Checker,
 	l security.LoginManager,
-	r formula.RepoLoader,
+	r formula.Loader,
 	srv server.Validator,
 	sv session.Validator,
 	e api.Edition,
@@ -161,10 +160,8 @@ func (o *rootCmd) checkSession(commandPath string) error {
 			return err
 		}
 
-		if o.edition == api.Team {
-			if err := o.repoLoader.Load(); err != nil {
-				return err
-			}
+		if err := o.repoLoader.Load(); err != nil {
+			return err
 		}
 
 		fmt.Println("Session created successfully!")
