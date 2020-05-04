@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,6 +17,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_java"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_node"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_python"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
 type CreateManager struct {
@@ -294,7 +294,23 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	default:
-		log.Println("Formula in Shell")
+		err = createMainFile(srcDir, pkg, lang)
+		if err != nil {
+			return err
+		}
+		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
+		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		err = createPkgFile(pkgDir, pkg, lang)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -323,9 +339,9 @@ func createPkgFile(dir, pkg, lang string) error {
 		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
 		return fileutil.WriteFile(dir+"/"+fu+".py", []byte(tfp))
 	default:
-
+		tfs := tpl_shell.TemplateFileShell
+		return fileutil.WriteFile(dir+"/"+pkg+".sh", []byte(tfs))
 	}
-	return nil
 }
 
 func createRunTemplate(dir, lang string) error {
@@ -376,9 +392,10 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
 		return fileutil.WriteFile(dir+"/Makefile", []byte(tfp))
 	default:
-
+		tfs := tpl_shell.TemplateMakefile
+		tfs = strings.ReplaceAll(tfs, nameBin, name)
+		return fileutil.WriteFile(dir+"/Makefile", []byte(tfs))
 	}
-	return nil
 }
 
 func createGoModFile(dir, pkg string) error {
@@ -409,9 +426,10 @@ func createMainFile(dir, pkg, lang string) error {
 		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
 		return fileutil.WriteFile(dir+"/main.py", []byte(tfp))
 	default:
-
+		tfs := tpl_shell.TemplateMain
+		tfs = strings.ReplaceAll(tfs, nameBin, pkg)
+		return fileutil.WriteFile(dir+"/main.sh", []byte(tfs))
 	}
-	return nil
 }
 
 func createConfigFile(dir string) error {

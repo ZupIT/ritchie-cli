@@ -105,16 +105,16 @@ func TestCreator(t *testing.T) {
 				err: nil,
 			},
 		},
-		/*		{
-				name: "command correct-shell",
-				in: &in{
-					fCmd: fCmdCorrect,
-					lang: langShell,
-				},
-				out: &out{
-					err: nil,
-				},
-			},*/
+		{
+			name: "command correct-shell",
+			in: &in{
+				fCmd: fCmdCorrectShell,
+				lang: langShell,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
 		{
 			name: "command incorrect",
 			in: &in{
