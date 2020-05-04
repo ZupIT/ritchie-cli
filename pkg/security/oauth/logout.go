@@ -96,7 +96,7 @@ func (l *LogoutManager) handlerLogout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(htmlLogout))
 		if err != nil {
-			fmt.Sprintf("Error in Write")
+			fmt.Sprintln("Error in Write")
 			return
 		}
 		l.Resp <- security.ChanResponse{}

@@ -10,6 +10,10 @@ import (
 
 func TestMain(m *testing.M) {
 	f := fmt.Sprintf(serverFilePattern, os.TempDir())
-	fileutil.RemoveFile(f)
+	err := fileutil.RemoveFile(f)
+	if err != nil {
+		fmt.Sprintln("Error in remove file")
+		return
+	}
 	os.Exit(m.Run())
 }

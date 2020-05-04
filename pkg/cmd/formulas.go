@@ -12,6 +12,9 @@ import (
 const (
 	fPath    = "fPath"
 	fBin     = "fBin"
+	fLBin     = "fLBin"
+	fMBin     = "fMBin"
+	fWBin     = "fWBin"
 	fBundle  = "fBundle"
 	fConfig  = "fConfig"
 	fRepoURL = "fRepoURL"
@@ -66,6 +69,9 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	annotations := make(map[string]string)
 	annotations[fPath] = frm.Path
 	annotations[fBin] = frm.Bin
+	annotations[fLBin] = frm.LBin
+	annotations[fMBin] = frm.MBin
+	annotations[fWBin] = frm.WBin
 	annotations[fBundle] = frm.Bundle
 	annotations[fConfig] = frm.Config
 	annotations[fRepoURL] = frm.RepoURL
@@ -83,12 +89,18 @@ func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args
 	return func(cmd *cobra.Command, args []string) error {
 		fPath := cmd.Annotations[fPath]
 		fBin := cmd.Annotations[fBin]
+		fLBin := cmd.Annotations[fLBin]
+		fMBin := cmd.Annotations[fMBin]
+		fWBin := cmd.Annotations[fWBin]
 		fBundle := cmd.Annotations[fBundle]
 		fConf := cmd.Annotations[fConfig]
 		fRepoURL := cmd.Annotations[fRepoURL]
 		frm := formula.Definition{
 			Path:    fPath,
 			Bin:     fBin,
+			LBin:    fLBin,
+			MBin:    fMBin,
+			WBin:    fWBin,
 			Bundle:  fBundle,
 			Config:  fConf,
 			RepoUrl: fRepoURL,

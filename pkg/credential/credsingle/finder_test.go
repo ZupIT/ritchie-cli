@@ -14,7 +14,7 @@ func TestFind(t *testing.T) {
 	setter := NewSetter(tmp, ctxFinder, sessManager)
 	err := setter.Set(githubCred)
 	if err != nil {
-		fmt.Sprintf("Error in Set")
+		fmt.Sprintln("Error in Set")
 		return
 	}
 	finder := NewFinder(tmp, ctxFinder, sessManager)

@@ -23,7 +23,6 @@ var (
 
 type Settings struct {
 	serverFinder   server.Finder
-	configURL      string
 	httpClient     *http.Client
 	sessionManager session.Manager
 	ctxFinder      rcontext.Finder

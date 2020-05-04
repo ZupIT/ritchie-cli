@@ -16,6 +16,8 @@ const (
 	BinPattern            = "%s%s"
 	BinPathPattern        = "%s/bin"
 	windows               = "windows"
+	darwin                = "darwin"
+	linux                 = "linux"
 	EnvPattern            = "%s=%s"
 	CachePattern          = "%s/.%s.cache"
 	DefaultCacheNewLabel  = "Type new value?"
@@ -54,7 +56,10 @@ type Cache struct {
 type Definition struct {
 	Path    string
 	Bin     string
-	Bundle	string
+	LBin    string
+	MBin    string
+	WBin    string
+	Bundle  string
 	Config  string
 	RepoUrl string
 }
@@ -74,21 +79,39 @@ func (d *Definition) TmpWorkDirPath(home, uuidHash string) (string, string) {
 
 // BinName builds the bin name from definition params
 func (d *Definition) BinName() string {
-	if strings.Contains(d.Bin, "${so}") {
-		so := runtime.GOOS
+	bName := d.Bin
+	so := runtime.GOOS
+	switch so {
+	case windows:
+		if d.WBin != "" {
+			bName = d.WBin
+		}
+	case darwin:
+		if d.MBin != "" {
+			bName = d.MBin
+		}
+	case linux:
+		if d.LBin != "" {
+			bName = d.MBin
+		}
+	default:
+		bName = d.Bin
+	}
+
+	if strings.Contains(bName, "${so}") {
 		suffix := ""
 		if so == windows {
 			suffix = ".exe"
 		}
-		binSO := strings.ReplaceAll(d.Bin, "${so}", so)
+		binSO := strings.ReplaceAll(bName, "${so}", so)
 
 		return fmt.Sprintf(BinPattern, binSO, suffix)
 	}
-	return d.Bin
+	return bName
 }
 
 // BinName builds the bin name from definition params
-func (d *Definition) 	BundleName() string {
+func (d *Definition) BundleName() string {
 	if strings.Contains(d.Bundle, "${so}") {
 		so := runtime.GOOS
 		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", so)

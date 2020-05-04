@@ -3,6 +3,7 @@ package credteam
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -82,7 +83,11 @@ func TestFields(t *testing.T) {
 			}
 
 			server := mockServer(out.status, body)
-			serverSetter.Set(server.URL)
+			err := serverSetter.Set(server.URL)
+			if err != nil {
+				fmt.Sprintln("Error in set")
+				return
+			}
 			defer server.Close()
 			settings := NewSettings(serverFinder, server.Client(), sessManager, ctxFinder)
 
