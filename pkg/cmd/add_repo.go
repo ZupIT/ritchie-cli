@@ -44,7 +44,6 @@ func NewAddRepoCmd(
 func (a addRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		rn, err := a.Text("Name of the repository: ", true)
-
 		if err != nil {
 			return err
 		}
@@ -66,10 +65,9 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		list, err := a.List()
-
 		for _, repo := range list {
 			if rn == repo.Name {
-				fmt.Printf("Your repository %s has been overwritten\n", repo.Name)
+				fmt.Printf("Your repository %s has been overwritten.\n", repo.Name)
 			}
 		}
 
