@@ -4,12 +4,12 @@ const (
 	TemplateMain = `#!/usr/bin/python3
 import os
 
-from {{bin-name-first-upper}} import {{bin-name-first-upper}}
+from {{bin-name}} import {{bin-name}}
 
 input1 = os.environ.get('SAMPLE_TEXT')
 input2 = os.environ.get('SAMPLE_LIST')
 input3 = os.environ.get('SAMPLE_BOOL')
-{{bin-name-first-upper}}.Run(input1, input2, input3)
+{{bin-name}}.Run(input1, input2, input3)
 `
 
 	TemplateMakefile = `# Make Run Python
@@ -19,9 +19,9 @@ DIST=../dist
 DIST_DIR=$(DIST)/commons/bin
 build:
 	mkdir -p $(DIST_DIR)
-	cp main.py $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name-first-upper}} $(DIST_DIR)
-	chmod +x $(DIST_DIR)/$(BINARY_NAME)
-	echo 'python {{bin-name}}.py' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)`
+	cp main.py $(DIST_DIR) && cp -r {{bin-name}} $(DIST_DIR)
+	chmod +x $(DIST_DIR)/main.py
+	echo 'python main.py' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)`
 
 	TemplateFilePython = `#!/usr/bin/python3
 import time

@@ -41,7 +41,6 @@ type RepoManager struct {
 	httpClient     *http.Client
 	sessionManager session.Manager
 	serverFinder   server.Finder
-
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -61,7 +60,6 @@ func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) 
 		sessionManager: sm,
 	}
 }
-
 
 func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Client, sm session.Manager) RepoManager {
 	return RepoManager{

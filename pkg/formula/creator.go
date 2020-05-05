@@ -184,25 +184,24 @@ func createMakefileMain(dir, dirForm, name string) error {
 	if err != nil {
 		return err
 	}
-
-	return fileutil.WriteFile(dir+"/Makefile", []byte(tplFile))
+	return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tplFile))
 }
 
 func createScripts(dir string) error {
 	tplFile := tpl_go.TemplateCopyBinConfig
 
-	err := fileutil.WriteFilePerm(dir+"/copy-bin-configs.sh", []byte(tplFile), 0755)
+	err := fileutil.WriteFilePerm(fmt.Sprintf("%s/copy-bin-configs.sh", dir), []byte(tplFile), 0755)
 	if err != nil {
 		return err
 	}
 
 	tplFile = tpl_go.TemplateUnzipBinConfigs
 
-	return fileutil.WriteFilePerm(dir+"/unzip-bin-configs.sh", []byte(tplFile), 0755)
+	return fileutil.WriteFilePerm(fmt.Sprintf("%s/unzip-bin-configs.sh", dir), []byte(tplFile), 0755)
 }
 
 func createSrcFiles(dir, pkg, lang string) error {
-	srcDir := dir + "/src"
+	srcDir := fmt.Sprintf("%s/src", dir)
 	err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm)
 	if err != nil {
 		return err
@@ -221,7 +220,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		pkgDir := srcDir + "/pkg/" + pkg
+		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
 		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 		if err != nil {
 			return err
@@ -283,8 +282,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		pkgu := strings.Title(strings.ToLower(pkg))
-		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkgu)
+		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
 		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 		if err != nil {
 			return err
@@ -322,25 +320,24 @@ func createPkgFile(dir, pkg, lang string) error {
 		tfgo := tpl_go.TemplatePkg
 		tfgo = strings.ReplaceAll(tfgo, nameModule, pkg)
 
-		return fileutil.WriteFile(dir+"/"+pkg+".go", []byte(tfgo))
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s.go", dir, pkg), []byte(tfgo))
 	case "Java":
 		tfj := tpl_java.TemplateFileJava
 		tfj = strings.ReplaceAll(tfj, nameBin, pkg)
 		fu := strings.Title(strings.ToLower(pkg))
 		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(dir+"/"+fu+".java", []byte(tfj))
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s.java", dir, fu), []byte(tfj))
 	case "Node":
 		tfn := tpl_node.TemplateFileNode
 		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
-		return fileutil.WriteFile(dir+"/"+pkg+".js", []byte(tfn))
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s.js", dir, pkg), []byte(tfn))
 	case "Python":
 		tfp := tpl_python.TemplateFilePython
-		fu := strings.Title(strings.ToLower(pkg))
-		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(dir+"/"+fu+".py", []byte(tfp))
+		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, pkg)
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s.py", dir, pkg), []byte(tfp))
 	default:
 		tfs := tpl_shell.TemplateFileShell
-		return fileutil.WriteFile(dir+"/"+pkg+".sh", []byte(tfs))
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s.sh", dir, pkg), []byte(tfs))
 	}
 }
 
@@ -350,10 +347,10 @@ func createRunTemplate(dir, lang string) error {
 		return nil
 	case "Java":
 		tj := tpl_java.TemplateRunTemplate
-		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tj), 0777)
+		return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tj), 0777)
 	case "Node":
 		tn := tpl_node.TemplateRunTemplate
-		return fileutil.WriteFilePerm(dir+"/run_template", []byte(tn), 0777)
+		return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tn), 0777)
 	case "Python":
 	default:
 
@@ -368,40 +365,40 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		tplFile = strings.ReplaceAll(tplFile, "{{name}}", name)
 		tplFile = strings.ReplaceAll(tplFile, "{{form-path}}", pathName)
 
-		return fileutil.WriteFile(dir+"/Makefile", []byte(tplFile))
+		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tplFile))
 	case "Java":
 		tfj := tpl_java.TemplateMakefile
 		tfj = strings.ReplaceAll(tfj, nameBin, name)
 		fu := strings.Title(strings.ToLower(name))
 		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(dir+"/Makefile", []byte(tfj))
+		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfj))
 	case "Node":
 		tfn := tpl_node.TemplateMakefile
 		tfn = strings.ReplaceAll(tfn, nameBin, name)
 
-		err := fileutil.WriteFile(dir+"/Makefile", []byte(tfn))
+		err := fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfn))
 		if err != nil {
 			return err
 		}
 		tfpj := tpl_node.TemplatePackageJson
-		return fileutil.WriteFile(dir+"/package.json", []byte(tfpj))
+		return fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tfpj))
 	case "Python":
 		tfp := tpl_python.TemplateMakefile
 		tfp = strings.ReplaceAll(tfp, nameBin, name)
 		fu := strings.Title(strings.ToLower(name))
 		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(dir+"/Makefile", []byte(tfp))
+		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfp))
 	default:
 		tfs := tpl_shell.TemplateMakefile
 		tfs = strings.ReplaceAll(tfs, nameBin, name)
-		return fileutil.WriteFile(dir+"/Makefile", []byte(tfs))
+		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfs))
 	}
 }
 
 func createGoModFile(dir, pkg string) error {
 	tplFile := tpl_go.TemplateGoMod
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
-	return fileutil.WriteFile(dir+"/go.mod", []byte(tplFile))
+	return fileutil.WriteFile(fmt.Sprintf("%s/go.mod", dir), []byte(tplFile))
 }
 
 func createMainFile(dir, pkg, lang string) error {
@@ -409,32 +406,31 @@ func createMainFile(dir, pkg, lang string) error {
 	case "Go":
 		tfgo := tpl_go.TemplateMain
 		tfgo = strings.ReplaceAll(tfgo, nameModule, pkg)
-		return fileutil.WriteFile(dir+"/main.go", []byte(tfgo))
+		return fileutil.WriteFile(fmt.Sprintf("%s/main.go", dir), []byte(tfgo))
 	case "Java":
 		tfj := tpl_java.TemplateMain
 		tfj = strings.ReplaceAll(tfj, nameBin, pkg)
 		fu := strings.Title(strings.ToLower(pkg))
 		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(dir+"/Main.java", []byte(tfj))
+		return fileutil.WriteFile(fmt.Sprintf("%s/Main.java", dir), []byte(tfj))
 	case "Node":
 		tfn := tpl_node.TemplateIndex
 		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
-		return fileutil.WriteFile(dir+"/index.js", []byte(tfn))
+		return fileutil.WriteFile(fmt.Sprintf("%s/index.java", dir), []byte(tfn))
 	case "Python":
 		tfp := tpl_python.TemplateMain
-		fu := strings.Title(strings.ToLower(pkg))
-		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(dir+"/main.py", []byte(tfp))
+		tfp = strings.ReplaceAll(tfp, nameBin, pkg)
+		return fileutil.WriteFile(fmt.Sprintf("%s/main.py", dir), []byte(tfp))
 	default:
 		tfs := tpl_shell.TemplateMain
 		tfs = strings.ReplaceAll(tfs, nameBin, pkg)
-		return fileutil.WriteFile(dir+"/main.sh", []byte(tfs))
+		return fileutil.WriteFile(fmt.Sprintf("%s/main.sh", dir), []byte(tfs))
 	}
 }
 
 func createConfigFile(dir string) error {
 	tplFile := tpl_go.TemplateConfig
-	return fileutil.WriteFile(dir+"/config.json", []byte(tplFile))
+	return fileutil.WriteFile(fmt.Sprintf("%s/config.json", dir), []byte(tplFile))
 }
 
 func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
@@ -456,9 +452,9 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
 					Formula: api.Formula{
 						Path:   pathValue,
-						Bin:    fn + ".py",
-						LBin:   fn + ".py",
-						MBin:   fn + ".py",
+						Bin:    "main.py",
+						LBin:   "main.py",
+						MBin:   "main.py",
 						WBin:   fn + ".bat",
 						Bundle: "${so}.zip",
 						Config: "config.json",

@@ -11,7 +11,7 @@ import (
 
 const (
 	serverFilePattern = "%s/server"
-	serverDown = "please, check your server. It doesn't seem to be UP"
+	serverDown        = "please, check your server. It doesn't seem to be UP"
 )
 
 type SetterManager struct {
@@ -32,7 +32,7 @@ func (s SetterManager) Set(url string) error {
 	if (err != nil) || (resp.StatusCode != http.StatusOK) {
 		return fmt.Errorf(
 			"%v: %w",
-			"HttpStatus returned: " + resp.Status + " for URL: " + url,
+			"HttpStatus returned: "+resp.Status+" for URL: "+url,
 			errors.New(serverDown))
 	}
 	if err := fileutil.WriteFile(s.serverFile, []byte(url)); err != nil {
