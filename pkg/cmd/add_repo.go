@@ -16,6 +16,7 @@ type addRepoCmd struct {
 	prompt.InputText
 	prompt.InputURL
 	prompt.InputInt
+	prompt.InputBool
 }
 
 // NewRepoAddCmd creates a new cmd instance
@@ -23,12 +24,14 @@ func NewAddRepoCmd(
 	adl formula.AddLister,
 	it prompt.InputText,
 	iu prompt.InputURL,
-	ii prompt.InputInt) *cobra.Command {
+	ii prompt.InputInt,
+	ib prompt.InputBool) *cobra.Command {
 	a := &addRepoCmd{
 		adl,
 		it,
 		iu,
 		ii,
+		ib,
 	}
 
 	cmd := &cobra.Command{
@@ -70,7 +73,13 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 		}
 		for _, repo := range list {
 			if rn == repo.Name {
-				fmt.Printf("Your repository %s has been overwritten.\n", repo.Name)
+				fmt.Printf("Your repository %s is gonna be overwritten.\n", repo.Name)
+				options := []string{"yes", "no"}
+				choice, _ := a.Bool("Want to proceed?", options)
+				if !choice {
+					fmt.Println("Operation cancelled")
+					return err
+				}
 			}
 		}
 
