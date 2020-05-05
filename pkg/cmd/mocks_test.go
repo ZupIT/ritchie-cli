@@ -76,6 +76,10 @@ func (inputListCredMock) List(name string, items []string) (string, error) {
 
 type repoAdder struct{}
 
+func (a repoAdder) List() ([]formula.Repository, error) {
+	return []formula.Repository{}, nil
+}
+
 func (repoAdder) Add(d formula.Repository) error {
 	return nil
 }

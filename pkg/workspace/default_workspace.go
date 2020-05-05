@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
 	"github.com/gofrs/flock"
 
