@@ -65,6 +65,9 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		list, err := a.List()
+		if err != nil {
+			return err
+		}
 		for _, repo := range list {
 			if rn == repo.Name {
 				fmt.Printf("Your repository %s has been overwritten.\n", repo.Name)
