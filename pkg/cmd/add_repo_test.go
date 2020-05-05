@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewAddRepoCmd(t *testing.T) {
-	cmd := NewAddRepoCmd(repoAdd{}, inputTextMock{}, inputURLMock{}, inputIntMock{})
+	cmd := NewAddRepoCmd(repoAdder{}, inputTextMock{}, inputURLMock{}, inputIntMock{})
 	if cmd == nil {
 		t.Errorf("NewAddRepoCmd got %v", cmd)
 
