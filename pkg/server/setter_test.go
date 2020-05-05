@@ -29,14 +29,14 @@ func TestSet(t *testing.T) {
 		{
 			name: "empty serverURL",
 			in:   "",
-			out:  out {
+			out: out{
 				err: validator.ErrInvalidServerURL,
 			},
 		},
 		{
 			name: "existing serverURL",
 			in:   "http://localhost/mocked",
-			out:  out {
+			out: out{
 				status: 200,
 			},
 		},

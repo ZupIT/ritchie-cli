@@ -14,7 +14,7 @@ func TestNewSetServerCmd(t *testing.T) {
 	}
 }
 
-type setServerMock struct {}
+type setServerMock struct{}
 
 func (setServerMock) Set(url string) error {
 	return nil

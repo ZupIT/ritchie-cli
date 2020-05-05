@@ -249,7 +249,7 @@ func MoveFiles(oPath, nPath string, files []string) error {
 	for _, f := range files {
 		pwdOF := fmt.Sprintf("%s/%s", oPath, f)
 		pwdNF := fmt.Sprintf("%s/%s", nPath, f)
-		if err :=  os.Rename(pwdOF, pwdNF); err != nil {
+		if err := os.Rename(pwdOF, pwdNF); err != nil {
 			return err
 		}
 	}
@@ -278,5 +278,3 @@ func ListNewFiles(oPath, nPath string) ([]string, error) {
 	}
 	return new, nil
 }
-
-
