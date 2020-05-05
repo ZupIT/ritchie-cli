@@ -42,6 +42,7 @@ func (l listRepoCmd) runFunc() CommandRunnerFunc {
 
 func printList(rr []formula.Repository) {
 	table := uitable.New()
+
 	table.AddRow("NAME", "URL")
 	for _, re := range rr {
 		table.AddRow(re.Name, re.TreePath)

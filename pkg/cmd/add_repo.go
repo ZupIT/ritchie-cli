@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -9,7 +12,7 @@ import (
 
 // addRepoCmd type for add repo command
 type addRepoCmd struct {
-	formula.Adder
+	formula.AddLister
 	prompt.InputText
 	prompt.InputURL
 	prompt.InputInt
@@ -17,12 +20,12 @@ type addRepoCmd struct {
 
 // NewRepoAddCmd creates a new cmd instance
 func NewAddRepoCmd(
-	ad formula.Adder,
+	adl formula.AddLister,
 	it prompt.InputText,
 	iu prompt.InputURL,
 	ii prompt.InputInt) *cobra.Command {
 	a := &addRepoCmd{
-		ad,
+		adl,
 		it,
 		iu,
 		ii,
@@ -41,6 +44,7 @@ func NewAddRepoCmd(
 func (a addRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		rn, err := a.Text("Name of the repository: ", true)
+
 		if err != nil {
 			return err
 		}
@@ -59,6 +63,14 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 			Priority: int(pr),
 			Name:     rn,
 			TreePath: ur,
+		}
+
+		list, err := a.List()
+
+		for _, repo := range list {
+			if rn == repo.Name {
+				fmt.Println("WARNING: Your repository has been overwritten")
+			}
 		}
 
 		if err = a.Add(r); err != nil {

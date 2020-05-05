@@ -35,3 +35,8 @@ type Cleaner interface {
 type Loader interface {
 	Load() error
 }
+
+type AddLister interface {
+	Adder
+	Lister
+}
