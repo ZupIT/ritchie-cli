@@ -51,6 +51,22 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
+		repos, err := a.List()
+		if err != nil {
+			return err
+		}
+		for _, repo := range repos {
+			if rn == repo.Name {
+				fmt.Printf("Your repository %s is gonna be overwritten.\n", repo.Name)
+				options := []string{"yes", "no"}
+				choice, _ := a.Bool("Want to proceed?", options)
+				if !choice {
+					fmt.Println("Operation cancelled")
+					return nil
+				}
+			}
+		}
+
 		ur, err := a.URL("URL of the tree [http(s)://host:port/tree.json]: ", "")
 		if err != nil {
 			return err
@@ -65,22 +81,6 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 			Priority: int(pr),
 			Name:     rn,
 			TreePath: ur,
-		}
-
-		list, err := a.List()
-		if err != nil {
-			return err
-		}
-		for _, repo := range list {
-			if rn == repo.Name {
-				fmt.Printf("Your repository %s is gonna be overwritten.\n", repo.Name)
-				options := []string{"yes", "no"}
-				choice, _ := a.Bool("Want to proceed?", options)
-				if !choice {
-					fmt.Println("Operation cancelled")
-					return err
-				}
-			}
 		}
 
 		if err = a.Add(r); err != nil {
