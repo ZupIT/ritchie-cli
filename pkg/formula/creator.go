@@ -455,7 +455,22 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 						Bin:    "main.py",
 						LBin:   "main.py",
 						MBin:   "main.py",
-						WBin:   fn + ".bat",
+						WBin:   fmt.Sprintf("%s.bat", fn),
+						Bundle: "${so}.zip",
+						Config: "config.json",
+					},
+					Parent: parent,
+				})
+			} else if lang == "Go" {
+				commands = append(t.Commands, api.Command{
+					Usage: fn,
+					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
+					Formula: api.Formula{
+						Path:   pathValue,
+						Bin:    fmt.Sprintf("%s-${so}", fn),
+						LBin:   fmt.Sprintf("%s-${so}", fn),
+						MBin:   fmt.Sprintf("%s-${so}", fn),
+						WBin:   fmt.Sprintf("%s-${so}.exe", fn),
 						Bundle: "${so}.zip",
 						Config: "config.json",
 					},
@@ -467,10 +482,10 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
 					Formula: api.Formula{
 						Path:   pathValue,
-						Bin:    fn + ".sh",
-						LBin:   fn + ".sh",
-						MBin:   fn + ".sh",
-						WBin:   fn + ".bat",
+						Bin:    fmt.Sprintf("%s.sh", fn),
+						LBin:   fmt.Sprintf("%s.sh", fn),
+						MBin:   fmt.Sprintf("%s.sh", fn),
+						WBin:   fmt.Sprintf("%s.bat", fn),
 						Bundle: "${so}.zip",
 						Config: "config.json",
 					},
