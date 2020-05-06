@@ -17,7 +17,8 @@ func Parse() (Args, error) {
 		return nil, err
 	}
 
-	data = strings.TrimSpace(data)
+	//data = strings.TrimSpace(data)
+
 	ss := strings.Split(data, "@in:")
 	args := make(Args, len(ss))
 	for _, s := range ss {

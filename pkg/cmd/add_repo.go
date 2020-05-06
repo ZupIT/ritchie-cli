@@ -45,7 +45,7 @@ func NewAddRepoCmd(
 		Use:     "repo",
 		Short:   "Add a repository.",
 		Example: "rit add repo ",
-		RunE:    RunFunc(a.runStdin(), a.runPrompt()),
+		RunE:    RunFuncE(a.runStdin(), a.runPrompt()),
 	}
 	cmd.LocalFlags()
 
