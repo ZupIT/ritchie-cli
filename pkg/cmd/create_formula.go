@@ -35,7 +35,7 @@ func (c createFormulaCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
+		lang, err := c.ListI("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
 		if err != nil {
 			return err
 		}

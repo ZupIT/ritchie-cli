@@ -150,7 +150,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		providers = append(providers, k)
 	}
 
-	typ, err := s.List("Profile: ", []string{credential.Me, credential.Other})
+	typ, err := s.ListI("Profile: ", []string{credential.Me, credential.Other})
 	if err != nil {
 		return credDetail, err
 	}
@@ -163,7 +163,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		}
 	}
 
-	service, err := s.List("Provider: ", providers)
+	service, err := s.ListI("Provider: ", providers)
 	if err != nil {
 		return credDetail, err
 	}

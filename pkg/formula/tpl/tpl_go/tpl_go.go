@@ -107,7 +107,7 @@ func main() {
 
 	{{nameModule}}.Input{
     	Text:    input1,
-    	List:    input2,
+    	ListI:    input2,
     	Boolean: input3,
     }.Run()
 }`
@@ -186,14 +186,14 @@ import (
 
 type Input struct {
 	Text string
-	List string
+	ListI string
 	Boolean string
 }
 
 func(in Input)Run()  {
 	fmt.Println("Hello world!")
 	color.Green(fmt.Sprintf("You receive %s in text.", in.Text ))
-	color.Red(fmt.Sprintf("You receive %s in list.", in.List ))
+	color.Red(fmt.Sprintf("You receive %s in list.", in.ListI ))
 	color.Yellow(fmt.Sprintf("You receive %s in boolean.", in.Boolean ))
 }`
 

@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewDeleteRepoCmd(t *testing.T) {
-	cmd := NewDeleteRepoCmd(repoDeleterMock{}, inputTextMock{})
+	cmd := NewDeleteRepoCmd(repoDeleterMock{}, inputTextMock{}, inputListMock{})
 	if cmd == nil {
 		t.Errorf("NewDeleteRepoCmd got %v", cmd)
 

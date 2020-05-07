@@ -247,7 +247,7 @@ func (d DefaultRunner) loadInputValList(items []string, input Input) (string, er
 		}
 		items = append(items, newLabel)
 	}
-	inputVal, err := d.List(input.Label, items)
+	inputVal, err := d.ListI(input.Label, items)
 	if inputVal == newLabel {
 		validate := len(input.Default) == 0
 		inputVal, err = d.Text(input.Label, validate)

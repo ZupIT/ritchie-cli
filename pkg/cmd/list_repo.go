@@ -19,7 +19,7 @@ func NewListRepoCmd(ls formula.Lister) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "repo",
-		Short:   "List all repositories.",
+		Short:   "ListI all repositories.",
 		Example: "rit list repo",
 		RunE:    l.runFunc(),
 	}

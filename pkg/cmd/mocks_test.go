@@ -64,13 +64,13 @@ func (inputFalseMock) Bool(name string, items []string) (bool, error) {
 
 type inputListMock struct{}
 
-func (inputListMock) List(name string, items []string) (string, error) {
+func (inputListMock) ListI(name string, items []string) (string, error) {
 	return "item-mocked", nil
 }
 
 type inputListCredMock struct{}
 
-func (inputListCredMock) List(name string, items []string) (string, error) {
+func (inputListCredMock) ListI(name string, items []string) (string, error) {
 	return "me", nil
 }
 
@@ -142,6 +142,10 @@ func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
 }
 
 type repoDeleterMock struct{}
+
+func (m repoDeleterMock) List() ([]formula.Repository, error) {
+	return []formula.Repository{}, nil
+}
 
 func (repoDeleterMock) Delete(name string) error {
 	return nil
