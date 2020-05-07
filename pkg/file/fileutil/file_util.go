@@ -244,7 +244,7 @@ func readFilesDir(path string) ([]os.FileInfo, error) {
 	return fl, err
 }
 
-//Move files from oPath to nPath
+// Move files from oPath to nPath
 func MoveFiles(oPath, nPath string, files []string) error {
 	for _, f := range files {
 		pwdOF := fmt.Sprintf("%s/%s", oPath, f)
@@ -256,7 +256,7 @@ func MoveFiles(oPath, nPath string, files []string) error {
 	return nil
 }
 
-// ListI new files in nPath differing of oPath
+// List new files in nPath differing of oPath
 func ListNewFiles(oPath, nPath string) ([]string, error) {
 	of, err := readFilesDir(oPath)
 	if err != nil {
