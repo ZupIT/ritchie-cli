@@ -26,7 +26,9 @@ func Unzip(src string, dest string) error {
 
 		if file.FileInfo().IsDir() {
 			log.Println("Directory Created:", extractedFilePath)
-			os.MkdirAll(extractedFilePath, file.Mode())
+			if err := os.MkdirAll(extractedFilePath, file.Mode()); err != nil {
+				return err
+			}
 		} else {
 			log.Println("File extracted:", file.Name)
 
