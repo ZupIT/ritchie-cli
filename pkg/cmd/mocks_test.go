@@ -64,13 +64,13 @@ func (inputFalseMock) Bool(name string, items []string) (bool, error) {
 
 type inputListMock struct{}
 
-func (inputListMock) ListI(name string, items []string) (string, error) {
+func (inputListMock) List(name string, items []string) (string, error) {
 	return "item-mocked", nil
 }
 
 type inputListCredMock struct{}
 
-func (inputListCredMock) ListI(name string, items []string) (string, error) {
+func (inputListCredMock) List(name string, items []string) (string, error) {
 	return "me", nil
 }
 

@@ -47,7 +47,7 @@ func (d deleteContextCmd) runFunc() CommandRunnerFunc {
 			}
 		}
 
-		ctx, err := d.ListI("All:", ctxHolder.All)
+		ctx, err := d.List("All:", ctxHolder.All)
 		if err != nil {
 			return err
 		}
