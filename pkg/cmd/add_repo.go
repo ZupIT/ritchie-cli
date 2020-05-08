@@ -45,13 +45,16 @@ func NewAddRepoCmd(
 		Use:     "repo",
 		Short:   "Add a repository.",
 		Example: "rit add repo ",
-		RunE:    RunFuncE(a.runStdin(), a.runPrompt()),
+		//1
+		RunE: RunFuncE(a.runStdin(), a.runPrompt()),
 	}
+	//2
 	cmd.LocalFlags()
 
 	return cmd
 }
 
+//3
 func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		rn, err := a.Text("Name of the repository: ", true)
@@ -99,6 +102,7 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
+//4
 func (a addRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		data, err := stdin.Parse()

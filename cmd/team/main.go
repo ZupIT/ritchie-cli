@@ -102,6 +102,8 @@ func buildCommands() *cobra.Command {
 		inputText,
 		inputPassword)
 
+	rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
