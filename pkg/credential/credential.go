@@ -2,11 +2,11 @@ package credential
 
 const (
 	// Admin role
-	Admin = "admin"
+	Admin Type = "admin"
 	// Me credential
-	Me = "me"
-	// Other credential
-	Other = "other"
+	Me Type = "me"
+	// Org credential
+	Org Type = "org"
 )
 
 // Info represents a credential information of the user.
@@ -14,6 +14,13 @@ type Detail struct {
 	Username   string     `json:"username"`
 	Credential Credential `json:"credential"`
 	Service    string     `json:"service"`
+	Type       Type       `json:"type"`
+}
+
+type Type string
+
+func (t Type) String() string {
+	return string(t)
 }
 
 // A Credential represents the key-value pairs for the Service (User/Pass, Github, Jenkins, etc).

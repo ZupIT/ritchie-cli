@@ -145,22 +145,14 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 	if err != nil {
 		return credDetail, err
 	}
+
 	providers := make([]string, 0, len(cfg))
 	for k := range cfg {
 		providers = append(providers, k)
 	}
 
-	typ, err := s.List("Profile: ", []string{credential.Me, credential.Other})
-	if err != nil {
+	if err := s.profile(&credDetail); err != nil {
 		return credDetail, err
-	}
-
-	username := "me"
-	if typ == credential.Other {
-		username, err = s.Text("Username: ", true)
-		if err != nil {
-			return credDetail, err
-		}
 	}
 
 	service, err := s.List("Provider: ", providers)
@@ -186,9 +178,35 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		credentials[field] = val
 	}
 
-	credDetail.Username = username
 	credDetail.Credential = credentials
 	credDetail.Service = service
 
 	return credDetail, nil
+}
+
+func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
+	profiles := map[string]credential.Type{
+		"ME (for you)":               credential.Me,
+		"ADMIN (for a user)":         credential.Admin,
+		"ORG (for the organization)": credential.Org,
+	}
+	var types []string
+	for k := range profiles {
+		types = append(types, k)
+	}
+
+	typ, err := s.List("Profile to add credential: ", types)
+	if err != nil {
+		return err
+	}
+
+	if profiles[typ] == credential.Admin {
+		credDetail.Username, err = s.Text("Username: ", true)
+		if err != nil {
+			return err
+		}
+	}
+
+	credDetail.Type = profiles[typ]
+	return nil
 }
