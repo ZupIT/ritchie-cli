@@ -32,6 +32,7 @@ func NewCreateUserCmd(
 		RunE:  c.runFunc(),
 	}
 
+	cmd.LocalFlags()
 
 	return cmd
 }
