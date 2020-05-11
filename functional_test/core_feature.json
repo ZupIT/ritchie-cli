@@ -1,0 +1,71 @@
+[
+    {
+        "entry":"When running show context",
+        "steps":[
+            {
+                "key":"",
+                "value":"show context",
+                "action":"main"
+            }
+        ],
+        "result":"Current context:"
+    },
+    {
+        "entry":"Add new repo without error",
+        "steps":[
+            {
+                "key":"",
+                "value":"add repo",
+                "action":"main"
+            },
+            {
+                "key":"Name of the repository:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            },
+            {
+                "key":"URL of the tree",
+                "value":"https://commons-repo.ritchiecli.io/tree/tree.json",
+                "action":"sendkey"
+            },
+            {
+                "key":"Priority",
+                "value":"999",
+                "action":"sendkey"
+            }
+        ],
+        "result":""
+    },
+    {
+        "entry":"Clean repo without error",
+        "steps":[
+            {
+                "key":"",
+                "value":"clean repo",
+                "action":"main"
+            },
+            {
+                "key":"Name of the repository:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            }
+        ],
+        "result":"\"Leonidas\" has been cleaned successfully"
+    },
+    {
+        "entry":"Delete repo without error",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete repo",
+                "action":"main"
+            },
+            {
+                "key":"Name of the repository:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            }
+        ],
+        "result":"\"Leonidas\" has been removed from your repositories"
+    }
+]

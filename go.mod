@@ -12,6 +12,9 @@ require (
 	github.com/gosuri/uitable v0.0.4
 	github.com/manifoldco/promptui v0.7.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
+	github.com/mitchellh/mapstructure v1.1.2
+	github.com/onsi/ginkgo v1.11.0
+	github.com/onsi/gomega v1.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/spf13/cobra v1.0.0
