@@ -25,12 +25,15 @@ func NewCreateUserCmd(
 	ip prompt.InputPassword) *cobra.Command {
 	c := &createUserCmd{um, it, ie, ip}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "user",
 		Short: "Create user",
 		Long:  `Create user of the organization`,
 		RunE:  c.runFunc(),
 	}
+
+
+	return cmd
 }
 
 func (c createUserCmd) runFunc() CommandRunnerFunc {
