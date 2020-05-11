@@ -1,6 +1,5 @@
 version: 2.1
 
-
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
@@ -56,7 +55,8 @@ jobs:
           name: lint
           command: |
             /go/bin/golangci-lint run
-  unit-test:
+
+  unit_test:
     executor: ritchie-executor
     environment:
       <<: *ENVIRONMENT
@@ -125,15 +125,14 @@ jobs:
             . ./version.sh
             make release
 
-
 workflows:
-  build_and_test:
+  build-for-branch:
     jobs:
-      - lint:
-      - unit-test:
+      - lint
+      - unit_test
       - build:
           requires:
-            - unit-test
+            - unit_test
             - lint
       - delivery:
           filters:
