@@ -95,10 +95,9 @@ clean:
 	rm -rf $(BIN)
 
 unit-test-circle:
-	mkdir -p $(BIN)
+	mkdir -p $TEST_RESULTS_DIR
 	PACKAGE_NAMES=$(go list ./pkg/... | circleci tests split --split-by=timings --timings-type=classname)
 	echo "Running $(echo $PACKAGE_NAMES | wc -w) packages"
-	echo $PACKAGE_NAMES
 	gotestsum --format=short-verbose \
 		--junitfile $TEST_RESULTS_DIR/gotestsum-report.xml -- \
 		-p 2 \
