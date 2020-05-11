@@ -1,11 +1,11 @@
 package credential
 
 const (
-	// Admin role
-	Admin Type = "admin"
-	// Me credential
+	// Other credential path /admin
+	Other Type = "admin"
+	// Me credential path /me
 	Me Type = "me"
-	// Org credential
+	// Org credential path /org
 	Org Type = "org"
 )
 

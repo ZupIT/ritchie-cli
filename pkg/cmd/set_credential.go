@@ -187,7 +187,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
 	profiles := map[string]credential.Type{
 		"ME (for you)":               credential.Me,
-		"ADMIN (for a user)":         credential.Admin,
+		"OTHER (for another user)":   credential.Other,
 		"ORG (for the organization)": credential.Org,
 	}
 	var types []string
@@ -200,7 +200,7 @@ func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
 		return err
 	}
 
-	if profiles[typ] == credential.Admin {
+	if profiles[typ] == credential.Other {
 		credDetail.Username, err = s.Text("Username: ", true)
 		if err != nil {
 			return err
