@@ -15,7 +15,7 @@ references:
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
 
-  filters: &FILTERS
+  filters: &FILTERS_DElIVERY
     branches:
       only:
         - master
@@ -26,14 +26,6 @@ references:
     branches:
       only:
         - /^release-.*/
-
-  filters-checks: &FILTERS_CHECK
-    branches:
-      only:
-        - master
-        - /^release-.*/
-        - qa
-        - /^pull\/.*$/
 
 executors:
   ritchie-executor:
@@ -64,7 +56,7 @@ jobs:
           name: lint
           command: |
             /go/bin/golangci-lint run
-  test:
+  unit-test:
     executor: ritchie-executor
     environment:
       <<: *ENVIRONMENT
@@ -138,20 +130,14 @@ workflows:
   build_and_test:
     jobs:
       - lint:
-          filters:
-            <<: *FILTERS_CHECK
-      - test:
-          filters:
-            <<: *FILTERS_CHECK
+      - unit-test:
       - build:
-          filters:
-            <<: *FILTERS
           requires:
-            - test
+            - unit-test
             - lint
       - delivery:
           filters:
-            <<: *FILTERS
+            <<: *FILTERS_DElIVERY
           requires:
             - build
       - release:
