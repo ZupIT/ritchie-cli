@@ -7,6 +7,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const newCtx = "Type new context?"
@@ -23,15 +24,19 @@ func NewSetContextCmd(
 	il prompt.InputList) *cobra.Command {
 	s := setContextCmd{fs, it, il}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:     "context",
 		Short:   "Set context",
 		Example: "rit set context",
-		RunE:    s.runFunc(),
+		RunE: RunFuncE(s.runStdin(), s.runPrompt()),
 	}
+
+	cmd.LocalFlags()
+
+	return cmd
 }
 
-func (s setContextCmd) runFunc() CommandRunnerFunc {
+func (s setContextCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		ctxHolder, err := s.Find()
 		if err != nil {
@@ -60,4 +65,20 @@ func (s setContextCmd) runFunc() CommandRunnerFunc {
 		return nil
 	}
 
+}
+
+func (s setContextCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		data, err := stdin.Parse()
+		if err != nil {
+			return err
+		}
+
+		if _, err := s.Set(data[context]); err != nil {
+			return err
+		}
+
+		fmt.Println("Set context successful!")
+		return nil
+	}
 }
