@@ -45,12 +45,12 @@ func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reade
 
 func (scenario *Scenario) RunSteps() (string, error) {
 	fmt.Println("Running: "+ scenario.Entry)
-	steps := scenario.Steps
 
-	cmd, stdin, err, out := funcHitRit(steps)
+	args := strings.Fields(scenario.Steps[0].Value)
+	cmd, stdin, err, out := funcHitRit(args)
 
-	if err != nil {
-		for _, step := range steps {
+	if err == nil {
+		for _, step := range scenario.Steps {
 			if step.Action == "sendkey" {
 				err = funcSendKeys(step, out, stdin)
 				if err != nil {
@@ -65,12 +65,10 @@ func (scenario *Scenario) RunSteps() (string, error) {
 		}
 	}
 
-
 	defer stdin.Close()
 
 	resp := ""
-	scanner := bufio.NewScanner(out)
-	scanner.Split(bufio.ScanLines)
+	scanner := funcScannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
 		resp = fmt.Sprint(resp, m, "\n")
@@ -86,8 +84,22 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	return resp, err
 }
 
-func funcHitRit(steps []Step) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
-	args := strings.Fields(steps[0].Value)
+func funcValidateLoginRequired() {
+	login := []string{"set", "credential"}
+	_, stdin, _, out := funcHitRit(login)
+
+	scanner := funcScannerTerminal(out)
+	for scanner.Scan() {
+		m := scanner.Text()
+		if strings.Contains(m, "To use this command, you need to start a session on Ritchie") {
+			inputCommand(stdin, "123")
+			inputCommand(stdin, "\n")
+		}
+		break
+	}
+}
+
+func funcHitRit(args []string) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
 	cmd := exec.Command("rit", args...)
 	stdin, err, out, cmd := commandInit(cmd)
 	if err != nil {
@@ -97,8 +109,7 @@ func funcHitRit(steps []Step) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
 }
 
 func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
-	scanner := bufio.NewScanner(out)
-	scanner.Split(bufio.ScanLines)
+	scanner := funcScannerTerminal(out)
 	startKey := false
 	optionNumber := 0
 	for scanner.Scan() {
@@ -128,8 +139,7 @@ func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
 
 func funcSendKeys(step Step, out io.Reader, stdin io.WriteCloser) error {
 	valueFinal := step.Value + "\n"
-	scanner := bufio.NewScanner(out)
-	scanner.Split(bufio.ScanLines)
+	scanner := funcScannerTerminal(out)
 	startKey := false
 	//Need to work on this possibility
 	// optionNumber := 0
@@ -176,4 +186,10 @@ func LoadScenarios(file string) []Scenario {
 		os.Exit(1)
 	}
 	return result
+}
+
+func funcScannerTerminal(out io.Reader) *bufio.Scanner {
+	scanner := bufio.NewScanner(out)
+	scanner.Split(bufio.ScanLines)
+	return scanner
 }
