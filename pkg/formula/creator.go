@@ -375,7 +375,6 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 	case "Node":
 		tfn := tpl_node.TemplateMakefile
 		tfn = strings.ReplaceAll(tfn, nameBin, name)
-
 		err := fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfn))
 		if err != nil {
 			return err
@@ -416,7 +415,7 @@ func createMainFile(dir, pkg, lang string) error {
 	case "Node":
 		tfn := tpl_node.TemplateIndex
 		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
-		return fileutil.WriteFile(fmt.Sprintf("%s/index.java", dir), []byte(tfn))
+		return fileutil.WriteFile(fmt.Sprintf("%s/index.js", dir), []byte(tfn))
 	case "Python":
 		tfp := tpl_python.TemplateMain
 		tfp = strings.ReplaceAll(tfp, nameBin, pkg)
