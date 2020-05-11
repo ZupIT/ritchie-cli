@@ -7,6 +7,16 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+)
+
+const (
+	organization = "organization"
+	firstName    = "firstName"
+	lastName 	 = "lastName"
+	email 		 = "email"
+	username 	 = "username"
+	password 	 = "password"
 )
 
 // createUserCmd type for create user command
@@ -29,7 +39,7 @@ func NewCreateUserCmd(
 		Use:   "user",
 		Short: "Create user",
 		Long:  `Create user of the organization`,
-		RunE:  c.runFunc(),
+		RunE: RunFuncE(c.runStdin(), c.runPrompt()),
 	}
 
 	cmd.LocalFlags()
@@ -37,7 +47,7 @@ func NewCreateUserCmd(
 	return cmd
 }
 
-func (c createUserCmd) runFunc() CommandRunnerFunc {
+func (c createUserCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		org, err := c.Text("Organization: ", true)
 		if err != nil {
@@ -79,5 +89,31 @@ func (c createUserCmd) runFunc() CommandRunnerFunc {
 		fmt.Println("User created!")
 
 		return err
+	}
+}
+
+func (c createUserCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		data, err := stdin.Parse()
+		if err != nil {
+			return err
+		}
+
+		u := security.User{
+			Organization: data[organization],
+			FirstName:    data[firstName],
+			LastName:     data[lastName],
+			Email:        data[email],
+			Username:     data[username],
+			Password:     data[password],
+		}
+
+		if err := c.Create(u); err != nil {
+			return err
+		}
+
+		fmt.Println("User created!")
+
+		return nil
 	}
 }

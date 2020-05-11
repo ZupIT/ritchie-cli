@@ -46,27 +46,31 @@ func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.Inpu
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Creating Formula ...")
+
 		fCmd, err := c.Text("New formula's command ? [ex.: rit group verb <noun>]", true)
 		if err != nil {
 			return err
 		}
+
 		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
 		if err != nil {
 			return err
 		}
+
 		f, err := c.Create(fCmd, lang)
 		if err != nil {
 			return err
 		}
+
 		log.Printf("Formula in %s successfully created!\n", lang)
 		log.Printf("Your formula is in %s", f.FormPath)
+
 		return nil
 	}
 }
 
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
 		fmt.Println("Creating Formula ...")
 
 		data, err := stdin.Parse()

@@ -61,6 +61,8 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
+		fmt.Printf("%q has been cleaned successfully\n", data[name])
+
 		return nil
 	}
 }
