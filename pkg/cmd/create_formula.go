@@ -86,7 +86,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		log.Printf("Formula in %s successfully created!\n", data[""])
+		log.Printf("Formula in %s successfully created!\n", data[language])
 		log.Printf("Your formula is in %s", f.FormPath)
 
 		return nil

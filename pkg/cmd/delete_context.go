@@ -7,6 +7,11 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+)
+
+const (
+	context = "ctx"
 )
 
 type deleteContextCmd struct {
@@ -21,15 +26,19 @@ func NewDeleteContextCmd(
 	il prompt.InputList) *cobra.Command {
 	d := deleteContextCmd{fr, ib, il}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:     "context",
 		Short:   "Delete context for Ritchie-cli",
 		Example: "rit delete context",
-		RunE:    d.runFunc(),
+		RunE: RunFuncE(d.runStdin(), d.runPrompt()),
 	}
+
+	cmd.LocalFlags()
+
+	return cmd
 }
 
-func (d deleteContextCmd) runFunc() CommandRunnerFunc {
+func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		ctxHolder, err := d.Find()
 		if err != nil {
@@ -59,6 +68,32 @@ func (d deleteContextCmd) runFunc() CommandRunnerFunc {
 		}
 
 		if _, err := d.Remove(ctx); err != nil {
+			return err
+		}
+
+		fmt.Println("Delete context successful!")
+		return nil
+	}
+}
+
+func (d deleteContextCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		ctxHolder, err := d.Find()
+		if err != nil {
+			return err
+		}
+
+		if len(ctxHolder.All) <= 0 {
+			fmt.Println("You have no defined contexts")
+			return nil
+		}
+
+		data, err := stdin.Parse()
+		if err != nil {
+			return err
+		}
+
+		if _, err := d.Remove(data[context]); err != nil {
 			return err
 		}
 
