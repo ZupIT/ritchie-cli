@@ -14,13 +14,15 @@ import (
 type deleteRepoCmd struct {
 	formula.DelLister
 	input prompt.InputList
+	prompt.InputBool
 }
 
 // NewDeleteRepoCmd delete repository instance
-func NewDeleteRepoCmd(dl formula.DelLister, il prompt.InputList) *cobra.Command {
+func NewDeleteRepoCmd(dl formula.DelLister, il prompt.InputList, ib prompt.InputBool) *cobra.Command {
 	d := &deleteRepoCmd{
 		dl,
 		il,
+		ib,
 	}
 
 	return &cobra.Command{
@@ -48,7 +50,7 @@ func (d deleteRepoCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if len(repos) <= 0 {
+		if len(repos) == 0 {
 			fmt.Println("You dont have any repository to delete")
 			return nil
 		}
@@ -58,6 +60,12 @@ func (d deleteRepoCmd) runFunc() CommandRunnerFunc {
 		rn, err := d.input.List("Choose a repository to delete:", options)
 		if err != nil {
 			return err
+		}
+
+		choice, _ := d.Bool(fmt.Sprintf("Want to delete %s?", rn), []string{"yes", "no"})
+		if !choice {
+			fmt.Println("Operation cancelled")
+			return nil
 		}
 
 		if err = d.Delete(rn); err != nil {
