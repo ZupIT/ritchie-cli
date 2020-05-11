@@ -96,5 +96,5 @@ clean:
 
 test:
 	mkdir -p $(BIN)
-	$(GOTEST) -short -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
+	$(GOTEST) -v -short -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
 	$(GOTOOLCOVER) -func=$(BIN)/cov.out

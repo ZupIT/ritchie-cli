@@ -56,3 +56,11 @@ know.
 
 Ritchie does not currently maintain a style guide. Use your best judgment, and
 try to follow the example set by the existing files.
+
+## Tests guide
+
+To keep Ritchie easy to maintain is crucial to have unit tests.
+To run:
+```
+make test
+```
