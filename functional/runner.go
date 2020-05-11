@@ -49,11 +49,19 @@ func (scenario *Scenario) RunSteps() (string, error) {
 
 	cmd, stdin, err, out := funcHitRit(steps)
 
-	for _, step := range steps {
-		if step.Action == "sendkey" {
-			err = funcSendKeys(step, out, err, stdin)
-		} else if step.Action == "select" {
-			err = funcSelect(step, out, err, stdin)
+	if err != nil {
+		for _, step := range steps {
+			if step.Action == "sendkey" {
+				err = funcSendKeys(step, out, stdin)
+				if err != nil {
+					break
+				}
+			} else if step.Action == "select" {
+				err = funcSelect(step, out, stdin)
+				if err != nil {
+					break
+				}
+			}
 		}
 	}
 
@@ -71,12 +79,11 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	err = cmd.Wait()
 	if err != nil {
 		log.Printf("Error while running: %q", err)
-		os.Exit(1)
 	}
 
 	fmt.Println(resp)
 	fmt.Println("--------")
-	return resp, nil
+	return resp, err
 }
 
 func funcHitRit(steps []Step) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
@@ -86,10 +93,10 @@ func funcHitRit(steps []Step) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
 	if err != nil {
 		log.Panic(err)
 	}
-	return cmd, stdin, err, out
+	return cmd, stdin, nil, out
 }
 
-func funcSelect(step Step, out io.Reader, err error, stdin io.WriteCloser) error {
+func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
 	scanner := bufio.NewScanner(out)
 	scanner.Split(bufio.ScanLines)
 	startKey := false
@@ -101,18 +108,25 @@ func funcSelect(step Step, out io.Reader, err error, stdin io.WriteCloser) error
 		}
 		if startKey {
 			if strings.Contains(m, step.Value) {
-				err = inputCommand(err, stdin, "\n")
+				err := inputCommand(stdin, "\n")
+				if err != nil {
+					return err
+				}
 				break
 			} else if optionNumber >= 1 {
-				err = inputCommand(err, stdin, "j")
+				err := inputCommand(stdin, "j")
+				if err != nil {
+					return err
+				}
 			}
+
 			optionNumber++
 		}
 	}
-	return err
+	return nil
 }
 
-func funcSendKeys(step Step, out io.Reader, err error, stdin io.WriteCloser) error {
+func funcSendKeys(step Step, out io.Reader, stdin io.WriteCloser) error {
 	valueFinal := step.Value + "\n"
 	scanner := bufio.NewScanner(out)
 	scanner.Split(bufio.ScanLines)
@@ -127,7 +141,10 @@ func funcSendKeys(step Step, out io.Reader, err error, stdin io.WriteCloser) err
 		if startKey {
 			// if strings.Contains(m, "Type new value.") {
 			// 	err = inputCommand(err, stdin, "\n")
-				err = inputCommand(err, stdin, valueFinal)
+				err := inputCommand(stdin, valueFinal)
+				if err != nil {
+					return err
+				}
 				break
 			// } else if optionNumber >= 1 {
 			// 	err = inputCommand(err, stdin, "j")
@@ -135,15 +152,14 @@ func funcSendKeys(step Step, out io.Reader, err error, stdin io.WriteCloser) err
 			// optionNumber++
 		}
 	}
-	return err
+	return nil
 }
 
-func inputCommand(err error, stdin io.WriteCloser, impcommand string) error {
+func inputCommand(stdin io.WriteCloser, impcommand string) error {
 	time.Sleep(1000 * time.Millisecond)
-	_, err = io.Copy(stdin, bytes.NewBuffer([]byte(impcommand)))
+	_, err := io.Copy(stdin, bytes.NewBuffer([]byte(impcommand)))
 	if err != nil {
 		log.Printf("Error when giving inputs: %q", err)
-		os.Exit(1)
 	}
 	return err
 }
@@ -154,6 +170,10 @@ func LoadScenarios(file string) []Scenario {
 	defer scaffoldJson.Close()
 	var result []Scenario
 	byteValue, _ := ioutil.ReadAll(scaffoldJson)
-	json.Unmarshal([]byte(byteValue), &result)
+	err := json.Unmarshal([]byte(byteValue), &result)
+	if err != nil {
+		log.Printf("Error unmarshal json: %q", err)
+		os.Exit(1)
+	}
 	return result
 }
