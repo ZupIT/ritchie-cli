@@ -1,4 +1,5 @@
-package main
+
+package functional
 
 import (
 	"testing"

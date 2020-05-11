@@ -94,7 +94,22 @@ clean:
 	rm -rf $(DIST)
 	rm -rf $(BIN)
 
-test:
+unit-test-circle:
 	mkdir -p $(BIN)
-	$(GOTEST) -v -short -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
+	PACKAGE_NAMES=$(go list ./pkg/... | circleci tests split --split-by=timings --timings-type=classname)
+	echo "Running $(echo $PACKAGE_NAMES | wc -w) packages"
+	echo $PACKAGE_NAMES
+	gotestsum --format=short-verbose \
+		--junitfile $TEST_RESULTS_DIR/gotestsum-report.xml -- \
+		-p 2 \
+		-cover -coverprofile=coverage.txt \
+		$PACKAGE_NAMES
+
+unit-test:
+	mkdir -p $(BIN)
+	$(GOTEST) -v -short -coverprofile=$(BIN)/cov.out `go list ./pkg/... | grep -v vendor/`
 	$(GOTOOLCOVER) -func=$(BIN)/cov.out
+
+functional-test:
+	mkdir -p $(BIN)
+	$(GOTEST) -v `go list ./functional/... | grep -v vendor/`

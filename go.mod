@@ -19,7 +19,9 @@ require (
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/thoas/go-funk v0.6.0
+	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c // indirect
 	gopkg.in/square/go-jose.v2 v2.5.0 // indirect
 	k8s.io/kubectl v0.18.2
 )
