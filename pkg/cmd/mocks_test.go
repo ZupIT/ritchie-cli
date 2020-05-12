@@ -143,6 +143,10 @@ func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
 
 type repoDeleterMock struct{}
 
+func (m repoDeleterMock) List() ([]formula.Repository, error) {
+	return []formula.Repository{}, nil
+}
+
 func (repoDeleterMock) Delete(name string) error {
 	return nil
 }
