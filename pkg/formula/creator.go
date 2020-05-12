@@ -278,6 +278,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
+		err = createDockerfile(srcDir)
+		if err != nil {
+			return err
+		}
 		err = createMakefileForm(srcDir, pkg, dir, lang)
 		if err != nil {
 			return err
@@ -392,6 +396,12 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		tfs = strings.ReplaceAll(tfs, nameBin, name)
 		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfs))
 	}
+}
+
+func createDockerfile(dir string) error {
+
+	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl_python.TemplateDockerfile))
+
 }
 
 func createGoModFile(dir, pkg string) error {
