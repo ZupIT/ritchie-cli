@@ -81,6 +81,8 @@ jobs:
       <<: *ENVIRONMENT
     steps:
       - checkout
+      - attach_workspace:
+            at: /workspace/dist
       - run:
           name: Running Functional tests
           command: |
