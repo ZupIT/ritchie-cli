@@ -52,11 +52,12 @@ func NewRunner(
 		tm,
 		il,
 		it,
-		ib}
+		ib,
+	}
 }
 
 // Run default implementation of function Manager.Run
-func (d DefaultRunner) Run(def Definition) error {
+func (d DefaultRunner) Run(def Definition, docker bool) error {
 	cPwd, _ := os.Getwd()
 	fPath := def.FormulaPath(d.ritchieHome)
 	config, err := d.loadConfig(def)

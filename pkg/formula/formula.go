@@ -155,7 +155,7 @@ func (d *Definition) ConfigUrl(configName string) string {
 }
 
 type Runner interface {
-	Run(def Definition) error
+	Run(def Definition, docker bool) error
 }
 
 type Creator interface {
