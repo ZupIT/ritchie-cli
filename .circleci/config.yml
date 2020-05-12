@@ -75,6 +75,21 @@ jobs:
           when: always
           command: bash <(curl -s https://codecov.io/bash)
 
+  functional_test:
+    executor: ritchie-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - run:
+          name: Running Functional tests
+          command: |
+            make functional-test
+      - store_test_results:
+          path: *TEST_RESULTS_DIR
+      - store_artifacts:
+          path: *TEST_RESULTS_DIR
+
   build:
     executor: ritchie-executor
     branches:
@@ -134,6 +149,9 @@ workflows:
           requires:
             - unit_test
             - lint
+      - functional_test:
+          requires:
+            - build
       - delivery:
           filters:
             <<: *FILTERS_DElIVERY
