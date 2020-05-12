@@ -16,9 +16,12 @@ var _ = Describe("RitCore", func() {
 			Expect(out).To(ContainSubstring(scenario.Result))
 		},
 		Entry("When running show context", scenariosCore[0]),
-		Entry("Add new repo without error", scenariosCore[1]),
-		Entry("Clean repo without error", scenariosCore[2]),
-		Entry("Delete repo without error", scenariosCore[3]),
+		Entry("When running set context", scenariosCore[1]),
+		Entry("Add new repo without error", scenariosCore[2]),
+		Entry("Clean repo without error", scenariosCore[3]),
+		Entry("List repo without error", scenariosCore[4]),
+		Entry("Delete repo without error", scenariosCore[5]),
+		Entry("Set Credential", scenariosCore[6]),
 	)
 
 })

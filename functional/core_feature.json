@@ -11,6 +11,22 @@
         "result":"Current context:"
     },
     {
+        "entry":"When running set context",
+        "steps":[
+            {
+                "key":"",
+                "value":"set context",
+                "action":"main"
+            },
+            {
+                "key":"All:",
+                "value":"",
+                "action":"sendkey"
+            }
+        ],
+        "result":"Set context successful!"
+    },
+    {
         "entry":"Add new repo without error",
         "steps":[
             {
@@ -53,6 +69,17 @@
         "result":"\"Leonidas\" has been cleaned successfully"
     },
     {
+        "entry":"List repo without error",
+        "steps":[
+            {
+                "key":"",
+                "value":"list repo",
+                "action":"main"
+            }
+        ],
+        "result":"Leonidas"
+    },
+    {
         "entry":"Delete repo without error",
         "steps":[
             {
@@ -67,5 +94,43 @@
             }
         ],
         "result":"\"Leonidas\" has been removed from your repositories"
+    },
+    {
+        "entry":"Set credentials",
+        "steps":[
+            {
+                "key":"",
+                "value":"set credential",
+                "action":"main"
+            },
+            {
+                "key":"Provider:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            },
+            {
+                "key":"Type your credential using the format",
+                "value":"email=email@email.com",
+                "action":"sendkey"
+            },
+            {
+                "key":"Add more fields?",
+                "value":"no",
+                "action":"select"
+            }
+        ],
+        "result":""
+    },
+    {
+        "entry":"Update repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"update repo",
+                "action":"main"
+            }
+        ],
+        "result":"Successfully got an update"
     }
+
 ]
