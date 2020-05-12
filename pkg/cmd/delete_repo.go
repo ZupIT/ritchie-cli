@@ -12,8 +12,8 @@ import (
 
 // deleteRepoCmd type for delete repo command
 type deleteRepoCmd struct {
-	formula.DelLister
-	input prompt.InputList
+	repo formula.DelLister
+	prompt.InputList
 	prompt.InputBool
 }
 
@@ -45,7 +45,7 @@ func rNameList(r []formula.Repository) []string {
 func (d deleteRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		repos, err := d.List()
+		repos, err := d.repo.List()
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,7 @@ func (d deleteRepoCmd) runFunc() CommandRunnerFunc {
 
 		options := rNameList(repos)
 
-		rn, err := d.input.List("Choose a repository to delete:", options)
+		rn, err := d.List("Choose a repository to delete:", options)
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ func (d deleteRepoCmd) runFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		if err = d.Delete(rn); err != nil {
+		if err = d.repo.Delete(rn); err != nil {
 			return err
 		}
 
