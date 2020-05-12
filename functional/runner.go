@@ -71,6 +71,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	scanner := funcScannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
+		funcShowTerminal(m)
 		resp = fmt.Sprint(resp, m, "\n")
 	}
 
@@ -85,17 +86,24 @@ func (scenario *Scenario) RunSteps() (string, error) {
 }
 
 func funcValidateLoginRequired() {
-	login := []string{"set", "credential"}
+	login := []string{"show", "context"}
 	_, stdin, _, out := funcHitRit(login)
-
 	scanner := funcScannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
+		funcShowTerminal(m)
 		if strings.Contains(m, "To use this command, you need to start a session on Ritchie") {
-			inputCommand(stdin, "123")
-			inputCommand(stdin, "\n")
+			err := inputCommand(stdin, "12345\n")
+			if err != nil {
+				log.Printf("Error when input number: %q", err)
+			}
+			break
 		}
-		break
+	}
+	scanner = funcScannerTerminal(out)
+	for scanner.Scan() {
+		m := scanner.Text()
+		funcShowTerminal(m)
 	}
 }
 
@@ -114,6 +122,7 @@ func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
 	optionNumber := 0
 	for scanner.Scan() {
 		m := scanner.Text()
+		funcShowTerminal(m)
 		if strings.Contains(m, step.Key) {
 			startKey = true
 		}
@@ -145,6 +154,7 @@ func funcSendKeys(step Step, out io.Reader, stdin io.WriteCloser) error {
 	// optionNumber := 0
 	for scanner.Scan() {
 		m := scanner.Text()
+		funcShowTerminal(m)
 		if strings.Contains(m, step.Key) {
 			startKey = true
 		}
@@ -165,9 +175,9 @@ func funcSendKeys(step Step, out io.Reader, stdin io.WriteCloser) error {
 	return nil
 }
 
-func inputCommand(stdin io.WriteCloser, impcommand string) error {
+func inputCommand(stdin io.WriteCloser, command string) error {
 	time.Sleep(1000 * time.Millisecond)
-	_, err := io.Copy(stdin, bytes.NewBuffer([]byte(impcommand)))
+	_, err := io.Copy(stdin, bytes.NewBuffer([]byte(command)))
 	if err != nil {
 		log.Printf("Error when giving inputs: %q", err)
 	}
@@ -192,4 +202,8 @@ func funcScannerTerminal(out io.Reader) *bufio.Scanner {
 	scanner := bufio.NewScanner(out)
 	scanner.Split(bufio.ScanLines)
 	return scanner
+}
+
+func funcShowTerminal(message string) {
+	fmt.Println(message)
 }
