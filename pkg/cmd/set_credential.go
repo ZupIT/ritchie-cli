@@ -34,7 +34,7 @@ func NewSingleSetCredentialCmd(
 	ip prompt.InputPassword) *cobra.Command {
 	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip}
 
-	return newCmd(s)
+	return newSetCredentialCobra(s)
 }
 
 // NewTeamSetCredentialCmd creates a new cmd instance
@@ -47,10 +47,10 @@ func NewTeamSetCredentialCmd(
 	ip prompt.InputPassword) *cobra.Command {
 	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip}
 
-	return newCmd(s)
+	return newSetCredentialCobra(s)
 }
 
-func newCmd(s *setCredentialCmd) *cobra.Command {
+func newSetCredentialCobra(s *setCredentialCmd) *cobra.Command {
 	return &cobra.Command{
 		Use:   "credential",
 		Short: "Set credential",
