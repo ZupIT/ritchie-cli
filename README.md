@@ -26,7 +26,6 @@ This repository contains the CLI core, which can execute formulas stored inside 
 
 - [Linux / Mac](https://docs.ritchiecli.io/get-started/installation/linux-mac)
 
-
 ## Contributors
 
 * [@sandokandias](https://github.com/sandokandias) 
