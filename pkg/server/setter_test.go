@@ -44,7 +44,7 @@ func TestSet(t *testing.T) {
 			name: "server error",
 			in:   "http://localhost/mocked",
 			out: out{
-				err:    errors.New("internal server error"),
+				err:    errors.New("EOF"),
 			},
 		},
 		{
@@ -52,7 +52,7 @@ func TestSet(t *testing.T) {
 			in:   "http://localhost/mocked",
 			out: out{
 				status: 500,
-				err:    errors.New("internal server error"),
+				err:    errors.New("please, check your server. It doesn't seem to be UP"),
 			},
 		},
 	}
@@ -67,18 +67,13 @@ func TestSet(t *testing.T) {
 			if in != "" {
 				body, _ = json.Marshal(&in)
 				server := mockServer(out.status, body)
-				err := s.Set(server.URL)
-				if err != nil {
-					fmt.Sprintln("Error in set")
-					return
-				}
-				defer server.Close()
 				got = s.Set(server.URL)
+				defer server.Close()
 			} else {
 				got = s.Set(in)
 			}
 
-			if got != nil && errors.Unwrap(got) != out.err {
+			if got != nil && errors.Unwrap(got).Error() != out.err.Error() {
 				t.Errorf("Set(%s) got %v, want %v", in, got, out)
 			}
 
