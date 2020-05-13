@@ -27,9 +27,24 @@ build:
 	jar cvfm Main.jar manifest.txt *.class {{bin-name}}/*.class
 	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
 	cp run_template $(BINARY_NAME_WINDOWS) && chmod +x $(BINARY_NAME_WINDOWS)
-	cp Main.jar $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX) $(DIST_DIR)
+	cp Main.jar $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX) $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
 	#Clean files
 	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
+
+	TemplateDockerfile = `
+FROM openjdk:8-jre-alpine
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN apk update
+RUN apk fetch openjdk8
+RUN apk add openjdk8
+ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
+ENV PATH="$JAVA_HOME/bin:${PATH}"
+
+CMD javac Main.java && ls && java Main.class`
 
 	TemplateRunTemplate = `#!/bin/sh
 java -jar Main.jar`

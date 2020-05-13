@@ -30,8 +30,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-CMD python3 main.py
-`
+CMD python3 main.py`
 
 	TemplateFilePython = `#!/usr/bin/python3
 import time

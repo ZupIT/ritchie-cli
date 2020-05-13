@@ -220,6 +220,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
+		err = createDockerfile(srcDir, tpl_go.TemplateDockerfile)
+		if err != nil {
+			return err
+		}
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
 		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 		if err != nil {
@@ -235,6 +239,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		err = createDockerfile(srcDir, tpl_java.TemplateDockerfile)
 		if err != nil {
 			return err
 		}
@@ -260,6 +268,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
+		err = createDockerfile(srcDir, tpl_node.TemplateDockerfile)
+		if err != nil {
+			return err
+		}
 		err = createRunTemplate(srcDir, lang)
 		if err != nil {
 			return err
@@ -278,11 +290,11 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		err = createDockerfile(srcDir)
+		err = createMakefileForm(srcDir, pkg, dir, lang)
 		if err != nil {
 			return err
 		}
-		err = createMakefileForm(srcDir, pkg, dir, lang)
+		err = createDockerfile(srcDir, tpl_python.TemplateDockerfile)
 		if err != nil {
 			return err
 		}
@@ -301,6 +313,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		err = createDockerfile(srcDir, tpl_shell.TemplateDockerfile)
 		if err != nil {
 			return err
 		}
@@ -368,7 +384,6 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		tplFile := tpl_go.TemplateMakefile
 		tplFile = strings.ReplaceAll(tplFile, "{{name}}", name)
 		tplFile = strings.ReplaceAll(tplFile, "{{form-path}}", pathName)
-
 		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tplFile))
 	case "Java":
 		tfj := tpl_java.TemplateMakefile
@@ -398,9 +413,8 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 	}
 }
 
-func createDockerfile(dir string) error {
-
-	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl_python.TemplateDockerfile))
+func createDockerfile(dir string, tpl string) error {
+	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
 
 }
 
