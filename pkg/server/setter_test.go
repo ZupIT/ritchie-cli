@@ -41,14 +41,14 @@ func TestSet(t *testing.T) {
 			},
 		},
 		{
-			name: "existing serverURL",
+			name: "server error",
 			in:   "http://localhost/mocked",
 			out: out{
 				err:    errors.New("internal server error"),
 			},
 		},
 		{
-			name: "existing serverURL",
+			name: "server http status not OK",
 			in:   "http://localhost/mocked",
 			out: out{
 				status: 500,
