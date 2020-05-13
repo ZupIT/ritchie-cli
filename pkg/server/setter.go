@@ -29,7 +29,10 @@ func (s SetterManager) Set(url string) error {
 		return err
 	}
 	resp, err := http.Get(url)
-	if (err != nil) || (resp.StatusCode != http.StatusOK) {
+	if (err != nil) {
+		return err
+	}
+	if (resp.StatusCode != http.StatusOK) {
 		return fmt.Errorf(
 			"%v: %w",
 			"HttpStatus returned: "+resp.Status+" for URL: "+url,
