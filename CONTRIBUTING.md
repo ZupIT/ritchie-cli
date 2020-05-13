@@ -59,8 +59,9 @@ try to follow the example set by the existing files.
 
 ## Tests guide
 
-To keep Ritchie easy to maintain is crucial to have unit tests.
+To keep Ritchie easy to maintain is crucial to have tests.
 To run:
 ```
-make test
+make unit-test:
+make functional-test:
 ```
