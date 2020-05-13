@@ -1,6 +1,6 @@
 [
     {
-        "entry":"When running show context",
+        "entry":"Show context",
         "steps":[
             {
                 "key":"",
@@ -11,7 +11,7 @@
         "result":"Current context:"
     },
     {
-        "entry":"When running set context",
+        "entry":"Set context",
         "steps":[
             {
                 "key":"",
@@ -20,14 +20,53 @@
             },
             {
                 "key":"All:",
-                "value":"",
+                "value":"Type new context?",
+                "action":"select"
+            },
+            {
+                "key":"New context:",
+                "value":"Leonidas",
                 "action":"sendkey"
             }
+
         ],
         "result":"Set context successful!"
     },
     {
-        "entry":"Add new repo without error",
+        "entry":"Delete context",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete context",
+                "action":"main"
+            },
+            {
+                "key":"All:",
+                "value":"Leonidas",
+                "action":"select"
+            },
+            {
+                "key":"Are you sure want to delete this context?",
+                "value":"yes",
+                "action":"select"
+            }
+
+        ],
+        "result":"Delete context successful!"
+    },
+    {
+        "entry":"Add",
+        "steps":[
+            {
+                "key":"",
+                "value":"add",
+                "action":"main"
+            }
+        ],
+        "result":"It can be used to add formulas, repositories and other objects.."
+    },
+    {
+        "entry":"Add new repo",
         "steps":[
             {
                 "key":"",
@@ -53,7 +92,7 @@
         "result":""
     },
     {
-        "entry":"Clean repo without error",
+        "entry":"Clean repo",
         "steps":[
             {
                 "key":"",
@@ -69,7 +108,7 @@
         "result":"\"Leonidas\" has been cleaned successfully"
     },
     {
-        "entry":"List repo without error",
+        "entry":"List repo",
         "steps":[
             {
                 "key":"",
@@ -80,7 +119,7 @@
         "result":"Leonidas"
     },
     {
-        "entry":"Delete repo without error",
+        "entry":"Delete repo",
         "steps":[
             {
                 "key":"",
@@ -122,6 +161,17 @@
         "result":""
     },
     {
+        "entry":"Set",
+        "steps":[
+            {
+                "key":"",
+                "value":"set",
+                "action":"main"
+            }
+        ],
+        "result":"Set objects like credentials, etc."
+    },
+    {
         "entry":"Update repo",
         "steps":[
             {
@@ -131,6 +181,82 @@
             }
         ],
         "result":"Successfully got an update"
+    },
+    {
+        "entry":"Completion",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion",
+                "action":"main"
+            }
+        ],
+        "result":"Add autocomplete for terminal, Available for (bash, zsh)."
+    },
+    {
+        "entry":"Completion bash",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion bash",
+                "action":"main"
+            }
+        ],
+        "result":"#!/bin/bash"
+    },
+    {
+        "entry":"Completion zsh",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion zsh",
+                "action":"main"
+            }
+        ],
+        "result":"#compdef rit"
+    },
+    {
+        "entry":"Version",
+        "steps":[
+            {
+                "key":"",
+                "value":"--version",
+                "action":"main"
+            }
+        ],
+        "result":"rit version"
+    },
+    {
+        "entry":"Delete",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete",
+                "action":"main"
+            }
+        ],
+        "result":"Delete objects like users, etc."
+    },
+    {
+        "entry":"Show",
+        "steps":[
+            {
+                "key":"",
+                "value":"show",
+                "action":"main"
+            }
+        ],
+        "result":"Show objects like context, organization etc."
+    },
+    {
+        "entry":"Help",
+        "steps":[
+            {
+                "key":"",
+                "value":"help",
+                "action":"main"
+            }
+        ],
+        "result":"Use \"rit <command> --help\" for more information about a given command."
     }
-
 ]
