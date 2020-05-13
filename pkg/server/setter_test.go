@@ -40,6 +40,21 @@ func TestSet(t *testing.T) {
 				status: 200,
 			},
 		},
+		{
+			name: "existing serverURL",
+			in:   "http://localhost/mocked",
+			out: out{
+				err:    errors.New("internal server error"),
+			},
+		},
+		{
+			name: "existing serverURL",
+			in:   "http://localhost/mocked",
+			out: out{
+				status: 500,
+				err:    errors.New("internal server error"),
+			},
+		},
 	}
 
 	for _, tt := range tests {

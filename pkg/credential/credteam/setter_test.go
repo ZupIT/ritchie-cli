@@ -34,13 +34,7 @@ func TestSet(t *testing.T) {
 			},
 		},
 		{
-			name: "get server error",
-			out: out{
-				err:    errors.New("internal server error"),
-			},
-		},
-		{
-			name: "server http status not ok",
+			name: "server error",
 			out: out{
 				status: 500,
 				err:    errors.New("internal server error"),
