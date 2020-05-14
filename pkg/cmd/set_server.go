@@ -14,9 +14,15 @@ const (
 	url     = "url"
 )
 
+// setServerCmd type for add repo command
 type setServerCmd struct {
 	server.Setter
 	prompt.InputURL
+}
+
+// setServerJsonDecoder type for stdin json decoder
+type setServerJsonDecoder struct {
+	url string
 }
 
 func NewSetServerCmd(
@@ -57,12 +63,16 @@ func (s setServerCmd) runPrompt() CommandRunnerFunc {
 
 func (s setServerCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data, err := stdin.Parse()
+
+		ss := setServerJsonDecoder{}
+
+		err := stdin.ReadJson(&ss)
 		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err
 		}
 
-		if err := s.Set(data[url]); err != nil {
+		if err := s.Set(ss.url); err != nil {
 			return err
 		}
 
