@@ -17,6 +17,11 @@ type deleteRepoCmd struct {
 	prompt.InputText
 }
 
+// deleteRepoJsonDecoder type for stdin json decoder
+type deleteRepoJsonDecoder struct {
+	name string
+}
+
 // NewDeleteRepoCmd delete repository instance
 func NewDeleteRepoCmd(dl formula.Deleter, it prompt.InputText) *cobra.Command {
 	d := &deleteRepoCmd{dl, it}
@@ -52,16 +57,19 @@ func (d deleteRepoCmd) runPrompt() CommandRunnerFunc {
 
 func (d deleteRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data, err := stdin.Parse()
+		dr := deleteRepoJsonDecoder{}
+
+		err := stdin.ReadJson(&dr)
 		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err
 		}
 
-		if err = d.Delete(data[name]); err != nil {
+		if err = d.Delete(dr.name); err != nil {
 			return err
 		}
 
-		fmt.Printf("%q has been removed from your repositories\n", data[name])
+		fmt.Printf("%q has been removed from your repositories\n", dr.name)
 
 		return nil
 	}
