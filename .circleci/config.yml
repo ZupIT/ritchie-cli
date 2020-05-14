@@ -27,7 +27,6 @@ references:
     branches:
       only:
         - /^release-.*/
-        - feature/changelog
 
   filters-checks: &FILTERS_CHECK
     branches:
@@ -174,6 +173,6 @@ workflows:
       - release:
           filters:
             <<: *FILTERS_RELEASE
-#          requires:
-#            - build
+          requires:
+            - build
 
