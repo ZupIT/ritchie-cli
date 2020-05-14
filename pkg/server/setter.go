@@ -1,7 +1,6 @@
 package server
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -11,16 +10,19 @@ import (
 
 const (
 	serverFilePattern = "%s/server"
-	serverDown        = "please, check your server. It doesn't seem to be UP"
+	// ServerErrPattern error message pattern
+	ServerErrPattern = "Server (%s) returned %s"
 )
 
 type SetterManager struct {
 	serverFile string
+	httpClient *http.Client
 }
 
-func NewSetter(ritchieHomeDir string) Setter {
+func NewSetter(ritHomeDir string, hc *http.Client) Setter {
 	return SetterManager{
-		serverFile: fmt.Sprintf(serverFilePattern, ritchieHomeDir),
+		serverFile: fmt.Sprintf(serverFilePattern, ritHomeDir),
+		httpClient: hc,
 	}
 }
 
@@ -28,15 +30,12 @@ func (s SetterManager) Set(url string) error {
 	if err := validator.IsValidURL(url); err != nil {
 		return err
 	}
-	resp, err := http.Get(url)
-	if (err != nil) {
+	resp, err := s.httpClient.Get(url)
+	if err != nil {
 		return err
 	}
-	if (resp.StatusCode != http.StatusOK) {
-		return fmt.Errorf(
-			"%v: %w",
-			"HttpStatus returned: "+resp.Status+" for URL: "+url,
-			errors.New(serverDown))
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf(ServerErrPattern, url, resp.Status)
 	}
 	if err := fileutil.WriteFile(s.serverFile, []byte(url)); err != nil {
 		return err
