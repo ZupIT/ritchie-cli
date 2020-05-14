@@ -10,15 +10,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	organization = "organization"
-	firstName    = "firstName"
-	lastName 	 = "lastName"
-	email 		 = "email"
-	username 	 = "username"
-	password 	 = "password"
-)
-
 // createUserCmd type for create user command
 type createUserCmd struct {
 	security.UserManager

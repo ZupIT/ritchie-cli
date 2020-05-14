@@ -10,14 +10,16 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	context = "ctx"
-)
-
+// deleteContextCmd type for clean repo command
 type deleteContextCmd struct {
 	rcontext.FindRemover
 	prompt.InputBool
 	prompt.InputList
+}
+
+// deleteContextJsonDecoder type for stdin json decoder
+type deleteContextJsonDecoder struct {
+	context string
 }
 
 func NewDeleteContextCmd(
@@ -88,12 +90,15 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 			return nil
 		}
 
-		data, err := stdin.Parse()
+		dc := deleteContextJsonDecoder{}
+
+		err = stdin.ReadJson(&dc)
 		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err
 		}
 
-		if _, err := d.Remove(data[context]); err != nil {
+		if _, err := d.Remove(dc.context); err != nil {
 			return err
 		}
 

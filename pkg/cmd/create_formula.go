@@ -11,11 +11,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	formulaCmd     = "formulaCmd"
-	language       = "lang"
-)
-
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
 	formula.Creator
