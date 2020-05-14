@@ -181,6 +181,7 @@ func (d DefaultRunner) fromPrompt(cmd *exec.Cmd, formulaPath string, config *Con
 	return nil
 }
 
+// TODO : Update this method to follow different steps depending if core command or formula
 func (d DefaultRunner) fromStdin(cmd *exec.Cmd, formulaPath string, config *Config) error {
 	data, err := stdin.Parse()
 	if err != nil {

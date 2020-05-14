@@ -57,6 +57,7 @@ func (d deleteRepoCmd) runPrompt() CommandRunnerFunc {
 
 func (d deleteRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
+
 		dr := deleteRepoJsonDecoder{}
 
 		err := stdin.ReadJson(&dr)
