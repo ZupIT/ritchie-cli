@@ -5,9 +5,12 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+
 	"github.com/spf13/cobra"
 )
 
+// deleteUserCmd type for clean repo command
 type deleteUserCmd struct {
 	userManager security.UserManager
 	prompt.InputBool
@@ -20,15 +23,19 @@ func NewDeleteUserCmd(
 	it prompt.InputText) *cobra.Command {
 	d := &deleteUserCmd{um, ib, it}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "user",
 		Short: "Delete user",
 		Long:  `Delete user of the organization`,
-		RunE:  d.runFunc(),
+		RunE: RunFuncE(d.runStdin(), d.runPrompt()),
 	}
+
+	cmd.LocalFlags()
+
+	return cmd
 }
 
-func (d deleteUserCmd) runFunc() CommandRunnerFunc {
+func (d deleteUserCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		un, err := d.Text("Username: ", true)
 		if err != nil {
@@ -52,6 +59,27 @@ func (d deleteUserCmd) runFunc() CommandRunnerFunc {
 			Email:    e,
 			Username: un,
 		}
+		if err = d.userManager.Delete(u); err != nil {
+			return err
+		}
+
+		fmt.Printf("User %s deleted!", u.Username)
+
+		return nil
+	}
+}
+
+func (d deleteUserCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		u := security.User{}
+
+		err := stdin.ReadJson(&u)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
+		}
+
 		if err = d.userManager.Delete(u); err != nil {
 			return err
 		}
