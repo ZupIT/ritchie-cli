@@ -46,9 +46,7 @@ RUN apk add openjdk8
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
 ENV PATH="$JAVA_HOME/bin:${PATH}"
 
-RUN javac Main.java 
-
-ENTRYPOINT java Main`
+ENTRYPOINT java -jar Main.jar`
 
 	TemplateRunTemplate = `#!/bin/sh
 java -jar Main.jar`
