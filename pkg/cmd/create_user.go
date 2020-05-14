@@ -95,18 +95,12 @@ func (c createUserCmd) runPrompt() CommandRunnerFunc {
 func (c createUserCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		data, err := stdin.Parse()
-		if err != nil {
-			return err
-		}
+		u := security.User{}
 
-		u := security.User{
-			Organization: data[organization],
-			FirstName:    data[firstName],
-			LastName:     data[lastName],
-			Email:        data[email],
-			Username:     data[username],
-			Password:     data[password],
+		err := stdin.ReadJson(&u)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
 		}
 
 		if err := c.Create(u); err != nil {
