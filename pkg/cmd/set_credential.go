@@ -220,41 +220,18 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 }
 
 func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
-	switch s.edition {
-	case api.Single:
-		return s.singleStdin()
-	case api.Team:
-		return s.teamStdin()
-	default:
-		return credential.Detail{}, errors.New("invalid CLI build, no edition defined")
-	}
-}
-
-func (s setCredentialCmd) singleStdin() (credential.Detail, error) {
 	var credDetail credential.Detail
 
-	data, err := stdin.Parse()
-	if err != nil {
-		return credDetail, err
+	if s.edition == api.Single || s.edition == api.Team {
+
+		err := stdin.ReadJson(&credDetail)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return credDetail, err
+		}
+
+		return credDetail, nil
 	}
 
-	cred := credential.Credential{}
-
-	pair := strings.Split(data["???"], "=") //TODO
-	if s := validate(pair); s != "" {
-		fmt.Println(s)
-	}
-	cred[pair[0]] = pair[1]
-
-	credDetail.Service = data[service]
-	credDetail.Credential = cred
-
-	return credDetail, nil
-}
-
-func (s setCredentialCmd) teamStdin() (credential.Detail, error) {
-
-	//TODO
-
-	return credential.Detail{}, nil
+	return credDetail, errors.New("invalid CLI build, no edition defined")
 }
