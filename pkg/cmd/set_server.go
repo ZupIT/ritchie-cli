@@ -27,7 +27,7 @@ func NewSetServerCmd(
 	return &cobra.Command{
 		Use:   "server",
 		Short: "Set server",
-		Long:  `Set organization Server url `,
+		Long:  `Set organization Server URL `,
 		RunE:  o.runFunc(),
 	}
 }
@@ -41,7 +41,7 @@ func (s setServerCmd) runFunc() CommandRunnerFunc {
 		if err := s.Set(u); err != nil {
 			return err
 		}
-		fmt.Sprintln("Organization server url saved!")
+		fmt.Sprintln("Organization server URL saved!")
 		return nil
 	}
 }

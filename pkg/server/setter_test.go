@@ -1,9 +1,9 @@
 package server
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -12,9 +12,32 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
-func TestSet(t *testing.T) {
+var (
+	srvListener       = "127.0.0.1:57469"
+	srvURL            = fmt.Sprintf("http://%s", srvListener)
+	errNoSuchHost     = fmt.Errorf("lookup %s: no such host", srvListener)
+	errNoSuchHostLong = fmt.Errorf("Get \"%s\": %s", srvURL, errNoSuchHost)
+)
 
-	s := NewSetter(os.TempDir())
+type RoundTripFunc func(req *http.Request) *http.Response
+
+func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return nil, errNoSuchHost
+}
+
+func newClientErrNoSuchHost() *http.Client {
+	return &http.Client{
+		Transport: RoundTripFunc(func(req *http.Request) *http.Response {
+			return &http.Response{}
+		}),
+	}
+}
+
+func TestSet(t *testing.T) {
+	type in struct {
+		URL string
+		hc  *http.Client
+	}
 
 	type out struct {
 		status int
@@ -23,21 +46,43 @@ func TestSet(t *testing.T) {
 
 	tests := []struct {
 		name string
-		in   string
+		in   in
 		out  out
 	}{
 		{
 			name: "empty serverURL",
-			in:   "",
+			in:   in{URL: ""},
 			out: out{
-				err: validator.ErrInvalidServerURL,
+				err: validator.ErrInvalidURL,
 			},
 		},
 		{
-			name: "existing serverURL",
-			in:   "http://localhost/mocked",
+			name: "invalid serverURL",
+			in:   in{URL: "invalid.server.URL"},
+			out: out{
+				err: validator.ErrInvalidURL,
+			},
+		},
+		{
+			name: "valid serverURL",
+			in:   in{URL: srvURL, hc: http.DefaultClient},
 			out: out{
 				status: 200,
+			},
+		},
+		{
+			name: "no such host error",
+			in:   in{URL: srvURL, hc: newClientErrNoSuchHost()},
+			out: out{
+				err: errNoSuchHostLong,
+			},
+		},
+		{
+			name: "server error",
+			in:   in{URL: srvURL, hc: http.DefaultClient},
+			out: out{
+				status: 500,
+				err:    fmt.Errorf(ServerErrPattern, srvURL, "500 Internal Server Error"),
 			},
 		},
 	}
@@ -46,41 +91,33 @@ func TestSet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			out := tt.out
+			s := NewSetter(os.TempDir(), in.hc)
 
-			var body []byte
-			var got error
-			if in != "" {
-				body, _ = json.Marshal(&in)
-				server := mockServer(out.status, body)
-				err := s.Set(server.URL)
-				if err != nil {
-					fmt.Sprintln("Error in set")
-					return
-				}
-				defer server.Close()
-				got = s.Set(server.URL)
-			} else {
-				got = s.Set(in)
+			if in.URL != "" {
+				srv := mockServer(out.status)
+				defer srv.Close()
 			}
 
-			if got != nil && errors.Unwrap(got) != out.err {
-				t.Errorf("Set(%s) got %v, want %v", in, got, out)
-			}
-
-			if got == nil && out.status != 200 {
-				t.Errorf("Set(%s) got %v, want %v", in, out.status, 200)
+			got := s.Set(in.URL)
+			if got != nil && got.Error() != out.err.Error() {
+				t.Errorf("Set(%s) got %v, want %v", in.URL, got, out.err)
 			}
 		})
 	}
 }
 
-func mockServer(status int, body []byte) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+func mockServer(status int) *httptest.Server {
+	l, err := net.Listen("tcp", srvListener)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.WriteHeader(status)
-		_, err := rw.Write(body)
-		if err != nil {
-			fmt.Sprintln("Error in Write")
-			return
-		}
 	}))
+	srv.Listener.Close()
+	srv.Listener = l
+	srv.Start()
+
+	return srv
 }
