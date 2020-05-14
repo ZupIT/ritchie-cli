@@ -32,7 +32,7 @@ build:
 	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
 
 	TemplateDockerfile = `
-FFROM alpine:latest
+FROM alpine:latest
 USER root
 
 WORKDIR /app

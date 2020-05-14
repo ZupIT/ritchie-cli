@@ -415,7 +415,6 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 
 func createDockerfile(dir string, tpl string) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
-
 }
 
 func createGoModFile(dir, pkg string) error {
