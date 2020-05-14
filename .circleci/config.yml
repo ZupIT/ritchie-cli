@@ -14,10 +14,9 @@ references:
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
 
-  filters: &FILTERS_DElIVERY
+  filters: &FILTERS_DELIVERY
     branches:
       only:
-        - master
         - /^release-.*/
         - qa
 
@@ -25,6 +24,14 @@ references:
     branches:
       only:
         - /^release-.*/
+
+  filters-checks: &FILTERS_CHECK
+    branches:
+      only:
+        - master
+        - /^release-.*/
+        - qa
+        - /^pull\/.*$/
 
 executors:
   ritchie-executor:
@@ -153,18 +160,26 @@ jobs:
 workflows:
   build-for-branch:
     jobs:
-      - lint
-      - unit_test
+      - lint:
+          filters:
+            <<: *FILTERS_CHECK
+      - unit_test:
+          filters:
+            <<: *FILTERS_CHECK
       - build:
+          filters:
+            <<: *FILTERS_CHECK
           requires:
             - unit_test
             - lint
       - functional_test:
+          filters:
+            <<: *FILTERS_CHECK
           requires:
             - build
       - delivery:
           filters:
-            <<: *FILTERS_DElIVERY
+            <<: *FILTERS_DELIVERY
           requires:
             - build
       - release:
