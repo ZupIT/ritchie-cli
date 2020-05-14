@@ -40,3 +40,8 @@ type AddLister interface {
 	Adder
 	Lister
 }
+
+type DelLister interface {
+	Deleter
+	Lister
+}
