@@ -12,10 +12,16 @@ import (
 
 const newCtx = "Type new context?"
 
+// setContextCmd type for clean repo command
 type setContextCmd struct {
 	rcontext.FindSetter
 	prompt.InputText
 	prompt.InputList
+}
+
+// setContextJsonDecoder type for stdin json decoder
+type setContextJsonDecoder struct {
+	context string
 }
 
 func NewSetContextCmd(
@@ -69,12 +75,16 @@ func (s setContextCmd) runPrompt() CommandRunnerFunc {
 
 func (s setContextCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data, err := stdin.Parse()
+
+		sc := setContextJsonDecoder{}
+
+		err := stdin.ReadJson(&sc)
 		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err
 		}
 
-		if _, err := s.Set(data[context]); err != nil {
+		if _, err := s.Set(sc.context); err != nil {
 			return err
 		}
 
