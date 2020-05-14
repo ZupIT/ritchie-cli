@@ -20,6 +20,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
+const (
+	localTreeFile     = "%s/tree/tree.json"
+	nameModule        = "{{nameModule}}"
+	nameBin           = "{{bin-name}}"
+	nameBinFirstUpper = "{{bin-name-first-upper}}"
+)
+
 type CreateManager struct {
 	FormPath    string
 	treeManager TreeManager
@@ -178,7 +185,7 @@ func createMakefileMain(dir, dirForm, name string) error {
 	tplFile := tpl_go.TemplateMakefileMain
 
 	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
-	tplFile = strings.ReplaceAll(string(tplFile), "{{formPath}}", dirForm)
+	tplFile = strings.ReplaceAll(tplFile, "{{formPath}}", dirForm)
 
 	err := createScripts(dir)
 	if err != nil {

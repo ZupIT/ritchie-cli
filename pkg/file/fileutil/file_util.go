@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -200,14 +199,11 @@ func Unzip(src string, dest string) error {
 		)
 
 		if file.FileInfo().IsDir() {
-			log.Println("Directory Created:", extractedFilePath)
 			err := os.MkdirAll(extractedFilePath, file.Mode())
 			if err != nil {
 				return err
 			}
 		} else {
-			log.Println("File extracted:", file.Name)
-
 			outputFile, err := os.OpenFile(
 				extractedFilePath,
 				os.O_WRONLY|os.O_CREATE|os.O_TRUNC,

@@ -75,9 +75,9 @@ func newSubCmd(cmd api.Command) *cobra.Command {
 
 func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	formulaCmd := &cobra.Command{
-		Use:         cmd.Usage,
-		Short:       cmd.Help,
-		Long:        cmd.Help,
+		Use:   cmd.Usage,
+		Short: cmd.Help,
+		Long:  cmd.Help,
 	}
 
 	var docker bool

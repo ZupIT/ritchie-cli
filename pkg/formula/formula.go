@@ -64,6 +64,16 @@ type Definition struct {
 	RepoUrl string
 }
 
+type RunData struct {
+	pwd            string
+	formulaPath    string
+	binPath        string
+	tmpDir         string
+	tmpBinDir      string
+	tmpBinFilePath string
+	config         Config
+}
+
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
 	return fmt.Sprintf(PathPattern, home, d.Path)
@@ -154,8 +164,16 @@ func (d *Definition) ConfigUrl(configName string) string {
 	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, configName)
 }
 
+type PreRunner interface {
+	PreRun(def Definition) (RunData, error)
+}
+
 type Runner interface {
 	Run(def Definition, docker bool) error
+}
+
+type PostRunner interface {
+	PostRun(p RunData) error
 }
 
 type Creator interface {

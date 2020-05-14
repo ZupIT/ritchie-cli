@@ -2,10 +2,7 @@ package formula
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -13,18 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
-
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-)
-
-const (
-	localTreeFile     = "%s/tree/tree.json"
-	nameModule        = "{{nameModule}}"
-	nameBin           = "{{bin-name}}"
-	nameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
 type DefaultRunner struct {
@@ -56,69 +44,33 @@ func NewRunner(
 	}
 }
 
-// Run default implementation of function Manager.Run
 func (d DefaultRunner) Run(def Definition, docker bool) error {
-	pwd, _ := os.Getwd() // Needs in Post run to copy new files, Must return pwd in Pre run
-	formulaPath := def.FormulaPath(d.ritchieHome) // Needs only in Pre run
-	config, err := d.loadConfig(formulaPath, def) // Needs in Run inputs, Must return config in pre run?
+	preData, err := d.PreRun(def)
 	if err != nil {
 		return err
 	}
 
-	binName := def.BinName() // Needs in run, Must return binName in pre run?
-	binPath := def.BinPath(formulaPath) // Needs in post run, Must return binPath in pre run?
-	binFilePath := def.BinFilePath(binPath, binName) // Needs only in pre run
+	cmd := exec.Command(preData.tmpBinFilePath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	if !fileutil.Exists(binFilePath) { // Pre run
-		url := def.BundleUrl()
-		name := def.BundleName()
-		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name)
-		if err != nil {
-			return err
-		}
-
-		if err := d.unzipFile(zipFile, formulaPath); err != nil {
-			return err
-		}
-	} // ---
-
-	tmpDir, tmpBinDir, err := d.createWorkDir(binPath, def) // Pre run, Must return tmpDir to remove in Post run
-	if err != nil {
+	if err := d.inputs(cmd, preData.formulaPath, &preData.config); err != nil { // Run
 		return err
 	}
 
-	defer d.removeWorkDir(tmpDir) // Post run
-
-	if err := os.Chdir(tmpBinDir); err != nil { // Pre run
+	if err := cmd.Start(); err != nil {
 		return err
 	}
 
-	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName) // Needs in run, Must return tmpBinFilePath in Pre run
-
-	cmd := exec.Command(tmpBinFilePath) // Run
-	cmd.Stdin = os.Stdin // Run
-	cmd.Stdout = os.Stdout // Run
-	cmd.Stderr = os.Stderr // Run
-
-	if err := d.inputs(cmd, formulaPath, &config); err != nil { // Run
+	if err := cmd.Wait(); err != nil {
 		return err
-	} // ---
+	}
 
-	if err := cmd.Start(); err != nil { // Run
+	if err := d.PostRun(preData); err != nil {
 		return err
-	} // ---
+	}
 
-	if err := cmd.Wait(); err != nil { // Run
-		return err
-	} // ---
-
-	df, err := fileutil.ListNewFiles(binPath, tmpBinDir) // Post run
-	if err != nil {
-		return err
-	} // ---
-	if err = fileutil.MoveFiles(tmpBinDir, pwd, df); err != nil { // Post run
-		return err
-	} // ---
 	return nil
 }
 
@@ -170,49 +122,6 @@ func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config)
 		cmd.Env = append(cmd.Env, command)
 	}
 	return nil
-}
-
-func (d DefaultRunner) loadConfig(formulaPath string, def Definition) (Config, error) {
-	configName := def.ConfigName()
-	configPath := def.ConfigPath(formulaPath, configName)
-	if !fileutil.Exists(configPath) {
-		url := def.ConfigUrl(configName)
-		if err := d.downloadConfig(url, formulaPath, configName); err != nil {
-			return Config{}, err
-		}
-	}
-
-	configFile, err := ioutil.ReadFile(configPath)
-	if err != nil {
-		return Config{}, err
-	}
-
-	var formulaConfig Config
-	if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
-		return Config{}, err
-	}
-	return formulaConfig, nil
-}
-
-func (d DefaultRunner) createWorkDir(binPath string, def Definition) (string, string, error) {
-	u := uuid.New().String()
-	tDir, tBDir := def.TmpWorkDirPath(d.ritchieHome, u)
-
-	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
-		return "", "", err
-	}
-
-	if err := fileutil.CopyDirectory(binPath, tBDir); err != nil {
-		return "", "", err
-	}
-
-	return tDir, tBDir, nil
-}
-
-func (d DefaultRunner) removeWorkDir(tmpDir string) {
-	if err := fileutil.RemoveDir(tmpDir); err != nil {
-		fmt.Sprintln("Error in remove dir")
-	}
 }
 
 func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, items []string) {
@@ -302,102 +211,4 @@ func (d DefaultRunner) resolveIfReserved(input Input) (string, error) {
 		return resolver.Resolve(input.Type)
 	}
 	return "", nil
-}
-
-func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName string) (string, error) {
-	log.Println("Download formula...")
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("formula bin not found")
-	}
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusNotFound:
-		return "", errors.New("formula bin not found")
-	default:
-		return "", errors.New("unknown error when downloading your formula")
-	}
-
-	file := fmt.Sprintf("%s/%s", destPath, zipName)
-
-	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
-		return "", err
-	}
-	out, err := os.Create(file)
-	if err != nil {
-		return "", err
-	}
-
-	defer out.Close()
-	if _, err = io.Copy(out, resp.Body); err != nil {
-		return "", err
-	}
-
-	log.Println("Done.")
-	return file, nil
-}
-
-func (d DefaultRunner) downloadConfig(url, destPath, configName string) error {
-	log.Println("Downloading config file...")
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusNotFound:
-		return errors.New("config file not found")
-	default:
-		return errors.New("unknown error when downloading your config file")
-	}
-
-	file := fmt.Sprintf("%s/%s", destPath, configName)
-
-	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
-		return err
-	}
-
-	out, err := os.Create(file) // Create an empty .zip file
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	if _, err := io.Copy(out, resp.Body); err != nil { // Copy body data to empty .zip file
-		return err
-	}
-
-	log.Println("Done.")
-	return nil
-}
-
-func (d DefaultRunner) unzipFile(filename, destPath string) error {
-	log.Println("Installing formula...")
-
-	if err := fileutil.CreateDirIfNotExists(destPath, 0655); err != nil {
-		return err
-	}
-
-	if err := fileutil.Unzip(filename, destPath); err != nil {
-		return err
-	}
-
-	if err := fileutil.RemoveFile(filename); err != nil {
-		return err
-	}
-
-	log.Println("Done.")
-	return nil
 }
