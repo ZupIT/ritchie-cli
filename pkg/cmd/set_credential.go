@@ -6,12 +6,18 @@ import (
 	"log"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
+
+const (
+	service   = "service"
+	cred      = "credential"
 )
 
 // setCredentialCmd type for set credential command
@@ -51,12 +57,16 @@ func NewTeamSetCredentialCmd(
 }
 
 func newCmd(s *setCredentialCmd) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "credential",
 		Short: "Set credential",
 		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE:  s.runFunc(),
+		RunE: RunFuncE(s.runFunc(), s.runStdin()),
 	}
+
+	cmd.LocalFlags()
+
+	return cmd
 }
 
 func (s setCredentialCmd) runFunc() CommandRunnerFunc {
@@ -94,22 +104,6 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 		return credDetail, err
 	}
 
-	validate := func(pair []string) string {
-		if len(pair) < 2 {
-			return "Invalid key value credential"
-		}
-
-		if strings.TrimSpace(pair[0]) == "" {
-			return "The key must not be empty."
-		}
-
-		if strings.TrimSpace(pair[1]) == "" {
-			return "The value must not be empty."
-		}
-
-		return ""
-	}
-
 	cred := credential.Credential{}
 	addMore := true
 	for addMore {
@@ -136,6 +130,22 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	credDetail.Credential = cred
 
 	return credDetail, nil
+}
+
+func validate(pair []string) string {
+	if len(pair) < 2 {
+		return "Invalid key value credential"
+	}
+
+	if strings.TrimSpace(pair[0]) == "" {
+		return "The key must not be empty."
+	}
+
+	if strings.TrimSpace(pair[1]) == "" {
+		return "The value must not be empty."
+	}
+
+	return ""
 }
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
@@ -191,4 +201,60 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 	credDetail.Service = service
 
 	return credDetail, nil
+}
+
+func (s setCredentialCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		cred, err := s.stdinResolver()
+		if err != nil {
+			return err
+		}
+
+		if err := s.Set(cred); err != nil {
+			return err
+		}
+
+		log.Println(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		return nil
+	}
+}
+
+func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
+	switch s.edition {
+	case api.Single:
+		return s.singleStdin()
+	case api.Team:
+		return s.teamStdin()
+	default:
+		return credential.Detail{}, errors.New("invalid CLI build, no edition defined")
+	}
+}
+
+func (s setCredentialCmd) singleStdin() (credential.Detail, error) {
+	var credDetail credential.Detail
+
+	data, err := stdin.Parse()
+	if err != nil {
+		return credDetail, err
+	}
+
+	cred := credential.Credential{}
+
+	pair := strings.Split(data["???"], "=") //TODO
+	if s := validate(pair); s != "" {
+		fmt.Println(s)
+	}
+	cred[pair[0]] = pair[1]
+
+	credDetail.Service = data[service]
+	credDetail.Credential = cred
+
+	return credDetail, nil
+}
+
+func (s setCredentialCmd) teamStdin() (credential.Detail, error) {
+
+	//TODO
+
+	return credential.Detail{}, nil
 }

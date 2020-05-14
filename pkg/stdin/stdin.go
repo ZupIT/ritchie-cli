@@ -1,6 +1,7 @@
 package stdin
 
 import (
+	"encoding/json"
 	"bufio"
 	"os"
 	"strings"
@@ -8,6 +9,11 @@ import (
 
 // Args type that represents parsed args from stdin
 type Args map[string]string
+
+// ReadJson reads the json from stdin inputs
+func ReadJson(v interface{}) error {
+	return json.NewDecoder(os.Stdin).Decode(v)
+}
 
 // Parse reads the input from stdin and parse the args to map[name]value
 func Parse() (Args, error) {
@@ -33,3 +39,21 @@ func Parse() (Args, error) {
 
 	return args, nil
 }
+
+// TODO : formulas STDIN
+
+// r := make(map[string]interface{})
+
+// err := stdin.ReadJson(&r)
+// if err != nil {
+//	fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
+//	return err
+//}
+
+// fmt.Println("Map:", r)
+
+// TODO : check config.json inputs with map
+
+// if err := execute.FormulaCommand(nil); err != nil {
+//	return err
+//}

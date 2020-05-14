@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -105,20 +104,13 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 //4
 func (a addRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data, err := stdin.Parse()
-		if err != nil {
-			return err
-		}
 
-		p, err := strconv.Atoi(data[priority])
-		if err != nil {
-			return err
-		}
+		r := formula.Repository{}
 
-		r := formula.Repository{
-			Name:     data[name],
-			TreePath: data[URL],
-			Priority: p,
+		err := stdin.ReadJson(&r)
+		if err != nil {
+			fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
 		}
 
 		if err := a.Add(r); err != nil {
