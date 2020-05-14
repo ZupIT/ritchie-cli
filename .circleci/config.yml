@@ -5,6 +5,7 @@ references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
+    ruby: &RUBY_IMAGE cimg/ruby:2.6.5
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -26,6 +27,7 @@ references:
     branches:
       only:
         - /^release-.*/
+        - feature/changelog
 
   filters-checks: &FILTERS_CHECK
     branches:
@@ -45,6 +47,12 @@ executors:
   delivery-executor:
     docker:
       - image: *PYTHON_IMAGE
+        user: root
+    working_directory: /workspace
+
+  release-executor:
+    docker:
+      - image: *RUBY_IMAGE
         user: root
     working_directory: /workspace
 
@@ -133,7 +141,7 @@ jobs:
   release:
     environment:
       <<: *ENVIRONMENT
-    executor: delivery-executor
+    executor: release-executor
     steps:
       - checkout
       - run:

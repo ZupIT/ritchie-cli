@@ -70,12 +70,15 @@ build-circle:
 release:
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_NAME)"
-	git add .
-	git commit --allow-empty -m "release"
-	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
-	git tag -a $(RELEASE_VERSION) -m "release"
-	git push $(GIT_REMOTE) $(RELEASE_VERSION)
-	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
+	gem install github_changelog_generator
+	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --exclude-labels duplicate,question,invalid,wontfix
+	cat CHANGELOG.md
+#	git add .
+#	git commit --allow-empty -m "[ci skip] release"
+#	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
+#	git tag -a $(RELEASE_VERSION) -m "$(RELEASE_VERSION)"
+#	git push $(GIT_REMOTE) $(RELEASE_VERSION)
+#	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
 
 delivery:
 ifneq "$(BUCKET)" ""
