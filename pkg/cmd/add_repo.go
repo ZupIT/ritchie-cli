@@ -10,12 +10,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	name     = "name"
-	URL      = "url"
-	priority = "priority"
-)
-
 // addRepoCmd type for add repo command
 type addRepoCmd struct {
 	formula.AddLister
@@ -109,7 +103,7 @@ func (a addRepoCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(&r)
 		if err != nil {
-			fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err
 		}
 

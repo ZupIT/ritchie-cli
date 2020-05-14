@@ -17,6 +17,11 @@ type cleanRepoCmd struct {
 	prompt.InputText
 }
 
+// cleanRepoJsonDecoder type for stdin json decoder
+type cleanRepoJsonDecoder struct {
+	name string
+}
+
 // NewCleanRepoCmd creates a new cmd instance
 func NewCleanRepoCmd(cl formula.Cleaner, it prompt.InputText) *cobra.Command {
 	c := &cleanRepoCmd{cl, it}
@@ -52,16 +57,20 @@ func (c cleanRepoCmd) runPrompt() CommandRunnerFunc {
 
 func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data, err := stdin.Parse()
+
+		f := cleanRepoJsonDecoder{}
+
+		err := stdin.ReadJson(&f)
 		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err
 		}
 
-		if err := c.Clean(data[name]); err != nil {
+		if err := c.Clean(f.name); err != nil {
 			return err
 		}
 
-		fmt.Printf("%q has been cleaned successfully\n", data[name])
+		fmt.Printf("%q has been cleaned successfully\n", f.name)
 
 		return nil
 	}
