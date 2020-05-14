@@ -174,5 +174,5 @@ workflows:
       - release:
           filters:
             <<: *FILTERS_RELEASE
-          requires:
-            - build
+#          requires:
+#            - build
