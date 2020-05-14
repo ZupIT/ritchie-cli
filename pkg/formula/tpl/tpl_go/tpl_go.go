@@ -138,15 +138,18 @@ build:
 
 test:
 	$(GOTEST) -short ` + "`go list ./... | grep -v vendor/`"
+
 	TemplateDockerfile = `
-FROM golang:alpine
-RUN mkdir /app 
-ADD . /app/
-WORKDIR /app 
-RUN go build -o main .
-RUN adduser -S -D -H -h /app appuser
-USER appuser
-CMD ["./main"]`
+FROM golang:alpine AS builder
+WORKDIR /app/
+COPY . .
+RUN go build -o main -v main.go
+
+FROM alpine:latest  
+WORKDIR /app/
+COPY --from=builder app/main .
+ENTRYPOINT ["./main"]`
+
 	TemplateMakefileMain = `#Makefiles
 {{formName}}={{formPath}}
 FORMULAS=$({{formName}})

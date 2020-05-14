@@ -26,11 +26,11 @@ build:
 	TemplateDockerfile = `
 FROM python:3
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
-CMD python3 main.py`
+ENTRYPOINT python3 main.py`
 
 	TemplateFilePython = `#!/usr/bin/python3
 import time

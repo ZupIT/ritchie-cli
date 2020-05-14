@@ -32,19 +32,23 @@ build:
 	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
 
 	TemplateDockerfile = `
-FROM openjdk:8-jre-alpine
+FFROM alpine:latest
+USER root
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
 RUN apk update
 RUN apk fetch openjdk8
 RUN apk add openjdk8
+
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
 ENV PATH="$JAVA_HOME/bin:${PATH}"
 
-CMD javac Main.java && ls && java Main.class`
+RUN javac Main.java 
+
+ENTRYPOINT java Main`
 
 	TemplateRunTemplate = `#!/bin/sh
 java -jar Main.jar`

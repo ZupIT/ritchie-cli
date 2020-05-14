@@ -27,11 +27,11 @@ build:
 	TemplateDockerfile = `
 FROM node:10
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
-CMD node index.js`
+ENTRYPOINT node index.js`
 
 	TemplateRunTemplate = `#!/bin/sh
 node index.js`

@@ -19,11 +19,13 @@ build:
 	TemplateDockerfile = `
 FROM alpine:3.7
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY . .
 
-CMD chmod +x main.sh && ./main.sh`
+RUN chmod +x main.sh
+
+ENTRYPOINT /app/main.sh`
 
 	TemplateFileShell = `#!/bin/sh
 run() {
