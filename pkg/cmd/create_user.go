@@ -94,6 +94,7 @@ func (c createUserCmd) runPrompt() CommandRunnerFunc {
 
 func (c createUserCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
+
 		data, err := stdin.Parse()
 		if err != nil {
 			return err

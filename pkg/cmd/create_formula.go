@@ -23,6 +23,12 @@ type createFormulaCmd struct {
 	prompt.InputList
 }
 
+// createFormulaJsonDecoder type for stdin json decoder
+type createFormulaJsonDecoder struct {
+	formulaCmd string
+	lang string
+}
+
 // CreateFormulaCmd creates a new cmd instance
 func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.InputList) *cobra.Command {
 	c := createFormulaCmd{
@@ -73,20 +79,23 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Creating Formula ...")
 
-		data, err := stdin.Parse()
+		cf := createFormulaJsonDecoder{}
+
+		err := stdin.ReadJson(&cf)
 		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err
 		}
 
 		f, err := c.Create(
-			data[formulaCmd],
-			data[language],
+			cf.formulaCmd,
+			cf.lang,
 			)
 		if err != nil {
 			return err
 		}
 
-		log.Printf("Formula in %s successfully created!\n", data[language])
+		log.Printf("Formula in %s successfully created!\n", cf.lang)
 		log.Printf("Your formula is in %s", f.FormPath)
 
 		return nil
