@@ -71,7 +71,7 @@ release:
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_NAME)"
 	gem install github_changelog_generator
-	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --exclude-labels duplicate,question,invalid,wontfix
+	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --enhancement-labels feature,Feature --exclude-labels duplicate,question,invalid,wontfix
 	cat CHANGELOG.md
 #	git add .
 #	git commit --allow-empty -m "[ci skip] release"
