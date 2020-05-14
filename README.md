@@ -36,3 +36,4 @@ This repository contains the CLI core, which can execute formulas stored inside 
 * [@ernelio](https://github.com/ernelio)
 * [@guillaumefalourd](https://github.com/guillaumefalourd)
 * [@rodrigomedeirosf](https://github.com/rodrigomedeirosf)
+* [@victor-schumacher](https://github.com/victor-schumacher)
