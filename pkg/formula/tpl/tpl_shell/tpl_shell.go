@@ -13,8 +13,19 @@ DIST=../dist
 DIST_DIR=$(DIST)/commons/bin
 build:
 	mkdir -p $(DIST_DIR)
-	cp main.sh $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name}} $(DIST_DIR)
+	cp main.sh $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name}} $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
 	chmod +x $(DIST_DIR)/$(BINARY_NAME)`
+
+	TemplateDockerfile = `
+FROM alpine:3.7
+
+WORKDIR /app
+
+COPY . .
+
+RUN chmod +x main.sh
+
+ENTRYPOINT /app/main.sh`
 
 	TemplateFileShell = `#!/bin/sh
 run() {

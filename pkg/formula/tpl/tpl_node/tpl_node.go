@@ -20,10 +20,18 @@ build:
 	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
 	echo 'node index.js' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)
 
-	cp -r $(BINARY_NAME_UNIX) index.js package.json {{bin-name}} $(DIST_DIR)
+	cp -r $(BINARY_NAME_UNIX) index.js package.json {{bin-name}} $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
 
 	#Clean files
 	rm $(BINARY_NAME_UNIX)`
+	TemplateDockerfile = `
+FROM node:10
+
+WORKDIR /app
+
+COPY . .
+
+ENTRYPOINT node index.js`
 
 	TemplateRunTemplate = `#!/bin/sh
 node index.js`

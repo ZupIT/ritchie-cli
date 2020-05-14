@@ -19,9 +19,18 @@ DIST=../dist
 DIST_DIR=$(DIST)/commons/bin
 build:
 	mkdir -p $(DIST_DIR)
-	cp main.py $(DIST_DIR) && cp -r {{bin-name}} $(DIST_DIR)
+	cp main.py $(DIST_DIR) && cp -r {{bin-name}} $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
 	chmod +x $(DIST_DIR)/main.py
 	echo 'python main.py' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)`
+
+	TemplateDockerfile = `
+FROM python:3
+
+WORKDIR /app
+
+COPY . .
+
+ENTRYPOINT python3 main.py`
 
 	TemplateFilePython = `#!/usr/bin/python3
 import time
