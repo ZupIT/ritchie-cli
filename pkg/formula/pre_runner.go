@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
@@ -30,7 +31,7 @@ func (d DefaultRunner) PreRun(def Definition) (RunData, error) {
 	if !fileutil.Exists(binFilePath) {
 		url := def.BundleUrl()
 		name := def.BundleName()
-		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name)
+		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name, def.RepoName)
 		if err != nil {
 			return RunData{}, err
 		}
@@ -69,7 +70,7 @@ func (d DefaultRunner) loadConfig(formulaPath string, def Definition) (Config, e
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
 		url := def.ConfigUrl(configName)
-		if err := d.downloadConfig(url, formulaPath, configName); err != nil {
+		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
 			return Config{}, err
 		}
 	}
@@ -101,10 +102,25 @@ func (d DefaultRunner) createWorkDir(binPath string, def Definition) (string, st
 	return tDir, tBDir, nil
 }
 
-func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName string) (string, error) {
+func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
 	log.Println("Download formula...")
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", errors.New("failed to create request for config download")
+	}
+
+	if d.edition == api.Team {
+		s, err := d.sessionManager.Current()
+		if err != nil {
+			return "", errors.New("failed get current session")
+		}
+		req.Header.Set("x-org", s.Organization)
+		req.Header.Set("x-repo-name", repoName)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+	}
+
+	resp, err := d.client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -142,10 +158,25 @@ func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName string) (str
 	return file, nil
 }
 
-func (d DefaultRunner) downloadConfig(url, destPath, configName string) error {
+func (d DefaultRunner) downloadConfig(url, destPath, configName, repoName string) error {
 	log.Println("Downloading config file...")
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return errors.New("failed to create request for config download")
+	}
+
+	if d.edition == api.Team {
+		s, err := d.sessionManager.Current()
+		if err != nil {
+			return errors.New("failed get current session")
+		}
+		req.Header.Set("x-org", s.Organization)
+		req.Header.Set("x-repo-name", repoName)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+	}
+
+	resp, err := d.client.Do(req)
 	if err != nil {
 		return err
 	}

@@ -81,11 +81,12 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	formulaRunner := formula.NewRunner(
+	formulaRunner := formula.NewTeamRunner(
 		ritchieHomeDir,
 		envResolvers,
 		http.DefaultClient,
 		treeManager,
+		sessionManager,
 		inputList,
 		inputText,
 		inputBool)

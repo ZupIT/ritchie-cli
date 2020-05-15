@@ -16,6 +16,7 @@ import (
 
 	"github.com/gofrs/flock"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -41,6 +42,7 @@ type RepoManager struct {
 	httpClient     *http.Client
 	sessionManager session.Manager
 	serverFinder   server.Finder
+	edition        api.Edition
 }
 
 // ByPriority implements sort.Interface for []Repository based on
@@ -58,6 +60,7 @@ func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) 
 		homePath:       homePath,
 		httpClient:     hc,
 		sessionManager: sm,
+		edition:        api.Single,
 	}
 }
 
@@ -70,6 +73,7 @@ func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Cl
 		serverFinder:   serverFinder,
 		httpClient:     hc,
 		sessionManager: sm,
+		edition:        api.Team,
 	}
 }
 
@@ -218,11 +222,20 @@ func (dm RepoManager) List() ([]Repository, error) {
 
 func (dm RepoManager) loadTreeFile(r Repository) error {
 
+	session, err := dm.sessionManager.Current()
+	if err != nil {
+		return errors.New("error restore current session")
+	}
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {
 		return err
 	}
 
+	if dm.edition == api.Team {
+		req.Header.Set("x-org", session.Organization)
+		req.Header.Set("x-repo-name", r.Name)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", session.AccessToken))
+	}
 	resp, err := dm.httpClient.Do(req)
 	if err != nil {
 		return err

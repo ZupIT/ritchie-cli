@@ -83,22 +83,23 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	var docker bool
 	formulaFlags := formulaCmd.Flags()
 	formulaFlags.BoolVar(&docker, "docker", false, "Use to run formulas inside a docker container")
-	formulaCmd.RunE = execFormulaFunc(f.formulaRunner, cmd.Formula, &docker)
+	formulaCmd.RunE = execFormulaFunc(f.formulaRunner, cmd.Repo, cmd.Formula, &docker)
 
 	return formulaCmd
 }
 
-func execFormulaFunc(formulaRunner formula.Runner, f api.Formula, docker *bool) func(cmd *cobra.Command, args []string) error {
+func execFormulaFunc(formulaRunner formula.Runner, repo string, f api.Formula, docker *bool) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		d := formula.Definition{
-			Path:    f.Path,
-			Bin:     f.Bin,
-			LBin:    f.LBin,
-			MBin:    f.MBin,
-			WBin:    f.WBin,
-			Bundle:  f.Bundle,
-			Config:  f.Config,
-			RepoUrl: f.RepoURL,
+			Path:     f.Path,
+			Bin:      f.Bin,
+			LBin:     f.LBin,
+			MBin:     f.MBin,
+			WBin:     f.WBin,
+			Bundle:   f.Bundle,
+			Config:   f.Config,
+			RepoUrl:  f.RepoURL,
+			RepoName: repo,
 		}
 
 		return formulaRunner.Run(d, *docker)

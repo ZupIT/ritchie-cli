@@ -10,16 +10,20 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 type DefaultRunner struct {
-	ritchieHome  string
-	envResolvers env.Resolvers
-	client       *http.Client
-	treeManager  TreeManager
+	ritchieHome    string
+	envResolvers   env.Resolvers
+	client         *http.Client
+	treeManager    TreeManager
+	sessionManager session.Manager
+	edition        api.Edition
 	prompt.InputList
 	prompt.InputText
 	prompt.InputBool
@@ -34,13 +38,36 @@ func NewRunner(
 	it prompt.InputText,
 	ib prompt.InputBool) DefaultRunner {
 	return DefaultRunner{
-		ritchieHome,
-		er,
-		hc,
-		tm,
-		il,
-		it,
-		ib,
+		ritchieHome:  ritchieHome,
+		envResolvers: er,
+		client:       hc,
+		treeManager:  tm,
+		edition:      api.Single,
+		InputList:    il,
+		InputText:    it,
+		InputBool:    ib,
+	}
+}
+
+func NewTeamRunner(
+	ritchieHome string,
+	er env.Resolvers,
+	hc *http.Client,
+	tm TreeManager,
+	sm session.Manager,
+	il prompt.InputList,
+	it prompt.InputText,
+	ib prompt.InputBool) DefaultRunner {
+	return DefaultRunner{
+		ritchieHome:    ritchieHome,
+		envResolvers:   er,
+		client:         hc,
+		treeManager:    tm,
+		sessionManager: sm,
+		edition:        api.Team,
+		InputList:      il,
+		InputText:      it,
+		InputBool:      ib,
 	}
 }
 
@@ -55,7 +82,7 @@ func (d DefaultRunner) Run(def Definition, docker bool) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := d.inputs(cmd, preData.formulaPath, &preData.config); err != nil { // Run
+	if err := d.inputs(cmd, preData.formulaPath, &preData.config); err != nil {
 		return err
 	}
 
