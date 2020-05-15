@@ -22,7 +22,7 @@ type setContextCmd struct {
 
 // setContext type for stdin json decoder
 type setContext struct {
-	context string
+	Context string `json:"context"`
 }
 
 func NewSetContextCmd(
@@ -85,7 +85,7 @@ func (s setContextCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if _, err := s.Set(sc.context); err != nil {
+		if _, err := s.Set(sc.Context); err != nil {
 			return err
 		}
 

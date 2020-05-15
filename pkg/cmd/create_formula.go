@@ -21,8 +21,8 @@ type createFormulaCmd struct {
 
 // createFormula type for stdin json decoder
 type createFormula struct {
-	formulaCmd string
-	lang string
+	FormulaCmd string `json:"formulaCmd"`
+	Lang string `json:"lang"`
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -84,14 +84,14 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		}
 
 		f, err := c.Create(
-			cf.formulaCmd,
-			cf.lang,
+			cf.FormulaCmd,
+			cf.Lang,
 			)
 		if err != nil {
 			return err
 		}
 
-		log.Printf("Formula in %s successfully created!\n", cf.lang)
+		log.Printf("Formula in %s successfully created!\n", cf.Lang)
 		log.Printf("Your formula is in %s", f.FormPath)
 
 		return nil

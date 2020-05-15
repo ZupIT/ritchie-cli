@@ -20,7 +20,7 @@ type cleanRepoCmd struct {
 
 // cleanRepo type for stdin json decoder
 type cleanRepo struct {
-	name string
+	Name string `json:"name"`
 }
 
 // NewCleanRepoCmd creates a new cmd instance
@@ -67,11 +67,11 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err := c.Clean(f.name); err != nil {
+		if err := c.Clean(f.Name); err != nil {
 			return err
 		}
 
-		fmt.Printf("%q has been cleaned successfully\n", f.name)
+		fmt.Printf("%q has been cleaned successfully\n", f.Name)
 
 		return nil
 	}

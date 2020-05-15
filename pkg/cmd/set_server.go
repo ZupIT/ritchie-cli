@@ -23,7 +23,7 @@ type setServerCmd struct {
 
 // setServer type for stdin json decoder
 type setServer struct {
-	url string
+	Url string `json:"url"`
 }
 
 func NewSetServerCmd(
@@ -73,7 +73,7 @@ func (s setServerCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err := s.Set(ss.url); err != nil {
+		if err := s.Set(ss.Url); err != nil {
 			return err
 		}
 

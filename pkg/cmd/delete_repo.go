@@ -20,7 +20,7 @@ type deleteRepoCmd struct {
 
 // deleteRepo type for stdin json decoder
 type deleteRepo struct {
-	name string
+	Name string `json:"name"`
 }
 
 // NewDeleteRepoCmd delete repository instance
@@ -67,11 +67,11 @@ func (d deleteRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err = d.Delete(dr.name); err != nil {
+		if err = d.Delete(dr.Name); err != nil {
 			return err
 		}
 
-		fmt.Printf("%q has been removed from your repositories\n", dr.name)
+		fmt.Printf("%q has been removed from your repositories\n", dr.Name)
 
 		return nil
 	}

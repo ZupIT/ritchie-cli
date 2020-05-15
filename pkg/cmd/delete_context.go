@@ -20,7 +20,7 @@ type deleteContextCmd struct {
 
 // deleteContext type for stdin json decoder
 type deleteContext struct {
-	context string
+	Context string `json:"context"`
 }
 
 func NewDeleteContextCmd(
@@ -99,7 +99,7 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if _, err := d.Remove(dc.context); err != nil {
+		if _, err := d.Remove(dc.Context); err != nil {
 			return err
 		}
 
