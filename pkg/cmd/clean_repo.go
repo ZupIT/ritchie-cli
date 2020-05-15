@@ -17,8 +17,8 @@ type cleanRepoCmd struct {
 	prompt.InputText
 }
 
-// cleanRepoJsonDecoder type for stdin json decoder
-type cleanRepoJsonDecoder struct {
+// cleanRepo type for stdin json decoder
+type cleanRepo struct {
 	name string
 }
 
@@ -58,7 +58,7 @@ func (c cleanRepoCmd) runPrompt() CommandRunnerFunc {
 func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		f := cleanRepoJsonDecoder{}
+		f := cleanRepo{}
 
 		err := stdin.ReadJson(&f)
 		if err != nil {

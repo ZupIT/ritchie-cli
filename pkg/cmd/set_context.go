@@ -19,8 +19,8 @@ type setContextCmd struct {
 	prompt.InputList
 }
 
-// setContextJsonDecoder type for stdin json decoder
-type setContextJsonDecoder struct {
+// setContext type for stdin json decoder
+type setContext struct {
 	context string
 }
 
@@ -76,7 +76,7 @@ func (s setContextCmd) runPrompt() CommandRunnerFunc {
 func (s setContextCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		sc := setContextJsonDecoder{}
+		sc := setContext{}
 
 		err := stdin.ReadJson(&sc)
 		if err != nil {

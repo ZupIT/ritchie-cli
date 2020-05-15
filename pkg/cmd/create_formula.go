@@ -18,8 +18,8 @@ type createFormulaCmd struct {
 	prompt.InputList
 }
 
-// createFormulaJsonDecoder type for stdin json decoder
-type createFormulaJsonDecoder struct {
+// createFormula type for stdin json decoder
+type createFormula struct {
 	formulaCmd string
 	lang string
 }
@@ -74,7 +74,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Creating Formula ...")
 
-		cf := createFormulaJsonDecoder{}
+		cf := createFormula{}
 
 		err := stdin.ReadJson(&cf)
 		if err != nil {

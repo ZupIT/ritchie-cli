@@ -17,8 +17,8 @@ type deleteContextCmd struct {
 	prompt.InputList
 }
 
-// deleteContextJsonDecoder type for stdin json decoder
-type deleteContextJsonDecoder struct {
+// deleteContext type for stdin json decoder
+type deleteContext struct {
 	context string
 }
 
@@ -90,7 +90,7 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 			return nil
 		}
 
-		dc := deleteContextJsonDecoder{}
+		dc := deleteContext{}
 
 		err = stdin.ReadJson(&dc)
 		if err != nil {

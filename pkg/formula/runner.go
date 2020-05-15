@@ -105,7 +105,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	case api.Prompt:
 		err = d.fromPrompt(cmd, fPath, &config)
 	case api.Stdin:
-		err = d.fromStdin(cmd, fPath, &config)
+		err = d.fromStdin(cmd, &config)
 	default:
 		err = fmt.Errorf("terminal input (%v) not recongnized", inputType)
 	}
@@ -181,10 +181,13 @@ func (d DefaultRunner) fromPrompt(cmd *exec.Cmd, formulaPath string, config *Con
 	return nil
 }
 
-// TODO : Update this method to follow different steps depending if core command or formula
-func (d DefaultRunner) fromStdin(cmd *exec.Cmd, formulaPath string, config *Config) error {
-	data, err := stdin.Parse()
+func (d DefaultRunner) fromStdin(cmd *exec.Cmd, config *Config) error {
+
+	data := make(map[string]interface{})
+
+	err := stdin.ReadJson(&data)
 	if err != nil {
+		fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
 		return err
 	}
 
@@ -195,7 +198,7 @@ func (d DefaultRunner) fromStdin(cmd *exec.Cmd, formulaPath string, config *Conf
 		}
 		switch iType := input.Type; iType {
 		case "text", "bool":
-			inputVal = data[input.Name]
+			inputVal = fmt.Sprintf("%v", data[input.Name])
 		default:
 			inputVal, err = d.resolveIfReserved(input)
 			if err != nil {
