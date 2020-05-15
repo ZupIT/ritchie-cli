@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -20,8 +21,8 @@ type setServerCmd struct {
 	prompt.InputURL
 }
 
-// setServerJsonDecoder type for stdin json decoder
-type setServerJsonDecoder struct {
+// setServer type for stdin json decoder
+type setServer struct {
 	url string
 }
 
@@ -64,9 +65,9 @@ func (s setServerCmd) runPrompt() CommandRunnerFunc {
 func (s setServerCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		ss := setServerJsonDecoder{}
+		ss := setServer{}
 
-		err := stdin.ReadJson(&ss)
+		err := stdin.ReadJson(os.Stdin, &ss)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err

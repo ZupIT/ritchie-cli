@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -224,7 +225,7 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 
 	if s.edition == api.Single || s.edition == api.Team {
 
-		err := stdin.ReadJson(&credDetail)
+		err := stdin.ReadJson(os.Stdin, &credDetail)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return credDetail, err

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -76,7 +77,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 
 		cf := createFormula{}
 
-		err := stdin.ReadJson(&cf)
+		err := stdin.ReadJson(os.Stdin, &cf)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err

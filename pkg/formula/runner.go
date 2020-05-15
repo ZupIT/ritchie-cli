@@ -185,7 +185,7 @@ func (d DefaultRunner) fromStdin(cmd *exec.Cmd, config *Config) error {
 
 	data := make(map[string]interface{})
 
-	err := stdin.ReadJson(&data)
+	err := stdin.ReadJson(os.Stdin, &data)
 	if err != nil {
 		fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
 		return err

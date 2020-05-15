@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -92,7 +93,7 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 
 		dc := deleteContext{}
 
-		err = stdin.ReadJson(&dc)
+		err = stdin.ReadJson(os.Stdin, &dc)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -101,7 +102,7 @@ func (a addRepoCmd) runStdin() CommandRunnerFunc {
 
 		r := formula.Repository{}
 
-		err := stdin.ReadJson(&r)
+		err := stdin.ReadJson(os.Stdin, &r)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err

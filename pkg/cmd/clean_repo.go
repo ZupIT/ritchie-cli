@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -60,7 +61,7 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 
 		f := cleanRepo{}
 
-		err := stdin.ReadJson(&f)
+		err := stdin.ReadJson(os.Stdin, &f)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err

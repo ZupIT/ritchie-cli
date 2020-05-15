@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -78,7 +79,7 @@ func (s setContextCmd) runStdin() CommandRunnerFunc {
 
 		sc := setContext{}
 
-		err := stdin.ReadJson(&sc)
+		err := stdin.ReadJson(os.Stdin, &sc)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err

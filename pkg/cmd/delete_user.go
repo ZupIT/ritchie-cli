@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -74,7 +75,7 @@ func (d deleteUserCmd) runStdin() CommandRunnerFunc {
 
 		u := security.User{}
 
-		err := stdin.ReadJson(&u)
+		err := stdin.ReadJson(os.Stdin, &u)
 		if err != nil {
 			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
 			return err

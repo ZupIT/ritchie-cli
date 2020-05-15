@@ -2,11 +2,11 @@ package stdin
 
 import (
 	"encoding/json"
-	"os"
+	"io"
 )
 
 // ReadJson reads the json from stdin inputs
-func ReadJson(v interface{}) error {
-	return json.NewDecoder(os.Stdin).Decode(v)
+func ReadJson(reader io.Reader, v interface{}) error {
+	return json.NewDecoder(reader).Decode(v)
 }
 
