@@ -16,11 +16,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-const (
-	service   = "service"
-	cred      = "credential"
-)
-
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
