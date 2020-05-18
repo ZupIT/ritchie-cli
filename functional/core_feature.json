@@ -127,7 +127,7 @@
                 "action":"main"
             },
             {
-                "key":"Name of the repository:",
+                "key":"Choose a repository to delete:",
                 "value":"Leonidas",
                 "action":"sendkey"
             }
