@@ -129,7 +129,7 @@
             {
                 "key":"Choose a repository to delete:",
                 "value":"Leonidas",
-                "action":"sendkey"
+                "action":"select"
             },
             {
                 "key":"Want to delete",
