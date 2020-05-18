@@ -6,6 +6,7 @@ import (
 
 func TestNewAddRepoCmd(t *testing.T) {
 	cmd := NewAddRepoCmd(repoAdder{}, inputTextMock{}, inputURLMock{}, inputIntMock{}, inputTrueMock{})
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewAddRepoCmd got %v", cmd)
 
