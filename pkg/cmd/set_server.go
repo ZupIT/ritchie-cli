@@ -11,10 +11,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	url     = "url"
-)
-
 // setServerCmd type for add repo command
 type setServerCmd struct {
 	server.Setter
