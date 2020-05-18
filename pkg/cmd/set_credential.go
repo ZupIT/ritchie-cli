@@ -57,7 +57,7 @@ func newCmd(s *setCredentialCmd) *cobra.Command {
 		Use:   "credential",
 		Short: "Set credential",
 		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE: RunFuncE(s.runFunc(), s.runStdin()),
+		RunE: RunFuncE(s.runStdin(), s.runPrompt()),
 	}
 
 	cmd.LocalFlags()
@@ -65,7 +65,7 @@ func newCmd(s *setCredentialCmd) *cobra.Command {
 	return cmd
 }
 
-func (s setCredentialCmd) runFunc() CommandRunnerFunc {
+func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		cred, err := s.promptResolver()
 		if err != nil {
