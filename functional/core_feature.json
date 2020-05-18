@@ -130,6 +130,11 @@
                 "key":"Choose a repository to delete:",
                 "value":"Leonidas",
                 "action":"sendkey"
+            },
+            {
+                "key":"Want to delete",
+                "value":"yes",
+                "action":"select"
             }
         ],
         "result":"\"Leonidas\" has been removed from your repositories"
