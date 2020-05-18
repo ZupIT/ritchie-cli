@@ -34,7 +34,7 @@ func NewSetter(serverFinder server.Finder, hc *http.Client, sm session.Manager, 
 }
 
 func (s Setter) Set(cred credential.Detail) error {
-	session, err := s.sessionManager.Current()
+	sess, err := s.sessionManager.Current()
 	if err != nil {
 		return err
 	}
@@ -49,28 +49,21 @@ func (s Setter) Set(cred credential.Detail) error {
 		return err
 	}
 
-	path := credential.Me
-	if cred.Username != credential.Me {
-		path = credential.Admin
-	} else {
-		cred.Username = ""
-	}
-
 	serverURL, err := s.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	url := fmt.Sprintf(urlCreatePattern, serverURL, path)
+	url := fmt.Sprintf(urlCreatePattern, serverURL, cred.Type)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-org", session.Organization)
+	req.Header.Set("x-org", sess.Organization)
 	req.Header.Set("x-ctx", ctx.Current)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", session.AccessToken))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", sess.AccessToken))
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return err

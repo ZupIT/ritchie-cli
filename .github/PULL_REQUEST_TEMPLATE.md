@@ -5,7 +5,7 @@ Please make sure you've read and understood our contributing guidelines;
 https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md
 
 For additional information on our contributing process, read our contributing
-guide https://docs.ritchiecli.io/v/doc-english/community
+guide https://docs.ritchiecli.io/community
 
 Please provide the following information:
 -->

@@ -56,14 +56,15 @@ type Cache struct {
 
 // Definition type that represents a Formula
 type Definition struct {
-	Path    string
-	Bin     string
-	LBin    string
-	MBin    string
-	WBin    string
-	Bundle  string
-	Config  string
-	RepoURL string
+	Path     string
+	Bin      string
+	LBin     string
+	MBin     string
+	WBin     string
+	Bundle   string
+	Config   string
+	RepoURL  string
+	RepoName string
 }
 
 // FormulaPath builds the formula path from ritchie home

@@ -220,6 +220,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
+		err = createDockerfile(srcDir, tpl_go.TemplateDockerfile)
+		if err != nil {
+			return err
+		}
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
 		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 		if err != nil {
@@ -235,6 +239,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		err = createDockerfile(srcDir, tpl_java.TemplateDockerfile)
 		if err != nil {
 			return err
 		}
@@ -260,6 +268,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
+		err = createDockerfile(srcDir, tpl_node.TemplateDockerfile)
+		if err != nil {
+			return err
+		}
 		err = createRunTemplate(srcDir, lang)
 		if err != nil {
 			return err
@@ -282,6 +294,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
+		err = createDockerfile(srcDir, tpl_python.TemplateDockerfile)
+		if err != nil {
+			return err
+		}
 		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
 		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 		if err != nil {
@@ -297,6 +313,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 		err = createMakefileForm(srcDir, pkg, dir, lang)
+		if err != nil {
+			return err
+		}
+		err = createDockerfile(srcDir, tpl_shell.TemplateDockerfile)
 		if err != nil {
 			return err
 		}
@@ -364,7 +384,6 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		tplFile := tpl_go.TemplateMakefile
 		tplFile = strings.ReplaceAll(tplFile, "{{name}}", name)
 		tplFile = strings.ReplaceAll(tplFile, "{{form-path}}", pathName)
-
 		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tplFile))
 	case "Java":
 		tfj := tpl_java.TemplateMakefile
@@ -375,7 +394,6 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 	case "Node":
 		tfn := tpl_node.TemplateMakefile
 		tfn = strings.ReplaceAll(tfn, nameBin, name)
-
 		err := fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfn))
 		if err != nil {
 			return err
@@ -393,6 +411,10 @@ func createMakefileForm(dir string, name, pathName, lang string) error {
 		tfs = strings.ReplaceAll(tfs, nameBin, name)
 		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tfs))
 	}
+}
+
+func createDockerfile(dir string, tpl string) error {
+	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
 }
 
 func createGoModFile(dir, pkg string) error {
@@ -416,7 +438,7 @@ func createMainFile(dir, pkg, lang string) error {
 	case "Node":
 		tfn := tpl_node.TemplateIndex
 		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
-		return fileutil.WriteFile(fmt.Sprintf("%s/index.java", dir), []byte(tfn))
+		return fileutil.WriteFile(fmt.Sprintf("%s/index.js", dir), []byte(tfn))
 	case "Python":
 		tfp := tpl_python.TemplateMain
 		tfp = strings.ReplaceAll(tfp, nameBin, pkg)
@@ -455,7 +477,22 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 						Bin:    "main.py",
 						LBin:   "main.py",
 						MBin:   "main.py",
-						WBin:   fn + ".bat",
+						WBin:   fmt.Sprintf("%s.bat", fn),
+						Bundle: "${so}.zip",
+						Config: "config.json",
+					},
+					Parent: parent,
+				})
+			} else if lang == "Go" {
+				commands = append(t.Commands, api.Command{
+					Usage: fn,
+					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
+					Formula: api.Formula{
+						Path:   pathValue,
+						Bin:    fmt.Sprintf("%s-${so}", fn),
+						LBin:   fmt.Sprintf("%s-${so}", fn),
+						MBin:   fmt.Sprintf("%s-${so}", fn),
+						WBin:   fmt.Sprintf("%s-${so}.exe", fn),
 						Bundle: "${so}.zip",
 						Config: "config.json",
 					},
@@ -467,10 +504,10 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
 					Formula: api.Formula{
 						Path:   pathValue,
-						Bin:    fn + ".sh",
-						LBin:   fn + ".sh",
-						MBin:   fn + ".sh",
-						WBin:   fn + ".bat",
+						Bin:    fmt.Sprintf("%s.sh", fn),
+						LBin:   fmt.Sprintf("%s.sh", fn),
+						MBin:   fmt.Sprintf("%s.sh", fn),
+						WBin:   fmt.Sprintf("%s.bat", fn),
 						Bundle: "${so}.zip",
 						Config: "config.json",
 					},

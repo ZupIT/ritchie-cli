@@ -151,22 +151,14 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 	if err != nil {
 		return credDetail, err
 	}
+
 	providers := make([]string, 0, len(cfg))
 	for k := range cfg {
 		providers = append(providers, k)
 	}
 
-	typ, err := s.List("Profile: ", []string{credential.Me, credential.Other})
-	if err != nil {
+	if err := s.profile(&credDetail); err != nil {
 		return credDetail, err
-	}
-
-	username := "me"
-	if typ == credential.Other {
-		username, err = s.Text("Username: ", true)
-		if err != nil {
-			return credDetail, err
-		}
 	}
 
 	service, err := s.List("Provider: ", providers)
@@ -192,7 +184,6 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		credentials[field] = val
 	}
 
-	credDetail.Username = username
 	credDetail.Credential = credentials
 	credDetail.Service = service
 
@@ -230,4 +221,31 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 	}
 
 	return credDetail, errors.New("invalid CLI build, no edition defined")
+}
+
+func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
+	profiles := map[string]credential.Type{
+		"ME (for you)":               credential.Me,
+		"OTHER (for another user)":   credential.Other,
+		"ORG (for the organization)": credential.Org,
+	}
+	var types []string
+	for k := range profiles {
+		types = append(types, k)
+	}
+
+	typ, err := s.List("Profile to add credential: ", types)
+	if err != nil {
+		return err
+	}
+
+	if profiles[typ] == credential.Other {
+		credDetail.Username, err = s.Text("Username: ", true)
+		if err != nil {
+			return err
+		}
+	}
+
+	credDetail.Type = profiles[typ]
+	return nil
 }

@@ -81,11 +81,12 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	formulaRunner := formula.NewRunner(
+	formulaRunner := formula.NewTeamRunner(
 		ritchieHomeDir,
 		envResolvers,
 		http.DefaultClient,
 		treeManager,
+		sessionManager,
 		inputList,
 		inputText,
 		inputBool)
@@ -133,7 +134,7 @@ func buildCommands() *cobra.Command {
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
-	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputText)
+	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
 	listRepoCmd := cmd.NewListRepoCmd(repoManager)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)

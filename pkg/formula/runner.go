@@ -20,6 +20,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 const (
@@ -34,6 +35,8 @@ type DefaultRunner struct {
 	envResolvers env.Resolvers
 	client       *http.Client
 	treeManager  TreeManager
+	sessionManager session.Manager
+	edition api.Edition
 	prompt.InputList
 	prompt.InputText
 	prompt.InputBool
@@ -48,13 +51,37 @@ func NewRunner(
 	it prompt.InputText,
 	ib prompt.InputBool) DefaultRunner {
 	return DefaultRunner{
-		ritchieHome,
-		er,
-		hc,
-		tm,
-		il,
-		it,
-		ib}
+		ritchieHome:    ritchieHome,
+		envResolvers:   er,
+		client:         hc,
+		treeManager:    tm,
+		edition:        api.Single,
+		InputList:      il,
+		InputText:      it,
+		InputBool:      ib,
+	}
+}
+
+func NewTeamRunner (
+	ritchieHome string,
+	er env.Resolvers,
+	hc *http.Client,
+	tm TreeManager,
+	sm session.Manager,
+	il prompt.InputList,
+	it prompt.InputText,
+	ib prompt.InputBool) DefaultRunner {
+	return DefaultRunner{
+		ritchieHome:    ritchieHome,
+		envResolvers:   er,
+		client:         hc,
+		treeManager:    tm,
+		sessionManager: sm,
+		edition:        api.Team,
+		InputList:      il,
+		InputText:      it,
+		InputBool:      ib,
+	}
 }
 
 // Run default implementation of Runner
@@ -70,7 +97,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	bPath := def.BinPath(fPath)
 	bFilePath := def.BinFilePath(bPath, bName)
 	if !fileutil.Exists(bFilePath) {
-		zipFile, err := d.downloadFormulaBundle(def.BundleURL(), fPath, def.BundleName())
+		zipFile, err := d.downloadFormulaBundle(def.BundleURL(), fPath, def.BundleName(), def.RepoName)
 		if err != nil {
 			return err
 		}
@@ -232,7 +259,7 @@ func (d DefaultRunner) loadConfig(def Definition) (Config, error) {
 	cName := def.ConfigName()
 	cPath := def.ConfigPath(fPath, cName)
 	if !fileutil.Exists(cPath) {
-		if err := d.downloadConfig(def.ConfigURL(cName), fPath, cName); err != nil {
+		if err := d.downloadConfig(def.ConfigURL(cName), fPath, cName, def.RepoName); err != nil {
 			return Config{}, err
 		}
 	}
@@ -352,10 +379,25 @@ func (d DefaultRunner) resolveIfReserved(input Input) (string, error) {
 	return "", nil
 }
 
-func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName string) (string, error) {
+func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
 	log.Println("Download formula...")
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", errors.New("failed to create request for config download")
+	}
+
+	if d.edition == api.Team {
+		s, err := d.sessionManager.Current()
+		if err != nil {
+			return "", errors.New("failed get current session")
+		}
+		req.Header.Set("x-org", s.Organization)
+		req.Header.Set("x-repo-name", repoName)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+	}
+
+	resp, err := d.client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -392,10 +434,24 @@ func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName string) (str
 	return file, nil
 }
 
-func (d DefaultRunner) downloadConfig(url, destPath, configName string) error {
+func (d DefaultRunner) downloadConfig(url, destPath, configName, repoName string) error {
 	log.Println("Downloading config file...")
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return errors.New("failed to create request for config download")
+	}
+
+	if d.edition == api.Team {
+		s, err := d.sessionManager.Current()
+		if err != nil {
+			return errors.New("failed get current session")
+		}
+		req.Header.Set("x-org", s.Organization)
+		req.Header.Set("x-repo-name", repoName)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+	}
+	resp, err := d.client.Do(req)
 	if err != nil {
 		return err
 	}

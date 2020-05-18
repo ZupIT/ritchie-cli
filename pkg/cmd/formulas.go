@@ -19,6 +19,7 @@ const (
 	fBundle  = "fBundle"
 	fConfig  = "fConfig"
 	fRepoURL = "fRepoURL"
+	fRepoName = "fRepoName"
 	subcmd   = " SUBCOMMAND"
 	//Group formulas group
 	Group = "group"
@@ -78,6 +79,7 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	annotations[fBundle] = frm.Bundle
 	annotations[fConfig] = frm.Config
 	annotations[fRepoURL] = frm.RepoURL
+	annotations[fRepoName] = cmd.Repo
 
 	c := &cobra.Command{
 		Annotations: annotations,
@@ -100,6 +102,7 @@ func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args
 		fBundle := cmd.Annotations[fBundle]
 		fConf := cmd.Annotations[fConfig]
 		fRepoURL := cmd.Annotations[fRepoURL]
+		fRepoName := cmd.Annotations[fRepoName]
 		frm := formula.Definition{
 			Path:    fPath,
 			Bin:     fBin,
@@ -109,6 +112,7 @@ func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args
 			Bundle:  fBundle,
 			Config:  fConf,
 			RepoURL: fRepoURL,
+			RepoName: fRepoName,
 		}
 		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
 		if err != nil {
