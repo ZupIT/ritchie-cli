@@ -28,6 +28,7 @@ DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./ritchie_env.sh)
 COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
+PATH:=/workspace/dist/linux/single:$(PATH)
 
 build:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
@@ -94,7 +95,11 @@ clean:
 	rm -rf $(DIST)
 	rm -rf $(BIN)
 
-test:
+unit-test:
 	mkdir -p $(BIN)
-	$(GOTEST) -short -coverprofile=$(BIN)/cov.out `go list ./... | grep -v vendor/`
+	$(GOTEST) -v -short -coverprofile=$(BIN)/cov.out `go list ./pkg/... | grep -v vendor/`
 	$(GOTOOLCOVER) -func=$(BIN)/cov.out
+
+functional-test:
+	mkdir -p $(BIN)
+	$(GOTEST) -v `go list ./functional/... | grep -v vendor/`
