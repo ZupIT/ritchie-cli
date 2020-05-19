@@ -1,12 +1,17 @@
 package formula
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/google/uuid"
+
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
+
+var ErrNotEnableDocker = errors.New("this formula is not enabled to run in a container")
 
 type DockerPreRunner struct {
 	sDefault Setuper
@@ -22,6 +27,10 @@ func (d DockerPreRunner) PreRun(def Definition) (Setup, error) {
 		return Setup{}, err
 	}
 
+	if err := validate(setup.tmpBinDir); err != nil {
+		return Setup{}, err
+	}
+
 	containerId, err := uuid.NewRandom()
 	if err != nil {
 		return Setup{}, err
@@ -33,6 +42,15 @@ func (d DockerPreRunner) PreRun(def Definition) (Setup, error) {
 	}
 
 	return setup, nil
+}
+
+func validate(tmpBinDir string) error {
+	dockerFile := fmt.Sprintf("%s/Dockerfile", tmpBinDir)
+	if !fileutil.Exists(dockerFile) {
+		return ErrNotEnableDocker
+	}
+
+	return nil
 }
 
 func buildImg(containerId string) error {
