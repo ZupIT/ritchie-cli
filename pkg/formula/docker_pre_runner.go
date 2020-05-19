@@ -56,7 +56,7 @@ func validate(tmpBinDir string) error {
 func buildImg(containerId string) error {
 	fmt.Println("Building docker image...")
 	args := []string{dockerBuildCmd, "-t", containerId, "."}
-	cmd := exec.Command(docker, args...)
+	cmd := exec.Command(docker, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {
