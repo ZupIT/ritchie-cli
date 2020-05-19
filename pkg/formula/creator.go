@@ -156,6 +156,7 @@ func changeMakefileMain(formPath, fCmd, fName string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println(d)
 	variable := strings.ToUpper(d[len(d)-1]) + "=" + strings.Join(d[1:], "/")
 	tplFile = []byte(strings.ReplaceAll(string(tplFile), "\nFORMULAS=", "\n"+variable+"\nFORMULAS="))
 	formulas := formulaValue(tplFile)
@@ -202,6 +203,7 @@ func createScripts(dir string) error {
 
 func createSrcFiles(dir, pkg, lang string) error {
 	srcDir := fmt.Sprintf("%s/src", dir)
+	pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
 	err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm)
 	if err != nil {
 		return err
@@ -250,8 +252,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
-		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		err = createPkgDir(pkgDir)
 		if err != nil {
 			return err
 		}
@@ -280,8 +281,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
-		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		err = createPkgDir(pkgDir)
 		if err != nil {
 			return err
 		}
@@ -302,8 +302,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
-		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		err = createPkgDir(pkgDir)
 		if err != nil {
 			return err
 		}
@@ -324,8 +323,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
-		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+		err = createPkgDir(pkgDir)
 		if err != nil {
 			return err
 		}
@@ -335,6 +333,10 @@ func createSrcFiles(dir, pkg, lang string) error {
 		}
 	}
 	return nil
+}
+
+func createPkgDir(pkgDir string) error {
+	return fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 }
 
 func createPkgFile(dir, pkg, lang string) error {
@@ -359,7 +361,7 @@ func createPkgFile(dir, pkg, lang string) error {
 }
 
 func createRunTemplate(dir, tpl string) error {
-		return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tpl), 0777)
+	return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tpl), 0777)
 }
 
 func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
@@ -382,7 +384,7 @@ func createGoModFile(dir, pkg string) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/go.mod", dir), []byte(tplFile))
 }
 
-func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool, ) error {
+func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error {
 	if uc {
 		tpl = strings.ReplaceAll(tpl, nameBin, pkg)
 		tpl = strings.ReplaceAll(tpl, nameBinFirstUpper, strings.Title(strings.ToLower(pkg)))
