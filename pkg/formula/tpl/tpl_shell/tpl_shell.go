@@ -1,13 +1,13 @@
 package tpl_shell
 
 const (
-	TemplateMain = `#!/bin/sh
+	Main = `#!/bin/sh
 
 . ./{{bin-name}}/{{bin-name}}.sh --source-only
 
 run $SAMPLE_TEXT $SAMPLE_LIST $SAMPLE_BOOL`
 
-	TemplateMakefile = `# SH
+	Makefile = `# SH
 BINARY_NAME={{bin-name}}.sh
 DIST=../dist
 DIST_DIR=$(DIST)/commons/bin
@@ -16,7 +16,7 @@ build:
 	cp main.sh $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name}} $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
 	chmod +x $(DIST_DIR)/$(BINARY_NAME)`
 
-	TemplateDockerfile = `
+	Dockerfile = `
 FROM alpine:3.7
 
 WORKDIR /app
@@ -27,7 +27,7 @@ RUN chmod +x main.sh
 
 ENTRYPOINT /app/main.sh`
 
-	TemplateFileShell = `#!/bin/sh
+	File = `#!/bin/sh
 run() {
   echo "Hello World! "
   echo "You receive $SAMPLE_TEXT in text. "

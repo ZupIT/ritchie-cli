@@ -149,7 +149,7 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 	return nil
 }
 
-func changeMakefileMain(formPath string, fCmd, fName string) error {
+func changeMakefileMain(formPath, fCmd, fName string) error {
 	d := strings.Split(fCmd, " ")
 	dir := fmt.Sprintf("%s/%s", formPath, Makefile)
 	tplFile, err := fileutil.ReadFile(dir)
@@ -175,7 +175,7 @@ func formulaValue(file []byte) string {
 }
 
 func createMakefileMain(dir, dirForm, name string) error {
-	tplFile := tpl_go.TemplateMakefileMain
+	tplFile := tpl_go.Makefilemain
 
 	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
 	tplFile = strings.ReplaceAll(string(tplFile), "{{formPath}}", dirForm)
@@ -188,14 +188,14 @@ func createMakefileMain(dir, dirForm, name string) error {
 }
 
 func createScripts(dir string) error {
-	tplFile := tpl_go.TemplateCopyBinConfig
+	tplFile := tpl_go.CopyBinConfig
 
 	err := fileutil.WriteFilePerm(fmt.Sprintf("%s/copy-bin-configs.sh", dir), []byte(tplFile), 0755)
 	if err != nil {
 		return err
 	}
 
-	tplFile = tpl_go.TemplateUnzipBinConfigs
+	tplFile = tpl_go.UnzipBinConfigs
 
 	return fileutil.WriteFilePerm(fmt.Sprintf("%s/unzip-bin-configs.sh", dir), []byte(tplFile), 0755)
 }
@@ -208,7 +208,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 	}
 	switch lang {
 	case "Go":
-		err = createMainFile(srcDir, pkg, tpl_go.TemplateMain, "go", "main", false)
+		err = createMainFile(srcDir, pkg, tpl_go.Main, "go", "main", false)
 		if err != nil {
 			return err
 		}
@@ -216,11 +216,11 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_go.TemplateMakefile, true)
+		err = createMakefileForm(srcDir, pkg, dir, tpl_go.Makefile, true)
 		if err != nil {
 			return err
 		}
-		err = createDockerfile(srcDir, tpl_go.TemplateDockerfile)
+		err = createDockerfile(srcDir, tpl_go.Dockerfile)
 		if err != nil {
 			return err
 		}
@@ -234,19 +234,19 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Java":
-		err = createMainFile(srcDir, pkg, tpl_java.TemplateMain, "java", "Main", true)
+		err = createMainFile(srcDir, pkg, tpl_java.Main, "java", "Main", true)
 		if err != nil {
 			return err
 		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_java.TemplateMakefile, false)
+		err = createMakefileForm(srcDir, pkg, dir, tpl_java.Makefile, false)
 		if err != nil {
 			return err
 		}
-		err = createDockerfile(srcDir, tpl_java.TemplateDockerfile)
+		err = createDockerfile(srcDir, tpl_java.Dockerfile)
 		if err != nil {
 			return err
 		}
-		err = createRunTemplate(srcDir, lang)
+		err = createRunTemplate(srcDir, tpl_java.RunTemplate)
 		if err != nil {
 			return err
 		}
@@ -260,23 +260,23 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Node":
-		err = createMainFile(srcDir, pkg, tpl_node.TemplateIndex, "js", "index", false)
+		err = createMainFile(srcDir, pkg, tpl_node.Index, "js", "index", false)
 		if err != nil {
 			return err
 		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_node.TemplateMakefile, false)
+		err = createMakefileForm(srcDir, pkg, dir, tpl_node.Makefile, false)
 		if err != nil {
 			return err
 		}
-		err = createPackageJson(dir, tpl_node.TemplatePackageJson)
+		err = createPackageJson(srcDir, tpl_node.PackageJson)
 		if err != nil {
 			return err
 		}
-		err = createDockerfile(srcDir, tpl_node.TemplateDockerfile)
+		err = createDockerfile(srcDir, tpl_node.Dockerfile)
 		if err != nil {
 			return err
 		}
-		err = createRunTemplate(srcDir, lang)
+		err = createRunTemplate(srcDir, tpl_node.RunTemplate)
 		if err != nil {
 			return err
 		}
@@ -290,15 +290,15 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Python":
-		err = createMainFile(srcDir, pkg, tpl_python.TemplateMain, "py", "main", false)
+		err = createMainFile(srcDir, pkg, tpl_python.Main, "py", "main", false)
 		if err != nil {
 			return err
 		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_python.TemplateMakefile, false)
+		err = createMakefileForm(srcDir, pkg, dir, tpl_python.Makefile, false)
 		if err != nil {
 			return err
 		}
-		err = createDockerfile(srcDir, tpl_python.TemplateDockerfile)
+		err = createDockerfile(srcDir, tpl_python.Dockerfile)
 		if err != nil {
 			return err
 		}
@@ -312,15 +312,15 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	default:
-		err = createMainFile(srcDir, pkg, tpl_shell.TemplateMain, "sh", "main", false)
+		err = createMainFile(srcDir, pkg, tpl_shell.Main, "sh", "main", false)
 		if err != nil {
 			return err
 		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_shell.TemplateMakefile, false)
+		err = createMakefileForm(srcDir, pkg, dir, tpl_shell.Makefile, false)
 		if err != nil {
 			return err
 		}
-		err = createDockerfile(srcDir, tpl_shell.TemplateDockerfile)
+		err = createDockerfile(srcDir, tpl_shell.Dockerfile)
 		if err != nil {
 			return err
 		}
@@ -340,46 +340,28 @@ func createSrcFiles(dir, pkg, lang string) error {
 func createPkgFile(dir, pkg, lang string) error {
 	switch lang {
 	case "Go":
-		tfgo := tpl_go.TemplatePkg
-		tfgo = strings.ReplaceAll(tfgo, nameModule, pkg)
-
+		tfgo := strings.ReplaceAll(tpl_go.Pkg, nameModule, pkg)
 		return fileutil.WriteFile(fmt.Sprintf("%s/%s.go", dir, pkg), []byte(tfgo))
 	case "Java":
-		tfj := tpl_java.TemplateFileJava
-		tfj = strings.ReplaceAll(tfj, nameBin, pkg)
+		tfj := strings.ReplaceAll(tpl_java.File, nameBin, pkg)
 		fu := strings.Title(strings.ToLower(pkg))
 		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
 		return fileutil.WriteFile(fmt.Sprintf("%s/%s.java", dir, fu), []byte(tfj))
 	case "Node":
-		tfn := tpl_node.TemplateFileNode
+		tfn := tpl_node.File
 		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
 		return fileutil.WriteFile(fmt.Sprintf("%s/%s.js", dir, pkg), []byte(tfn))
 	case "Python":
-		tfp := tpl_python.TemplateFilePython
-		tfp = strings.ReplaceAll(tfp, nameBinFirstUpper, pkg)
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.py", dir, pkg), []byte(tfp))
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s.py", dir, pkg), []byte(tpl_python.File))
 	default:
-		tfs := tpl_shell.TemplateFileShell
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.sh", dir, pkg), []byte(tfs))
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s.sh", dir, pkg), []byte(tpl_shell.File))
 	}
 }
 
-func createRunTemplate(dir, lang string) error {
-	switch lang {
-	case "Go":
-		return nil
-	case "Java":
-		tj := tpl_java.TemplateRunTemplate
-		return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tj), 0777)
-	case "Node":
-		tn := tpl_node.TemplateRunTemplate
-		return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tn), 0777)
-	case "Python":
-	default:
-
-	}
-	return nil
+func createRunTemplate(dir, tpl string) error {
+		return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tpl), 0777)
 }
+
 func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
 	if compiled {
 		tpl = strings.ReplaceAll(tpl, "{{name}}", name)
@@ -395,7 +377,7 @@ func createDockerfile(dir, tpl string) error {
 }
 
 func createGoModFile(dir, pkg string) error {
-	tplFile := tpl_go.TemplateGoMod
+	tplFile := tpl_go.GoMod
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/go.mod", dir), []byte(tplFile))
 }
@@ -412,7 +394,7 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool, ) erro
 }
 
 func createConfigFile(dir string) error {
-	tplFile := tpl_go.TemplateConfig
+	tplFile := tpl_go.Config
 	return fileutil.WriteFile(fmt.Sprintf("%s/config.json", dir), []byte(tplFile))
 }
 
@@ -520,9 +502,5 @@ func generateParent(fc []string, index int) string {
 }
 
 func createPackageJson(dir, tpl string) error {
-	err := fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tpl))
-	if err != nil {
-		return err
-	}
-	return nil
+	return fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tpl))
 }

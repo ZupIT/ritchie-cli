@@ -1,7 +1,7 @@
 package tpl_go
 
 const (
-	TemplateConfig = `{
+	Config = `{
   "description": "Sample inputs in Ritchie.",
   "inputs" : [
     {
@@ -30,7 +30,7 @@ const (
     }
   ]
 }`
-	TemplateCopyBinConfig = `#!/bin/sh
+	CopyBinConfig = `#!/bin/sh
 
 FORMULAS="$1"
 
@@ -87,13 +87,13 @@ init() {
 
 init
 `
-	TemplateGoMod = `module {{nameModule}}
+	GoMod = `module {{nameModule}}
 
 go 1.14
 
 require github.com/fatih/color v1.9.0`
 
-	TemplateMain = `package main
+	Main = `package main
 
 import (
     "os"
@@ -112,7 +112,7 @@ func main() {
     }.Run()
 }`
 
-	TemplateMakefile = `# Go parameters
+	Makefile = `# Go parameters
 BINARY_NAME={{name}}
 GOCMD=go
 GOBUILD=$(GOCMD) build
@@ -139,7 +139,7 @@ build:
 test:
 	$(GOTEST) -short ` + "`go list ./... | grep -v vendor/`"
 
-	TemplateDockerfile = `
+	Dockerfile = `
 FROM golang:alpine AS builder
 WORKDIR /app/
 COPY . .
@@ -150,7 +150,7 @@ WORKDIR /app/
 COPY --from=builder app/main .
 ENTRYPOINT ["./main"]`
 
-	TemplateMakefileMain = `#Makefiles
+	Makefilemain = `#Makefiles
 {{formName}}={{formPath}}
 FORMULAS=$({{formName}})
 
@@ -188,7 +188,7 @@ endif
 	rm -rf $(HOME)/.rit/repo/local/tree.json
 	cp tree/tree.json  $(HOME)/.rit/repo/local/tree.json
 `
-	TemplatePkg = `package {{nameModule}}
+	Pkg = `package {{nameModule}}
 
 import (
 	"fmt"
@@ -208,6 +208,6 @@ func(in Input)Run()  {
 	color.Yellow(fmt.Sprintf("You receive %s in boolean.", in.Boolean ))
 }`
 
-	TemplateUnzipBinConfigs = `#!/bin/sh
+	UnzipBinConfigs = `#!/bin/sh
 find formulas -name "*.zip" | while read filename; do unzip -o -d "` + "`dirname \"$filename\"`\" \"$filename\"; rm -f \"$filename\"; done;"
 )
