@@ -130,6 +130,8 @@ func (d DefaultRunner) Run(def Definition) error {
 	if err := d.inputs(cmd, fPath, &config); err != nil {
 		return err
 	}
+	ePwd := fmt.Sprintf(EnvPattern, PwdEnv, cPwd)
+	cmd.Env = append(cmd.Env, ePwd)
 
 	if err := cmd.Start(); err != nil {
 		return err

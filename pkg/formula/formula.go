@@ -13,6 +13,7 @@ const (
 	DefaultConfig         = "config.json"
 	ConfigPattern         = "%s/%s"
 	CommandEnv            = "COMMAND"
+	PwdEnv                = "PWD"
 	BinPattern            = "%s%s"
 	BinPathPattern        = "%s/bin"
 	windows               = "windows"
