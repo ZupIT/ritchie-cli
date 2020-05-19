@@ -68,14 +68,14 @@ type Commands []Command
 
 // Formula type
 type Formula struct {
-	Path    string `json:"path"`
-	Bin     string `json:"bin"`
-	LBin    string `json:"binLinux"`
-	MBin    string `json:"binDarwin"`
-	WBin    string `json:"binWindows"`
-	Bundle  string `json:"bundle"`
-	Config  string `json:"config"`
-	RepoURL string `json:"repoUrl"`
+	Path          string `json:"path"`
+	Bin           string `json:"bin"`
+	LBin          string `json:"binLinux"`
+	MBin          string `json:"binDarwin"`
+	WBin          string `json:"binWindows"`
+	Bundle        string `json:"bundle"`
+	Config        string `json:"config"`
+	RepoURL       string `json:"repoUrl"`
 }
 
 // Edition type that represents Single or Team.

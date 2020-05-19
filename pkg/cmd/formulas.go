@@ -20,17 +20,20 @@ const (
 type FormulaCommand struct {
 	coreCmds      api.Commands
 	treeManager   formula.TreeManager
-	formulaRunner formula.Runner
+	defaultRunner formula.Runner
+	dockerRunner  formula.Runner
 }
 
 func NewFormulaCommand(
 	coreCmds api.Commands,
 	treeManager formula.TreeManager,
-	formulaRunner formula.Runner) *FormulaCommand {
+	defaultRunner formula.Runner,
+	dockerRunner formula.Runner) *FormulaCommand {
 	return &FormulaCommand{
 		coreCmds:      coreCmds,
 		treeManager:   treeManager,
-		formulaRunner: formulaRunner,
+		defaultRunner: defaultRunner,
+		dockerRunner:  dockerRunner,
 	}
 }
 
@@ -83,25 +86,29 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	var docker bool
 	formulaFlags := formulaCmd.Flags()
 	formulaFlags.BoolVar(&docker, "docker", false, "Use to run formulas inside a docker container")
-	formulaCmd.RunE = execFormulaFunc(f.formulaRunner, cmd.Repo, cmd.Formula, &docker)
+	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, cmd.Formula, &docker)
 
 	return formulaCmd
 }
 
-func execFormulaFunc(formulaRunner formula.Runner, repo string, f api.Formula, docker *bool) func(cmd *cobra.Command, args []string) error {
+func (f FormulaCommand) execFormulaFunc(repo string, form api.Formula, docker *bool) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		d := formula.Definition{
-			Path:     f.Path,
-			Bin:      f.Bin,
-			LBin:     f.LBin,
-			MBin:     f.MBin,
-			WBin:     f.WBin,
-			Bundle:   f.Bundle,
-			Config:   f.Config,
-			RepoUrl:  f.RepoURL,
+			Path:     form.Path,
+			Bin:      form.Bin,
+			LBin:     form.LBin,
+			MBin:     form.MBin,
+			WBin:     form.WBin,
+			Bundle:   form.Bundle,
+			Config:   form.Config,
+			RepoUrl:  form.RepoURL,
 			RepoName: repo,
 		}
 
-		return formulaRunner.Run(d, *docker)
+		if *docker {
+			return f.dockerRunner.Run(d)
+		}
+
+		return f.defaultRunner.Run(d)
 	}
 }

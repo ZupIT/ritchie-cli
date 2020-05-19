@@ -127,6 +127,19 @@ func CreateFileIfNotExist(file string, content []byte) error {
 	return nil
 }
 
+func AppendFileData(file string, content []byte) error {
+	f, err := os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 777)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := f.Write(content); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // RemoveDir removes path and any children it contains.
 func RemoveDir(dir string) error {
 	if err := os.RemoveAll(dir); err != nil {

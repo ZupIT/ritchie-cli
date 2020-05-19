@@ -2,6 +2,7 @@ package formula
 
 import (
 	"fmt"
+	"os/exec"
 	"runtime"
 	"strings"
 )
@@ -65,7 +66,7 @@ type Definition struct {
 	RepoName string
 }
 
-type RunData struct {
+type Setup struct {
 	pwd            string
 	formulaPath    string
 	binPath        string
@@ -73,6 +74,7 @@ type RunData struct {
 	tmpBinDir      string
 	tmpBinFilePath string
 	config         Config
+	containerId    string
 }
 
 // FormulaPath builds the formula path from ritchie home
@@ -166,15 +168,19 @@ func (d *Definition) ConfigUrl(configName string) string {
 }
 
 type PreRunner interface {
-	PreRun(def Definition) (RunData, error)
+	PreRun(def Definition) (Setup, error)
 }
 
 type Runner interface {
-	Run(def Definition, docker bool) error
+	Run(def Definition) error
 }
 
-type PostRunner interface {
-	PostRun(p RunData) error
+type InputRunner interface {
+	Inputs(cmd *exec.Cmd, formulaPath string, config *Config, docker bool) error
+}
+
+type Setuper interface {
+	Setup(def Definition) (Setup, error)
 }
 
 type Creator interface {

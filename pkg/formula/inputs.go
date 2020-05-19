@@ -4,108 +4,41 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
-type DefaultRunner struct {
-	ritchieHome    string
-	envResolvers   env.Resolvers
-	client         *http.Client
-	treeManager    TreeManager
-	sessionManager session.Manager
-	edition        api.Edition
+type InputManager struct {
+	envResolvers env.Resolvers
 	prompt.InputList
 	prompt.InputText
 	prompt.InputBool
 }
 
-func NewRunner(
-	ritchieHome string,
-	er env.Resolvers,
-	hc *http.Client,
-	tm TreeManager,
-	il prompt.InputList,
-	it prompt.InputText,
-	ib prompt.InputBool) DefaultRunner {
-	return DefaultRunner{
-		ritchieHome:  ritchieHome,
-		envResolvers: er,
-		client:       hc,
-		treeManager:  tm,
-		edition:      api.Single,
-		InputList:    il,
-		InputText:    it,
-		InputBool:    ib,
+func NewInputManager(
+	env env.Resolvers,
+	inList prompt.InputList,
+	inText prompt.InputText,
+	inBool prompt.InputBool) InputManager {
+	return InputManager{
+		envResolvers: env,
+		InputList:    inList,
+		InputText:    inText,
+		InputBool:    inBool,
 	}
 }
 
-func NewTeamRunner(
-	ritchieHome string,
-	er env.Resolvers,
-	hc *http.Client,
-	tm TreeManager,
-	sm session.Manager,
-	il prompt.InputList,
-	it prompt.InputText,
-	ib prompt.InputBool) DefaultRunner {
-	return DefaultRunner{
-		ritchieHome:    ritchieHome,
-		envResolvers:   er,
-		client:         hc,
-		treeManager:    tm,
-		sessionManager: sm,
-		edition:        api.Team,
-		InputList:      il,
-		InputText:      it,
-		InputBool:      ib,
-	}
-}
-
-func (d DefaultRunner) Run(def Definition, docker bool) error {
-	preData, err := d.PreRun(def)
-	if err != nil {
-		return err
-	}
-
-	cmd := exec.Command(preData.tmpBinFilePath)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := d.inputs(cmd, preData.formulaPath, &preData.config); err != nil {
-		return err
-	}
-
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	if err := cmd.Wait(); err != nil {
-		return err
-	}
-
-	if err := d.PostRun(preData); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config) error {
+func (d InputManager) Inputs(cmd *exec.Cmd, formulaPath string, config *Config, docker bool) error {
 	for i, input := range config.Inputs {
 		var inputVal string
 		var valBool bool
-		items, err := d.loadItems(input, formulaPath)
+		items, err := loadItems(input, formulaPath)
 		if err != nil {
 			return err
 		}
@@ -135,12 +68,25 @@ func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config)
 		}
 
 		if len(inputVal) != 0 {
-			d.persistCache(formulaPath, inputVal, input, items)
+			persistCache(formulaPath, inputVal, input, items)
 			e := fmt.Sprintf(EnvPattern, strings.ToUpper(input.Name), inputVal)
-			if i == 0 {
-				cmd.Env = append(os.Environ(), e)
+
+			if docker {
+				if !fileutil.Exists(envFile) {
+					if err := fileutil.WriteFile(envFile, []byte(e+"\n")); err != nil {
+						return err
+					}
+				} else {
+					if err := fileutil.AppendFileData(envFile, []byte(e+"\n")); err != nil {
+						return err
+					}
+				}
 			} else {
-				cmd.Env = append(cmd.Env, e)
+				if i == 0 {
+					cmd.Env = append(os.Environ(), e)
+				} else {
+					cmd.Env = append(cmd.Env, e)
+				}
 			}
 		}
 	}
@@ -151,7 +97,7 @@ func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config)
 	return nil
 }
 
-func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, items []string) {
+func persistCache(formulaPath, inputVal string, input Input, items []string) {
 	cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
 	if input.Cache.Active {
 		if items == nil {
@@ -182,7 +128,7 @@ func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, i
 	}
 }
 
-func (d DefaultRunner) loadInputValList(items []string, input Input) (string, error) {
+func (d InputManager) loadInputValList(items []string, input Input) (string, error) {
 	newLabel := DefaultCacheNewLabel
 	if input.Cache.Active {
 		if input.Cache.NewLabel != "" {
@@ -201,7 +147,7 @@ func (d DefaultRunner) loadInputValList(items []string, input Input) (string, er
 	return inputVal, err
 }
 
-func (d DefaultRunner) loadItems(input Input, formulaPath string) ([]string, error) {
+func loadItems(input Input, formulaPath string) ([]string, error) {
 	if input.Cache.Active {
 		cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
 		if fileutil.Exists(cachePath) {
@@ -231,7 +177,7 @@ func (d DefaultRunner) loadItems(input Input, formulaPath string) ([]string, err
 	}
 }
 
-func (d DefaultRunner) resolveIfReserved(input Input) (string, error) {
+func (d InputManager) resolveIfReserved(input Input) (string, error) {
 	s := strings.Split(input.Type, "_")
 	resolver := d.envResolvers[s[0]]
 	if resolver != nil {

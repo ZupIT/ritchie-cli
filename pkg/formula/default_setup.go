@@ -14,14 +14,40 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
-func (d DefaultRunner) PreRun(def Definition) (RunData, error) {
+type DefaultSetup struct {
+	ritchieHome    string
+	client         *http.Client
+	sessionManager session.Manager
+	edition        api.Edition
+}
+
+func NewDefaultSingleSetup(ritchieHome string, c *http.Client) DefaultSetup {
+	return DefaultSetup{
+		ritchieHome:    ritchieHome,
+		client:         c,
+		edition:        api.Single,
+	}
+}
+
+func NewDefaultTeamSetup(ritchieHome string, c *http.Client, sess session.Manager) DefaultSetup {
+	return DefaultSetup{
+		ritchieHome:    ritchieHome,
+		client:         c,
+		sessionManager: sess,
+		edition:        api.Team,
+	}
+}
+
+func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 	pwd, _ := os.Getwd()
-	formulaPath := def.FormulaPath(d.ritchieHome)
+	ritchieHome := d.ritchieHome
+	formulaPath := def.FormulaPath(ritchieHome)
 	config, err := d.loadConfig(formulaPath, def)
 	if err != nil {
-		return RunData{}, err
+		return Setup{}, err
 	}
 
 	binName := def.BinName()
@@ -33,26 +59,26 @@ func (d DefaultRunner) PreRun(def Definition) (RunData, error) {
 		name := def.BundleName()
 		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name, def.RepoName)
 		if err != nil {
-			return RunData{}, err
+			return Setup{}, err
 		}
 
-		if err := d.unzipFile(zipFile, formulaPath); err != nil {
-			return RunData{}, err
+		if err := unzipFile(zipFile, formulaPath); err != nil {
+			return Setup{}, err
 		}
 	}
 
-	tmpDir, tmpBinDir, err := d.createWorkDir(binPath, def)
+	tmpDir, tmpBinDir, err := createWorkDir(ritchieHome, binPath, def)
 	if err != nil {
-		return RunData{}, err
+		return Setup{}, err
 	}
 
 	if err := os.Chdir(tmpBinDir); err != nil {
-		return RunData{}, err
+		return Setup{}, err
 	}
 
 	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
 
-	run := RunData{
+	run := Setup{
 		pwd:            pwd,
 		formulaPath:    formulaPath,
 		binPath:        binPath,
@@ -65,7 +91,7 @@ func (d DefaultRunner) PreRun(def Definition) (RunData, error) {
 	return run, nil
 }
 
-func (d DefaultRunner) loadConfig(formulaPath string, def Definition) (Config, error) { // Pre run
+func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, error) { // Pre run
 	configName := def.ConfigName()
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
@@ -87,22 +113,7 @@ func (d DefaultRunner) loadConfig(formulaPath string, def Definition) (Config, e
 	return formulaConfig, nil
 }
 
-func (d DefaultRunner) createWorkDir(binPath string, def Definition) (string, string, error) {
-	u := uuid.New().String()
-	tDir, tBDir := def.TmpWorkDirPath(d.ritchieHome, u)
-
-	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
-		return "", "", err
-	}
-
-	if err := fileutil.CopyDirectory(binPath, tBDir); err != nil {
-		return "", "", err
-	}
-
-	return tDir, tBDir, nil
-}
-
-func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
+func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
 	log.Println("Download formula...")
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -158,7 +169,7 @@ func (d DefaultRunner) downloadFormulaBundle(url, destPath, zipName, repoName st
 	return file, nil
 }
 
-func (d DefaultRunner) downloadConfig(url, destPath, configName, repoName string) error {
+func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string) error {
 	log.Println("Downloading config file...")
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -211,7 +222,22 @@ func (d DefaultRunner) downloadConfig(url, destPath, configName, repoName string
 	return nil
 }
 
-func (d DefaultRunner) unzipFile(filename, destPath string) error {
+func createWorkDir(ritchieHome, binPath string, def Definition) (string, string, error) {
+	u := uuid.New().String()
+	tDir, tBDir := def.TmpWorkDirPath(ritchieHome, u)
+
+	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
+		return "", "", err
+	}
+
+	if err := fileutil.CopyDirectory(binPath, tBDir); err != nil {
+		return "", "", err
+	}
+
+	return tDir, tBDir, nil
+}
+
+func unzipFile(filename, destPath string) error {
 	log.Println("Installing formula...")
 
 	if err := fileutil.CreateDirIfNotExists(destPath, 0655); err != nil {
