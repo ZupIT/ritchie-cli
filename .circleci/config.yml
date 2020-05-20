@@ -107,10 +107,15 @@ jobs:
       - attach_workspace:
             at: /workspace/dist
       - run:
-          name: Running Functional tests for single
+          name: Setup Bash for Single
           command: |
             echo "export PATH=/workspace/dist/linux/single:$PATH" >> $BASH_ENV
-            source /home/circleci/.bashr
+            source /home/circleci/.bashrc
+      - run: |
+          echo $PATH
+      - run:
+          name: Running Functional tests for single
+          command: |
             make functional-test-single
 
 
@@ -123,10 +128,15 @@ jobs:
       - attach_workspace:
           at: /workspace/dist
       - run:
-          name: Running Functional tests for team
+          name: Setup Bash for Team
           command: |
             echo "export PATH=/workspace/dist/linux/team:$PATH" >> $BASH_ENV
             source /home/circleci/.bashrc
+      - run: |
+          echo $PATH
+      - run:
+          name: Running Functional tests for team
+          command: |
             make functional-test-team
 
   build:
