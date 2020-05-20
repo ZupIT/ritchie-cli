@@ -1,4 +1,4 @@
-package functional
+package single
 
 import (
 	. "github.com/onsi/ginkgo"

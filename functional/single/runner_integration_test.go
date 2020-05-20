@@ -1,5 +1,5 @@
 
-package functional
+package single
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package functional
+package single
 
 import (
 	"bufio"
@@ -21,8 +21,8 @@ type Step struct {
 }
 
 type Scenario struct {
-	Entry string `json:"entry"`
-	Steps []Step `json:"steps"`
+	Entry string  `json:"entry"`
+	Steps []Step  `json:"steps"`
 	Result string `json:"result"`
 }
 

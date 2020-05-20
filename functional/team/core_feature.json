@@ -1,0 +1,117 @@
+[
+    {
+        "entry":"Set",
+        "steps":[
+            {
+                "key":"",
+                "value":"set",
+                "action":"main"
+            }
+        ],
+        "result":"Set objects like credentials, etc."
+    },
+    {
+        "entry":"Add",
+        "steps":[
+            {
+                "key":"",
+                "value":"add",
+                "action":"main"
+            }
+        ],
+        "result":"It can be used to add formulas, repositories and other objects.."
+    },
+    {
+        "entry":"Completion",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion",
+                "action":"main"
+            }
+        ],
+        "result":"Add autocomplete for terminal, Available for (bash, zsh)."
+    },
+    {
+        "entry":"Clean",
+        "steps":[
+            {
+                "key":"",
+                "value":"clean",
+                "action":"main"
+            }
+        ],
+        "result":"It can be used to clean formulas, repositories and other objects.."
+    },
+    {
+        "entry":"Create",
+        "steps":[
+            {
+                "key":"",
+                "value":"create",
+                "action":"main"
+            }
+        ],
+        "result":"Create objects like users, etc."
+    },
+    {
+        "entry":"Delete",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete",
+                "action":"main"
+            }
+        ],
+        "result":"Delete objects like users, etc."
+    },
+    {
+        "entry":"List",
+        "steps":[
+            {
+                "key":"",
+                "value":"list",
+                "action":"main"
+            }
+        ],
+        "result":"It can be used to list formulas, repositories and other objects."
+    },
+    {
+        "entry":"Show",
+        "steps":[
+            {
+                "key":"",
+                "value":"show",
+                "action":"main"
+            }
+        ],
+        "result":"Show objects like context, organization etc."
+    },
+    {
+        "entry":"Update",
+        "steps":[
+            {
+                "key":"",
+                "value":"update",
+                "action":"main"
+            }
+        ],
+        "result":"It can be used to update formulas repositories and etc."
+    },
+    {
+        "entry":"Set Server",
+        "steps":[
+            {
+                "key":"",
+                "value":"set server",
+                "action":"main"
+            },
+            {
+                "key":"URL of the server",
+                "value":"Leonidas",
+                "action":"sendkey"
+            }
+        ],
+        "result":"Set objects like credentials, etc."
+    }
+]
