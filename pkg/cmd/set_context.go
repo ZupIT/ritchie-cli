@@ -2,19 +2,27 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const newCtx = "Type new context?"
 
+// setContextCmd type for clean repo command
 type setContextCmd struct {
 	rcontext.FindSetter
 	prompt.InputText
 	prompt.InputList
+}
+
+// setContext type for stdin json decoder
+type setContext struct {
+	Context string `json:"context"`
 }
 
 func NewSetContextCmd(
@@ -23,15 +31,19 @@ func NewSetContextCmd(
 	il prompt.InputList) *cobra.Command {
 	s := setContextCmd{fs, it, il}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:     "context",
 		Short:   "Set context",
 		Example: "rit set context",
-		RunE:    s.runFunc(),
+		RunE: RunFuncE(s.runStdin(), s.runPrompt()),
 	}
+
+	cmd.LocalFlags()
+
+	return cmd
 }
 
-func (s setContextCmd) runFunc() CommandRunnerFunc {
+func (s setContextCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		ctxHolder, err := s.Find()
 		if err != nil {
@@ -60,4 +72,24 @@ func (s setContextCmd) runFunc() CommandRunnerFunc {
 		return nil
 	}
 
+}
+
+func (s setContextCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		sc := setContext{}
+
+		err := stdin.ReadJson(os.Stdin, &sc)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
+		}
+
+		if _, err := s.Set(sc.Context); err != nil {
+			return err
+		}
+
+		fmt.Println("Set context successful!")
+		return nil
+	}
 }

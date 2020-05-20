@@ -6,6 +6,7 @@ import (
 
 func TestNewSetServerCmd(t *testing.T) {
 	cmd := NewSetServerCmd(setServerMock{}, inputURLMock{})
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewSetServerCmd got %v", cmd)
 	}

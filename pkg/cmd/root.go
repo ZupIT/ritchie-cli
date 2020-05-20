@@ -85,6 +85,7 @@ func NewSingleRootCmd(wm workspace.Checker,
 		PersistentPreRunE: o.PreRunFunc(),
 		RunE:              runHelp,
 		SilenceErrors:     true,
+		TraverseChildren:  true,
 	}
 }
 

@@ -19,6 +19,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -83,8 +84,8 @@ func NewTeamRunner (
 	}
 }
 
-// Run default implementation of function Manager.Run
-func (d DefaultRunner) Run(def Definition) error {
+// Run default implementation of Runner
+func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	cPwd, _ := os.Getwd()
 	fPath := def.FormulaPath(d.ritchieHome)
 	config, err := d.loadConfig(def)
@@ -96,7 +97,7 @@ func (d DefaultRunner) Run(def Definition) error {
 	bPath := def.BinPath(fPath)
 	bFilePath := def.BinFilePath(bPath, bName)
 	if !fileutil.Exists(bFilePath) {
-		zipFile, err := d.downloadFormulaBundle(def.BundleUrl(), fPath, def.BundleName(), def.RepoName)
+		zipFile, err := d.downloadFormulaBundle(def.BundleURL(), fPath, def.BundleName(), def.RepoName)
 		if err != nil {
 			return err
 		}
@@ -127,7 +128,15 @@ func (d DefaultRunner) Run(def Definition) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := d.inputs(cmd, fPath, &config); err != nil {
+	switch inputType {
+	case api.Prompt:
+		err = d.fromPrompt(cmd, fPath, &config)
+	case api.Stdin:
+		err = d.fromStdin(cmd, &config)
+	default:
+		err = fmt.Errorf("terminal input (%v) not recongnized", inputType)
+	}
+	if err != nil {
 		return err
 	}
 
@@ -149,7 +158,7 @@ func (d DefaultRunner) Run(def Definition) error {
 	return nil
 }
 
-func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config) error {
+func (d DefaultRunner) fromPrompt(cmd *exec.Cmd, formulaPath string, config *Config) error {
 	for i, input := range config.Inputs {
 		var inputVal string
 		var valBool bool
@@ -199,13 +208,58 @@ func (d DefaultRunner) inputs(cmd *exec.Cmd, formulaPath string, config *Config)
 	return nil
 }
 
+func (d DefaultRunner) fromStdin(cmd *exec.Cmd, config *Config) error {
+
+	data := make(map[string]interface{})
+
+	err := stdin.ReadJson(os.Stdin, &data)
+	if err != nil {
+		fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
+		return err
+	}
+
+	for i, input := range config.Inputs {
+		var inputVal string
+		if err != nil {
+			return err
+		}
+		switch iType := input.Type; iType {
+		case "text", "bool":
+			inputVal = fmt.Sprintf("%v", data[input.Name])
+		default:
+			inputVal, err = d.resolveIfReserved(input)
+			if err != nil {
+				log.Fatalf("Fail to resolve input: %v, verify your credentials. [try using set credential]", input.Type)
+			}
+		}
+
+		if err != nil {
+			return err
+		}
+
+		if len(inputVal) != 0 {
+			e := fmt.Sprintf(EnvPattern, strings.ToUpper(input.Name), inputVal)
+			if i == 0 {
+				cmd.Env = append(os.Environ(), e)
+			} else {
+				cmd.Env = append(cmd.Env, e)
+			}
+		}
+	}
+	if len(config.Command) != 0 {
+		command := fmt.Sprintf(EnvPattern, CommandEnv, config.Command)
+		cmd.Env = append(cmd.Env, command)
+	}
+	return nil
+}
+
 func (d DefaultRunner) loadConfig(def Definition) (Config, error) {
 	fPath := def.FormulaPath(d.ritchieHome)
 	var config Config
 	cName := def.ConfigName()
 	cPath := def.ConfigPath(fPath, cName)
 	if !fileutil.Exists(cPath) {
-		if err := d.downloadConfig(def.ConfigUrl(cName), fPath, cName, def.RepoName); err != nil {
+		if err := d.downloadConfig(def.ConfigURL(cName), fPath, cName, def.RepoName); err != nil {
 			return Config{}, err
 		}
 	}
