@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/spf13/cobra"
 
@@ -15,6 +18,11 @@ type cleanRepoCmd struct {
 	prompt.InputText
 }
 
+// cleanRepo type for stdin json decoder
+type cleanRepo struct {
+	Name string `json:"name"`
+}
+
 // NewCleanRepoCmd creates a new cmd instance
 func NewCleanRepoCmd(cl formula.Cleaner, it prompt.InputText) *cobra.Command {
 	c := &cleanRepoCmd{cl, it}
@@ -23,13 +31,15 @@ func NewCleanRepoCmd(cl formula.Cleaner, it prompt.InputText) *cobra.Command {
 		Use:     "repo",
 		Short:   "clean a repository.",
 		Example: "rit clean repo ",
-		RunE:    c.runFunc(),
+		RunE: RunFuncE(c.runStdin(), c.runPrompt()),
 	}
+
+	cmd.LocalFlags()
 
 	return cmd
 }
 
-func (c cleanRepoCmd) runFunc() CommandRunnerFunc {
+func (c cleanRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		n, err := c.Text("Name of the repository: ", true)
 		if err != nil {
@@ -41,6 +51,27 @@ func (c cleanRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		fmt.Printf("%q has been cleaned successfully\n", n)
+
+		return nil
+	}
+}
+
+func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		f := cleanRepo{}
+
+		err := stdin.ReadJson(os.Stdin, &f)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
+		}
+
+		if err := c.Clean(f.Name); err != nil {
+			return err
+		}
+
+		fmt.Printf("%q has been cleaned successfully\n", f.Name)
 
 		return nil
 	}

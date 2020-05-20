@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/spf13/cobra"
 
@@ -17,6 +19,11 @@ type deleteRepoCmd struct {
 	prompt.InputBool
 }
 
+// deleteRepo type for stdin json decoder
+type deleteRepo struct {
+	Name string `json:"name"`
+}
+
 // NewDeleteRepoCmd delete repository instance
 func NewDeleteRepoCmd(dl formula.DelLister, il prompt.InputList, ib prompt.InputBool) *cobra.Command {
 	d := &deleteRepoCmd{
@@ -25,12 +32,16 @@ func NewDeleteRepoCmd(dl formula.DelLister, il prompt.InputList, ib prompt.Input
 		ib,
 	}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:     "repo [NAME_REPOSITORY]",
 		Short:   "Delete a repository.",
 		Example: "rit delete repo [NAME_REPOSITORY]",
-		RunE:    d.runFunc(),
+		RunE: RunFuncE(d.runStdin(), d.runPrompt()),
 	}
+
+	cmd.LocalFlags()
+
+	return cmd
 }
 func rNameList(r []formula.Repository) []string {
 	var names []string
@@ -42,7 +53,7 @@ func rNameList(r []formula.Repository) []string {
 	return names
 }
 
-func (d deleteRepoCmd) runFunc() CommandRunnerFunc {
+func (d deleteRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
 		repos, err := d.repo.List()
@@ -73,6 +84,27 @@ func (d deleteRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		fmt.Printf("%q has been removed from your repositories\n", rn)
+
+		return nil
+	}
+}
+
+func (d deleteRepoCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		dr := deleteRepo{}
+
+		err := stdin.ReadJson(os.Stdin, &dr)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
+		}
+
+		if err = d.repo.Delete(dr.Name); err != nil {
+			return err
+		}
+
+		fmt.Printf("%q has been removed from your repositories\n", dr.Name)
 
 		return nil
 	}

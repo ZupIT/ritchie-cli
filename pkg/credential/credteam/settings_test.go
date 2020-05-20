@@ -3,20 +3,13 @@ package credteam
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"os"
 	"reflect"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 func TestFields(t *testing.T) {
-	tmp := os.TempDir()
-	serverSetter := server.NewSetter(tmp)
-	serverFinder := server.NewFinder(tmp)
-
 	type out struct {
 		err    error
 		status int
@@ -82,14 +75,10 @@ func TestFields(t *testing.T) {
 				body = []byte(out.err.Error())
 			}
 
-			server := mockServer(out.status, body)
-			err := serverSetter.Set(server.URL)
-			if err != nil {
-				fmt.Sprintln("Error in set")
-				return
-			}
-			defer server.Close()
-			settings := NewSettings(serverFinder, server.Client(), sessManager, ctxFinder)
+			srv := mockServer(out.status, body)
+			defer srv.Close()
+
+			settings := NewSettings(serverFinderMock{srvURL: srv.URL}, srv.Client(), sessManager, ctxFinder)
 
 			got, err := settings.Fields()
 			if err != nil && err.Error() != out.err.Error() {

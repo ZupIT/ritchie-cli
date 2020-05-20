@@ -50,14 +50,14 @@ func HasMinValue(str string, min int) error {
 	return nil
 }
 
-//ErrInvalidServerURL when the URL is invalid
-var ErrInvalidServerURL = errors.New("invalid server URL")
+//ErrInvalidURL when the URL is invalid
+var ErrInvalidURL = errors.New("invalid URL")
 
 //IsValidURL validates the url format
 func IsValidURL(value string) error {
 	_, err := url.ParseRequestURI(value)
 	if err != nil {
-		return fmt.Errorf("%v: %w", value, ErrInvalidServerURL)
+		return ErrInvalidURL
 	}
 	return nil
 }
