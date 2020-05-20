@@ -139,6 +139,8 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	if err != nil {
 		return err
 	}
+	ePwd := fmt.Sprintf(EnvPattern, PwdEnv, cPwd)
+	cmd.Env = append(cmd.Env, ePwd)
 
 	if err := cmd.Start(); err != nil {
 		return err
