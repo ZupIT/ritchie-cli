@@ -10,7 +10,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/functional"
 )
 
-func TestRitScaffold(t *testing.T) {
+func TestRitSingle(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Rit Suite")
 }

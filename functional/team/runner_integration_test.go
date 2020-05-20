@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestRitScaffold(t *testing.T) {
+func TestRitTeam(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Rit Suite")
 }
