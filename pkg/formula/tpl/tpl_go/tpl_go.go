@@ -150,7 +150,7 @@ WORKDIR /app/
 COPY --from=builder app/main .
 ENTRYPOINT ["./main"]`
 
-	Makefilemain = `#Makefiles
+	MakefileMain = `#Makefiles
 {{formName}}={{formPath}}
 FORMULAS=$({{formName}})
 

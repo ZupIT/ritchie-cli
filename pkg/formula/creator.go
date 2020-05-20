@@ -64,6 +64,7 @@ func (c CreateManager) Create(fCmd, lang string) (CreateManager, error) {
 func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	d := strings.Split(fCmd, " ")
 	dirForm := strings.Join(d[1:], "/")
+	formulaName := fmt.Sprintf("%s_%s", d[len(d)-2], d[len(d)-1])
 
 	var dir string
 	if new {
@@ -72,7 +73,8 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 		if err != nil && !os.IsExist(err) {
 			return err
 		}
-		err = createMakefileMain(formPath, dirForm, d[len(d)-1])
+
+		err = createMakefileMain(formPath, dirForm, formulaName)
 		if err != nil {
 			return err
 		}
@@ -83,7 +85,8 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 		if err != nil && !os.IsExist(err) {
 			return err
 		}
-		err = changeMakefileMain(formPath, fCmd, d[len(d)-1])
+		fmt.Println(d)
+		err = changeMakefileMain(formPath, fCmd, formulaName)
 		if err != nil {
 			return err
 		}
@@ -92,7 +95,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	if err != nil {
 		return err
 	}
-	err = createSrcFiles(dir, d[len(d)-1], lang)
+	err = createSrcFiles(dir, formulaName, lang)
 	if err != nil {
 		return err
 	}
@@ -133,7 +136,7 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 		return errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	}
 
-	if len(s) == 1 || len(s) == 2 {
+	if len(s) <= 2 {
 		return errors.New("the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
 	}
 	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
@@ -156,12 +159,10 @@ func changeMakefileMain(formPath, fCmd, fName string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(d)
-	variable := strings.ToUpper(d[len(d)-1]) + "=" + strings.Join(d[1:], "/")
+	variable := strings.ToUpper(fName) + "=" + strings.Join(d[1:], "/")
 	tplFile = []byte(strings.ReplaceAll(string(tplFile), "\nFORMULAS=", "\n"+variable+"\nFORMULAS="))
 	formulas := formulaValue(tplFile)
 	tplFile = []byte(strings.ReplaceAll(string(tplFile), formulas, formulas+" $("+strings.ToUpper(fName)+")"))
-
 	err = fileutil.WriteFile(dir, tplFile)
 	if err != nil {
 		return err
@@ -176,10 +177,10 @@ func formulaValue(file []byte) string {
 }
 
 func createMakefileMain(dir, dirForm, name string) error {
-	tplFile := tpl_go.Makefilemain
+	tplFile := tpl_go.MakefileMain
 
 	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
-	tplFile = strings.ReplaceAll(string(tplFile), "{{formPath}}", dirForm)
+	tplFile = strings.ReplaceAll(tplFile, "{{formPath}}", dirForm)
 
 	err := createScripts(dir)
 	if err != nil {
