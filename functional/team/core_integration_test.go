@@ -27,5 +27,7 @@ var _ = Describe("RitCore", func() {
 		Entry("List", scenariosCore[6]),
 		Entry("Show", scenariosCore[7]),
 		Entry("Update", scenariosCore[8]),
+
+		Entry("Set Server", scenariosCore[9]),
 	)
 })

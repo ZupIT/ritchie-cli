@@ -5,8 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"github.com/ZupIT/ritchie-cli/functional"
 )
 
 func TestRitScaffold(t *testing.T) {
@@ -16,6 +14,5 @@ func TestRitScaffold(t *testing.T) {
 
 var _ = Describe("RitScaffold", func() {
 	BeforeSuite(func() {
-		functional.FuncValidateLoginRequired()
 	})
 })

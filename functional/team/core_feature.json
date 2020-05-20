@@ -108,10 +108,10 @@
             },
             {
                 "key":"URL of the server",
-                "value":"Leonidas",
+                "value":"https://ritchie-server.itiaws.dev",
                 "action":"sendkey"
             }
         ],
-        "result":"Set objects like credentials, etc."
+        "result": ""
     }
 ]
