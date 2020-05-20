@@ -60,7 +60,7 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	serverSetter := server.NewSetter(ritchieHomeDir)
+	serverSetter := server.NewSetter(ritchieHomeDir, http.DefaultClient)
 	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
 	repoLoader := formula.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)

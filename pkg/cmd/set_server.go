@@ -53,7 +53,7 @@ func (s setServerCmd) runPrompt() CommandRunnerFunc {
 		if err := s.Set(u); err != nil {
 			return err
 		}
-		fmt.Sprintln("Organization server url saved!")
+		fmt.Sprintln("Organization server URL saved!")
 		return nil
 	}
 }
