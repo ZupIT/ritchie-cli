@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
 const docker = "docker"
@@ -21,7 +23,7 @@ func NewDockerRunner(preRunner PreRunner, inputRunner InputRunner) DockerRunner 
 	return DockerRunner{preRunner, inputRunner}
 }
 
-func (d DockerRunner) Run(def Definition) error {
+func (d DockerRunner) Run(def Definition, inputType api.TermInputType) error {
 	setup, err := d.PreRun(def)
 	if err != nil {
 		return err
@@ -34,7 +36,7 @@ func (d DockerRunner) Run(def Definition) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := d.Inputs(cmd, setup.formulaPath, &setup.config, true); err != nil {
+	if err := d.Inputs(cmd, setup,  inputType, true); err != nil {
 		return err
 	}
 

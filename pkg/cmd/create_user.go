@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 // createUserCmd type for create user command
@@ -25,15 +27,19 @@ func NewCreateUserCmd(
 	ip prompt.InputPassword) *cobra.Command {
 	c := &createUserCmd{um, it, ie, ip}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "user",
 		Short: "Create user",
 		Long:  `Create user of the organization`,
-		RunE:  c.runFunc(),
+		RunE: RunFuncE(c.runStdin(), c.runPrompt()),
 	}
+
+	cmd.LocalFlags()
+
+	return cmd
 }
 
-func (c createUserCmd) runFunc() CommandRunnerFunc {
+func (c createUserCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		org, err := c.Text("Organization: ", true)
 		if err != nil {
@@ -75,5 +81,26 @@ func (c createUserCmd) runFunc() CommandRunnerFunc {
 		fmt.Println("User created!")
 
 		return err
+	}
+}
+
+func (c createUserCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		u := security.User{}
+
+		err := stdin.ReadJson(os.Stdin, &u)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
+		}
+
+		if err := c.Create(u); err != nil {
+			return err
+		}
+
+		fmt.Println("User created!")
+
+		return nil
 	}
 }

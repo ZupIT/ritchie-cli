@@ -60,7 +60,7 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	serverSetter := server.NewSetter(ritchieHomeDir)
+	serverSetter := server.NewSetter(ritchieHomeDir, http.DefaultClient)
 	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
 	repoLoader := formula.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
@@ -102,6 +102,8 @@ func buildCommands() *cobra.Command {
 		api.Team,
 		inputText,
 		inputPassword)
+
+	rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()

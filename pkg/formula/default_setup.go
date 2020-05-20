@@ -55,7 +55,7 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 	binFilePath := def.BinFilePath(binPath, binName)
 
 	if !fileutil.Exists(binFilePath) {
-		url := def.BundleUrl()
+		url := def.BundleURL()
 		name := def.BundleName()
 		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name, def.RepoName)
 		if err != nil {
@@ -95,7 +95,7 @@ func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, er
 	configName := def.ConfigName()
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
-		url := def.ConfigUrl(configName)
+		url := def.ConfigURL(configName)
 		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
 			return Config{}, err
 		}

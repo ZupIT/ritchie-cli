@@ -13,8 +13,8 @@ import (
 
 const (
 	subCommand = " SUBCOMMAND"
-	// Group formulas group
 	Group = "group"
+	dockerFlag = "docker"
 )
 
 type FormulaCommand struct {
@@ -68,12 +68,14 @@ func newSubCmd(cmd api.Command) *cobra.Command {
 		group = fmt.Sprintf("%s commands:", cmd.Repo)
 	}
 
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:         cmd.Usage + subCommand,
 		Short:       cmd.Help,
 		Long:        cmd.Help,
 		Annotations: map[string]string{Group: group},
 	}
+	c.LocalFlags()
+	return c
 }
 
 func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
@@ -83,15 +85,13 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 		Long:  cmd.Help,
 	}
 
-	var docker bool
-	formulaFlags := formulaCmd.Flags()
-	formulaFlags.BoolVar(&docker, "docker", false, "Use to run formulas inside a docker container")
-	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, cmd.Formula, &docker)
+	addFlags(formulaCmd)
+	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, cmd.Formula)
 
 	return formulaCmd
 }
 
-func (f FormulaCommand) execFormulaFunc(repo string, form api.Formula, docker *bool) func(cmd *cobra.Command, args []string) error {
+func (f FormulaCommand) execFormulaFunc(repo string, form api.Formula) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		d := formula.Definition{
 			Path:     form.Path,
@@ -101,14 +101,33 @@ func (f FormulaCommand) execFormulaFunc(repo string, form api.Formula, docker *b
 			WBin:     form.WBin,
 			Bundle:   form.Bundle,
 			Config:   form.Config,
-			RepoUrl:  form.RepoURL,
+			RepoURL:  form.RepoURL,
 			RepoName: repo,
 		}
 
-		if *docker {
-			return f.dockerRunner.Run(d)
+		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
+		if err != nil {
+			return err
+		}
+		inputType := api.Prompt
+		if stdin {
+			inputType = api.Stdin
 		}
 
-		return f.defaultRunner.Run(d)
+		docker, err := cmd.Flags().GetBool(dockerFlag)
+		if err != nil {
+			return err
+		}
+
+		if docker {
+			return f.dockerRunner.Run(d, inputType)
+		}
+
+		return f.defaultRunner.Run(d, inputType)
 	}
+}
+
+func addFlags(cmd *cobra.Command) {
+	formulaFlags := cmd.Flags()
+	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside a docker container")
 }

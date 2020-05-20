@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"os"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 // addRepoCmd type for add repo command
@@ -19,7 +20,7 @@ type addRepoCmd struct {
 	prompt.InputBool
 }
 
-// NewRepoAddCmd creates a new cmd instance
+// NewAddRepoCmd creates a new cmd instance
 func NewAddRepoCmd(
 	adl formula.AddLister,
 	it prompt.InputText,
@@ -38,13 +39,17 @@ func NewAddRepoCmd(
 		Use:     "repo",
 		Short:   "Add a repository.",
 		Example: "rit add repo ",
-		RunE:    a.runFunc(),
+		//1
+		RunE: RunFuncE(a.runStdin(), a.runPrompt()),
 	}
+	//2
+	cmd.LocalFlags()
 
 	return cmd
 }
 
-func (a addRepoCmd) runFunc() CommandRunnerFunc {
+//3
+func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		rn, err := a.Text("Name of the repository: ", true)
 		if err != nil {
@@ -88,5 +93,24 @@ func (a addRepoCmd) runFunc() CommandRunnerFunc {
 
 		return err
 	}
+}
 
+//4
+func (a addRepoCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		r := formula.Repository{}
+
+		err := stdin.ReadJson(os.Stdin, &r)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
+		}
+
+		if err := a.Add(r); err != nil {
+			return err
+		}
+
+		return nil
+	}
 }

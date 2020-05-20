@@ -9,9 +9,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 type InputManager struct {
@@ -34,11 +36,65 @@ func NewInputManager(
 	}
 }
 
-func (d InputManager) Inputs(cmd *exec.Cmd, formulaPath string, config *Config, docker bool) error {
+func (d InputManager) Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType, docker bool) error {
+	switch inputType {
+	case api.Prompt:
+		if err := d.fromPrompt(cmd, setup, docker); err != nil {
+			return err
+		}
+	case api.Stdin:
+		if err := d.fromStdin(cmd, setup, docker); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("terminal input (%v) not recongnized", inputType)
+	}
+
+	return nil
+}
+
+func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup, docker bool) error {
+	data := make(map[string]interface{})
+	if err := stdin.ReadJson(os.Stdin, &data); err != nil {
+		fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
+		return err
+	}
+
+	config := setup.config
+
+	for i, input := range config.Inputs {
+		var inputVal string
+		var err error
+		switch iType := input.Type; iType {
+		case "text", "bool":
+			inputVal = fmt.Sprintf("%v", data[input.Name])
+		default:
+			inputVal, err = d.resolveIfReserved(input)
+			if err != nil {
+				log.Fatalf("Fail to resolve input: %v, verify your credentials. [try using set credential]", input.Type)
+				return err
+			}
+		}
+
+		if len(inputVal) != 0 {
+			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i, docker); err != nil {
+				return err
+			}
+		}
+	}
+	if len(config.Command) != 0 {
+		command := fmt.Sprintf(EnvPattern, CommandEnv, config.Command)
+		cmd.Env = append(cmd.Env, command)
+	}
+	return nil
+}
+
+func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup, docker bool) error {
+	config := setup.config
 	for i, input := range config.Inputs {
 		var inputVal string
 		var valBool bool
-		items, err := loadItems(input, formulaPath)
+		items, err := loadItems(input, setup.formulaPath)
 		if err != nil {
 			return err
 		}
@@ -68,25 +124,9 @@ func (d InputManager) Inputs(cmd *exec.Cmd, formulaPath string, config *Config, 
 		}
 
 		if len(inputVal) != 0 {
-			persistCache(formulaPath, inputVal, input, items)
-			e := fmt.Sprintf(EnvPattern, strings.ToUpper(input.Name), inputVal)
-
-			if docker {
-				if !fileutil.Exists(envFile) {
-					if err := fileutil.WriteFile(envFile, []byte(e+"\n")); err != nil {
-						return err
-					}
-				} else {
-					if err := fileutil.AppendFileData(envFile, []byte(e+"\n")); err != nil {
-						return err
-					}
-				}
-			} else {
-				if i == 0 {
-					cmd.Env = append(os.Environ(), e)
-				} else {
-					cmd.Env = append(cmd.Env, e)
-				}
+			persistCache(setup.formulaPath, inputVal, input, items)
+			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i, docker); err != nil {
+				return err
 			}
 		}
 	}
@@ -94,6 +134,36 @@ func (d InputManager) Inputs(cmd *exec.Cmd, formulaPath string, config *Config, 
 		command := fmt.Sprintf(EnvPattern, CommandEnv, config.Command)
 		cmd.Env = append(cmd.Env, command)
 	}
+	return nil
+}
+
+// addEnv Add environment variable to run formulas.
+// If docker is true, create a file named .env and add the variable inName=inValue.
+// If docker is false, add the variable inName=inValue to cmd
+func addEnv(cmd *exec.Cmd, pwd, inName, inValue string, index int, docker bool) error {
+	e := fmt.Sprintf(EnvPattern, strings.ToUpper(inName), inValue)
+	if docker {
+		if !fileutil.Exists(envFile) {
+			pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, pwd) // Add "pwd" to use in formulas that need it
+			file := fmt.Sprintf("%s\n%s\n", pwdEnv, e)
+			if err := fileutil.WriteFile(envFile, []byte(file)); err != nil {
+				return err
+			}
+		} else {
+			if err := fileutil.AppendFileData(envFile, []byte(e+"\n")); err != nil {
+				return err
+			}
+		}
+	} else {
+		if index == 0 {
+			pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, pwd)
+			cmd.Env = append(cmd.Env, pwdEnv) // Add "pwd" to use in formulas that need it
+			cmd.Env = append(cmd.Env, e)
+		} else {
+			cmd.Env = append(cmd.Env, e)
+		}
+	}
+
 	return nil
 }
 

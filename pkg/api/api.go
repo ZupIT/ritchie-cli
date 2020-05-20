@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"os/user"
+	"strings"
 )
 
 const (
@@ -68,19 +69,39 @@ type Commands []Command
 
 // Formula type
 type Formula struct {
-	Path          string `json:"path"`
-	Bin           string `json:"bin"`
-	LBin          string `json:"binLinux"`
-	MBin          string `json:"binDarwin"`
-	WBin          string `json:"binWindows"`
-	Bundle        string `json:"bundle"`
-	Config        string `json:"config"`
-	RepoURL       string `json:"repoUrl"`
+	Path    string `json:"path"`
+	Bin     string `json:"bin"`
+	LBin    string `json:"binLinux"`
+	MBin    string `json:"binDarwin"`
+	WBin    string `json:"binWindows"`
+	Bundle  string `json:"bundle"`
+	Config  string `json:"config"`
+	RepoURL string `json:"repoUrl"`
 }
 
 // Edition type that represents Single or Team.
 type Edition string
 
+// TermInputType represents the source of the inputs will be readed
+type TermInputType int
+
+const (
+	// Prompt input
+	Prompt TermInputType = iota
+	// Stdin input
+	Stdin
+)
+
+func (t TermInputType) String() string {
+	return [...]string{"Prompt", "Stdin"}[t]
+}
+
+// ToLower converts the input type to lower case
+func (t TermInputType) ToLower() string {
+	return strings.ToLower(t.String())
+}
+
+// UserHomeDir returns the home dir of the user
 func UserHomeDir() string {
 	usr, err := user.Current()
 	if err != nil {
@@ -89,6 +110,7 @@ func UserHomeDir() string {
 	return usr.HomeDir
 }
 
+// RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
 	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
 }

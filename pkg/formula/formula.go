@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
 const (
@@ -14,6 +16,7 @@ const (
 	DefaultConfig         = "config.json"
 	ConfigPattern         = "%s/%s"
 	CommandEnv            = "COMMAND"
+	PwdEnv                = "PWD"
 	BinPattern            = "%s%s"
 	BinPathPattern        = "%s/bin"
 	windows               = "windows"
@@ -62,7 +65,7 @@ type Definition struct {
 	WBin     string
 	Bundle   string
 	Config   string
-	RepoUrl  string
+	RepoURL  string
 	RepoName string
 }
 
@@ -144,9 +147,9 @@ func (d *Definition) BinFilePath(binPath, binName string) string {
 	return fmt.Sprintf("%s/%s", binPath, binName)
 }
 
-// BinUrl builds the bin url
-func (d *Definition) BundleUrl() string {
-	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, d.BundleName())
+// BundleURL builds the bundle url
+func (d *Definition) BundleURL() string {
+	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, d.BundleName())
 }
 
 // ConfigName resolver de config name
@@ -162,9 +165,9 @@ func (d *Definition) ConfigPath(formula, configName string) string {
 	return fmt.Sprintf(ConfigPattern, formula, configName)
 }
 
-// ConfigUrl builds the config url
-func (d *Definition) ConfigUrl(configName string) string {
-	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, configName)
+// ConfigURL builds the config url
+func (d *Definition) ConfigURL(configName string) string {
+	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
 type PreRunner interface {
@@ -172,11 +175,11 @@ type PreRunner interface {
 }
 
 type Runner interface {
-	Run(def Definition) error
+	Run(def Definition, inputType api.TermInputType) error
 }
 
 type InputRunner interface {
-	Inputs(cmd *exec.Cmd, formulaPath string, config *Config, docker bool) error
+	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType, docker bool) error
 }
 
 type Setuper interface {

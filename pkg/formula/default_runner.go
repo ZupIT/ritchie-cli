@@ -1,8 +1,11 @@
 package formula
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
 type DefaultRunner struct {
@@ -14,7 +17,7 @@ func NewDefaultRunner(preRunner PreRunner, inRunner InputRunner) DefaultRunner {
 	return DefaultRunner{preRunner, inRunner}
 }
 
-func (d DefaultRunner) Run(def Definition) error {
+func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	setup, err := d.PreRun(def)
 	if err != nil {
 		return err
@@ -25,7 +28,10 @@ func (d DefaultRunner) Run(def Definition) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := d.Inputs(cmd, setup.formulaPath, &setup.config, false); err != nil {
+	ePwd := fmt.Sprintf(EnvPattern, PwdEnv, setup.pwd)
+	cmd.Env = append(cmd.Env, ePwd)
+
+	if err := d.Inputs(cmd, setup, inputType, false); err != nil {
 		return err
 	}
 
