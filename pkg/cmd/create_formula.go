@@ -15,11 +15,12 @@ type createFormulaCmd struct {
 	formula.Creator
 	prompt.InputText
 	prompt.InputList
+	prompt.InputBool
 }
 
 // CreateFormulaCmd creates a new cmd instance
-func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.InputList) *cobra.Command {
-	c := createFormulaCmd{cf, it, il}
+func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.InputList, ib prompt.InputBool) *cobra.Command {
+	c := createFormulaCmd{cf, it, il, ib}
 	return &cobra.Command{
 		Use:     "formula",
 		Short:   "Create a new formula",
@@ -30,8 +31,9 @@ func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.Inpu
 
 func (c createFormulaCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Creating Formula ...")
-		fCmd, err := c.Text("New formula's command ? [ex.: rit group verb <noun>]", true)
+		var localRepoDir = ""
+
+		fCmd, err := c.Text("Enter the new formula command [ex.: rit group verb noun]", true)
 		if err != nil {
 			return err
 		}
@@ -39,10 +41,21 @@ func (c createFormulaCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-		f, err := c.Create(fCmd, lang)
+		choice, err := c.Bool("Use default repo?", []string{"yes", "no"})
+
+		if !choice {
+			localRepoDir, err  = c.Text("Enter your path [ex.:/home/user/my-ritchie-formulas ]", true)
+			fmt.Println("Make sure you have Makefile and tree.json")
+			if err != nil {
+				return err
+			}
+
+		}
+		f, err := c.Create(fCmd, lang,localRepoDir)
 		if err != nil {
 			return err
 		}
+
 		log.Printf("Formula in %s successfully created!\n", lang)
 		log.Printf("Your formula is in %s", f.FormPath)
 		return nil

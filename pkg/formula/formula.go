@@ -160,5 +160,5 @@ type Runner interface {
 }
 
 type Creator interface {
-	Create(formulaCmd, lang string) (CreateManager, error)
+	Create(formulaCmd, lang, customRepoDir string) (CreateManager, error)
 }

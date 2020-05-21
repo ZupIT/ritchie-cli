@@ -29,8 +29,16 @@ func NewCreator(homePath string, tm TreeManager) CreateManager {
 	return CreateManager{FormPath: fmt.Sprintf(FormCreatePathPattern, homePath), treeManager: tm}
 }
 
-func (c CreateManager) Create(fCmd, lang string) (CreateManager, error) {
+func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, error) {
 	_ = fileutil.CreateDirIfNotExists(c.FormPath, os.ModePerm)
+
+	if localRepoDir != "" {
+		if !filesVerify(localRepoDir){
+			return CreateManager{}, errors.New("Makefile or tree.json not found")
+		}
+		c.FormPath = localRepoDir
+	}
+
 	trees, err := c.treeManager.Tree()
 	if err != nil {
 		return CreateManager{}, err
@@ -46,7 +54,7 @@ func (c CreateManager) Create(fCmd, lang string) (CreateManager, error) {
 		return CreateManager{}, err
 	}
 
-	if fileutil.Exists(fmt.Sprintf(TreeCreatePathPattern, c.FormPath)) && (fileutil.Exists(fmt.Sprintf("%s/%s", c.FormPath, Makefile))) {
+	if filesVerify(c.FormPath) {
 		err = generateFormulaFiles(c.FormPath, fCmd, lang, false)
 		if err != nil {
 			return CreateManager{}, err
@@ -59,6 +67,14 @@ func (c CreateManager) Create(fCmd, lang string) (CreateManager, error) {
 	}
 
 	return c, nil
+}
+
+func filesVerify(formPath string) bool {
+	if fileutil.Exists(fmt.Sprintf(TreeCreatePathPattern, formPath)) &&
+		(fileutil.Exists(fmt.Sprintf("%s/%s", formPath, Makefile))) {
+		return true
+	}
+	return false
 }
 
 func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {

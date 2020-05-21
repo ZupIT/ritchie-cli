@@ -132,7 +132,7 @@ func TestCreator(t *testing.T) {
 			in := tt.in
 			out := tt.out
 
-			_, got := creator.Create(in.fCmd, in.lang)
+			_, got := creator.Create(in.fCmd, in.lang, "")
 			if got != nil && got.Error() != out.err.Error() {
 				t.Errorf("Create(%s) got %v, want %v", tt.name, got, out.err)
 			}
