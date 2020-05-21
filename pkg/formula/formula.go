@@ -27,6 +27,7 @@ const (
 	DefaultCacheQtd       = 5
 	FormCreatePathPattern = "%s/ritchie-formulas-local"
 	TreeCreatePathPattern = "%s/tree/tree.json"
+	MakefileCreatePathPattern = "%s/%s"
 	Makefile              = "Makefile"
 )
 

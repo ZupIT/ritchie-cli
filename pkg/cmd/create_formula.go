@@ -22,8 +22,9 @@ type createFormulaCmd struct {
 
 // createFormula type for stdin json decoder
 type createFormula struct {
-	FormulaCmd string `json:"formulaCmd"`
-	Lang string `json:"lang"`
+	FormulaCmd   string `json:"formulaCmd"`
+	Lang         string `json:"lang"`
+	LocalRepoDir string `json:"localRepoDir"`
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -41,7 +42,7 @@ func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.Inpu
 		Use:     "formula",
 		Short:   "Create a new formula",
 		Example: "rit create formula",
-		RunE: RunFuncE(c.runStdin(), c.runPrompt()),
+		RunE:    RunFuncE(c.runStdin(), c.runPrompt()),
 	}
 
 	cmd.LocalFlags()
@@ -52,7 +53,7 @@ func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.Inpu
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		var localRepoDir = ""
+		var localRepoDir string
 
 		fCmd, err := c.Text("Enter the new formula command [ex.: rit group verb noun]", true)
 
@@ -67,17 +68,18 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		choice, err := c.Bool("Use default repo?", []string{"yes", "no"})
+		choice, err := c.Bool("Use default repo (ritchie-formulas-local)? ", []string{"yes", "no"})
 
 		if !choice {
-			localRepoDir, err  = c.Text("Enter your path [ex.:/home/user/my-ritchie-formulas ]", true)
+			// verificar user.current(pegar home dir) + my rit
+			localRepoDir, err = c.Text("Enter your path [ex.:/home/user/my-ritchie-formulas]", true)
 			fmt.Println("Make sure you have Makefile and tree.json")
 			if err != nil {
 				return err
 			}
 
 		}
-		f, err := c.Create(fCmd, lang,localRepoDir)
+		f, err := c.Create(fCmd, lang, localRepoDir)
 		if err != nil {
 			return err
 		}
@@ -105,7 +107,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			cf.FormulaCmd,
 			cf.Lang,
 			"",
-			)
+		)
 		if err != nil {
 			return err
 		}

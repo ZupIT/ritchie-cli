@@ -20,6 +20,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
+var ErrMakefileNotFound = errors.New("makefile not found")
+var ErrTreeJsonNotFound = errors.New("tree.json not found")
+
 type CreateManager struct {
 	FormPath    string
 	treeManager TreeManager
@@ -33,9 +36,13 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 	_ = fileutil.CreateDirIfNotExists(c.FormPath, os.ModePerm)
 
 	if localRepoDir != "" {
-		if !filesVerify(localRepoDir){
-			return CreateManager{}, errors.New("Makefile or tree.json not found")
+		if !existsMakefile(c.FormPath) {
+			return CreateManager{}, ErrMakefileNotFound
 		}
+		if !existsTreeJson(c.FormPath) {
+			return CreateManager{}, ErrTreeJsonNotFound
+		}
+
 		c.FormPath = localRepoDir
 	}
 
@@ -54,7 +61,7 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 		return CreateManager{}, err
 	}
 
-	if filesVerify(c.FormPath) {
+	if existsMakefile(c.FormPath) && existsTreeJson(c.FormPath) {
 		err = generateFormulaFiles(c.FormPath, fCmd, lang, false)
 		if err != nil {
 			return CreateManager{}, err
@@ -69,14 +76,22 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 	return c, nil
 }
 
-func filesVerify(formPath string) bool {
-	if fileutil.Exists(fmt.Sprintf(TreeCreatePathPattern, formPath)) &&
-		(fileutil.Exists(fmt.Sprintf("%s/%s", formPath, Makefile))) {
+func existsTreeJson(formPath string) bool {
+	treePath := fmt.Sprintf(TreeCreatePathPattern, formPath)
+	if fileutil.Exists(treePath) {
 		return true
 	}
 	return false
 }
 
+func existsMakefile(formPath string) bool {
+	makefilePath := fmt.Sprintf(MakefileCreatePathPattern, formPath, Makefile)
+	if fileutil.Exists(makefilePath) {
+		return true
+	}
+	return false
+}
+// TODO: formula must not be static
 func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	d := strings.Split(fCmd, " ")
 	dirForm := strings.Join(d[1:], "/")
