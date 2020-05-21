@@ -36,14 +36,17 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 	_ = fileutil.CreateDirIfNotExists(c.FormPath, os.ModePerm)
 
 	if localRepoDir != "" {
-		if !existsMakefile(c.FormPath) {
+
+		if !existsMakefile(localRepoDir) {
 			return CreateManager{}, ErrMakefileNotFound
 		}
-		if !existsTreeJson(c.FormPath) {
+		if !existsTreeJson(localRepoDir) {
+
 			return CreateManager{}, ErrTreeJsonNotFound
 		}
 
 		c.FormPath = localRepoDir
+		fmt.Println(c.FormPath)
 	}
 
 	trees, err := c.treeManager.Tree()

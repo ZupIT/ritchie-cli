@@ -3,6 +3,7 @@ package formula
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 
@@ -33,15 +34,60 @@ func (repoListerMock) List() ([]Repository, error) {
 
 func cleanForm() {
 	_ = fileutil.RemoveDir(fmt.Sprintf(FormCreatePathPattern, os.TempDir()))
+	_ = fileutil.RemoveDir(os.TempDir() + "/customRepo")
+}
+
+func createDirWithMakefile() (string, error) {
+	dir := os.TempDir() + "/customRepo"
+	err := fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	makefilePath := fmt.Sprintf("%s/%s", dir, Makefile)
+	_, err = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
+	return dir, err
+}
+
+func createDirWithTree() (string, error) {
+	dir := os.TempDir() + "/customRepo"
+	err := fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	treeJsonPath := fmt.Sprintf("%s/%s", dir, TreeJson)
+	_, err = fileutil.CreateFileIfNotExist(treeJsonPath, []byte(""))
+	return dir, err
+}
+
+func createDir(dirname string, filename string, both bool) (string, error) {
+	dir := os.TempDir() + dirname
+	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
+	treeJsonFile := fmt.Sprintf(TreeCreatePathPattern, dir)
+
+	err := fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	if both {
+		err := fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
+
+		_, err = fileutil.CreateFileIfNotExist(treeJsonFile, []byte(""))
+		makefilePath := fmt.Sprintf("%s/%s", dir, Makefile)
+		_, err = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
+		return dir, err
+	}
+	path := fmt.Sprintf("%s/%s", dir, filename)
+	_, err = fileutil.CreateFileIfNotExist(path, []byte(""))
+	return dir, err
 }
 
 func TestCreator(t *testing.T) {
 	cleanForm()
+	dir, err := createDirWithMakefile()
+
+	fullDir,err := createDir("/customFullRepo","", true)
+
+	fmt.Println(fullDir)
+	if err != nil {
+		log.Fatalf("Erro")
+	}
 	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
 
 	type in struct {
-		fCmd string
-		lang string
+		fCmd          string
+		lang          string
+		customRepoDir string
 	}
 
 	type out struct {
@@ -49,7 +95,6 @@ func TestCreator(t *testing.T) {
 	}
 
 	creator := NewCreator(fmt.Sprintf(FormCreatePathPattern, os.TempDir()), treeMan)
-
 	tests := []struct {
 		name string
 		in   *in
@@ -125,14 +170,35 @@ func TestCreator(t *testing.T) {
 				err: errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]"),
 			},
 		},
+		{
+			name: "command to custom repo with missing packge.json",
+			in: &in{
+				fCmd:          fCmdCorrectGo,
+				lang:          langGo,
+				customRepoDir: dir,
+			},
+			out: &out{
+				err: ErrTreeJsonNotFound,
+			},
+		},
+		{
+			name: "command to custom repo correct",
+			in: &in{
+				fCmd:          fCmdCorrectGo,
+				lang:          langGo,
+				customRepoDir: fullDir,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			out := tt.out
-
-			_, got := creator.Create(in.fCmd, in.lang, "")
+			_, got := creator.Create(in.fCmd, in.lang, in.customRepoDir)
 			if got != nil && got.Error() != out.err.Error() {
 				t.Errorf("Create(%s) got %v, want %v", tt.name, got, out.err)
 			}

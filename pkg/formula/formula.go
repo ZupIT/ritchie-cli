@@ -9,26 +9,27 @@ import (
 )
 
 const (
-	PathPattern           = "%s/formulas/%s"
-	TmpDirPattern         = "%s/tmp/%s"
-	TmpBinDirPattern      = "%s/tmp/%s/%s"
-	DefaultConfig         = "config.json"
-	ConfigPattern         = "%s/%s"
-	CommandEnv            = "COMMAND"
-	PwdEnv                = "PWD"
-	BinPattern            = "%s%s"
-	BinPathPattern        = "%s/bin"
-	windows               = "windows"
-	darwin                = "darwin"
-	linux                 = "linux"
-	EnvPattern            = "%s=%s"
-	CachePattern          = "%s/.%s.cache"
-	DefaultCacheNewLabel  = "Type new value?"
-	DefaultCacheQtd       = 5
-	FormCreatePathPattern = "%s/ritchie-formulas-local"
-	TreeCreatePathPattern = "%s/tree/tree.json"
+	PathPattern               = "%s/formulas/%s"
+	TmpDirPattern             = "%s/tmp/%s"
+	TmpBinDirPattern          = "%s/tmp/%s/%s"
+	DefaultConfig             = "config.json"
+	ConfigPattern             = "%s/%s"
+	CommandEnv                = "COMMAND"
+	PwdEnv                    = "PWD"
+	BinPattern                = "%s%s"
+	BinPathPattern            = "%s/bin"
+	windows                   = "windows"
+	darwin                    = "darwin"
+	linux                     = "linux"
+	EnvPattern                = "%s=%s"
+	CachePattern              = "%s/.%s.cache"
+	DefaultCacheNewLabel      = "Type new value?"
+	DefaultCacheQtd           = 5
+	FormCreatePathPattern     = "%s/ritchie-formulas-local"
+	TreeCreatePathPattern     = "%s/tree/tree.json"
 	MakefileCreatePathPattern = "%s/%s"
-	Makefile              = "Makefile"
+	Makefile                  = "Makefile"
+	TreeJson                  = "tree.json"
 )
 
 // Config type that represents formula config
@@ -159,12 +160,12 @@ func (d *Definition) ConfigURL(configName string) string {
 	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
-//Runner defines the formula runner process
+// Runner defines the formula runner process
 type Runner interface {
 	Run(def Definition, inputType api.TermInputType) error
 }
 
-//Creator defines the formula creator process
+// Creator defines the formula creator process
 type Creator interface {
 	Create(formulaCmd, lang, customRepoDir string) (CreateManager, error)
 }
