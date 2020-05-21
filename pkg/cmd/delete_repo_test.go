@@ -6,6 +6,7 @@ import (
 
 func TestNewDeleteRepoCmd(t *testing.T) {
 	cmd := NewDeleteRepoCmd(repoDeleterMock{}, inputListMock{}, inputTrueMock{})
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewDeleteRepoCmd got %v", cmd)
 
