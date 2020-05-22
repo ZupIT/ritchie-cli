@@ -223,6 +223,6 @@ workflows:
       - release:
           filters:
             <<: *FILTERS_RELEASE
-          requires:
+#          requires:
 #            - build
 
