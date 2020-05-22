@@ -5,6 +5,7 @@ reference:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
+    security: &HORUS_IMAGE horuszup/horus-client:latest
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -114,7 +115,7 @@ jobs:
           path: *TEST_RESULTS_DIR
 
   security_test:
-    machine: true
+    executor: delivery-executor
     steps:
       - run:
           name: Horus Security Test
