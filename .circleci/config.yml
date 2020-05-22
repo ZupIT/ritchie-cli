@@ -25,6 +25,7 @@ references:
     branches:
       only:
         - /^release-.*/
+        - fix/changelog
 
   filters-checks: &FILTERS_CHECK
     branches:
@@ -192,36 +193,36 @@ jobs:
 workflows:
   build-for-branch:
     jobs:
-      - lint:
-          filters:
-            <<: *FILTERS_CHECK
-      - unit_test:
-          filters:
-            <<: *FILTERS_CHECK
-      - build:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - unit_test
-            - lint
-      - functional_test_single:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
-      - functional_test_team:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
-      - delivery:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - build
+#      - lint:
+#          filters:
+#            <<: *FILTERS_CHECK
+#      - unit_test:
+#          filters:
+#            <<: *FILTERS_CHECK
+#      - build:
+#          filters:
+#            <<: *FILTERS_CHECK
+#          requires:
+#            - unit_test
+#            - lint
+#      - functional_test_single:
+#          filters:
+#            <<: *FILTERS_CHECK
+#          requires:
+#            - build
+#      - functional_test_team:
+#          filters:
+#            <<: *FILTERS_CHECK
+#          requires:
+#            - build
+#      - delivery:
+#          filters:
+#            <<: *FILTERS_DELIVERY
+#          requires:
+#            - build
       - release:
           filters:
             <<: *FILTERS_RELEASE
           requires:
-            - build
+#            - build
 
