@@ -13,7 +13,7 @@ import (
 
 const (
 	subCommand = " SUBCOMMAND"
-	Group = "group"
+	Group      = "group"
 	dockerFlag = "docker"
 )
 

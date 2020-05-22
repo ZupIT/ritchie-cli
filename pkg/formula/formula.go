@@ -129,8 +129,7 @@ func (d *Definition) BinName() string {
 // BinName builds the bin name from definition params
 func (d *Definition) BundleName() string {
 	if strings.Contains(d.Bundle, "${so}") {
-		so := runtime.GOOS
-		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", so)
+		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", d.SO)
 
 		return bundleSO
 	}
@@ -161,8 +160,8 @@ func (d *Definition) ConfigName() string {
 }
 
 // ConfigPath builds the config path from formula path and config name
-func (d *Definition) ConfigPath(formula, configName string) string {
-	return fmt.Sprintf(ConfigPattern, formula, configName)
+func (d *Definition) ConfigPath(formulaPath, configName string) string {
+	return fmt.Sprintf(ConfigPattern, formulaPath, configName)
 }
 
 // ConfigURL builds the config url
