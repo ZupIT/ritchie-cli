@@ -80,19 +80,12 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 
 func existsTreeJson(formPath string) bool {
 	treePath := fmt.Sprintf(TreeCreatePathPattern, formPath)
-	if fileutil.Exists(treePath) {
-		return true
-	}
-	return false
+		return fileutil.Exists(treePath)
 }
 
 func existsMakefile(formPath string) bool {
 	makefilePath := fmt.Sprintf(MakefileCreatePathPattern, formPath, Makefile)
-
-	if fileutil.Exists(makefilePath) {
-		return true
-	}
-	return false
+		return fileutil.Exists(makefilePath)
 }
 
 func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {

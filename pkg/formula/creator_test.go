@@ -3,7 +3,6 @@ package formula
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -39,47 +38,44 @@ func cleanForm() {
 	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoTreejson")
 }
 
-func createDirWithMakefile() (string, error) {
+func createDirWithMakefile() string {
 	dir := os.TempDir() + "/customRepoMakefile"
-	err := fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
 	makefilePath := fmt.Sprintf("%s/%s", dir, Makefile)
-	err = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
-	return dir, err
+	_ = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
+	return dir
 }
 
-func createDirWithTree() (string, error) {
+func createDirWithTree() string {
 	dir := os.TempDir() + "/customRepoTreejson"
 	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
 	treeJsonFile := fmt.Sprintf(TreeCreatePathPattern, dir)
-	err := fileutil.CreateDirIfNotExists(dir, os.ModePerm)
-	err = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
-	err = fileutil.CreateFileIfNotExist(treeJsonFile, []byte(""))
-	return dir, err
+	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
+	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte(""))
+	return dir
 }
 
-func createFullDir() (string, error){
+func createFullDir() string {
 	dir := os.TempDir() + "/customRepo"
 	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
 	treeJsonFile := fmt.Sprintf(TreeCreatePathPattern, dir)
 	makefilePath := fmt.Sprintf("%s/%s", dir, Makefile)
-	err := fileutil.CreateDirIfNotExists(dir, os.ModePerm)
-	err = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
+	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
 	makefile, _ := fileutil.ReadFile("../../testdata/Makefile")
-	err = fileutil.CreateFileIfNotExist(makefilePath, makefile)
-	err = fileutil.CreateFileIfNotExist(treeJsonFile, []byte("{}"))
+	_ = fileutil.CreateFileIfNotExist(makefilePath, makefile)
+	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte("{}"))
 
-	return dir, err
+	return dir
 }
 
 func TestCreator(t *testing.T) {
 	cleanForm()
 
-	makefileDir, err := createDirWithMakefile()
-	jsonDir, err := createDirWithTree()
-	fullDir , err := createFullDir()
-	if err != nil {
-		log.Fatalf("Erro")
-	}
+	makefileDir := createDirWithMakefile()
+	jsonDir := createDirWithTree()
+	fullDir := createFullDir()
 
 	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
 
