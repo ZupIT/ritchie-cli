@@ -12,6 +12,7 @@ import (
 )
 
 var ErrNotEnableDocker = errors.New("this formula is not enabled to run in a container")
+var ErrDockerNotFound = errors.New("you must have the docker installed on the machine to run formulas inside a container")
 
 type DockerPreRunner struct {
 	sDefault Setuper
@@ -45,6 +46,13 @@ func (d DockerPreRunner) PreRun(def Definition) (Setup, error) {
 }
 
 func validate(tmpBinDir string) error {
+	args := []string{"version", "--format", "'{{.Server.Version}}'"}
+	cmd := exec.Command("docker", args...)
+	output, err := cmd.CombinedOutput()
+	if output == nil || err != nil {
+		return ErrDockerNotFound
+	}
+
 	dockerFile := fmt.Sprintf("%s/Dockerfile", tmpBinDir)
 	if !fileutil.Exists(dockerFile) {
 		return ErrNotEnableDocker
@@ -57,6 +65,8 @@ func buildImg(containerId string) error {
 	fmt.Println("Building docker image...")
 	args := []string{dockerBuildCmd, "-t", containerId, "."}
 	cmd := exec.Command(docker, args...) // Run command "docker build -t (randomId) ."
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {

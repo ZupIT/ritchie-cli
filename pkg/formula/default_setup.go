@@ -17,6 +17,15 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
+var (
+	ErrFormulaBinNotFound        = errors.New("formula bin not found")
+	ErrConfigFileNotFound        = errors.New("config file not found")
+	ErrUnknownFormulaDownload    = errors.New("unknown error when downloading your formula")
+	ErrUnknownConfigFileDownload = errors.New("unknown error when downloading your config file")
+	ErrCreateReqBundle           = errors.New("failed to create request for bundle download")
+	ErrCreateReqConfig           = errors.New("failed to create request for config download")
+)
+
 type DefaultSetup struct {
 	ritchieHome    string
 	client         *http.Client
@@ -26,9 +35,9 @@ type DefaultSetup struct {
 
 func NewDefaultSingleSetup(ritchieHome string, c *http.Client) DefaultSetup {
 	return DefaultSetup{
-		ritchieHome:    ritchieHome,
-		client:         c,
-		edition:        api.Single,
+		ritchieHome: ritchieHome,
+		client:      c,
+		edition:     api.Single,
 	}
 }
 
@@ -118,13 +127,13 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return "", errors.New("failed to create request for config download")
+		return "", ErrCreateReqBundle
 	}
 
 	if d.edition == api.Team {
 		s, err := d.sessionManager.Current()
 		if err != nil {
-			return "", errors.New("failed get current session")
+			return "", err
 		}
 		req.Header.Set("x-org", s.Organization)
 		req.Header.Set("x-repo-name", repoName)
@@ -137,17 +146,13 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("formula bin not found")
-	}
-
 	switch resp.StatusCode {
 	case http.StatusOK:
 		break
 	case http.StatusNotFound:
-		return "", errors.New("formula bin not found")
+		return "", ErrFormulaBinNotFound
 	default:
-		return "", errors.New("unknown error when downloading your formula")
+		return "", ErrUnknownFormulaDownload
 	}
 
 	file := fmt.Sprintf("%s/%s", destPath, zipName)
@@ -174,13 +179,13 @@ func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string)
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return errors.New("failed to create request for config download")
+		return ErrCreateReqConfig
 	}
 
 	if d.edition == api.Team {
 		s, err := d.sessionManager.Current()
 		if err != nil {
-			return errors.New("failed get current session")
+			return err
 		}
 		req.Header.Set("x-org", s.Organization)
 		req.Header.Set("x-repo-name", repoName)
@@ -197,9 +202,9 @@ func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string)
 	case http.StatusOK:
 		break
 	case http.StatusNotFound:
-		return errors.New("config file not found")
+		return ErrConfigFileNotFound
 	default:
-		return errors.New("unknown error when downloading your config file")
+		return ErrUnknownConfigFileDownload
 	}
 
 	file := fmt.Sprintf("%s/%s", destPath, configName)

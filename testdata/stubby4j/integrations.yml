@@ -1,0 +1,84 @@
+#s3-tree
+- request:
+    method: GET
+    url: ^/tree/tree.json$
+
+  response:
+    status: 200
+    headers:
+      content-type: application/json
+    body: >
+      {
+        "commands": [
+          {
+            "parent": "root",
+            "usage": "mock",
+            "help": "mock commands",
+          },
+          {
+            "parent": "root_mock",
+            "usage": "test",
+            "help": "mock test",
+            "formula": {
+              "path": "mock/test",
+              "bin": "test-${so}",
+              "binLinux": "test-${so}",
+              "binDarwin": "test-${so}",
+              "binWindows": "test-${so}.exe",
+              "bundle": "${so}.zip",
+              "config": "config.json",
+              "repoUrl": "http://localhost:8882/formulas"
+            }
+          }
+        ]
+      }
+#s3-formulas-config.json
+- request:
+    method: GET
+    url: ^/formulas/mock/test/config.json$
+
+  response:
+    status: 200
+    headers:
+      content-type: application/json
+    body: >
+      {
+        "description": "Sample inputs in Ritchie.",
+        "inputs" : [
+          {
+            "name" : "sample_text",
+            "type" : "text",
+            "label" : "Type : ",
+            "cache" : {
+              "active": true,
+              "qtd" : 6,
+              "newLabel" : "Type new value. "
+            }
+          },
+          {
+            "name" : "sample_list",
+            "type" : "text",
+            "default" : "in1",
+            "items" : ["in_list1", "in_list2", "in_list3", "in_listN"],
+            "label" : "Pick your : "
+          },
+          {
+            "name" : "sample_bool",
+            "type" : "bool",
+            "default" : "false",
+            "items" : ["false", "true"],
+            "label" : "Pick: "
+          }
+        ]
+      }
+
+#s3-formulas-zip
+- request:
+    method: GET
+    url: ^/formulas/mock/test/linux.zip$
+
+  response:
+    status: 200
+    headers:
+      content-type: application/zip
+    file: response.zip

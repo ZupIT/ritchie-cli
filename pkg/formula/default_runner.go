@@ -10,11 +10,12 @@ import (
 
 type DefaultRunner struct {
 	PreRunner
+	PostRunner
 	InputRunner
 }
 
-func NewDefaultRunner(preRunner PreRunner, inRunner InputRunner) DefaultRunner {
-	return DefaultRunner{preRunner, inRunner}
+func NewDefaultRunner(preRunner PreRunner, postRunner PostRunner, inRunner InputRunner) DefaultRunner {
+	return DefaultRunner{preRunner, postRunner, inRunner}
 }
 
 func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
@@ -43,7 +44,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	if err := PostRun(setup, false); err != nil {
+	if err := d.PostRun(setup, false); err != nil {
 		return err
 	}
 

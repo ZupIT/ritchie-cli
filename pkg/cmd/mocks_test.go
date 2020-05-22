@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -202,4 +203,25 @@ func (credSettingsMock) Fields() (credential.Fields, error) {
 			},
 		},
 	}, nil
+}
+
+type runnerMock struct {
+	error error
+}
+
+func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType) error {
+	return r.error
+}
+
+type treeMock struct {
+	tree  formula.Tree
+	error error
+}
+
+func (t treeMock) Tree() (map[string]formula.Tree, error) {
+	return map[string]formula.Tree{"test": t.tree}, t.error
+}
+
+func (t treeMock) MergedTree(bool) formula.Tree {
+	return t.tree
 }

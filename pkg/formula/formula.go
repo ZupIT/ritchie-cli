@@ -129,7 +129,8 @@ func (d *Definition) BinName() string {
 // BinName builds the bin name from definition params
 func (d *Definition) BundleName() string {
 	if strings.Contains(d.Bundle, "${so}") {
-		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", d.SO)
+		so := runtime.GOOS
+		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", so)
 
 		return bundleSO
 	}
@@ -175,6 +176,10 @@ type PreRunner interface {
 
 type Runner interface {
 	Run(def Definition, inputType api.TermInputType) error
+}
+
+type PostRunner interface {
+	PostRun(p Setup, docker bool) error
 }
 
 type InputRunner interface {

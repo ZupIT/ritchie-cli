@@ -7,7 +7,14 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
-func PostRun(p Setup, docker bool) error {
+type PostRunnerManager struct {
+}
+
+func NewPostRunner() PostRunnerManager {
+	return PostRunnerManager{}
+}
+
+func (PostRunnerManager) PostRun(p Setup, docker bool) error {
 	if docker {
 		if err := fileutil.RemoveFile(envFile); err != nil {
 			return err

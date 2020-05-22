@@ -19,14 +19,14 @@ const (
 
 type FormulaCommand struct {
 	coreCmds      api.Commands
-	treeManager   formula.TreeManager
+	treeManager   formula.Manager
 	defaultRunner formula.Runner
 	dockerRunner  formula.Runner
 }
 
 func NewFormulaCommand(
 	coreCmds api.Commands,
-	treeManager formula.TreeManager,
+	treeManager formula.Manager,
 	defaultRunner formula.Runner,
 	dockerRunner formula.Runner) *FormulaCommand {
 	return &FormulaCommand{
