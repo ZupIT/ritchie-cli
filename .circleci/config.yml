@@ -177,7 +177,11 @@ jobs:
 workflows:
   build-for-branch:
     jobs:
-      - security_test:      
+      - security_test:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build      
       - lint:
           filters:
             <<: *FILTERS_CHECK
