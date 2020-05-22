@@ -179,6 +179,7 @@ jobs:
 workflows:
   build-for-branch:
     jobs:
+      - security_test:      
       - lint:
           filters:
             <<: *FILTERS_CHECK
@@ -192,11 +193,6 @@ workflows:
             - unit_test
             - lint
       - functional_test:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
-      - security_test:        
           filters:
             <<: *FILTERS_CHECK
           requires:
