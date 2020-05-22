@@ -67,7 +67,6 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 
 		choice, _ := c.Bool("Use default repo (ritchie-formulas-local)? ", []string{"yes", "no"})
 		if !choice {
-			// TODO verify user.current(pegar home dir) + my rit
 			localRepoDir, err = c.Text("Enter your path [ex.:/home/user/my-ritchie-formulas]", true)
 			fmt.Println("Make sure you have Makefile and tree.json")
 			if err != nil {
@@ -103,7 +102,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		f, err := c.Create(
 			cf.FormulaCmd,
 			cf.Lang,
-			"",
+			cf.LocalRepoDir,
 		)
 		if err != nil {
 			return err
