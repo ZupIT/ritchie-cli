@@ -54,6 +54,10 @@ executors:
         user: root
     working_directory: /workspace
 
+  security-executor:
+    docker:
+      - image: *HORUS_IMAGE
+
 jobs:
   # Runs Go linters
   lint:
@@ -115,13 +119,13 @@ jobs:
           path: *TEST_RESULTS_DIR
 
   security_test:
-    executor: delivery-executor
+    executor: security-executor
     steps:
       - run:
           name: Horus Security Test
           command: |
             echo Starting Security Analysis...
-            docker run --rm -e HORUS_CLIENT_REPO_URL= -e HORUS_CLIENT_REPO_BRANCH= -e HORUS_CLIENT_API_ADDR= -e HORUS_CLIENT_TOKEN    = -e HORUS_CLIENT_API_USE_HTTPS= -e HORUS_VULNERABILITY_CHECK= horuszup/horus-client:latest
+            docker run --rm -e HORUS_CLIENT_REPO_URL=$HORUS_CLIENT_REPO_URL -e HORUS_CLIENT_REPO_BRANCH=$HORUS_CLIENT_REPO_BRANCH -e HORUS_CLIENT_API_ADDR=$HORUS_CLIENT_API_ADDR -e HORUS_CLIENT_TOKEN    =$HORUS_CLIENT_TOKEN -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK *HORUS_IMAGE
 
   build:
     executor: ritchie-executor
