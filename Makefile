@@ -22,7 +22,7 @@ DIST_WIN=$(DIST)/windows
 DIST_WIN_TEAM=$(DIST_WIN)/$(TEAM)
 DIST_WIN_SINGLE=$(DIST_WIN)/$(SINGLE)
 VERSION=$(RELEASE_VERSION)
-GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/viniciusramosdefaria/ritchie-cli
+GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
@@ -72,9 +72,9 @@ release:
 	git config --global user.name "$(GIT_NAME)"
 	git tag -a $(RELEASE_VERSION) -m "$(RELEASE_VERSION)"
 	git push $(GIT_REMOTE) $(RELEASE_VERSION)
-	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/viniciusramosdefaria/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
+	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
 	gem install github_changelog_generator
-	github_changelog_generator -u viniciusramosdefaria -p ritchie-cli --token $(GIT_PASSWORD) --enhancement-labels feature,Feature --exclude-labels duplicate,question,invalid,wontfix
+	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --enhancement-labels feature,Feature --exclude-labels duplicate,question,invalid,wontfix
 	git add .
 	git commit --allow-empty -m "[ci skip] release"
 	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
