@@ -37,16 +37,15 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 
 	if localRepoDir != "" {
 
-		if !existsMakefile(localRepoDir) {
-			return CreateManager{}, ErrMakefileNotFound
-		}
 		if !existsTreeJson(localRepoDir) {
 
 			return CreateManager{}, ErrTreeJsonNotFound
 		}
+		if !existsMakefile(localRepoDir) {
+			return CreateManager{}, ErrMakefileNotFound
+		}
 
 		c.FormPath = localRepoDir
-		fmt.Println(c.FormPath)
 	}
 
 	trees, err := c.treeManager.Tree()
@@ -89,12 +88,13 @@ func existsTreeJson(formPath string) bool {
 
 func existsMakefile(formPath string) bool {
 	makefilePath := fmt.Sprintf(MakefileCreatePathPattern, formPath, Makefile)
+
 	if fileutil.Exists(makefilePath) {
 		return true
 	}
 	return false
 }
-// TODO: formula must not be static
+
 func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	d := strings.Split(fCmd, " ")
 	dirForm := strings.Join(d[1:], "/")
@@ -107,7 +107,6 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 		if err != nil && !os.IsExist(err) {
 			return err
 		}
-
 		err = createMakefileMain(formPath, dirForm, formulaName)
 		if err != nil {
 			return err
@@ -119,7 +118,6 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 		if err != nil && !os.IsExist(err) {
 			return err
 		}
-		fmt.Println(d)
 		err = changeMakefileMain(formPath, fCmd, formulaName)
 		if err != nil {
 			return err

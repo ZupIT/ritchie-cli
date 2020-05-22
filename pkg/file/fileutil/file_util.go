@@ -119,13 +119,13 @@ func CreateDirIfNotExists(dir string, perm os.FileMode) error {
 }
 
 // CreateFileIfNotExist creates file if not exists
-func CreateFileIfNotExist(file string, content []byte) (error, error) {
+func CreateFileIfNotExist(file string, content []byte) error {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		if err := WriteFile(file, content); err != nil {
-			return err, nil
+			return err
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 // RemoveDir removes path and any children it contains.
