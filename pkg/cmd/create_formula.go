@@ -65,7 +65,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		choice, err := c.Bool("Use default repo (ritchie-formulas-local)? ", []string{"yes", "no"})
+		choice, _ := c.Bool("Use default repo (ritchie-formulas-local)? ", []string{"yes", "no"})
 		if !choice {
 			// TODO verify user.current(pegar home dir) + my rit
 			localRepoDir, err = c.Text("Enter your path [ex.:/home/user/my-ritchie-formulas]", true)
