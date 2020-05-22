@@ -22,7 +22,7 @@ DIST_WIN=$(DIST)/windows
 DIST_WIN_TEAM=$(DIST_WIN)/$(TEAM)
 DIST_WIN_SINGLE=$(DIST_WIN)/$(SINGLE)
 VERSION=$(RELEASE_VERSION)
-GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
+GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/viniciusramosdefaria/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
