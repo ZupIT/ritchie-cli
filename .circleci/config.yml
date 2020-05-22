@@ -6,6 +6,7 @@ reference:
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     security: &HORUS_IMAGE horuszup/horus-client:latest
+    docker: &DOCKER_IMAGE circleci/classic:201808-01
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -55,8 +56,8 @@ executors:
     working_directory: /workspace
 
   security-executor:
-    docker:
-      - image: *HORUS_IMAGE
+    machine:
+      - image: *DOCKER_IMAGE
 
 jobs:
   # Runs Go linters
