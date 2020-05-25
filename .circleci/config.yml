@@ -216,6 +216,8 @@ workflows:
       - security_test:
           filters:
            <<: *FILTERS_CHECK
+           requires:
+             - build      
       - functional_test_single:
           filters:
             <<: *FILTERS_CHECK
