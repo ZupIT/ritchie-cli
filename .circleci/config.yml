@@ -56,7 +56,6 @@ executors:
 
   security-executor:
     machine: true
-      - image: *HORUS_IMAGE
 
 jobs:
   # Runs Go linters
