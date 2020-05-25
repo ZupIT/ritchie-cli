@@ -229,6 +229,11 @@ workflows:
             <<: *FILTERS_CHECK
           requires:
             - build
+      - windows_functional_test_team:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build
       - delivery:
           filters:
             <<: *FILTERS_DELIVERY
