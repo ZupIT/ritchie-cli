@@ -5,6 +5,8 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
+    windows: &WINDOWS_IMAGE stefanscherer/chocolatey
+
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -51,6 +53,12 @@ executors:
   release-executor:
     docker:
       - image: *RUBY_IMAGE
+        user: root
+    working_directory: /workspace
+
+  windows-executor:
+    docker:
+      - image: *WINDOWS_IMAGE
         user: root
     working_directory: /workspace
 
@@ -140,17 +148,21 @@ jobs:
             make functional-test-team
 
   windows_functional_test_team:
-    machine: true
+    executor: windows-executor
+    environment:
+      <<: *ENVIRONMENT
     steps:
       - checkout
+      - attach_workspace:
+          at: /workspace/dist
       - run:
-          name: Build Container
+          name: Install GO
           command: |
-            docker build -t Windows -f WindowsTest.Dockerfile .
+            choco install -y golang
       - run:
           name: Running Functional tests for team
           command: |
-            docker exec -d Windows go test -v $(go list ./pkg/... | grep -v vendor/)
+              go test -v $(go list ./pkg/... | grep -v vendor/)
 
   build:
     executor: ritchie-executor
