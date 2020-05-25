@@ -1,11 +1,13 @@
 version: 2.1
 
+orbs:
+  windows: circleci/windows@2.4.0
+
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    windows: &WINDOWS_IMAGE circleci/windows:2.2.0
 
 
   paths:
@@ -57,10 +59,11 @@ executors:
     working_directory: /workspace
 
   windows-executor:
-    docker:
-      - image: *WINDOWS_IMAGE
-        user: root
     working_directory: /workspace
+    resource_class: windows.medium
+    shell: powershell.exe -ExecutionPolicy Bypass
+    machine:
+      image: windows-server-2019
 
 jobs:
   # Runs Go linters
@@ -162,7 +165,7 @@ jobs:
       - run:
           name: Running Functional tests for team
           command: |
-              go test -v $(go list ./pkg/... | grep -v vendor/)
+            $Env:path +=";C:\workspace\workspace\dist\windows\team;"; go test -v (go list ./functional/team/... | grep -v vendor/)
 
   build:
     executor: ritchie-executor
@@ -214,6 +217,7 @@ jobs:
             . ./version.sh
             make release
 
+
 workflows:
   build-for-branch:
     jobs:
@@ -226,9 +230,9 @@ workflows:
       - build:
           filters:
             <<: *FILTERS_CHECK
-          requires:
-            - unit_test
-            - lint
+#          requires:
+#            - unit_test
+#            - lint
       - functional_test_single:
           filters:
             <<: *FILTERS_CHECK
