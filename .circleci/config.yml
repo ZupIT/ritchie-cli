@@ -213,6 +213,9 @@ workflows:
           requires:
             - unit_test
             - lint
+      - security_test:
+          filters:
+           <<: *FILTERS_CHECK
       - functional_test_single:
           filters:
             <<: *FILTERS_CHECK
