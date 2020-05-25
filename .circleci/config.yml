@@ -5,7 +5,6 @@ reference:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    security: &HORUS_IMAGE horuszup/horus-client:latest
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -114,15 +113,6 @@ jobs:
       - store_artifacts:
           path: *TEST_RESULTS_DIR
 
-  security_test:
-    machine: true
-    steps:
-      - run:
-          name: Horus Security Test
-          command: |
-            echo Starting Security Analysis...
-            docker run --rm -e HORUS_CLIENT_REPO_URL=$HORUS_CLIENT_REPO_URL -e HORUS_CLIENT_REPO_BRANCH=$HORUS_CLIENT_REPO_BRANCH -e HORUS_CLIENT_API_ADDR=$HORUS_CLIENT_API_ADDR -e HORUS_CLIENT_TOKEN    =$HORUS_CLIENT_TOKEN -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK *HORUS_IMAGE
-
   build:
     executor: ritchie-executor
     branches:
@@ -174,9 +164,6 @@ jobs:
 workflows:
   build-for-branch:
     jobs:
-      - security_test:
-          filters:
-            <<: *FILTERS_CHECK
       - lint:
           filters:
             <<: *FILTERS_CHECK
