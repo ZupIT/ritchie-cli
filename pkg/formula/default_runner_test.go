@@ -20,7 +20,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 		WBin:    "test-${so}.exe",
 		Bundle:  "${so}.zip",
 		Config:  "config.json",
-		RepoURL: "http://localhost:8882/formulas",
+		RepoURL: RepoUrl,
 	}
 
 	home := os.TempDir()
@@ -44,7 +44,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 			name: "success",
 			in: in{
 				envMock: envResolverMock{in: "ok"},
-				inText:  inputMock{text: "ok"},
+				inText:  inputMock{text: ""},
 				inBool:  inputMock{boolean: true},
 			},
 			want: nil,

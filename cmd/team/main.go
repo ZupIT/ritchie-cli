@@ -86,9 +86,10 @@ func buildCommands() *cobra.Command {
 
 	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
 	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
+	postRunner := formula.NewPostRunner()
 
-	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, inputManager)
-	dockerRunner := formula.NewDockerRunner(dockerPreRunner, inputManager)
+	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
+	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 

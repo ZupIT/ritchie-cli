@@ -183,7 +183,7 @@ type PostRunner interface {
 }
 
 type InputRunner interface {
-	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType, docker bool) error
+	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
 }
 
 type Setuper interface {

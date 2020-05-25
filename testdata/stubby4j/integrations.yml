@@ -27,7 +27,6 @@
               "binWindows": "test-${so}.exe",
               "bundle": "${so}.zip",
               "config": "config.json",
-              "repoUrl": "http://localhost:8882/formulas"
             }
           }
         ]
@@ -68,6 +67,10 @@
             "default" : "false",
             "items" : ["false", "true"],
             "label" : "Pick: "
+          },
+          {
+            "name" : "test_resolver",
+            "type" : "CREDENTIAL_TEST"
           }
         ]
       }

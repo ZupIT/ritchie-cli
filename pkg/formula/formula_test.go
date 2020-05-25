@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+var RepoUrl = os.Getenv("REPO_URL")
 var def Definition
 var home string
 

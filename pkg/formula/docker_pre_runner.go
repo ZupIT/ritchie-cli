@@ -65,8 +65,6 @@ func buildImg(containerId string) error {
 	fmt.Println("Building docker image...")
 	args := []string{dockerBuildCmd, "-t", containerId, "."}
 	cmd := exec.Command(docker, args...) // Run command "docker build -t (randomId) ."
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {

@@ -18,7 +18,7 @@ func TestDefaultSetup_Setup(t *testing.T) {
 		WBin:    "test-${so}.exe",
 		Bundle:  "${so}.zip",
 		Config:  "config.json",
-		RepoURL: "http://localhost:8882/formulas",
+		RepoURL: RepoUrl,
 	}
 
 	home := os.TempDir()

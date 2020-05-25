@@ -2,9 +2,9 @@ package formula
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -15,6 +15,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
+
+var ErrInputNotRecognized = errors.New("terminal input not recognized")
 
 type InputManager struct {
 	envResolvers env.Resolvers
@@ -36,26 +38,26 @@ func NewInputManager(
 	}
 }
 
-func (d InputManager) Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType, docker bool) error {
+func (d InputManager) Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error {
 	switch inputType {
 	case api.Prompt:
-		if err := d.fromPrompt(cmd, setup, docker); err != nil {
+		if err := d.fromPrompt(cmd, setup); err != nil {
 			return err
 		}
 	case api.Stdin:
-		if err := d.fromStdin(cmd, setup, docker); err != nil {
+		if err := d.fromStdin(cmd, setup); err != nil {
 			return err
 		}
 	default:
-		return fmt.Errorf("terminal input (%v) not recongnized", inputType)
+		return ErrInputNotRecognized
 	}
 
 	return nil
 }
 
-func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup, docker bool) error {
+func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup) error {
 	data := make(map[string]interface{})
-	if err := stdin.ReadJson(os.Stdin, &data); err != nil {
+	if err := stdin.ReadJson(cmd.Stdin, &data); err != nil {
 		fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
 		return err
 	}
@@ -77,7 +79,7 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup, docker bool) error {
 		}
 
 		if len(inputVal) != 0 {
-			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i, docker); err != nil {
+			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i); err != nil {
 				return err
 			}
 		}
@@ -89,7 +91,7 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup, docker bool) error {
 	return nil
 }
 
-func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup, docker bool) error {
+func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 	config := setup.config
 	for i, input := range config.Inputs {
 		var inputVal string
@@ -125,7 +127,7 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup, docker bool) error 
 
 		if len(inputVal) != 0 {
 			persistCache(setup.formulaPath, inputVal, input, items)
-			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i, docker); err != nil {
+			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i); err != nil {
 				return err
 			}
 		}
@@ -138,30 +140,15 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup, docker bool) error 
 }
 
 // addEnv Add environment variable to run formulas.
-// If docker is true, create a file named .env and add the variable inName=inValue.
-// If docker is false, add the variable inName=inValue to cmd
-func addEnv(cmd *exec.Cmd, pwd, inName, inValue string, index int, docker bool) error {
+// add the variable inName=inValue to cmd.Env
+func addEnv(cmd *exec.Cmd, pwd, inName, inValue string, index int) error {
 	e := fmt.Sprintf(EnvPattern, strings.ToUpper(inName), inValue)
-	if docker {
-		if !fileutil.Exists(envFile) {
-			pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, pwd) // Add "pwd" to use in formulas that need it
-			file := fmt.Sprintf("%s\n%s\n", pwdEnv, e)
-			if err := fileutil.WriteFile(envFile, []byte(file)); err != nil {
-				return err
-			}
-		} else {
-			if err := fileutil.AppendFileData(envFile, []byte(e+"\n")); err != nil {
-				return err
-			}
-		}
+	if index == 0 {
+		pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, pwd)
+		cmd.Env = append(cmd.Env, pwdEnv) // Add "pwd" to use in formulas that need it
+		cmd.Env = append(cmd.Env, e)
 	} else {
-		if index == 0 {
-			pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, pwd)
-			cmd.Env = append(cmd.Env, pwdEnv) // Add "pwd" to use in formulas that need it
-			cmd.Env = append(cmd.Env, e)
-		} else {
-			cmd.Env = append(cmd.Env, e)
-		}
+		cmd.Env = append(cmd.Env, e)
 	}
 
 	return nil

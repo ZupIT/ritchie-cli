@@ -32,7 +32,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	ePwd := fmt.Sprintf(EnvPattern, PwdEnv, setup.pwd)
 	cmd.Env = append(cmd.Env, ePwd)
 
-	if err := d.Inputs(cmd, setup, inputType, false); err != nil {
+	if err := d.Inputs(cmd, setup, inputType); err != nil {
 		return err
 	}
 
