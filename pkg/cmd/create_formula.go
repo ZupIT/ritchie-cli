@@ -68,7 +68,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		choice, _ := c.Bool("Use default repo (ritchie-formulas-local)? ", []string{"yes", "no"})
 		if !choice {
 			localRepoDir, err = c.Text("Enter your path [ex.:/home/user/my-ritchie-formulas]", true)
-			fmt.Println("Make sure you have Makefile and tree.json")
+			// fmt.Println("Make sure you have Makefile and tree.json")
 			if err != nil {
 				return err
 			}

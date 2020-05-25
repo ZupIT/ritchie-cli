@@ -37,11 +37,10 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 
 	if localRepoDir != "" {
 
-		if !existsTreeJson(localRepoDir) {
-
+		if !existsTreeJson(localRepoDir) && existsMakefile(localRepoDir){
 			return CreateManager{}, ErrTreeJsonNotFound
 		}
-		if !existsMakefile(localRepoDir) {
+		if !existsMakefile(localRepoDir) && existsTreeJson(localRepoDir) {
 			return CreateManager{}, ErrMakefileNotFound
 		}
 
