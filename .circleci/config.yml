@@ -5,7 +5,7 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    windows: &WINDOWS_IMAGE stefanscherer/chocolatey
+    windows: &WINDOWS_IMAGE circleci/windows:2.2.0
 
 
   paths:
