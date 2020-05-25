@@ -85,7 +85,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	return resp, err
 }
 
-func funcValidateLoginRequired() {
+func FuncValidateLoginRequired() {
 	login := []string{"show", "context"}
 	_, stdin, _, out := funcHitRit(login)
 	scanner := funcScannerTerminal(out)

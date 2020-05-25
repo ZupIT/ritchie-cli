@@ -1,17 +1,19 @@
 
-package functional
+package single
 
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
+
+	"github.com/ZupIT/ritchie-cli/functional"
 )
 
 var _ = Describe("RitScaffold", func() {
-	scenariosScaffold := LoadScenarios("scaffold_feature.json")
+	scenariosScaffold := functional.LoadScenarios("scaffold_feature.json")
 
-	DescribeTable("Running entry for Scaffolds",
-		func(scenario Scenario) {
+	DescribeTable("When running core command",
+		func(scenario functional.Scenario) {
 			out, err := scenario.RunSteps()
 			Expect(err).To(Succeed())
 			Expect(out).To(ContainSubstring(scenario.Result))

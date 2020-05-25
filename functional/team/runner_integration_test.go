@@ -1,5 +1,4 @@
-
-package functional
+package team
 
 import (
 	"testing"
@@ -8,13 +7,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestRitScaffold(t *testing.T) {
+func TestRitTeam(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Rit Suite")
 }
 
 var _ = Describe("RitScaffold", func() {
 	BeforeSuite(func() {
-		funcValidateLoginRequired()
 	})
 })
