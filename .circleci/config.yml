@@ -149,11 +149,11 @@ jobs:
         - run:
             name: Build Container
             command: |
-            docker build -t Windows -f WindowsTest.Dockerfile .
+              docker build -t Windows -f WindowsTest.Dockerfile .
         - run:
             name: Running Functional tests for team
             command: |
-            docker exec -d Windows go test -v $(go list ./pkg/... | grep -v vendor/)
+              docker exec -d Windows go test -v $(go list ./pkg/... | grep -v vendor/)
 
   build:
     executor: ritchie-executor
