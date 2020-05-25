@@ -143,8 +143,6 @@ jobs:
     machine: true
     steps:
       - checkout
-      - attach_workspace:
-          at: /workspace/dist
       - run:
           name: Build Container
           command: |
