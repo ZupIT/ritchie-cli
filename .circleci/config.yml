@@ -54,10 +54,6 @@ executors:
         user: root
     working_directory: /workspace
 
-  security-executor:
-    docker:
-      - image: ubuntu-1604:201903-01
-
 jobs:
   # Runs Go linters
   lint:
@@ -119,7 +115,7 @@ jobs:
           path: *TEST_RESULTS_DIR
 
   security_test:
-    executor: security-executor
+    machine: true
     steps:
       - run:
           name: Horus Security Test
