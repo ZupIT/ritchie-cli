@@ -90,10 +90,7 @@ jobs:
             mkdir tmp
             cd /tmp
             wget https://dl.google.com/go/go1.14.1.linux-amd64.tar.gz
-            sudo tar -xvf go1.14.1.linux-amd64.tar.gz
-            sudo rm -rf /usr/local/go
-            sudo mv go /usr/local
-            go version
+            sudo tar -zxf go1.14.1.linux-amd64.tar.gz -C /usr/local
       - run:
           name: Install gotestsum
           command: |
