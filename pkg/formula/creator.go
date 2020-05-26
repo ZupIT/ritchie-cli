@@ -88,9 +88,12 @@ func existsMakefile(formPath string) bool {
 }
 
 func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
+
+
 	d := strings.Split(fCmd, " ")
+
 	dirForm := strings.Join(d[1:], "/")
-	formulaName := fmt.Sprintf("%s_%s", d[len(d)-2], d[len(d)-1])
+	formulaName := strings.Join(d[1:], "_")
 
 	var dir string
 	if new {

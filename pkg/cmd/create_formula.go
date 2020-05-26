@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -11,6 +13,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
+
+var ErrNotAllowedCharacter = errors.New(`not allowed character on formula name \/,><`)
+
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -54,6 +59,10 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		var localRepoDir string
 
 		fCmd, err := c.Text("Enter the new formula command [ex.: rit group verb noun]", true)
+		notAllowed := `\/><,`
+		if strings.ContainsAny(fCmd, notAllowed){
+			return ErrNotAllowedCharacter
+		}
 
 		fmt.Println("Creating Formula ...")
 		if err != nil {
