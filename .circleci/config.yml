@@ -5,7 +5,7 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:201903-01
+    ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -84,15 +84,6 @@ jobs:
       <<: *ENVIRONMENT
     steps:
       - checkout
-      - run:
-          name: Install golang
-          command: |
-            mkdir tmp
-            cd /tmp
-            wget https://dl.google.com/go/go1.14.1.linux-amd64.tar.gz
-            sudo tar -xf go1.14.1.linux-amd64.tar.gz
-            sudo rm -rf /usr/local/go
-            sudo mv go /usr/local
       - run:
           name: Install gotestsum
           command: |
