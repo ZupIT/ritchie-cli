@@ -10,7 +10,7 @@ import (
 
 type initSingleCmd struct {
 	prompt.InputPassword
-	security.LoginManager
+	security.PassphraseManager
 	formula.Loader
 }
 
@@ -25,10 +25,10 @@ type initTeamCmd struct {
 // NewSingleInitCmd creates init command for single edition
 func NewSingleInitCmd(
 	ip prompt.InputPassword,
-	lm security.LoginManager,
+	pm security.PassphraseManager,
 	rl formula.Loader) *cobra.Command {
 
-	o := initSingleCmd{ip, lm, rl}
+	o := initSingleCmd{ip, pm, rl}
 
 	return newInitCmd(o.runFunc())
 }
@@ -62,8 +62,8 @@ func (o initSingleCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		p := security.Passcode(pass)
-		if err := o.Login(p); err != nil {
+		p := security.Passphrase(pass)
+		if err := o.Save(p); err != nil {
 			return err
 		}
 
@@ -91,8 +91,7 @@ func (o initTeamCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		p := security.Passcode(org)
-		if err := o.Login(p); err != nil {
+		if err := o.Login(); err != nil {
 			return err
 		}
 

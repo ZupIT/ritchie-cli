@@ -30,8 +30,7 @@ func NewLoginCmd(
 
 func (l loginCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		p := security.Passcode("org")
-		if err := l.Login(p); err != nil {
+		if err := l.Login(); err != nil {
 			return err
 		}
 

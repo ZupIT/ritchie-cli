@@ -31,7 +31,7 @@ func NewLoginManager(
 	}
 }
 
-func (l LoginManager) Login(p security.Passcode) error {
+func (l LoginManager) Login() error {
 	cfg, err := l.serverFinder.Find()
 	if err != nil {
 		return err

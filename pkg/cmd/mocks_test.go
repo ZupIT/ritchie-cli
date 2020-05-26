@@ -171,7 +171,7 @@ func (repoUpdaterMock) Update() error {
 
 type loginManagerMock struct{}
 
-func (loginManagerMock) Login(p security.Passcode) error {
+func (loginManagerMock) Login() error {
 	return nil
 }
 
