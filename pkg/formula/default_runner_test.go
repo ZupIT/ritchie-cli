@@ -74,9 +74,9 @@ func TestDefaultRunner_Run(t *testing.T) {
 		{
 			name: "post run error",
 			in: in{
-				envMock: envResolverMock{in: "ok"},
-				inText:  inputMock{text: "ok"},
-				inBool:  inputMock{boolean: true},
+				envMock:  envResolverMock{in: "ok"},
+				inText:   inputMock{text: "ok"},
+				inBool:   inputMock{boolean: true},
 				postMock: &postRunnerMock{error: errors.New("error in remove dir")},
 			},
 			want: errors.New("error in remove dir"),
