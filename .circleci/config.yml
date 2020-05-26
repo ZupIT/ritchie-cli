@@ -85,10 +85,17 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install gotestsum
+          command: |
+            curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v0.4.2/gotestsum_0.4.2_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
+      - run:
+          name: Run docker-compose
+          command: |
+            docker-compose up -d
+      - run:
           name: Running Unit tests
           command: |
             mkdir -p $TEST_RESULTS_DIR
-            docker-compose up -d
             ./run-tests-ci.sh
       - store_test_results:
           path: *TEST_RESULTS_DIR
