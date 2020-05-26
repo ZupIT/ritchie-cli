@@ -79,15 +79,11 @@ jobs:
             /go/bin/golangci-lint run
 
   unit_test:
-    executor: ritchie-tests-executor
+    executor: ritchie-executor
     environment:
       <<: *ENVIRONMENT
     steps:
       - checkout
-      - run:
-          name: Install gotestsum
-          command: |
-            curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v0.4.2/gotestsum_0.4.2_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
       - run:
           name: Run docker-compose
           command: |
