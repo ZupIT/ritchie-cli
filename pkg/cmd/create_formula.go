@@ -14,7 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var ErrNotAllowedCharacter = errors.New(`not allowed character on formula name \/,><`)
+var ErrNotAllowedCharacter = errors.New(`not allowed character on formula name \/,><@`)
 
 
 // createFormulaCmd type for add formula command
@@ -59,7 +59,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		var localRepoDir string
 
 		fCmd, err := c.Text("Enter the new formula command [ex.: rit group verb noun]", true)
-		notAllowed := `\/><,`
+		notAllowed := `\/><,@`
 		if strings.ContainsAny(fCmd, notAllowed){
 			return ErrNotAllowedCharacter
 		}
@@ -73,11 +73,13 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-
-		choice, _ := c.Bool("Use default repo (ritchie-formulas-local)? ", []string{"yes", "no"})
+		homeDir, _ := os.UserHomeDir()
+		ritFormulasPath := fmt.Sprintf("%s/my-ritchie-formulas", homeDir)
+		repoQuestion := fmt.Sprintf("Use default repo (%s)?", ritFormulasPath)
+		choice, _ := c.Bool(repoQuestion, []string{"yes", "no"})
 		if !choice {
-			localRepoDir, err = c.Text("Enter your path [ex.:/home/user/my-ritchie-formulas]", true)
-			// fmt.Println("Make sure you have Makefile and tree.json")
+			pathQuestion := fmt.Sprintf("Enter your path [ex.:%s]",ritFormulasPath)
+			localRepoDir, err = c.Text(pathQuestion, true)
 			if err != nil {
 				return err
 			}
