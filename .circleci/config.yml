@@ -5,6 +5,7 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
+    ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:201903-01
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -14,6 +15,7 @@ references:
     GIT_EMAIL : "zup-ci@zup.com.br"
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
+    BUILD_IMAGE: *GOLANG_IMAGE
 
   filters: &FILTERS_DELIVERY
     branches:
@@ -36,6 +38,11 @@ references:
         - /^feature.*/
 
 executors:
+  ritchie-tests-executor:
+    machine:
+      image: *CI_MACHINE_IMAGE
+    working_directory: ~/workspace
+
   ritchie-executor:
     docker:
       - image: *GOLANG_IMAGE
@@ -72,7 +79,7 @@ jobs:
             /go/bin/golangci-lint run
 
   unit_test:
-    executor: ritchie-executor
+    executor: ritchie-tests-executor
     environment:
       <<: *ENVIRONMENT
     steps:
@@ -81,14 +88,7 @@ jobs:
           name: Running Unit tests
           command: |
             mkdir -p $TEST_RESULTS_DIR
-            PACKAGE_NAMES=$(go list ./pkg/... | circleci tests split --split-by=timings --timings-type=classname)
-            echo "Running $(echo $PACKAGE_NAMES | wc -w) packages"
-            echo $PACKAGE_NAMES
-            gotestsum --format=short-verbose \
-              --junitfile $TEST_RESULTS_DIR/gotestsum-report.xml -- \
-              -p 2 \
-              -cover -coverprofile=coverage.txt \
-              $PACKAGE_NAMES
+            docker-compose -f docker-compose-ci.yml run server
       - store_test_results:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
