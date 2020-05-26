@@ -207,17 +207,16 @@ workflows:
       - unit_test:
           filters:
             <<: *FILTERS_CHECK
+      - security_test:
+          filters:
+           <<: *FILTERS_CHECK
       - build:
           filters:
             <<: *FILTERS_CHECK
           requires:
             - unit_test
             - lint
-      - security_test:
-          filters:
-           <<: *FILTERS_CHECK
-          requires:
-            - build      
+            - security_test  
       - functional_test_single:
           filters:
             <<: *FILTERS_CHECK
