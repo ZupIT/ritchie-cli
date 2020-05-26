@@ -1,5 +1,7 @@
 #!/bin/sh
 
+./wait-for-it.sh "stubby4j:8882" && echo "stubby4j is up"
+
 export REPO_URL=http://stubby4j:8882/formulas
 
 PACKAGE_NAMES=$(go list ./pkg/... | grep -v vendor/)
