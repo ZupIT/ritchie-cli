@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -48,6 +49,10 @@ func (scenario *Scenario) RunSteps() (string, error) {
 
 	args := strings.Fields(scenario.Steps[0].Value)
 	cmd, stdin, err, out := funcHitRit(args)
+
+	os := runtime.GOOS
+
+	fmt.Println(os)
 
 	if err == nil {
 		for _, step := range scenario.Steps {
