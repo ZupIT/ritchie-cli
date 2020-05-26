@@ -1,0 +1,267 @@
+[
+    {
+        "entry":"Show context",
+        "steps":[
+            {
+                "key":"",
+                "value":"show context",
+                "action":"main"
+            }
+        ],
+        "result":"Current context:"
+    },
+    {
+        "entry":"Set context",
+        "steps":[
+            {
+                "key":"",
+                "value":"set context",
+                "action":"main"
+            },
+            {
+                "key":"All:",
+                "value":"Type new context?",
+                "action":"select"
+            },
+            {
+                "key":"New context:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            }
+
+        ],
+        "result":"Set context successful!"
+    },
+    {
+        "entry":"Delete context",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete context",
+                "action":"main"
+            },
+            {
+                "key":"All:",
+                "value":"Leonidas",
+                "action":"select"
+            },
+            {
+                "key":"Are you sure want to delete this context?",
+                "value":"yes",
+                "action":"select"
+            }
+
+        ],
+        "result":"Delete context successful!"
+    },
+    {
+        "entry":"Add",
+        "steps":[
+            {
+                "key":"",
+                "value":"add",
+                "action":"main"
+            }
+        ],
+        "result":"It can be used to add formulas, repositories and other objects.."
+    },
+    {
+        "entry":"Add new repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"add repo",
+                "action":"main"
+            },
+            {
+                "key":"Name of the repository:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            },
+            {
+                "key":"URL of the tree",
+                "value":"https://commons-repo.ritchiecli.io/tree/tree.json",
+                "action":"sendkey"
+            },
+            {
+                "key":"Priority",
+                "value":"999",
+                "action":"sendkey"
+            }
+        ],
+        "result":""
+    },
+    {
+        "entry":"Clean repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"clean repo",
+                "action":"main"
+            },
+            {
+                "key":"Name of the repository:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            }
+        ],
+        "result":"\"Leonidas\" has been cleaned successfully"
+    },
+    {
+        "entry":"List repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"list repo",
+                "action":"main"
+            }
+        ],
+        "result":"Leonidas"
+    },
+    {
+        "entry":"Delete repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete repo",
+                "action":"main"
+            },
+            {
+                "key":"Choose a repository to delete:",
+                "value":"Leonidas",
+                "action":"select"
+            },
+            {
+                "key":"Want to delete",
+                "value":"yes",
+                "action":"select"
+            }
+        ],
+        "result":"\"Leonidas\" has been removed from your repositories"
+    },
+    {
+        "entry":"Set credentials",
+        "steps":[
+            {
+                "key":"",
+                "value":"set credential",
+                "action":"main"
+            },
+            {
+                "key":"Provider:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            },
+            {
+                "key":"Type your credential using the format",
+                "value":"email=email@email.com",
+                "action":"sendkey"
+            },
+            {
+                "key":"Add more fields?",
+                "value":"no",
+                "action":"select"
+            }
+        ],
+        "result":""
+    },
+    {
+        "entry":"Set",
+        "steps":[
+            {
+                "key":"",
+                "value":"set",
+                "action":"main"
+            }
+        ],
+        "result":"Set objects like credentials, etc."
+    },
+    {
+        "entry":"Update repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"update repo",
+                "action":"main"
+            }
+        ],
+        "result":"Successfully got an update"
+    },
+    {
+        "entry":"Completion",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion",
+                "action":"main"
+            }
+        ],
+        "result":"Add autocomplete for terminal, Available for (bash, zsh)."
+    },
+    {
+        "entry":"Completion bash",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion bash",
+                "action":"main"
+            }
+        ],
+        "result":"#!/bin/bash"
+    },
+    {
+        "entry":"Completion zsh",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion zsh",
+                "action":"main"
+            }
+        ],
+        "result":"#compdef rit"
+    },
+    {
+        "entry":"Version",
+        "steps":[
+            {
+                "key":"",
+                "value":"--version",
+                "action":"main"
+            }
+        ],
+        "result":"rit version"
+    },
+    {
+        "entry":"Delete",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete",
+                "action":"main"
+            }
+        ],
+        "result":"Delete objects like users, etc."
+    },
+    {
+        "entry":"Show",
+        "steps":[
+            {
+                "key":"",
+                "value":"show",
+                "action":"main"
+            }
+        ],
+        "result":"Show objects like context, organization etc."
+    },
+    {
+        "entry":"Help",
+        "steps":[
+            {
+                "key":"",
+                "value":"help",
+                "action":"main"
+            }
+        ],
+        "result":"Use \"rit <command> --help\" for more information about a given command."
+    }
+]

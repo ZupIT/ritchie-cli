@@ -26,12 +26,12 @@ func (l LogoutManager) Logout() error {
 		return err
 	}
 
-	serverURL, err := l.serverFinder.Find()
+	cfg, err := l.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	cr, err := logoutChannelProvider(l.provider, session.Organization, serverURL)
+	cr, err := logoutChannelProvider(l.provider, session.Organization, cfg.Organization)
 	if err != nil {
 		return err
 	}

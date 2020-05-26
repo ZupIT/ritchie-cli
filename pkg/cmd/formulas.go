@@ -19,6 +19,7 @@ const (
 	fBundle  = "fBundle"
 	fConfig  = "fConfig"
 	fRepoURL = "fRepoURL"
+	fRepoName = "fRepoName"
 	subcmd   = " SUBCOMMAND"
 	//Group formulas group
 	Group = "group"
@@ -78,14 +79,17 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	annotations[fBundle] = frm.Bundle
 	annotations[fConfig] = frm.Config
 	annotations[fRepoURL] = frm.RepoURL
+	annotations[fRepoName] = cmd.Repo
 
-	return &cobra.Command{
+	c := &cobra.Command{
 		Annotations: annotations,
 		Use:         cmd.Usage,
 		Short:       cmd.Help,
 		Long:        cmd.Help,
 		RunE:        execFormulaFunc(f.formulaRunner),
 	}
+	c.LocalFlags()
+	return c
 }
 
 func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args []string) error {
@@ -98,6 +102,7 @@ func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args
 		fBundle := cmd.Annotations[fBundle]
 		fConf := cmd.Annotations[fConfig]
 		fRepoURL := cmd.Annotations[fRepoURL]
+		fRepoName := cmd.Annotations[fRepoName]
 		frm := formula.Definition{
 			Path:    fPath,
 			Bin:     fBin,
@@ -106,9 +111,18 @@ func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args
 			WBin:    fWBin,
 			Bundle:  fBundle,
 			Config:  fConf,
-			RepoUrl: fRepoURL,
+			RepoURL: fRepoURL,
+			RepoName: fRepoName,
 		}
-		return formulaRunner.Run(frm)
+		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
+		if err != nil {
+			return err
+		}
+		inputType := api.Prompt
+		if stdin {
+			inputType = api.Stdin
+		}
+		return formulaRunner.Run(frm, inputType)
 	}
 }
 

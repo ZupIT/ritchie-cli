@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"reflect"
 	"testing"
 
@@ -13,10 +12,6 @@ import (
 )
 
 func TestFinder(t *testing.T) {
-	tmp := os.TempDir()
-	serverSetter := server.NewSetter(tmp)
-	serverFinder := server.NewFinder(tmp)
-
 	type out struct {
 		err    error
 		status int
@@ -66,17 +61,15 @@ func TestFinder(t *testing.T) {
 				body = []byte(out.err.Error())
 			}
 
-			server := mockServer(out.status, body)
-			err := serverSetter.Set(server.URL)
-			if err != nil {
-				fmt.Sprintln("Error in set")
-				return
-			}
+			srv := mockServer(out.status, body)
+			defer srv.Close()
 
-			defer server.Close()
-			finder := NewFinder(serverFinder, server.Client(), sessManager, ctxFinder)
+			srvFinder := serverFinderMock{Config: server.Config{URL: srv.URL}}
+			finder := NewFinder(srvFinder, srv.Client(), sessManager, ctxFinder)
 
 			got, err := finder.Find(tt.in)
+			fmt.Println("err: ", err)
+
 			if err != nil && err.Error() != out.err.Error() {
 				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)
 			}

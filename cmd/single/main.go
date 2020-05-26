@@ -73,14 +73,7 @@ func buildCommands() *cobra.Command {
 		inputBool)
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	rootCmd := cmd.NewSingleRootCmd(
-		workspaceManager,
-		loginManager,
-		repoLoader,
-		sessionValidator,
-		api.Single,
-		inputText,
-		inputPassword)
+	rootCmd := cmd.NewSingleRootCmd(workspaceManager, sessionValidator)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -88,6 +81,7 @@ func buildCommands() *cobra.Command {
 	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
+	initCmd := cmd.NewSingleInitCmd(inputPassword, loginManager, repoLoader)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -136,6 +130,7 @@ func buildCommands() *cobra.Command {
 				cleanCmd,
 				createCmd,
 				deleteCmd,
+				initCmd,
 				listCmd,
 				setCmd,
 				showCmd,

@@ -2,13 +2,15 @@ package credteam
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 var (
@@ -38,6 +40,14 @@ func (sessionMock) Current() (s session.Session, err error) {
 
 func (sessionMock) Destroy() error {
 	return nil
+}
+
+type serverFinderMock struct {
+	Config server.Config
+}
+
+func (s serverFinderMock) Find() (server.Config, error) {
+	return s.Config, nil
 }
 
 func TestMain(m *testing.M) {

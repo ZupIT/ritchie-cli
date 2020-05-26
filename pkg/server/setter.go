@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,32 +11,49 @@ import (
 )
 
 const (
-	serverFilePattern = "%s/server"
-	serverDown        = "please, check your server. It doesn't seem to be UP"
+	// ServerErrPattern error message pattern
+	ServerErrPattern = "Server (%s) returned %s"
+)
+
+var (
+	// ErrOrgIsRequired error message for org
+	ErrOrgIsRequired = errors.New("Organization is required")
 )
 
 type SetterManager struct {
 	serverFile string
+	httpClient *http.Client
 }
 
-func NewSetter(ritchieHomeDir string) Setter {
+func NewSetter(ritHomeDir string, hc *http.Client) Setter {
 	return SetterManager{
-		serverFile: fmt.Sprintf(serverFilePattern, ritchieHomeDir),
+		serverFile: fmt.Sprintf(serverFilePattern, ritHomeDir),
+		httpClient: hc,
 	}
 }
 
-func (s SetterManager) Set(url string) error {
-	if err := validator.IsValidURL(url); err != nil {
+func (s SetterManager) Set(cfg Config) error {
+	if cfg.Organization == "" {
+		return ErrOrgIsRequired
+	}
+
+	if err := validator.IsValidURL(cfg.URL); err != nil {
 		return err
 	}
-	resp, err := http.Get(url)
-	if (err != nil) || (resp.StatusCode != http.StatusOK) {
-		return fmt.Errorf(
-			"%v: %w",
-			"HttpStatus returned: "+resp.Status+" for URL: "+url,
-			errors.New(serverDown))
+	resp, err := s.httpClient.Get(cfg.URL)
+	if err != nil {
+		return err
 	}
-	if err := fileutil.WriteFile(s.serverFile, []byte(url)); err != nil {
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf(ServerErrPattern, cfg.URL, resp.Status)
+	}
+
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	if err := fileutil.WriteFile(s.serverFile, b); err != nil {
 		return err
 	}
 	return nil

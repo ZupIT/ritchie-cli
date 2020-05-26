@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
 const (
@@ -13,6 +15,7 @@ const (
 	DefaultConfig         = "config.json"
 	ConfigPattern         = "%s/%s"
 	CommandEnv            = "COMMAND"
+	PwdEnv                = "PWD"
 	BinPattern            = "%s%s"
 	BinPathPattern        = "%s/bin"
 	windows               = "windows"
@@ -54,14 +57,15 @@ type Cache struct {
 
 // Definition type that represents a Formula
 type Definition struct {
-	Path    string
-	Bin     string
-	LBin    string
-	MBin    string
-	WBin    string
-	Bundle  string
-	Config  string
-	RepoUrl string
+	Path     string
+	Bin      string
+	LBin     string
+	MBin     string
+	WBin     string
+	Bundle   string
+	Config   string
+	RepoURL  string
+	RepoName string
 }
 
 // FormulaPath builds the formula path from ritchie home
@@ -131,9 +135,9 @@ func (d *Definition) BinFilePath(binPath, binName string) string {
 	return fmt.Sprintf("%s/%s", binPath, binName)
 }
 
-// BinUrl builds the bin url
-func (d *Definition) BundleUrl() string {
-	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, d.BundleName())
+// BundleURL builds the bundle url
+func (d *Definition) BundleURL() string {
+	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, d.BundleName())
 }
 
 // ConfigName resolver de config name
@@ -149,15 +153,17 @@ func (d *Definition) ConfigPath(formula, configName string) string {
 	return fmt.Sprintf(ConfigPattern, formula, configName)
 }
 
-// ConfigUrl builds the config url
-func (d *Definition) ConfigUrl(configName string) string {
-	return fmt.Sprintf("%s/%s/%s", d.RepoUrl, d.Path, configName)
+// ConfigURL builds the config url
+func (d *Definition) ConfigURL(configName string) string {
+	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
+//Runner defines the formula runner process
 type Runner interface {
-	Run(def Definition) error
+	Run(def Definition, inputType api.TermInputType) error
 }
 
+//Creator defines the formula creator process
 type Creator interface {
 	Create(formulaCmd, lang string) (CreateManager, error)
 }

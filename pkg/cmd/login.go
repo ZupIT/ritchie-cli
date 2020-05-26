@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 )
 
@@ -14,15 +13,13 @@ import (
 type loginCmd struct {
 	security.LoginManager
 	formula.Loader
-	prompt.InputText
 }
 
 // NewLoginCmd creates new cmd instance
 func NewLoginCmd(
 	lm security.LoginManager,
-	rm formula.Loader,
-	it prompt.InputText) *cobra.Command {
-	l := loginCmd{lm, rm, it}
+	rm formula.Loader) *cobra.Command {
+	l := loginCmd{lm, rm}
 	return &cobra.Command{
 		Use:   "login",
 		Short: "User login",
@@ -33,13 +30,8 @@ func NewLoginCmd(
 
 func (l loginCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		org, err := l.Text("Enter your organization: ", true)
-		if err != nil {
-			return err
-		}
-
-		secret := security.Passcode(org)
-		if err := l.Login(secret); err != nil {
+		p := security.Passcode("org")
+		if err := l.Login(p); err != nil {
 			return err
 		}
 
