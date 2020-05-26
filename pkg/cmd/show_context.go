@@ -34,7 +34,7 @@ func (s showContextCmd) runFunc() CommandRunnerFunc {
 			ctx.Current = rcontext.DefaultCtx
 		}
 
-		fmt.Printf("Current context: %s", ctx.Current)
+		fmt.Println(fmt.Sprintf("Current context: %s", ctx.Current))
 
 		return nil
 	}

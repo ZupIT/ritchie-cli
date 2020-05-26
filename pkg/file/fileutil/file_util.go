@@ -128,7 +128,7 @@ func CreateFileIfNotExist(file string, content []byte) error {
 }
 
 func AppendFileData(file string, content []byte) error {
-	f, err := os.OpenFile(file, os.O_APPEND|os.O_WRONLY, 777)
+	f, err := os.OpenFile(file, os.O_APPEND|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
