@@ -109,5 +109,9 @@ functional-test-team:
 	mkdir -p $(BIN)
 	$(GOTEST) -v `go list ./functional/team/... | grep -v vendor/`
 
-rebase:
+rebase-nightly:
+	git config --global user.email "$(GIT_EMAIL)"
+	git config --global user.name "$(GIT_NAME)"
+	git checkout nightly
 	git reset --hard master
+	git push $(GIT_REMOTE) HEAD:nightly

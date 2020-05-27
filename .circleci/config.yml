@@ -197,20 +197,20 @@ jobs:
       - run:
           name: Rebase Nightly
           command: |
-            . ./version
-            make rebase
+            make rebase-nightly
 
 workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "*/2 0 * * *"
           filters:
             branches:
               only:
-                - master
+                - feature/nightly
     jobs:
-      -
+      - rebase_nightly
+
   build-for-branch:
     jobs:
       - lint:
