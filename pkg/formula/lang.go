@@ -14,17 +14,17 @@ import (
 )
 
 const (
-	main = "main"
-	Main = "Main"
-	index = "index"
-	PythonName = "Python"
-	PyFormat = "py"
-	JavaName = "Java"
-	JavaFormat = "java"
-	GoName = "Go"
-	GoFormat = "go"
-	NodeName = "Node"
-	NodeFormat = "js"
+	main        = "main"
+	Main        = "Main"
+	index       = "index"
+	Pythonlang  = "Python"
+	PyFormat    = "py"
+	Javalang    = "Java"
+	JavaFormat  = "java"
+	Golang      = "Go"
+	GoFormat    = "go"
+	Nodelang    = "Node"
+	NodeFormat  = "js"
 	ShellFormat = "sh"
 )
 
