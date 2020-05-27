@@ -113,7 +113,7 @@ rebase-nightly:
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_NAME)"
 	git fetch --all
-	git checkout feature/nightly
+	git checkout nightly
 	git reset --hard feature/nightly
 	git add .
 	git commit --allow-empty -m "nightly"
