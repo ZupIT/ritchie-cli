@@ -14,10 +14,18 @@ import (
 )
 
 const (
+	main = "main"
+	Main = "Main"
+	index = "index"
 	PythonName = "Python"
+	PyFormat = "py"
 	JavaName = "Java"
+	JavaFormat = "java"
 	GoName = "Go"
+	GoFormat = "go"
 	NodeName = "Node"
+	NodeFormat = "js"
+	ShellFormat = "sh"
 )
 
 type LangCreator interface {
@@ -44,8 +52,8 @@ type Python struct {
 
 func NewPython() Python {
 	return Python{Lang{
-		FileFormat: "py",
-		StartFile:  "main",
+		FileFormat: PyFormat,
+		StartFile:  main,
 		Main:       tpl_python.Main,
 		Makefile:   tpl_python.Makefile,
 		Dockerfile: tpl_python.Dockerfile,
@@ -78,8 +86,8 @@ type Java struct {
 
 func NewJava() Java {
 	return Java{Lang{
-		FileFormat: "java",
-		StartFile:  "Main",
+		FileFormat: JavaFormat,
+		StartFile:  Main,
 		Main:       tpl_java.Main,
 		Makefile:   tpl_java.Makefile,
 		Run:        tpl_java.Run,
@@ -120,8 +128,8 @@ type Go struct {
 
 func NewGo() Go {
 	return Go{Lang{
-		FileFormat: "go",
-		StartFile:  "main",
+		FileFormat: GoFormat,
+		StartFile:  main,
 		Main:       tpl_go.Main,
 		Makefile:   tpl_go.Makefile,
 		Dockerfile: tpl_go.Dockerfile,
@@ -158,8 +166,8 @@ type Node struct {
 
 func NewNode() Node {
 	return Node{Lang{
-		FileFormat:  "js",
-		StartFile:   "index",
+		FileFormat:  NodeFormat,
+		StartFile:   index,
 		Main:        tpl_node.Index,
 		Makefile:    tpl_node.Makefile,
 		Run:         tpl_node.Run,
@@ -203,8 +211,8 @@ type Shell struct {
 
 func NewShell() Shell {
 	return Shell{Lang{
-		FileFormat: "sh",
-		StartFile:  "main",
+		FileFormat: ShellFormat,
+		StartFile:  main,
 		Main:       tpl_shell.Main,
 		Makefile:   tpl_shell.Makefile,
 		Dockerfile: tpl_shell.Dockerfile,
