@@ -112,10 +112,9 @@ functional-test-team:
 rebase-nightly:
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_NAME)"
-	git fetch --all
-	git checkout nightly
+	git push $(GIT_REMOTE) --delete nightly
+	git checkout -b nightly
 	git reset --hard feature/nightly
 	git add .
 	git commit --allow-empty -m "nightly"
-	git pull origin nightly
 	git push $(GIT_REMOTE) HEAD:nightly
