@@ -78,14 +78,8 @@ func TestCreator(t *testing.T) {
 	fullDir := createFullDir()
 
 	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
-	//
-	// type in struct {
-	// 	fCmd          string
-	// 	lang          string
-	// 	customRepoDir string
-	// }
-	type in Create
 
+	type in Create
 
 	type out struct {
 		err error
