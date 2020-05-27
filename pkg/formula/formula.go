@@ -56,7 +56,11 @@ type Cache struct {
 	Qtd      int    `json:"qtd"`
 	NewLabel string `json:"newLabel"`
 }
-
+type Create struct {
+	FormulaCmd   string `json:"formulaCmd"`
+	Lang         string `json:"lang"`
+	LocalRepoDir string `json:"localRepoDir"`
+}
 // Definition type that represents a Formula
 type Definition struct {
 	Path     string
@@ -167,5 +171,5 @@ type Runner interface {
 
 // Creator defines the formula creator process
 type Creator interface {
-	Create(formulaCmd, lang, customRepoDir string) (CreateManager, error)
+	Create(cf Create) (CreateManager, error)
 }

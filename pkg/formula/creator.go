@@ -28,8 +28,11 @@ func NewCreator(homePath string, tm TreeManager) CreateManager {
 	return CreateManager{FormPath: fmt.Sprintf(FormCreatePathPattern, homePath), treeManager: tm}
 }
 
-func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, error) {
+func (c CreateManager) Create(cf Create) (CreateManager, error) {
 	_ = fileutil.CreateDirIfNotExists(c.FormPath, os.ModePerm)
+	localRepoDir := cf.LocalRepoDir
+	fCmd := cf.FormulaCmd
+	lang := cf.Lang
 
 	if localRepoDir != "" {
 

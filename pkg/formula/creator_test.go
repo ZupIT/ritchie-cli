@@ -78,12 +78,14 @@ func TestCreator(t *testing.T) {
 	fullDir := createFullDir()
 
 	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+	//
+	// type in struct {
+	// 	fCmd          string
+	// 	lang          string
+	// 	customRepoDir string
+	// }
+	type in Create
 
-	type in struct {
-		fCmd          string
-		lang          string
-		customRepoDir string
-	}
 
 	type out struct {
 		err error
@@ -92,14 +94,14 @@ func TestCreator(t *testing.T) {
 	creator := NewCreator(fmt.Sprintf(FormCreatePathPattern, os.TempDir()), treeMan)
 	tests := []struct {
 		name string
-		in   *in
+		in   *Create
 		out  *out
 	}{
 		{
 			name: "command exists",
-			in: &in{
-				fCmd: fCmdExists,
-				lang: langGo,
+			in: &Create{
+				FormulaCmd: fCmdExists,
+				Lang: langGo,
 			},
 			out: &out{
 				err: errors.New("this command already exists"),
@@ -107,9 +109,9 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command correct-go",
-			in: &in{
-				fCmd: fCmdCorrectGo,
-				lang: langGo,
+			in: &Create{
+				FormulaCmd: fCmdCorrectGo,
+				Lang: langGo,
 			},
 			out: &out{
 				err: nil,
@@ -117,9 +119,9 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command correct-java",
-			in: &in{
-				fCmd: fCmdCorrectJava,
-				lang: langJava,
+			in: &Create{
+				FormulaCmd: fCmdCorrectJava,
+				Lang: langJava,
 			},
 			out: &out{
 				err: nil,
@@ -127,9 +129,9 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command correct-node",
-			in: &in{
-				fCmd: fCmdCorrectNode,
-				lang: langNode,
+			in: &Create{
+				FormulaCmd: fCmdCorrectNode,
+				Lang: langNode,
 			},
 			out: &out{
 				err: nil,
@@ -137,9 +139,9 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command correct-python",
-			in: &in{
-				fCmd: fCmdCorrectPython,
-				lang: langPython,
+			in: &Create{
+				FormulaCmd: fCmdCorrectPython,
+				Lang: langPython,
 			},
 			out: &out{
 				err: nil,
@@ -147,9 +149,9 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command correct-shell",
-			in: &in{
-				fCmd: fCmdCorrectShell,
-				lang: langShell,
+			in: &Create{
+				FormulaCmd: fCmdCorrectShell,
+				Lang: langShell,
 			},
 			out: &out{
 				err: nil,
@@ -157,9 +159,9 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command incorrect",
-			in: &in{
-				fCmd: fCmdIncorrect,
-				lang: langGo,
+			in: &Create{
+				FormulaCmd: fCmdIncorrect,
+				Lang: langGo,
 			},
 			out: &out{
 				err: errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]"),
@@ -167,10 +169,10 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command to custom repo with missing packge.json",
-			in: &in{
-				fCmd:          fCmdCorrectGo,
-				lang:          langGo,
-				customRepoDir: makefileDir,
+			in: &Create{
+				FormulaCmd:          fCmdCorrectGo,
+				Lang:          langGo,
+				LocalRepoDir: makefileDir,
 			},
 			out: &out{
 				err: ErrTreeJsonNotFound,
@@ -178,10 +180,10 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command to custom repo with missing Makefile",
-			in: &in{
-				fCmd:          fCmdCorrectGo,
-				lang:          langGo,
-				customRepoDir: jsonDir,
+			in: &Create{
+				FormulaCmd:          fCmdCorrectGo,
+				Lang:          langGo,
+				LocalRepoDir: jsonDir,
 			},
 			out: &out{
 				err: ErrMakefileNotFound,
@@ -189,10 +191,10 @@ func TestCreator(t *testing.T) {
 		},
 		{
 			name: "command to custom repo correct",
-			in: &in{
-				fCmd:          fCmdCorrectGo,
-				lang:          langGo,
-				customRepoDir: fullDir,
+			in: &Create{
+				FormulaCmd:          fCmdCorrectGo,
+				Lang:          langGo,
+				LocalRepoDir: fullDir,
 			},
 			out: &out{
 				err: nil,
@@ -204,7 +206,7 @@ func TestCreator(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			out := tt.out
-			_, got := creator.Create(in.fCmd, in.lang, in.customRepoDir)
+			_, got := creator.Create(*in)
 			if got != nil && got.Error() != out.err.Error() {
 				t.Errorf("Create(%s) got %v, want %v", tt.name, got, out.err)
 			}
