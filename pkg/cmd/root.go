@@ -56,14 +56,12 @@ var (
 type singleRootCmd struct {
 	workspaceChecker workspace.Checker
 	sessionValidator session.Validator
-	edition          api.Edition
 }
 
 type teamRootCmd struct {
 	workspaceChecker workspace.Checker
 	serverFinder     server.Finder
 	sessionValidator session.Validator
-	edition          api.Edition
 }
 
 // NewSingleRootCmd creates the root command for single edition.
@@ -71,7 +69,6 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 	o := &singleRootCmd{
 		workspaceChecker: wc,
 		sessionValidator: sv,
-		edition:          api.Single,
 	}
 
 	cmd := &cobra.Command{
