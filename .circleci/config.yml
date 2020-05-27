@@ -246,9 +246,9 @@ workflows:
       - build:
           filters:
             <<: *FILTERS_CHECK
-#          requires:
-#            - unit_test
-#            - lint
+          requires:
+            - unit_test
+            - lint
       - unix_functional_test_single:
           filters:
             <<: *FILTERS_CHECK
