@@ -79,8 +79,6 @@ func TestCreator(t *testing.T) {
 
 	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
 
-	type in Create
-
 	type out struct {
 		err error
 	}
