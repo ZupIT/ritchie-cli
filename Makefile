@@ -115,4 +115,6 @@ rebase-nightly:
 	git fetch --all
 	git checkout feature/nightly
 	git reset --hard master
+	git add .
+	git commit --allow-empty -m "nightly"
 	git push $(GIT_REMOTE) HEAD:nightly
