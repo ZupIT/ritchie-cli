@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.0-beta.10](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.10) (2020-05-27)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.9...1.0.0-beta.10)
+
+**Merged pull requests:**
+
+- \[FEATURE\] adding link to changelog inside the release description [\#121](https://github.com/ZupIT/ritchie-cli/pull/121) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Release 1.0.0-beta.9 merge [\#120](https://github.com/ZupIT/ritchie-cli/pull/120) ([zup-ci](https://github.com/zup-ci))
+
 ## [1.0.0-beta.9](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.9) (2020-05-27)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.8...1.0.0-beta.9)
