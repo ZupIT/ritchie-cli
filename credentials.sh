@@ -7,5 +7,6 @@ if expr "$CIRCLE_BRANCH" : 'qa' >/dev/null; then
 elif expr "$CIRCLE_BRANCH" : '^release-.*' >/dev/null; then
   export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID_PROD"
   export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY_PROD"
-else echo ""
+else
+  echo ""
 fi
