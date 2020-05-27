@@ -109,7 +109,7 @@ jobs:
           when: always
           command: bash <(curl -s https://codecov.io/bash)
 
-  functional_test_single:
+  unix_functional_test_single:
     executor: ritchie-executor
     environment:
       <<: *ENVIRONMENT
@@ -129,8 +129,7 @@ jobs:
           command: |
             make functional-test-single
 
-
-  functional_test_team:
+  unix_functional_test_team:
     executor: ritchie-executor
     environment:
       <<: *ENVIRONMENT
@@ -166,6 +165,23 @@ jobs:
           name: Running Functional tests for team
           command: |
             $Env:path +=";C:\workspace\workspace\dist\windows\team;"; go test -v (go list ./functional/team/... | grep -v vendor/)
+
+  windows_functional_test_single:
+    executor: windows-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Install GO
+          command: |
+            choco install -y golang
+      - run:
+          name: Running Functional tests for single
+          command: |
+            $Env:path +=";C:\workspace\workspace\dist\windows\single;"; go test -v (go list ./functional/single/... | grep -v vendor/)
 
   build:
     executor: ritchie-executor
@@ -233,17 +249,22 @@ workflows:
 #          requires:
 #            - unit_test
 #            - lint
-      - functional_test_single:
+      - unix_functional_test_single:
           filters:
             <<: *FILTERS_CHECK
           requires:
             - build
-      - functional_test_team:
+      - unix_functional_test_team:
           filters:
             <<: *FILTERS_CHECK
           requires:
             - build
       - windows_functional_test_team:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build
+      - windows_functional_test_single:
           filters:
             <<: *FILTERS_CHECK
           requires:
