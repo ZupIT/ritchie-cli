@@ -26,6 +26,7 @@ type Lang struct {
 	Dockerfile  string
 	PackageJson string
 	File        string
+	Pkg         string
 	Compiled    bool
 	UpperCase   bool
 }
@@ -98,8 +99,8 @@ func (j Java) Create(srcDir, pkg, pkgDir, dir string) error {
 	templateFileJava := strings.ReplaceAll(j.File, nameBin, pkg)
 	firstUpper := strings.Title(strings.ToLower(pkg))
 	templateFileJava = strings.ReplaceAll(templateFileJava, nameBinFirstUpper, firstUpper)
-	file := fmt.Sprintf("%s/%s.%s", pkgDir, firstUpper, j.FileFormat)
-	if err := fileutil.WriteFile(file, []byte(templateFileJava)); err != nil {
+	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, firstUpper, j.FileFormat)
+	if err := fileutil.WriteFile(pkgFile, []byte(templateFileJava)); err != nil {
 		return err
 	}
 
@@ -117,6 +118,7 @@ func NewGo() Go {
 		Main:       tpl_go.Main,
 		Makefile:   tpl_go.Makefile,
 		Dockerfile: tpl_go.Dockerfile,
+		Pkg: tpl_go.Pkg,
 		Compiled:   false,
 		UpperCase:  true,
 	}}
@@ -135,9 +137,9 @@ func (g Go) Create(srcDir, pkg, pkgDir, dir string) error {
 		return err
 	}
 
-	templateGo := strings.ReplaceAll(tpl_go.Pkg, nameModule, pkg)
-	file := fmt.Sprintf("%s/%s.%s", dir, pkgDir, g.FileFormat)
-	if err := fileutil.WriteFile(file, []byte(templateGo)); err != nil {
+	templateGo := strings.ReplaceAll(g.Pkg, nameModule, pkg)
+	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir,pkg ,g.FileFormat)
+	if err := fileutil.WriteFile(pkgFile, []byte(templateGo)); err != nil {
 		return err
 	}
 	return nil
@@ -180,8 +182,8 @@ func (n Node) Create(srcDir, pkg, pkgDir, dir string) error {
 	}
 
 	templateNode := strings.ReplaceAll(n.File, nameBin, pkg)
-	file := fmt.Sprintf("%s.%s", pkgDir, n.FileFormat)
-	if err := fileutil.WriteFile(file, []byte(templateNode)); err != nil {
+	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, n.FileFormat)
+	if err := fileutil.WriteFile(pkgFile, []byte(templateNode)); err != nil {
 		return err
 	}
 
@@ -194,8 +196,8 @@ type Shell struct {
 
 func NewShell() Shell {
 	return Shell{Lang{
-		FileFormat: "java",
-		StartFile:  "Main",
+		FileFormat: "sh",
+		StartFile:  "main",
 		Main:       tpl_shell.Main,
 		Makefile:   tpl_shell.Makefile,
 		Dockerfile: tpl_shell.Dockerfile,
@@ -214,7 +216,7 @@ func (s Shell) Create(srcDir, pkg, pkgDir, dir string) error {
 		return err
 	}
 
-	pkgFile := fmt.Sprintf("%s/%s.%s", dir, pkgDir, s.FileFormat)
+	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, s.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(s.File)); err != nil {
 		return err
 	}

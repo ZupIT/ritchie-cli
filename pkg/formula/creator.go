@@ -235,7 +235,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 	case "Go":
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
 		golang := NewGo()
-		if err := golang.Create(srcDir, pkgDir, pkg, dir); err != nil {
+		if err := golang.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return nil
 		}
 	case "Java":
