@@ -117,4 +117,5 @@ rebase-nightly:
 	git reset --hard master
 	git add .
 	git commit --allow-empty -m "nightly"
+	git pull origin nightly
 	git push $(GIT_REMOTE) HEAD:nightly
