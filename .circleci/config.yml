@@ -55,7 +55,6 @@ executors:
     working_directory: /workspace
 
 jobs:
-  # Runs Go linters
   lint:
     executor: ritchie-executor
     steps:
@@ -198,12 +197,13 @@ workflows:
       - unit_test:
           filters:
             <<: *FILTERS_CHECK
+          requires:
+            - lint
       - build:
           filters:
             <<: *FILTERS_CHECK
           requires:
             - unit_test
-            - lint
       - functional_test_single:
           filters:
             <<: *FILTERS_CHECK
