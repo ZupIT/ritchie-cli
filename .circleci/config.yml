@@ -20,6 +20,7 @@ references:
       only:
         - /^release-.*/
         - qa
+        - nightly
 
   filters-release: &FILTERS_RELEASE
     branches:
@@ -34,6 +35,7 @@ references:
         - qa
         - /^pull\/.*$/
         - /^feature.*/
+        - nightly
 
 executors:
   ritchie-executor:
@@ -147,7 +149,7 @@ jobs:
       - run:
           name: Running build
           command: |
-            . ./version.sh
+            . ./.circleci/scripts/version.sh
             make build-circle
       - persist_to_workspace:
           root: dist
@@ -172,9 +174,9 @@ jobs:
           name: Delivering cli binary
           command: |
             pip install awscli
-            . ./version.sh
-            . ./bucket.sh
-            . ./credentials.sh
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/bucket.sh
+            . ./.circleci/scripts/credentials.sh
             make delivery
   release:
     environment:
@@ -185,7 +187,7 @@ jobs:
       - run:
           name: Releasing
           command: |
-            . ./version.sh
+            . ./.circleci/scripts/version.sh
             make release
 
   rebase_nightly:

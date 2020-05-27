@@ -25,8 +25,8 @@ VERSION=$(RELEASE_VERSION)
 GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
-BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
-RITCHIE_ENV=$(shell VERSION=$(VERSION) ./ritchie_env.sh)
+BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
+RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
 COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
 
 build:
