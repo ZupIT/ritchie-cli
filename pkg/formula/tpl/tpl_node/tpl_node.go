@@ -33,7 +33,7 @@ COPY . .
 
 ENTRYPOINT node index.js`
 
-	RunTemplate = `#!/bin/sh
+	Run = `#!/bin/sh
 node index.js`
 
 	PackageJson = `{

@@ -37,7 +37,7 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 
 	if localRepoDir != "" {
 
-		if !existsTreeJson(localRepoDir) && existsMakefile(localRepoDir){
+		if !existsTreeJson(localRepoDir) && existsMakefile(localRepoDir) {
 			return CreateManager{}, ErrTreeJsonNotFound
 		}
 		if !existsMakefile(localRepoDir) && existsTreeJson(localRepoDir) {
@@ -79,16 +79,15 @@ func (c CreateManager) Create(fCmd, lang, localRepoDir string) (CreateManager, e
 
 func existsTreeJson(formPath string) bool {
 	treePath := fmt.Sprintf(TreeCreatePathPattern, formPath)
-		return fileutil.Exists(treePath)
+	return fileutil.Exists(treePath)
 }
 
 func existsMakefile(formPath string) bool {
 	makefilePath := fmt.Sprintf(MakefileCreatePathPattern, formPath, Makefile)
-		return fileutil.Exists(makefilePath)
+	return fileutil.Exists(makefilePath)
 }
 
 func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
-
 
 	d := strings.Split(fCmd, " ")
 
@@ -246,14 +245,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_go.Makefile, true)
-		if err != nil {
-			return err
-		}
-		err = createDockerfile(srcDir, tpl_go.Dockerfile)
-		if err != nil {
-			return err
-		}
+
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
 		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
 		if err != nil {
@@ -264,27 +256,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Java":
-		err = createMainFile(srcDir, pkg, tpl_java.Main, "java", "Main", true)
-		if err != nil {
-			return err
-		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_java.Makefile, false)
-		if err != nil {
-			return err
-		}
-		err = createDockerfile(srcDir, tpl_java.Dockerfile)
-		if err != nil {
-			return err
-		}
-		err = createRunTemplate(srcDir, tpl_java.RunTemplate)
-		if err != nil {
-			return err
-		}
-		err = createPkgDir(pkgDir)
-		if err != nil {
-			return err
-		}
-		err = createPkgFile(pkgDir, pkg, lang)
+		err = createJavaFiles(srcDir, pkg, pkgDir, dir)
 		if err != nil {
 			return err
 		}
@@ -305,7 +277,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err != nil {
 			return err
 		}
-		err = createRunTemplate(srcDir, tpl_node.RunTemplate)
+		err = createRunTemplate(srcDir, tpl_node.Run)
 		if err != nil {
 			return err
 		}
@@ -318,23 +290,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Python":
-		err = createMainFile(srcDir, pkg, tpl_python.Main, "py", "main", false)
-		if err != nil {
-			return err
-		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_python.Makefile, false)
-		if err != nil {
-			return err
-		}
-		err = createDockerfile(srcDir, tpl_python.Dockerfile)
-		if err != nil {
-			return err
-		}
-		err = createPkgDir(pkgDir)
-		if err != nil {
-			return err
-		}
-		err = createPkgFile(pkgDir, pkg, lang)
+		err = createPythonFiles(srcDir, pkg, pkgDir, dir)
 		if err != nil {
 			return err
 		}
@@ -360,6 +316,126 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func createPythonFiles(srcDir, pkg, pkgDir, dir string) error {
+	err := createGenericFiles(srcDir, pkg, dir, Python)
+	if err != nil {
+		return err
+	}
+	err = createPkgDir(pkgDir)
+	if err != nil {
+		return err
+	}
+	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, Python.FileFormat)
+	err = fileutil.WriteFile(pkgFile, []byte(Python.File))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createJavaFiles(srcDir, pkg, pkgDir, dir string) error {
+	err := createGenericFiles(srcDir, pkg, dir, Java)
+	if err != nil {
+		return err
+	}
+	err = createRunTemplate(srcDir, Java.Run)
+	if err != nil {
+		return err
+	}
+	err = createPkgDir(pkgDir)
+	if err != nil {
+		return err
+	}
+	tfj := strings.ReplaceAll(Java.File, nameBin, pkg)
+	fu := strings.Title(strings.ToLower(pkg))
+	tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
+	err = fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", pkgDir, fu, Java.FileFormat), []byte(tfj))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createNodeFiles(srcDir, pkg, pkgDir, dir string) error {
+	err := createGenericFiles(srcDir, pkg, dir, Node)
+	if err != nil {
+		return err
+	}
+	err = createRunTemplate(srcDir, Node.Run)
+	if err != nil {
+		return err
+	}
+	err = createPkgDir(pkgDir)
+	if err != nil {
+		return err
+	}
+	tfn := Node.File
+	tfn = strings.ReplaceAll(tfn, nameBin, pkg)
+	err = fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, pkgDir, Node.FileFormat), []byte(tfn))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createGoFiles(srcDir, pkg, pkgDir, dir string) error {
+	err := createGenericFiles(srcDir, pkg, dir, Go)
+	if err != nil {
+		return err
+	}
+	err = createGoModFile(srcDir, pkg)
+	if err != nil {
+		return err
+	}
+	pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
+	err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	tfgo := strings.ReplaceAll(tpl_go.Pkg, nameModule, pkg)
+	err = fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, pkgDir, Go.FileFormat), []byte(tfgo))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createShellFiles(srcDir, pkg, pkgDir, dir string) error {
+	err :=createGenericFiles(srcDir,pkg,dir, Shell)
+	if err != nil {
+		return err
+	}
+	err = createPkgDir(pkgDir)
+	if err != nil {
+		return err
+	}
+	pkgFile := fmt.Sprintf("%s/%s.%s", dir, pkgDir, Shell.FileFormat)
+	err = fileutil.WriteFile(pkgFile, []byte(Shell.File))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
+	err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase)
+	if err != nil {
+		return err
+	}
+	err = createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled)
+	if err != nil {
+		return err
+	}
+	err = createDockerfile(srcDir, l.Dockerfile)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

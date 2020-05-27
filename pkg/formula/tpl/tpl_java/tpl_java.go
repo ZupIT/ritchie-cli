@@ -48,7 +48,7 @@ ENV PATH="$JAVA_HOME/bin:${PATH}"
 
 ENTRYPOINT java -jar Main.jar`
 
-	RunTemplate = `#!/bin/sh
+	Run = `#!/bin/sh
 java -jar Main.jar`
 
 	File = `package {{bin-name}};
