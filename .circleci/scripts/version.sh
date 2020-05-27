@@ -2,10 +2,10 @@
 
 if expr "$CIRCLE_BRANCH" : 'qa' >/dev/null; then
   export RELEASE_VERSION="qa-${CIRCLE_BUILD_NUM}"
-elif expr "$CIRCLE_BRANCH" : 'fix/changelog' >/dev/null; then
-  export RELEASE_VERSION="1.0.0.1"
 elif expr "$CIRCLE_BRANCH" : '^release-.*' >/dev/null; then
   export RELEASE_VERSION=$(echo "$CIRCLE_BRANCH" | cut -d '-' -f 2-)
+elif expr "$CIRCLE_BRANCH" : '^nightly' >/dev/null; then
+  export RELEASE_VERSION="nightly"
 else
   echo ""
 fi
