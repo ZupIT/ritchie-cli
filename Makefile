@@ -114,7 +114,7 @@ rebase-nightly:
 	git config --global user.name "$(GIT_NAME)"
 	git fetch --all
 	git checkout feature/nightly
-	git reset --hard master
+	git reset --hard feature/nightly
 	git add .
 	git commit --allow-empty -m "nightly"
 	git pull origin nightly
