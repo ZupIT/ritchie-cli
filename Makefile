@@ -70,7 +70,7 @@ build-circle:
 release:
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_NAME)"
-	git tag -a $(RELEASE_VERSION) -m "$(RELEASE_VERSION)"
+	git tag -a $(RELEASE_VERSION) -m "CHANGELOG: https://github.com/ZupIT/ritchie-cli/blob/master/CHANGELOG.md"
 	git push $(GIT_REMOTE) $(RELEASE_VERSION)
 	gem install github_changelog_generator
 	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --enhancement-labels feature,Feature --exclude-labels duplicate,question,invalid,wontfix
