@@ -15,7 +15,7 @@ import (
 )
 
 var ErrNotAllowedCharacter = errors.New(`not allowed character on formula name \/,><@`)
-
+const notAllowedChars = `\/><,@`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -59,8 +59,8 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		var localRepoDir string
 
 		fCmd, err := c.Text("Enter the new formula command [ex.: rit group verb noun]", true)
-		notAllowed := `\/><,@`
-		if strings.ContainsAny(fCmd, notAllowed){
+
+		if strings.ContainsAny(fCmd, notAllowedChars){
 			return ErrNotAllowedCharacter
 		}
 
