@@ -13,6 +13,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	. "github.com/onsi/ginkgo"
 )
 
 type Step struct {
@@ -51,8 +53,9 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	cmd, stdin, err, out := funcHitRit(args)
 
 	os := runtime.GOOS
-
-	fmt.Println(os)
+	if  os == "windows" && len(scenario.Steps) >= 2 {
+		Skip("Scenarios with multi steps for windows doesnt work")
+	}
 
 	if err == nil {
 		for _, step := range scenario.Steps {
