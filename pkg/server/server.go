@@ -16,3 +16,8 @@ type Setter interface {
 type Finder interface {
 	Find() (Config, error)
 }
+
+type FindSetter interface {
+	Finder
+	Setter
+}

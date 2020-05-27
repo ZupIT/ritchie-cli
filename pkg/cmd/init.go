@@ -1,11 +1,22 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/ZupIT/ritchie-cli/pkg/validator"
 	"github.com/spf13/cobra"
+)
+
+const (
+	msgPassphrase             = "Define a passphrase for your machine: "
+	msgOrganization           = "Enter your organization: "
+	msgServerURL              = "URL of the server [http(s)://host]: "
+	msgServerURLAlreadyExists = "The server URL(%s) already exists. Do you like to override?"
+	msgLogin                  = "You can perform login to your organization now, or later using [rit login]. Perform now?"
 )
 
 type initSingleCmd struct {
@@ -17,7 +28,8 @@ type initSingleCmd struct {
 type initTeamCmd struct {
 	prompt.InputText
 	prompt.InputURL
-	server.Setter
+	prompt.InputBool
+	server.FindSetter
 	security.LoginManager
 	formula.Loader
 }
@@ -37,27 +49,30 @@ func NewSingleInitCmd(
 func NewTeamInitCmd(
 	it prompt.InputText,
 	iu prompt.InputURL,
-	st server.Setter,
+	ib prompt.InputBool,
+	fs server.FindSetter,
 	lm security.LoginManager,
 	rl formula.Loader) *cobra.Command {
 
-	o := initTeamCmd{it, iu, st, lm, rl}
+	o := initTeamCmd{it, iu, ib, fs, lm, rl}
 
 	return newInitCmd(o.runFunc())
 }
 
 func newInitCmd(fn CommandRunnerFunc) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Init rit",
-		Long:  "Long desc for Single and Team",
+		Long:  "Initiliaze rit configuration",
 		RunE:  fn,
 	}
+	cmd.LocalFlags()
+	return cmd
 }
 
 func (o initSingleCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		pass, err := o.Password("Define a passphrase for your machine: ")
+		pass, err := o.Password(msgPassphrase)
 		if err != nil {
 			return err
 		}
@@ -73,30 +88,52 @@ func (o initSingleCmd) runFunc() CommandRunnerFunc {
 
 func (o initTeamCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		org, err := o.Text("Enter your organization: ", true)
+		cfg, err := o.Find()
 		if err != nil {
 			return err
 		}
 
-		u, err := o.URL("URL of the server [http(s)://host]", "")
+		org, err := o.Text(msgOrganization, true)
 		if err != nil {
 			return err
 		}
+		cfg.Organization = org
 
-		cfg := server.Config{
-			Organization: org,
-			URL:          u,
+		if err := validator.IsValidURL(cfg.URL); err != nil {
+			u, err := o.URL(msgServerURL, "")
+			if err != nil {
+				return err
+			}
+			cfg.URL = u
+		} else {
+			m := fmt.Sprintf(msgServerURLAlreadyExists, cfg.URL)
+			y, err := o.Bool(m, []string{"no", "yes"})
+			if err != nil {
+				return err
+			}
+			if y {
+				u, err := o.URL(msgServerURL, "")
+				if err != nil {
+					return err
+				}
+				cfg.URL = u
+			}
 		}
+
 		if err := o.Set(cfg); err != nil {
 			return err
 		}
 
-		if err := o.Login(); err != nil {
+		y, err := o.Bool(msgLogin, []string{"no", "yes"})
+		if err != nil {
 			return err
-		}
-
-		if err := o.Load(); err != nil {
-			return err
+		} else if y {
+			if err := o.Login(); err != nil {
+				return err
+			}
+			if err := o.Load(); err != nil {
+				return err
+			}
 		}
 
 		return nil

@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
+	"os"
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -29,10 +29,10 @@ var (
 	// BuildDate contains a string with the build date.
 	BuildDate = "unknown"
 
-	// ErrInit error message for init cmd
-	ErrInit = errors.New("to start using rit, you need to run init first.\n Command: rit init")
-	// ErrSession error message for session not initialized
-	ErrSession = errors.New("to use this command, you need to start a session first.\n Command: rit login")
+	// MsgInit error message for init cmd
+	MsgInit = "To start using rit, you need to initialize rit first.\nCommand: rit init"
+	// MsgSession error message for session not initialized
+	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
 
 	singleWhitelist = []string{
 		fmt.Sprint(cmdUse),
@@ -124,7 +124,8 @@ func (o *singleRootCmd) PreRunFunc() CommandRunnerFunc {
 		}
 
 		if err := o.sessionValidator.Validate(); err != nil {
-			return ErrInit
+			fmt.Println(MsgInit)
+			os.Exit(0)
 		}
 
 		return nil
@@ -141,13 +142,17 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		_, err := o.serverFinder.Find()
+		cfg, err := o.serverFinder.Find()
 		if err != nil {
-			return ErrInit
+			return err
+		} else if cfg.URL == "" {
+			fmt.Println(MsgInit)
+			os.Exit(0)
 		}
 
 		if err := o.sessionValidator.Validate(); err != nil {
-			return ErrSession
+			fmt.Println(MsgSession)
+			os.Exit(0)
 		}
 
 		return nil

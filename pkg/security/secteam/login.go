@@ -1,6 +1,7 @@
 package secteam
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -36,6 +37,7 @@ func (l LoginManager) Login() error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Organization:", cfg.Organization)
 
 	cr, err := loginChannelProvider(l.provider, cfg.Organization, cfg.URL)
 	if err != nil {
