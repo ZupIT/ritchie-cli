@@ -1,8 +1,46 @@
 # Changelog
 
-## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
+## [1.0.0-beta.9](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.9) (2020-05-27)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.6...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.8...1.0.0-beta.9)
+
+**Fixed bugs:**
+
+- \[BUG\] Changelog generation not working properly [\#105](https://github.com/ZupIT/ritchie-cli/issues/105)
+
+**Merged pull requests:**
+
+- testing in production the old way [\#119](https://github.com/ZupIT/ritchie-cli/pull/119) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
+## [1.0.0-beta.8](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.8) (2020-05-27)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.7...1.0.0-beta.8)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Command for publishing a new formula [\#33](https://github.com/ZupIT/ritchie-cli/issues/33)
+
+**Fixed bugs:**
+
+- \[BUG\] Getting error when running rit set server in Windows [\#83](https://github.com/ZupIT/ritchie-cli/issues/83)
+- \[FIX\] bin name linux [\#111](https://github.com/ZupIT/ritchie-cli/pull/111) ([marcosgmgm](https://github.com/marcosgmgm))
+
+**Security fixes:**
+
+- Improve Pipeline with security test [\#114](https://github.com/ZupIT/ritchie-cli/pull/114) ([flavioanellozup](https://github.com/flavioanellozup))
+
+**Merged pull requests:**
+
+- Revert "Improve Pipeline with security test" [\#115](https://github.com/ZupIT/ritchie-cli/pull/115) ([ernelio](https://github.com/ernelio))
+- \[FIX\] Links documentation after update beta-7 [\#112](https://github.com/ZupIT/ritchie-cli/pull/112) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+- \[FEATURE\] Update slack token [\#109](https://github.com/ZupIT/ritchie-cli/pull/109) ([kaduartur](https://github.com/kaduartur))
+- \[FIX\] changelog [\#106](https://github.com/ZupIT/ritchie-cli/pull/106) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/functional test team [\#102](https://github.com/ZupIT/ritchie-cli/pull/102) ([dmbarra](https://github.com/dmbarra))
+- Release 1.0.0-beta.7 merge [\#101](https://github.com/ZupIT/ritchie-cli/pull/101) ([zup-ci](https://github.com/zup-ci))
+
+## [1.0.0-beta.7](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.7) (2020-05-20)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.6...1.0.0-beta.7)
 
 **Implemented enhancements:**
 
