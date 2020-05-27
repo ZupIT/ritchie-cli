@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	msgPassphrase             = "Define a passphrase for your machine: "
-	msgOrganization           = "Enter your organization: "
-	msgServerURL              = "URL of the server [http(s)://host]: "
-	msgServerURLAlreadyExists = "The server URL(%s) already exists. Do you like to override?"
-	msgLogin                  = "You can perform login to your organization now, or later using [rit login] command. Perform now?"
+	msgPassphrase                = "Define a passphrase for your machine: "
+	msgOrganization              = "Enter your organization: "
+	msgOrganizationAlreadyExists = "The organization (%s) already exists. Do you like to override?"
+	msgServerURL                 = "URL of the server [http(s)://host]: "
+	msgServerURLAlreadyExists    = "The server URL(%s) already exists. Do you like to override?"
+	msgLogin                     = "You can perform login to your organization now, or later using [rit login] command. Perform now?"
 )
 
 type initSingleCmd struct {
@@ -117,11 +118,26 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		org, err := o.Text(msgOrganization, true)
-		if err != nil {
-			return err
+		if cfg.Organization != "" && len(cfg.Organization) > 0 {
+			m := fmt.Sprintf(msgOrganizationAlreadyExists, cfg.Organization)
+			y, err := o.Bool(m, []string{"no", "yes"})
+			if err != nil {
+				return err
+			}
+			if y {
+				org, err := o.Text(msgOrganization, true)
+				if err != nil {
+					return err
+				}
+				cfg.Organization = org
+			}
+		} else {
+			org, err := o.Text(msgOrganization, true)
+			if err != nil {
+				return err
+			}
+			cfg.Organization = org
 		}
-		cfg.Organization = org
 
 		if err := validator.IsValidURL(cfg.URL); err != nil {
 			u, err := o.URL(msgServerURL, "")
