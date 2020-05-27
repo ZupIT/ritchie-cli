@@ -243,7 +243,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Node":
-		err =createNodeFiles(srcDir,pkg,pkgDir,dir)
+		err = createNodeFiles(srcDir, pkg, pkgDir, dir)
 		if err != nil {
 			return err
 		}
@@ -320,7 +320,8 @@ func createNodeFiles(srcDir, pkg, pkgDir, dir string) error {
 	}
 	tfn := Node.File
 	tfn = strings.ReplaceAll(tfn, nameBin, pkg)
-	err = fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, pkgDir, Node.FileFormat), []byte(tfn))
+	file := fmt.Sprintf("%s.%s", pkgDir, Node.FileFormat)
+	err = fileutil.WriteFile(file, []byte(tfn))
 	if err != nil {
 		return err
 	}
@@ -351,7 +352,7 @@ func createGoFiles(srcDir, pkg, dir string) error {
 }
 
 func createShellFiles(srcDir, pkg, pkgDir, dir string) error {
-	err :=createGenericFiles(srcDir,pkg,dir, Shell)
+	err := createGenericFiles(srcDir, pkg, dir, Shell)
 	if err != nil {
 		return err
 	}
