@@ -9,11 +9,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
-const docker = "docker"
-const dockerBuildCmd = "build"
-const dockerRunCmd = "run"
-const dockerRemoveCmd = "rm"
-const envFile = ".env"
+const (
+	docker          = "docker"
+	dockerBuildCmd  = "build"
+	dockerRunCmd    = "run"
+	dockerRemoveCmd = "rm"
+	envFile         = ".env"
+)
 
 type DockerRunner struct {
 	PreRunner
@@ -44,7 +46,7 @@ func (d DockerRunner) Run(def Definition, inputType api.TermInputType) error {
 
 	for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
 		if !fileutil.Exists(envFile) {
-			if err := fileutil.WriteFile(envFile, []byte(e+ "\n")); err != nil {
+			if err := fileutil.WriteFile(envFile, []byte(e+"\n")); err != nil {
 				return err
 			}
 			continue

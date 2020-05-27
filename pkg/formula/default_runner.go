@@ -1,7 +1,6 @@
 package formula
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 
@@ -28,9 +27,6 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
-	ePwd := fmt.Sprintf(EnvPattern, PwdEnv, setup.pwd)
-	cmd.Env = append(cmd.Env, ePwd)
 
 	if err := d.Inputs(cmd, setup, inputType); err != nil {
 		return err

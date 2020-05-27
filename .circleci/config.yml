@@ -85,6 +85,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Check go version
+          command: |
+            . ./go-version.sh
+      - run:
           name: Install gotestsum
           command: |
             curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v0.4.2/gotestsum_0.4.2_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
