@@ -108,3 +108,6 @@ functional-test-single:
 functional-test-team:
 	mkdir -p $(BIN)
 	$(GOTEST) -v `go list ./functional/team/... | grep -v vendor/`
+
+rebase:
+	git reset --hard master

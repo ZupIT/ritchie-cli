@@ -176,7 +176,6 @@ jobs:
             . ./bucket.sh
             . ./credentials.sh
             make delivery
-
   release:
     environment:
       <<: *ENVIRONMENT
@@ -189,7 +188,29 @@ jobs:
             . ./version.sh
             make release
 
+  rebase_nightly:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Rebase Nightly
+          command: |
+            . ./version
+            make rebase
+
 workflows:
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      -
   build-for-branch:
     jobs:
       - lint:
