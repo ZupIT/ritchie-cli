@@ -235,23 +235,23 @@ func createSrcFiles(dir, pkg, lang string) error {
 		return err
 	}
 	switch lang {
-	case "Go":
+	case GoName:
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
 		golang := NewGo()
 		if err := golang.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return nil
 		}
-	case "Java":
+	case JavaName:
 		java := NewJava()
 		if err := java.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case "Node":
+	case NodeName:
 		node := NewNode()
 		if err := node.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case "Python":
+	case PythonName:
 		python := NewPython()
 		if err := python.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
@@ -339,7 +339,7 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 			pathValue := strings.Join(fc, "/")
 			fn := fc[len(fc)-1]
 			var commands []api.Command
-			if lang == "Python" {
+			if lang == PythonName {
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
@@ -354,7 +354,7 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 					},
 					Parent: parent,
 				})
-			} else if lang == "Go" {
+			} else if lang == GoName {
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),

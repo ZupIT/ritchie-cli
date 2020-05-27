@@ -13,6 +13,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
+const (
+	PythonName = "Python"
+	JavaName = "Java"
+	GoName = "Go"
+	NodeName = "Node"
+)
+
 type LangCreator interface {
 	Create(srcDir, pkg, pkgDir, dir string) error
 }
