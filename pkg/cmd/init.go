@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
 	"github.com/spf13/cobra"
 )
@@ -16,7 +18,7 @@ const (
 	msgOrganization           = "Enter your organization: "
 	msgServerURL              = "URL of the server [http(s)://host]: "
 	msgServerURLAlreadyExists = "The server URL(%s) already exists. Do you like to override?"
-	msgLogin                  = "You can perform login to your organization now, or later using [rit login]. Perform now?"
+	msgLogin                  = "You can perform login to your organization now, or later using [rit login] command. Perform now?"
 )
 
 type initSingleCmd struct {
@@ -42,7 +44,7 @@ func NewSingleInitCmd(
 
 	o := initSingleCmd{ip, pm, rl}
 
-	return newInitCmd(o.runFunc())
+	return newInitCmd(o.runStdin(), o.runPrompt())
 }
 
 // NewTeamInitCmd creates init command for team edition
@@ -56,21 +58,21 @@ func NewTeamInitCmd(
 
 	o := initTeamCmd{it, iu, ib, fs, lm, rl}
 
-	return newInitCmd(o.runFunc())
+	return newInitCmd(o.runStdin(), o.runPrompt())
 }
 
-func newInitCmd(fn CommandRunnerFunc) *cobra.Command {
+func newInitCmd(stdinFunc, promptFunc CommandRunnerFunc) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Init rit",
 		Long:  "Initiliaze rit configuration",
-		RunE:  fn,
+		RunE:  RunFuncE(stdinFunc, promptFunc),
 	}
 	cmd.LocalFlags()
 	return cmd
 }
 
-func (o initSingleCmd) runFunc() CommandRunnerFunc {
+func (o initSingleCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		pass, err := o.Password(msgPassphrase)
 		if err != nil {
@@ -86,7 +88,29 @@ func (o initSingleCmd) runFunc() CommandRunnerFunc {
 	}
 }
 
-func (o initTeamCmd) runFunc() CommandRunnerFunc {
+func (o initSingleCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		obj := struct {
+			Passphrase string `json:"passphrase"`
+		}{}
+
+		err := stdin.ReadJson(os.Stdin, &obj)
+		if err != nil {
+			fmt.Println(stdin.MsgInvalidInput)
+			return err
+		}
+
+		p := security.Passphrase(obj.Passphrase)
+		if err := o.Save(p); err != nil {
+			return err
+		}
+
+		return o.Load()
+	}
+}
+
+func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		cfg, err := o.Find()
 		if err != nil {
@@ -134,6 +158,24 @@ func (o initTeamCmd) runFunc() CommandRunnerFunc {
 			if err := o.Load(); err != nil {
 				return err
 			}
+		}
+
+		return nil
+	}
+}
+
+func (o initTeamCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		cfg := server.Config{}
+
+		err := stdin.ReadJson(os.Stdin, &cfg)
+		if err != nil {
+			fmt.Println(stdin.MsgInvalidInput)
+			return err
+		}
+
+		if err := o.Set(cfg); err != nil {
+			return err
 		}
 
 		return nil

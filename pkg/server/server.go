@@ -5,8 +5,8 @@ const (
 )
 
 type Config struct {
-	Organization string
-	URL          string
+	Organization string `json:"organization"`
+	URL          string `json:"url"`
 }
 
 type Setter interface {
