@@ -233,137 +233,31 @@ func createSrcFiles(dir, pkg, lang string) error {
 	}
 	switch lang {
 	case "Go":
-		err := createGoFiles(srcDir, pkg, dir)
-		if err != nil {
+		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
+		golang := NewGo()
+		if err := golang.Create(srcDir, pkgDir, pkg, dir); err != nil {
 			return nil
 		}
 	case "Java":
-		err = createJavaFiles(srcDir, pkg, pkgDir, dir)
-		if err != nil {
+		java := NewJava()
+		if err := java.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case "Node":
-		err = createNodeFiles(srcDir, pkg, pkgDir, dir)
-		if err != nil {
+		node := NewNode()
+		if err := node.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case "Python":
-		err = createPythonFiles(srcDir, pkg, pkgDir, dir)
-		if err != nil {
+		python := NewPython()
+		if err := python.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	default:
-		err = createShellFiles(srcDir, pkg, pkgDir, dir)
-		if err != nil {
+		shell := NewShell()
+		if err = shell.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return nil
 		}
-	}
-	return nil
-}
-
-func createPythonFiles(srcDir, pkg, pkgDir, dir string) error {
-	err := createGenericFiles(srcDir, pkg, dir, Python)
-	if err != nil {
-		return err
-	}
-	err = createPkgDir(pkgDir)
-	if err != nil {
-		return err
-	}
-	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, Python.FileFormat)
-	err = fileutil.WriteFile(pkgFile, []byte(Python.File))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func createJavaFiles(srcDir, pkg, pkgDir, dir string) error {
-	err := createGenericFiles(srcDir, pkg, dir, Java)
-	if err != nil {
-		return err
-	}
-	err = createRunTemplate(srcDir, Java.Run)
-	if err != nil {
-		return err
-	}
-	err = createPkgDir(pkgDir)
-	if err != nil {
-		return err
-	}
-	tfj := strings.ReplaceAll(Java.File, nameBin, pkg)
-	fu := strings.Title(strings.ToLower(pkg))
-	tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
-	err = fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", pkgDir, fu, Java.FileFormat), []byte(tfj))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func createNodeFiles(srcDir, pkg, pkgDir, dir string) error {
-	err := createGenericFiles(srcDir, pkg, dir, Node)
-	if err != nil {
-		return err
-	}
-	err = createRunTemplate(srcDir, Node.Run)
-	if err != nil {
-		return err
-	}
-	err = createPkgDir(pkgDir)
-	if err != nil {
-		return err
-	}
-	err = createPackageJson(srcDir, Node.PackageJson)
-	if err != nil {
-		return err
-	}
-	tfn := Node.File
-	tfn = strings.ReplaceAll(tfn, nameBin, pkg)
-	file := fmt.Sprintf("%s.%s", pkgDir, Node.FileFormat)
-	err = fileutil.WriteFile(file, []byte(tfn))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func createGoFiles(srcDir, pkg, dir string) error {
-	err := createGenericFiles(srcDir, pkg, dir, Go)
-	if err != nil {
-		return err
-	}
-	err = createGoModFile(srcDir, pkg)
-	if err != nil {
-		return err
-	}
-	pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
-	err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	tfgo := strings.ReplaceAll(tpl_go.Pkg, nameModule, pkg)
-	err = fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, pkgDir, Go.FileFormat), []byte(tfgo))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func createShellFiles(srcDir, pkg, pkgDir, dir string) error {
-	err := createGenericFiles(srcDir, pkg, dir, Shell)
-	if err != nil {
-		return err
-	}
-	err = createPkgDir(pkgDir)
-	if err != nil {
-		return err
-	}
-	pkgFile := fmt.Sprintf("%s/%s.%s", dir, pkgDir, Shell.FileFormat)
-	err = fileutil.WriteFile(pkgFile, []byte(Shell.File))
-	if err != nil {
-		return err
 	}
 	return nil
 }
