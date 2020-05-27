@@ -1,8 +1,11 @@
 package formula
 
 import (
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_java"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_node"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_python"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
 type Lang struct {
@@ -12,6 +15,7 @@ type Lang struct {
 	Makefile   string
 	Run        string
 	Dockerfile string
+	PackageJson string
 	File string
 	Compiled   bool
 	UpperCase  bool
@@ -41,25 +45,24 @@ var Java = Lang{
 }
 
 var Go = Lang{
-	FileFormat: "java",
-	StartFile:  "Main",
-	Main:       tpl_java.Main,
-	Makefile:   tpl_java.Makefile,
-	Run:        tpl_java.Run,
-	Dockerfile: tpl_java.Dockerfile,
-	File: tpl_java.File,
+	FileFormat: "go",
+	StartFile:  "main",
+	Main:       tpl_go.Main,
+	Makefile:   tpl_go.Makefile,
+	Dockerfile: tpl_go.Dockerfile,
 	Compiled:   false,
 	UpperCase:  true,
 }
 
 var Node = Lang{
-	FileFormat: "java",
-	StartFile:  "Main",
-	Main:       tpl_java.Main,
-	Makefile:   tpl_java.Makefile,
-	Run:        tpl_java.Run,
-	Dockerfile: tpl_java.Dockerfile,
-	File: tpl_java.File,
+	FileFormat: "js",
+	StartFile:  "index",
+	Main:       tpl_node.Index,
+	Makefile:   tpl_node.Makefile,
+	Run:        tpl_node.Run,
+	Dockerfile: tpl_node.Dockerfile,
+	PackageJson: tpl_node.PackageJson,
+	File: tpl_node.File,
 	Compiled:   false,
 	UpperCase:  true,
 }
@@ -67,11 +70,10 @@ var Node = Lang{
 var Shell = Lang{
 	FileFormat: "java",
 	StartFile:  "Main",
-	Main:       tpl_java.Main,
-	Makefile:   tpl_java.Makefile,
-	Run:        tpl_java.Run,
-	Dockerfile: tpl_java.Dockerfile,
-	File: tpl_java.File,
+	Main:       tpl_shell.Main,
+	Makefile:   tpl_shell.Makefile,
+	Dockerfile: tpl_shell.Dockerfile,
+	File: tpl_shell.File,
 	Compiled:   false,
 	UpperCase:  true,
 }

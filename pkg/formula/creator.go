@@ -14,10 +14,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_java"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_node"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_python"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
 var ErrMakefileNotFound = errors.New("makefile not found")
@@ -237,23 +233,9 @@ func createSrcFiles(dir, pkg, lang string) error {
 	}
 	switch lang {
 	case "Go":
-		err = createMainFile(srcDir, pkg, tpl_go.Main, "go", "main", false)
+		err := createGoFiles(srcDir, pkg, dir)
 		if err != nil {
-			return err
-		}
-		err = createGoModFile(srcDir, pkg)
-		if err != nil {
-			return err
-		}
-
-		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
-		err = fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
-		if err != nil {
-			return err
-		}
-		err = createPkgFile(pkgDir, pkg, lang)
-		if err != nil {
-			return err
+			return nil
 		}
 	case "Java":
 		err = createJavaFiles(srcDir, pkg, pkgDir, dir)
@@ -261,31 +243,7 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	case "Node":
-		err = createMainFile(srcDir, pkg, tpl_node.Index, "js", "index", false)
-		if err != nil {
-			return err
-		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_node.Makefile, false)
-		if err != nil {
-			return err
-		}
-		err = createPackageJson(srcDir, tpl_node.PackageJson)
-		if err != nil {
-			return err
-		}
-		err = createDockerfile(srcDir, tpl_node.Dockerfile)
-		if err != nil {
-			return err
-		}
-		err = createRunTemplate(srcDir, tpl_node.Run)
-		if err != nil {
-			return err
-		}
-		err = createPkgDir(pkgDir)
-		if err != nil {
-			return err
-		}
-		err = createPkgFile(pkgDir, pkg, lang)
+		err =createNodeFiles(srcDir,pkg,pkgDir,dir)
 		if err != nil {
 			return err
 		}
@@ -295,25 +253,9 @@ func createSrcFiles(dir, pkg, lang string) error {
 			return err
 		}
 	default:
-		err = createMainFile(srcDir, pkg, tpl_shell.Main, "sh", "main", false)
+		err = createShellFiles(srcDir, pkg, pkgDir, dir)
 		if err != nil {
-			return err
-		}
-		err = createMakefileForm(srcDir, pkg, dir, tpl_shell.Makefile, false)
-		if err != nil {
-			return err
-		}
-		err = createDockerfile(srcDir, tpl_shell.Dockerfile)
-		if err != nil {
-			return err
-		}
-		err = createPkgDir(pkgDir)
-		if err != nil {
-			return err
-		}
-		err = createPkgFile(pkgDir, pkg, lang)
-		if err != nil {
-			return err
+			return nil
 		}
 	}
 	return nil
@@ -333,7 +275,6 @@ func createPythonFiles(srcDir, pkg, pkgDir, dir string) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -373,6 +314,10 @@ func createNodeFiles(srcDir, pkg, pkgDir, dir string) error {
 	if err != nil {
 		return err
 	}
+	err = createPackageJson(srcDir, Node.PackageJson)
+	if err != nil {
+		return err
+	}
 	tfn := Node.File
 	tfn = strings.ReplaceAll(tfn, nameBin, pkg)
 	err = fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, pkgDir, Node.FileFormat), []byte(tfn))
@@ -382,7 +327,7 @@ func createNodeFiles(srcDir, pkg, pkgDir, dir string) error {
 	return nil
 }
 
-func createGoFiles(srcDir, pkg, pkgDir, dir string) error {
+func createGoFiles(srcDir, pkg, dir string) error {
 	err := createGenericFiles(srcDir, pkg, dir, Go)
 	if err != nil {
 		return err
@@ -441,27 +386,6 @@ func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
 
 func createPkgDir(pkgDir string) error {
 	return fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
-}
-
-func createPkgFile(dir, pkg, lang string) error {
-	switch lang {
-	case "Go":
-		tfgo := strings.ReplaceAll(tpl_go.Pkg, nameModule, pkg)
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.go", dir, pkg), []byte(tfgo))
-	case "Java":
-		tfj := strings.ReplaceAll(tpl_java.File, nameBin, pkg)
-		fu := strings.Title(strings.ToLower(pkg))
-		tfj = strings.ReplaceAll(tfj, nameBinFirstUpper, fu)
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.java", dir, fu), []byte(tfj))
-	case "Node":
-		tfn := tpl_node.File
-		tfn = strings.ReplaceAll(tfn, nameBin, pkg)
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.js", dir, pkg), []byte(tfn))
-	case "Python":
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.py", dir, pkg), []byte(tpl_python.File))
-	default:
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.sh", dir, pkg), []byte(tpl_shell.File))
-	}
 }
 
 func createRunTemplate(dir, tpl string) error {
