@@ -202,6 +202,11 @@ workflows:
             <<: *FILTERS_CHECK_PR
       - unit_test:
           filters:
+            <<: *FILTERS_CHECK_PR
+          requires:
+            - lint
+      - unit_test:
+          filters:
             <<: *FILTERS_CHECK
       - build:
           filters:
