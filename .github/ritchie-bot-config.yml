@@ -2,10 +2,10 @@ merge_branch:
   enable: true # Enable merge branch with comment
   branches: ['qa'] # Branches enabled to merge with comment
   users: ['sandokandias', 'marcosgmgm', 'kaduartur', 'ernelio', 'viniciusramosdefaria', 'guillaumefalourd', 'rodrigomedeirosf', 'victor-schumacher'] # Users enabled to merge with comment
-  
+
 issue_project:
   enable: true # Enable issue to project when opening a new issue
-  
+
 slack_notification:
   enable: true # Enable slack notification when opening a new pull request
   channel_id: C014670B9EZ

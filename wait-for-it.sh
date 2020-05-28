@@ -3,7 +3,7 @@
 TIMEOUT=120
 
 wait_for() {
-  for i in `seq $TIMEOUT` ; do
+  for i in $(seq $TIMEOUT) ; do
     nc -z "$HOST" "$PORT" > /dev/null 2>&1
 
     result=$?
