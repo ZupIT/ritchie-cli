@@ -56,7 +56,7 @@ executors:
 
 jobs:
   lint:
-    executor: ritchie-executor
+    machine: true
     steps:
       - checkout
       - run:
