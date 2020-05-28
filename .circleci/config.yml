@@ -214,7 +214,8 @@ workflows:
           filters:
             <<: *FILTERS_CHECK
           requires:
-            - unit_test
+            - with-lint
+            - without-lint
       - functional_test_single:
           filters:
             <<: *FILTERS_CHECK
