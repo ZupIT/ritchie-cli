@@ -88,30 +88,38 @@ func (scenario *Scenario) RunSteps() (string, error) {
 func (scenario *Scenario) RunStdin() (string, error) {
 	fmt.Println("Running: "+ scenario.Entry)
 
-	echo := append(strings.Fields(strings.Replace(scenario.Steps[0].Value, "echo", "", -1)), "|")
+	echo := strings.Fields(scenario.Steps[0].Value)
 	rit := strings.Fields(scenario.Steps[1].Value)
 
 
-	cmd, stdin, err, out := funcHitTerminal("echo", append(echo,  rit...))
+	c1 := exec.Command("echo", echo...)
+	c2 := exec.Command("rit", rit...)
 
-	defer stdin.Close()
+	r, w := io.Pipe()
+	c1.Stdout = w
+	c2.Stdin = r
 
-	resp := ""
-	scanner := funcScannerTerminal(out)
-	for scanner.Scan() {
-		m := scanner.Text()
-		funcShowTerminal(m)
-		resp = fmt.Sprint(resp, m, "\n")
+	var b2 bytes.Buffer
+	c2.Stdout = &b2
+
+	c1.Start()
+	c2.Start()
+
+	err1 := c1.Wait()
+
+	if err1 != nil {
+		log.Printf("Error while running: %q", err1)
 	}
 
-	err = cmd.Wait()
+	w.Close()
+	err := c2.Wait()
 	if err != nil {
 		log.Printf("Error while running: %q", err)
 	}
 
-	fmt.Println(resp)
+	fmt.Println(&b2)
 	fmt.Println("--------")
-	return resp, err
+	return b2.String(), err
 }
 
 func FuncValidateLoginRequired() {

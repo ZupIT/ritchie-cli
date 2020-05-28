@@ -4,12 +4,12 @@
         "steps":[
             {
                 "key":"",
-                "value":"echo '{\"context\":\"Leonidas\"}'",
+                "value":"{\"context\":\"Leonidas\"}",
                 "action":"echo"
             },
             {
                 "key":"",
-                "value":"rit set context --stdin",
+                "value":"set context --stdin",
                 "action":"main"
             }
 
