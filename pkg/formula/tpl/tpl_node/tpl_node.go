@@ -1,7 +1,7 @@
 package tpl_node
 
 const (
-	TemplateIndex = `const run = require("./{{bin-name}}/{{bin-name}}")
+	Index = `const run = require("./{{bin-name}}/{{bin-name}}")
 
 const INPUT1 = process.env.SAMPLE_TEXT
 const INPUT2 = process.env.SAMPLE_LIST
@@ -9,7 +9,7 @@ const INPUT3 = process.env.SAMPLE_BOOL
 
 run(INPUT1, INPUT2, INPUT3)`
 
-	TemplateMakefile = `# Make Run Node
+	Makefile = `# Make Run Node
 BINARY_NAME_UNIX={{bin-name}}.sh
 BINARY_NAME_WINDOWS={{bin-name}}.bat
 DIST=../dist
@@ -24,7 +24,7 @@ build:
 
 	#Clean files
 	rm $(BINARY_NAME_UNIX)`
-	TemplateDockerfile = `
+	Dockerfile = `
 FROM node:10
 
 WORKDIR /app
@@ -33,10 +33,10 @@ COPY . .
 
 ENTRYPOINT node index.js`
 
-	TemplateRunTemplate = `#!/bin/sh
+	Run = `#!/bin/sh
 node index.js`
 
-	TemplatePackageJson = `{
+	PackageJson = `{
   "name": "src",
   "version": "1.0.0",
   "description": "Sample formula in node",
@@ -48,7 +48,7 @@ node index.js`
   "license": "ISC"
 }`
 
-	TemplateFileNode = `function Run(input1, input2, input3) {
+	File = `function Run(input1, input2, input3) {
     console.log("Hello World!")
     console.log("You receive "+ input1 +" in text.");
     console.log("You receive "+ input2 +" in list.");

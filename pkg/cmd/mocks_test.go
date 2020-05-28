@@ -93,7 +93,7 @@ func (repoCleaner) Clean(name string) error {
 
 type formCreator struct{}
 
-func (formCreator) Create(formulaCmd, lang string) (formula.CreateManager, error) {
+func (formCreator) Create(cf formula.Create) (formula.CreateManager, error) {
 	return formula.CreateManager{}, nil
 }
 
