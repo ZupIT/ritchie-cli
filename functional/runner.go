@@ -47,7 +47,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	fmt.Println("Running: "+ scenario.Entry)
 
 	args := strings.Fields(scenario.Steps[0].Value)
-	cmd, stdin, err, out := funcHitRit(args)
+	cmd, stdin, err, out := funcHitTerminal("rit", args)
 
 	if err == nil {
 		for _, step := range scenario.Steps {
@@ -85,9 +85,38 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	return resp, err
 }
 
+func (scenario *Scenario) RunStdin() (string, error) {
+	fmt.Println("Running: "+ scenario.Entry)
+
+	echo := append(strings.Fields(strings.Replace(scenario.Steps[0].Value, "echo", "", -1)), "|")
+	rit := strings.Fields(scenario.Steps[1].Value)
+
+
+	cmd, stdin, err, out := funcHitTerminal("echo", append(echo,  rit...))
+
+	defer stdin.Close()
+
+	resp := ""
+	scanner := funcScannerTerminal(out)
+	for scanner.Scan() {
+		m := scanner.Text()
+		funcShowTerminal(m)
+		resp = fmt.Sprint(resp, m, "\n")
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		log.Printf("Error while running: %q", err)
+	}
+
+	fmt.Println(resp)
+	fmt.Println("--------")
+	return resp, err
+}
+
 func FuncValidateLoginRequired() {
 	login := []string{"show", "context"}
-	_, stdin, _, out := funcHitRit(login)
+	_, stdin, _, out := funcHitTerminal("rit", login)
 	scanner := funcScannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
@@ -107,8 +136,8 @@ func FuncValidateLoginRequired() {
 	}
 }
 
-func funcHitRit(args []string) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
-	cmd := exec.Command("rit", args...)
+func funcHitTerminal(app string, args []string) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
+	cmd := exec.Command(app, args...)
 	stdin, err, out, cmd := commandInit(cmd)
 	if err != nil {
 		log.Panic(err)
