@@ -201,21 +201,21 @@ workflows:
           filters:
             <<: *FILTERS_CHECK_PR
       - unit_test:
-          name: with-lint
+          name: unit.test
           filters:
             <<: *FILTERS_CHECK_PR
           requires:
             - lint
       - unit_test:
-          name: without-lint
+          name: unit-test
           filters:
             <<: *FILTERS_CHECK
       - build:
           filters:
             <<: *FILTERS_CHECK
           requires:
-            - with-lint
-            - without-lint
+            - unit-test
+            - build
       - functional_test_single:
           filters:
             <<: *FILTERS_CHECK
