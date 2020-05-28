@@ -28,6 +28,7 @@ DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
 COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
+IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+")
 
 build:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
@@ -80,11 +81,13 @@ release:
 	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
 
 delivery:
+	@echo $(VERSION)
 ifneq "$(BUCKET)" ""
-	echo $(BUCKET)
 	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
+ifneq "$(IS_RELEASE)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+endif
 else
 	echo "NOT GONNA PUBLISH"
 endif
