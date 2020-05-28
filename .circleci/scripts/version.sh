@@ -7,7 +7,7 @@ elif expr "$CIRCLE_BRANCH" : '^release-.*' >/dev/null; then
 elif expr "$CIRCLE_BRANCH" : '^nightly' >/dev/null; then
   export RELEASE_VERSION="nightly"
 elif expr "$CIRCLE_BRANCH" : '^beta' >/dev/null; then
-  export RELEASE_VERSION="nightly"
+  export RELEASE_VERSION="beta"
 else
   echo ""
 fi
