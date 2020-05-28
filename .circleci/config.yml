@@ -40,7 +40,6 @@ references:
       only:
         - qa
         - /^pull\/.*$/
-        - /^feature.*/
 
 executors:
   ritchie-executor:
