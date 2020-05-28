@@ -6,6 +6,7 @@ export REPO_URL=http://localhost:8882/formulas
 
 PACKAGE_NAMES=$(go list ./pkg/... | grep -v vendor/)
 
+go mod download
 gotestsum --format=short-verbose --junitfile $TEST_RESULTS_DIR/gotestsum-report.xml -- -p 2 -cover -coverprofile=coverage.txt $PACKAGE_NAMES
 
 testStatus=$?
