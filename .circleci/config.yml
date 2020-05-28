@@ -143,6 +143,7 @@ jobs:
     branches:
     steps:
       - checkout
+      - run: go mod download
       - run:
           name: Running build
           command: |
@@ -225,3 +226,17 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - delivery
+
+
+
+
+
+# create the debian package
+before_deploy:
+  - POOL=`echo ${GH_APP} | cut -c 1`
+  # build the program to build/amd64/dummy
+  - cd $GOPATH/src/github.com/$TRAVIS_REPO_SLUG
+  - mkdir -p build/$OSARCH
+  - GOOS=linux go build --ldflags "-X main.VERSION=$VERSION" -o build/$OSARCH/$GH_APP main.go
+  # generate teh debian package to ./dummy-amd64-0.0.2.deb
+  - go-bin-deb generate --file deb.json -a $OSARCH --version $VERSION -o $GH_APP-$OSARCH-$VERSION.deb
