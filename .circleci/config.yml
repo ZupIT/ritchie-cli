@@ -20,6 +20,8 @@ references:
       only:
         - /^release-.*/
         - qa
+        - nightly
+        - beta
 
   filters-release: &FILTERS_RELEASE
     branches:
@@ -34,6 +36,8 @@ references:
         - qa
         - /^pull\/.*$/
         - /^feature.*/
+        - nightly
+        - beta
 
   filters-checks-pr: &FILTERS_CHECK_LINT
     branches:
@@ -151,7 +155,7 @@ jobs:
       - run:
           name: Running build
           command: |
-            . ./version.sh
+            . ./.circleci/scripts/version.sh
             go mod download
             make build-circle
       - persist_to_workspace:
@@ -177,11 +181,10 @@ jobs:
           name: Delivering cli binary
           command: |
             pip install awscli
-            . ./version.sh
-            . ./bucket.sh
-            . ./credentials.sh
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/bucket.sh
+            . ./.circleci/scripts/credentials.sh
             make delivery
-
   release:
     environment:
       <<: *ENVIRONMENT
@@ -191,10 +194,32 @@ jobs:
       - run:
           name: Releasing
           command: |
-            . ./version.sh
+            . ./.circleci/scripts/version.sh
             make release
 
+  rebase_nightly:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Rebase Nightly
+          command: |
+            make rebase-nightly
+
 workflows:
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 22 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - rebase_nightly
+
   build-for-branch:
     jobs:
       - lint:
