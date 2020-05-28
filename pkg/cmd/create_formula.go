@@ -116,7 +116,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		}
 
 		fmt.Printf("Formula in %s successfully created!\n", cf.Lang)
-		fmt.Printf("Your formula is in %s", f.FormPath)
+		fmt.Printf("Your formula is in %s\n", f.FormPath)
 
 		return nil
 	}
