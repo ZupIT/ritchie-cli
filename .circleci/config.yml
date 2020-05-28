@@ -33,6 +33,7 @@ references:
         - /^release-.*/
         - qa
         - /^pull\/.*$/
+        - /^feature.*/
 
 executors:
   ritchie-executor:
