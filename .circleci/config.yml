@@ -59,7 +59,7 @@ executors:
     working_directory: /workspace
 
 jobs:
-  # Runs Go linters
+
   lint:
     executor: ritchie-executor
     steps:
@@ -207,11 +207,11 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "0 3 * * *"
+          cron: "0 22 * * *"
           filters:
             branches:
               only:
-                - feature/nightly
+                - master
     jobs:
       - rebase_nightly
 

@@ -117,7 +117,7 @@ rebase-nightly:
 	git config --global user.name "$(GIT_NAME)"
 	git push $(GIT_REMOTE) --delete nightly
 	git checkout -b nightly
-	git reset --hard feature/nightly
+	git reset --hard master
 	git add .
 	git commit --allow-empty -m "nightly"
 	git push $(GIT_REMOTE) HEAD:nightly
