@@ -19,6 +19,11 @@ var _ = Describe("RitStdin", func() {
 		},
 
 		Entry("Set context STDIN", scenariosStdin[0]),
+		Entry("Delete context STDIN", scenariosStdin[1]),
+		Entry("Add new repo STDIN", scenariosStdin[2]),
+		Entry("Clean repo STDIN", scenariosStdin[3]),
+		Entry("Delete repo STDIN", scenariosStdin[4]),
+		Entry("Set credentials STDIN", scenariosStdin[5]),
 
 	)
 

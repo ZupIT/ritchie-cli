@@ -17,235 +17,84 @@
         "result":"Set context successful!"
     },
     {
-        "entry":"Delete context",
+        "entry":"Delete context STDIN",
         "steps":[
             {
                 "key":"",
-                "value":"delete context",
+                "value":"{\"context\":\"Leonidas\"}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"delete context --stdin",
                 "action":"main"
-            },
-            {
-                "key":"All:",
-                "value":"Leonidas",
-                "action":"select"
-            },
-            {
-                "key":"Are you sure want to delete this context?",
-                "value":"yes",
-                "action":"select"
             }
 
         ],
         "result":"Delete context successful!"
     },
     {
-        "entry":"Add",
+        "entry":"Add new repo STDIN",
         "steps":[
             {
                 "key":"",
-                "value":"add",
-                "action":"main"
-            }
-        ],
-        "result":"It can be used to add formulas, repositories and other objects.."
-    },
-    {
-        "entry":"Add new repo",
-        "steps":[
+                "value":"{\"treePath\":\"https://commons-repo.ritchiecli.io/tree/tree.json\",\"name\":\"Leonidas\",\"priority\":999}",
+                "action":"echo"
+            },
             {
                 "key":"",
-                "value":"add repo",
+                "value":"add repo --stdin",
                 "action":"main"
-            },
-            {
-                "key":"Name of the repository:",
-                "value":"Leonidas",
-                "action":"sendkey"
-            },
-            {
-                "key":"URL of the tree",
-                "value":"https://commons-repo.ritchiecli.io/tree/tree.json",
-                "action":"sendkey"
-            },
-            {
-                "key":"Priority",
-                "value":"999",
-                "action":"sendkey"
             }
         ],
         "result":""
     },
     {
-        "entry":"Clean repo",
+        "entry":"Clean repo STDIN",
         "steps":[
             {
                 "key":"",
-                "value":"clean repo",
-                "action":"main"
+                "value":"{\"name\":\"Leonidas\"}",
+                "action":"echo"
             },
             {
-                "key":"Name of the repository:",
-                "value":"Leonidas",
-                "action":"sendkey"
+                "key":"",
+                "value":"clean repo --stdin",
+                "action":"main"
             }
         ],
         "result":"\"Leonidas\" has been cleaned successfully"
     },
     {
-        "entry":"List repo",
+        "entry":"Delete repo STDIN",
         "steps":[
             {
                 "key":"",
-                "value":"list repo",
-                "action":"main"
-            }
-        ],
-        "result":"Leonidas"
-    },
-    {
-        "entry":"Delete repo",
-        "steps":[
+                "value":"{\"name\":\"Leonidas\"}",
+                "action":"echo"
+            },
             {
                 "key":"",
-                "value":"delete repo",
+                "value":"delete repo --stdin",
                 "action":"main"
-            },
-            {
-                "key":"Choose a repository to delete:",
-                "value":"Leonidas",
-                "action":"select"
-            },
-            {
-                "key":"Want to delete",
-                "value":"yes",
-                "action":"select"
             }
         ],
         "result":"\"Leonidas\" has been removed from your repositories"
     },
     {
-        "entry":"Set credentials",
+        "entry":"Set credentials STDIN",
         "steps":[
             {
                 "key":"",
-                "value":"set credential",
+                "value":"{\"service\":\"Leonidas\",\"credential\": {\"username\":\"dmbarra\",\"token\": \"credentialToken\"}}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"set credential --stdin",
                 "action":"main"
-            },
-            {
-                "key":"Provider:",
-                "value":"Leonidas",
-                "action":"sendkey"
-            },
-            {
-                "key":"Type your credential using the format",
-                "value":"email=email@email.com",
-                "action":"sendkey"
-            },
-            {
-                "key":"Add more fields?",
-                "value":"no",
-                "action":"select"
             }
         ],
         "result":""
-    },
-    {
-        "entry":"Set",
-        "steps":[
-            {
-                "key":"",
-                "value":"set",
-                "action":"main"
-            }
-        ],
-        "result":"Set objects like credentials, etc."
-    },
-    {
-        "entry":"Update repo",
-        "steps":[
-            {
-                "key":"",
-                "value":"update repo",
-                "action":"main"
-            }
-        ],
-        "result":"Successfully got an update"
-    },
-    {
-        "entry":"Completion",
-        "steps":[
-            {
-                "key":"",
-                "value":"completion",
-                "action":"main"
-            }
-        ],
-        "result":"Add autocomplete for terminal, Available for (bash, zsh)."
-    },
-    {
-        "entry":"Completion bash",
-        "steps":[
-            {
-                "key":"",
-                "value":"completion bash",
-                "action":"main"
-            }
-        ],
-        "result":"#!/bin/bash"
-    },
-    {
-        "entry":"Completion zsh",
-        "steps":[
-            {
-                "key":"",
-                "value":"completion zsh",
-                "action":"main"
-            }
-        ],
-        "result":"#compdef rit"
-    },
-    {
-        "entry":"Version",
-        "steps":[
-            {
-                "key":"",
-                "value":"--version",
-                "action":"main"
-            }
-        ],
-        "result":"rit version"
-    },
-    {
-        "entry":"Delete",
-        "steps":[
-            {
-                "key":"",
-                "value":"delete",
-                "action":"main"
-            }
-        ],
-        "result":"Delete objects like users, etc."
-    },
-    {
-        "entry":"Show",
-        "steps":[
-            {
-                "key":"",
-                "value":"show",
-                "action":"main"
-            }
-        ],
-        "result":"Show objects like context, organization etc."
-    },
-    {
-        "entry":"Help",
-        "steps":[
-            {
-                "key":"",
-                "value":"help",
-                "action":"main"
-            }
-        ],
-        "result":"Use \"rit <command> --help\" for more information about a given command."
     }
 ]

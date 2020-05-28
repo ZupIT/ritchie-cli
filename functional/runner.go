@@ -26,23 +26,6 @@ type Scenario struct {
 	Result string `json:"result"`
 }
 
-func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader, cmd *exec.Cmd) {
-	stdin, err = cmdIn.StdinPipe()
-	if err != nil {
-		return nil, err, nil, cmdIn
-	}
-
-	stdout, _ := cmdIn.StdoutPipe()
-
-	err = cmdIn.Start()
-	if err != nil {
-		return nil, err, nil, cmdIn
-
-	}
-
-	return stdin, nil, stdout, cmdIn
-}
-
 func (scenario *Scenario) RunSteps() (string, error) {
 	fmt.Println("Running: "+ scenario.Entry)
 
@@ -90,7 +73,6 @@ func (scenario *Scenario) RunStdin() (string, error) {
 
 	echo := strings.Fields(scenario.Steps[0].Value)
 	rit := strings.Fields(scenario.Steps[1].Value)
-
 
 	commandEcho := exec.Command("echo", echo...)
 	commandRit := exec.Command("rit", rit...)
@@ -158,6 +140,23 @@ func funcHitTerminal(app string, args []string) (*exec.Cmd, io.WriteCloser, erro
 		log.Panic(err)
 	}
 	return cmd, stdin, nil, out
+}
+
+func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader, cmd *exec.Cmd) {
+	stdin, err = cmdIn.StdinPipe()
+	if err != nil {
+		return nil, err, nil, cmdIn
+	}
+
+	stdout, _ := cmdIn.StdoutPipe()
+
+	err = cmdIn.Start()
+	if err != nil {
+		return nil, err, nil, cmdIn
+
+	}
+
+	return stdin, nil, stdout, cmdIn
 }
 
 func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
