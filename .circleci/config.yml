@@ -35,6 +35,13 @@ references:
         - /^pull\/.*$/
         - /^feature.*/
 
+  filters-checks-pr: &FILTERS_CHECK_PR
+    branches:
+      only:
+        - qa
+        - /^pull\/.*$/
+        - /^feature.*/
+
 executors:
   ritchie-executor:
     docker:
@@ -193,7 +200,7 @@ workflows:
     jobs:
       - lint:
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_PR
       - unit_test:
           filters:
             <<: *FILTERS_CHECK
