@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 
@@ -14,6 +13,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -51,6 +51,7 @@ func NewDefaultTeamSetup(ritchieHome string, c *http.Client, sess session.Manage
 }
 
 func (d DefaultSetup) Setup(def Definition) (Setup, error) {
+	fmt.Println("Setting up formula...")
 	pwd, _ := os.Getwd()
 	ritchieHome := d.ritchieHome
 	formulaPath := def.FormulaPath(ritchieHome)
@@ -97,6 +98,7 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 		config:         config,
 	}
 
+	fmt.Println("Done")
 	return run, nil
 }
 
@@ -123,8 +125,6 @@ func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, er
 }
 
 func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
-	log.Println("Download formula...")
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", ErrCreateReqBundle
@@ -135,9 +135,9 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		if err != nil {
 			return "", err
 		}
-		req.Header.Set("x-org", s.Organization)
-		req.Header.Set("x-repo-name", repoName)
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+		req.Header.Set(headers.XOrg, s.Organization)
+		req.Header.Set(headers.XRepoName, repoName)
+		req.Header.Set(headers.Authorization, fmt.Sprintf("Bearer %s", s.AccessToken))
 	}
 
 	resp, err := d.client.Do(req)
@@ -170,13 +170,10 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		return "", err
 	}
 
-	log.Println("Done.")
 	return file, nil
 }
 
 func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string) error {
-	log.Println("Downloading config file...")
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return ErrCreateReqConfig
@@ -187,9 +184,9 @@ func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string)
 		if err != nil {
 			return err
 		}
-		req.Header.Set("x-org", s.Organization)
-		req.Header.Set("x-repo-name", repoName)
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+		req.Header.Set(headers.XOrg, s.Organization)
+		req.Header.Set(headers.XRepoName, repoName)
+		req.Header.Set(headers.Authorization, fmt.Sprintf("Bearer %s", s.AccessToken))
 	}
 
 	resp, err := d.client.Do(req)
@@ -223,7 +220,6 @@ func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string)
 		return err
 	}
 
-	log.Println("Done.")
 	return nil
 }
 
@@ -243,8 +239,6 @@ func createWorkDir(ritchieHome, binPath string, def Definition) (string, string,
 }
 
 func unzipFile(filename, destPath string) error {
-	log.Println("Installing formula...")
-
 	if err := fileutil.CreateDirIfNotExists(destPath, 0655); err != nil {
 		return err
 	}
@@ -257,6 +251,5 @@ func unzipFile(filename, destPath string) error {
 		return err
 	}
 
-	log.Println("Done.")
 	return nil
 }
