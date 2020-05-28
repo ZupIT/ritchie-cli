@@ -26,7 +26,7 @@ references:
       only:
         - /^release-.*/
 
-  filters-checks: &FILTERS_CHECK
+  filters-checks: &FILTERS_CHECK_CODE
     branches:
       only:
         - master
@@ -35,7 +35,7 @@ references:
         - /^pull\/.*$/
         - /^feature.*/
 
-  filters-checks-pr: &FILTERS_CHECK_PR
+  filters-checks-pr: &FILTERS_CHECK_LINT
     branches:
       only:
         - qa
@@ -199,24 +199,24 @@ workflows:
     jobs:
       - lint:
           filters:
-            <<: *FILTERS_CHECK_PR
+            <<: *FILTERS_CHECK_LINT
       - unit_test:
           name: unit-tests
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
       - build:
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
             - unit-tests
       - functional_test_single:
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
             - build
       - functional_test_team:
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
             - build
       - delivery:
