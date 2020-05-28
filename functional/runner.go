@@ -92,34 +92,41 @@ func (scenario *Scenario) RunStdin() (string, error) {
 	rit := strings.Fields(scenario.Steps[1].Value)
 
 
-	c1 := exec.Command("echo", echo...)
-	c2 := exec.Command("rit", rit...)
+	commandEcho := exec.Command("echo", echo...)
+	commandRit := exec.Command("rit", rit...)
 
-	r, w := io.Pipe()
-	c1.Stdout = w
-	c2.Stdin = r
+	pipeReader, pipeWriter := io.Pipe()
+	commandEcho.Stdout = pipeWriter
+	commandRit.Stdin = pipeReader
 
 	var b2 bytes.Buffer
-	c2.Stdout = &b2
+	commandRit.Stdout = &b2
 
-	c1.Start()
-	c2.Start()
-
-	err1 := c1.Wait()
-
-	if err1 != nil {
-		log.Printf("Error while running: %q", err1)
+	errorEcho := commandEcho.Start()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
 	}
 
-	w.Close()
-	err := c2.Wait()
-	if err != nil {
-		log.Printf("Error while running: %q", err)
+	errorRit := commandRit.Start()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
+	}
+
+	errorEcho = commandEcho.Wait()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
+	}
+
+	pipeWriter.Close()
+
+	errorRit = commandRit.Wait()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
 	}
 
 	fmt.Println(&b2)
 	fmt.Println("--------")
-	return b2.String(), err
+	return b2.String(), errorRit
 }
 
 func FuncValidateLoginRequired() {
