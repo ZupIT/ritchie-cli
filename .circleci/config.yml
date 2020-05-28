@@ -203,8 +203,6 @@ workflows:
       - unit_test:
           filters:
             <<: *FILTERS_CHECK
-          requires:
-            - lint
       - build:
           filters:
             <<: *FILTERS_CHECK
