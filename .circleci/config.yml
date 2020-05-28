@@ -64,10 +64,10 @@ jobs:
           command: |
             download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
             wget -O- -q $download | sh -s -- -b /go/bin/ v1.24.0
-      - run: go mod download
       - run:
           name: lint
           command: |
+            go mod download
             /go/bin/golangci-lint run
 
   unit_test:
@@ -80,6 +80,7 @@ jobs:
           name: Running Unit tests
           command: |
             mkdir -p $TEST_RESULTS_DIR
+            go mod download
             PACKAGE_NAMES=$(go list ./pkg/... | circleci tests split --split-by=timings --timings-type=classname)
             echo "Running $(echo $PACKAGE_NAMES | wc -w) packages"
             echo $PACKAGE_NAMES
@@ -115,6 +116,7 @@ jobs:
       - run:
           name: Running Functional tests for single
           command: |
+            go mod download
             make functional-test-single
 
 
@@ -136,6 +138,7 @@ jobs:
       - run:
           name: Running Functional tests for team
           command: |
+            go mod download
             make functional-test-team
 
   build:
@@ -143,11 +146,11 @@ jobs:
     branches:
     steps:
       - checkout
-      - run: go mod download
       - run:
           name: Running build
           command: |
             . ./version.sh
+            go mod download
             make build-circle
       - persist_to_workspace:
           root: dist
