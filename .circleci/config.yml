@@ -21,6 +21,7 @@ references:
         - /^release-.*/
         - qa
         - nightly
+        - beta
 
   filters-release: &FILTERS_RELEASE
     branches:
@@ -36,6 +37,7 @@ references:
         - /^pull\/.*$/
         - /^feature.*/
         - nightly
+        - beta
 
 executors:
   ritchie-executor:
