@@ -1,7 +1,7 @@
 package tpl_python
 
 const (
-	TemplateMain = `#!/usr/bin/python3
+	Main = `#!/usr/bin/python3
 import os
 
 from {{bin-name}} import {{bin-name}}
@@ -12,7 +12,7 @@ input3 = os.environ.get('SAMPLE_BOOL')
 {{bin-name}}.Run(input1, input2, input3)
 `
 
-	TemplateMakefile = `# Make Run Python
+	Makefile = `# Make Run Python
 BINARY_NAME={{bin-name}}.py
 BINARY_NAME_WINDOWS={{bin-name}}.bat
 DIST=../dist
@@ -23,7 +23,7 @@ build:
 	chmod +x $(DIST_DIR)/main.py
 	echo 'python main.py' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)`
 
-	TemplateDockerfile = `
+	Dockerfile = `
 FROM python:3
 
 WORKDIR /app
@@ -32,7 +32,7 @@ COPY . .
 
 ENTRYPOINT python3 main.py`
 
-	TemplateFilePython = `#!/usr/bin/python3
+	File = `#!/usr/bin/python3
 import time
 
 def Run(input1, input2, input3):

@@ -9,25 +9,27 @@ import (
 )
 
 const (
-	PathPattern           = "%s/formulas/%s"
-	TmpDirPattern         = "%s/tmp/%s"
-	TmpBinDirPattern      = "%s/tmp/%s/%s"
-	DefaultConfig         = "config.json"
-	ConfigPattern         = "%s/%s"
-	CommandEnv            = "COMMAND"
-	PwdEnv                = "PWD"
-	BinPattern            = "%s%s"
-	BinPathPattern        = "%s/bin"
-	windows               = "windows"
-	darwin                = "darwin"
-	linux                 = "linux"
-	EnvPattern            = "%s=%s"
-	CachePattern          = "%s/.%s.cache"
-	DefaultCacheNewLabel  = "Type new value?"
-	DefaultCacheQtd       = 5
-	FormCreatePathPattern = "%s/ritchie-formulas-local"
-	TreeCreatePathPattern = "%s/tree/tree.json"
-	Makefile              = "Makefile"
+	PathPattern               = "%s/formulas/%s"
+	TmpDirPattern             = "%s/tmp/%s"
+	TmpBinDirPattern          = "%s/tmp/%s/%s"
+	DefaultConfig             = "config.json"
+	ConfigPattern             = "%s/%s"
+	CommandEnv                = "COMMAND"
+	PwdEnv                    = "PWD"
+	BinPattern                = "%s%s"
+	BinPathPattern            = "%s/bin"
+	windows                   = "windows"
+	darwin                    = "darwin"
+	linux                     = "linux"
+	EnvPattern                = "%s=%s"
+	CachePattern              = "%s/.%s.cache"
+	DefaultCacheNewLabel      = "Type new value?"
+	DefaultCacheQtd           = 5
+	FormCreatePathPattern     = "%s/ritchie-formulas-local"
+	TreeCreatePathPattern     = "%s/tree/tree.json"
+	MakefileCreatePathPattern = "%s/%s"
+	Makefile                  = "Makefile"
+	TreeJson                  = "tree.json"
 )
 
 // Config type that represents formula config
@@ -54,7 +56,11 @@ type Cache struct {
 	Qtd      int    `json:"qtd"`
 	NewLabel string `json:"newLabel"`
 }
-
+type Create struct {
+	FormulaCmd   string `json:"formulaCmd"`
+	Lang         string `json:"lang"`
+	LocalRepoDir string `json:"localRepoDir"`
+}
 // Definition type that represents a Formula
 type Definition struct {
 	Path     string
@@ -158,12 +164,12 @@ func (d *Definition) ConfigURL(configName string) string {
 	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
-//Runner defines the formula runner process
+// Runner defines the formula runner process
 type Runner interface {
 	Run(def Definition, inputType api.TermInputType) error
 }
 
-//Creator defines the formula creator process
+// Creator defines the formula creator process
 type Creator interface {
-	Create(formulaCmd, lang string) (CreateManager, error)
+	Create(cf Create) (CreateManager, error)
 }
