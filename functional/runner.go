@@ -26,28 +26,11 @@ type Scenario struct {
 	Result string `json:"result"`
 }
 
-func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader, cmd *exec.Cmd) {
-	stdin, err = cmdIn.StdinPipe()
-	if err != nil {
-		return nil, err, nil, cmdIn
-	}
-
-	stdout, _ := cmdIn.StdoutPipe()
-
-	err = cmdIn.Start()
-	if err != nil {
-		return nil, err, nil, cmdIn
-
-	}
-
-	return stdin, nil, stdout, cmdIn
-}
-
 func (scenario *Scenario) RunSteps() (string, error) {
 	fmt.Println("Running: "+ scenario.Entry)
 
 	args := strings.Fields(scenario.Steps[0].Value)
-	cmd, stdin, err, out := funcHitRit(args)
+	cmd, stdin, err, out := funcHitTerminal("rit", args)
 
 	if err == nil {
 		for _, step := range scenario.Steps {
@@ -85,9 +68,52 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	return resp, err
 }
 
+func (scenario *Scenario) RunStdin() (string, error) {
+	fmt.Println("Running: "+ scenario.Entry)
+
+	echo := strings.Fields(scenario.Steps[0].Value)
+	rit := strings.Fields(scenario.Steps[1].Value)
+
+	commandEcho := exec.Command("echo", echo...)
+	commandRit := exec.Command("rit", rit...)
+
+	pipeReader, pipeWriter := io.Pipe()
+	commandEcho.Stdout = pipeWriter
+	commandRit.Stdin = pipeReader
+
+	var b2 bytes.Buffer
+	commandRit.Stdout = &b2
+
+	errorEcho := commandEcho.Start()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
+	}
+
+	errorRit := commandRit.Start()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
+	}
+
+	errorEcho = commandEcho.Wait()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
+	}
+
+	pipeWriter.Close()
+
+	errorRit = commandRit.Wait()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
+	}
+
+	fmt.Println(&b2)
+	fmt.Println("--------")
+	return b2.String(), errorRit
+}
+
 func FuncValidateLoginRequired() {
 	login := []string{"show", "context"}
-	_, stdin, _, out := funcHitRit(login)
+	_, stdin, _, out := funcHitTerminal("rit", login)
 	scanner := funcScannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
@@ -107,13 +133,30 @@ func FuncValidateLoginRequired() {
 	}
 }
 
-func funcHitRit(args []string) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
-	cmd := exec.Command("rit", args...)
+func funcHitTerminal(app string, args []string) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
+	cmd := exec.Command(app, args...)
 	stdin, err, out, cmd := commandInit(cmd)
 	if err != nil {
 		log.Panic(err)
 	}
 	return cmd, stdin, nil, out
+}
+
+func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader, cmd *exec.Cmd) {
+	stdin, err = cmdIn.StdinPipe()
+	if err != nil {
+		return nil, err, nil, cmdIn
+	}
+
+	stdout, _ := cmdIn.StdoutPipe()
+
+	err = cmdIn.Start()
+	if err != nil {
+		return nil, err, nil, cmdIn
+
+	}
+
+	return stdin, nil, stdout, cmdIn
 }
 
 func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
