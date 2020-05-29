@@ -261,11 +261,13 @@ workflows:
           requires:
             - unit-test
       - functional_test_single:
+          name: functional_test_single_code
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
       - functional_test_team:
+          name: functional_test_team_code
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
