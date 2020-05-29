@@ -91,14 +91,8 @@ jobs:
       - run:
           name: Horus Security Analysis
           command: |
-            ls -l /
-            ls -l /run
-            ls -l /var
-            whoami
-            ps -ef
-            uname -a
             echo "Starting scan Horus..."
-            docker run -v /var/run/docker.sock:/var/run/docker.sock --privileged -ti horuszup/horus-client:latest
+            docker run --rm -e HORUS_CLIENT_REPO_URL=$HORUS_CLIENT_REPO_URL -e HORUS_CLIENT_REPO_BRANCH=$HORUS_CLIENT_REPO_BRANCH -e HORUS_CLIENT_API_ADDR=$HORUS_CLIENT_API_ADDR -e HORUS_CLIENT_TOKEN=$HORUS_CLIENT_TOKEN -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK horuszup/horus-client:latest
   unit_test:
     executor: ritchie-executor
     environment:
