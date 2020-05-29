@@ -91,7 +91,7 @@ jobs:
           name: Horus Security Analysis
           command: |
             echo "Starting scan Horus..."
-            systemctl status docker.service
+            service start docker
             docker run -v /var/run/docker.sock:/var/run/docker.sock \
                        -ti horuszup/horus-client:latest
 
