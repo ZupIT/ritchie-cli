@@ -44,7 +44,6 @@ func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, out io.Reader, err erro
 	err = cmdIn.Start()
 	if err != nil {
 		return nil, nil, err
-
 	}
 
 	return stdin, stdout, nil
@@ -52,7 +51,6 @@ func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, out io.Reader, err erro
 
 func (scenario *Scenario) RunSteps() (string, error) {
 	fmt.Println("Running: " + scenario.Entry)
-
 	args := strings.Fields(scenario.Steps[0].Value)
 	cmd, stdin, out, err := execRit(args)
 
@@ -92,6 +90,48 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	return resp, err
 }
 
+func (scenario *Scenario) RunStdin() (string, error) {
+	fmt.Println("Running: " + scenario.Entry)
+
+	echo := strings.Fields(scenario.Steps[0].Value)
+	rit := strings.Fields(scenario.Steps[1].Value)
+
+	commandEcho := exec.Command("echo", echo...)
+	commandRit := exec.Command("rit", rit...)
+
+	pipeReader, pipeWriter := io.Pipe()
+	commandEcho.Stdout = pipeWriter
+	commandRit.Stdin = pipeReader
+
+	var b2 bytes.Buffer
+	commandRit.Stdout = &b2
+
+	errorEcho := commandEcho.Start()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
+	}
+
+	errorRit := commandRit.Start()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
+	}
+
+	errorEcho = commandEcho.Wait()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
+	}
+
+	pipeWriter.Close()
+
+	errorRit = commandRit.Wait()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
+	}
+
+	fmt.Println(&b2)
+	fmt.Println("--------")
+	return b2.String(), errorRit
+}
 func RitInit() {
 	command := []string{initCmd}
 	_, stdin, out, _ := execRit(command)
