@@ -167,7 +167,8 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 		y, err := o.Bool(MsgLogin, []string{"no", "yes"})
 		if err != nil {
 			return err
-		} else if y {
+		}
+		if y {
 			if err := o.Login(); err != nil {
 				return err
 			}
