@@ -5,7 +5,7 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    horus: &HORUS_IMAGE library/docker:latest
+    horus: &HORUS_IMAGE library/docker:dind
   paths:
     test-results: &TEST_RESULTS_DIR bin
 
@@ -96,7 +96,6 @@ jobs:
             whoami
             ps -ef
             uname -a
-            systemctl status docker
             echo "Starting scan Horus..."
             docker run -v /var/run/docker.sock:/var/run/docker.sock --privileged -ti horuszup/horus-client:latest
   unit_test:
