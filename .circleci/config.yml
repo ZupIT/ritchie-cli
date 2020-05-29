@@ -34,8 +34,6 @@ references:
       only:
         - master
         - /^release-.*/
-        - qa
-        - /^pull\/.*$/
         - nightly
         - beta
 
