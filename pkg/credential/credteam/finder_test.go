@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 func TestFinder(t *testing.T) {
@@ -63,7 +64,8 @@ func TestFinder(t *testing.T) {
 			srv := mockServer(out.status, body)
 			defer srv.Close()
 
-			finder := NewFinder(serverFinderMock{srvURL: srv.URL}, srv.Client(), sessManager, ctxFinder)
+			srvFinder := serverFinderMock{Config: server.Config{URL: srv.URL}}
+			finder := NewFinder(srvFinder, srv.Client(), sessManager, ctxFinder)
 
 			got, err := finder.Find(tt.in)
 			fmt.Println("err: ", err)

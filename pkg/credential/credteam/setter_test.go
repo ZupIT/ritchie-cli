@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 func TestSet(t *testing.T) {
@@ -50,7 +51,8 @@ func TestSet(t *testing.T) {
 			srv := mockServer(out.status, body)
 			defer srv.Close()
 
-			setter := NewSetter(serverFinderMock{srvURL: srv.URL}, srv.Client(), sessManager, ctxFinder)
+			srvFinder := serverFinderMock{Config: server.Config{URL: srv.URL}}
+			setter := NewSetter(srvFinder, srv.Client(), sessManager, ctxFinder)
 
 			err := setter.Set(in)
 			if err != nil && err.Error() != out.err.Error() {

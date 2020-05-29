@@ -31,7 +31,7 @@ func NewCreateUserCmd(
 		Use:   "user",
 		Short: "Create user",
 		Long:  `Create user of the organization`,
-		RunE: RunFuncE(c.runStdin(), c.runPrompt()),
+		RunE:  RunFuncE(c.runStdin(), c.runPrompt()),
 	}
 
 	cmd.LocalFlags()
@@ -41,10 +41,6 @@ func NewCreateUserCmd(
 
 func (c createUserCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		org, err := c.Text("Organization: ", true)
-		if err != nil {
-			return err
-		}
 		fn, err := c.Text("First name: ", true)
 		if err != nil {
 			return err
@@ -67,12 +63,11 @@ func (c createUserCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		u := security.User{
-			Organization: org,
-			FirstName:    fn,
-			LastName:     ln,
-			Email:        e,
-			Username:     un,
-			Password:     p,
+			FirstName: fn,
+			LastName:  ln,
+			Email:     e,
+			Username:  un,
+			Password:  p,
 		}
 		if err = c.Create(u); err != nil {
 			return err
