@@ -241,10 +241,17 @@ workflows:
       - lint:
           filters:
             <<: *FILTERS_CHECK_CODE
+      - horus:
+          filters:
+            <<: *FILTERS_CHECK_CODE
+            requires:
+              - lint
       - unit_test:
           name: unit-tests
           filters:
             <<: *FILTERS_CHECK_CODE
+            requires:
+              - horus
       - build:
           filters:
             <<: *FILTERS_CHECK_CODE
