@@ -88,13 +88,15 @@ jobs:
             /go/bin/golangci-lint run
 
   horus:
+    environment:
+      <<: *ENVIRONMENT
     executor: horus-executor
     steps:
       - checkout
       - run:
           name: Horus Security Analysis
           command: |
-            echo "Starting..."
+            echo "Starting scan Horus..."
 
   unit_test:
     executor: ritchie-executor
