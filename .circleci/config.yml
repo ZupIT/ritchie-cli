@@ -91,7 +91,6 @@ jobs:
           name: Horus Security Analysis
           command: |
             echo "Starting scan Horus..."
-            service start docker
             docker run --privileged -d horuszup/horus-client:latest
 
   unit_test:
