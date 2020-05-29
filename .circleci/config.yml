@@ -5,6 +5,7 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
+    horus: &HORUS_IMAGE horuszup/horus-client:latest
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -28,7 +29,7 @@ references:
       only:
         - /^release-.*/
 
-  filters-checks: &FILTERS_CHECK_CODE
+  filters-checks: &FILTERS_CHECK
     branches:
       only:
         - master
@@ -39,7 +40,7 @@ references:
         - nightly
         - beta
 
-  filters-checks-pr: &FILTERS_CHECK_LINT
+  filters-checks-pr: &FILTERS_CHECK_CODE
     branches:
       only:
         - qa
@@ -49,6 +50,12 @@ executors:
   ritchie-executor:
     docker:
       - image: *GOLANG_IMAGE
+        user: root
+    working_directory: /workspace
+
+  horus-executor:
+    docker:
+      - image: *HORUS_IMAGE
         user: root
     working_directory: /workspace
 
@@ -79,6 +86,15 @@ jobs:
           command: |
             go mod download
             /go/bin/golangci-lint run
+
+  security_test:
+    executor: horus-executor
+    steps:
+      - checkout
+      - run:
+          name: Horus Security Analysis
+          command: |
+            echo "Starting..."
 
   unit_test:
     executor: ritchie-executor
@@ -224,26 +240,7 @@ workflows:
     jobs:
       - lint:
           filters:
-            <<: *FILTERS_CHECK_LINT
-      - unit_test:
-          name: unit-tests
-          filters:
-            <<: *FILTERS_CHECK_LINT
-      - build:
-          filters:
-            <<: *FILTERS_CHECK_LINT
-          requires:
-            - unit-tests
-      - functional_test_single:
-          filters:
-            <<: *FILTERS_CHECK_LINT
-          requires:
-            - build
-      - functional_test_team:
-          filters:
-            <<: *FILTERS_CHECK_LINT
-          requires:
-            - build
+            <<: *FILTERS_CHECK_CODE
       - unit_test:
           name: unit-tests
           filters:
@@ -261,6 +258,25 @@ workflows:
       - functional_test_team:
           filters:
             <<: *FILTERS_CHECK_CODE
+          requires:
+            - build
+      - unit_test:
+          name: unit-tests
+          filters:
+            <<: *FILTERS_CHECK
+      - build:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - unit-tests
+      - functional_test_single:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build
+      - functional_test_team:
+          filters:
+            <<: *FILTERS_CHECK
           requires:
             - build
       - delivery:
