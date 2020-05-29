@@ -87,6 +87,7 @@ jobs:
     environment:
       <<: *ENVIRONMENT
     steps:
+      - setup_remote_docker
       - run:
           name: Horus Security Analysis
           command: |
