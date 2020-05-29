@@ -228,6 +228,25 @@ workflows:
       - unit_test:
           name: unit-tests
           filters:
+            <<: *FILTERS_CHECK_LINT
+      - build:
+          filters:
+            <<: *FILTERS_CHECK_LINT
+          requires:
+            - unit-tests
+      - functional_test_single:
+          filters:
+            <<: *FILTERS_CHECK_LINT
+          requires:
+            - build
+      - functional_test_team:
+          filters:
+            <<: *FILTERS_CHECK_LINT
+          requires:
+            - build
+      - unit_test:
+          name: unit-tests
+          filters:
             <<: *FILTERS_CHECK_CODE
       - build:
           filters:
