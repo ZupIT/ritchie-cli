@@ -254,7 +254,7 @@ workflows:
            <<: *FILTERS_CHECK_CODE
          requires:
            - horus
-      - build:
+      - build-code:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
@@ -263,12 +263,12 @@ workflows:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
-            - build
+            - build-code
       - functional_test_team:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
-            - build
+            - build-code
       - unit_test:
           name: unit-tests
           filters:
