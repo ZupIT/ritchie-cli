@@ -30,8 +30,11 @@ FROM node:10
 WORKDIR /app
 
 COPY . .
-
-ENTRYPOINT node index.js`
+COPY /app/set_umask.sh set_umask.sh
+RUN chmod +x main
+RUN chmod +x set_umask.sh
+ENTRYPOINT ["/set_umask.sh"]
+CMD node index.js`
 
 	Run = `#!/bin/sh
 node index.js`

@@ -89,7 +89,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		fmt.Printf("Formula in %s successfully created!\n", lang)
-		fmt.Printf("Your formula is in %s", f.FormPath)
+		fmt.Printf("Your formula is in %s\n", f.FormPath)
 
 		return nil
 	}

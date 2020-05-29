@@ -135,7 +135,7 @@ func NewGo() Go {
 		Dockerfile: tpl_go.Dockerfile,
 		Pkg: tpl_go.Pkg,
 		Compiled:   false,
-		UpperCase:  true,
+		UpperCase:  false,
 	}}
 }
 
@@ -151,7 +151,6 @@ func (g Go) Create(srcDir, pkg, pkgDir, dir string) error {
 	if err := fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm); err != nil {
 		return err
 	}
-
 	templateGo := strings.ReplaceAll(g.Pkg, nameModule, pkg)
 	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir,pkg ,g.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(templateGo)); err != nil {
@@ -175,7 +174,7 @@ func NewNode() Node {
 		PackageJson: tpl_node.PackageJson,
 		File:        tpl_node.File,
 		Compiled:    false,
-		UpperCase:   true,
+		UpperCase:   false,
 	}}
 }
 
@@ -218,7 +217,7 @@ func NewShell() Shell {
 		Dockerfile: tpl_shell.Dockerfile,
 		File:       tpl_shell.File,
 		Compiled:   false,
-		UpperCase:  true,
+		UpperCase:  false,
 	}}
 }
 

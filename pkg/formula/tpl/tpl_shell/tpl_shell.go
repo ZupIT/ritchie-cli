@@ -17,15 +17,18 @@ build:
 	chmod +x $(DIST_DIR)/$(BINARY_NAME)`
 
 	Dockerfile = `
-FROM alpine:3.7
+FROM alpine:latest
 
 WORKDIR /app
 
 COPY . .
 
 RUN chmod +x main.sh
+RUN chmod +x main
+RUN chmod +x set_umask.sh
 
-ENTRYPOINT /app/main.sh`
+ENTRYPOINT ["/set_umask.sh"]
+CMD /app/main.sh`
 
 	File = `#!/bin/sh
 run() {
@@ -34,5 +37,10 @@ run() {
   echo "You receive $SAMPLE_LIST in list. " 
   echo "You receive $SAMPLE_BOOL in boolean. "  
 }
+`
+
+	Umask = `#!/bin/sh
+umask 0011
+$1
 `
 )

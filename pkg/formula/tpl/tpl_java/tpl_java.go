@@ -38,15 +38,19 @@ USER root
 WORKDIR /app
 
 COPY . .
+COPY /app/set_umask.sh set_umask.sh
 
 RUN apk update
 RUN apk fetch openjdk8
 RUN apk add openjdk8
+RUN chmod +x main
+RUN chmod +x set_umask.sh
 
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
 ENV PATH="$JAVA_HOME/bin:${PATH}"
 
-ENTRYPOINT java -jar Main.jar`
+ENTRYPOINT ["/set_umask.sh"]
+CMD java -jar Main.jar`
 
 	Run = `#!/bin/sh
 java -jar Main.jar`

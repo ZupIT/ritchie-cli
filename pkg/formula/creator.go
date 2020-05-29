@@ -14,6 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
 var ErrMakefileNotFound = errors.New("makefile not found")
@@ -266,18 +267,19 @@ func createSrcFiles(dir, pkg, lang string) error {
 }
 
 func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
-	err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase)
-	if err != nil {
+	if err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase); err != nil {
 		return err
 	}
-	err = createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled)
-	if err != nil {
+	if err := createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled); err != nil {
 		return err
 	}
-	err = createDockerfile(srcDir, l.Dockerfile)
-	if err != nil {
+	if err := createDockerfile(srcDir, l.Dockerfile); err != nil {
 		return err
 	}
+	if err := createUmask(srcDir); err != nil {
+		return err
+	}
+
 
 	return nil
 }
@@ -301,7 +303,13 @@ func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
 }
 
 func createDockerfile(dir, tpl string) error {
-	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
+	dockerfile := fmt.Sprintf("%s/Dockerfile", dir)
+	return fileutil.WriteFile(dockerfile, []byte(tpl))
+}
+
+func createUmask(dir string) error {
+	uMaskFile := fmt.Sprintf("%s/set_umaks.sh", dir)
+	return fileutil.WriteFile(uMaskFile, []byte(tpl_shell.Umask))
 }
 
 func createGoModFile(dir, pkg string) error {
@@ -316,7 +324,9 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error 
 		tpl = strings.ReplaceAll(tpl, nameBinFirstUpper, strings.Title(strings.ToLower(pkg)))
 		return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
 	}
-
+	fmt.Println(pkg)
+	fmt.Println(nameModule)
+	tpl = strings.ReplaceAll(tpl, nameModule, pkg)
 	tpl = strings.ReplaceAll(tpl, nameBin, pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
 }
