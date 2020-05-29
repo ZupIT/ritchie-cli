@@ -1,109 +1,187 @@
-version: 2.1
-
-references:
-  images:
-    go: &GOLANG_IMAGE cimg/go:1.14
-    python: &PYTHON_IMAGE circleci/python:2.7-stretch
-    ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    horus: &HORUS_IMAGE horuszup/horus-client:latest
-
-  paths:
-    test-results: &TEST_RESULTS_DIR bin
-
-  environment: &ENVIRONMENT
-    TEST_RESULTS_DIR: *TEST_RESULTS_DIR
-    GIT_EMAIL : "zup-ci@zup.com.br"
-    GIT_USERNAME: "zup-ci"
-    GIT_NAME: "Zup CI"
-
-  filters: &FILTERS_DELIVERY
-    branches:
-      only:
-        - /^release-.*/
-        - qa
-        - nightly
-        - beta
-
-  filters-release: &FILTERS_RELEASE
-    branches:
-      only:
-        - /^release-.*/
-
-  filters-checks: &FILTERS_CHECK
-    branches:
-      only:
-        - master
-        - /^release-.*/
-        - qa
-        - /^pull\/.*$/
-        - /^feature.*/
-        - nightly
-        - beta
-
-  filters-checks-pr: &FILTERS_CHECK_CODE
-    branches:
-      only:
-        - qa
-        - /^pull\/.*$/
-
+---
 executors:
-  ritchie-executor:
-    docker:
-      - image: *GOLANG_IMAGE
-        user: root
-    working_directory: /workspace
-
-  horus-executor:
-    docker:
-      - image: *HORUS_IMAGE
-        user: root
-    working_directory: /workspace
-
   delivery-executor:
     docker:
-      - image: *PYTHON_IMAGE
+      -
+        image: "circleci/python:2.7-stretch"
         user: root
     working_directory: /workspace
-
+  horus-executor:
+    docker:
+      -
+        image: "horuszup/horus-client:latest"
+        user: root
+    working_directory: /workspace
   release-executor:
     docker:
-      - image: *RUBY_IMAGE
+      -
+        image: "cimg/ruby:2.6.5"
         user: root
     working_directory: /workspace
-
+  ritchie-executor:
+    docker:
+      -
+        image: "cimg/go:1.14"
+        user: root
+    working_directory: /workspace
 jobs:
+  build:
+    branches: ~
+    executor: ritchie-executor
+    steps:
+      - checkout
+      -
+        run:
+          command: |
+            . ./.circleci/scripts/version.sh
+            go mod download
+            make build-circle
+          name: "Running build"
+      -
+        persist_to_workspace:
+          paths:
+            - linux
+            - darwin
+            - windows
+          root: dist
+      -
+        store_test_results:
+          path: bin
+      -
+        store_artifacts:
+          path: bin
+  delivery:
+    environment:
+      GIT_EMAIL: zup-ci@zup.com.br
+      GIT_NAME: "Zup CI"
+      GIT_USERNAME: zup-ci
+      TEST_RESULTS_DIR: bin
+    executor: delivery-executor
+    steps:
+      - checkout
+      -
+        attach_workspace:
+          at: /workspace/dist
+      -
+        run:
+          command: |
+            pip install awscli
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/bucket.sh
+            . ./.circleci/scripts/credentials.sh
+            make delivery
+          name: "Delivering cli binary"
+  functional_test_single:
+    environment:
+      GIT_EMAIL: zup-ci@zup.com.br
+      GIT_NAME: "Zup CI"
+      GIT_USERNAME: zup-ci
+      TEST_RESULTS_DIR: bin
+    executor: ritchie-executor
+    steps:
+      - checkout
+      -
+        attach_workspace:
+          at: /workspace/dist
+      -
+        run:
+          command: |
+            echo "export PATH=/workspace/dist/linux/single:$PATH" >> $BASH_ENV
+            source /home/circleci/.bashrc
+          name: "Setup Bash for Single"
+      -
+        run:
+          command: |
+            go mod download
+            make functional-test-single
+          name: "Running Functional tests for single"
+  functional_test_team:
+    environment:
+      GIT_EMAIL: zup-ci@zup.com.br
+      GIT_NAME: "Zup CI"
+      GIT_USERNAME: zup-ci
+      TEST_RESULTS_DIR: bin
+    executor: ritchie-executor
+    steps:
+      - checkout
+      -
+        attach_workspace:
+          at: /workspace/dist
+      -
+        run:
+          command: |
+            echo "export PATH=/workspace/dist/linux/team:$PATH" >> $BASH_ENV
+            source /home/circleci/.bashrc
+          name: "Setup Bash for Team"
+      -
+        run:
+          command: |
+            go mod download
+            make functional-test-team
+          name: "Running Functional tests for team"
   lint:
     executor: ritchie-executor
     steps:
       - checkout
-      - run:
-          name: Install golangci-lint
+      -
+        run:
           command: |
             download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
             wget -O- -q $download | sh -s -- -b /go/bin/ v1.24.0
-      - run:
-          name: lint
+          name: "Install golangci-lint"
+      -
+        run:
           command: |
             go mod download
             /go/bin/golangci-lint run
-
+          name: lint
+  rebase_nightly:
+    environment:
+      GIT_EMAIL: zup-ci@zup.com.br
+      GIT_NAME: "Zup CI"
+      GIT_USERNAME: zup-ci
+      TEST_RESULTS_DIR: bin
+    executor: release-executor
+    steps:
+      - checkout
+      -
+        run:
+          command: "make rebase-nightly\n"
+          name: "Rebase Nightly"
+  release:
+    environment:
+      GIT_EMAIL: zup-ci@zup.com.br
+      GIT_NAME: "Zup CI"
+      GIT_USERNAME: zup-ci
+      TEST_RESULTS_DIR: bin
+    executor: release-executor
+    steps:
+      - checkout
+      -
+        run:
+          command: |
+            . ./.circleci/scripts/version.sh
+            make release
+          name: Releasing
   security_test:
     executor: horus-executor
     steps:
       - checkout
-      - run:
-          name: Horus Security Analysis
-          command: |
-            echo "Starting..."
-
+      -
+        run:
+          command: "echo \"Starting...\"\n"
+          name: "Horus Security Analysis"
   unit_test:
-    executor: ritchie-executor
     environment:
-      <<: *ENVIRONMENT
+      GIT_EMAIL: zup-ci@zup.com.br
+      GIT_NAME: "Zup CI"
+      GIT_USERNAME: zup-ci
+      TEST_RESULTS_DIR: bin
+    executor: ritchie-executor
     steps:
       - checkout
-      - run:
-          name: Running Unit tests
+      -
+        run:
           command: |
             mkdir -p $TEST_RESULTS_DIR
             go mod download
@@ -115,185 +193,197 @@ jobs:
               -p 2 \
               -cover -coverprofile=coverage.txt \
               $PACKAGE_NAMES
-      - store_test_results:
-          path: *TEST_RESULTS_DIR
-      - store_artifacts:
-          path: *TEST_RESULTS_DIR
-      - run:
-          name: codecov upload
+          name: "Running Unit tests"
+      -
+        store_test_results:
+          path: bin
+      -
+        store_artifacts:
+          path: bin
+      -
+        run:
+          command: "bash <(curl -s https://codecov.io/bash)"
+          name: "codecov upload"
           when: always
-          command: bash <(curl -s https://codecov.io/bash)
-
-  functional_test_single:
-    executor: ritchie-executor
-    environment:
-      <<: *ENVIRONMENT
-    steps:
-      - checkout
-      - attach_workspace:
-            at: /workspace/dist
-      - run:
-          name: Setup Bash for Single
-          command: |
-            echo "export PATH=/workspace/dist/linux/single:$PATH" >> $BASH_ENV
-            source /home/circleci/.bashrc
-      - run:
-          name: Running Functional tests for single
-          command: |
-            go mod download
-            make functional-test-single
-
-
-  functional_test_team:
-    executor: ritchie-executor
-    environment:
-      <<: *ENVIRONMENT
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /workspace/dist
-      - run:
-          name: Setup Bash for Team
-          command: |
-            echo "export PATH=/workspace/dist/linux/team:$PATH" >> $BASH_ENV
-            source /home/circleci/.bashrc
-      - run:
-          name: Running Functional tests for team
-          command: |
-            go mod download
-            make functional-test-team
-
-  build:
-    executor: ritchie-executor
+references:
+  environment:
+    GIT_EMAIL: zup-ci@zup.com.br
+    GIT_NAME: "Zup CI"
+    GIT_USERNAME: zup-ci
+    TEST_RESULTS_DIR: bin
+  filters:
     branches:
-    steps:
-      - checkout
-      - run:
-          name: Running build
-          command: |
-            . ./.circleci/scripts/version.sh
-            go mod download
-            make build-circle
-      - persist_to_workspace:
-          root: dist
-          paths:
-            - linux
-            - darwin
-            - windows
-      - store_test_results:
-          path: *TEST_RESULTS_DIR
-      - store_artifacts:
-          path: *TEST_RESULTS_DIR
-
-  delivery:
-    executor: delivery-executor
-    environment:
-      <<: *ENVIRONMENT
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /workspace/dist
-      - run:
-          name: Delivering cli binary
-          command: |
-            pip install awscli
-            . ./.circleci/scripts/version.sh
-            . ./.circleci/scripts/bucket.sh
-            . ./.circleci/scripts/credentials.sh
-            make delivery
-  release:
-    environment:
-      <<: *ENVIRONMENT
-    executor: release-executor
-    steps:
-      - checkout
-      - run:
-          name: Releasing
-          command: |
-            . ./.circleci/scripts/version.sh
-            make release
-
-  rebase_nightly:
-    environment:
-      <<: *ENVIRONMENT
-    executor: release-executor
-    steps:
-      - checkout
-      - run:
-          name: Rebase Nightly
-          command: |
-            make rebase-nightly
-
+      only:
+        - /^release-.*/
+        - qa
+        - nightly
+        - beta
+  filters-checks:
+    branches:
+      only:
+        - master
+        - /^release-.*/
+        - qa
+        - /^pull\/.*$/
+        - /^feature.*/
+        - nightly
+        - beta
+  filters-checks-pr:
+    branches:
+      only:
+        - qa
+        - /^pull\/.*$/
+  filters-release:
+    branches:
+      only:
+        - /^release-.*/
+  images:
+    go: "cimg/go:1.14"
+    horus: "horuszup/horus-client:latest"
+    python: "circleci/python:2.7-stretch"
+    ruby: "cimg/ruby:2.6.5"
+  paths:
+    test-results: bin
+version: 2.1
 workflows:
+  build-for-branch:
+    jobs:
+      -
+        lint:
+          filters:
+            branches:
+              only:
+                - qa
+                - /^pull\/.*$/
+      -
+        horus:
+          filters:
+            branches:
+              only:
+                - qa
+                - /^pull\/.*$/
+          requires:
+            - lint
+      -
+        unit_test:
+          filters:
+            branches:
+              only:
+                - qa
+                - /^pull\/.*$/
+          name: unit-tests
+          requires:
+            - horus
+      -
+        build:
+          filters:
+            branches:
+              only:
+                - qa
+                - /^pull\/.*$/
+          requires:
+            - unit-tests
+      -
+        functional_test_single:
+          filters:
+            branches:
+              only:
+                - qa
+                - /^pull\/.*$/
+          requires:
+            - build
+      -
+        functional_test_team:
+          filters:
+            branches:
+              only:
+                - qa
+                - /^pull\/.*$/
+          requires:
+            - build
+      -
+        unit_test:
+          filters:
+            branches:
+              only:
+                - master
+                - /^release-.*/
+                - qa
+                - /^pull\/.*$/
+                - /^feature.*/
+                - nightly
+                - beta
+          name: unit-tests
+      -
+        build:
+          filters:
+            branches:
+              only:
+                - master
+                - /^release-.*/
+                - qa
+                - /^pull\/.*$/
+                - /^feature.*/
+                - nightly
+                - beta
+          requires:
+            - unit-tests
+      -
+        functional_test_single:
+          filters:
+            branches:
+              only:
+                - master
+                - /^release-.*/
+                - qa
+                - /^pull\/.*$/
+                - /^feature.*/
+                - nightly
+                - beta
+          requires:
+            - build
+      -
+        functional_test_team:
+          filters:
+            branches:
+              only:
+                - master
+                - /^release-.*/
+                - qa
+                - /^pull\/.*$/
+                - /^feature.*/
+                - nightly
+                - beta
+          requires:
+            - build
+      -
+        delivery:
+          filters:
+            branches:
+              only:
+                - /^release-.*/
+                - qa
+                - nightly
+                - beta
+          requires:
+            - functional_test_single
+            - functional_test_team
+      -
+        release:
+          filters:
+            branches:
+              only:
+                - /^release-.*/
+          requires:
+            - delivery
   nightly:
+    jobs:
+      - rebase_nightly
     triggers:
-      - schedule:
+      -
+        schedule:
           cron: "0 22 * * *"
           filters:
             branches:
               only:
                 - master
-    jobs:
-      - rebase_nightly
-
-  build-for-branch:
-    jobs:
-      - lint:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-      - horus:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-            requires:
-              - lint
-      - unit_test:
-          name: unit-tests
-          filters:
-            <<: *FILTERS_CHECK_CODE
-            requires:
-              - horus
-      - build:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - unit-tests
-      - functional_test_single:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build
-      - functional_test_team:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build
-      - unit_test:
-          name: unit-tests
-          filters:
-            <<: *FILTERS_CHECK
-      - build:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - unit-tests
-      - functional_test_single:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
-      - functional_test_team:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
-      - delivery:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - functional_test_single
-            - functional_test_team
-      - release:
-          filters:
-            <<: *FILTERS_RELEASE
-          requires:
-            - delivery
