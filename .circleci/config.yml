@@ -87,7 +87,7 @@ jobs:
             go mod download
             /go/bin/golangci-lint run
 
-  security_test:
+  horus:
     executor: horus-executor
     steps:
       - checkout
