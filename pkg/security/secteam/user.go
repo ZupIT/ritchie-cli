@@ -47,12 +47,14 @@ func (u UserManager) Create(user security.User) error {
 		return err
 	}
 
-	serverURL, err := u.serverFinder.Find()
+	cfg, err := u.serverFinder.Find()
 	if err != nil {
 		return err
 	}
+	fmt.Println("Organization:", cfg.Organization)
+	user.Organization = cfg.Organization
 
-	url := fmt.Sprintf(urlPattern, serverURL)
+	url := fmt.Sprintf(urlPattern, cfg.URL)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return err
@@ -92,12 +94,12 @@ func (u UserManager) Delete(user security.User) error {
 		return err
 	}
 
-	serverURL, err := u.serverFinder.Find()
+	cfg, err := u.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	url := fmt.Sprintf(urlPattern, serverURL)
+	url := fmt.Sprintf(urlPattern, cfg.URL)
 	req, err := http.NewRequest(http.MethodDelete, url, bytes.NewBuffer(b))
 	if err != nil {
 		return err

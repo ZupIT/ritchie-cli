@@ -1,6 +1,8 @@
 package secteam
 
 import (
+	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -31,7 +33,9 @@ func (l LogoutManager) Logout() error {
 		return err
 	}
 
-	cr, err := logoutChannelProvider(l.provider, session.Organization, cfg.Organization)
+	fmt.Println("Organization:", cfg.Organization)
+
+	cr, err := logoutChannelProvider(l.provider, session.Organization, cfg.URL)
 	if err != nil {
 		return err
 	}

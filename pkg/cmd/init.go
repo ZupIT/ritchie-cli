@@ -14,12 +14,12 @@ import (
 )
 
 const (
-	msgPassphrase                = "Define a passphrase for your machine: "
-	msgOrganization              = "Enter your organization: "
+	MsgPassphrase                = "Define a passphrase for your machine: "
+	MsgOrganization              = "Enter your organization: "
 	msgOrganizationAlreadyExists = "The organization (%s) already exists. Do you like to override?"
-	msgServerURL                 = "URL of the server [http(s)://host]: "
+	MsgServerURL                 = "URL of the server [http(s)://host]: "
 	msgServerURLAlreadyExists    = "The server URL(%s) already exists. Do you like to override?"
-	msgLogin                     = "You can perform login to your organization now, or later using [rit login] command. Perform now?"
+	MsgLogin                     = "You can perform login to your organization now, or later using [rit login] command. Perform now?"
 )
 
 type initSingleCmd struct {
@@ -75,7 +75,7 @@ func newInitCmd(stdinFunc, promptFunc CommandRunnerFunc) *cobra.Command {
 
 func (o initSingleCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		pass, err := o.Password(msgPassphrase)
+		pass, err := o.Password(MsgPassphrase)
 		if err != nil {
 			return err
 		}
@@ -125,14 +125,14 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 				return err
 			}
 			if y {
-				org, err := o.Text(msgOrganization, true)
+				org, err := o.Text(MsgOrganization, true)
 				if err != nil {
 					return err
 				}
 				cfg.Organization = org
 			}
 		} else {
-			org, err := o.Text(msgOrganization, true)
+			org, err := o.Text(MsgOrganization, true)
 			if err != nil {
 				return err
 			}
@@ -140,7 +140,7 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		if err := validator.IsValidURL(cfg.URL); err != nil {
-			u, err := o.URL(msgServerURL, "")
+			u, err := o.URL(MsgServerURL, "")
 			if err != nil {
 				return err
 			}
@@ -152,7 +152,7 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 				return err
 			}
 			if y {
-				u, err := o.URL(msgServerURL, "")
+				u, err := o.URL(MsgServerURL, "")
 				if err != nil {
 					return err
 				}
@@ -164,7 +164,7 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		y, err := o.Bool(msgLogin, []string{"no", "yes"})
+		y, err := o.Bool(MsgLogin, []string{"no", "yes"})
 		if err != nil {
 			return err
 		} else if y {
