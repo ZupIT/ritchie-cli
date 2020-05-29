@@ -92,8 +92,7 @@ jobs:
           command: |
             echo "Starting scan Horus..."
             service start docker
-            docker run -v /var/run/docker.sock:/var/run/docker.sock \
-                       -ti horuszup/horus-client:latest
+            docker run --privileged -d horuszup/horus-client:latest
 
   unit_test:
     executor: ritchie-executor
