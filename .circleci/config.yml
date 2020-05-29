@@ -86,8 +86,6 @@ jobs:
             /go/bin/golangci-lint run
 
   horus:
-    environment:
-      <<: *ENVIRONMENT
     executor: horus-executor
     steps:
       - run:
