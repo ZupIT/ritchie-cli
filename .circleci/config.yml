@@ -44,7 +44,6 @@ references:
       only:
         - qa
         - /^pull\/.*$/
-        - /^feature.*/
 
 executors:
   ritchie-executor:
@@ -57,7 +56,6 @@ executors:
     docker:
       - image: *HORUS_IMAGE
         user: root
-    working_directory: /workspace
 
   delivery-executor:
     docker:
