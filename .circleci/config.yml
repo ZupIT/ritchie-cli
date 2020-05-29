@@ -91,8 +91,7 @@ jobs:
           name: Horus Security Analysis
           command: |
             echo "Starting scan Horus..."
-            sudo docker run -v /var/run/docker.sock:/var/run/docker.sock --privileged -d horuszup/horus-client:latest
-
+            docker run -v /var/run/docker.sock:/var/run/docker.sock --privileged -ti horuszup/horus-client:latest
   unit_test:
     executor: ritchie-executor
     environment:
