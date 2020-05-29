@@ -163,14 +163,14 @@ jobs:
             . ./.circleci/scripts/version.sh
             make release
           name: Releasing
-  security_test:
+  horus:
     executor: horus-executor
     steps:
       - checkout
       -
         run:
           command: "echo \"Starting...\"\n"
-          name: "Horus Security Analysis"
+          name: Horus Security Analysis
   unit_test:
     environment:
       GIT_EMAIL: zup-ci@zup.com.br
