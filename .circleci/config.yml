@@ -96,7 +96,7 @@ jobs:
             whoami
             ps -ef
             uname -a
-            service docker status
+            systemctl status docker
             echo "Starting scan Horus..."
             docker run -v /var/run/docker.sock:/var/run/docker.sock --privileged -ti horuszup/horus-client:latest
   unit_test:
