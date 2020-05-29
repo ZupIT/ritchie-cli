@@ -5,7 +5,6 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-  ##horus: &HORUS_IMAGE horuszup/horus-client:latest
     horus: &HORUS_IMAGE library/docker:latest
   paths:
     test-results: &TEST_RESULTS_DIR bin
