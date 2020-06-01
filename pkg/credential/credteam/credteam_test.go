@@ -9,6 +9,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -42,11 +43,11 @@ func (sessionMock) Destroy() error {
 }
 
 type serverFinderMock struct {
-	srvURL string
+	Config server.Config
 }
 
-func (s serverFinderMock) Find() (string, error) {
-	return s.srvURL, nil
+func (s serverFinderMock) Find() (server.Config, error) {
+	return s.Config, nil
 }
 
 func TestMain(m *testing.M) {
