@@ -35,7 +35,7 @@ func newClientErrNoSuchHost() *http.Client {
 
 func TestSet(t *testing.T) {
 	type in struct {
-		URL string
+		cfg Config
 		hc  *http.Client
 	}
 
@@ -50,36 +50,43 @@ func TestSet(t *testing.T) {
 		out  out
 	}{
 		{
+			name: "empty organization",
+			in:   in{cfg: Config{Organization: ""}},
+			out: out{
+				err: ErrOrgIsRequired,
+			},
+		},
+		{
 			name: "empty serverURL",
-			in:   in{URL: ""},
+			in:   in{cfg: Config{Organization: "org", URL: ""}},
 			out: out{
 				err: validator.ErrInvalidURL,
 			},
 		},
 		{
 			name: "invalid serverURL",
-			in:   in{URL: "invalid.server.URL"},
+			in:   in{cfg: Config{Organization: "org", URL: "invalid.server.URL"}},
 			out: out{
 				err: validator.ErrInvalidURL,
 			},
 		},
 		{
 			name: "valid serverURL",
-			in:   in{URL: srvURL, hc: http.DefaultClient},
+			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: http.DefaultClient},
 			out: out{
 				status: 200,
 			},
 		},
 		{
 			name: "no such host error",
-			in:   in{URL: srvURL, hc: newClientErrNoSuchHost()},
+			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: newClientErrNoSuchHost()},
 			out: out{
 				err: errNoSuchHostLong,
 			},
 		},
 		{
 			name: "server error",
-			in:   in{URL: srvURL, hc: http.DefaultClient},
+			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: http.DefaultClient},
 			out: out{
 				status: 500,
 				err:    fmt.Errorf(ServerErrPattern, srvURL, "500 Internal Server Error"),
@@ -93,14 +100,14 @@ func TestSet(t *testing.T) {
 			out := tt.out
 			s := NewSetter(os.TempDir(), in.hc)
 
-			if in.URL != "" {
+			if in.cfg.URL != "" {
 				srv := mockServer(out.status)
 				defer srv.Close()
 			}
 
-			got := s.Set(in.URL)
+			got := s.Set(in.cfg)
 			if got != nil && got.Error() != out.err.Error() {
-				t.Errorf("Set(%s) got %v, want %v", in.URL, got, out.err)
+				t.Errorf("Set(%s) got %v, want %v", in.cfg, got, out.err)
 			}
 		})
 	}
