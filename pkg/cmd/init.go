@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	MsgPhrase                    = "Define a passphrase for your machine: "
+	MsgPhrase                    = "Define a keyphrase for your machine: "
 	MsgOrganization              = "Enter your organization: "
 	msgOrganizationAlreadyExists = "The organization (%s) already exists. Do you like to override?"
 	MsgServerURL                 = "URL of the server [http(s)://host]: "
