@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	MsgPassphrase                = "Define a passphrase for your machine: "
+	MsgPhrase                    = "Define a passphrase for your machine: "
 	MsgOrganization              = "Enter your organization: "
 	msgOrganizationAlreadyExists = "The organization (%s) already exists. Do you like to override?"
 	MsgServerURL                 = "URL of the server [http(s)://host]: "
@@ -75,7 +75,7 @@ func newInitCmd(stdinFunc, promptFunc CommandRunnerFunc) *cobra.Command {
 
 func (o initSingleCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		pass, err := o.Password(MsgPassphrase)
+		pass, err := o.Password(MsgPhrase)
 		if err != nil {
 			return err
 		}
