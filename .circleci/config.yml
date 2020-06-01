@@ -224,6 +224,7 @@ jobs:
       - run:
           name: Generating package for debian
           command: |
+            . ./.circleci/scripts/version.sh
             . ./.circleci/scripts/gen-deb.sh
 
   release:
