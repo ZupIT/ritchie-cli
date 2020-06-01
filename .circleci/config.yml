@@ -92,7 +92,6 @@ jobs:
           name: Horus Security Analysis
           command: |
             echo "Starting scan Horus..."
-            env
             docker run --rm -e HORUS_CLIENT_REPO_URL=$HORUS_CLIENT_REPO_URL \
             -e HORUS_CLIENT_REPO_BRANCH=$HORUS_CLIENT_REPO_BRANCH \
             -e HORUS_CLIENT_API_ADDR=$HORUS_CLIENT_API_ADDR \
