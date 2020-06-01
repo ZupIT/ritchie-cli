@@ -7,7 +7,7 @@ references:
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
     horus: &HORUS_IMAGE library/docker:dind
-    centos: &CENTOS_IMAGE viniciusramosdefaria/centos-image:7.0
+    centos: &CENTOS_IMAGE viniciusramosdefaria/centos-circleci:7.0
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
