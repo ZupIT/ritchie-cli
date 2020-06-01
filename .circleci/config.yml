@@ -200,6 +200,8 @@ jobs:
     executor: ubuntu-executor
     steps:
       - checkout
+      - attach_workspace:
+          at: /workspace/dist
       - run:
           name: Generating package for debian
           command: |
