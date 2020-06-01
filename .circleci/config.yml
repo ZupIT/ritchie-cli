@@ -252,8 +252,8 @@ workflows:
       - build:
           filters:
             <<: *FILTERS_CHECK_CODE
-          requires:
-            - unit-tests
+#          requires:
+#            - unit-tests
 #      - functional_test_single:
 #          filters:
 #            <<: *FILTERS_CHECK_CODE
