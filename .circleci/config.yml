@@ -5,7 +5,7 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    ubuntu: &UBUNTU_IMAGE ubuntu:20.04
+    ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
     horus: &HORUS_IMAGE library/docker:dind
 
   paths:
