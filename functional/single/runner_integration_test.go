@@ -1,4 +1,3 @@
-
 package single
 
 import (
@@ -17,6 +16,6 @@ func TestRitSingle(t *testing.T) {
 
 var _ = Describe("RitScaffold", func() {
 	BeforeSuite(func() {
-		functional.FuncValidateLoginRequired()
+		functional.RitInit()
 	})
 })

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -9,9 +11,13 @@ import (
 )
 
 const (
-	serverFilePattern = "%s/server"
 	// ServerErrPattern error message pattern
 	ServerErrPattern = "Server (%s) returned %s"
+)
+
+var (
+	// ErrOrgIsRequired error message for org
+	ErrOrgIsRequired = errors.New("Organization is required")
 )
 
 type SetterManager struct {
@@ -26,18 +32,28 @@ func NewSetter(ritHomeDir string, hc *http.Client) Setter {
 	}
 }
 
-func (s SetterManager) Set(url string) error {
-	if err := validator.IsValidURL(url); err != nil {
+func (s SetterManager) Set(cfg Config) error {
+	if cfg.Organization == "" {
+		return ErrOrgIsRequired
+	}
+
+	if err := validator.IsValidURL(cfg.URL); err != nil {
 		return err
 	}
-	resp, err := s.httpClient.Get(url)
+	resp, err := s.httpClient.Get(cfg.URL)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf(ServerErrPattern, url, resp.Status)
+		return fmt.Errorf(ServerErrPattern, cfg.URL, resp.Status)
 	}
-	if err := fileutil.WriteFile(s.serverFile, []byte(url)); err != nil {
+
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	if err := fileutil.WriteFile(s.serverFile, b); err != nil {
 		return err
 	}
 	return nil

@@ -10,7 +10,7 @@ const (
       "label" : "Type : ",
       "cache" : {
         "active": true,
-        "qtd" : 6,
+        "qty" : 6,
         "newLabel" : "Type new value. "
       }
     },

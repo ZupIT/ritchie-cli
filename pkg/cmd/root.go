@@ -1,15 +1,11 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -25,9 +21,6 @@ const (
 	cmdDescription      = `A CLI that developers can build and operate
 your applications without help from the infra staff.
 Complete documentation is available at https://github.com/ZupIT/ritchie-cli`
-
-	serverCheckerDesc  = "To use this command on the Team version, you need to inform the server URL first\n Command : rit set server\n"
-	sessionCheckerDesc = "To use this command, you need to start a session on Ritchie\n\n"
 )
 
 var (
@@ -36,50 +29,51 @@ var (
 	// BuildDate contains a string with the build date.
 	BuildDate = "unknown"
 
-	whitelist = []string{
+	// MsgInit error message for init cmd
+	MsgInit = "To start using rit, you need to initialize rit first.\nCommand: rit init"
+	// MsgSession error message for session not initialized
+	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
+
+	singleWhitelist = []string{
+		fmt.Sprint(cmdUse),
+		fmt.Sprintf("%s help", cmdUse),
+		fmt.Sprintf("%s completion zsh", cmdUse),
+		fmt.Sprintf("%s completion bash", cmdUse),
+		fmt.Sprintf("%s init", cmdUse),
+	}
+
+	teamWhitelist = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s login", cmdUse),
 		fmt.Sprintf("%s logout", cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
-		fmt.Sprintf("%s set server", cmdUse),
+		fmt.Sprintf("%s init", cmdUse),
 	}
 )
 
-type rootCmd struct {
-	workspaceManager workspace.Checker
-	loginManager     security.LoginManager
-	repoLoader       formula.Loader
-	serverValidator  server.Validator
+type singleRootCmd struct {
+	workspaceChecker workspace.Checker
 	sessionValidator session.Validator
-	edition          api.Edition
-	prompt.InputText
-	prompt.InputPassword
+}
+
+type teamRootCmd struct {
+	workspaceChecker workspace.Checker
+	serverFinder     server.Finder
+	sessionValidator session.Validator
 }
 
 // NewSingleRootCmd creates the root command for single edition.
-func NewSingleRootCmd(wm workspace.Checker,
-	l security.LoginManager,
-	r formula.Loader,
-	sv session.Validator,
-	e api.Edition,
-	it prompt.InputText,
-	ip prompt.InputPassword) *cobra.Command {
-	o := &rootCmd{
-		wm,
-		l,
-		r,
-		nil,
-		sv,
-		e,
-		it,
-		ip,
+func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command {
+	o := &singleRootCmd{
+		workspaceChecker: wc,
+		sessionValidator: sv,
 	}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:               cmdUse,
-		Version:           o.version(),
+		Version:           version(api.Single),
 		Short:             cmdShortDescription,
 		Long:              cmdDescription,
 		PersistentPreRunE: o.PreRunFunc(),
@@ -87,116 +81,87 @@ func NewSingleRootCmd(wm workspace.Checker,
 		SilenceErrors:     true,
 		TraverseChildren:  true,
 	}
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+	return cmd
 }
 
 // NewTeamRootCmd creates the root command for team edition.
-func NewTeamRootCmd(wm workspace.Checker,
-	l security.LoginManager,
-	r formula.Loader,
-	srv server.Validator,
-	sv session.Validator,
-	e api.Edition,
-	it prompt.InputText,
-	ip prompt.InputPassword) *cobra.Command {
-	o := &rootCmd{
-		wm,
-		l,
-		r,
-		srv,
-		sv,
-		e,
-		it,
-		ip,
+func NewTeamRootCmd(wc workspace.Checker,
+	sf server.Finder,
+	sv session.Validator) *cobra.Command {
+	o := &teamRootCmd{
+		workspaceChecker: wc,
+		serverFinder:     sf,
+		sessionValidator: sv,
 	}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:               cmdUse,
-		Version:           o.version(),
+		Version:           version(api.Team),
 		Short:             cmdShortDescription,
 		Long:              cmdDescription,
 		PersistentPreRunE: o.PreRunFunc(),
 		RunE:              runHelp,
 		SilenceErrors:     true,
 	}
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+	return cmd
 }
 
-func (o *rootCmd) PreRunFunc() CommandRunnerFunc {
+func (o *singleRootCmd) PreRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if err := o.workspaceManager.Check(); err != nil {
+		if err := o.workspaceChecker.Check(); err != nil {
 			return err
 		}
 
-		if sliceutil.Contains(whitelist, cmd.CommandPath()) {
+		if isWhitelist(singleWhitelist, cmd) {
 			return nil
 		}
 
-		if err := o.checkServer(cmd.CommandPath()); err != nil {
-			return err
-		}
-
-		if err := o.checkSession(cmd.CommandPath()); err != nil {
-			return err
+		if err := o.sessionValidator.Validate(); err != nil {
+			fmt.Println(MsgInit)
+			os.Exit(0)
 		}
 
 		return nil
 	}
 }
 
-func (o *rootCmd) checkServer(commandPath string) error {
-	if o.edition == api.Team {
-		if err := o.serverValidator.Validate(); err != nil {
-			fmt.Print(serverCheckerDesc)
-			os.Exit(0)
+func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		if err := o.workspaceChecker.Check(); err != nil {
+			return err
 		}
-	}
-	return nil
-}
 
-func (o *rootCmd) checkSession(commandPath string) error {
-	if err := o.sessionValidator.Validate(); err != nil {
-		fmt.Print(sessionCheckerDesc)
-		secret, err := o.sessionPrompt()
+		if isWhitelist(teamWhitelist, cmd) {
+			return nil
+		}
+
+		cfg, err := o.serverFinder.Find()
 		if err != nil {
 			return err
+		} else if cfg.URL == "" {
+			fmt.Println(MsgInit)
+			os.Exit(0)
 		}
 
-		if err := o.loginManager.Login(secret); err != nil {
-			return err
+		if err := o.sessionValidator.Validate(); err != nil {
+			fmt.Println(MsgSession)
+			os.Exit(0)
 		}
 
-		if err := o.repoLoader.Load(); err != nil {
-			return err
-		}
-
-		fmt.Println("Session created successfully!")
-		os.Exit(0)
+		return nil
 	}
-
-	return nil
 }
 
-func (o *rootCmd) sessionPrompt() (security.Passcode, error) {
-	var passcode string
-	var err error
-
-	switch o.edition {
-	case api.Single:
-		passcode, err = o.Password("Define a passphrase for the session: ")
-	case api.Team:
-		passcode, err = o.Text("Enter your organization: ", true)
-	default:
-		err = errors.New("invalid Ritchie build, no edition defined")
-	}
-
-	if err != nil {
-		return "", err
-	}
-
-	return security.Passcode(passcode), nil
+func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
+	return sliceutil.Contains(whitelist, cmd.CommandPath())
 }
 
-func (o *rootCmd) version() string {
-	return fmt.Sprintf(versionMsg, Version, o.edition, BuildDate, runtime.Version())
+func version(edition api.Edition) string {
+	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
 }
 
 func runHelp(cmd *cobra.Command, args []string) error {

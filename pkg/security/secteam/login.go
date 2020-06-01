@@ -32,15 +32,14 @@ func NewLoginManager(
 	}
 }
 
-func (l LoginManager) Login(p security.Passcode) error {
-	org := p.String()
-	serverURL, err := l.serverFinder.Find()
-	if err != nil || serverURL == "" {
-		fmt.Print("Couldn't retrieve the server URL. Please, set the server URL.\n Command : rit set server\n")
+func (l LoginManager) Login() error {
+	cfg, err := l.serverFinder.Find()
+	if err != nil {
 		return err
 	}
+	fmt.Println("Organization:", cfg.Organization)
 
-	cr, err := loginChannelProvider(l.provider, org, serverURL)
+	cr, err := loginChannelProvider(l.provider, cfg.Organization, cfg.URL)
 	if err != nil {
 		return err
 	}
@@ -51,7 +50,7 @@ func (l LoginManager) Login(p security.Passcode) error {
 
 	sess := session.Session{
 		AccessToken:  resp.Token,
-		Organization: org,
+		Organization: cfg.Organization,
 		Username:     resp.Username,
 	}
 	err = l.sessionManager.Create(sess)

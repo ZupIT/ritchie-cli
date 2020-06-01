@@ -306,12 +306,12 @@ func (d DefaultRunner) persistCache(formulaPath, inputVal string, input Input, i
 			}
 			items = append([]string{inputVal}, items...)
 		}
-		qtd := DefaultCacheQtd
-		if input.Cache.Qtd != 0 {
-			qtd = input.Cache.Qtd
+		qty := DefaultCacheQty
+		if input.Cache.Qty != 0 {
+			qty = input.Cache.Qty
 		}
-		if len(items) > qtd {
-			items = items[0:qtd]
+		if len(items) > qty {
+			items = items[0:qty]
 		}
 		itemsBytes, _ := json.Marshal(items)
 		err := fileutil.WriteFile(cachePath, itemsBytes)
