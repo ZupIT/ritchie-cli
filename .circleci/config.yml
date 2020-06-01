@@ -36,6 +36,7 @@ references:
         - qa
         - /^pull\/.*$/
         - /^feature.*/
+        - /^fix.*/
         - nightly
         - beta
 
