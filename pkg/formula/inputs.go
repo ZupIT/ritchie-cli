@@ -168,9 +168,9 @@ func persistCache(formulaPath, inputVal string, input Input, items []string) {
 			}
 			items = append([]string{inputVal}, items...)
 		}
-		qtd := DefaultCacheQtd
-		if input.Cache.Qtd != 0 {
-			qtd = input.Cache.Qtd
+		qtd := DefaultCacheQty
+		if input.Cache.Qty != 0 {
+			qtd = input.Cache.Qty
 		}
 		if len(items) > qtd {
 			items = items[0:qtd]
