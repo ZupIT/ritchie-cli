@@ -226,6 +226,8 @@ jobs:
           command: |
             . ./.circleci/scripts/version.sh
             . ./.circleci/scripts/gen-deb.sh
+      - store_artifacts:
+          path: *TEST_RESULTS_DIR
 
   release:
     environment:
