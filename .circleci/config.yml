@@ -5,6 +5,7 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
+    ubuntu: &UBUNTU_IMAGE ubuntu:20.04
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -38,6 +39,7 @@ references:
         - /^feature.*/
         - nightly
         - beta
+        - feature/packaging
 
   filters-checks-pr: &FILTERS_CHECK_LINT
     branches:
@@ -61,6 +63,12 @@ executors:
   release-executor:
     docker:
       - image: *RUBY_IMAGE
+        user: root
+    working_directory: /workspace
+
+  ubuntu-executor:
+    docker:
+      - image: *UBUNTU_IMAGE
         user: root
     working_directory: /workspace
 
@@ -185,6 +193,18 @@ jobs:
             . ./.circleci/scripts/bucket.sh
             . ./.circleci/scripts/credentials.sh
             make delivery
+
+  deb-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: ubuntu-executor
+    steps:
+      - checkout
+      - run:
+          name: Generating package for debian
+          command: |
+            . ./.circleci/scripts/gen-deb.sh
+
   release:
     environment:
       <<: *ENVIRONMENT
@@ -222,36 +242,41 @@ workflows:
 
   build-for-branch:
     jobs:
-      - lint:
-          filters:
-            <<: *FILTERS_CHECK_LINT
-      - unit_test:
-          name: unit-tests
-          filters:
-            <<: *FILTERS_CHECK_CODE
+#      - lint:
+#          filters:
+#            <<: *FILTERS_CHECK_LINT
+#      - unit_test:
+#          name: unit-tests
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
       - build:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - unit-tests
-      - functional_test_single:
+#      - functional_test_single:
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build
+#      - functional_test_team:
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build
+#      - delivery:
+#          filters:
+#            <<: *FILTERS_DELIVERY
+#          requires:
+#            - functional_test_single
+#            - functional_test_team
+#      - release:
+#          filters:
+#            <<: *FILTERS_RELEASE
+#          requires:
+#            - delivery
+      - deb-package:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build
-      - functional_test_team:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build
-      - delivery:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - functional_test_single
-            - functional_test_team
-      - release:
-          filters:
-            <<: *FILTERS_RELEASE
-          requires:
-            - delivery
