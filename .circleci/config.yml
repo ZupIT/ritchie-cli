@@ -7,6 +7,7 @@ references:
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
     horus: &HORUS_IMAGE library/docker:dind
+    centos: &CENTOS_IMAGE viniciusramosdefaria/centos-image:7.0
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -72,6 +73,12 @@ executors:
   ubuntu-executor:
     docker:
       - image: *UBUNTU_IMAGE
+        user: root
+    working_directory: /workspace
+
+  centos-executor:
+    docker:
+      - image: *CENTOS_IMAGE
         user: root
     working_directory: /workspace
 
@@ -229,6 +236,22 @@ jobs:
       - store_artifacts:
           path: *TEST_RESULTS_DIR
 
+  rpm-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: centos-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Generating package for rpm
+          command: |
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/gen-rpm.sh
+      - store_artifacts:
+          path: *TEST_RESULTS_DIR
+
   release:
     environment:
       <<: *ENVIRONMENT
@@ -329,6 +352,11 @@ workflows:
 #          requires:
 #            - delivery
       - deb-package:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build
+      - rpm-package:
           filters:
             <<: *FILTERS_CHECK
           requires:
