@@ -6,6 +6,7 @@ references:
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
+    horus: &HORUS_IMAGE library/docker:dind
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -30,18 +31,15 @@ references:
       only:
         - /^release-.*/
 
-  filters-checks: &FILTERS_CHECK_CODE
+  filters-checks: &FILTERS_CHECK
     branches:
       only:
         - master
         - /^release-.*/
-        - qa
-        - /^pull\/.*$/
-        - /^feature.*/
         - nightly
         - beta
 
-  filters-checks-pr: &FILTERS_CHECK_LINT
+  filters-checks-pr: &FILTERS_CHECK_CODE
     branches:
       only:
         - qa
@@ -58,6 +56,11 @@ executors:
       - image: *GOLANG_IMAGE
         user: root
     working_directory: /workspace
+
+  horus-executor:
+    docker:
+      - image: *HORUS_IMAGE
+        user: root
 
   delivery-executor:
     docker:
@@ -86,6 +89,23 @@ jobs:
           command: |
             go mod download
             /go/bin/golangci-lint run
+
+  horus:
+    executor: horus-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Horus Security Analysis
+          command: |
+            echo "Starting scan Horus..."
+            docker run --rm -e HORUS_CLIENT_REPO_URL=$HORUS_CLIENT_REPO_URL \
+            -e HORUS_CLIENT_REPO_BRANCH=$HORUS_CLIENT_REPO_BRANCH \
+            -e HORUS_CLIENT_API_ADDR=$HORUS_CLIENT_API_ADDR \
+            -e HORUS_CLIENT_TOKEN=$HORUS_CLIENT_TOKEN \
+            -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS \
+            -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK horuszup/horus-client:latest
 
   unit_test:
     executor: ritchie-tests-executor
@@ -137,7 +157,6 @@ jobs:
           command: |
             go mod download
             make functional-test-single
-
 
   functional_test_team:
     executor: ritchie-executor
@@ -196,6 +215,7 @@ jobs:
             . ./.circleci/scripts/bucket.sh
             . ./.circleci/scripts/credentials.sh
             make delivery
+
   release:
     environment:
       <<: *ENVIRONMENT
@@ -235,24 +255,53 @@ workflows:
     jobs:
       - lint:
           filters:
-            <<: *FILTERS_CHECK_LINT
+            <<: *FILTERS_CHECK_CODE
+      - horus:
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - lint
+      - unit_test:
+         name: unit-test
+         filters:
+           <<: *FILTERS_CHECK_CODE
+         requires:
+           - horus
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - unit-test
+      - functional_test_single:
+          name: functional_test_single_code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - build-code
+      - functional_test_team:
+          name: functional_test_team_code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - build-code
       - unit_test:
           name: unit-tests
           filters:
-            <<: *FILTERS_CHECK_CODE
+            <<: *FILTERS_CHECK
       - build:
           filters:
-            <<: *FILTERS_CHECK_CODE
+            <<: *FILTERS_CHECK
           requires:
             - unit-tests
       - functional_test_single:
           filters:
-            <<: *FILTERS_CHECK_CODE
+            <<: *FILTERS_CHECK
           requires:
             - build
       - functional_test_team:
           filters:
-            <<: *FILTERS_CHECK_CODE
+            <<: *FILTERS_CHECK
           requires:
             - build
       - delivery:

@@ -7,6 +7,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 type inputTextMock struct{}
@@ -172,7 +173,7 @@ func (repoUpdaterMock) Update() error {
 
 type loginManagerMock struct{}
 
-func (loginManagerMock) Login(p security.Passcode) error {
+func (loginManagerMock) Login() error {
 	return nil
 }
 
@@ -224,4 +225,20 @@ func (t treeMock) Tree() (map[string]formula.Tree, error) {
 
 func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
+}
+
+type passphraseManagerMock struct{}
+
+func (passphraseManagerMock) Save(security.Passphrase) error {
+	return nil
+}
+
+type findSetterServerMock struct{}
+
+func (findSetterServerMock) Set(server.Config) error {
+	return nil
+}
+
+func (findSetterServerMock) Find() (server.Config, error) {
+	return server.Config{}, nil
 }

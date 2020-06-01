@@ -52,12 +52,12 @@ func (s Sender) SendCommand() {
 		return
 	}
 
-	serverURL, err := s.serverFinder.Find()
+	cfg, err := s.serverFinder.Find()
 	if err != nil {
 		return
 	}
 
-	url := fmt.Sprintf(urlPattern, serverURL)
+	url := fmt.Sprintf(urlPattern, cfg.URL)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return

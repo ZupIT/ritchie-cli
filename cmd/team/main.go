@@ -53,14 +53,14 @@ func buildCommands() *cobra.Command {
 	// deps
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
-	serverFinder := server.NewFinder(ritchieHomeDir)
-	serverValidator := server.NewValidator(serverFinder)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
+	serverFinder := server.NewFinder(ritchieHomeDir)
 	serverSetter := server.NewSetter(ritchieHomeDir, http.DefaultClient)
+	serverFindSetter := server.NewFindSetter(serverFinder, serverSetter)
 	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
 	repoLoader := formula.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
@@ -94,17 +94,7 @@ func buildCommands() *cobra.Command {
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	// commands
-	rootCmd := cmd.NewTeamRootCmd(
-		workspaceManager,
-		loginManager,
-		repoLoader,
-		serverValidator,
-		sessionValidator,
-		api.Team,
-		inputText,
-		inputPassword)
-
-	rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -112,8 +102,9 @@ func buildCommands() *cobra.Command {
 	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
+	initCmd := cmd.NewTeamInitCmd(inputText, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(loginManager, repoLoader, inputText)
+	loginCmd := cmd.NewLoginCmd(loginManager, repoLoader)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -131,7 +122,6 @@ func buildCommands() *cobra.Command {
 	deleteUserCmd := cmd.NewDeleteUserCmd(userManager, inputBool, inputText)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
-	setServerCmd := cmd.NewSetServerCmd(serverSetter, inputURL)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
@@ -148,7 +138,7 @@ func buildCommands() *cobra.Command {
 	createCmd.AddCommand(createUserCmd, createFormulaCmd)
 	deleteCmd.AddCommand(deleteUserCmd, deleteRepoCmd, deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setServerCmd)
+	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 
@@ -166,6 +156,7 @@ func buildCommands() *cobra.Command {
 				cleanCmd,
 				createCmd,
 				deleteCmd,
+				initCmd,
 				listCmd,
 				loginCmd,
 				logoutCmd,

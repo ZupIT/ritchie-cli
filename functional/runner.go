@@ -12,52 +12,57 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/cmd"
+)
+
+const (
+	rit     = "rit"
+	initCmd = "init"
 )
 
 type Step struct {
-	Key string `json:"key"`
-	Value string `json:"value"`
+	Key    string `json:"key"`
+	Value  string `json:"value"`
 	Action string `json:"action"`
 }
 
 type Scenario struct {
-	Entry string `json:"entry"`
-	Steps []Step `json:"steps"`
+	Entry  string `json:"entry"`
+	Steps  []Step `json:"steps"`
 	Result string `json:"result"`
 }
 
-func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, err error, out io.Reader, cmd *exec.Cmd) {
+func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, out io.Reader, err error) {
 	stdin, err = cmdIn.StdinPipe()
 	if err != nil {
-		return nil, err, nil, cmdIn
+		return nil, nil, err
 	}
 
 	stdout, _ := cmdIn.StdoutPipe()
 
 	err = cmdIn.Start()
 	if err != nil {
-		return nil, err, nil, cmdIn
-
+		return nil, nil, err
 	}
 
-	return stdin, nil, stdout, cmdIn
+	return stdin, stdout, nil
 }
 
 func (scenario *Scenario) RunSteps() (string, error) {
-	fmt.Println("Running: "+ scenario.Entry)
-
+	fmt.Println("Running: " + scenario.Entry)
 	args := strings.Fields(scenario.Steps[0].Value)
-	cmd, stdin, err, out := funcHitRit(args)
+	cmd, stdin, out, err := execRit(args)
 
 	if err == nil {
 		for _, step := range scenario.Steps {
 			if step.Action == "sendkey" {
-				err = funcSendKeys(step, out, stdin)
+				err = sendKeys(step, out, stdin)
 				if err != nil {
 					break
 				}
 			} else if step.Action == "select" {
-				err = funcSelect(step, out, stdin)
+				err = selectOption(step, out, stdin)
 				if err != nil {
 					break
 				}
@@ -68,10 +73,10 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	defer stdin.Close()
 
 	resp := ""
-	scanner := funcScannerTerminal(out)
+	scanner := scannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
-		funcShowTerminal(m)
+		fmt.Println(m)
 		resp = fmt.Sprint(resp, m, "\n")
 	}
 
@@ -85,14 +90,56 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	return resp, err
 }
 
-func FuncValidateLoginRequired() {
-	login := []string{"show", "context"}
-	_, stdin, _, out := funcHitRit(login)
-	scanner := funcScannerTerminal(out)
+func (scenario *Scenario) RunStdin() (string, error) {
+	fmt.Println("Running: " + scenario.Entry)
+
+	echo := strings.Fields(scenario.Steps[0].Value)
+	rit := strings.Fields(scenario.Steps[1].Value)
+
+	commandEcho := exec.Command("echo", echo...)
+	commandRit := exec.Command("rit", rit...)
+
+	pipeReader, pipeWriter := io.Pipe()
+	commandEcho.Stdout = pipeWriter
+	commandRit.Stdin = pipeReader
+
+	var b2 bytes.Buffer
+	commandRit.Stdout = &b2
+
+	errorEcho := commandEcho.Start()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
+	}
+
+	errorRit := commandRit.Start()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
+	}
+
+	errorEcho = commandEcho.Wait()
+	if errorEcho != nil {
+		log.Printf("Error while running: %q", errorEcho)
+	}
+
+	pipeWriter.Close()
+
+	errorRit = commandRit.Wait()
+	if errorRit != nil {
+		log.Printf("Error while running: %q", errorRit)
+	}
+
+	fmt.Println(&b2)
+	fmt.Println("--------")
+	return b2.String(), errorRit
+}
+func RitInit() {
+	command := []string{initCmd}
+	_, stdin, out, _ := execRit(command)
+	scanner := scannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
-		funcShowTerminal(m)
-		if strings.Contains(m, "To use this command, you need to start a session on Ritchie") {
+		fmt.Println(m)
+		if strings.Contains(m, cmd.MsgPhrase) {
 			err := inputCommand(stdin, "12345\n")
 			if err != nil {
 				log.Printf("Error when input number: %q", err)
@@ -100,29 +147,29 @@ func FuncValidateLoginRequired() {
 			break
 		}
 	}
-	scanner = funcScannerTerminal(out)
+	scanner = scannerTerminal(out)
 	for scanner.Scan() {
 		m := scanner.Text()
-		funcShowTerminal(m)
+		fmt.Println(m)
 	}
 }
 
-func funcHitRit(args []string) (*exec.Cmd, io.WriteCloser, error, io.Reader) {
-	cmd := exec.Command("rit", args...)
-	stdin, err, out, cmd := commandInit(cmd)
+func execRit(args []string) (*exec.Cmd, io.WriteCloser, io.Reader, error) {
+	cmd := exec.Command(rit, args...)
+	stdin, out, err := commandInit(cmd)
 	if err != nil {
 		log.Panic(err)
 	}
-	return cmd, stdin, nil, out
+	return cmd, stdin, out, err
 }
 
-func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
-	scanner := funcScannerTerminal(out)
+func selectOption(step Step, out io.Reader, stdin io.WriteCloser) error {
+	scanner := scannerTerminal(out)
 	startKey := false
 	optionNumber := 0
 	for scanner.Scan() {
 		m := scanner.Text()
-		funcShowTerminal(m)
+		fmt.Println(m)
 		if strings.Contains(m, step.Key) {
 			startKey = true
 		}
@@ -146,26 +193,26 @@ func funcSelect(step Step, out io.Reader, stdin io.WriteCloser) error {
 	return nil
 }
 
-func funcSendKeys(step Step, out io.Reader, stdin io.WriteCloser) error {
+func sendKeys(step Step, out io.Reader, stdin io.WriteCloser) error {
 	valueFinal := step.Value + "\n"
-	scanner := funcScannerTerminal(out)
+	scanner := scannerTerminal(out)
 	startKey := false
 	//Need to work on this possibility
 	// optionNumber := 0
 	for scanner.Scan() {
 		m := scanner.Text()
-		funcShowTerminal(m)
+		fmt.Println(m)
 		if strings.Contains(m, step.Key) {
 			startKey = true
 		}
 		if startKey {
 			// if strings.Contains(m, "Type new value.") {
 			// 	err = inputCommand(err, stdin, "\n")
-				err := inputCommand(stdin, valueFinal)
-				if err != nil {
-					return err
-				}
-				break
+			err := inputCommand(stdin, valueFinal)
+			if err != nil {
+				return err
+			}
+			break
 			// } else if optionNumber >= 1 {
 			// 	err = inputCommand(err, stdin, "j")
 			// }
@@ -185,25 +232,26 @@ func inputCommand(stdin io.WriteCloser, command string) error {
 }
 
 func LoadScenarios(file string) []Scenario {
-	scaffoldJson, _ := os.Open(file)
-	fmt.Println(scaffoldJson)
-	defer scaffoldJson.Close()
-	var result []Scenario
-	byteValue, _ := ioutil.ReadAll(scaffoldJson)
-	err := json.Unmarshal([]byte(byteValue), &result)
+	jsonFile, err := os.Open(file)
 	if err != nil {
-		log.Printf("Error unmarshal json: %q", err)
-		os.Exit(1)
+		log.Fatal("Error openning scenarios file:", err)
 	}
-	return result
+	fmt.Println(jsonFile)
+	defer jsonFile.Close()
+	var res []Scenario
+	b, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		log.Fatal("Error reading scenarios json:", err)
+	}
+	err = json.Unmarshal([]byte(b), &res)
+	if err != nil {
+		log.Fatal("Error unmarshal json:", err)
+	}
+	return res
 }
 
-func funcScannerTerminal(out io.Reader) *bufio.Scanner {
+func scannerTerminal(out io.Reader) *bufio.Scanner {
 	scanner := bufio.NewScanner(out)
 	scanner.Split(bufio.ScanLines)
 	return scanner
-}
-
-func funcShowTerminal(message string) {
-	fmt.Println(message)
 }

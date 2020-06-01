@@ -25,7 +25,7 @@ const (
 	EnvPattern                = "%s=%s"
 	CachePattern              = "%s/.%s.cache"
 	DefaultCacheNewLabel      = "Type new value?"
-	DefaultCacheQtd           = 5
+	DefaultCacheQty           = 5
 	FormCreatePathPattern     = "%s/ritchie-formulas-local"
 	TreeCreatePathPattern     = "%s/tree/tree.json"
 	MakefileCreatePathPattern = "%s/%s"
@@ -54,7 +54,7 @@ type Input struct {
 
 type Cache struct {
 	Active   bool   `json:"active"`
-	Qtd      int    `json:"qtd"`
+	Qty      int    `json:"qty"`
 	NewLabel string `json:"newLabel"`
 }
 type Create struct {

@@ -48,12 +48,12 @@ func (s Settings) Fields() (credential.Fields, error) {
 		return nil, err
 	}
 
-	serverURL, err := s.serverFinder.Find()
+	cfg, err := s.serverFinder.Find()
 	if err != nil {
 		return nil, err
 	}
 
-	url := fmt.Sprintf(urlConfigPattern, serverURL)
+	url := fmt.Sprintf(urlConfigPattern, cfg.URL)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err

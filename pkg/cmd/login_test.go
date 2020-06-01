@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewLoginCmd(t *testing.T) {
-	cmd := NewLoginCmd(loginManagerMock{}, repoLoaderMock{}, inputTextMock{})
+	cmd := NewLoginCmd(loginManagerMock{}, repoLoaderMock{})
 	if cmd == nil {
 		t.Errorf("NewLoginCmd got %v", cmd)
 

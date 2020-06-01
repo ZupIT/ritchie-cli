@@ -325,7 +325,7 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error 
 		tpl = strings.ReplaceAll(tpl, nameBinFirstUpper, strings.Title(strings.ToLower(pkg)))
 		return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
 	}
-
+	tpl = strings.ReplaceAll(tpl, nameModule, pkg)
 	tpl = strings.ReplaceAll(tpl, nameBin, pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
 }

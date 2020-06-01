@@ -27,6 +27,7 @@ var (
 		{Parent: "root_delete", Usage: "context"},
 		{Parent: "root_delete", Usage: "repo"},
 		{Parent: "root", Usage: "help"},
+		{Parent: "root", Usage: "init"},
 		{Parent: "root", Usage: "list"},
 		{Parent: "root_list", Usage: "repo"},
 		{Parent: "root", Usage: "set"},
@@ -47,7 +48,7 @@ var (
 	TeamCoreCmds = append(
 		CoreCmds,
 		[]Command{
-			{Parent: "root_create", Usage: "user"},
+			//temporarily removed {Parent: "root_create", Usage: "user"},
 			{Parent: "root_delete", Usage: "user"},
 			{Parent: "root_set", Usage: "server"},
 			{Parent: "root", Usage: "login"},

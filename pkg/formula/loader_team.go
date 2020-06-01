@@ -32,12 +32,12 @@ func (dm TeamLoader) Load() error {
 		return err
 	}
 
-	serverUrl, err := dm.serverFinder.Find()
+	cfg, err := dm.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	url := fmt.Sprintf(providerPath, serverUrl)
+	url := fmt.Sprintf(providerPath, cfg.URL)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err

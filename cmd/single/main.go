@@ -55,7 +55,7 @@ func buildCommands() *cobra.Command {
 	repoManager := formula.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
 	repoLoader := formula.NewSingleLoader(cmd.CommonsRepoURL, repoManager)
 	sessionValidator := sesssingle.NewValidator(sessionManager)
-	loginManager := secsingle.NewLoginManager(sessionManager)
+	passphraseManager := secsingle.NewPassphraseManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
 	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
 	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds)
@@ -77,16 +77,7 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	rootCmd := cmd.NewSingleRootCmd(
-		workspaceManager,
-		loginManager,
-		repoLoader,
-		sessionValidator,
-		api.Single,
-		inputText,
-		inputPassword)
-
-	rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+	rootCmd := cmd.NewSingleRootCmd(workspaceManager, sessionValidator)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -94,6 +85,7 @@ func buildCommands() *cobra.Command {
 	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
+	initCmd := cmd.NewSingleInitCmd(inputPassword, passphraseManager, repoLoader)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -142,6 +134,7 @@ func buildCommands() *cobra.Command {
 				cleanCmd,
 				createCmd,
 				deleteCmd,
+				initCmd,
 				listCmd,
 				setCmd,
 				showCmd,
