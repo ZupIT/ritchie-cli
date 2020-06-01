@@ -88,8 +88,8 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("Formula in %s successfully created!\n", lang)
-		fmt.Printf("Your formula is in %s", f.FormPath)
+		fmt.Printf("%s formula successfully created!\n", lang)
+		fmt.Printf("Formula path is %s \n", f.FormPath)
 
 		return nil
 	}
@@ -115,8 +115,8 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("Formula in %s successfully created!\n", cf.Lang)
-		fmt.Printf("Your formula is in %s\n", f.FormPath)
+		fmt.Printf("%s formula successfully created!\n", cf.Lang)
+		fmt.Printf("Formula path is %s \n", f.FormPath)
 
 		return nil
 	}

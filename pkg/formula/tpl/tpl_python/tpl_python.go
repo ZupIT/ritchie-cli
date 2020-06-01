@@ -30,7 +30,10 @@ WORKDIR /app
 
 COPY . .
 
-ENTRYPOINT python3 main.py`
+RUN chmod +x set_umask.sh
+
+ENTRYPOINT ["/app/set_umask.sh"]
+CMD ["python3 main.py"]`
 
 	File = `#!/usr/bin/python3
 import time

@@ -14,6 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
 
 var ErrMakefileNotFound = errors.New("makefile not found")
@@ -278,6 +279,9 @@ func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
 	if err != nil {
 		return err
 	}
+	if err := createUmask(srcDir); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -302,6 +306,11 @@ func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
 
 func createDockerfile(dir, tpl string) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
+}
+
+func createUmask(dir string) error {
+	uMaskFile := fmt.Sprintf("%s/set_umask.sh", dir)
+	return fileutil.WriteFile(uMaskFile, []byte(tpl_shell.Umask))
 }
 
 func createGoModFile(dir, pkg string) error {
