@@ -135,7 +135,7 @@ func NewGo() Go {
 		Dockerfile: tpl_go.Dockerfile,
 		Pkg: tpl_go.Pkg,
 		Compiled:   false,
-		UpperCase:  true,
+		UpperCase:  false,
 	}}
 }
 
@@ -175,7 +175,7 @@ func NewNode() Node {
 		PackageJson: tpl_node.PackageJson,
 		File:        tpl_node.File,
 		Compiled:    false,
-		UpperCase:   true,
+		UpperCase:   false,
 	}}
 }
 
@@ -218,7 +218,7 @@ func NewShell() Shell {
 		Dockerfile: tpl_shell.Dockerfile,
 		File:       tpl_shell.File,
 		Compiled:   false,
-		UpperCase:  true,
+		UpperCase:  false,
 	}}
 }
 
