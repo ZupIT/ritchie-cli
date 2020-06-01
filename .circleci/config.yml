@@ -98,6 +98,7 @@ jobs:
             -e HORUS_CLIENT_TOKEN=$HORUS_CLIENT_TOKEN \
             -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS \
             -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK horuszup/horus-client:latest
+
   unit_test:
     executor: ritchie-executor
     environment:
@@ -144,7 +145,6 @@ jobs:
           command: |
             go mod download
             make functional-test-single
-
 
   functional_test_team:
     executor: ritchie-executor
@@ -203,6 +203,7 @@ jobs:
             . ./.circleci/scripts/bucket.sh
             . ./.circleci/scripts/credentials.sh
             make delivery
+
   release:
     environment:
       <<: *ENVIRONMENT
