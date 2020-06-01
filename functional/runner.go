@@ -139,7 +139,7 @@ func RitInit() {
 	for scanner.Scan() {
 		m := scanner.Text()
 		fmt.Println(m)
-		if strings.Contains(m, cmd.MsgPassphrase) {
+		if strings.Contains(m, cmd.MsgPhrase) {
 			err := inputCommand(stdin, "12345\n")
 			if err != nil {
 				log.Printf("Error when input number: %q", err)
