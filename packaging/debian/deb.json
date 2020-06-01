@@ -5,9 +5,9 @@
   "homepage": "https://ritchiecli.io",
   "files": [
     {
-      "from": "workspace/dist/linux/single/rit",
+      "from": "dist/linux/single/rit",
       "to": "/usr/local/bin",
-      "base" : "workspace/dist/single/linux",
+      "base" : "dist/linux/single",
       "fperm": "0755"
     }
   ]
