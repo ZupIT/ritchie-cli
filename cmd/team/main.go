@@ -41,7 +41,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	//prompt
+	// prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -50,7 +50,7 @@ func buildCommands() *cobra.Command {
 	inputList := prompt.NewInputList()
 	inputURL := prompt.NewInputURL()
 
-	//deps
+	// deps
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
@@ -92,7 +92,7 @@ func buildCommands() *cobra.Command {
 		inputBool)
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	//commands
+	// commands
 	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)
 
 	// level 1
@@ -108,6 +108,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
+	testCmd := cmd.NewTestCmd()
 
 	// level 2
 	setCredentialCmd := cmd.NewTeamSetCredentialCmd(
@@ -130,6 +131,7 @@ func buildCommands() *cobra.Command {
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
+	testFormulaCmd := cmd.NewTestFormulaCmd()
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
@@ -140,6 +142,7 @@ func buildCommands() *cobra.Command {
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
+	testCmd.AddCommand(testFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.TeamCoreCmds, treeManager, formulaRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
@@ -161,6 +164,7 @@ func buildCommands() *cobra.Command {
 				logoutCmd,
 				setCmd,
 				showCmd,
+				testCmd,
 				updateCmd,
 			},
 		},

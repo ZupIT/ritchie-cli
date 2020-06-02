@@ -41,6 +41,8 @@ var (
 		{Parent: "root_update", Usage: "repo"},
 		{Parent: "root", Usage: "clean"},
 		{Parent: "root_clean", Usage: "repo"},
+		{Parent: "root", Usage: "test"},
+		{Parent: "root_test", Usage: "formula"},
 	}
 
 	SingleCoreCmds = CoreCmds
@@ -48,7 +50,7 @@ var (
 	TeamCoreCmds = append(
 		CoreCmds,
 		[]Command{
-			//temporarily removed {Parent: "root_create", Usage: "user"},
+			// temporarily removed {Parent: "root_create", Usage: "user"},
 			{Parent: "root_delete", Usage: "user"},
 			{Parent: "root", Usage: "login"},
 			{Parent: "root", Usage: "logout"},
@@ -84,7 +86,7 @@ type Edition string
 type TermInputType int
 
 const (
-	//Prompt input
+	// Prompt input
 	Prompt TermInputType = iota
 	// Stdin input
 	Stdin
@@ -99,7 +101,7 @@ func (t TermInputType) ToLower() string {
 	return strings.ToLower(t.String())
 }
 
-//UserHomeDir returns the home dir of the user
+// UserHomeDir returns the home dir of the user
 func UserHomeDir() string {
 	usr, err := user.Current()
 	if err != nil {
@@ -108,7 +110,7 @@ func UserHomeDir() string {
 	return usr.HomeDir
 }
 
-//RitchieHomeDir returns the home dir of the ritchie
+// RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
 	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
 }
