@@ -24,6 +24,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	}
 
 	cmd := exec.Command(setup.tmpBinFilePath)
+	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

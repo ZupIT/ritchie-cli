@@ -141,14 +141,22 @@ test:
 
 	Dockerfile = `
 FROM golang:alpine AS builder
-WORKDIR /app/
-COPY . .
+
+ADD . /app
+WORKDIR /app
 RUN go build -o main -v main.go
 
-FROM alpine:latest  
-WORKDIR /app/
-COPY --from=builder app/main .
-ENTRYPOINT ["./main"]`
+FROM alpine:latest
+
+
+COPY --from=builder /app/main main
+COPY --from=builder /app/set_umask.sh set_umask.sh
+RUN chmod +x main
+RUN chmod +x set_umask.sh
+
+WORKDIR /app
+ENTRYPOINT ["/set_umask.sh"]
+CMD ["/main"]`
 
 	MakefileMain = `#Makefiles
 {{formName}}={{formPath}}

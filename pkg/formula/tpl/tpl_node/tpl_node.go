@@ -31,7 +31,9 @@ WORKDIR /app
 
 COPY . .
 
-ENTRYPOINT node index.js`
+RUN chmod +x set_umask.sh
+ENTRYPOINT ["/app/set_umask.sh"]
+CMD ["node index.js"]`
 
 	Run = `#!/bin/sh
 node index.js`

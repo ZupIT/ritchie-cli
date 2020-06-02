@@ -16,6 +16,7 @@ func NewInputList() inputList {
 func (inputList) List(name string, items []string) (string, error) {
 	prompt := promptui.Select{
 		Items:     items,
+		Pointer: promptui.PipeCursor,
 		Templates: defaultSelectTemplate(name),
 	}
 	_, result, err := prompt.Run()

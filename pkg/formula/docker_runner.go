@@ -36,6 +36,7 @@ func (d DockerRunner) Run(def Definition, inputType api.TermInputType) error {
 	volume := fmt.Sprintf("%s:/app", setup.pwd)
 	args := []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.containerId, setup.containerId}
 	cmd := exec.Command(docker, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
+	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

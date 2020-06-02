@@ -46,7 +46,11 @@ RUN apk add openjdk8
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
 ENV PATH="$JAVA_HOME/bin:${PATH}"
 
-ENTRYPOINT java -jar Main.jar`
+RUN javac Main.java
+RUN chmod +x set_umask.sh
+
+ENTRYPOINT ["/app/set_umask.sh"]
+CMD ["java Main"]`
 
 	Run = `#!/bin/sh
 java -jar Main.jar`

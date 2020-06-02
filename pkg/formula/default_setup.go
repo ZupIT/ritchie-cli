@@ -51,7 +51,6 @@ func NewDefaultTeamSetup(ritchieHome string, c *http.Client, sess session.Manage
 }
 
 func (d DefaultSetup) Setup(def Definition) (Setup, error) {
-	fmt.Println("Setting up formula...")
 	pwd, _ := os.Getwd()
 	ritchieHome := d.ritchieHome
 	formulaPath := def.FormulaPath(ritchieHome)
@@ -63,18 +62,8 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 	binName := def.BinName()
 	binPath := def.BinPath(formulaPath)
 	binFilePath := def.BinFilePath(binPath, binName)
-
-	if !fileutil.Exists(binFilePath) {
-		url := def.BundleURL()
-		name := def.BundleName()
-		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name, def.RepoName)
-		if err != nil {
-			return Setup{}, err
-		}
-
-		if err := unzipFile(zipFile, formulaPath); err != nil {
-			return Setup{}, err
-		}
+	if err := d.loadBundle(formulaPath, binFilePath, def); err != nil {
+		return Setup{}, err
 	}
 
 	tmpDir, tmpBinDir, err := createWorkDir(ritchieHome, binPath, def)
@@ -98,18 +87,19 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 		config:         config,
 	}
 
-	fmt.Println("Done")
 	return run, nil
 }
 
-func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, error) { // Pre run
+func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, error) {
 	configName := def.ConfigName()
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
+		fmt.Println("Downloading formula config...")
 		url := def.ConfigURL(configName)
 		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
 			return Config{}, err
 		}
+		fmt.Println("Formula config download completed \\o/")
 	}
 
 	configFile, err := ioutil.ReadFile(configPath)
@@ -124,7 +114,25 @@ func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, er
 	return formulaConfig, nil
 }
 
+func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def Definition) error {
+	if !fileutil.Exists(binFilePath) {
+		url := def.BundleURL()
+		name := def.BundleName()
+		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name, def.RepoName)
+		if err != nil {
+			return err
+		}
+
+		if err := unzipFile(zipFile, formulaPath); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
+	fmt.Println("Downloading formula...")
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", ErrCreateReqBundle
@@ -170,6 +178,7 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		return "", err
 	}
 
+	fmt.Println("Formula download completed \\o/")
 	return file, nil
 }
 
