@@ -66,7 +66,7 @@ func newInitCmd(stdinFunc, promptFunc CommandRunnerFunc) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Init rit",
-		Long:  "Initiliaze rit configuration",
+		Long:  "Initialize rit configuration",
 		RunE:  RunFuncE(stdinFunc, promptFunc),
 	}
 	cmd.LocalFlags()

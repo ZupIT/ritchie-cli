@@ -21,6 +21,7 @@ func NewInputPassword() inputPassword {
 func (inputPassword) Password(label string) (string, error) {
 	prompt := promptui.Prompt{
 		Label:     label,
+		Pointer: promptui.PipeCursor,
 		Mask:      '*',
 		Validate:  validateEmptyInput,
 		Templates: defaultTemplate(),
