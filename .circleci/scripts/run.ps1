@@ -27,4 +27,4 @@ function Unzip
 
 Unzip "$PSScriptRoot\wix310-binaries.zip" "$PSScriptRoot\wix310"
 
-dir
+dir "$PSScriptRoot"
