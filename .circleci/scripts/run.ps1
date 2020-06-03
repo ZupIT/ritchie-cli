@@ -29,3 +29,5 @@ function Unzip
 Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "$((Get-Item -Path ".\").FullName)\packaging\windows\wix310"
 
 dir "$((Get-Item -Path ".\").FullName)"
+
+go-msi

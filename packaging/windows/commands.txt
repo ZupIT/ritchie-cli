@@ -13,3 +13,7 @@ go-msi choco --path wix.json --version 0.0.1 --input ritchiecli.msi
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
 choco install ritchiecli.0.0.1.nupkg
+
+$output = "$((Get-Item -Path ".\").FullName)\go-msi-amd64.msi"
+
+Start-Process msiexec.exe -Wait -ArgumentList "/I $output /quiet"
