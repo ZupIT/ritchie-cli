@@ -43,11 +43,13 @@ $release_version=$(Get-Content .\release_version.txt)
 
 mkdir dist\installer
 
+copy LICENSE packaging/windows
+
 cd packaging\windows
 
 Write-Output 'GENERATING MSI INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version -l ..\..\LICENSE
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version
 
 Write-Output 'GENERATING CHOCO INSTALLER'
 
