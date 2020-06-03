@@ -267,8 +267,11 @@ jobs:
     executor:
       name: win/default
     steps:
+      - checkout
       - run:
-          command: echo hello && echo world
+          command: |
+            . ./.circleci/scripts/version.sh
+            env
           shell: bash.exe
 
   release:
