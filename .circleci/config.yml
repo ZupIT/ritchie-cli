@@ -274,7 +274,7 @@ jobs:
           command: |
             . ./.circleci/scripts/version.sh
             powershell.exe .circleci/scripts/run.ps1
-
+            C:/Program\ Files/go-msi/go-msi.exe
           shell: bash.exe
 
   release:
