@@ -69,29 +69,29 @@ build-circle:
 	GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.CommonsRepoURL=$(COMMONS_REPO_URL)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(SINGLE_CMD_PATH)
 
 release:
-	tree dist
-#	git config --global user.email "$(GIT_EMAIL)"
-#	git config --global user.name "$(GIT_NAME)"
-#	git tag -a $(RELEASE_VERSION) -m "CHANGELOG: https://github.com/ZupIT/ritchie-cli/blob/master/CHANGELOG.md"
-#	git push $(GIT_REMOTE) $(RELEASE_VERSION)
-#	gem install github_changelog_generator
-#	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --enhancement-labels feature,Feature --exclude-labels duplicate,question,invalid,wontfix
-#	git add .
-#	git commit --allow-empty -m "[ci skip] release"
-#	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
-#	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
+	git config --global user.email "$(GIT_EMAIL)"
+	git config --global user.name "$(GIT_NAME)"
+	git tag -a $(RELEASE_VERSION) -m "CHANGELOG: https://github.com/ZupIT/ritchie-cli/blob/master/CHANGELOG.md"
+	git push $(GIT_REMOTE) $(RELEASE_VERSION)
+	gem install github_changelog_generator
+	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --enhancement-labels feature,Feature --exclude-labels duplicate,question,invalid,wontfix
+	git add .
+	git commit --allow-empty -m "[ci skip] release"
+	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
+	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
 
 delivery:
-	@echo $(VERSION)
-ifneq "$(BUCKET)" ""
-	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
-ifneq "$(IS_RELEASE)" ""
-	echo -n "$(RELEASE_VERSION)" > stable.txt
-	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
-endif
-else
-	echo "NOT GONNA PUBLISH"
-endif
+	tree dist
+#	@echo $(VERSION)
+#ifneq "$(BUCKET)" ""
+#	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
+#ifneq "$(IS_RELEASE)" ""
+#	echo -n "$(RELEASE_VERSION)" > stable.txt
+#	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+#endif
+#else
+#	echo "NOT GONNA PUBLISH"
+#endif
 
 publish:
 	echo "Do nothing"

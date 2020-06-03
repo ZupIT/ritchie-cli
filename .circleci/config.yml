@@ -29,6 +29,7 @@ references:
         - qa
         - nightly
         - beta
+        - feature/packaging
 
   filters-release: &FILTERS_RELEASE
     branches:
@@ -372,17 +373,20 @@ workflows:
 #            <<: *FILTERS_CHECK
 #          requires:
 #            - build
-#      - delivery:
-#          filters:
-#            <<: *FILTERS_DELIVERY
-#          requires:
+      - delivery:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - deb-package
+            - rpm-package
+            - win-package
 #            - functional_test_single
 #            - functional_test_team
-      - release:
-          filters:
-            <<: *FILTERS_RELEASE
-          requires:
-            - delivery
+#      - release:
+#          filters:
+#            <<: *FILTERS_RELEASE
+#          requires:
+#            - delivery
       - deb-package:
           filters:
             <<: *FILTERS_CHECK
