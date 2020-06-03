@@ -26,9 +26,9 @@ function Unzip
     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
 
-Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Windows\system32"
+Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\circleci\AppData\Local\Microsoft\WindowsApps"
 
 cd packaging\windows
 
-& 'C:\Program\ Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version 0.0.1 -l ..\..\LICENSE
-& 'C:\Program\ Files\go-msi\go-msi.exe' --path wix.json --version 0.0.1 --input ritchiecli.msi
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version 0.0.1 -l ..\..\LICENSE
+& 'C:\Program Files\go-msi\go-msi.exe' --path wix.json --version 0.0.1 --input ritchiecli.msi
