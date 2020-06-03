@@ -262,7 +262,7 @@ jobs:
             . ./.circleci/scripts/gen-rpm.sh
       - store_artifacts:
           path: *TEST_RESULTS_DIR
-          
+
   win-package:
     executor:
       name: win/default

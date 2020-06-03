@@ -51,7 +51,7 @@ Write-Output 'GENERATING MSI INSTALLER'
 
 Write-Output 'GENERATING CHOCO INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' --version $release_version --input ritchiecli.msi
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version --input ritchiecli.msi
 
 dir
 
