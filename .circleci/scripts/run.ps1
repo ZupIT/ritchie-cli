@@ -30,4 +30,4 @@ Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "$((Get-Item -Path
 
 dir "$((Get-Item -Path ".\").FullName)"
 
-go-msi
+& 'C:\Program Files\go-msi\go-msi.exe'
