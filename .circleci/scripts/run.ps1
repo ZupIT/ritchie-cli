@@ -7,7 +7,7 @@ $wc.DownloadFile($url, $output)
 
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 
-$output /quiet
+Start-Process msiexec.exe -Wait -ArgumentList "/I $output /quiet"
 
 $url = "http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip"
 $output = "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip"
