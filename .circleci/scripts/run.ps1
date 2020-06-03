@@ -32,10 +32,9 @@ dir "$((Get-Item -Path ".\").FullName)"
 
 & 'C:\Program Files\go-msi\go-msi.exe'
 
-dir
+dir "$((Get-Item -Path ".\").FullName)/workspace/dist"
 
-$olddir = "$((Get-Item -Path ".\").FullName)"
+# $olddir = "$((Get-Item -Path ".\").FullName)"
 
-cd "$((Get-Item -Path ".\").FullName)/packaging/windows"
+# cd "$((Get-Item -Path ".\").FullName)/packaging/windows"
 
-dir
