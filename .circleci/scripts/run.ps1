@@ -7,7 +7,7 @@ $wc.DownloadFile($url, $output)
 
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 
-.\go-msi-amd64.msi /quiet
+"$((Get-Item -Path ".\").FullName)\go-msi-amd64.msi" /quiet
 
 $url = "http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip"
 $output = "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip"
@@ -28,6 +28,4 @@ function Unzip
 
 Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "$((Get-Item -Path ".\").FullName)\packaging\windows\wix310"
 
-dir "$((Get-Item -Path ".\").FullName)\packaging\windows\wix310"
-
-go-msi
+dir "$((Get-Item -Path ".\").FullName)"
