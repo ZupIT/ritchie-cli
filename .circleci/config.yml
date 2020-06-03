@@ -275,6 +275,7 @@ jobs:
       - run:
           command: |
             powershell.exe .circleci\scripts\run.ps1
+            dir
           shell: powershell.exe
 
   release:
