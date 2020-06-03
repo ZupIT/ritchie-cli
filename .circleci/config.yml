@@ -378,21 +378,21 @@ workflows:
 #          requires:
 #            - functional_test_single
 #            - functional_test_team
-#      - release:
-#          filters:
-#            <<: *FILTERS_RELEASE
-#          requires:
-#            - delivery
-#      - deb-package:
-#          filters:
-#            <<: *FILTERS_CHECK
-#          requires:
-#            - build
-#      - rpm-package:
-#          filters:
-#            <<: *FILTERS_CHECK
-#          requires:
-#            - build
+      - release:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - delivery
+      - deb-package:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build
+      - rpm-package:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build
       - win-package:
           filters:
             <<: *FILTERS_CHECK
