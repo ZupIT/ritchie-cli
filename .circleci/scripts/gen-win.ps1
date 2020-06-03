@@ -47,18 +47,24 @@ copy LICENSE packaging/windows
 
 cd packaging\windows
 
-Write-Output 'GENERATING MSI INSTALLER'
+Write-Output 'GENERATING MSI TEAM INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecliteam.msi --version $release_version --path wix-team.json
 
-Write-Output 'GENERATING CHOCO INSTALLER'
+Write-Output 'GENERATING CHOCO TEAM INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version --input ritchiecli.msi
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version --input ritchiecliteam.msi --path wix-team.json
 
-dir
+Write-Output 'GENERATING MSI SINGLE INSTALLER'
+
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchieclisingle.msi --version $release_version --path wix-single.json
+
+Write-Output 'GENERATING CHOCO SINGLE INSTALLER'
+
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version --input ritchieclisingle.msi --path wix-single.json
 
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
 
-copy ritchiecli.msi ..\..\dist\installer
+copy ritchie* ..\..\dist\installer
 
 copy *.nupkg ..\..\dist\installer
