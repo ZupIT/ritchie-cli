@@ -328,10 +328,10 @@ workflows:
 #           <<: *FILTERS_CHECK_CODE
 #         requires:
 #           - horus
-#      - build:
-#          name: build-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_CHECK_CODE
 #          requires:
 #            - unit-test
 #      - functional_test_single:
@@ -389,5 +389,5 @@ workflows:
       - win-package:
           filters:
             <<: *FILTERS_CHECK
-#          requires:
-#            - build
+          requires:
+            - build
