@@ -271,7 +271,7 @@ jobs:
       - run:
           command: |
             . ./.circleci/scripts/version.sh
-            env
+            wget -O go-msi-amd64.msi https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.msi
           shell: bash.exe
 
   release:
