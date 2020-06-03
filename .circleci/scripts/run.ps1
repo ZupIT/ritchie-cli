@@ -29,3 +29,5 @@ function Unzip
 Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "$((Get-Item -Path ".\").FullName)/wix310"
 
 $env:Path += "$((Get-Item -Path ".\").FullName)/wix310"
+
+[Environment]::SetEnvironmentVariable("Path", $env:Path, "Machine")
