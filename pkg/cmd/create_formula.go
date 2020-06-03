@@ -12,8 +12,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
-
-var ErrNotAllowedCharacter = errors.New(`not allowed character on formula name \/,><@`)
+var msgNotAllowedCharacter = fmt.Sprintf(prompt.Error,`not allowed character on formula name \/,><@`)
+var ErrNotAllowedCharacter = errors.New(msgNotAllowedCharacter)
 
 const notAllowedChars = `\/><,@`
 
@@ -57,8 +57,6 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		fmt.Println("Creating Formula ...")
-
 		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
 		if err != nil {
 			return err
@@ -88,8 +86,10 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%s formula successfully created!\n", lang)
-		fmt.Printf("Formula path is %s \n", f.FormPath)
+		msg := fmt.Sprintf("%s formula successfully created!\n", lang)
+		fmt.Printf(prompt.Success, msg)
+		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
+		fmt.Printf(prompt.Info,msg)
 
 		return nil
 	}
@@ -97,7 +97,6 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Creating Formula ...")
 
 		var cf formula.Create
 
@@ -115,8 +114,10 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%s formula successfully created!\n", cf.Lang)
-		fmt.Printf("Formula path is %s \n", f.FormPath)
+		msg := fmt.Sprintf("%s formula successfully created!\n", cf.Lang)
+		fmt.Printf(prompt.Success, msg)
+		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
+		fmt.Printf(prompt.Info,msg)
 
 		return nil
 	}

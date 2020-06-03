@@ -15,10 +15,19 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-var ErrMakefileNotFound = errors.New("makefile not found")
-var ErrTreeJsonNotFound = errors.New("tree.json not found")
+var msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
+var ErrMakefileNotFound = errors.New(msgErrMakefileNotFound)
+var msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")
+var ErrTreeJsonNotFound = errors.New(msgErrTreeJsonNotFound)
+var msgErrRepeatedCommand = fmt.Sprintf(prompt.Error, "this command already exists")
+var ErrRepeatedCommand = errors.New(msgErrRepeatedCommand)
+var msgErrDontStartWithRit = fmt.Sprintf(prompt.Error, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
+var ErrDontStartWithRit = errors.New(msgErrDontStartWithRit)
+var msgErrTooShortCommand = fmt.Sprintf(prompt.Error, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+var ErrTooShortCommand = errors.New(msgErrTooShortCommand)
 
 type CreateManager struct {
 	FormPath    string
@@ -159,18 +168,19 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 	s := strings.Split(fCmd, " ")
 
 	if s[0] != "rit" {
-		return errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+		return ErrDontStartWithRit
 	}
 
 	if len(s) <= 2 {
-		return errors.New("the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+		return ErrTooShortCommand
 	}
 	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
 	u := s[len(s)-1]
 	for _, v := range trees {
 		for _, j := range v.Commands {
 			if j.Parent == cp && j.Usage == u {
-				return errors.New("this command already exists")
+				return ErrRepeatedCommand
+
 			}
 		}
 	}

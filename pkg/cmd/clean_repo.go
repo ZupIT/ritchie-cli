@@ -72,7 +72,7 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		msg := fmt.Sprintf("%q has been cleaned successfully\n", n)
+		msg := fmt.Sprintf("%q has been cleaned successfully\n", f.Name)
 		fmt.Printf(prompt.Success, msg)
 
 		return nil
