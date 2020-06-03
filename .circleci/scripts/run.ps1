@@ -25,6 +25,6 @@ function Unzip
     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
 
-Unzip "$PSScriptRoot\wix310-binaries.zip" "$PSScriptRoot\wix310"
+Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "$((Get-Item -Path ".\").FullName)\packaging\windows\wix310"
 
-dir
+dir "$((Get-Item -Path ".\").FullName)\packaging\windows\wix310"
