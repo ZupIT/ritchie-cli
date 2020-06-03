@@ -41,6 +41,8 @@ Write-Output 'Setting Release Version Variable'
 
 $release_version=$(Get-Content .\release_version.txt)
 
+mkdir dist\installer
+
 cd packaging\windows
 
 Write-Output 'GENERATING MSI INSTALLER'
@@ -53,6 +55,6 @@ Write-Output 'GENERATING CHOCO INSTALLER'
 
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
 
-copy ritchiecli.msi ..\..\dist
+copy ritchiecli.msi ..\..\dist\installer
 
-copy *.nupkg ..\..\dist
+copy *.nupkg ..\..\dist\installer

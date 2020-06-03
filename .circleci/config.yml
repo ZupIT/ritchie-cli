@@ -277,8 +277,13 @@ jobs:
           shell: bash.exe
       - run:
           command: |
-            .circleci/scripts/run.ps1
+            .circleci/scripts/gen-win.ps1
           shell: powershell.exe
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
   release:
     environment:
       <<: *ENVIRONMENT
