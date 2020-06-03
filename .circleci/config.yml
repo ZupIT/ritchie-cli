@@ -328,10 +328,10 @@ workflows:
 #           <<: *FILTERS_CHECK_CODE
 #         requires:
 #           - horus
-      - build:
-          name: build-code
-          filters:
-            <<: *FILTERS_CHECK_CODE
+#      - build:
+#          name: build-code
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
 #          requires:
 #            - unit-test
 #      - functional_test_single:
@@ -350,11 +350,11 @@ workflows:
 #          name: unit-tests
 #          filters:
 #            <<: *FILTERS_CHECK
-#      - build:
-#          filters:
-#            <<: *FILTERS_CHECK
-#          requires:
-#            - unit-tests
+      - build:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - unit-tests
 #      - functional_test_single:
 #          filters:
 #            <<: *FILTERS_CHECK
