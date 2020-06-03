@@ -1,6 +1,6 @@
 wget -O go-msi-amd64.msi https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.msi
 
-Start-Process go-msi-amd64.msi
+Start-Process go-msi-amd64.msi /quiet
 
 wget -O wix310-binaries.zip http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip
 

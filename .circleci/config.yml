@@ -271,8 +271,8 @@ jobs:
       - run:
           command: |
             . ./.circleci/scripts/version.sh
+            env
             powershell.exe .circleci/scripts/run.ps1
-            dir
           shell: bash.exe
 
   release:
