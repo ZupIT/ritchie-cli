@@ -1,13 +1,17 @@
 version: 2.1
 
+orbs:
+  win: circleci/windows@2.2.0
+
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
-    ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
     horus: &HORUS_IMAGE library/docker:dind
+    ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
     centos: &CENTOS_IMAGE viniciusramosdefaria/centos-circleci:7.0
+    windows: &WINDOWS_IMAGE win/default
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -79,6 +83,12 @@ executors:
   centos-executor:
     docker:
       - image: *CENTOS_IMAGE
+        user: root
+    working_directory: /workspace
+
+  windows-executor:
+    docker:
+      - image: *WINDOWS_IMAGE
         user: root
     working_directory: /workspace
 
@@ -252,6 +262,15 @@ jobs:
       - store_artifacts:
           path: *TEST_RESULTS_DIR
 
+
+  win-package:
+    executor:
+      name: win/default
+    steps:
+      - run:
+          command: echo hello && echo world
+          shell: bash.exe
+
   release:
     environment:
       <<: *ENVIRONMENT
@@ -351,12 +370,17 @@ workflows:
 #            <<: *FILTERS_RELEASE
 #          requires:
 #            - delivery
-      - deb-package:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
-      - rpm-package:
+#      - deb-package:
+#          filters:
+#            <<: *FILTERS_CHECK
+#          requires:
+#            - build
+#      - rpm-package:
+#          filters:
+#            <<: *FILTERS_CHECK
+#          requires:
+#            - build
+      - win-package:
           filters:
             <<: *FILTERS_CHECK
           requires:
