@@ -1,3 +1,6 @@
+
+Write-Output 'DOWLOADING GO-MSI INSTALLER'
+
 $url = "https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.msi"
 $output = "$((Get-Item -Path ".\").FullName)\go-msi-amd64.msi"
 $start_time = Get-Date
@@ -7,7 +10,11 @@ $wc.DownloadFile($url, $output)
 
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 
+Write-Output 'INSTALLING GO-MSI'
+
 Start-Process msiexec.exe -Wait -ArgumentList "/I $output /quiet"
+
+Write-Output 'DOWLOADING WIX FILES'
 
 $url = "http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip"
 $output = "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip"
@@ -26,9 +33,22 @@ function Unzip
     [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
 
+Write-Output 'EXTRACTING WIX FILES TO PATH'
+
 Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\circleci\AppData\Local\Microsoft\WindowsApps"
 
 cd packaging\windows
 
+Write-Output 'GENERATING MSI INSTALLER'
+
 & 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version 0.0.1 -l ..\..\LICENSE
-& 'C:\Program Files\go-msi\go-msi.exe' --path wix.json --version 0.0.1 --input ritchiecli.msi
+
+Write-Output 'GENERATING CHOCO INSTALLER'
+
+& 'C:\Program Files\go-msi\go-msi.exe' --version 0.0.1 --input ritchiecli.msi
+
+Write-Output 'COPYING FILES TO THE RIGHT PLACE'
+
+copy ritchie.msi ..\..\dist
+
+copy *.nupkg ..\..\dist
