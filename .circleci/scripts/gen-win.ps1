@@ -53,6 +53,8 @@ Write-Output 'GENERATING CHOCO INSTALLER'
 
 & 'C:\Program Files\go-msi\go-msi.exe' --version $release_version --input ritchiecli.msi
 
+dir
+
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
 
 copy ritchiecli.msi ..\..\dist\installer
