@@ -268,11 +268,13 @@ jobs:
       name: win/default
     steps:
       - checkout
+      - attach_workspace:
+          at: /workspace/dist
       - run:
           command: |
             . ./.circleci/scripts/version.sh
-            env
             powershell.exe .circleci/scripts/run.ps1
+
           shell: bash.exe
 
   release:
