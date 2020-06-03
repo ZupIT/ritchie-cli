@@ -49,7 +49,7 @@ cd packaging\windows
 
 Write-Output 'GENERATING MSI TEAM INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecliteam.msi --version $release_version --path wix-team.json
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecliteam.msi --version $release_version".team" --path wix-team.json
 
 Write-Output 'GENERATING CHOCO TEAM INSTALLER'
 
@@ -57,7 +57,7 @@ Write-Output 'GENERATING CHOCO TEAM INSTALLER'
 
 Write-Output 'GENERATING MSI SINGLE INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchieclisingle.msi --version $release_version --path wix-single.json
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchieclisingle.msi --version $release_version".single" --path wix-single.json
 
 Write-Output 'GENERATING CHOCO SINGLE INSTALLER'
 
