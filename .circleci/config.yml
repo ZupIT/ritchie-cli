@@ -273,15 +273,12 @@ jobs:
       - run:
           command: |
             . ./.circleci/scripts/version.sh
-            powershell.exe .circleci/scripts/run.ps1
-            cd packaging/windows
-            env
-            C:/Program\ Files/go-msi/go-msi.exe make --msi ritchiecli.msi --version 0.0.1 -l ../../LICENSE
-            C:/Program\ Files/go-msi/go-msi.exe --path wix.json --version 0.0.1 --input ritchiecli.msi
-            dir
-            C:/Program\ Files/go-msi/go-msi.exe
+            echo $RELEASE_VERSION > release_version.txt
           shell: bash.exe
-
+      - run:
+          command: |
+            .circleci/scripts/run.ps1
+          shell: powershell.exe
   release:
     environment:
       <<: *ENVIRONMENT
