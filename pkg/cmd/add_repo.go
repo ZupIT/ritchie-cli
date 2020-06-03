@@ -62,10 +62,11 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 		for _, repo := range repos {
 			if rn == repo.Name {
-				fmt.Printf("Your repository %s is gonna be overwritten.\n", repo.Name)
+				msg := fmt.Sprintf("Your repository %q is gonna be overwritten.\n", repo.Name)
+				fmt.Printf(prompt.Warning, msg)
 				choice, _ := a.Bool("Want to proceed?", []string{"yes", "no"})
 				if !choice {
-					fmt.Println("Operation cancelled")
+					fmt.Printf(prompt.Error, "Operation cancelled\n")
 					return nil
 				}
 			}
@@ -90,7 +91,7 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 		if err = a.Add(r); err != nil {
 			return err
 		}
-
+		fmt.Printf(prompt.Success, "Repository added\n")
 		return err
 	}
 }
@@ -110,7 +111,7 @@ func (a addRepoCmd) runStdin() CommandRunnerFunc {
 		if err := a.Add(r); err != nil {
 			return err
 		}
-
+		fmt.Printf(prompt.Success, "Repository added\n")
 		return nil
 	}
 }
