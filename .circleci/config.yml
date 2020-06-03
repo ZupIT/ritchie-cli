@@ -271,7 +271,8 @@ jobs:
       - run:
           command: |
             . ./.circleci/scripts/version.sh
-            wget -O go-msi-amd64.msi https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.msi
+            bitsadmin.exe /transfer downloadJob /download /priority normal https://commons-repo.ritchiecli.io/stable.txt stable.txt
+#            wget -O go-msi-amd64.msi https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.msi
           shell: bash.exe
 
   release:
@@ -347,9 +348,9 @@ workflows:
 #          name: unit-tests
 #          filters:
 #            <<: *FILTERS_CHECK
-      - build:
-          filters:
-            <<: *FILTERS_CHECK
+#      - build:
+#          filters:
+#            <<: *FILTERS_CHECK
 #          requires:
 #            - unit-tests
 #      - functional_test_single:
@@ -386,5 +387,5 @@ workflows:
       - win-package:
           filters:
             <<: *FILTERS_CHECK
-          requires:
-            - build
+#          requires:
+#            - build
