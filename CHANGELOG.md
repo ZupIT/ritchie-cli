@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.0-beta.12](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.12) (2020-06-03)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.11...1.0.0-beta.12)
+
+**Merged pull requests:**
+
+- \[FIX\] changed go to compiled [\#143](https://github.com/ZupIT/ritchie-cli/pull/143) ([victor-schumacher](https://github.com/victor-schumacher))
+- Release 1.0.0-beta.11 merge [\#139](https://github.com/ZupIT/ritchie-cli/pull/139) ([zup-ci](https://github.com/zup-ci))
+
 ## [1.0.0-beta.11](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.11) (2020-06-02)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.10...1.0.0-beta.11)
