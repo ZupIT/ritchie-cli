@@ -93,6 +93,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 
 	dirForm := strings.Join(d[1:], "/")
 	formulaName := strings.Join(d[1:], "_")
+	pkgName := d[len(d) - 1]
 
 	var dir string
 	if new {
@@ -121,7 +122,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	if err != nil {
 		return err
 	}
-	err = createSrcFiles(dir, formulaName, lang)
+	err = createSrcFiles(dir, pkgName, lang)
 	if err != nil {
 		return err
 	}
