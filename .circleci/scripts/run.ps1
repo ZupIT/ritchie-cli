@@ -37,18 +37,22 @@ Write-Output 'EXTRACTING WIX FILES TO PATH'
 
 Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\circleci\AppData\Local\Microsoft\WindowsApps"
 
+Write-Output 'Setting Release Version Variable'
+
+$release_version=$(Get-Content .\release_version.txt)
+
 cd packaging\windows
 
 Write-Output 'GENERATING MSI INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version 0.0.1 -l ..\..\LICENSE
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version -l ..\..\LICENSE
 
 Write-Output 'GENERATING CHOCO INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' --version 0.0.1 --input ritchiecli.msi
+& 'C:\Program Files\go-msi\go-msi.exe' --version $release_version --input ritchiecli.msi
 
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
 
-copy ritchie.msi ..\..\dist
+copy ritchiecli.msi ..\..\dist
 
 copy *.nupkg ..\..\dist
