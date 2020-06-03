@@ -19,12 +19,14 @@ func (inputText) Text(name string, required bool) (string, error) {
 	if required {
 		prompt = promptui.Prompt{
 			Label:     name,
+			Pointer: promptui.PipeCursor,
 			Validate:  validateEmptyInput,
 			Templates: defaultTemplate(),
 		}
 	} else {
 		prompt = promptui.Prompt{
 			Label:     name,
+			Pointer: promptui.PipeCursor,
 			Templates: defaultTemplate(),
 		}
 	}

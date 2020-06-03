@@ -45,12 +45,12 @@ func (f Finder) Find(provider string) (credential.Detail, error) {
 		return credential.Detail{}, err
 	}
 
-	serverURL, err := f.serverFinder.Find()
+	cfg, err := f.serverFinder.Find()
 	if err != nil {
 		return credential.Detail{}, err
 	}
 
-	url := fmt.Sprintf(urlGetPattern, serverURL, provider)
+	url := fmt.Sprintf(urlGetPattern, cfg.URL, provider)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return credential.Detail{}, err

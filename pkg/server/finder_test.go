@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -13,18 +14,18 @@ func TestFind(t *testing.T) {
 
 	tests := []struct {
 		name string
-		in   string
-		out  string
+		in   Config
+		out  Config
 	}{
 		{
 			name: "empty server",
-			in:   "",
-			out:  "",
+			in:   Config{},
+			out:  Config{},
 		},
 		{
 			name: "existing server",
-			in:   "http://localhost/mocked",
-			out:  "http://localhost/mocked",
+			in:   Config{Organization: "org", URL: "http://localhost/mocked"},
+			out:  Config{Organization: "org", URL: "http://localhost/mocked"},
 		},
 	}
 
@@ -33,8 +34,9 @@ func TestFind(t *testing.T) {
 			in := tt.in
 			out := tt.out
 
-			if in != "" {
-				_ = fileutil.WriteFile(finder.serverFile, []byte(in))
+			if in.URL != "" {
+				b, _ := json.Marshal(in)
+				_ = fileutil.WriteFile(finder.serverFile, b)
 			}
 
 			got, err := finder.Find()

@@ -20,6 +20,7 @@ func NewInputBool() inputBool {
 func (inputBool) Bool(name string, items []string) (bool, error) {
 	prompt := promptui.Select{
 		Items:     items,
+		Pointer: promptui.PipeCursor,
 		Templates: defaultSelectTemplate(name),
 	}
 	_, result, err := prompt.Run()

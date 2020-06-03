@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -14,19 +15,21 @@ func NewFinder(ritchieHomeDir string) FindManager {
 	return FindManager{serverFile: fmt.Sprintf(serverFilePattern, ritchieHomeDir)}
 }
 
-func (f FindManager) Find() (string, error) {
-	serverURL := ""
+func (f FindManager) Find() (Config, error) {
+	cfg := Config{}
 
 	if !fileutil.Exists(f.serverFile) {
-		return serverURL, nil
+		return cfg, nil
 	}
 
 	b, err := fileutil.ReadFile(f.serverFile)
 	if err != nil {
-		return serverURL, err
+		return cfg, err
 	}
 
-	serverURL = string(b)
+	if err := json.Unmarshal(b, &cfg); err != nil {
+		return cfg, err
+	}
 
-	return serverURL, nil
+	return cfg, nil
 }

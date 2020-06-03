@@ -49,12 +49,12 @@ func (s Setter) Set(cred credential.Detail) error {
 		return err
 	}
 
-	serverURL, err := s.serverFinder.Find()
+	cfg, err := s.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 
-	url := fmt.Sprintf(urlCreatePattern, serverURL, cred.Type)
+	url := fmt.Sprintf(urlCreatePattern, cfg.URL, cred.Type)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
 		return err

@@ -1,7 +1,7 @@
 package tpl_java
 
 const (
-	TemplateMain = `import {{bin-name}}.{{bin-name-first-upper}};
+	Main = `import {{bin-name}}.{{bin-name-first-upper}};
 
 public class Main {
 
@@ -14,7 +14,7 @@ public class Main {
     }
 }`
 
-	TemplateMakefile = `# Java Parameters
+	Makefile = `# Java Parameters
 BINARY_NAME_UNIX={{bin-name}}.sh
 BINARY_NAME_WINDOWS={{bin-name}}.bat
 DIST=../dist
@@ -31,7 +31,7 @@ build:
 	#Clean files
 	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
 
-	TemplateDockerfile = `
+	Dockerfile = `
 FROM alpine:latest
 USER root
 
@@ -46,12 +46,16 @@ RUN apk add openjdk8
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
 ENV PATH="$JAVA_HOME/bin:${PATH}"
 
-ENTRYPOINT java -jar Main.jar`
+RUN javac Main.java
+RUN chmod +x set_umask.sh
 
-	TemplateRunTemplate = `#!/bin/sh
+ENTRYPOINT ["/app/set_umask.sh"]
+CMD ["java Main"]`
+
+	Run = `#!/bin/sh
 java -jar Main.jar`
 
-	TemplateFileJava = `package {{bin-name}};
+	File = `package {{bin-name}};
 
 public class {{bin-name-first-upper}} {
 

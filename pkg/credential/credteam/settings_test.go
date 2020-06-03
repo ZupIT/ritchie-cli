@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 func TestFields(t *testing.T) {
@@ -78,7 +79,8 @@ func TestFields(t *testing.T) {
 			srv := mockServer(out.status, body)
 			defer srv.Close()
 
-			settings := NewSettings(serverFinderMock{srvURL: srv.URL}, srv.Client(), sessManager, ctxFinder)
+			srvFinder := serverFinderMock{Config: server.Config{URL: srv.URL}}
+			settings := NewSettings(srvFinder, srv.Client(), sessManager, ctxFinder)
 
 			got, err := settings.Fields()
 			if err != nil && err.Error() != out.err.Error() {

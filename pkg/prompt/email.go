@@ -19,6 +19,7 @@ func NewInputEmail() inputEmail {
 func (inputEmail) Email(name string) (string, error) {
 	prompt := promptui.Prompt{
 		Label:     name,
+		Pointer: promptui.PipeCursor,
 		Validate:  validator.IsValidEmail,
 		Templates: defaultTemplate(),
 	}

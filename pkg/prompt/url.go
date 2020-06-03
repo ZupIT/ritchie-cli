@@ -19,6 +19,7 @@ func NewInputURL() inputURL {
 func (inputURL) URL(name, defaultValue string) (string, error) {
 	prompt := promptui.Prompt{
 		Label:     name,
+		Pointer: promptui.PipeCursor,
 		Default:   defaultValue,
 		Validate:  validator.IsValidURL,
 		Templates: defaultTemplate(),

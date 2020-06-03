@@ -25,9 +25,10 @@ VERSION=$(RELEASE_VERSION)
 GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
-BUCKET=$(shell VERSION=$(VERSION) ./bucket.sh)
-RITCHIE_ENV=$(shell VERSION=$(VERSION) ./ritchie_env.sh)
+BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
+RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
 COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
+IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+")
 
 build:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
@@ -70,21 +71,23 @@ build-circle:
 release:
 	git config --global user.email "$(GIT_EMAIL)"
 	git config --global user.name "$(GIT_NAME)"
+	git tag -a $(RELEASE_VERSION) -m "CHANGELOG: https://github.com/ZupIT/ritchie-cli/blob/master/CHANGELOG.md"
+	git push $(GIT_REMOTE) $(RELEASE_VERSION)
 	gem install github_changelog_generator
 	github_changelog_generator -u zupit -p ritchie-cli --token $(GIT_PASSWORD) --enhancement-labels feature,Feature --exclude-labels duplicate,question,invalid,wontfix
 	git add .
 	git commit --allow-empty -m "[ci skip] release"
 	git push $(GIT_REMOTE) HEAD:release-$(RELEASE_VERSION)
-	git tag -a $(RELEASE_VERSION) -m "$(RELEASE_VERSION)"
-	git push $(GIT_REMOTE) $(RELEASE_VERSION)
 	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
 
 delivery:
+	@echo $(VERSION)
 ifneq "$(BUCKET)" ""
-	echo $(BUCKET)
 	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
+ifneq "$(IS_RELEASE)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+endif
 else
 	echo "NOT GONNA PUBLISH"
 endif
@@ -108,3 +111,13 @@ functional-test-single:
 functional-test-team:
 	mkdir -p $(BIN)
 	$(GOTEST) -v `go list ./functional/team/... | grep -v vendor/`
+
+rebase-nightly:
+	git config --global user.email "$(GIT_EMAIL)"
+	git config --global user.name "$(GIT_NAME)"
+	git push $(GIT_REMOTE) --delete nightly
+	git checkout -b nightly
+	git reset --hard master
+	git add .
+	git commit --allow-empty -m "nightly"
+	git push $(GIT_REMOTE) HEAD:nightly
