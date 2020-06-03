@@ -2,7 +2,9 @@ $url = "https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.m
 $output = "$PSScriptRoot\go-msi-amd64.msi"
 $start_time = Get-Date
 
-Invoke-WebRequest -Uri $url -OutFile $output
+$wc = New-Object System.Net.WebClient
+$wc.DownloadFile($url, $output)
+
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 
 
