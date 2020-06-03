@@ -306,54 +306,41 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - unit-test
-      - functional_test_single:
-          name: functional_test_single_code
+      - unix_functional_test_single:
+          name: unix-functional-test-single-code
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-      - functional_test_team:
-          name: functional_test_team_code
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build-code
-      - unit_test:
-          name: unit-tests
-          filters:
-            <<: *FILTERS_CHECK
-      - build:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - unit-tests
-      - functional_test_single:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
       - unix_functional_test_team:
+          name: unix-functional-test-team-code
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
-            - build
+            - build-code
       - windows_functional_test_team:
+          name: windows-functional-test-team-code
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
-            - build
+            - build-code
       - windows_functional_test_single:
+          name: windows-functional-test-single-code
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
-            - build
+            - build-code
       - delivery:
+          name: delivery
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - functional_test_single
-            - functional_test_team
+            - unix-functional-test-single-code
+            - unix-functional-test-team-code
+            - windows-functional-test-single-code
+            - windows-functional-test-team-code
       - release:
+          name: release
           filters:
             <<: *FILTERS_RELEASE
           requires:
