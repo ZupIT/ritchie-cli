@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/onsi/ginkgo"
+
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
 )
 
@@ -57,7 +59,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 
 	os := runtime.GOOS
 	if  os == "windows" && len(scenario.Steps) >= 2 {
-		Skip("Scenarios with multi steps for windows doesnt work")
+		ginkgo.Skip("Scenarios with multi steps for windows doesnt work")
 	}
 
 	if err == nil {
@@ -138,6 +140,7 @@ func (scenario *Scenario) RunStdin() (string, error) {
 	fmt.Println("--------")
 	return b2.String(), errorRit
 }
+
 func RitInit() {
 	command := []string{initCmd}
 	_, stdin, out, _ := execRit(command)
