@@ -81,18 +81,16 @@ release:
 	curl --user $(GIT_USERNAME):$(GIT_PASSWORD) -X POST https://api.github.com/repos/ZupIT/ritchie-cli/pulls -H 'Content-Type: application/json' -d '{ "title": "Release $(RELEASE_VERSION) merge", "body": "Release $(RELEASE_VERSION) merge with master", "head": "release-$(RELEASE_VERSION)", "base": "master" }'
 
 delivery:
-	apt-get install tree
-	tree dist
-#	@echo $(VERSION)
-#ifneq "$(BUCKET)" ""
-#	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
-#ifneq "$(IS_RELEASE)" ""
-#	echo -n "$(RELEASE_VERSION)" > stable.txt
-#	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
-#endif
-#else
-#	echo "NOT GONNA PUBLISH"
-#endif
+	@echo $(VERSION)
+ifneq "$(BUCKET)" ""
+	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
+ifneq "$(IS_RELEASE)" ""
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+endif
+else
+	echo "NOT GONNA PUBLISH"
+endif
 
 publish:
 	echo "Do nothing"

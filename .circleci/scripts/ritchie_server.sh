@@ -8,6 +8,8 @@ elif expr "$VERSION" : '^nightly' >/dev/null; then
   echo "https://ritchie-server.zup.io"
 elif expr "$VERSION" : '^beta' >/dev/null; then
   echo "https://ritchie-server.zup.io"
+elif expr "$CIRCLE_BRANCH" : '^feature/packaging' >/dev/null; then
+  echo "https://ritchie-server.zup.io"
 else
   echo ""
 fi
