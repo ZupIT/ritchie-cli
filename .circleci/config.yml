@@ -271,9 +271,11 @@ jobs:
       - run:
           command: |
             . ./.circleci/scripts/version.sh
-            bitsadmin.exe /transfer downloadJob /download /priority normal https://commons-repo.ritchiecli.io/stable.txt stable.txt
-#            wget -O go-msi-amd64.msi https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.msi
           shell: bash.exe
+      - run:
+          command: |
+            powershell.exe .circleci\scripts\run.ps1
+          shell: powershell.exe
 
   release:
     environment:
