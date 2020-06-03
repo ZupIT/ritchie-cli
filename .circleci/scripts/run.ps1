@@ -4,8 +4,6 @@ $start_time = Get-Date
 
 Import-Module BitsTransfer
 Start-BitsTransfer -Source $url -Destination $output
-#OR
-Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 
@@ -15,7 +13,17 @@ $start_time = Get-Date
 
 Import-Module BitsTransfer
 Start-BitsTransfer -Source $url -Destination $output
-#OR
-Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+function Unzip
+{
+    param([string]$zipfile, [string]$outpath)
+
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
+}
+
+Unzip "$PSScriptRoot\wix310-binaries.zip" "$PSScriptRoot\wix310"
+
+dir
