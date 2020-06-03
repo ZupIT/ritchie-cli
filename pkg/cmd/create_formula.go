@@ -64,7 +64,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		homeDir, _ := os.UserHomeDir()
-		ritFormulasPath := fmt.Sprintf("%s/my-ritchie-formulas", homeDir)
+		ritFormulasPath := fmt.Sprintf("%s/ritchie-formulas-local", homeDir)
 		repoQuestion := fmt.Sprintf("Use default repo (%s)?", ritFormulasPath)
 		var localRepoDir string
 		choice, _ := c.Bool(repoQuestion, []string{"yes", "no"})
