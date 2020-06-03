@@ -12,8 +12,8 @@ $url = "http://wixtoolset.org/downloads/v3.10.3.3007/wix310-binaries.zip"
 $output = "$PSScriptRoot\wix310-binaries.zip"
 $start_time = Get-Date
 
-Import-Module BitsTransfer
-Start-BitsTransfer -Source $url -Destination $output
+$wc = New-Object System.Net.WebClient
+$wc.DownloadFile($url, $output)
 
 Write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
 
