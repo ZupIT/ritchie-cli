@@ -1,14 +1,16 @@
 {
-  "name": "ritchiecli",
-  "maintainer": "viniciusramosdefaria <viniciusramosdefaria@gmail.com>",
-  "description": "Install ritchie CLI",
-  "homepage": "https://ritchiecli.io",
-  "files": [
-    {
-      "from": "dist/linux/single/rit",
-      "to": "/usr/local/bin",
-      "base" : "dist/linux/single",
-      "fperm": "0755"
-    }
-  ]
+    "name": "ritchiecli",
+    "maintainer": "viniciusramosdefaria <viniciusramosdefaria@gmail.com>",
+    "description": "Install ritchie CLI",
+    "homepage": "https://ritchiecli.io",
+    "files": [
+        {
+            "from": "dist/linux/single/rit",
+            "to": "/usr/local/bin",
+            "base": "dist/linux/single",
+            "fperm": "0755"
+        }
+    ],
+    "preinst-file": "src/preinst.sh",
+    "postinst-file": "src/postinst.sh"
 }
