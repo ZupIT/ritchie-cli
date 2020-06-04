@@ -18,16 +18,18 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-var msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
-var ErrMakefileNotFound = errors.New(msgErrMakefileNotFound)
-var msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")
-var ErrTreeJsonNotFound = errors.New(msgErrTreeJsonNotFound)
-var msgErrRepeatedCommand = fmt.Sprintf(prompt.Error, "this command already exists")
-var ErrRepeatedCommand = errors.New(msgErrRepeatedCommand)
-var msgErrDontStartWithRit = fmt.Sprintf(prompt.Error, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
-var ErrDontStartWithRit = errors.New(msgErrDontStartWithRit)
-var msgErrTooShortCommand = fmt.Sprintf(prompt.Error, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
-var ErrTooShortCommand = errors.New(msgErrTooShortCommand)
+var (
+	msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
+	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")
+	msgErrRepeatedCommand  = fmt.Sprintf(prompt.Error, "this command already exists")
+	msgErrDontStartWithRit = fmt.Sprintf(prompt.Error, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
+	msgErrTooShortCommand  = fmt.Sprintf(prompt.Error, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+	ErrRepeatedCommand     = errors.New(msgErrRepeatedCommand)
+	ErrDontStartWithRit    = errors.New(msgErrDontStartWithRit)
+	ErrTooShortCommand     = errors.New(msgErrTooShortCommand)
+	ErrTreeJsonNotFound    = errors.New(msgErrTreeJsonNotFound)
+	ErrMakefileNotFound    = errors.New(msgErrMakefileNotFound)
+)
 
 type CreateManager struct {
 	FormPath    string

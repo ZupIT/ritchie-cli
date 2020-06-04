@@ -12,8 +12,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
-var msgNotAllowedCharacter = fmt.Sprintf(prompt.Error,`not allowed character on formula name \/,><@`)
-var ErrNotAllowedCharacter = errors.New(msgNotAllowedCharacter)
+
+var (
+	msgNotAllowedCharacter = fmt.Sprintf(prompt.Error, `not allowed character on formula name \/,><@`)
+	ErrNotAllowedCharacter = errors.New(msgNotAllowedCharacter)
+)
 
 const notAllowedChars = `\/><,@`
 
@@ -89,7 +92,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		msg := fmt.Sprintf("%s formula successfully created!\n", lang)
 		fmt.Printf(prompt.Success, msg)
 		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
-		fmt.Printf(prompt.Info,msg)
+		fmt.Printf(prompt.Info, msg)
 
 		return nil
 	}
@@ -117,7 +120,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		msg := fmt.Sprintf("%s formula successfully created!\n", cf.Lang)
 		fmt.Printf(prompt.Success, msg)
 		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
-		fmt.Printf(prompt.Info,msg)
+		fmt.Printf(prompt.Info, msg)
 
 		return nil
 	}
