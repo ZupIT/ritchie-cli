@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.0-beta.13](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.13) (2020-06-03)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.12...1.0.0-beta.13)
+
+**Fixed bugs:**
+
+- changed folder name [\#145](https://github.com/ZupIT/ritchie-cli/pull/145) ([victor-schumacher](https://github.com/victor-schumacher))
+
+**Merged pull requests:**
+
+- Release 1.0.0-beta.12 merge [\#144](https://github.com/ZupIT/ritchie-cli/pull/144) ([zup-ci](https://github.com/zup-ci))
+- \[FIX\] update local repo name [\#142](https://github.com/ZupIT/ritchie-cli/pull/142) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+
 ## [1.0.0-beta.12](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.12) (2020-06-03)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.11...1.0.0-beta.12)
