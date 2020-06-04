@@ -77,7 +77,7 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 
 	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
 
-	run := Setup{
+	s := Setup{
 		pwd:            pwd,
 		formulaPath:    formulaPath,
 		binPath:        binPath,
@@ -87,7 +87,7 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 		config:         config,
 	}
 
-	return run, nil
+	return s, nil
 }
 
 func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, error) {

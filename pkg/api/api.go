@@ -50,7 +50,6 @@ var (
 		[]Command{
 			//temporarily removed {Parent: "root_create", Usage: "user"},
 			{Parent: "root_delete", Usage: "user"},
-			{Parent: "root_set", Usage: "server"},
 			{Parent: "root", Usage: "login"},
 			{Parent: "root", Usage: "logout"},
 		}...,

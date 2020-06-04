@@ -79,9 +79,7 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup) error {
 		}
 
 		if len(inputVal) != 0 {
-			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i); err != nil {
-				return err
-			}
+			addEnv(cmd, setup.pwd, input.Name, inputVal, i)
 		}
 	}
 	if len(config.Command) != 0 {
@@ -127,9 +125,7 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 
 		if len(inputVal) != 0 {
 			persistCache(setup.formulaPath, inputVal, input, items)
-			if err := addEnv(cmd, setup.pwd, input.Name, inputVal, i); err != nil {
-				return err
-			}
+			addEnv(cmd, setup.pwd, input.Name, inputVal, i)
 		}
 	}
 	if len(config.Command) != 0 {
@@ -141,7 +137,7 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 
 // addEnv Add environment variable to run formulas.
 // add the variable inName=inValue to cmd.Env
-func addEnv(cmd *exec.Cmd, pwd, inName, inValue string, index int) error {
+func addEnv(cmd *exec.Cmd, pwd, inName, inValue string, index int) {
 	e := fmt.Sprintf(EnvPattern, strings.ToUpper(inName), inValue)
 	if index == 0 {
 		pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, pwd)
@@ -150,8 +146,6 @@ func addEnv(cmd *exec.Cmd, pwd, inName, inValue string, index int) error {
 	} else {
 		cmd.Env = append(cmd.Env, e)
 	}
-
-	return nil
 }
 
 func persistCache(formulaPath, inputVal string, input Input, items []string) {

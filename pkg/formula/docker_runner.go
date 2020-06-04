@@ -15,6 +15,7 @@ const (
 	dockerRunCmd    = "run"
 	dockerRemoveCmd = "rm"
 	envFile         = ".env"
+	isDocker        = true
 )
 
 type DockerRunner struct {
@@ -65,7 +66,7 @@ func (d DockerRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	if err := d.PostRun(setup, true); err != nil {
+	if err := d.PostRun(setup, isDocker); err != nil {
 		return err
 	}
 
