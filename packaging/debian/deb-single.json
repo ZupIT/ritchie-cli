@@ -11,6 +11,6 @@
             "fperm": "0755"
         }
     ],
-    "preinst-file": "src/preinst.sh",
-    "postinst-file": "src/postinst.sh"
+    "preinst-file": "packaging/debian/src/preinst.sh",
+    "postinst-file": "packaging/debian/src/postinst.sh"
 }
