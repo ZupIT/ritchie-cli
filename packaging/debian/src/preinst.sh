@@ -1,3 +1,3 @@
 #!/bin/sh -xe
 
-echo "pre inst"
+rm -rf ~/.rit
