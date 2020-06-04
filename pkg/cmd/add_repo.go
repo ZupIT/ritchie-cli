@@ -66,7 +66,7 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 				fmt.Printf(prompt.Warning, msg)
 				choice, _ := a.Bool("Want to proceed?", []string{"yes", "no"})
 				if !choice {
-					fmt.Printf(prompt.Error, "Operation cancelled\n")
+					fmt.Printf(prompt.Info, "Operation cancelled\n")
 					return nil
 				}
 			}
