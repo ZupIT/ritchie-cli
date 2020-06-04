@@ -1,7 +1,6 @@
 package formula
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -96,7 +95,7 @@ func TestCreator(t *testing.T) {
 				Lang: langGo,
 			},
 			out: &out{
-				err: errors.New("this command already exists"),
+				err: ErrRepeatedCommand,
 			},
 		},
 		{
@@ -156,7 +155,7 @@ func TestCreator(t *testing.T) {
 				Lang: langGo,
 			},
 			out: &out{
-				err: errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]"),
+				err: ErrDontStartWithRit,
 			},
 		},
 		{
