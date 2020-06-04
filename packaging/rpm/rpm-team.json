@@ -12,5 +12,7 @@
             "base": "dist/linux/team",
             "type": ""
         }
-    ]
+    ],
+    "preinst": "packaging/rpm/src/preinst.sh",
+    "postinst": "packaging/rpm/src/postinst.sh"
 }

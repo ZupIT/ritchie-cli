@@ -12,5 +12,6 @@
             "base": "dist/linux/single",
             "type": ""
         }
-    ]
+    ],
+    "preinst": "packaging/rpm/src/preinst.sh"
 }
