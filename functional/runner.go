@@ -142,24 +142,35 @@ func (scenario *Scenario) RunStdin() (string, error) {
 }
 
 func RitInit() {
-	command := []string{initCmd}
-	_, stdin, out, _ := execRit(command)
-	scanner := scannerTerminal(out)
-	for scanner.Scan() {
-		m := scanner.Text()
-		fmt.Println(m)
-		if strings.Contains(m, cmd.MsgPhrase) {
-			err := inputCommand(stdin, "12345\n")
-			if err != nil {
-				log.Printf("Error when input number: %q", err)
-			}
-			break
+	os := runtime.GOOS
+	if  os == "windows" {
+		args := []string{"Write-Output", "'{\"passphrase\":\"test\"}'", "|", "rit", "init", "--stdin"}
+		cmd := exec.Command("powershell", args...)
+		err := cmd.Start()
+		if err != nil {
+			log.Fatal(err)
 		}
-	}
-	scanner = scannerTerminal(out)
-	for scanner.Scan() {
-		m := scanner.Text()
-		fmt.Println(m)
+		err = cmd.Wait()
+	} else {
+		command := []string{initCmd}
+		_, stdin, out, _ := execRit(command)
+		scanner := scannerTerminal(out)
+		for scanner.Scan() {
+			m := scanner.Text()
+			fmt.Println(m)
+			if strings.Contains(m, cmd.MsgPhrase) {
+				err := inputCommand(stdin, "12345\n")
+				if err != nil {
+					log.Printf("Error when input number: %q", err)
+				}
+				break
+			}
+		}
+		scanner = scannerTerminal(out)
+		for scanner.Scan() {
+			m := scanner.Text()
+			fmt.Println(m)
+		}
 	}
 }
 
