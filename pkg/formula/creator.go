@@ -18,6 +18,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
+const (
+	localTreeFile     = "%s/tree/tree.json"
+	nameModule        = "{{nameModule}}"
+	nameBin           = "{{bin-name}}"
+	nameBinFirstUpper = "{{bin-name-first-upper}}"
+)
+
 var (
 	msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
 	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")

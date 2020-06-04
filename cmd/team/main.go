@@ -41,7 +41,7 @@ func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
 
-	//prompt
+	// prompt
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
@@ -50,7 +50,7 @@ func buildCommands() *cobra.Command {
 	inputList := prompt.NewInputList()
 	inputURL := prompt.NewInputURL()
 
-	//deps
+	// deps
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
@@ -81,18 +81,19 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	formulaRunner := formula.NewTeamRunner(
-		ritchieHomeDir,
-		envResolvers,
-		http.DefaultClient,
-		treeManager,
-		sessionManager,
-		inputList,
-		inputText,
-		inputBool)
+	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool)
+	formulaSetup := formula.NewDefaultTeamSetup(ritchieHomeDir, http.DefaultClient, sessionManager)
+
+	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
+	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
+	postRunner := formula.NewPostRunner()
+
+	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
+	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
+
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	//commands
+	// commands
 	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)
 
 	// level 1
@@ -141,7 +142,7 @@ func buildCommands() *cobra.Command {
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 
-	formulaCmd := cmd.NewFormulaCommand(api.TeamCoreCmds, treeManager, formulaRunner)
+	formulaCmd := cmd.NewFormulaCommand(api.TeamCoreCmds, treeManager, defaultRunner, dockerRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}

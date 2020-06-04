@@ -2,6 +2,7 @@ package formula
 
 import (
 	"fmt"
+	"os/exec"
 	"runtime"
 	"strings"
 
@@ -61,6 +62,7 @@ type Create struct {
 	Lang         string `json:"lang"`
 	LocalRepoDir string `json:"localRepoDir"`
 }
+
 // Definition type that represents a Formula
 type Definition struct {
 	Path     string
@@ -72,6 +74,17 @@ type Definition struct {
 	Config   string
 	RepoURL  string
 	RepoName string
+}
+
+type Setup struct {
+	pwd            string
+	formulaPath    string
+	binPath        string
+	tmpDir         string
+	tmpBinDir      string
+	tmpBinFilePath string
+	config         Config
+	containerId    string
 }
 
 // FormulaPath builds the formula path from ritchie home
@@ -155,8 +168,8 @@ func (d *Definition) ConfigName() string {
 }
 
 // ConfigPath builds the config path from formula path and config name
-func (d *Definition) ConfigPath(formula, configName string) string {
-	return fmt.Sprintf(ConfigPattern, formula, configName)
+func (d *Definition) ConfigPath(formulaPath, configName string) string {
+	return fmt.Sprintf(ConfigPattern, formulaPath, configName)
 }
 
 // ConfigURL builds the config url
@@ -164,12 +177,26 @@ func (d *Definition) ConfigURL(configName string) string {
 	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
-// Runner defines the formula runner process
+type PreRunner interface {
+	PreRun(def Definition) (Setup, error)
+}
+
 type Runner interface {
 	Run(def Definition, inputType api.TermInputType) error
 }
 
-// Creator defines the formula creator process
+type PostRunner interface {
+	PostRun(p Setup, docker bool) error
+}
+
+type InputRunner interface {
+	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
+}
+
+type Setuper interface {
+	Setup(def Definition) (Setup, error)
+}
+
 type Creator interface {
 	Create(cf Create) (CreateManager, error)
 }
