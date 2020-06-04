@@ -88,9 +88,9 @@ func (scenario *Scenario) RunStdin() (string, error) {
 	fmt.Println("Running: " + scenario.Entry)
 	os := runtime.GOOS
 	if  os == "windows" {
-		writeOutput := scenario.Steps[0].Value
+		writeOutput := strings.ReplaceAll(scenario.Steps[0].Value, "\"","\"\"\"")
 		rit := strings.Fields(scenario.Steps[1].Value)
-		args := append([]string{"Write-Output", "'"+writeOutput+"'", "|", "rit"}, rit...)
+		args := append([]string{"--%%", "Write-Output", "'"+writeOutput+"'", "|", "rit"}, rit...)
 		cmd := exec.Command("powershell", args...)
 		_, pipeWriter := io.Pipe()
 		cmd.Stdout = pipeWriter
@@ -100,12 +100,12 @@ func (scenario *Scenario) RunStdin() (string, error) {
 
 		err := cmd.Start()
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error while running: %q", err)
 		}
 
 		err = cmd.Wait()
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error while running: %q", err)
 		}
 
 		pipeWriter.Close()
@@ -162,17 +162,18 @@ func (scenario *Scenario) RunStdin() (string, error) {
 func RitInit() {
 	os := runtime.GOOS
 	if  os == "windows" {
-		args := []string{"Write-Output", "'{\"passphrase\":\"test\"}'", "|", "rit", "init", "--stdin"}
+		fmt.Println("Running Setup for Windows..")
+		args := []string{"--%%", "Write-Output", "'{\"\"\"passphrase\"\"\":\"\"\"test\"\"\"}'", "|", "rit", "init", "--stdin"}
 		cmd := exec.Command("powershell", args...)
-		err := cmd.Start()
+
+		stdoutStderr, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Error while running: %q", err)
 		}
-		err = cmd.Wait()
-		if err != nil {
-			log.Printf("Error when input number: %q", err)
-		}
+		fmt.Printf("%s\n", stdoutStderr)
+
 	} else {
+		fmt.Println("Running Setup for Unix..")
 		command := []string{initCmd}
 		_, stdin, out, _ := execRit(command)
 		scanner := scannerTerminal(out)
@@ -193,6 +194,7 @@ func RitInit() {
 			fmt.Println(m)
 		}
 	}
+	fmt.Println("Setup Done..")
 }
 
 func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, out io.Reader, err error) {

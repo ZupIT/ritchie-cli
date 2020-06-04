@@ -72,7 +72,7 @@ executors:
 
   windows-executor:
     working_directory: /workspace
-    resource_class: windows.medium
+    resource_class: windows.small
     shell: powershell.exe -ExecutionPolicy Bypass
     machine:
       image: windows-server-2019
