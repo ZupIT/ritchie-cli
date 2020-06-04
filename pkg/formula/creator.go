@@ -184,7 +184,6 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 			}
 		}
 	}
-
 	return nil
 }
 
