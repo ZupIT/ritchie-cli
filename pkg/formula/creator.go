@@ -15,6 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
@@ -25,8 +26,16 @@ const (
 )
 
 var (
-	ErrMakefileNotFound = errors.New("makefile not found")
-	ErrTreeJsonNotFound = errors.New("tree.json not found")
+	msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
+	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")
+	msgErrRepeatedCommand  = fmt.Sprintf(prompt.Error, "this command already exists")
+	msgErrDontStartWithRit = fmt.Sprintf(prompt.Error, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
+	msgErrTooShortCommand  = fmt.Sprintf(prompt.Error, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+	ErrRepeatedCommand     = errors.New(msgErrRepeatedCommand)
+	ErrDontStartWithRit    = errors.New(msgErrDontStartWithRit)
+	ErrTooShortCommand     = errors.New(msgErrTooShortCommand)
+	ErrTreeJsonNotFound    = errors.New(msgErrTreeJsonNotFound)
+	ErrMakefileNotFound    = errors.New(msgErrMakefileNotFound)
 )
 
 type CreateManager struct {
@@ -102,6 +111,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 
 	dirForm := strings.Join(d[1:], "/")
 	formulaName := strings.Join(d[1:], "_")
+	pkgName := d[len(d) - 1]
 
 	var dir string
 	if new {
@@ -130,7 +140,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	if err != nil {
 		return err
 	}
-	err = createSrcFiles(dir, formulaName, lang)
+	err = createSrcFiles(dir, pkgName, lang)
 	if err != nil {
 		return err
 	}
@@ -168,22 +178,22 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 	s := strings.Split(fCmd, " ")
 
 	if s[0] != "rit" {
-		return errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+		return ErrDontStartWithRit
 	}
 
 	if len(s) <= 2 {
-		return errors.New("the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+		return ErrTooShortCommand
 	}
 	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
 	u := s[len(s)-1]
 	for _, v := range trees {
 		for _, j := range v.Commands {
 			if j.Parent == cp && j.Usage == u {
-				return errors.New("this command already exists")
+				return ErrRepeatedCommand
+
 			}
 		}
 	}
-
 	return nil
 }
 

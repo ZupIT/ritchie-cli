@@ -50,7 +50,8 @@ func (c cleanRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%q has been cleaned successfully\n", n)
+		msg := fmt.Sprintf("%q has been cleaned successfully\n", n)
+		fmt.Printf(prompt.Success, msg)
 
 		return nil
 	}
@@ -71,7 +72,8 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%q has been cleaned successfully\n", f.Name)
+		msg := fmt.Sprintf("%q has been cleaned successfully\n", f.Name)
+		fmt.Printf(prompt.Success, msg)
 
 		return nil
 	}
