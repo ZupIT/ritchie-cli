@@ -244,6 +244,7 @@ jobs:
           command: |
             . ./.circleci/scripts/version.sh
             . ./.circleci/scripts/gen-deb.sh
+            ls -liah
       - persist_to_workspace:
           root: dist
           paths:
