@@ -244,8 +244,6 @@ jobs:
           command: |
             . ./.circleci/scripts/version.sh
             . ./.circleci/scripts/gen-deb.sh
-            ls -liah
-            dpkg -i /workspace/dist/installer/ritchie-single.deb
       - persist_to_workspace:
           root: dist
           paths:

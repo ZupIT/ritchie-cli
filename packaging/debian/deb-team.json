@@ -10,5 +10,7 @@
       "base" : "dist/linux/team",
       "fperm": "0755"
     }
-  ]
+  ],
+    "preinst-file": "packaging/debian/src/preinst.sh",
+    "postinst-file": "packaging/debian/src/postinst.sh"
 }
