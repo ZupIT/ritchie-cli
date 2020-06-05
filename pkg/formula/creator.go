@@ -15,10 +15,28 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-var ErrMakefileNotFound = errors.New("makefile not found")
-var ErrTreeJsonNotFound = errors.New("tree.json not found")
+const (
+	localTreeFile     = "%s/tree/tree.json"
+	nameModule        = "{{nameModule}}"
+	nameBin           = "{{bin-name}}"
+	nameBinFirstUpper = "{{bin-name-first-upper}}"
+)
+
+var (
+	msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
+	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")
+	msgErrRepeatedCommand  = fmt.Sprintf(prompt.Error, "this command already exists")
+	msgErrDontStartWithRit = fmt.Sprintf(prompt.Error, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
+	msgErrTooShortCommand  = fmt.Sprintf(prompt.Error, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+	ErrRepeatedCommand     = errors.New(msgErrRepeatedCommand)
+	ErrDontStartWithRit    = errors.New(msgErrDontStartWithRit)
+	ErrTooShortCommand     = errors.New(msgErrTooShortCommand)
+	ErrTreeJsonNotFound    = errors.New(msgErrTreeJsonNotFound)
+	ErrMakefileNotFound    = errors.New(msgErrMakefileNotFound)
+)
 
 type CreateManager struct {
 	FormPath    string
@@ -160,22 +178,22 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 	s := strings.Split(fCmd, " ")
 
 	if s[0] != "rit" {
-		return errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+		return ErrDontStartWithRit
 	}
 
 	if len(s) <= 2 {
-		return errors.New("the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+		return ErrTooShortCommand
 	}
 	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
 	u := s[len(s)-1]
 	for _, v := range trees {
 		for _, j := range v.Commands {
 			if j.Parent == cp && j.Usage == u {
-				return errors.New("this command already exists")
+				return ErrRepeatedCommand
+
 			}
 		}
 	}
-
 	return nil
 }
 

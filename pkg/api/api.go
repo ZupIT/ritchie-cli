@@ -65,6 +65,8 @@ type Command struct {
 	Repo    string
 }
 
+type Commands []Command
+
 // Formula type
 type Formula struct {
 	Path    string `json:"path"`
@@ -84,7 +86,7 @@ type Edition string
 type TermInputType int
 
 const (
-	//Prompt input
+	// Prompt input
 	Prompt TermInputType = iota
 	// Stdin input
 	Stdin
@@ -99,7 +101,7 @@ func (t TermInputType) ToLower() string {
 	return strings.ToLower(t.String())
 }
 
-//UserHomeDir returns the home dir of the user
+// UserHomeDir returns the home dir of the user
 func UserHomeDir() string {
 	usr, err := user.Current()
 	if err != nil {
@@ -108,7 +110,7 @@ func UserHomeDir() string {
 	return usr.HomeDir
 }
 
-//RitchieHomeDir returns the home dir of the ritchie
+// RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
 	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
 }

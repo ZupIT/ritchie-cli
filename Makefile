@@ -100,9 +100,7 @@ clean:
 	rm -rf $(BIN)
 
 unit-test:
-	mkdir -p $(BIN)
-	$(GOTEST) -v -short -coverprofile=$(BIN)/cov.out `go list ./pkg/... | grep -v vendor/`
-	$(GOTOOLCOVER) -func=$(BIN)/cov.out
+	./run-tests.sh
 
 functional-test-single:
 	mkdir -p $(BIN)
