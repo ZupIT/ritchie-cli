@@ -61,6 +61,7 @@ type Create struct {
 	Lang         string `json:"lang"`
 	LocalRepoDir string `json:"localRepoDir"`
 }
+
 // Definition type that represents a Formula
 type Definition struct {
 	Path     string
@@ -172,4 +173,12 @@ type Runner interface {
 // Creator defines the formula creator process
 type Creator interface {
 	Create(cf Create) (CreateManager, error)
+}
+
+type Builder interface {
+	Build(workspacePath string, formulaPath string) error
+}
+
+type Watcher interface {
+	Watch(dir string)
 }

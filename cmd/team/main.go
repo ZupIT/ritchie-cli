@@ -10,8 +10,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/watcher"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -20,6 +22,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	form_workspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/metrics"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -131,7 +134,11 @@ func buildCommands() *cobra.Command {
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
-	testFormulaCmd := cmd.NewTestFormulaCmd()
+	fileManager := stream.NewFileManager()
+	watchManager := watcher.New()
+	formulaWorkspace := form_workspace.New(ritchieHomeDir, fileManager)
+	formulaBuilder := formula.NewBuilder(ritchieHomeDir)
+	testFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
