@@ -63,6 +63,14 @@ Write-Output 'GENERATING CHOCO SINGLE INSTALLER'
 
 & 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-single" --input ritchieclisingle.msi --path wix-single.json
 
+Write-Output 'GENERATING MSI TEAM ZUP INSTALLER'
+
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecliteamzup.msi --version $release_version --path wix-team-zup.json
+
+Write-Output 'GENERATING CHOCO TEAM ZUP INSTALLER'
+
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-team" --input ritchiecliteamzup.msi --path wix-team-zup.json
+
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
 
 copy ritchie* ..\..\dist\installer
