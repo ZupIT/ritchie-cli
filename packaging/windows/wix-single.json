@@ -35,12 +35,6 @@
         }
     ]
   },
-    "hooks": [
-        {
-            "when": "install",
-            "command": "mkdir [%HOMEDRIVE][%HOMEPATH]/.rit"
-        }
-    ],
     "choco": {
         "description": "ritchie cli",
         "project-url": "https://github.com/ZupIT/ritchie-cli/tree/master/",
