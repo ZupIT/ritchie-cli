@@ -13,6 +13,6 @@
             "type": ""
         }
     ],
-    "preinst": "packaging/rpm/src/preinst.sh",
-    "postinst": "packaging/rpm/src/postinst.sh"
+    "preinst": "packaging/scripts/preinst.sh",
+    "postinst": "packaging/scripts/postinst.sh"
 }

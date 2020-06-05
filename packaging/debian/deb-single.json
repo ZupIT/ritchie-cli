@@ -11,5 +11,5 @@
             "fperm": "0755"
         }
     ],
-    "preinst-file": "packaging/debian/src/preinst.sh"
+    "preinst-file": "packaging/scripts/preinst.sh"
 }

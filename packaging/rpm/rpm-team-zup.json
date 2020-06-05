@@ -7,11 +7,12 @@
     "url": "https://github.com/ZupIT/ritchie-cli",
     "files": [
         {
-            "from": "dist/linux/single/rit",
+            "from": "dist/linux/team/rit",
             "to": "/usr/local/bin",
-            "base": "dist/linux/single",
+            "base": "dist/linux/team",
             "type": ""
         }
     ],
-    "preinst": "packaging/scripts/preinst.sh"
+    "preinst": "packaging/scripts/preinst.sh",
+    "postinst": "packaging/scripts/postinst-zup.sh"
 }

@@ -12,5 +12,5 @@
     }
   ],
     "preinst-file": "packaging/scripts/preinst.sh",
-    "postinst-file": "packaging/scripts/postinst.sh"
+    "postinst-file": "packaging/scripts/postinst-zup.sh"
 }

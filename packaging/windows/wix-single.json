@@ -13,32 +13,38 @@
     "guid": "f29951f5-7869-4bd5-9e40-de2edd9291e8",
     "vars": [
       {
-        "name": "some",
-        "value": "value",
-        "permanent": "no",
-        "system": "no",
-        "action": "set",
-        "part": "last"
+          "name": "some",
+          "value": "value",
+          "permanent": "no",
+          "system": "no",
+          "action": "set",
+          "part": "last"
       }
     ]
   },
   "shortcuts": {
     "guid": "503ab4a8-dc62-4130-903b-12f3ab7c2618",
     "items": [
-      {
-        "name": "ritchiecli",
-        "description": "Ritchie CLI",
-        "target": "[INSTALLDIR]\\rit.exe",
-        "wdir": "INSTALLDIR",
-        "arguments": "",
-        "icon": "ico.ico"
-      }
+        {
+            "name": "ritchiecli",
+            "description": "Ritchie CLI",
+            "target": "[INSTALLDIR]\\rit.exe",
+            "wdir": "INSTALLDIR",
+            "arguments": "",
+            "icon": "ico.ico"
+        }
     ]
   },
-  "choco": {
-    "description": "ritchie cli",
-    "project-url": "https://github.com/ZupIT/ritchie-cli/tree/master/",
-    "tags": "ritchiecli",
-    "license-url": "https://github.com/ZupIT/ritchie-cli/blob/master/LICENSE"
-  }
+    "hooks": [
+        {
+            "when": "install",
+            "command": "mkdir [%HOMEDRIVE][%HOMEPATH]/.rit"
+        }
+    ],
+    "choco": {
+        "description": "ritchie cli",
+        "project-url": "https://github.com/ZupIT/ritchie-cli/tree/master/",
+        "tags": "ritchiecli",
+        "license-url": "https://github.com/ZupIT/ritchie-cli/blob/master/LICENSE"
+    }
 }

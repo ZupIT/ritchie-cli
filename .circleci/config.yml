@@ -395,13 +395,13 @@ workflows:
 #            <<: *FILTERS_CHECK
 #          requires:
 #            - build
-      - rpm-package:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
-#      - win-package:
+#      - rpm-package:
 #          filters:
 #            <<: *FILTERS_CHECK
 #          requires:
 #            - build
+      - win-package:
+          filters:
+            <<: *FILTERS_CHECK
+          requires:
+            - build
