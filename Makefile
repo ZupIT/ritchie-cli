@@ -95,9 +95,7 @@ clean:
 	rm -rf $(BIN)
 
 unit-test:
-	mkdir -p $(BIN)
-	$(GO_TEST) -v -short -coverprofile=$(BIN)/cov.out `go list ./pkg/... | grep -v vendor/`
-	$(GO_TOOL_COVER) -func=$(BIN)/cov.out
+	./run-tests.sh
 
 functional-test-single:
 	mkdir -p $(BIN)

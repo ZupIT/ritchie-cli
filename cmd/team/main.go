@@ -84,15 +84,16 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	formulaRunner := formula.NewTeamRunner(
-		ritchieHomeDir,
-		envResolvers,
-		http.DefaultClient,
-		treeManager,
-		sessionManager,
-		inputList,
-		inputText,
-		inputBool)
+	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool)
+	formulaSetup := formula.NewDefaultTeamSetup(ritchieHomeDir, http.DefaultClient, sessionManager)
+
+	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
+	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
+	postRunner := formula.NewPostRunner()
+
+	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
+	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
+
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	// commands
@@ -151,7 +152,7 @@ func buildCommands() *cobra.Command {
 	updateCmd.AddCommand(updateRepoCmd)
 	testCmd.AddCommand(testFormulaCmd)
 
-	formulaCmd := cmd.NewFormulaCommand(api.TeamCoreCmds, treeManager, formulaRunner)
+	formulaCmd := cmd.NewFormulaCommand(api.TeamCoreCmds, treeManager, defaultRunner, dockerRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}

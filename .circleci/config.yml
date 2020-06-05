@@ -5,7 +5,9 @@ references:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
+    ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
     horus: &HORUS_IMAGE library/docker:dind
+
   paths:
     test-results: &TEST_RESULTS_DIR bin
 
@@ -14,6 +16,7 @@ references:
     GIT_EMAIL : "zup-ci@zup.com.br"
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
+    BUILD_IMAGE: *GOLANG_IMAGE
 
   filters: &FILTERS_DELIVERY
     branches:
@@ -43,6 +46,11 @@ references:
         - /^pull\/.*$/
 
 executors:
+  ritchie-tests-executor:
+    machine:
+      image: *CI_MACHINE_IMAGE
+    working_directory: ~/workspace
+
   ritchie-executor:
     docker:
       - image: *GOLANG_IMAGE
@@ -100,24 +108,28 @@ jobs:
             -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK horuszup/horus-client:latest
 
   unit_test:
-    executor: ritchie-executor
+    executor: ritchie-tests-executor
     environment:
       <<: *ENVIRONMENT
     steps:
       - checkout
       - run:
+          name: Check go version
+          command: |
+            . ./go-version.sh
+      - run:
+          name: Install gotestsum
+          command: |
+            curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v0.4.2/gotestsum_0.4.2_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
+      - run:
+          name: Run docker-compose
+          command: |
+            docker-compose up -d
+      - run:
           name: Running Unit tests
           command: |
             mkdir -p $TEST_RESULTS_DIR
-            go mod download
-            PACKAGE_NAMES=$(go list ./pkg/... | circleci tests split --split-by=timings --timings-type=classname)
-            echo "Running $(echo $PACKAGE_NAMES | wc -w) packages"
-            echo $PACKAGE_NAMES
-            gotestsum --format=short-verbose \
-              --junitfile $TEST_RESULTS_DIR/gotestsum-report.xml -- \
-              -p 2 \
-              -cover -coverprofile=coverage.txt \
-              $PACKAGE_NAMES
+            . ./run-tests-ci.sh
       - store_test_results:
           path: *TEST_RESULTS_DIR
       - store_artifacts:

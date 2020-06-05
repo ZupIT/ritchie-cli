@@ -67,6 +67,8 @@ type Command struct {
 	Repo    string
 }
 
+type Commands []Command
+
 // Formula type
 type Formula struct {
 	Path    string `json:"path"`
