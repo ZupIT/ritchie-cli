@@ -220,7 +220,12 @@ jobs:
       - run:
           name: Running Functional tests for single
           command: |
+            $Env:path +=";C:\workspace\workspace\dist\windows\single;"; powershell --% Write-Output '{"""passphrase""":"""test"""}' | rit init --stdin
+      - run:
+          name: Running Functional tests for single
+          command: |
             $Env:path +=";C:\workspace\workspace\dist\windows\single;"; go test -v (go list ./functional/single/... | grep -v vendor/)
+
 
   build:
     executor: ritchie-executor
@@ -319,42 +324,42 @@ workflows:
             <<: *FILTERS_CHECK_CODE
 #          requires:
 #            - unit-test
-      - unix_functional_test_single:
-          name: unix-functional-test-single-code
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build-code
-      - unix_functional_test_team:
-          name: unix-functional-test-team-code
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build-code
-      - windows_functional_test_team:
-          name: windows-functional-test-team-code
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build-code
+#      - unix_functional_test_single:
+#          name: unix-functional-test-single-code
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build-code
+#      - unix_functional_test_team:
+#          name: unix-functional-test-team-code
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build-code
+#      - windows_functional_test_team:
+#          name: windows-functional-test-team-code
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build-code
       - windows_functional_test_single:
           name: windows-functional-test-single-code
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-      - delivery:
-          name: delivery
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - unix-functional-test-single-code
-            - unix-functional-test-team-code
-            - windows-functional-test-single-code
-            - windows-functional-test-team-code
-      - release:
-          name: release
-          filters:
-            <<: *FILTERS_RELEASE
-          requires:
-            - delivery
+#      - delivery:
+#          name: delivery
+#          filters:
+#            <<: *FILTERS_DELIVERY
+#          requires:
+#            - unix-functional-test-single-code
+#            - unix-functional-test-team-code
+#            - windows-functional-test-single-code
+#            - windows-functional-test-team-code
+#      - release:
+#          name: release
+#          filters:
+#            <<: *FILTERS_RELEASE
+#          requires:
+#            - delivery
