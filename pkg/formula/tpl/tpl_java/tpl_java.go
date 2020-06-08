@@ -27,7 +27,7 @@ build:
 	jar cvfm Main.jar manifest.txt *.class {{bin-name}}/*.class
 	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
 	cp run_template $(BINARY_NAME_WINDOWS) && chmod +x $(BINARY_NAME_WINDOWS)
-	cp Main.jar $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX) $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
+	cp Main.jar $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX) Dockerfile set_umask.sh $(DIST_DIR)
 	#Clean files
 	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
 
