@@ -81,7 +81,7 @@ executors:
   windows-executor:
     working_directory: /workspace
     resource_class: windows.medium
-    shell: powershell.exe -ExecutionPolicy Bypass
+    shell: powershell.exe -ExecutionPolicy Unrestricted
     machine:
       image: windows-server-2019
 
@@ -221,6 +221,10 @@ jobs:
           name: Running Functional tests for single
           command: |
             $Env:path +=";C:\workspace\workspace\dist\windows\single;"; powershell --% Write-Output '{"""passphrase""":"""test"""}' | rit init --stdin
+      - run:
+          name: Running Functional tests for single
+          command: |
+            $Env:path +=";C:\workspace\workspace\dist\windows\single;"; powershell $profile
       - run:
           name: Running Functional tests for single
           command: |
