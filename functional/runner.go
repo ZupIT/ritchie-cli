@@ -90,7 +90,7 @@ func (scenario *Scenario) RunStdin() (string, error) {
 	if  os == "windows" {
 		writeOutput := strings.ReplaceAll(scenario.Steps[0].Value, "\"","\"\"\"")
 		rit := strings.Fields(scenario.Steps[1].Value)
-		args := append([]string{"Write-Output", "'"+writeOutput+"'", "|", "rit"}, rit...)
+		args := append([]string{"-Command", "--% Write-Output", "'"+writeOutput+"'", "|", "rit"}, rit...)
 		cmd := exec.Command("powershell", args...)
 		_, pipeWriter := io.Pipe()
 		cmd.Stdout = pipeWriter
@@ -163,7 +163,7 @@ func RitInit() {
 	os := runtime.GOOS
 	if  os == "windows" {
 		fmt.Println("Running Setup for Windows..")
-		args := []string{"Write-Output", "'{\"\"\"passphrase\"\"\":\"\"\"test\"\"\"}'", "|", "rit", "init", "--stdin"}
+		args := []string{"-Command", "--% Write-Output", "'{\"\"\"passphrase\"\"\":\"\"\"test\"\"\"}'", "|", "rit", "init", "--stdin"}
 		cmd := exec.Command("powershell", args...)
 
 		stdoutStderr, err := cmd.CombinedOutput()

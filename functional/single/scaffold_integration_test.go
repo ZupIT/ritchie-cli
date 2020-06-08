@@ -10,7 +10,7 @@ import (
 )
 
 var _ = Describe("RitScaffold", func() {
-	scenariosScaffold := functional.LoadScenarios("scaffold_feature.json")
+	// scenariosScaffold := functional.LoadScenarios("scaffold_feature.json")
 
 	DescribeTable("When running core command",
 		func(scenario functional.Scenario) {
@@ -18,6 +18,6 @@ var _ = Describe("RitScaffold", func() {
 			Expect(err).To(Succeed())
 			Expect(out).To(ContainSubstring(scenario.Result))
 		},
-		Entry("Run scaffold coffee-go", scenariosScaffold[0]),
+		// Entry("Run scaffold coffee-go", scenariosScaffold[0]),
 	)
 })
