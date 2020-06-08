@@ -16,19 +16,19 @@ build:
 	cp main.sh $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name}} Dockerfile set_umask.sh $(DIST_DIR)
 	chmod +x $(DIST_DIR)/$(BINARY_NAME)`
 
-
 	Dockerfile = `
 FROM alpine:3.7
 
 COPY . .
 
-RUN chmod +x main.sh
 RUN chmod +x set_umask.sh
+RUN chmod +x {{bin-name}}.sh
 
 WORKDIR /app
 
 ENTRYPOINT ["/set_umask.sh"]
-CMD ["./main.sh"]`
+CMD ["/{{bin-name}}.sh"]`
+
 	Umask = `#!/bin/sh
 umask 0011
 $1`

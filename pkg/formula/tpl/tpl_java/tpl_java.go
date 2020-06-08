@@ -35,8 +35,6 @@ build:
 FROM alpine:latest
 USER root
 
-WORKDIR /app
-
 COPY . .
 
 RUN apk update
@@ -49,8 +47,10 @@ ENV PATH="$JAVA_HOME/bin:${PATH}"
 RUN javac Main.java
 RUN chmod +x set_umask.sh
 
-ENTRYPOINT ["/app/set_umask.sh"]
-CMD ["java Main"]`
+WORKDIR /app
+
+ENTRYPOINT ["/set_umask.sh"]
+CMD ["java /Main"]`
 
 	Run = `#!/bin/sh
 java -jar Main.jar`
