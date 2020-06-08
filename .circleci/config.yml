@@ -201,9 +201,13 @@ jobs:
           command: |
             choco install -y golang
       - run:
+          name: Set Enviroment PATH
+          command: |
+            [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\workspace\workspace\dist\windows\team", "Machine")
+      - run:
           name: Running Functional tests for team
           command: |
-            $Env:path +=";C:\workspace\workspace\dist\windows\team;"; go test -v (go list ./functional/team/... | grep -v vendor/)
+            go test -v (go list ./functional/team/... | grep -v vendor/)
 
   windows_functional_test_single:
     executor: windows-executor
@@ -218,17 +222,13 @@ jobs:
           command: |
             choco install -y golang
       - run:
-          name: Running Functional tests for single
+          name: Set Enviroment PATH
           command: |
-            $Env:path +=";C:\workspace\workspace\dist\windows\single;"; powershell --% Write-Output '{"""passphrase""":"""test"""}' | rit init --stdin
+            [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\workspace\workspace\dist\windows\single", "Machine")
       - run:
           name: Running Functional tests for single
           command: |
-            $Env:path +=";C:\workspace\workspace\dist\windows\single;"; powershell $profile
-      - run:
-          name: Running Functional tests for single
-          command: |
-            $Env:path +=";C:\workspace\workspace\dist\windows\single;"; go test -v (go list ./functional/single/... | grep -v vendor/)
+            go test -v (go list ./functional/single/... | grep -v vendor/)
 
 
   build:
