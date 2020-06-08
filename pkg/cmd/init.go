@@ -169,7 +169,7 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		if y {
-			if err := o.Login(); err != nil {
+			if err := o.Login(security.User{}); err != nil {
 				return err
 			}
 			if err := o.Load(); err != nil {

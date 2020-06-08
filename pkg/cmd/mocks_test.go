@@ -173,7 +173,7 @@ func (repoUpdaterMock) Update() error {
 
 type loginManagerMock struct{}
 
-func (loginManagerMock) Login() error {
+func (loginManagerMock) Login(security.User) error {
 	return nil
 }
 
