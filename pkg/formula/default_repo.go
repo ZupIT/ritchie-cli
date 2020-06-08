@@ -18,6 +18,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
@@ -232,9 +233,9 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 	}
 
 	if dm.edition == api.Team {
-		req.Header.Set("x-org", session.Organization)
-		req.Header.Set("x-repo-name", r.Name)
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", session.AccessToken))
+		req.Header.Set(headers.XOrg, session.Organization)
+		req.Header.Set(headers.XRepoName, r.Name)
+		req.Header.Set(headers.Authorization, session.AccessToken)
 	}
 	resp, err := dm.httpClient.Do(req)
 	if err != nil {

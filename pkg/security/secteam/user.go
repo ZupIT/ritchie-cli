@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 
@@ -61,8 +62,8 @@ func (u UserManager) Create(user security.User) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-org", s.Organization)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+	req.Header.Set(headers.XOrg, s.Organization)
+	req.Header.Set(headers.Authorization, s.AccessToken)
 	resp, err := u.httpClient.Do(req)
 	if err != nil {
 		return err
@@ -106,8 +107,8 @@ func (u UserManager) Delete(user security.User) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-org", s.Organization)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.AccessToken))
+	req.Header.Set(headers.XOrg, s.Organization)
+	req.Header.Set(headers.Authorization, s.AccessToken)
 	res, err := u.httpClient.Do(req)
 	if err != nil {
 		return err
