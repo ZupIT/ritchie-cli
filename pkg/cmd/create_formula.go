@@ -14,11 +14,11 @@ import (
 )
 
 var (
-	msgNotAllowedCharacter = fmt.Sprintf(prompt.Error, `not allowed character on formula name \/,><@`)
+	msgNotAllowedCharacter = fmt.Sprintf(prompt.Error, `not allowed character on formula name \/,><@-`)
 	ErrNotAllowedCharacter = errors.New(msgNotAllowedCharacter)
 )
 
-const notAllowedChars = `\/><,@`
+const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {

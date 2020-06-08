@@ -26,14 +26,14 @@ build:
 	Dockerfile = `
 FROM python:3
 
-WORKDIR /app
-
 COPY . .
 
 RUN chmod +x set_umask.sh
 
-ENTRYPOINT ["/app/set_umask.sh"]
-CMD ["python3 main.py"]`
+WORKDIR /app
+
+ENTRYPOINT ["/set_umask.sh"]
+CMD ["python3 /main.py"]`
 
 	File = `#!/usr/bin/python3
 import time
