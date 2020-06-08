@@ -163,7 +163,7 @@ func RitInit() {
 	os := runtime.GOOS
 	if  os == "windows" {
 		fmt.Println("Running Setup for Windows..")
-		args := []string{"--%%", "Write-Output", "'{\"\"\"passphrase\"\"\":\"\"\"test\"\"\"}'", "|", "rit", "init", "--stdin"}
+		args := []string{"Write-Output", "'{\"\"\"passphrase\"\"\":\"\"\"test\"\"\"}'", "|", "rit", "init", "--stdin"}
 		cmd := exec.Command("powershell", args...)
 
 		stdoutStderr, err := cmd.CombinedOutput()
