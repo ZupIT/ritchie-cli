@@ -90,6 +90,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
+	upgradeCmd := cmd.NewUpgradeCmd()
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
@@ -139,6 +140,7 @@ func buildCommands() *cobra.Command {
 				setCmd,
 				showCmd,
 				updateCmd,
+				upgradeCmd,
 			},
 		},
 	}
