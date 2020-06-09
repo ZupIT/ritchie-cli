@@ -30,6 +30,7 @@ type initSingleCmd struct {
 
 type initTeamCmd struct {
 	prompt.InputText
+	prompt.InputPassword
 	prompt.InputURL
 	prompt.InputBool
 	server.FindSetter
@@ -51,13 +52,14 @@ func NewSingleInitCmd(
 // NewTeamInitCmd creates init command for team edition
 func NewTeamInitCmd(
 	it prompt.InputText,
+	ip prompt.InputPassword,
 	iu prompt.InputURL,
 	ib prompt.InputBool,
 	fs server.FindSetter,
 	lm security.LoginManager,
 	rl formula.Loader) *cobra.Command {
 
-	o := initTeamCmd{it, iu, ib, fs, lm, rl}
+	o := initTeamCmd{it, ip,iu, ib, fs, lm, rl}
 
 	return newInitCmd(o.runStdin(), o.runPrompt())
 }
@@ -169,12 +171,25 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		if y {
-			if err := o.Login(security.User{}); err != nil {
+			u, err := o.Text(MsgUsername, true)
+			if err != nil {
+				return err
+			}
+			p, err := o.Password(MsgPassword)
+			if err != nil {
+				return err
+			}
+			us := security.User{
+				Username: u,
+				Password: p,
+			}
+			if err := o.Login(us); err != nil {
 				return err
 			}
 			if err := o.Load(); err != nil {
 				return err
 			}
+			fmt.Println("Login successfully!")
 		}
 
 		return nil

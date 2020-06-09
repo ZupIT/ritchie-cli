@@ -85,3 +85,26 @@
     headers:
       content-type: application/zip
     file: response.zip
+
+#Post Login
+- request:
+    method: POST
+    url: ^/login$
+
+  response:
+    status: 200
+    headers:
+      content-type: application/json
+    body: >
+      {
+          "token": "dmF1bHQ6djE6WDJ2VzRpS0V4L3czOFpoUDNZYmNvaDVaeTltL2R0MVN1MWp2cnF3WjFzNGw1Qmhiem42U29EdnR1czBISTNZbU5EdGh1alJMRmJBQXlXZ2ZOR2hkaUFZcGptMGRHQ1I2Mkp4TG4vcXZMUVFXRlNlVnBaUDJjeDZoMStzeFh3MHQrYk9kdHc5NWVSMlEyQi9oZTVyOUpQM1NOUkp2ai82V2NOK3BEN2hmRVNzbVlTNW9xQ3piZko3elFJbjE1c3dmVEhCaDFzOFh2WEFyd080ZFF1MWpSeENTY2RDT3dkN2k0SjJvY2RiYzVOSnA1bGRuTTdVdjB3OWx0dHhSK2Z5S1BNQT0=",
+          "ttl": 1591743763
+      }
+
+#Post Login
+- request:
+    method: POST
+    url: ^/unauthorized/login$
+
+  response:
+    status: 401

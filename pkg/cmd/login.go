@@ -20,6 +20,11 @@ type loginCmd struct {
 	prompt.InputPassword
 }
 
+const (
+	MsgUsername = "Enter your username: "
+	MsgPassword = "Enter your password: "
+)
+
 // NewLoginCmd creates new cmd instance
 func NewLoginCmd(
 	t prompt.InputText,
@@ -42,11 +47,11 @@ func NewLoginCmd(
 
 func (l loginCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		u, err := l.Text("Username: ", true)
+		u, err := l.Text(MsgUsername, true)
 		if err != nil {
 			return err
 		}
-		p, err := l.Password("Password: ")
+		p, err := l.Password(MsgPassword)
 		if err != nil {
 			return err
 		}
@@ -55,6 +60,9 @@ func (l loginCmd) runPrompt() CommandRunnerFunc {
 			Password: p,
 		}
 		if err = l.Login(us); err != nil {
+			return err
+		}
+		if err := l.Load(); err != nil {
 			return err
 		}
 		fmt.Println("Login successfully!")
@@ -74,6 +82,9 @@ func (l loginCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if err = l.Login(u); err != nil {
+			return err
+		}
+		if err := l.Load(); err != nil {
 			return err
 		}
 		fmt.Println("Login successfully!")
