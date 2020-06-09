@@ -294,7 +294,7 @@ jobs:
       - run:
           name: Verify Command
           command: |
-            rit --version | grep "nightly (single)" || true
+            rit --version | grep "nightly (single)"
       - run:
           name: install Rit Team
           command: |
@@ -302,7 +302,7 @@ jobs:
       - run:
           name: Verify Command
           command: |
-            rit --version | grep "nightly (team)" || true
+            rit --version | grep "nightly (team)"
 
 
 workflows:
