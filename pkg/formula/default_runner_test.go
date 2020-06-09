@@ -1,6 +1,7 @@
 package formula
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"testing"
@@ -13,11 +14,8 @@ import (
 func TestDefaultRunner_Run(t *testing.T) {
 	def := Definition{
 		Path:    "mock/test",
-		Bin:     "test-${so}",
-		LBin:    "test-${so}",
-		MBin:    "test-${so}",
-		WBin:    "test-${so}.exe",
-		Bundle:  "${so}.zip",
+		Bin:     "test-linux",
+		Bundle:  "linux.zip",
 		Config:  "config.json",
 		RepoURL: RepoUrl,
 	}
@@ -48,7 +46,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 			},
 			want: nil,
 		},
-		/*{
+		{
 			name: "pre run error",
 			in: in{
 				envMock: envResolverMock{in: "ok"},
@@ -79,7 +77,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				postMock: &postRunnerMock{error: errors.New("error in remove dir")},
 			},
 			want: errors.New("error in remove dir"),
-		},*/
+		},
 	}
 
 	for _, tt := range tests {
