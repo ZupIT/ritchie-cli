@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -33,6 +34,8 @@ var (
 	MsgInit = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 	// MsgSession error message for session not initialized
 	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
+	// MsgUpgrade error message to inform user to upgrade rit version
+	MsgRitUpgrade = "\nWarning: Rit have a new version.\nPlease run: rit upgrade"
 
 	singleWhitelist = []string{
 		fmt.Sprint(cmdUse),
@@ -72,14 +75,15 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 	}
 
 	cmd := &cobra.Command{
-		Use:               cmdUse,
-		Version:           version(api.Single),
-		Short:             cmdShortDescription,
-		Long:              cmdDescription,
-		PersistentPreRunE: o.PreRunFunc(),
-		RunE:              runHelp,
-		SilenceErrors:     true,
-		TraverseChildren:  true,
+		Use:                cmdUse,
+		Version:            version(api.Single),
+		Short:              cmdShortDescription,
+		Long:               cmdDescription,
+		PersistentPreRunE:  o.PreRunFunc(),
+		PersistentPostRunE: o.PostRunFunc(),
+		RunE:               runHelp,
+		SilenceErrors:      true,
+		TraverseChildren:   true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -97,13 +101,14 @@ func NewTeamRootCmd(wc workspace.Checker,
 	}
 
 	cmd := &cobra.Command{
-		Use:               cmdUse,
-		Version:           version(api.Team),
-		Short:             cmdShortDescription,
-		Long:              cmdDescription,
-		PersistentPreRunE: o.PreRunFunc(),
-		RunE:              runHelp,
-		SilenceErrors:     true,
+		Use:                cmdUse,
+		Version:            version(api.Team),
+		Short:              cmdShortDescription,
+		Long:               cmdDescription,
+		PersistentPreRunE:  o.PreRunFunc(),
+		PersistentPostRunE: o.PostRunFunc(),
+		RunE:               runHelp,
+		SilenceErrors:      true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -153,6 +158,27 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 		}
 
 		return nil
+	}
+}
+
+func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		verifyNewVersion()
+		return nil
+	}
+}
+
+func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		verifyNewVersion()
+		return nil
+	}
+}
+
+func verifyNewVersion() {
+	stableVersion := "dev"
+	if Version != stableVersion {
+		fmt.Printf(prompt.Warning, MsgRitUpgrade)
 	}
 }
 
