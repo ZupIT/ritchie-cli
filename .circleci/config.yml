@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  windows: circleci/windows@2.4.0
+
 references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
@@ -44,6 +47,7 @@ references:
       only:
         - qa
         - /^pull\/.*$/
+        - /^feature.*/
 
 executors:
   ritchie-tests-executor:
@@ -73,6 +77,13 @@ executors:
       - image: *RUBY_IMAGE
         user: root
     working_directory: /workspace
+
+  windows-executor:
+    working_directory: /workspace
+    resource_class: windows.medium
+    shell: powershell.exe -ExecutionPolicy Unrestricted
+    machine:
+      image: windows-server-2019
 
 jobs:
   lint:
@@ -139,7 +150,7 @@ jobs:
           when: always
           command: bash <(curl -s https://codecov.io/bash)
 
-  functional_test_single:
+  unix_functional_test_single:
     executor: ritchie-executor
     environment:
       <<: *ENVIRONMENT
@@ -158,7 +169,7 @@ jobs:
             go mod download
             make functional-test-single
 
-  functional_test_team:
+  unix_functional_test_team:
     executor: ritchie-executor
     environment:
       <<: *ENVIRONMENT
@@ -176,6 +187,49 @@ jobs:
           command: |
             go mod download
             make functional-test-team
+
+  windows_functional_test_team:
+    executor: windows-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Install GO
+          command: |
+            choco install -y golang
+      - run:
+          name: Set Enviroment PATH
+          command: |
+            [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\workspace\workspace\dist\windows\team", "Machine")
+      - run:
+          name: Running Functional tests for team
+          command: |
+            go test -v (go list ./functional/team/... | grep -v vendor/)
+
+  windows_functional_test_single:
+    executor: windows-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Install GO
+          command: |
+            choco install -y golang
+      - run:
+          name: Set Enviroment PATH
+          command: |
+            [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\workspace\workspace\dist\windows\single", "Machine")
+      - run:
+          name: Running Functional tests for single
+          command: |
+            go test -v (go list ./functional/single/... | grep -v vendor/)
+
 
   build:
     executor: ritchie-executor
@@ -267,50 +321,48 @@ workflows:
            <<: *FILTERS_CHECK_CODE
          requires:
            - horus
+           - lint
       - build:
           name: build-code
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - unit-test
-      - functional_test_single:
-          name: functional_test_single_code
+      - unix_functional_test_single:
+          name: unix-functional-test-single-code
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-      - functional_test_team:
-          name: functional_test_team_code
+      - unix_functional_test_team:
+          name: unix-functional-test-team-code
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-      - unit_test:
-          name: unit-tests
+      - windows_functional_test_team:
+          name: windows-functional-test-team-code
           filters:
-            <<: *FILTERS_CHECK
-      - build:
-          filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
-            - unit-tests
-      - functional_test_single:
+            - build-code
+      - windows_functional_test_single:
+          name: windows-functional-test-single-code
           filters:
-            <<: *FILTERS_CHECK
+            <<: *FILTERS_CHECK_CODE
           requires:
-            - build
-      - functional_test_team:
-          filters:
-            <<: *FILTERS_CHECK
-          requires:
-            - build
+            - build-code
       - delivery:
+          name: delivery
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - functional_test_single
-            - functional_test_team
+            - unix-functional-test-single-code
+            - unix-functional-test-team-code
+            - windows-functional-test-single-code
+            - windows-functional-test-team-code
       - release:
+          name: release
           filters:
             <<: *FILTERS_RELEASE
           requires:
