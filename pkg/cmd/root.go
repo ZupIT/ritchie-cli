@@ -35,6 +35,9 @@ var (
 	// MsgSession error message for session not initialized
 	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
 
+	// Url to get Rit Stable Version
+	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+
 	singleWhitelist = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
@@ -161,14 +164,22 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 
 func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		versionUtil.VerifyNewVersion(versionUtil.DefaultVersionResolver{CurrentVersion: Version},os.Stdout)
+		resolver := versionUtil.DefaultVersionResolver{
+			CurrentVersion:   Version,
+			StableVersionUrl: StableVersionUrl,
+		}
+		versionUtil.VerifyNewVersion(resolver, os.Stdout)
 		return nil
 	}
 }
 
 func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		versionUtil.VerifyNewVersion(versionUtil.DefaultVersionResolver{CurrentVersion: Version},os.Stdout)
+		resolver := versionUtil.DefaultVersionResolver{
+			CurrentVersion:   Version,
+			StableVersionUrl: StableVersionUrl,
+		}
+		versionUtil.VerifyNewVersion(resolver, os.Stdout)
 		return nil
 	}
 }
