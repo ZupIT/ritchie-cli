@@ -6,10 +6,10 @@ import (
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	versionUtil "github.com/ZupIT/ritchie-cli/pkg/version"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 
 	"github.com/spf13/cobra"
@@ -34,8 +34,6 @@ var (
 	MsgInit = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 	// MsgSession error message for session not initialized
 	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
-	// MsgUpgrade error message to inform user to upgrade rit version
-	MsgRitUpgrade = "\nWarning: Rit have a new version.\nPlease run: rit upgrade"
 
 	singleWhitelist = []string{
 		fmt.Sprint(cmdUse),
@@ -163,22 +161,15 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 
 func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		verifyNewVersion()
+		versionUtil.VerifyNewVersion(versionUtil.DefaultVersionResolver{CurrentVersion: Version},os.Stdout)
 		return nil
 	}
 }
 
 func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		verifyNewVersion()
+		versionUtil.VerifyNewVersion(versionUtil.DefaultVersionResolver{CurrentVersion: Version},os.Stdout)
 		return nil
-	}
-}
-
-func verifyNewVersion() {
-	stableVersion := "dev"
-	if Version != stableVersion {
-		fmt.Printf(prompt.Warning, MsgRitUpgrade)
 	}
 }
 
