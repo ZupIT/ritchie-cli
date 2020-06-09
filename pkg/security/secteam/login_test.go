@@ -157,5 +157,5 @@ func (s sessionManagerMock) Current() (session.Session, error) {
 	return session.Session{}, nil
 }
 func (s sessionManagerMock) Destroy() error {
-	return nil
+	return s.err
 }
