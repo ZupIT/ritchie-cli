@@ -281,6 +281,30 @@ jobs:
           command: |
             make rebase-nightly
 
+  unix_smoke_test:
+    executor: ritchie-tests-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - run:
+          name: install Rit Single
+          command: |
+            curl -fsSL https://commons-repo.ritchiecli.io/install_single.sh | bash
+      - run:
+          name: Verify Command
+          command: |
+            rit --version | grep "nightly (single)" || true
+      - run:
+          name: install Rit Team
+          command: |
+            curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+      - run:
+          name: Verify Command
+          command: |
+            rit --version | grep "nightly (team)" || true
+
+
 workflows:
   nightly:
     triggers:
@@ -370,3 +394,9 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - build-code
+  smoke:
+    jobs:
+      - unix_smoke_test:
+          name: unix-smoke-test
+          filters:
+            <<: *FILTERS_CHECK_CODE
