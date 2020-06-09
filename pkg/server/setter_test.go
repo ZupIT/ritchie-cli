@@ -16,7 +16,7 @@ var (
 	srvListener       = "127.0.0.1:57469"
 	srvURL            = fmt.Sprintf("http://%s", srvListener)
 	errNoSuchHost     = fmt.Errorf("lookup %s: no such host", srvListener)
-	errNoSuchHostLong = fmt.Errorf("Get %s: %s", srvURL, errNoSuchHost)
+	errNoSuchHostLong = fmt.Errorf("Get \"%s\": %s", srvURL, errNoSuchHost)
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
