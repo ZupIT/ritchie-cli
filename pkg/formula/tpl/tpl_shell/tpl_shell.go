@@ -17,17 +17,18 @@ build:
 	chmod +x $(DIST_DIR)/$(BINARY_NAME)`
 
 	Dockerfile = `
-FROM alpine:3.7
+FROM alpine:latest
 
-COPY . .
+WORKDIR /app
+COPY . /app
 
 RUN chmod +x set_umask.sh
 RUN chmod +x {{bin-name}}.sh
 
 WORKDIR /app
 
-ENTRYPOINT ["/set_umask.sh"]
-CMD ["/{{bin-name}}.sh"]`
+ENTRYPOINT ["./set_umask.sh"]
+CMD ["./{{bin-name}}.sh"]`
 
 	Umask = `#!/bin/sh
 umask 0011
