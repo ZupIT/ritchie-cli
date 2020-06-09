@@ -22,6 +22,11 @@ type LoginManager struct {
 	sessionManager session.Manager
 }
 
+type loginResponse struct {
+	Token string `json:"token"`
+	TTL   int64  `json:"ttl"`
+}
+
 func NewLoginManager(
 	serverFinder server.Finder,
 	hc *http.Client,
@@ -40,58 +45,58 @@ func (l LoginManager) Login(user security.User) error {
 	}
 	fmt.Println("Organization:", cfg.Organization)
 
+	url := fmt.Sprintf(urlLoginPattern, cfg.URL)
+
+	lr, err := requestLogin(user, l.httpClient, url, cfg.Organization)
+	if err != nil {
+		return err
+	}
+	sess := session.Session{
+		AccessToken:  lr.Token,
+		Organization: cfg.Organization,
+		Username:     user.Username,
+		TTL:          lr.TTL,
+	}
+	err = l.sessionManager.Create(sess)
+	if err != nil {
+		return errors.New("error create session, clear your rit home")
+	}
+	return nil
+}
+
+func requestLogin(user security.User, hc *http.Client, url, org string) (loginResponse, error) {
+	lr := loginResponse{}
 	b, err := json.Marshal(&user)
 	if err != nil {
-		return err
+		return lr, err
 	}
-
-	url := fmt.Sprintf(urlLoginPattern, cfg.URL)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
-		return err
+		return lr, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set(headers.XOrg, cfg.Organization)
+	req.Header.Set(headers.XOrg, org)
 
-	resp, err := l.httpClient.Do(req)
+	resp, err := hc.Do(req)
 	if err != nil {
-		return err
+		return lr, err
 	}
 
 	defer resp.Body.Close()
 
 	b, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return lr, err
 	}
-
-	type loginResponse struct {
-		Token string `json:"token"`
-		TTL   int64  `json:"ttl"`
-	}
-
-	lr := loginResponse{}
-
 	switch resp.StatusCode {
 	case 200:
 		if err = json.Unmarshal(b, &lr); err != nil {
-			return err
+			return lr, err
 		}
-		sess := session.Session{
-			AccessToken:  lr.Token,
-			Organization: cfg.Organization,
-			Username:     user.Username,
-			TTL:          lr.TTL,
-		}
-		err = l.sessionManager.Create(sess)
-		if err != nil {
-			return err
-		}
-		return nil
+		return lr, err
 	case 401:
-		return errors.New("login failed! Verify your credentials")
+		return lr, errors.New("login failed! Verify your credentials")
 	default:
-		return errors.New("login failed")
+		return lr, errors.New("login failed")
 	}
-
 }
