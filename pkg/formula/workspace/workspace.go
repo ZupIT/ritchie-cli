@@ -21,7 +21,12 @@ type Lister interface {
 	List() (Workspaces, error)
 }
 
-type AddLister interface {
+type Validator interface {
+	Validate(workspace Workspace) error
+}
+
+type AddListValidator interface {
 	Adder
 	Lister
+	Validator
 }

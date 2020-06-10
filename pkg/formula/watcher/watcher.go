@@ -2,121 +2,74 @@ package watcher
 
 import (
 	"fmt"
-	"github.com/fsnotify/fsnotify"
 	"log"
-	"os"
+	"time"
+
+	"github.com/radovskyb/watcher"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/spinner"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type WatchManager struct {
-	watcher *fsnotify.Watcher
+	watcher *watcher.Watcher
+	formula formula.Builder
+	dir     stream.DirListChecker
 }
 
-func New() *WatchManager {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
+func New(formula formula.Builder, dir stream.DirListChecker) *WatchManager {
+	w := watcher.New()
 
-	return &WatchManager{watcher: watcher}
+	return &WatchManager{watcher: w, formula: formula, dir: dir}
 }
 
-func (w *WatchManager) Watch(dir string) {
-	defer w.watcher.Close()
-
-	done := make(chan bool)
+func (w *WatchManager) Watch(workspacePath, formulaPath string) {
+	w.watcher.FilterOps(watcher.Write)
 	go func() {
 		for {
 			select {
-			case event, ok := <-w.watcher.Events:
-				if !ok {
-					return
+			case event := <-w.watcher.Event:
+				if !event.IsDir() {
+					w.build(workspacePath, formulaPath)
+					fmt.Printf(prompt.Info, "Waiting for modify \n")
 				}
-				log.Println("event:", event)
-
-				if event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Rename == fsnotify.Rename {
-					if Exists(event.Name) && isDir(event.Name) {
-						w.watch(event.Name)
-					}
-				}
-
-				// TODO: run Makefile or .bat
-			case err, ok := <-w.watcher.Errors:
-				if !ok {
-					return
-				}
-				log.Println("error:", err)
+			case err := <-w.watcher.Error:
+				log.Fatalln(err)
+			case <-w.watcher.Closed:
+				return
 			}
 		}
 	}()
 
-	w.start(dir)
-	fmt.Printf("Watching dir %s \n", dir)
-	<-done
+	formulaSrc := fmt.Sprintf("%s/src", formulaPath)
+	if err := w.watcher.AddRecursive(formulaSrc); err != nil {
+		log.Fatalln(err)
+	}
+
+	w.build(workspacePath, formulaPath)
+
+	watchText := fmt.Sprintf("Watching dir %s \n", formulaPath)
+	fmt.Printf(prompt.Info, watchText)
+
+	if err := w.watcher.Start(time.Second * 2); err != nil {
+		log.Fatalln(err)
+	}
 }
 
-func (w *WatchManager) watch(dirName string) {
-	if err := w.watcher.Add(dirName); err != nil {
-		log.Println(err)
-		return
-	}
-	return
-}
-
-func (w *WatchManager) start(name string) {
-	if !isDir(name) {
-		return
-	}
-
-	w.watch(name)
-
-	open, err := os.Open(name)
+func (w *WatchManager) build(workspacePath, formulaPath string) {
+	buildInfo := fmt.Sprintf(prompt.Info, "Building formula...")
+	s := spinner.New(buildInfo)
+	s.Start()
+	stderr, err := w.formula.Build(workspacePath, formulaPath)
 	if err != nil {
-		fmt.Println(err)
-		return
+		s.Stop()
+		msgFormatted := fmt.Sprintf("Build error: \n%s", string(stderr))
+		errMsg := fmt.Sprintf(prompt.Error, msgFormatted)
+		fmt.Println(errMsg)
+	} else {
+		s.Stop()
+		fmt.Printf(prompt.Success, "✔ Build completed! \n")
 	}
-
-	names, err := open.Readdirnames(-1)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	for _, n := range names { // Watch all directories in current dir
-		dir := fmt.Sprintf("%s/%s", name, n)
-		if !isDir(dir) {
-			continue
-		}
-
-		w.watch(dir)
-		w.start(dir)
-	}
-
-	return
-}
-
-func isDir(name string) bool {
-	file, err := os.Open(name)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-
-	info, err := file.Stat()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-
-	if !info.IsDir() {
-		return false
-	}
-	return true
-}
-
-func Exists(name string) bool {
-	if _, err := os.Stat(name); os.IsNotExist(err) {
-		return false
-	}
-
-	return true
 }

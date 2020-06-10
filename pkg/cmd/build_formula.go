@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -10,6 +9,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/spinner"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -21,26 +22,29 @@ const (
 
 type buildFormulaCmd struct {
 	userHomeDir string
-	workspace   workspace.AddLister
+	workspace   workspace.AddListValidator
 	formula     formula.Builder
 	watcher     formula.Watcher
+	directory   stream.DirListChecker
 	prompt.InputText
 	prompt.InputList
 }
 
 func NewBuildFormulaCmd(
 	userHomeDir string,
-	workManager workspace.AddLister,
+	workManager workspace.AddListValidator,
 	formula formula.Builder,
 	watcher formula.Watcher,
+	directory stream.DirListChecker,
 	inText prompt.InputText,
 	inList prompt.InputList,
 ) *cobra.Command {
 	s := buildFormulaCmd{
 		userHomeDir: userHomeDir,
 		workspace:   workManager,
-		watcher:     watcher,
 		formula:     formula,
+		watcher:     watcher,
+		directory:   directory,
 		InputText:   inText,
 		InputList:   inList,
 	}
@@ -64,16 +68,19 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		workspaces[workspace.DefaultWorkspaceName] = fmt.Sprintf(workspace.DefaultWorkspaceDirPattern, b.userHomeDir)
-
-		var test []string
-		for k, v := range workspaces {
-			kv := fmt.Sprintf("%s (%s)", k, v)
-			test = append(test, kv)
+		defaultWorkspace := fmt.Sprintf(workspace.DefaultWorkspaceDirPattern, b.userHomeDir)
+		if b.directory.Exists(defaultWorkspace) {
+			workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
 		}
 
-		test = append(test, newWorkspace)
-		selected, err := b.List("Select a formula workspace: ", test)
+		var items []string
+		for k, v := range workspaces {
+			kv := fmt.Sprintf("%s (%s)", k, v)
+			items = append(items, kv)
+		}
+
+		items = append(items, newWorkspace)
+		selected, err := b.List("Select a formula workspace: ", items)
 		if err != nil {
 			return err
 		}
@@ -108,6 +115,10 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 				Name: strings.Title(workspaceName),
 				Dir:  workspacePath,
 			}
+
+			if err := b.workspace.Validate(wspace); err != nil {
+				return err
+			}
 		}
 
 		formulaPath, err := b.readFormulas(wspace.Dir)
@@ -121,38 +132,45 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 		}
 
 		if watch {
-			b.watcher.Watch(formulaPath)
+			b.watcher.Watch(wspace.Dir, formulaPath)
 			return nil
 		}
 
-		fmt.Printf(prompt.Info, "Building formula... \n")
-		if err := b.formula.Build(wspace.Dir, formulaPath); err != nil {
-			return err
-		}
+		b.build(wspace.Dir, formulaPath)
 
-		fmt.Printf(prompt.Success, "Formula built with success \\o/ \n")
 		return nil
+
+	}
+}
+
+func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
+	buildInfo := fmt.Sprintf(prompt.Info, "Building formula...")
+	s := spinner.New(buildInfo)
+	s.Start()
+	stderr, err := b.formula.Build(workspacePath, formulaPath)
+	if err != nil {
+		s.Stop()
+		msgFormatted := fmt.Sprintf("Build error: \n%s", string(stderr))
+		errMsg := fmt.Sprintf(prompt.Error, msgFormatted)
+		fmt.Println(errMsg)
+	} else {
+		s.Stop()
+		fmt.Printf(prompt.Success, "✔ Build completed! \n")
+		fmt.Printf(prompt.Info, "Now you can run your formula with Ritchie!\n")
 	}
 }
 
 func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
-	open, err := os.Open(dir)
+	dirs, err := b.directory.List(dir, false)
 	if err != nil {
 		return "", err
 	}
 
-	fileInfos, err := open.Readdir(0)
-	if err != nil {
-		return "", err
-	}
-
-	formulas, isFormula := filterDir(fileInfos)
-
-	if isFormula {
+	if isFormula(dirs) {
 		return dir, nil
 	}
 
-	selected, err := b.List("Select a formula you want to build: ", formulas)
+	selected, err := b.List("Select a formula or group: ", dirs)
 	if err != nil {
 		return "", err
 	}
@@ -165,20 +183,12 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 	return dir, nil
 }
 
-func filterDir(fileInfos []os.FileInfo) ([]string, bool) {
-	var dirs []string
-	var isFormula bool
-	for _, fileInfo := range fileInfos {
-		n := fileInfo.Name()
-		if n == srcDir {
-			isFormula = true
-			break
-		}
-
-		if fileInfo.IsDir() && n != treeDir && !strings.ContainsAny(n, ".") {
-			dirs = append(dirs, n)
+func isFormula(dirs []string) bool {
+	for _, dir := range dirs {
+		if dir == srcDir {
+			return true
 		}
 	}
 
-	return dirs, isFormula
+	return false
 }

@@ -202,9 +202,9 @@ type Creator interface {
 }
 
 type Builder interface {
-	Build(workspacePath string, formulaPath string) error
+	Build(workspacePath, formulaPath string) ([]byte, error)
 }
 
 type Watcher interface {
-	Watch(dir string)
+	Watch(workspacePath, formulaPath string)
 }
