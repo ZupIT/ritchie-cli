@@ -51,7 +51,7 @@ func (b BuilderManager) Build(workspacePath, formulaPath string) ([]byte, error)
 		return nil, err
 	}
 
-	if err := b.copyFormulaConfig(formulaPath, ritFormulaDestPath); err != nil {
+	if err := b.copyConfig(formulaPath, ritFormulaDestPath); err != nil {
 		return nil, err
 	}
 
@@ -96,7 +96,7 @@ func (b BuilderManager) copyDist(formulaPath, ritFormulaDistPath string) error {
 	return nil
 }
 
-func (b BuilderManager) copyFormulaConfig(formulaPath string, distPath string) error {
+func (b BuilderManager) copyConfig(formulaPath string, distPath string) error {
 	files, err := b.file.List(formulaPath)
 	if err != nil {
 		return err

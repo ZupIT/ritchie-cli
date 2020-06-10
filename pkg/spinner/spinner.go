@@ -8,7 +8,7 @@ import (
 
 var (
 	speed     = 100 * time.Millisecond
-	sleepTime = 3 * time.Second
+	sleepTime = 2 * time.Second
 	template  = []string{"⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"}
 )
 

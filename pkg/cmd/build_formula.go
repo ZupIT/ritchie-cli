@@ -9,6 +9,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/spinner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -150,7 +151,7 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 	stderr, err := b.formula.Build(workspacePath, formulaPath)
 	if err != nil {
 		s.Stop()
-		msgFormatted := fmt.Sprintf("Build error: \n%s", string(stderr))
+		msgFormatted := fmt.Sprintf("Build error: \n%s \n%s", string(stderr), err)
 		errMsg := fmt.Sprintf(prompt.Error, msgFormatted)
 		fmt.Println(errMsg)
 	} else {
@@ -165,6 +166,8 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	dirs = sliceutil.Remove(dirs, treeDir)
 
 	if isFormula(dirs) {
 		return dir, nil

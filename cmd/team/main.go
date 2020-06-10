@@ -112,7 +112,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
-	testCmd := cmd.NewTestCmd()
+	buildCmd := cmd.NewBuildCmd()
 
 	// level 2
 	setCredentialCmd := cmd.NewTeamSetCredentialCmd(
@@ -140,7 +140,7 @@ func buildCommands() *cobra.Command {
 	formulaWorkspace := form_workspace.New(ritchieHomeDir, fileManager)
 	formulaBuilder := formula.NewBuilder(ritchieHomeDir, dirManager, fileManager)
 	watchManager := watcher.New(formulaBuilder, dirManager)
-	testFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
@@ -151,7 +151,7 @@ func buildCommands() *cobra.Command {
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
-	testCmd.AddCommand(testFormulaCmd)
+	buildCmd.AddCommand(buildFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.TeamCoreCmds, treeManager, defaultRunner, dockerRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
@@ -173,7 +173,7 @@ func buildCommands() *cobra.Command {
 				logoutCmd,
 				setCmd,
 				showCmd,
-				testCmd,
+				buildCmd,
 				updateCmd,
 			},
 		},
