@@ -288,6 +288,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Load Versions
+          command: |
+            . ./.circleci/scripts/version.sh
+      - run:
           name: install Rit Single
           command: |
             curl -fsSL https://commons-repo.ritchiecli.io/install_single.sh | bash
@@ -295,7 +299,7 @@ jobs:
           name: Verify Command
           command: |
             rit --version
-            rit --version | grep "nightly (single)"
+            rit --version | grep $RELEASE_VERSION
       - run:
           name: install Rit Team
           command: |
@@ -304,7 +308,7 @@ jobs:
           name: Verify Command
           command: |
             rit --version
-            rit --version | grep "nightly (team)"
+            rit --version | grep $RELEASE_VERSION
 
 
 
