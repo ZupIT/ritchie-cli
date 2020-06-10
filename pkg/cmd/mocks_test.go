@@ -34,12 +34,6 @@ func (inputIntMock) Int(name string) (int64, error) {
 	return 0, nil
 }
 
-type inputEmailMock struct{}
-
-func (inputEmailMock) Email(name string) (string, error) {
-	return "dennis@ritchie.io", nil
-}
-
 type inputPasswordMock struct{}
 
 func (inputPasswordMock) Password(label string) (string, error) {
@@ -96,16 +90,6 @@ type formCreator struct{}
 
 func (formCreator) Create(cf formula.Create) (formula.CreateManager, error) {
 	return formula.CreateManager{}, nil
-}
-
-type userManagerMock struct{}
-
-func (userManagerMock) Create(u security.User) error {
-	return nil
-}
-
-func (userManagerMock) Delete(u security.User) error {
-	return nil
 }
 
 type ctxSetterMock struct{}
@@ -173,7 +157,7 @@ func (repoUpdaterMock) Update() error {
 
 type loginManagerMock struct{}
 
-func (loginManagerMock) Login() error {
+func (loginManagerMock) Login(security.User) error {
 	return nil
 }
 

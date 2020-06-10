@@ -18,7 +18,7 @@ func TestNewSingleInitCmd(t *testing.T) {
 }
 
 func TestNewTeamInitCmd(t *testing.T) {
-	cmd := NewTeamInitCmd(inputTextMock{}, inputURLMock{}, inputFalseMock{}, findSetterServerMock{}, loginManagerMock{}, repoLoaderMock{})
+	cmd := NewTeamInitCmd(inputTextMock{}, inputPasswordMock{}, inputURLMock{}, inputFalseMock{}, findSetterServerMock{}, loginManagerMock{}, repoLoaderMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 	if cmd == nil {
