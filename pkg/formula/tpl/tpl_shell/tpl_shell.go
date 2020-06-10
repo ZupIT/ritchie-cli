@@ -3,7 +3,7 @@ package tpl_shell
 const (
 	Main = `#!/bin/sh
 
-. ./{{bin-name}}/{{bin-name}}.sh --source-only
+. $PWD/{{bin-name}}/{{bin-name}}.sh --source-only
 
 run $SAMPLE_TEXT $SAMPLE_LIST $SAMPLE_BOOL`
 
@@ -19,13 +19,11 @@ build:
 	Dockerfile = `
 FROM alpine:latest
 
-WORKDIR /app
-COPY . /app
+COPY . .
 
 RUN chmod +x set_umask.sh
 RUN chmod +x {{bin-name}}.sh
-
-WORKDIR /app
+RUN mkdir app
 
 ENTRYPOINT ["./set_umask.sh"]
 CMD ["./{{bin-name}}.sh"]`
