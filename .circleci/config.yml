@@ -24,7 +24,6 @@ references:
   filters: &FILTERS_DELIVERY
     branches:
       only:
-        - /^release-.*/
         - qa
         - nightly
         - beta
@@ -34,20 +33,12 @@ references:
       only:
         - /^release-.*/
 
-  filters-checks: &FILTERS_CHECK
-    branches:
-      only:
-        - master
-        - /^release-.*/
-        - nightly
-        - beta
-
   filters-checks-pr: &FILTERS_CHECK_CODE
     branches:
       only:
-        - qa
         - /^pull\/.*$/
         - /^feature.*/
+        - master
 
 executors:
   ritchie-tests-executor:
@@ -100,7 +91,6 @@ jobs:
           command: |
             go mod download
             /go/bin/golangci-lint run
-
   horus:
     executor: horus-executor
     environment:
@@ -149,7 +139,6 @@ jobs:
           name: codecov upload
           when: always
           command: bash <(curl -s https://codecov.io/bash)
-
   unix_functional_test_single:
     executor: ritchie-executor
     environment:
@@ -252,7 +241,6 @@ jobs:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
           path: *TEST_RESULTS_DIR
-
   delivery:
     executor: delivery-executor
     environment:
@@ -293,6 +281,38 @@ jobs:
           command: |
             make rebase-nightly
 
+  unix_smoke_test:
+    executor: ritchie-tests-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - run:
+          name: Load Versions
+          command: |
+            . ./.circleci/scripts/version.sh
+            echo $RELEASE_VERSION
+      - run:
+          name: install Rit Single
+          command: |
+            curl -fsSL https://commons-repo.ritchiecli.io/install_single.sh | bash
+      - run:
+          name: Verify Command
+          command: |
+            rit --version
+            rit --version | grep "$RELEASE_VERSION"
+      - run:
+          name: install Rit Team
+          command: |
+            curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+      - run:
+          name: Verify Command
+          command: |
+            rit --version
+            rit --version | grep "$RELEASE_VERSION"
+
+
+
 workflows:
   nightly:
     triggers:
@@ -304,8 +324,7 @@ workflows:
                 - master
     jobs:
       - rebase_nightly
-
-  build-for-branch:
+  build-for-requests:
     jobs:
       - lint:
           filters:
@@ -352,18 +371,39 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
+  release:
+    jobs:
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_RELEASE
+      - delivery:
+          name: delivery
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
+      - release:
+          name: release
+          type: approval
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - delivery
+      - unix_smoke_test:
+          name: unix-smoke-test
+          filters:
+            <<: *FILTERS_RELEASE
+  delivery:
+    jobs:
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_DELIVERY
       - delivery:
           name: delivery
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - unix-functional-test-single-code
-            - unix-functional-test-team-code
-            - windows-functional-test-single-code
-            - windows-functional-test-team-code
-      - release:
-          name: release
-          filters:
-            <<: *FILTERS_RELEASE
-          requires:
-            - delivery
+            - build-code
+

@@ -9,5 +9,6 @@ elif expr "$CIRCLE_BRANCH" : '^nightly' >/dev/null; then
 elif expr "$CIRCLE_BRANCH" : '^beta' >/dev/null; then
   export RELEASE_VERSION="beta"
 else
+  export RELEASE_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
   echo ""
 fi
