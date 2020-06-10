@@ -406,9 +406,4 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - build-code
-  smoke:
-    jobs:
-      - unix_smoke_test:
-          name: unix-smoke-test
-          filters:
-            <<: *FILTERS_CHECK_CODE
+
