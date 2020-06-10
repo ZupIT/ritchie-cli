@@ -291,6 +291,7 @@ jobs:
           name: Load Versions
           command: |
             . ./.circleci/scripts/version.sh
+            echo $RELEASE_VERSION
       - run:
           name: install Rit Single
           command: |
@@ -299,7 +300,7 @@ jobs:
           name: Verify Command
           command: |
             rit --version
-            rit --version | grep $RELEASE_VERSION
+            rit --version | grep "$RELEASE_VERSION"
       - run:
           name: install Rit Team
           command: |
@@ -308,7 +309,7 @@ jobs:
           name: Verify Command
           command: |
             rit --version
-            rit --version | grep $RELEASE_VERSION
+            rit --version | grep "$RELEASE_VERSION"
 
 
 
