@@ -294,6 +294,7 @@ jobs:
       - run:
           name: Verify Command
           command: |
+            rit --version
             rit --version | grep "nightly (single)"
       - run:
           name: install Rit Team
@@ -302,7 +303,9 @@ jobs:
       - run:
           name: Verify Command
           command: |
+            rit --version
             rit --version | grep "nightly (team)"
+
 
 
 workflows:
@@ -382,6 +385,10 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - delivery
+      - unix_smoke_test:
+          name: unix-smoke-test
+          filters:
+            <<: *FILTERS_RELEASE
   delivery:
     jobs:
       - build:
