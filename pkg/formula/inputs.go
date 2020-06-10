@@ -64,7 +64,7 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup) error {
 
 	config := setup.config
 
-	for i, input := range config.Inputs {
+	for _, input := range config.Inputs {
 		var inputVal string
 		var err error
 		switch iType := input.Type; iType {
@@ -79,7 +79,7 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup) error {
 		}
 
 		if len(inputVal) != 0 {
-			addEnv(cmd, setup.pwd, input.Name, inputVal, i)
+			addEnv(cmd, input.Name, inputVal)
 		}
 	}
 	if len(config.Command) != 0 {
@@ -91,7 +91,7 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup) error {
 
 func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 	config := setup.config
-	for i, input := range config.Inputs {
+	for _, input := range config.Inputs {
 		var inputVal string
 		var valBool bool
 		items, err := loadItems(input, setup.formulaPath)
@@ -125,7 +125,7 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 
 		if len(inputVal) != 0 {
 			persistCache(setup.formulaPath, inputVal, input, items)
-			addEnv(cmd, setup.pwd, input.Name, inputVal, i)
+			addEnv(cmd, input.Name, inputVal)
 		}
 	}
 	if len(config.Command) != 0 {
@@ -137,15 +137,9 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 
 // addEnv Add environment variable to run formulas.
 // add the variable inName=inValue to cmd.Env
-func addEnv(cmd *exec.Cmd, pwd, inName, inValue string, index int) {
+func addEnv(cmd *exec.Cmd, inName, inValue string) {
 	e := fmt.Sprintf(EnvPattern, strings.ToUpper(inName), inValue)
-	if index == 0 {
-		pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, pwd)
-		cmd.Env = append(cmd.Env, pwdEnv) // Add "pwd" to use in formulas that need it
-		cmd.Env = append(cmd.Env, e)
-	} else {
-		cmd.Env = append(cmd.Env, e)
-	}
+	cmd.Env = append(cmd.Env, e)
 }
 
 func persistCache(formulaPath, inputVal string, input Input, items []string) {

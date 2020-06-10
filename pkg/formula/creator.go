@@ -294,7 +294,7 @@ func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
 	if err != nil {
 		return err
 	}
-	err = createDockerfile(srcDir, l.Dockerfile)
+	err = createDockerfile(pkg, srcDir, l.Dockerfile)
 	if err != nil {
 		return err
 	}
@@ -323,7 +323,8 @@ func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tpl))
 }
 
-func createDockerfile(dir, tpl string) error {
+func createDockerfile(pkg, dir, tpl string) error {
+	tpl = strings.ReplaceAll(tpl, "{{bin-name}}", pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
 }
 
@@ -346,7 +347,7 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error 
 	}
 	tpl = strings.ReplaceAll(tpl, nameModule, pkg)
 	tpl = strings.ReplaceAll(tpl, nameBin, pkg)
-	return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
+	return fileutil.WriteFilePerm(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl), 0777)
 }
 
 func createConfigFile(dir string) error {
