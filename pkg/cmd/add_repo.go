@@ -63,7 +63,7 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 		for _, repo := range repos {
 			if rn == repo.Name {
 				msg := fmt.Sprintf("Your repository %q is gonna be overwritten.\n", repo.Name)
-				fmt.Printf(prompt.Warning, msg)
+				fmt.Printf(prompt.Yellow, msg)
 				choice, _ := a.Bool("Want to proceed?", []string{"yes", "no"})
 				if !choice {
 					fmt.Printf(prompt.Info, "Operation cancelled\n")
