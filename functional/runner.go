@@ -44,7 +44,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 }
 
 func (scenario *Scenario) RunStdin() (string, error) {
-	fmt.Println("Running: " + scenario.Entry)
+	fmt.Println("Running STDIN: " + scenario.Entry)
 	os := runtime.GOOS
 	if  os == "windows" {
 		b2, err := scenario.runStdinForWindows()

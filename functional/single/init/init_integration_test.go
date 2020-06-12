@@ -16,7 +16,7 @@ func TestRitSingleInit(t *testing.T) {
 }
 
 var _ = Describe("RitInit", func() {
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		functional.RitClearConfigs()
 	})
 
@@ -37,6 +37,29 @@ var _ = Describe("RitInit", func() {
 		Entry("List repo", scenariosCore[5]),
 		Entry("Delete repo", scenariosCore[6]),
 		Entry("Set Credential", scenariosCore[7]),
+		Entry("Update repo", scenariosCore[8]),
+
+		Entry("Do init", scenariosCore[9]),
+	)
+
+})
+
+var _ = Describe("RitInit", func() {
+	BeforeEach(func() {
+		functional.RitClearConfigs()
+	})
+
+	scenariosCore := functional.LoadScenarios("init_feature.json")
+
+	DescribeTable("When STDIN for init",
+		func(scenario functional.Scenario) {
+			out, err := scenario.RunStdin()
+			Expect(err).To(Succeed())
+			Expect(out).To(ContainSubstring(scenario.Result))
+		},
+
+		Entry("Set Init STDIN", scenariosCore[10]),
+
 	)
 
 })
