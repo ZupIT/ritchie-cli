@@ -1,6 +1,8 @@
-package single
+package stdin
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -8,7 +10,16 @@ import (
 	"github.com/ZupIT/ritchie-cli/functional"
 )
 
+func TestRitSingleStdin(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Rit Suite Stdin")
+}
+
 var _ = Describe("RitStdin", func() {
+	BeforeSuite(func() {
+		functional.RitInit()
+	})
+
 	scenariosStdin := functional.LoadScenarios("stdin_feature.json")
 
 	DescribeTable("When running core command",

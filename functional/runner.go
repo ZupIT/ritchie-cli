@@ -66,6 +66,16 @@ func RitInit() {
 	fmt.Println("Setup Done..")
 }
 
+func RitClearConfigs() {
+	os := runtime.GOOS
+	if  os == "windows" {
+		// TODO clear config windows
+	} else {
+		setUpClearSetupUnix()
+	}
+	fmt.Println("Setup Done..")
+}
+
 func LoadScenarios(file string) []Scenario {
 	jsonFile, err := os.Open(file)
 	if err != nil {

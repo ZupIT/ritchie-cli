@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -73,6 +76,29 @@ func setUpRitUnix() {
 	for scanner.Scan() {
 		m := scanner.Text()
 		fmt.Println(m)
+	}
+}
+
+func setUpClearSetupUnix() {
+	fmt.Println("Running Clear for Unix..")
+	myPath := "/.rit/"
+	usr, _ := user.Current()
+	dir := usr.HomeDir + myPath
+
+	d, err := os.Open(dir)
+	if err != nil {
+		log.Printf("Error Open dir: %q", err)
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		log.Printf("Error Readdirnames: %q", err)
+	}
+	for _, name := range names {
+		err := os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			log.Printf("Error cleaning repo rit: %q", err)
+		}
 	}
 }
 
