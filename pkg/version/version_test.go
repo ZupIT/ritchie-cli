@@ -138,7 +138,11 @@ func TestGetStableVersion(t *testing.T) {
 			w.Write([]byte(expectedResult + "\n"))
 		}))
 
-		result, err := DefaultVersionResolver{StableVersionUrl: mockHttp.URL, FileUtilService: StubFileUtilServiceWithFail{}}.GetStableVersion()
+		result, err := DefaultVersionResolver{
+			StableVersionUrl: mockHttp.URL,
+			FileUtilService: StubFileUtilServiceWithFail{},
+			HttpClient: mockHttp.Client(),
+		}.GetStableVersion()
 		if err != nil {
 			t.Errorf("fail Err:%s\n", err)
 		}
@@ -146,7 +150,11 @@ func TestGetStableVersion(t *testing.T) {
 	})
 
 	t.Run("Should return err when http.get fail", func(t *testing.T) {
-		_, err := DefaultVersionResolver{FileUtilService: StubFileUtilServiceWithFail{}}.GetStableVersion()
+		_, err := DefaultVersionResolver{
+			FileUtilService: StubFileUtilServiceWithFail{},
+			HttpClient: &http.Client{},
+		}.GetStableVersion()
+
 		if err == nil {
 			t.Fatalf("Should return err.")
 		}

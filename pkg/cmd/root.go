@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -189,6 +191,7 @@ func verifyNewVersion(cmd *cobra.Command) {
 			CurrentVersion:   Version,
 			StableVersionUrl: StableVersionUrl,
 			FileUtilService:  fileutil.DefaultFileUtilService{},
+			HttpClient:       &http.Client{Timeout: 1 * time.Second},
 		}
 		versionUtil.VerifyNewVersion(resolver, os.Stdout)
 	}

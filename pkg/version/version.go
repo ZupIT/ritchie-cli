@@ -29,11 +29,12 @@ type Resolver interface {
 type DefaultVersionResolver struct {
 	CurrentVersion   string
 	StableVersionUrl string
-	FileUtilService fileutil.FileUtilService
+	FileUtilService  fileutil.FileUtilService
+	HttpClient       *http.Client
 }
 
 type stableVersionCache struct {
-	StableVersion string `json:"stableVersion"`
+	StableVersion string    `json:"stableVersion"`
 	ExpiresAt     time.Time `json:"expiresAt"`
 }
 
@@ -54,7 +55,11 @@ func (r DefaultVersionResolver) GetStableVersion() (string, error) {
 
 		api.RitchieHomeDir()
 
-		response, err := http.Get(r.StableVersionUrl)
+		request, err := http.NewRequest(http.MethodGet, r.StableVersionUrl, nil)
+		if err != nil {
+			return "", err
+		}
+		response, err := r.HttpClient.Do(request)
 		if err != nil {
 			return "", err
 		}
