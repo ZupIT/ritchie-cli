@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	versionUtil "github.com/ZupIT/ritchie-cli/pkg/version"
@@ -93,6 +94,8 @@ func buildCommands() *cobra.Command {
 	defaultUpgradeResolver := versionUtil.DefaultVersionResolver{
 		CurrentVersion:   cmd.Version,
 		StableVersionUrl: cmd.StableVersionUrl,
+		FileUtilService:  fileutil.DefaultFileUtilService{},
+		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
 	upgradeUrl := cmd.GetUpgradeUrl(api.Team, defaultUpgradeResolver)
 

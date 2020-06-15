@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
@@ -82,6 +84,8 @@ func buildCommands() *cobra.Command {
 	defaultUpgradeResolver := versionUtil.DefaultVersionResolver{
 		CurrentVersion:   cmd.Version,
 		StableVersionUrl: cmd.StableVersionUrl,
+		FileUtilService:  fileutil.DefaultFileUtilService{},
+		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
 	upgradeUrl := cmd.GetUpgradeUrl(api.Single, defaultUpgradeResolver)
 
