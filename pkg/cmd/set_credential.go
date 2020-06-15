@@ -76,7 +76,7 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		log.Println(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
 		return nil
 	}
 }
@@ -110,7 +110,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 		pair := strings.Split(kv, "=")
 		if s := validate(pair); s != "" {
-			fmt.Println(s)
+			prompt.Error(s)
 			continue
 		}
 
@@ -201,7 +201,7 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		log.Println(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
 		return nil
 	}
 }
