@@ -39,7 +39,14 @@ func GetUpgradeUrl(edition api.Edition, resolver versionUtil.Resolver) string {
 	if err != nil {
 		return ""
 	}
-	return fmt.Sprintf(UpgradeUrlFormat, stableVersion, runtime.GOOS, edition)
+
+	upgradeUrl := fmt.Sprintf(UpgradeUrlFormat, stableVersion, runtime.GOOS, edition)
+
+	if runtime.GOOS == "windows" {
+		upgradeUrl += ".exe"
+	}
+
+	return upgradeUrl
 }
 
 func NewUpgradeCmd(upgradeUrl string, upgradeUtil UpgradeUtil) *cobra.Command {
@@ -67,10 +74,14 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 
 		resp, err := http.Get(u.upgradeUrl)
 		if err != nil {
-			fmt.Printf(prompt.Error, "Fail to download new version.\n")
+			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to download new version.\nErr:%s\n", err))
 			return err
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to download new version.\nStatus:%d\n", resp.StatusCode))
+			return errors.New(fmt.Sprintf("upgradeUrl return status:%d",resp.StatusCode))
+		}
 
 		err = u.upgradeUtil.Apply(resp.Body, update.Options{})
 		if err != nil {

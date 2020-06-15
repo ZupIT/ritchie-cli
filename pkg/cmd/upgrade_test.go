@@ -61,12 +61,18 @@ func (u StubUpgradeUtilFail) Apply(reader io.Reader, opts update.Options) error 
 func TestGetUpgradeUrlSingle(t *testing.T) {
 	result := GetUpgradeUrl(api.Single, stubResolver{})
 	expected := fmt.Sprintf(UpgradeUrlFormat, stableVersion, runtime.GOOS, api.Single)
+	if runtime.GOOS == "windows" {
+		expected += ".exe"
+	}
 	assertEquals(expected, result, t)
 }
 
 func TestGetUpgradeUrlTeam(t *testing.T) {
 	result := GetUpgradeUrl(api.Team, stubResolver{})
 	expected := fmt.Sprintf(UpgradeUrlFormat, stableVersion, runtime.GOOS, api.Team)
+	if runtime.GOOS == "windows" {
+		expected += ".exe"
+	}
 	assertEquals(expected, result, t)
 }
 
@@ -130,6 +136,32 @@ func TestNewUpgradeCmdFailToGet(t *testing.T) {
 	stubUpgradeUtilApplyExecutions = 0
 
 	upgradeCmd := NewUpgradeCmd(upgradeUrl, StubUpgradeUtil{})
+
+	if upgradeCmd == nil {
+		t.Errorf("Expeceted to build a UpgradeCmd")
+	}
+
+	err := upgradeCmd.Execute()
+
+	if err == nil {
+		t.Errorf("Expected Error")
+	}
+
+	if stubUpgradeUtilApplyExecutions != 0 {
+		t.Errorf("Shloud not call upgradeUtil.")
+	}
+
+}
+
+func TestNewUpgradeCmdNotFoundToGet(t *testing.T) {
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+	}))
+	defer mockServer.Close()
+	stubUpgradeUtilApplyExecutions = 0
+
+	upgradeCmd := NewUpgradeCmd(mockServer.URL, StubUpgradeUtil{})
 
 	if upgradeCmd == nil {
 		t.Errorf("Expeceted to build a UpgradeCmd")
