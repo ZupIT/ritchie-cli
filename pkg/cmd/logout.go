@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 )
 
@@ -29,7 +30,7 @@ func (l logoutCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("Logout successful!")
+		prompt.Success("Logout successful!")
 		return nil
 	}
 }

@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 )
 
@@ -38,7 +37,7 @@ func (l loginCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("Session created successfully!")
+		prompt.Success("Session created successfully!")
 		return nil
 	}
 }
