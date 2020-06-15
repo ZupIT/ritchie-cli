@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	msgNotAllowedCharacter = fmt.Sprintf(prompt.Error, `not allowed character on formula name \/,><@-`)
+	msgNotAllowedCharacter = fmt.Sprintf(prompt.Red, `not allowed character on formula name \/,><@-`)
 	ErrNotAllowedCharacter = errors.New(msgNotAllowedCharacter)
 )
 
@@ -90,9 +90,9 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		msg := fmt.Sprintf("%s formula successfully created!\n", lang)
-		fmt.Printf(prompt.Success, msg)
+		fmt.Printf(prompt.Green, msg)
 		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
-		fmt.Printf(prompt.Info, msg)
+		fmt.Printf(prompt.Teal, msg)
 
 		return nil
 	}
@@ -104,7 +104,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		var cf formula.Create
 
 		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
-			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			fmt.Println(prompt.Error(stdin.MsgInvalidInput))
 			return err
 		}
 
@@ -118,9 +118,9 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		}
 
 		msg := fmt.Sprintf("%s formula successfully created!\n", cf.Lang)
-		fmt.Printf(prompt.Success, msg)
+		fmt.Printf(prompt.Green, msg)
 		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
-		fmt.Printf(prompt.Info, msg)
+		fmt.Printf(prompt.Teal, msg)
 
 		return nil
 	}

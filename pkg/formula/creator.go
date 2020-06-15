@@ -26,11 +26,11 @@ const (
 )
 
 var (
-	msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
-	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")
-	msgErrRepeatedCommand  = fmt.Sprintf(prompt.Error, "this command already exists")
-	msgErrDontStartWithRit = fmt.Sprintf(prompt.Error, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
-	msgErrTooShortCommand  = fmt.Sprintf(prompt.Error, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+	msgErrMakefileNotFound = fmt.Sprintf(prompt.Red, "makefile not found")
+	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Red, "tree.json not found")
+	msgErrRepeatedCommand  = fmt.Sprintf(prompt.Red, "this command already exists")
+	msgErrDontStartWithRit = fmt.Sprintf(prompt.Red, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
+	msgErrTooShortCommand  = fmt.Sprintf(prompt.Red, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
 	ErrRepeatedCommand     = errors.New(msgErrRepeatedCommand)
 	ErrDontStartWithRit    = errors.New(msgErrDontStartWithRit)
 	ErrTooShortCommand     = errors.New(msgErrTooShortCommand)

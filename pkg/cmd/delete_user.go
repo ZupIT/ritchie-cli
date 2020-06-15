@@ -77,7 +77,7 @@ func (d deleteUserCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &u)
 		if err != nil {
-			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			fmt.Println(prompt.Error(stdin.MsgInvalidInput))
 			return err
 		}
 
