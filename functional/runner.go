@@ -100,3 +100,7 @@ func scannerTerminal(out io.Reader) *bufio.Scanner {
 	scanner.Split(bufio.ScanLines)
 	return scanner
 }
+
+func Failed() {
+
+}

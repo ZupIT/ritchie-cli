@@ -33,6 +33,8 @@ func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
 	if errorEcho != nil {
 		log.Printf("Error while running: %q", errorEcho)
 	}
+	var stderr bytes.Buffer
+	commandRit.Stderr = &stderr
 
 	errorRit := commandRit.Start()
 	if errorRit != nil {
@@ -49,6 +51,7 @@ func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
 	errorRit = commandRit.Wait()
 	if errorRit != nil {
 		log.Printf("Error while running: %q", errorRit)
+		b2 = stderr
 	}
 
 	fmt.Println(&b2)

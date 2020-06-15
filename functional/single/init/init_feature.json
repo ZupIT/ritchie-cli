@@ -131,5 +131,22 @@
 
         ],
         "result":""
+    },
+    {
+        "entry":"Set Login STDIN without passphrase",
+        "steps":[
+            {
+                "key":"",
+                "value":"{\"name\":\"12345\"}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"init --stdin",
+                "action":"main"
+            }
+
+        ],
+        "result":"Error: passphrase is required"
     }
 ]

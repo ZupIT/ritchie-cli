@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gexec"
 
 	"github.com/ZupIT/ritchie-cli/functional"
 )
@@ -59,6 +60,26 @@ var _ = Describe("RitInit", func() {
 		},
 
 		Entry("Set Init STDIN", scenariosCore[10]),
+
+	)
+
+})
+
+var _ = Describe("RitInit STDIN Invalid", func() {
+	BeforeEach(func() {
+		functional.RitClearConfigs()
+	})
+
+	scenariosCore := functional.LoadScenarios("init_feature.json")
+
+	DescribeTable("When STDIN for init is invalid",
+		func(scenario functional.Scenario) {
+			out, err := scenario.RunStdin()
+			Expect(err).Should(gexec.Exit(1))
+			Expect(out).To(ContainSubstring(scenario.Result))
+		},
+
+		Entry("Set Init STDIN without passphrase", scenariosCore[11]),
 
 	)
 
