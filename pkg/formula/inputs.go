@@ -166,7 +166,7 @@ func persistCache(formulaPath, inputVal string, input Input, items []string) {
 		itemsBytes, _ := json.Marshal(items)
 		err := fileutil.WriteFile(cachePath, itemsBytes)
 		if err != nil {
-			fmt.Sprintln("Red in WriteFile")
+			fmt.Sprintln("Write file error")
 			return
 		}
 
