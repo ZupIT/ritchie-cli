@@ -72,13 +72,12 @@ type StubFileUtilService struct{}
 const stubFileUtilServiceCacheValue = `
 {
     "stableVersion": "1.0.0",
-    "expiresAt": %s
+    "expiresAt": %d
 }
 `
 
 func (s StubFileUtilService) ReadFile(path string) ([]byte, error) {
-	now, _ := json.Marshal(time.Now().Add(time.Hour * 1))
-	json := fmt.Sprintf(stubFileUtilServiceCacheValue, now)
+	json := fmt.Sprintf(stubFileUtilServiceCacheValue, time.Now().Add(time.Hour * 1).Unix())
 	return []byte(json), nil
 }
 
@@ -165,8 +164,7 @@ func TestGetStableVersion(t *testing.T) {
 		if err != nil {
 			t.Errorf("fail Err:%s\n", err)
 		}
-		now, _ := json.Marshal(time.Now().Add(time.Hour * 1))
-		expectedJson := []byte(fmt.Sprintf(stubFileUtilServiceCacheValue, now))
+		expectedJson := []byte(fmt.Sprintf(stubFileUtilServiceCacheValue, time.Now().Add(time.Hour * 1).Unix()))
 		cacheExpected := &stableVersionCache{}
 		json.Unmarshal(expectedJson, cacheExpected)
 

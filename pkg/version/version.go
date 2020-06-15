@@ -18,7 +18,7 @@ var (
 	// MsgUpgrade error message to inform user to upgrade rit version
 	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade\n"
 	// stableVersionFileCache is the file name to cache stableVersion
-	stableVersionFileCache = "stable-version-cache.txt"
+	stableVersionFileCache = "stable-version-cache.json"
 )
 
 type Resolver interface {
@@ -34,8 +34,8 @@ type DefaultVersionResolver struct {
 }
 
 type stableVersionCache struct {
-	StableVersion string    `json:"stableVersion"`
-	ExpiresAt     time.Time `json:"expiresAt"`
+	StableVersion string `json:"stableVersion"`
+	ExpiresAt     int64  `json:"expiresAt"`
 }
 
 func (r DefaultVersionResolver) GetCurrentVersion() (string, error) {
@@ -51,7 +51,7 @@ func (r DefaultVersionResolver) GetStableVersion() (string, error) {
 		err = json.Unmarshal(cacheData, cache)
 	}
 
-	if err != nil || cache.ExpiresAt.Before(time.Now()) {
+	if err != nil || cache.ExpiresAt <= time.Now().Unix() {
 
 		api.RitchieHomeDir()
 
@@ -73,7 +73,7 @@ func (r DefaultVersionResolver) GetStableVersion() (string, error) {
 
 		newCache := stableVersionCache{
 			StableVersion: stableVersion,
-			ExpiresAt:     time.Now().Add(time.Hour * 10),
+			ExpiresAt:     time.Now().Add(time.Hour * 10).Unix(),
 		}
 
 		newCacheJson, err := json.Marshal(newCache)
