@@ -10,181 +10,271 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-type StubResolverWithSameVersions struct {
+type StubResolverVersions struct {
+	getCurrentVersion func() (string, error)
+	getStableVersion  func() (string, error)
 }
 
-func (r StubResolverWithSameVersions) GetCurrentVersion() (string, error) {
-	return "1.0.0", nil
+func (r StubResolverVersions) GetCurrentVersion() (string, error) {
+	return r.getCurrentVersion()
 }
 
-func (r StubResolverWithSameVersions) GetStableVersion() (string, error) {
-	return "1.0.0", nil
+func (r StubResolverVersions) GetStableVersion() (string, error) {
+	return r.getStableVersion()
 }
 
-type StubResolverWithDifferentVersions struct {
+type StubFileUtilService struct {
+	readFile      func(string) ([]byte, error)
+	writeFilePerm func(string, []byte, int32) error
 }
-
-func (r StubResolverWithDifferentVersions) GetCurrentVersion() (string, error) {
-	return "1.0.0", nil
-}
-
-func (r StubResolverWithDifferentVersions) GetStableVersion() (string, error) {
-	return "1.0.1", nil
-}
-
-type StubResolverWithErrorOnGetCurrentVersion struct {
-}
-
-func (r StubResolverWithErrorOnGetCurrentVersion) GetCurrentVersion() (string, error) {
-	return "", errors.New("some error")
-}
-
-func (r StubResolverWithErrorOnGetCurrentVersion) GetStableVersion() (string, error) {
-	return "1.0.1", nil
-}
-
-type StubResolverWithErrorOnGetStableVersion struct {
-}
-
-func (r StubResolverWithErrorOnGetStableVersion) GetCurrentVersion() (string, error) {
-	return "1.0.0", nil
-}
-
-func (r StubResolverWithErrorOnGetStableVersion) GetStableVersion() (string, error) {
-	return "1.0.1", errors.New("some error")
-}
-
-type StubFileUtilServiceWithFail struct{}
-
-func (s StubFileUtilServiceWithFail) ReadFile(path string) ([]byte, error) {
-	return []byte{}, errors.New("some error")
-}
-
-func (s StubFileUtilServiceWithFail) WriteFilePerm(path string, content []byte, perm int32) error {
-	return errors.New("some error")
-}
-
-type StubFileUtilService struct{}
-
-const stubFileUtilServiceCacheValue = `
-{
-    "stableVersion": "1.0.0",
-    "expiresAt": %d
-}
-`
 
 func (s StubFileUtilService) ReadFile(path string) ([]byte, error) {
-	json := fmt.Sprintf(stubFileUtilServiceCacheValue, time.Now().Add(time.Hour * 1).Unix())
-	return []byte(json), nil
+
+	return s.readFile(path)
 }
 
 func (s StubFileUtilService) WriteFilePerm(path string, content []byte, perm int32) error {
-	return nil
+	return s.writeFilePerm(path, content, perm)
 }
 
-func TestVerifyNewVersion(t *testing.T) {
-
-	testCases := []struct {
-		name           string
-		resolver       Resolver
-		expectedResult string
+func TestDefaultVersionResolver_GetCurrentVersion(t *testing.T) {
+	type fields struct {
+		CurrentVersion   string
+		StableVersionUrl string
+		FileUtilService  fileutil.FileUtilService
+		HttpClient       *http.Client
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    string
+		wantErr bool
 	}{
 		{
-			name:           "Should not print warning",
-			resolver:       StubResolverWithSameVersions{},
-			expectedResult: "",
-		},
-		{
-			name:           "Should print warning",
-			resolver:       StubResolverWithDifferentVersions{},
-			expectedResult: fmt.Sprintf(prompt.Warning, MsgRitUpgrade),
-		},
-		{
-			name:           "Should not print on error in GetCurrentVersion",
-			resolver:       StubResolverWithErrorOnGetCurrentVersion{},
-			expectedResult: "",
-		},
-		{
-			name:           "Should not print on error in GetStableVersion",
-			resolver:       StubResolverWithErrorOnGetStableVersion{},
-			expectedResult: "",
+			"should get current version",
+			fields{
+				"0.0.1",
+				"any url",
+				StubFileUtilService{},
+				&http.Client{},
+			},
+			"0.0.1",
+			false,
 		},
 	}
 
-	for _, tCase := range testCases {
-		t.Run(tCase.name, func(t *testing.T) {
-
-			buffer := &bytes.Buffer{}
-
-			VerifyNewVersion(tCase.resolver, buffer)
-
-			result := buffer.String()
-
-			assertEquals(result, tCase.expectedResult, t)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := DefaultVersionResolver{
+				CurrentVersion:   tt.fields.CurrentVersion,
+				StableVersionUrl: tt.fields.StableVersionUrl,
+				FileUtilService:  tt.fields.FileUtilService,
+				HttpClient:       tt.fields.HttpClient,
+			}
+			got, err := r.GetCurrentVersion()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetCurrentVersion() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetCurrentVersion() got = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
 
-func TestGetStableVersion(t *testing.T) {
-
-	t.Run("Should get stableVersion", func(t *testing.T) {
-		expectedResult := "1.0.0"
-
-		mockHttp := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte(expectedResult + "\n"))
-		}))
-
-		result, err := DefaultVersionResolver{
-			StableVersionUrl: mockHttp.URL,
-			FileUtilService: StubFileUtilServiceWithFail{},
-			HttpClient: mockHttp.Client(),
-		}.GetStableVersion()
-		if err != nil {
-			t.Errorf("fail Err:%s\n", err)
-		}
-		assertEquals(expectedResult, result, t)
-	})
-
-	t.Run("Should return err when http.get fail", func(t *testing.T) {
-		_, err := DefaultVersionResolver{
-			FileUtilService: StubFileUtilServiceWithFail{},
-			HttpClient: &http.Client{},
-		}.GetStableVersion()
-
-		if err == nil {
-			t.Fatalf("Should return err.")
-		}
-	})
-
-	t.Run("Should get stableVersion from cache", func(t *testing.T) {
-		stableVersion, err := DefaultVersionResolver{FileUtilService: StubFileUtilService{}}.GetStableVersion()
-		if err != nil {
-			t.Errorf("fail Err:%s\n", err)
-		}
-		expectedJson := []byte(fmt.Sprintf(stubFileUtilServiceCacheValue, time.Now().Add(time.Hour * 1).Unix()))
-		cacheExpected := &stableVersionCache{}
-		json.Unmarshal(expectedJson, cacheExpected)
-
-		assertEquals(cacheExpected.StableVersion, stableVersion, t)
-	})
-
+func TestVerifyNewVersion(t *testing.T) {
+	type args struct {
+		resolve Resolver
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantWriter string
+	}{
+		{
+			name: "Should not print warning",
+			args: args{StubResolverVersions{
+				getCurrentVersion: func() (string, error) {
+					return "1.0.0", nil
+				},
+				getStableVersion: func() (string, error) {
+					return "1.0.0", nil
+				},
+			}},
+			wantWriter: "",
+		},
+		{
+			name: "Should print warning",
+			args: args{StubResolverVersions{
+				getCurrentVersion: func() (string, error) {
+					return "1.0.0", nil
+				},
+				getStableVersion: func() (string, error) {
+					return "1.0.1", nil
+				},
+			}},
+			wantWriter: fmt.Sprintf(prompt.Warning, MsgRitUpgrade),
+		},
+		{
+			name: "Should not print on error in GetCurrentVersion",
+			args: args{StubResolverVersions{
+				getCurrentVersion: func() (string, error) {
+					return "", errors.New("any error")
+				},
+				getStableVersion: func() (string, error) {
+					return "1.0.1", nil
+				},
+			}},
+			wantWriter: "",
+		},
+		{
+			name: "Should not print on error in GetStableVersion",
+			args: args{StubResolverVersions{
+				getCurrentVersion: func() (string, error) {
+					return "1.0.0", nil
+				},
+				getStableVersion: func() (string, error) {
+					return "", errors.New("any error")
+				},
+			}},
+			wantWriter: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			writer := &bytes.Buffer{}
+			VerifyNewVersion(tt.args.resolve, writer)
+			if gotWriter := writer.String(); gotWriter != tt.wantWriter {
+				t.Errorf("VerifyNewVersion() = %v, want %v", gotWriter, tt.wantWriter)
+			}
+		})
+	}
 }
 
-func TestGetCurrentVersion(t *testing.T) {
-	t.Run("Should Return the Current Version", func(t *testing.T) {
-		currentVersion := "0.0.1"
-		resolver := DefaultVersionResolver{CurrentVersion: currentVersion}
-		result, _ := resolver.GetCurrentVersion()
-		assertEquals(currentVersion, result, t)
-	})
-}
+func TestDefaultVersionResolver_GetStableVersion(t *testing.T) {
 
-func assertEquals(expected string, result string, t *testing.T) {
-	if expected != result {
-		t.Helper()
-		t.Errorf("\nExpected: %s\nbut was:%s\n", expected, result)
+	// case 1 Should get stableVersion
+	expectedResultCase1 := "1.0.0"
+
+	mockHttpCase1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(expectedResultCase1 + "\n"))
+	}))
+
+	// case 4 Should not get stableVersion from expired cache
+	expectedResultCase4 := "2.5.6"
+
+	mockHttpCase4 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(expectedResultCase4 + "\n"))
+	}))
+
+	type fields struct {
+		CurrentVersion   string
+		StableVersionUrl string
+		FileUtilService  fileutil.FileUtilService
+		HttpClient       *http.Client
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "Should get stableVersion",
+			fields: fields{
+				CurrentVersion:   "Any value",
+				StableVersionUrl: mockHttpCase1.URL,
+				FileUtilService: StubFileUtilService{
+					readFile: func(s string) ([]byte, error) {
+						return []byte{}, errors.New("some error")
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: mockHttpCase1.Client(),
+			},
+			want:    expectedResultCase1,
+			wantErr: false,
+		},
+		{
+			name: "Should return err when http.get fail",
+			fields: fields{
+				CurrentVersion:   "Any value",
+				StableVersionUrl: "any value",
+				FileUtilService: StubFileUtilService{
+					readFile: func(s string) ([]byte, error) {
+						return []byte{}, errors.New("some error")
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: &http.Client{},
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "Should get stableVersion from cache",
+			fields: fields{
+				CurrentVersion:   "Any value",
+				StableVersionUrl: "any value",
+				FileUtilService: StubFileUtilService{
+					readFile: func(_ string) ([]byte, error) {
+						cache := stableVersionCache{
+							"1.4.5",
+							time.Now().Add(time.Hour * 1).Unix(),
+						}
+
+						return json.Marshal(cache)
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: &http.Client{},
+			},
+			want:    "1.4.5",
+			wantErr: false,
+		},
+		{
+			name: "Should not get stableVersion from expired cache",
+			fields: fields{
+				CurrentVersion:   "Any value",
+				StableVersionUrl: mockHttpCase4.URL,
+				FileUtilService: StubFileUtilService{
+					readFile: func(_ string) ([]byte, error) {
+						cache := stableVersionCache{
+							"1.5.0",
+							time.Now().Add(time.Hour * 1 * -1).Unix(),
+						}
+
+						return json.Marshal(cache)
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: mockHttpCase4.Client(),
+			},
+			want:    expectedResultCase4,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := DefaultVersionResolver{
+				CurrentVersion:   tt.fields.CurrentVersion,
+				StableVersionUrl: tt.fields.StableVersionUrl,
+				FileUtilService:  tt.fields.FileUtilService,
+				HttpClient:       tt.fields.HttpClient,
+			}
+			got, err := r.GetStableVersion()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetStableVersion() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetStableVersion() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

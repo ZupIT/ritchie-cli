@@ -78,7 +78,7 @@ func (r DefaultVersionResolver) GetStableVersion() (string, error) {
 
 		newCacheJson, err := json.Marshal(newCache)
 		if err == nil {
-			r.FileUtilService.WriteFilePerm(cachePath, newCacheJson, 0600)
+			_ = r.FileUtilService.WriteFilePerm(cachePath, newCacheJson, 0600)
 		}
 
 		return stableVersion, nil
@@ -98,6 +98,6 @@ func VerifyNewVersion(resolve Resolver, writer io.Writer) {
 		return
 	}
 	if currentVersion != stableVersion {
-		fmt.Fprintf(writer, prompt.Warning, MsgRitUpgrade)
+		_, _ = fmt.Fprintf(writer, prompt.Warning, MsgRitUpgrade)
 	}
 }
