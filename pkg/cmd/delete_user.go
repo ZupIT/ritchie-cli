@@ -54,7 +54,7 @@ func (d deleteUserCmd) runPrompt() CommandRunnerFunc {
 			return nil
 		}
 
-		fmt.Println("Deleting user...")
+		prompt.Info("Deleting user...")
 
 		u := security.User{
 			Email:    e,
@@ -64,7 +64,7 @@ func (d deleteUserCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("User %s deleted!", u.Username)
+		prompt.Info(fmt.Sprintf("User %s deleted!", u.Username))
 
 		return nil
 	}
@@ -85,7 +85,7 @@ func (d deleteUserCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("User %s deleted!", u.Username)
+		prompt.Info(fmt.Sprintf("User %s deleted!", u.Username))
 
 		return nil
 	}
