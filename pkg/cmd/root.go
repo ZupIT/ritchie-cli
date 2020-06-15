@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -170,27 +171,26 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 
 func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if !isWhitelist(upgradeValidationWhiteList, cmd) {
-			resolver := versionUtil.DefaultVersionResolver{
-				CurrentVersion:   Version,
-				StableVersionUrl: StableVersionUrl,
-			}
-			versionUtil.VerifyNewVersion(resolver, os.Stdout)
-		}
+		verifyNewVersion(cmd)
 		return nil
 	}
 }
 
 func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if !isWhitelist(upgradeValidationWhiteList, cmd) {
-			resolver := versionUtil.DefaultVersionResolver{
-				CurrentVersion:   Version,
-				StableVersionUrl: StableVersionUrl,
-			}
-			versionUtil.VerifyNewVersion(resolver, os.Stdout)
-		}
+		verifyNewVersion(cmd)
 		return nil
+	}
+}
+
+func verifyNewVersion(cmd *cobra.Command) {
+	if !isWhitelist(upgradeValidationWhiteList, cmd) {
+		resolver := versionUtil.DefaultVersionResolver{
+			CurrentVersion:   Version,
+			StableVersionUrl: StableVersionUrl,
+			FileUtilService:  fileutil.DefaultFileUtilService{},
+		}
+		versionUtil.VerifyNewVersion(resolver, os.Stdout)
 	}
 }
 

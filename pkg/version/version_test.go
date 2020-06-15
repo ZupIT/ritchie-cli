@@ -2,11 +2,13 @@ package version
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
@@ -53,6 +55,35 @@ func (r StubResolverWithErrorOnGetStableVersion) GetCurrentVersion() (string, er
 
 func (r StubResolverWithErrorOnGetStableVersion) GetStableVersion() (string, error) {
 	return "1.0.1", errors.New("some error")
+}
+
+type StubFileUtilServiceWithFail struct{}
+
+func (s StubFileUtilServiceWithFail) ReadFile(path string) ([]byte, error) {
+	return []byte{}, errors.New("some error")
+}
+
+func (s StubFileUtilServiceWithFail) WriteFilePerm(path string, content []byte, perm int32) error {
+	return errors.New("some error")
+}
+
+type StubFileUtilService struct{}
+
+const stubFileUtilServiceCacheValue = `
+{
+    "stableVersion": "1.0.0",
+    "expiresAt": %s
+}
+`
+
+func (s StubFileUtilService) ReadFile(path string) ([]byte, error) {
+	now, _ := json.Marshal(time.Now().Add(time.Hour * 1))
+	json := fmt.Sprintf(stubFileUtilServiceCacheValue, now)
+	return []byte(json), nil
+}
+
+func (s StubFileUtilService) WriteFilePerm(path string, content []byte, perm int32) error {
+	return nil
 }
 
 func TestVerifyNewVersion(t *testing.T) {
@@ -107,7 +138,7 @@ func TestGetStableVersion(t *testing.T) {
 			w.Write([]byte(expectedResult + "\n"))
 		}))
 
-		result, err := DefaultVersionResolver{StableVersionUrl: mockHttp.URL}.GetStableVersion()
+		result, err := DefaultVersionResolver{StableVersionUrl: mockHttp.URL, FileUtilService: StubFileUtilServiceWithFail{}}.GetStableVersion()
 		if err != nil {
 			t.Errorf("fail Err:%s\n", err)
 		}
@@ -115,10 +146,23 @@ func TestGetStableVersion(t *testing.T) {
 	})
 
 	t.Run("Should return err when http.get fail", func(t *testing.T) {
-		_, err := DefaultVersionResolver{}.GetStableVersion()
+		_, err := DefaultVersionResolver{FileUtilService: StubFileUtilServiceWithFail{}}.GetStableVersion()
 		if err == nil {
 			t.Fatalf("Should return err.")
 		}
+	})
+
+	t.Run("Should get stableVersion from cache", func(t *testing.T) {
+		stableVersion, err := DefaultVersionResolver{FileUtilService: StubFileUtilService{}}.GetStableVersion()
+		if err != nil {
+			t.Errorf("fail Err:%s\n", err)
+		}
+		now, _ := json.Marshal(time.Now().Add(time.Hour * 1))
+		expectedJson := []byte(fmt.Sprintf(stubFileUtilServiceCacheValue, now))
+		cacheExpected := &stableVersionCache{}
+		json.Unmarshal(expectedJson, cacheExpected)
+
+		assertEquals(cacheExpected.StableVersion, stableVersion, t)
 	})
 
 }
