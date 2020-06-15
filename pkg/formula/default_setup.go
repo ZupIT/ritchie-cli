@@ -14,6 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
@@ -94,12 +95,12 @@ func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, er
 	configName := def.ConfigName()
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
-		fmt.Println("Downloading formula config...")
+		fmt.Printf(prompt.Info, "Downloading formula config...\n")
 		url := def.ConfigURL(configName)
 		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
 			return Config{}, err
 		}
-		fmt.Println("Formula config download completed \\o/")
+		fmt.Printf(prompt.Success, "Formula config download completed!\n")
 	}
 
 	configFile, err := ioutil.ReadFile(configPath)
@@ -132,7 +133,7 @@ func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def Definition
 }
 
 func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
-	fmt.Println("Downloading formula...")
+	fmt.Printf(prompt.Info, "Downloading formula...\n")
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", ErrCreateReqBundle
@@ -178,7 +179,7 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		return "", err
 	}
 
-	fmt.Println("Formula download completed \\o/")
+	fmt.Printf(prompt.Success, "Formula download completed!\n")
 	return file, nil
 }
 
