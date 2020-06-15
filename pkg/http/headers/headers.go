@@ -4,5 +4,5 @@ const (
 	XOrg          = "x-org"
 	XCtx          = "x-ctx"
 	XRepoName     = "x-repo-name"
-	Authorization = "Authorization"
+	Authorization = "x-authorization"
 )
