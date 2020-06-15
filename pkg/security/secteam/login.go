@@ -1,62 +1,102 @@
 package secteam
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
+const urlLoginPattern = "%s/login"
+
 type LoginManager struct {
-	homePath       string
 	serverFinder   server.Finder
-	provider       security.AuthProvider
 	httpClient     *http.Client
 	sessionManager session.Manager
 }
 
+type loginResponse struct {
+	Token string `json:"token"`
+	TTL   int64  `json:"ttl"`
+}
+
 func NewLoginManager(
-	homePath string,
 	serverFinder server.Finder,
-	provider security.AuthProvider,
 	hc *http.Client,
 	sm session.Manager) LoginManager {
 	return LoginManager{
-		homePath:       homePath,
 		serverFinder:   serverFinder,
-		provider:       provider,
 		httpClient:     hc,
 		sessionManager: sm,
 	}
 }
 
-func (l LoginManager) Login() error {
+func (l LoginManager) Login(user security.User) error {
 	cfg, err := l.serverFinder.Find()
 	if err != nil {
 		return err
 	}
 	fmt.Println("Organization:", cfg.Organization)
 
-	cr, err := loginChannelProvider(l.provider, cfg.Organization, cfg.URL)
+	url := fmt.Sprintf(urlLoginPattern, cfg.URL)
+
+	lr, err := requestLogin(user, l.httpClient, url, cfg.Organization)
 	if err != nil {
 		return err
 	}
-	resp := <-cr
-	if resp.Error != nil {
-		return resp.Error
-	}
-
 	sess := session.Session{
-		AccessToken:  resp.Token,
+		AccessToken:  lr.Token,
 		Organization: cfg.Organization,
-		Username:     resp.Username,
+		Username:     user.Username,
+		TTL:          lr.TTL,
 	}
 	err = l.sessionManager.Create(sess)
 	if err != nil {
-		return err
+		return errors.New("error create session, clear your rit home")
+	}
+	return nil
+}
+
+func requestLogin(user security.User, hc *http.Client, url, org string) (loginResponse, error) {
+	lr := loginResponse{}
+	b, err := json.Marshal(&user)
+	if err != nil {
+		return lr, err
+	}
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
+	if err != nil {
+		return lr, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(headers.XOrg, org)
+
+	resp, err := hc.Do(req)
+	if err != nil {
+		return lr, err
 	}
 
-	return nil
+	defer resp.Body.Close()
+
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return lr, err
+	}
+	switch resp.StatusCode {
+	case 200:
+		if err = json.Unmarshal(b, &lr); err != nil {
+			return lr, err
+		}
+		return lr, err
+	case 401:
+		return lr, errors.New("login failed! Verify your credentials")
+	default:
+		return lr, errors.New("login failed")
+	}
 }

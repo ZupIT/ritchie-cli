@@ -2,43 +2,92 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 // loginCmd type for init command
 type loginCmd struct {
 	security.LoginManager
 	formula.Loader
+	prompt.InputText
+	prompt.InputPassword
 }
+
+const (
+	MsgUsername = "Enter your username: "
+	MsgPassword = "Enter your password: "
+)
 
 // NewLoginCmd creates new cmd instance
 func NewLoginCmd(
+	t prompt.InputText,
+	p prompt.InputPassword,
 	lm security.LoginManager,
-	rm formula.Loader) *cobra.Command {
-	l := loginCmd{lm, rm}
+	fm formula.Loader) *cobra.Command {
+	l := loginCmd{
+		LoginManager:  lm,
+		Loader:        fm,
+		InputText:     t,
+		InputPassword: p,
+	}
 	return &cobra.Command{
 		Use:   "login",
 		Short: "User login",
 		Long:  "Authenticates and creates a session for the user of the organization",
-		RunE:  l.runFunc(),
+		RunE:  RunFuncE(l.runStdin(), l.runPrompt()),
 	}
 }
 
-func (l loginCmd) runFunc() CommandRunnerFunc {
+func (l loginCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if err := l.Login(); err != nil {
+		u, err := l.Text(MsgUsername, true)
+		if err != nil {
 			return err
 		}
-
+		p, err := l.Password(MsgPassword)
+		if err != nil {
+			return err
+		}
+		us := security.User{
+			Username: u,
+			Password: p,
+		}
+		if err = l.Login(us); err != nil {
+			return err
+		}
 		if err := l.Load(); err != nil {
 			return err
 		}
+		fmt.Println("Login successfully!")
+		return err
+	}
+}
 
-		fmt.Println("Session created successfully!")
-		return nil
+func (l loginCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		u := security.User{}
+
+		err := stdin.ReadJson(os.Stdin, &u)
+		if err != nil {
+			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			return err
+		}
+
+		if err = l.Login(u); err != nil {
+			return err
+		}
+		if err := l.Load(); err != nil {
+			return err
+		}
+		fmt.Println("Login successfully!")
+		return err
 	}
 }
