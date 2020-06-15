@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -87,7 +86,7 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 	case api.Team:
 		return s.teamPrompt()
 	default:
-		return credential.Detail{}, errors.New("invalid CLI build, no edition defined")
+		return credential.Detail{}, fmt.Errorf(prompt.Red, "invalid CLI build, no edition defined")
 	}
 }
 
@@ -219,7 +218,7 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 		return credDetail, nil
 	}
 
-	return credDetail, errors.New("invalid CLI build, no edition defined")
+	return credDetail, fmt.Errorf(prompt.Red, "invalid CLI build, no edition defined")
 }
 
 func (s setCredentialCmd) profile(credDetail *credential.Detail) error {

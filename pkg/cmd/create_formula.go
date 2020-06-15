@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -14,8 +13,7 @@ import (
 )
 
 var (
-	msgNotAllowedCharacter = fmt.Sprintf(prompt.Red, `not allowed character on formula name \/,><@-`)
-	ErrNotAllowedCharacter = errors.New(msgNotAllowedCharacter)
+	ErrNotAllowedCharacter = fmt.Errorf(prompt.Red, `not allowed character on formula name \/,><@-`)
 )
 
 const notAllowedChars = `\/><,@-`

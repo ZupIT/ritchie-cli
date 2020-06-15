@@ -26,11 +26,11 @@ const (
 )
 
 var (
-	ErrDontStartWithRit = errors.New(fmt.Sprintf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]"))
-	ErrTooShortCommand  = errors.New(fmt.Sprintf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]"))
-	ErrRepeatedCommand  = errors.New(fmt.Sprintf(prompt.Red, "this command already exists"))
-	ErrTreeJsonNotFound = errors.New(fmt.Sprintf(prompt.Red, "tree.json not found"))
-	ErrMakefileNotFound = errors.New(fmt.Sprintf(prompt.Red, "makefile not found"))
+	ErrDontStartWithRit = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrTooShortCommand  = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrRepeatedCommand  = fmt.Errorf(prompt.Red, "this command already exists")
+	ErrTreeJsonNotFound = fmt.Errorf(prompt.Red, "tree.json not found")
+	ErrMakefileNotFound = fmt.Errorf(prompt.Red, "makefile not found")
 )
 
 type CreateManager struct {
