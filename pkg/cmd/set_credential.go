@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -183,7 +182,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		}
 		credentials[field] = val
 	}
-
+	
 	credDetail.Credential = credentials
 	credDetail.Service = service
 

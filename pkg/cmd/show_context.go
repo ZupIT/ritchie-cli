@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
@@ -34,8 +35,7 @@ func (s showContextCmd) runFunc() CommandRunnerFunc {
 			ctx.Current = rcontext.DefaultCtx
 		}
 
-		fmt.Printf("Current context: %s \n", ctx.Current)
-
+		prompt.Info(fmt.Sprintf("Current context: %s \n", ctx.Current))
 		return nil
 	}
 }
