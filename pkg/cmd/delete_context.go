@@ -49,7 +49,7 @@ func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		if len(ctxHolder.All) <= 0 {
-			fmt.Println("You have no defined contexts")
+			prompt.Error("You have no defined contexts")
 			return nil
 		}
 
@@ -74,7 +74,7 @@ func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("Delete context successful!")
+		prompt.Success("Delete context successful!")
 		return nil
 	}
 }
@@ -87,7 +87,7 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if len(ctxHolder.All) <= 0 {
-			fmt.Println("You have no defined contexts")
+			prompt.Error("You have no defined contexts")
 			return nil
 		}
 
@@ -103,7 +103,7 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("Delete context successful!")
+		prompt.Success("Delete context successful!")
 		return nil
 	}
 }
