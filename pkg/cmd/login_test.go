@@ -5,7 +5,8 @@ import (
 )
 
 func TestNewLoginCmd(t *testing.T) {
-	cmd := NewLoginCmd(loginManagerMock{}, repoLoaderMock{})
+	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{})
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewLoginCmd got %v", cmd)
 

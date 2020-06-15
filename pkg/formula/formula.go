@@ -17,6 +17,7 @@ const (
 	ConfigPattern             = "%s/%s"
 	CommandEnv                = "COMMAND"
 	PwdEnv                    = "PWD"
+	CPwdEnv                   = "CURRENT_PWD"
 	BinPattern                = "%s%s"
 	BinPathPattern            = "%s/bin"
 	windows                   = "windows"
@@ -30,7 +31,6 @@ const (
 	TreeCreatePathPattern     = "%s/tree/tree.json"
 	MakefileCreatePathPattern = "%s/%s"
 	Makefile                  = "Makefile"
-	TreeJson                  = "tree.json"
 )
 
 // Config type that represents formula config

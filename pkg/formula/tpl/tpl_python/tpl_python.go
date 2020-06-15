@@ -19,21 +19,21 @@ DIST=../dist
 DIST_DIR=$(DIST)/commons/bin
 build:
 	mkdir -p $(DIST_DIR)
-	cp main.py $(DIST_DIR) && cp -r {{bin-name}} $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
+	cp main.py $(DIST_DIR) && cp -r {{bin-name}} Dockerfile set_umask.sh $(DIST_DIR)
 	chmod +x $(DIST_DIR)/main.py
 	echo 'python main.py' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)`
 
 	Dockerfile = `
 FROM python:3
 
-WORKDIR /app
-
 COPY . .
 
 RUN chmod +x set_umask.sh
 
-ENTRYPOINT ["/app/set_umask.sh"]
-CMD ["python3 main.py"]`
+WORKDIR /app
+
+ENTRYPOINT ["/set_umask.sh"]
+CMD ["python3 /main.py"]`
 
 	File = `#!/usr/bin/python3
 import time

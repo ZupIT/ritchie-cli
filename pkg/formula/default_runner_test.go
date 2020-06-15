@@ -14,11 +14,8 @@ import (
 func TestDefaultRunner_Run(t *testing.T) {
 	def := Definition{
 		Path:    "mock/test",
-		Bin:     "test-${so}",
-		LBin:    "test-${so}",
-		MBin:    "test-${so}",
-		WBin:    "test-${so}.exe",
-		Bundle:  "${so}.zip",
+		Bin:     "test-linux",
+		Bundle:  "linux.zip",
 		Config:  "config.json",
 		RepoURL: RepoUrl,
 	}

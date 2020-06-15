@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
@@ -64,8 +65,8 @@ func (s Sender) SendCommand() {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-org", session.Organization)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", session.AccessToken))
+	req.Header.Set(headers.XOrg, session.Organization)
+	req.Header.Set(headers.Authorization, session.AccessToken)
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return
