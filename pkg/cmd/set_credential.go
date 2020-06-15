@@ -213,7 +213,7 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 
 		err := stdin.ReadJson(os.Stdin, &credDetail)
 		if err != nil {
-			fmt.Println(prompt.Error(stdin.MsgInvalidInput))
+			prompt.Error(stdin.MsgInvalidInput)
 			return credDetail, err
 		}
 

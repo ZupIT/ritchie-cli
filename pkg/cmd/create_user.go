@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -73,7 +72,7 @@ func (c createUserCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("User created!")
+		prompt.Success("User created!")
 
 		return err
 	}
@@ -86,7 +85,7 @@ func (c createUserCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &u)
 		if err != nil {
-			fmt.Println(prompt.Error(stdin.MsgInvalidInput))
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 
@@ -94,7 +93,7 @@ func (c createUserCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("User created!")
+		prompt.Success("User created!")
 
 		return nil
 	}

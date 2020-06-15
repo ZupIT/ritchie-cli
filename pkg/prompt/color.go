@@ -9,19 +9,18 @@ const (
 	Green  = "\033[1;32m%s\033[0m"
 )
 
-func Error(text string) string {
-	return fmt.Sprintf(Red,text)
+func Error(text string) {
+	fmt.Println(fmt.Sprintf(Red, text))
 }
 
-func Warning(text string) string {
-	return fmt.Sprintf(Yellow,text)
+func Warning(text string) {
+	fmt.Println(fmt.Sprintf(Yellow, text))
 }
 
-func Success(text string) string {
-	return fmt.Sprintf(Green,text)
+func Success(text string) {
+	fmt.Println(fmt.Sprintf(Green, text))
 }
 
-func Info(text string) string {
-	return fmt.Sprintf(Teal,text)
+func Info(text string) {
+	fmt.Println(fmt.Sprintf(Teal, text))
 }
-

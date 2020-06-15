@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -68,7 +67,7 @@ func (s setContextCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("Set context successful!")
+		prompt.Success("Set context successful!")
 		return nil
 	}
 
@@ -81,7 +80,7 @@ func (s setContextCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &sc)
 		if err != nil {
-			fmt.Println(prompt.Error(stdin.MsgInvalidInput))
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 
@@ -89,7 +88,7 @@ func (s setContextCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Println("Set context successful!")
+		prompt.Success("Set context successful!")
 		return nil
 	}
 }
