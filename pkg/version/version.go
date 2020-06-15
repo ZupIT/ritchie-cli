@@ -12,14 +12,12 @@ import (
 
 var (
 	// MsgUpgrade error message to inform user to upgrade rit version
-	MsgRitUpgrade = "\nWarning: Rit have a new version.\nPlease run: rit upgrade\n"
-	// Env to save stable version cache
-	StableVersionCacheEnv = "RITCHIE_STABLE_VERSION"
+	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade\n"
 )
 
 type Resolver interface {
-	getCurrentVersion() (string, error)
-	getStableVersion() (string, error)
+	GetCurrentVersion() (string, error)
+	GetStableVersion() (string, error)
 }
 
 type DefaultVersionResolver struct {
@@ -27,11 +25,11 @@ type DefaultVersionResolver struct {
 	StableVersionUrl string
 }
 
-func (r DefaultVersionResolver) getCurrentVersion() (string, error) {
+func (r DefaultVersionResolver) GetCurrentVersion() (string, error) {
 	return r.CurrentVersion, nil
 }
 
-func (r DefaultVersionResolver) getStableVersion() (string, error) {
+func (r DefaultVersionResolver) GetStableVersion() (string, error) {
 
 	response, err := http.Get(r.StableVersionUrl)
 	if err != nil {
@@ -49,11 +47,11 @@ func (r DefaultVersionResolver) getStableVersion() (string, error) {
 }
 
 func VerifyNewVersion(resolve Resolver, writer io.Writer) {
-	stableVersion, err := resolve.getStableVersion()
+	stableVersion, err := resolve.GetStableVersion()
 	if err != nil {
 		return
 	}
-	currentVersion, err := resolve.getCurrentVersion()
+	currentVersion, err := resolve.GetCurrentVersion()
 	if err != nil {
 		return
 	}

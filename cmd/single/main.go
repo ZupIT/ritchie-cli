@@ -21,6 +21,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/security/secsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/session/sesssingle"
+	versionUtil "github.com/ZupIT/ritchie-cli/pkg/version"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 )
 
@@ -77,6 +78,13 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
+	defaultUpgradeUtil := cmd.DefaultUpgradeUtil{}
+	defaultUpgradeResolver := versionUtil.DefaultVersionResolver{
+		CurrentVersion:   cmd.Version,
+		StableVersionUrl: cmd.StableVersionUrl,
+	}
+	upgradeUrl := cmd.GetUpgradeUrl(api.Single, defaultUpgradeResolver)
+
 	rootCmd := cmd.NewSingleRootCmd(workspaceManager, sessionValidator)
 
 	// level 1
@@ -90,7 +98,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
-	upgradeCmd := cmd.NewUpgradeCmd()
+	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, defaultUpgradeUtil)
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(

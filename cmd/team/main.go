@@ -12,6 +12,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
+	versionUtil "github.com/ZupIT/ritchie-cli/pkg/version"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -93,6 +94,13 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
+	defaultUpgradeUtil := cmd.DefaultUpgradeUtil{}
+	defaultUpgradeResolver := versionUtil.DefaultVersionResolver{
+		CurrentVersion:   cmd.Version,
+		StableVersionUrl: cmd.StableVersionUrl,
+	}
+	upgradeUrl := cmd.GetUpgradeUrl(api.Team, defaultUpgradeResolver)
+
 	// commands
 	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)
 
@@ -109,6 +117,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
+	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, defaultUpgradeUtil)
 
 	// level 2
 	setCredentialCmd := cmd.NewTeamSetCredentialCmd(
@@ -163,6 +172,7 @@ func buildCommands() *cobra.Command {
 				setCmd,
 				showCmd,
 				updateCmd,
+				upgradeCmd,
 			},
 		},
 	}

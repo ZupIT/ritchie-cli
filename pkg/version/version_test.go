@@ -14,44 +14,44 @@ import (
 type StubResolverWithSameVersions struct {
 }
 
-func (r StubResolverWithSameVersions) getCurrentVersion() (string, error) {
+func (r StubResolverWithSameVersions) GetCurrentVersion() (string, error) {
 	return "1.0.0", nil
 }
 
-func (r StubResolverWithSameVersions) getStableVersion() (string, error) {
+func (r StubResolverWithSameVersions) GetStableVersion() (string, error) {
 	return "1.0.0", nil
 }
 
 type StubResolverWithDifferentVersions struct {
 }
 
-func (r StubResolverWithDifferentVersions) getCurrentVersion() (string, error) {
+func (r StubResolverWithDifferentVersions) GetCurrentVersion() (string, error) {
 	return "1.0.0", nil
 }
 
-func (r StubResolverWithDifferentVersions) getStableVersion() (string, error) {
+func (r StubResolverWithDifferentVersions) GetStableVersion() (string, error) {
 	return "1.0.1", nil
 }
 
 type StubResolverWithErrorOnGetCurrentVersion struct {
 }
 
-func (r StubResolverWithErrorOnGetCurrentVersion) getCurrentVersion() (string, error) {
+func (r StubResolverWithErrorOnGetCurrentVersion) GetCurrentVersion() (string, error) {
 	return "", errors.New("some error")
 }
 
-func (r StubResolverWithErrorOnGetCurrentVersion) getStableVersion() (string, error) {
+func (r StubResolverWithErrorOnGetCurrentVersion) GetStableVersion() (string, error) {
 	return "1.0.1", nil
 }
 
 type StubResolverWithErrorOnGetStableVersion struct {
 }
 
-func (r StubResolverWithErrorOnGetStableVersion) getCurrentVersion() (string, error) {
+func (r StubResolverWithErrorOnGetStableVersion) GetCurrentVersion() (string, error) {
 	return "1.0.0", nil
 }
 
-func (r StubResolverWithErrorOnGetStableVersion) getStableVersion() (string, error) {
+func (r StubResolverWithErrorOnGetStableVersion) GetStableVersion() (string, error) {
 	return "1.0.1", errors.New("some error")
 }
 
@@ -73,12 +73,12 @@ func TestVerifyNewVersion(t *testing.T) {
 			expectedResult: fmt.Sprintf(prompt.Warning, MsgRitUpgrade),
 		},
 		{
-			name:           "Should not print on error in getCurrentVersion",
+			name:           "Should not print on error in GetCurrentVersion",
 			resolver:       StubResolverWithErrorOnGetCurrentVersion{},
 			expectedResult: "",
 		},
 		{
-			name:           "Should not print on error in getStableVersion",
+			name:           "Should not print on error in GetStableVersion",
 			resolver:       StubResolverWithErrorOnGetStableVersion{},
 			expectedResult: "",
 		},
@@ -107,7 +107,7 @@ func TestGetStableVersion(t *testing.T) {
 			w.Write([]byte(expectedResult + "\n"))
 		}))
 
-		result, err := DefaultVersionResolver{StableVersionUrl: mockHttp.URL}.getStableVersion()
+		result, err := DefaultVersionResolver{StableVersionUrl: mockHttp.URL}.GetStableVersion()
 		if err != nil {
 			t.Errorf("fail Err:%s\n", err)
 		}
@@ -115,7 +115,7 @@ func TestGetStableVersion(t *testing.T) {
 	})
 
 	t.Run("Should return err when http.get fail", func(t *testing.T) {
-		_, err := DefaultVersionResolver{}.getStableVersion()
+		_, err := DefaultVersionResolver{}.GetStableVersion()
 		if err == nil {
 			t.Fatalf("Should return err.")
 		}
@@ -127,7 +127,7 @@ func TestGetCurrentVersion(t *testing.T) {
 	t.Run("Should Return the Current Version", func(t *testing.T) {
 		currentVersion := "0.0.1"
 		resolver := DefaultVersionResolver{CurrentVersion: currentVersion}
-		result, _ := resolver.getCurrentVersion()
+		result, _ := resolver.GetCurrentVersion()
 		assertEquals(currentVersion, result, t)
 	})
 }

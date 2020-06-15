@@ -44,6 +44,7 @@ var (
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
+		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 
 	teamWhitelist = []string{
@@ -54,6 +55,11 @@ var (
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
+		fmt.Sprintf("%s upgrade", cmdUse),
+	}
+
+	upgradeValidationWhiteList = []string{
+		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 )
 
@@ -164,22 +170,26 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 
 func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		resolver := versionUtil.DefaultVersionResolver{
-			CurrentVersion:   Version,
-			StableVersionUrl: StableVersionUrl,
+		if !isWhitelist(upgradeValidationWhiteList, cmd) {
+			resolver := versionUtil.DefaultVersionResolver{
+				CurrentVersion:   Version,
+				StableVersionUrl: StableVersionUrl,
+			}
+			versionUtil.VerifyNewVersion(resolver, os.Stdout)
 		}
-		versionUtil.VerifyNewVersion(resolver, os.Stdout)
 		return nil
 	}
 }
 
 func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		resolver := versionUtil.DefaultVersionResolver{
-			CurrentVersion:   Version,
-			StableVersionUrl: StableVersionUrl,
+		if !isWhitelist(upgradeValidationWhiteList, cmd) {
+			resolver := versionUtil.DefaultVersionResolver{
+				CurrentVersion:   Version,
+				StableVersionUrl: StableVersionUrl,
+			}
+			versionUtil.VerifyNewVersion(resolver, os.Stdout)
 		}
-		versionUtil.VerifyNewVersion(resolver, os.Stdout)
 		return nil
 	}
 }
