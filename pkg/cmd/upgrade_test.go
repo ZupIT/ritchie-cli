@@ -60,7 +60,7 @@ func (u StubUpgradeUtilFail) Apply(reader io.Reader, opts update.Options) error 
 
 func TestGetUpgradeUrlSingle(t *testing.T) {
 	result := GetUpgradeUrl(api.Single, stubResolver{})
-	expected := fmt.Sprintf(UpgradeUrlFormat, stableVersion, runtime.GOOS, api.Single)
+	expected := fmt.Sprintf(upgradeUrlFormat, stableVersion, runtime.GOOS, api.Single)
 	if runtime.GOOS == "windows" {
 		expected += ".exe"
 	}
@@ -69,7 +69,7 @@ func TestGetUpgradeUrlSingle(t *testing.T) {
 
 func TestGetUpgradeUrlTeam(t *testing.T) {
 	result := GetUpgradeUrl(api.Team, stubResolver{})
-	expected := fmt.Sprintf(UpgradeUrlFormat, stableVersion, runtime.GOOS, api.Team)
+	expected := fmt.Sprintf(upgradeUrlFormat, stableVersion, runtime.GOOS, api.Team)
 	if runtime.GOOS == "windows" {
 		expected += ".exe"
 	}

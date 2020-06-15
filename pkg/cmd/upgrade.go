@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	UpgradeUrlFormat = "https://commons-repo.ritchiecli.io/%s/%s/%s/rit"
+	upgradeUrlFormat = "https://commons-repo.ritchiecli.io/%s/%s/%s/rit"
 )
 
 type UpgradeUtil interface {
@@ -40,7 +40,7 @@ func GetUpgradeUrl(edition api.Edition, resolver versionUtil.Resolver) string {
 		return ""
 	}
 
-	upgradeUrl := fmt.Sprintf(UpgradeUrlFormat, stableVersion, runtime.GOOS, edition)
+	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, runtime.GOOS, edition)
 
 	if runtime.GOOS == "windows" {
 		upgradeUrl += ".exe"
