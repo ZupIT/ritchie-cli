@@ -146,7 +146,7 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		}
 		req.Header.Set(headers.XOrg, s.Organization)
 		req.Header.Set(headers.XRepoName, repoName)
-		req.Header.Set(headers.Authorization, fmt.Sprintf("Bearer %s", s.AccessToken))
+		req.Header.Set(headers.Authorization, s.AccessToken)
 	}
 
 	resp, err := d.client.Do(req)
@@ -196,7 +196,7 @@ func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string)
 		}
 		req.Header.Set(headers.XOrg, s.Organization)
 		req.Header.Set(headers.XRepoName, repoName)
-		req.Header.Set(headers.Authorization, fmt.Sprintf("Bearer %s", s.AccessToken))
+		req.Header.Set(headers.Authorization, s.AccessToken)
 	}
 
 	resp, err := d.client.Do(req)

@@ -28,7 +28,7 @@ DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
 COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
-IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+")
+IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+|qa-.*")
 
 build:
 	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE) $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE) $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
