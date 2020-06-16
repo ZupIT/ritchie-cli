@@ -440,6 +440,8 @@ workflows:
           name: unix-smoke-test
           filters:
             <<: *FILTERS_RELEASE
+          requires:
+            - release
   delivery:
     jobs:
       - build:
