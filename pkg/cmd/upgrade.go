@@ -85,7 +85,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 
 		err = u.upgradeUtil.Apply(resp.Body, update.Options{})
 		if err != nil {
-			fmt.Printf(prompt.Error, "Fail to upgrade new version.\n")
+			fmt.Printf(prompt.Error, "Fail to upgrade new version.\nErr:%s\n", err)
 			return err
 		}
 		fmt.Printf(prompt.Success, "Rit upgrated with success\n")
