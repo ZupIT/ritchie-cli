@@ -21,11 +21,6 @@ var (
 	stableVersionFileCache = "stable-version-cache.json"
 )
 
-type Resolver interface {
-	GetCurrentVersion() (string, error)
-	GetStableVersion() (string, error)
-}
-
 type DefaultVersionResolver struct {
 	CurrentVersion   string
 	StableVersionUrl string
