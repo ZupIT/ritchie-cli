@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/version/versionutil"
+
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/spf13/cobra"
@@ -23,7 +25,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/security/secsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/session/sesssingle"
-	versionUtil "github.com/ZupIT/ritchie-cli/pkg/version"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 )
 
@@ -81,7 +82,7 @@ func buildCommands() *cobra.Command {
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	defaultUpgradeUtil := cmd.DefaultUpgradeUtil{}
-	defaultUpgradeResolver := versionUtil.DefaultVersionResolver{
+	defaultUpgradeResolver := versionutil.DefaultVersionResolver{
 		CurrentVersion:   cmd.Version,
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultFileUtilService{},

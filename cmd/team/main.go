@@ -6,14 +6,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/version/versionutil"
+
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/spf13/cobra"
-
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
-	versionUtil "github.com/ZupIT/ritchie-cli/pkg/version"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -21,10 +18,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential/credteam"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/metrics"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security/secteam"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/session/sessteam"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
@@ -91,7 +91,7 @@ func buildCommands() *cobra.Command {
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	defaultUpgradeUtil := cmd.DefaultUpgradeUtil{}
-	defaultUpgradeResolver := versionUtil.DefaultVersionResolver{
+	defaultUpgradeResolver := versionutil.DefaultVersionResolver{
 		CurrentVersion:   cmd.Version,
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultFileUtilService{},

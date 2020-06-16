@@ -12,7 +12,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	versionUtil "github.com/ZupIT/ritchie-cli/pkg/version"
+	"github.com/ZupIT/ritchie-cli/pkg/version/versionutil"
 )
 
 const (
@@ -34,7 +34,7 @@ type UpgradeCmd struct {
 	upgradeUtil UpgradeUtil
 }
 
-func GetUpgradeUrl(edition api.Edition, resolver versionUtil.Resolver) string {
+func GetUpgradeUrl(edition api.Edition, resolver versionutil.Resolver) string {
 	stableVersion, err := resolver.GetStableVersion()
 	if err != nil {
 		return ""
@@ -80,7 +80,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
 			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to download new version.\nStatus:%d\n", resp.StatusCode))
-			return errors.New(fmt.Sprintf("upgradeUrl return status:%d",resp.StatusCode))
+			return errors.New(fmt.Sprintf("upgradeUrl return status:%d", resp.StatusCode))
 		}
 
 		err = u.upgradeUtil.Apply(resp.Body, update.Options{})
