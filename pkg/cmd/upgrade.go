@@ -80,12 +80,12 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
 			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to download new version.\nStatus:%d\n", resp.StatusCode))
-			return errors.New(fmt.Sprintf("upgradeUrl return status:%d", resp.StatusCode))
+			return fmt.Errorf("upgradeUrl return status:%d", resp.StatusCode)
 		}
 
 		err = u.upgradeUtil.Apply(resp.Body, update.Options{})
 		if err != nil {
-			fmt.Printf(prompt.Error, "Fail to upgrade new version.\nErr:%s\n", err)
+			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to upgrade new version.\nErr:%s\n", err))
 			return err
 		}
 		fmt.Printf(prompt.Success, "Rit upgrated with success\n")
