@@ -97,7 +97,7 @@ func buildCommands() *cobra.Command {
 		FileUtilService:  fileutil.DefaultFileUtilService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
-	upgradeUrl := cmd.GetUpgradeUrl(api.Team, defaultUpgradeResolver)
+	upgradeUrl := cmd.UpgradeUrl(api.Team, defaultUpgradeResolver)
 
 	// commands
 	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)

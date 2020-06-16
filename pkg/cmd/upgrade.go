@@ -34,7 +34,7 @@ type UpgradeCmd struct {
 	upgradeUtil UpgradeUtil
 }
 
-func GetUpgradeUrl(edition api.Edition, resolver versionutil.Resolver) string {
+func UpgradeUrl(edition api.Edition, resolver versionutil.Resolver) string {
 	stableVersion, err := resolver.GetStableVersion()
 	if err != nil {
 		return ""

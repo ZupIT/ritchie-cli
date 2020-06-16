@@ -133,7 +133,7 @@ func TestUpgradeCmd(t *testing.T) {
 	}
 }
 
-func TestGetUpgradeUrl(t *testing.T) {
+func TestUpgradeUrl(t *testing.T) {
 	type args struct {
 		edition  api.Edition
 		resolver versionutil.Resolver
@@ -204,8 +204,8 @@ func TestGetUpgradeUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetUpgradeUrl(tt.args.edition, tt.args.resolver); got != tt.want {
-				t.Errorf("GetUpgradeUrl() = %v, want %v", got, tt.want)
+			if got := UpgradeUrl(tt.args.edition, tt.args.resolver); got != tt.want {
+				t.Errorf("UpgradeUrl() = %v, want %v", got, tt.want)
 			}
 		})
 	}
