@@ -411,110 +411,110 @@ jobs:
 
 
 workflows:
-#  release_trigger:
-#    triggers:
-#      - schedule:
-#          cron: "0 10 * * 1"
-#          filters:
-#            branches:
-#              only:
-#                - beta
-#    jobs:
-#      - release_creator
-#  nightly:
-#    triggers:
-#      - schedule:
-#          cron: "0 22 * * *"
-#          filters:
-#            branches:
-#              only:
-#                - master
-#    jobs:
-#      - rebase_nightly
-#  beta:
-#    triggers:
-#      - schedule:
-#          cron: "0 8 * * 1,4"
-#          filters:
-#            branches:
-#              only:
-#                - nightly
-#    jobs:
-#      - build:
-#          name: build-code
-#      - windows_functional_test_team:
-#          name: windows-functional-test-team-code
-#          requires:
-#            - build-code
-#      - windows_functional_test_single:
-#          name: windows-functional-test-single-code
-#          requires:
-#            - build-code
-#      - rebase_beta:
-#          name: release-beta
-#          requires:
-#            - windows-functional-test-team-code
-#            - windows-functional-test-single-code
+  release_trigger:
+    triggers:
+      - schedule:
+          cron: "0 10 * * 1"
+          filters:
+            branches:
+              only:
+                - beta
+    jobs:
+      - release_creator
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 22 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - rebase_nightly
+  beta:
+    triggers:
+      - schedule:
+          cron: "0 8 * * 1,4"
+          filters:
+            branches:
+              only:
+                - nightly
+    jobs:
+      - build:
+          name: build-code
+      - windows_functional_test_team:
+          name: windows-functional-test-team-code
+          requires:
+            - build-code
+      - windows_functional_test_single:
+          name: windows-functional-test-single-code
+          requires:
+            - build-code
+      - rebase_beta:
+          name: release-beta
+          requires:
+            - windows-functional-test-team-code
+            - windows-functional-test-single-code
 
-#  build-for-requests:
-#    jobs:
-#      - lint:
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#      - horus:
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - lint
-#      - unit_test:
-#         name: unit-test
-#         filters:
-#           <<: *FILTERS_CHECK_CODE
-#         requires:
-#           - horus
-#           - lint
-#      - build:
-#          name: build-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - unit-test
-#      - unix_functional_test_single:
-#          name: unix-functional-test-single-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - build-code
-#      - unix_functional_test_team:
-#          name: unix-functional-test-team-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - build-code
-#  release:
-#    jobs:
-#      - build:
-#          name: build-code
-#          filters:
-#            <<: *FILTERS_RELEASE
-#      - delivery:
-#          name: delivery
-#          filters:
-#            <<: *FILTERS_RELEASE
-#          requires:
-#            - build-code
-#      - release:
-#          name: release
-#          filters:
-#            <<: *FILTERS_RELEASE
-#          requires:
-#            - delivery
-#      - unix_smoke_test:
-#          name: unix-smoke-test
-#          filters:
-#            <<: *FILTERS_RELEASE
-#          requires:
-#            - release
+  build-for-requests:
+    jobs:
+      - lint:
+          filters:
+            <<: *FILTERS_CHECK_CODE
+      - horus:
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - lint
+      - unit_test:
+         name: unit-test
+         filters:
+           <<: *FILTERS_CHECK_CODE
+         requires:
+           - horus
+           - lint
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - unit-test
+      - unix_functional_test_single:
+          name: unix-functional-test-single-code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - build-code
+      - unix_functional_test_team:
+          name: unix-functional-test-team-code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - build-code
+  release:
+    jobs:
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_RELEASE
+      - delivery:
+          name: delivery
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
+      - release:
+          name: release
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - delivery
+      - unix_smoke_test:
+          name: unix-smoke-test
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - release
   delivery:
     jobs:
       - build:
