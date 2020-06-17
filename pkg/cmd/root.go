@@ -13,7 +13,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
-	"github.com/ZupIT/ritchie-cli/pkg/sv"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 
 	"github.com/spf13/cobra"
@@ -87,7 +87,7 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
-		Version:            version(api.Single),
+		Version:            versionFlag(api.Single),
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
 		PersistentPreRunE:  o.PreRunFunc(),
@@ -113,7 +113,7 @@ func NewTeamRootCmd(wc workspace.Checker,
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
-		Version:            version(api.Team),
+		Version:            versionFlag(api.Team),
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
 		PersistentPreRunE:  o.PreRunFunc(),
@@ -188,12 +188,12 @@ func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 
 func verifyNewVersion(cmd *cobra.Command) {
 	if !isWhitelist(upgradeValidationWhiteList, cmd) {
-		resolver := sv.DefaultVersionResolver{
+		resolver := version.DefaultVersionResolver{
 			StableVersionUrl: StableVersionUrl,
 			FileUtilService:  fileutil.DefaultService{},
 			HttpClient:       &http.Client{Timeout: 1 * time.Second},
 		}
-		prompt.Warning(sv.VerifyNewVersion(resolver, Version))
+		prompt.Warning(version.VerifyNewVersion(resolver, Version))
 	}
 }
 
@@ -201,7 +201,7 @@ func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
 	return sliceutil.Contains(whitelist, cmd.CommandPath())
 }
 
-func version(edition api.Edition) string {
+func versionFlag(edition api.Edition) string {
 	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
 }
 

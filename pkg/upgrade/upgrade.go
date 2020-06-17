@@ -5,10 +5,10 @@ import (
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/sv"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
-func UpgradeUrl(edition api.Edition, resolver sv.Resolver) string {
+func UpgradeUrl(edition api.Edition, resolver version.Resolver) string {
 	stableVersion, err := resolver.StableVersion()
 	if err != nil {
 		return ""

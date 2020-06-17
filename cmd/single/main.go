@@ -8,8 +8,8 @@ import (
 
 	"k8s.io/kubectl/pkg/util/templates"
 
-	"github.com/ZupIT/ritchie-cli/pkg/sv"
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 
 	"github.com/spf13/cobra"
 
@@ -83,7 +83,7 @@ func buildCommands() *cobra.Command {
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
-	defaultUpgradeResolver := sv.DefaultVersionResolver{
+	defaultUpgradeResolver := version.DefaultVersionResolver{
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},

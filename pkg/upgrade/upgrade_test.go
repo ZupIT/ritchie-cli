@@ -1,12 +1,13 @@
 package upgrade
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/sv"
 	"errors"
 	"fmt"
 	"runtime"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
 type stubResolver struct {
@@ -20,7 +21,7 @@ func (r stubResolver) StableVersion() (string, error) {
 func TestUpgradeUrl(t *testing.T) {
 	type args struct {
 		edition  api.Edition
-		resolver sv.Resolver
+		resolver version.Resolver
 	}
 	tests := []struct {
 		name string

@@ -1,4 +1,4 @@
-package sv
+package version
 
 import (
 	"encoding/json"
