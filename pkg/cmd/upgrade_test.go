@@ -29,66 +29,66 @@ func (r stubResolver) GetStableVersion() (string, error) {
 	return r.getStableVersion()
 }
 
-var stubUpgradeUtilApplyExecutions = 0
+var stubUpgradeApplyExecutions = 0
 
-type StubUpgradeUtil struct {
+type StubUpgrade struct {
 	apply func(reader io.Reader, opts update.Options) error
 }
 
-func (u StubUpgradeUtil) Apply(reader io.Reader, opts update.Options) error {
-	stubUpgradeUtilApplyExecutions++
+func (u StubUpgrade) Apply(reader io.Reader, opts update.Options) error {
+	stubUpgradeApplyExecutions++
 	return u.apply(reader, opts)
 }
 
 func TestUpgradeCmd(t *testing.T) {
 	type fields struct {
-		upgradeUrl  string
-		upgradeUtil upgrade.Upgrade
+		upgradeUrl string
+		upgrade    upgrade.Upgrade
 	}
 	tests := []struct {
-		name                         string
-		fields                       fields
-		executionWantedOfUpgradeUtil int
-		wantErr                      bool
+		name                     string
+		fields                   fields
+		executionWantedOfUpgrade int
+		wantErr                  bool
 	}{
 		{
 			name: "Run with success",
 			fields: fields{
 				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
-				upgradeUtil: StubUpgradeUtil{
+				upgrade: StubUpgrade{
 					apply: func(reader io.Reader, opts update.Options) error {
 						return nil
 					},
 				},
 			},
-			executionWantedOfUpgradeUtil: 1,
-			wantErr:                      false,
+			executionWantedOfUpgrade: 1,
+			wantErr:                  false,
 		},
 		{
 			name: "Should return err when url is empty",
 			fields: fields{
 				upgradeUrl: "",
-				upgradeUtil: StubUpgradeUtil{
+				upgrade: StubUpgrade{
 					apply: func(reader io.Reader, opts update.Options) error {
 						return nil
 					},
 				},
 			},
-			executionWantedOfUpgradeUtil: 0,
-			wantErr:                      true,
+			executionWantedOfUpgrade: 0,
+			wantErr:                  true,
 		},
 		{
 			name: "Should return err when happening err when perform get",
 			fields: fields{
 				upgradeUrl: "some url",
-				upgradeUtil: StubUpgradeUtil{
+				upgrade: StubUpgrade{
 					apply: func(reader io.Reader, opts update.Options) error {
 						return nil
 					},
 				},
 			},
-			executionWantedOfUpgradeUtil: 0,
-			wantErr:                      true,
+			executionWantedOfUpgrade: 0,
+			wantErr:                  true,
 		},
 		{
 			name: "Should return err when get return not 200 code",
@@ -96,35 +96,35 @@ func TestUpgradeCmd(t *testing.T) {
 				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(404)
 				})).URL,
-				upgradeUtil: StubUpgradeUtil{
+				upgrade: StubUpgrade{
 					apply: func(reader io.Reader, opts update.Options) error {
 						return nil
 					},
 				},
 			},
-			executionWantedOfUpgradeUtil: 0,
-			wantErr:                      true,
+			executionWantedOfUpgrade: 0,
+			wantErr:                  true,
 		},
 		{
 			name: "Should return err when fail to apply",
 			fields: fields{
 				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
-				upgradeUtil: StubUpgradeUtil{
+				upgrade: StubUpgrade{
 					apply: func(reader io.Reader, opts update.Options) error {
 						return errors.New("some error")
 					},
 				},
 			},
-			executionWantedOfUpgradeUtil: 1,
-			wantErr:                      true,
+			executionWantedOfUpgrade: 1,
+			wantErr:                  true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			stubUpgradeUtilApplyExecutions = 0
-			err := NewUpgradeCmd(tt.fields.upgradeUrl, tt.fields.upgradeUtil).Execute()
-			if stubUpgradeUtilApplyExecutions != tt.executionWantedOfUpgradeUtil {
-				t.Errorf("Expected %d executions of StubUpgradeUtil.apply", tt.executionWantedOfUpgradeUtil)
+			stubUpgradeApplyExecutions = 0
+			err := NewUpgradeCmd(tt.fields.upgradeUrl, tt.fields.upgrade).Execute()
+			if stubUpgradeApplyExecutions != tt.executionWantedOfUpgrade {
+				t.Errorf("Expected %d executions of StubUpgrade.apply", tt.executionWantedOfUpgrade)
 			}
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpgradeCmd() error = %v, wantErr %v", err, tt.wantErr)

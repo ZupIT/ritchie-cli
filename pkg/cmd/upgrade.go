@@ -20,8 +20,8 @@ const (
 )
 
 type UpgradeCmd struct {
-	upgradeUrl  string
-	upgradeUtil upgrade.Upgrade
+	upgradeUrl string
+	upgrade    upgrade.Upgrade
 }
 
 func UpgradeUrl(edition api.Edition, resolver version_util.Resolver) string {
@@ -42,8 +42,8 @@ func UpgradeUrl(edition api.Edition, resolver version_util.Resolver) string {
 func NewUpgradeCmd(upgradeUrl string, upgrade upgrade.Upgrade) *cobra.Command {
 
 	u := UpgradeCmd{
-		upgradeUrl:  upgradeUrl,
-		upgradeUtil: upgrade,
+		upgradeUrl: upgradeUrl,
+		upgrade:    upgrade,
 	}
 
 	return &cobra.Command{
@@ -73,7 +73,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 			return fmt.Errorf("upgradeUrl return status:%d", resp.StatusCode)
 		}
 
-		err = u.upgradeUtil.Apply(resp.Body, update.Options{})
+		err = u.upgrade.Apply(resp.Body, update.Options{})
 		if err != nil {
 			prompt.Error(fmt.Sprintf("Fail to upgrade new version.\nErr:%s\n", err))
 			return err

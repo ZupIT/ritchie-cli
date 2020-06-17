@@ -82,7 +82,7 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	defaultUpgradeUtil := upgrade.DefaultUpgrade{}
+	defaultUpgrade := upgrade.DefaultUpgrade{}
 	defaultUpgradeResolver := version_util.DefaultVersionResolver{
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultFileUtilService{},
@@ -103,7 +103,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, defaultUpgradeUtil)
+	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, defaultUpgrade)
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
