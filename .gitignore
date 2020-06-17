@@ -94,3 +94,5 @@ Temporary Items
 
 # Jenkins mvn
 settings.xml
+/change.log
+/pkg-build/

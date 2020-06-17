@@ -1,0 +1,44 @@
+{
+  "product": "rit",
+  "company": "ZupIT",
+  "license": "LICENSE",
+  "upgrade-code": "978a8f0d-0720-4c7a-a40c-71edf98ba660",
+  "files": {
+    "guid": "ebdf3311-3856-4b44-99d4-d77bc264e208",
+    "items": [
+      "..\\..\\workspace\\dist\\windows\\single\\rit.exe"
+    ]
+  },
+  "env": {
+    "guid": "f29951f5-7869-4bd5-9e40-de2edd9291e8",
+    "vars": [
+      {
+          "name": "some",
+          "value": "value",
+          "permanent": "no",
+          "system": "no",
+          "action": "set",
+          "part": "last"
+      }
+    ]
+  },
+  "shortcuts": {
+    "guid": "503ab4a8-dc62-4130-903b-12f3ab7c2618",
+    "items": [
+        {
+            "name": "ritchiecli",
+            "description": "Ritchie CLI",
+            "target": "[INSTALLDIR]\\rit.exe",
+            "wdir": "INSTALLDIR",
+            "arguments": "",
+            "icon": "ico.ico"
+        }
+    ]
+  },
+    "choco": {
+        "description": "ritchie cli",
+        "project-url": "https://github.com/ZupIT/ritchie-cli/tree/master/",
+        "tags": "ritchiecli",
+        "license-url": "https://github.com/ZupIT/ritchie-cli/blob/master/LICENSE"
+    }
+}
