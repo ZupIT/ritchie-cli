@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -14,11 +13,10 @@ import (
 )
 
 var (
-	msgNotAllowedCharacter = fmt.Sprintf(prompt.Error, `not allowed character on formula name \/,><@`)
-	ErrNotAllowedCharacter = errors.New(msgNotAllowedCharacter)
+	ErrNotAllowedCharacter = fmt.Errorf(prompt.Red, `not allowed character on formula name \/,><@-`)
 )
 
-const notAllowedChars = `\/><,@`
+const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -89,10 +87,9 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		msg := fmt.Sprintf("%s formula successfully created!\n", lang)
-		fmt.Printf(prompt.Success, msg)
-		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
-		fmt.Printf(prompt.Info, msg)
+		prompt.Success(fmt.Sprintf("%s formula successfully created!", lang))
+
+		prompt.Info(fmt.Sprintf("Formula path is %s", f.FormPath))
 
 		return nil
 	}
@@ -104,7 +101,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		var cf formula.Create
 
 		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
-			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 
@@ -117,11 +114,8 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		msg := fmt.Sprintf("%s formula successfully created!\n", cf.Lang)
-		fmt.Printf(prompt.Success, msg)
-		msg = fmt.Sprintf("Formula path is %s \n", f.FormPath)
-		fmt.Printf(prompt.Info, msg)
-
+		prompt.Success(fmt.Sprintf("%s formula successfully created!\n", cf.Lang))
+		prompt.Info(fmt.Sprintf("Formula path is %s \n", f.FormPath))
 		return nil
 	}
 }

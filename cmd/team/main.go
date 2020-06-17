@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
+
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/spf13/cobra"
-
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
@@ -19,10 +19,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential/credteam"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/metrics"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security/secteam"
+	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/session/sessteam"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
@@ -88,6 +91,14 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
+	defaultUpgrade := upgrade.DefaultUpgrade{}
+	defaultUpgradeResolver := version_util.DefaultVersionResolver{
+		StableVersionUrl: cmd.StableVersionUrl,
+		FileUtilService:  fileutil.DefaultFileUtilService{},
+		HttpClient:       &http.Client{Timeout: 1 * time.Second},
+	}
+	upgradeUrl := cmd.UpgradeUrl(api.Team, defaultUpgradeResolver)
+
 	// commands
 	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)
 
@@ -104,6 +115,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
+	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, defaultUpgrade)
 
 	// level 2
 	setCredentialCmd := cmd.NewTeamSetCredentialCmd(
@@ -156,6 +168,7 @@ func buildCommands() *cobra.Command {
 				setCmd,
 				showCmd,
 				updateCmd,
+				upgradeCmd,
 			},
 		},
 	}

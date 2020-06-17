@@ -2,13 +2,17 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 
 	"github.com/spf13/cobra"
@@ -20,7 +24,7 @@ const (
 	cmdShortDescription = "rit is a NoOps CLI"
 	cmdDescription      = `A CLI that developers can build and operate
 your applications without help from the infra staff.
-Complete documentation is available at https://github.com/ZupIT/ritchie-cli`
+Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
@@ -34,12 +38,16 @@ var (
 	// MsgSession error message for session not initialized
 	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
 
+	// Url to get Rit Stable Version
+	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+
 	singleWhitelist = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
+		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 
 	teamWhitelist = []string{
@@ -50,6 +58,11 @@ var (
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
+		fmt.Sprintf("%s upgrade", cmdUse),
+	}
+
+	upgradeValidationWhiteList = []string{
+		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 )
 
@@ -72,14 +85,15 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 	}
 
 	cmd := &cobra.Command{
-		Use:               cmdUse,
-		Version:           version(api.Single),
-		Short:             cmdShortDescription,
-		Long:              cmdDescription,
-		PersistentPreRunE: o.PreRunFunc(),
-		RunE:              runHelp,
-		SilenceErrors:     true,
-		TraverseChildren:  true,
+		Use:                cmdUse,
+		Version:            version(api.Single),
+		Short:              cmdShortDescription,
+		Long:               cmdDescription,
+		PersistentPreRunE:  o.PreRunFunc(),
+		PersistentPostRunE: o.PostRunFunc(),
+		RunE:               runHelp,
+		SilenceErrors:      true,
+		TraverseChildren:   true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -97,13 +111,14 @@ func NewTeamRootCmd(wc workspace.Checker,
 	}
 
 	cmd := &cobra.Command{
-		Use:               cmdUse,
-		Version:           version(api.Team),
-		Short:             cmdShortDescription,
-		Long:              cmdDescription,
-		PersistentPreRunE: o.PreRunFunc(),
-		RunE:              runHelp,
-		SilenceErrors:     true,
+		Use:                cmdUse,
+		Version:            version(api.Team),
+		Short:              cmdShortDescription,
+		Long:               cmdDescription,
+		PersistentPreRunE:  o.PreRunFunc(),
+		PersistentPostRunE: o.PostRunFunc(),
+		RunE:               runHelp,
+		SilenceErrors:      true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -153,6 +168,31 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 		}
 
 		return nil
+	}
+}
+
+func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		verifyNewVersion(cmd)
+		return nil
+	}
+}
+
+func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		verifyNewVersion(cmd)
+		return nil
+	}
+}
+
+func verifyNewVersion(cmd *cobra.Command) {
+	if !isWhitelist(upgradeValidationWhiteList, cmd) {
+		resolver := version_util.DefaultVersionResolver{
+			StableVersionUrl: StableVersionUrl,
+			FileUtilService:  fileutil.DefaultFileUtilService{},
+			HttpClient:       &http.Client{Timeout: 1 * time.Second},
+		}
+		version_util.VerifyNewVersion(resolver, os.Stdout, Version)
 	}
 }
 

@@ -26,16 +26,11 @@ const (
 )
 
 var (
-	msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "makefile not found")
-	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found")
-	msgErrRepeatedCommand  = fmt.Sprintf(prompt.Error, "this command already exists")
-	msgErrDontStartWithRit = fmt.Sprintf(prompt.Error, "\"the formula's command needs to start with \\\"rit\\\" [ex.: rit group verb <noun>]\"")
-	msgErrTooShortCommand  = fmt.Sprintf(prompt.Error, "the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
-	ErrRepeatedCommand     = errors.New(msgErrRepeatedCommand)
-	ErrDontStartWithRit    = errors.New(msgErrDontStartWithRit)
-	ErrTooShortCommand     = errors.New(msgErrTooShortCommand)
-	ErrTreeJsonNotFound    = errors.New(msgErrTreeJsonNotFound)
-	ErrMakefileNotFound    = errors.New(msgErrMakefileNotFound)
+	ErrDontStartWithRit = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrTooShortCommand  = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrRepeatedCommand  = fmt.Errorf(prompt.Red, "this command already exists")
+	ErrTreeJsonNotFound = fmt.Errorf(prompt.Red, "tree.json not found")
+	ErrMakefileNotFound = fmt.Errorf(prompt.Red, "makefile not found")
 )
 
 type CreateManager struct {
@@ -111,7 +106,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 
 	dirForm := strings.Join(d[1:], "/")
 	formulaName := strings.Join(d[1:], "_")
-	pkgName := d[len(d) - 1]
+	pkgName := d[len(d)-1]
 
 	var dir string
 	if new {
@@ -294,7 +289,7 @@ func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
 	if err != nil {
 		return err
 	}
-	err = createDockerfile(srcDir, l.Dockerfile)
+	err = createDockerfile(pkg, srcDir, l.Dockerfile)
 	if err != nil {
 		return err
 	}
@@ -323,7 +318,8 @@ func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tpl))
 }
 
-func createDockerfile(dir, tpl string) error {
+func createDockerfile(pkg, dir, tpl string) error {
+	tpl = strings.ReplaceAll(tpl, "{{bin-name}}", pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
 }
 
@@ -346,7 +342,7 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error 
 	}
 	tpl = strings.ReplaceAll(tpl, nameModule, pkg)
 	tpl = strings.ReplaceAll(tpl, nameBin, pkg)
-	return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
+	return fileutil.WriteFilePerm(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl), 0777)
 }
 
 func createConfigFile(dir string) error {
