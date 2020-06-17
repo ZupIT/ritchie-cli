@@ -88,7 +88,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 			prompt.Error(fmt.Sprintf("Fail to upgrade new version.\nErr:%s\n", err))
 			return err
 		}
-		prompt.Success("Rit upgrated with success\n")
+		prompt.Success("Rit upgraded with success\n")
 		return nil
 	}
 }
