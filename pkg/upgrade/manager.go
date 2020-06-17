@@ -27,7 +27,7 @@ func (m DefaultManager) Run(upgradeUrl string) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("fail to download new status:%d", resp.StatusCode)
+		return fmt.Errorf("fail to download stable version status:%d", resp.StatusCode)
 	}
 
 	err = m.Updater.Apply(resp.Body, update.Options{})
