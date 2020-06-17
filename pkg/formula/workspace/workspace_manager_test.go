@@ -168,10 +168,10 @@ func TestManager_List(t *testing.T) {
 			in := tt.in
 			out := tt.out
 
-			fileManager.Remove(workspaceFile)
+			_ = fileManager.Remove(workspaceFile)
 			if in.workspaces != nil {
 				content, _ := json.Marshal(in.workspaces)
-				fileManager.Write(workspaceFile, content)
+				_ = fileManager.Write(workspaceFile, content)
 			}
 
 			workspace := New(tmpDir, in.fileManager)
