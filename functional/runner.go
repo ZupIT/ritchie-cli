@@ -69,7 +69,7 @@ func RitInit() {
 func RitClearConfigs() {
 	os := runtime.GOOS
 	if  os == "windows" {
-		// TODO clear config windows
+		setUpClearSetupWindows()
 	} else {
 		setUpClearSetupUnix()
 	}
@@ -101,6 +101,3 @@ func scannerTerminal(out io.Reader) *bufio.Scanner {
 	return scanner
 }
 
-func Failed() {
-
-}
