@@ -32,7 +32,11 @@ func (m DefaultManager) Run(upgradeUrl string) error {
 
 	err = m.Updater.Apply(resp.Body, update.Options{})
 	if err != nil {
-		return fmt.Errorf("fail to upgrade")
+		return errors.New(
+			"Fail to upgrade\n" +
+				"Please try running this command again as root/Administrator\n" +
+				"Example: sudo rit upgrade",
+		)
 	}
 	return nil
 }
