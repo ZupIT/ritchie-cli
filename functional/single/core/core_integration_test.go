@@ -16,7 +16,7 @@ func TestRitSingleCore(t *testing.T) {
 }
 
 var _ = Describe("RitCore", func() {
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		functional.RitInit()
 	})
 

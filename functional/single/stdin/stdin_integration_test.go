@@ -16,7 +16,7 @@ func TestRitSingleStdin(t *testing.T) {
 }
 
 var _ = Describe("RitStdin", func() {
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		functional.RitInit()
 	})
 
