@@ -69,7 +69,7 @@ Write-Output 'GENERATING MSI TEAM ZUP INSTALLER'
 
 Write-Output 'GENERATING CHOCO TEAM ZUP INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-team" --input ritchiecliteamzup.msi --path wix-team-zup.json
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-teamzup" --input ritchiecliteamzup.msi --path wix-team-zup.json
 
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
 
