@@ -110,7 +110,7 @@ func TestBuild(t *testing.T) {
 			e, got := builderManager.Build(workspacePath, formulaPath)
 
 			fmt.Println(got)
-			fmt.Println(e)
+			fmt.Println(string(e))
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Build(%s) got %v, want %v", tt.name, got, tt.want)
 			}
