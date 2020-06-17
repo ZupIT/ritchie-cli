@@ -31,12 +31,12 @@ func NewBuilder(ritHome string, dir stream.DirCreateListCopier, file stream.File
 
 func (b BuilderManager) Build(workspacePath, formulaPath string) ([]byte, error) {
 	formulaSrc := fmt.Sprintf(srcPattern, formulaPath)
-	if err := os.Chdir(formulaSrc); err != nil { // cd formula src directory
+	if err := os.Chdir(formulaSrc); err != nil {
 		return nil, err
 	}
 
-	cmd := exec.Command("make", "build") // make build formula
-
+	var cmd *exec.Cmd
+	cmd = exec.Command("make", "build")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
@@ -44,14 +44,13 @@ func (b BuilderManager) Build(workspacePath, formulaPath string) ([]byte, error)
 		return stderr.Bytes(), err
 	}
 
-	dest := strings.ReplaceAll(formulaPath, workspacePath, "")
-	ritFormulaDestPath := fmt.Sprintf(formulaPathPattern, b.ritHome, dest)
+	formulaDestPath := b.formulaDestPath(formulaPath, workspacePath)
 
-	if err := b.copyDist(formulaPath, ritFormulaDestPath); err != nil {
+	if err := b.copyDist(formulaPath, formulaDestPath); err != nil {
 		return nil, err
 	}
 
-	if err := b.copyConfig(formulaPath, ritFormulaDestPath); err != nil {
+	if err := b.copyConfig(formulaPath, formulaDestPath); err != nil {
 		return nil, err
 	}
 
@@ -129,4 +128,9 @@ func (b BuilderManager) copyTree(workspacePath string) error {
 	}
 
 	return nil
+}
+
+func (b BuilderManager) formulaDestPath(formulaPath, workspacePath string) string {
+	dest := strings.ReplaceAll(formulaPath, workspacePath, "")
+	return fmt.Sprintf(formulaPathPattern, b.ritHome, dest)
 }

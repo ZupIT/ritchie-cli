@@ -33,7 +33,7 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 			case event := <-w.watcher.Event:
 				if !event.IsDir() {
 					w.build(workspacePath, formulaPath)
-					fmt.Printf(prompt.Info, "Waiting for modify \n")
+					fmt.Printf(prompt.Info, "Waiting for changes...\n")
 				}
 			case err := <-w.watcher.Error:
 				log.Fatalln(err)

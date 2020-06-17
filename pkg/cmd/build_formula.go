@@ -90,19 +90,19 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 		var workspacePath string
 		var wspace workspace.Workspace
 		if selected == newWorkspace {
-			workspaceName, err = b.Text("Type a new formula workspace name: ", true)
+			workspaceName, err = b.Text("Workspace name: ", true)
 			if err != nil {
 				return err
 			}
 
-			workspacePath, err = b.Text("Type a new formula workspace path: ", true)
+			workspacePath, err = b.Text("Workspace path (e.g.: /home/user/github):", true)
 			if err != nil {
 				return err
 			}
 
 			wspace = workspace.Workspace{
 				Name: strings.Title(workspaceName),
-				Dir:  fmt.Sprintf(dirPattern, b.userHomeDir, workspacePath),
+				Dir:  workspacePath,
 			}
 
 			if err := b.workspace.Add(wspace); err != nil {
