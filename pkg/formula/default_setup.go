@@ -95,12 +95,12 @@ func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, er
 	configName := def.ConfigName()
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
-		fmt.Printf(prompt.Info, "Downloading formula config...\n")
+		prompt.Info("Downloading formula config...")
 		url := def.ConfigURL(configName)
 		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
 			return Config{}, err
 		}
-		fmt.Printf(prompt.Success, "Formula config download completed!\n")
+		prompt.Success("Formula config download completed!")
 	}
 
 	configFile, err := ioutil.ReadFile(configPath)
@@ -133,7 +133,7 @@ func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def Definition
 }
 
 func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
-	fmt.Printf(prompt.Info, "Downloading formula...\n")
+	prompt.Info( "Downloading formula...")
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", ErrCreateReqBundle
@@ -146,7 +146,7 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		}
 		req.Header.Set(headers.XOrg, s.Organization)
 		req.Header.Set(headers.XRepoName, repoName)
-		req.Header.Set(headers.Authorization, fmt.Sprintf("Bearer %s", s.AccessToken))
+		req.Header.Set(headers.Authorization, s.AccessToken)
 	}
 
 	resp, err := d.client.Do(req)
@@ -179,7 +179,7 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		return "", err
 	}
 
-	fmt.Printf(prompt.Success, "Formula download completed!\n")
+	prompt.Success( "Formula download completed!")
 	return file, nil
 }
 
@@ -196,7 +196,7 @@ func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string)
 		}
 		req.Header.Set(headers.XOrg, s.Organization)
 		req.Header.Set(headers.XRepoName, repoName)
-		req.Header.Set(headers.Authorization, fmt.Sprintf("Bearer %s", s.AccessToken))
+		req.Header.Set(headers.Authorization, s.AccessToken)
 	}
 
 	resp, err := d.client.Do(req)

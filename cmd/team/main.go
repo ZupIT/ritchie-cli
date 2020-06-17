@@ -25,7 +25,6 @@ import (
 	form_workspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/metrics"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/security/secteam"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/session/sessteam"
@@ -48,7 +47,6 @@ func buildCommands() *cobra.Command {
 	inputText := prompt.NewInputText()
 	inputInt := prompt.NewInputInt()
 	inputBool := prompt.NewInputBool()
-	inputEmail := prompt.NewInputEmail()
 	inputPassword := prompt.NewInputPassword()
 	inputList := prompt.NewInputList()
 	inputURL := prompt.NewInputURL()
@@ -68,13 +66,10 @@ func buildCommands() *cobra.Command {
 	repoLoader := formula.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
-		ritchieHomeDir,
 		serverFinder,
-		security.OAuthProvider,
 		http.DefaultClient,
 		sessionManager)
-	logoutManager := secteam.NewLogoutManager(security.OAuthProvider, sessionManager, serverFinder)
-	userManager := secteam.NewUserManager(serverFinder, http.DefaultClient, sessionManager)
+	logoutManager := secteam.NewLogoutManager(sessionManager)
 	credSetter := credteam.NewSetter(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
 	credFinder := credteam.NewFinder(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
 	credSettings := credteam.NewSettings(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
@@ -105,9 +100,9 @@ func buildCommands() *cobra.Command {
 	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewTeamInitCmd(inputText, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
+	initCmd := cmd.NewTeamInitCmd(inputText, inputPassword, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(loginManager, repoLoader)
+	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -122,8 +117,6 @@ func buildCommands() *cobra.Command {
 		inputBool,
 		inputList,
 		inputPassword)
-	createUserCmd := cmd.NewCreateUserCmd(userManager, inputText, inputEmail, inputPassword)
-	deleteUserCmd := cmd.NewDeleteUserCmd(userManager, inputBool, inputText)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
@@ -145,8 +138,8 @@ func buildCommands() *cobra.Command {
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
 	cleanCmd.AddCommand(cleanRepoCmd)
-	createCmd.AddCommand(createUserCmd, createFormulaCmd)
-	deleteCmd.AddCommand(deleteUserCmd, deleteRepoCmd, deleteCtxCmd)
+	createCmd.AddCommand(createFormulaCmd)
+	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
 	showCmd.AddCommand(showCtxCmd)
