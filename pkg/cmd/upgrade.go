@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"runtime"
 
@@ -12,29 +11,20 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/version/versionutil"
+	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
 )
 
 const (
 	upgradeUrlFormat = "https://commons-repo.ritchiecli.io/%s/%s/%s/rit"
 )
 
-type UpgradeUtil interface {
-	Apply(reader io.Reader, opts update.Options) error
-}
-
-type DefaultUpgradeUtil struct{}
-
-func (u DefaultUpgradeUtil) Apply(reader io.Reader, opts update.Options) error {
-	return update.Apply(reader, opts)
-}
-
 type UpgradeCmd struct {
 	upgradeUrl  string
-	upgradeUtil UpgradeUtil
+	upgradeUtil upgrade.Upgrade
 }
 
-func UpgradeUrl(edition api.Edition, resolver versionutil.Resolver) string {
+func UpgradeUrl(edition api.Edition, resolver version_util.Resolver) string {
 	stableVersion, err := resolver.GetStableVersion()
 	if err != nil {
 		return ""
@@ -49,11 +39,11 @@ func UpgradeUrl(edition api.Edition, resolver versionutil.Resolver) string {
 	return upgradeUrl
 }
 
-func NewUpgradeCmd(upgradeUrl string, upgradeUtil UpgradeUtil) *cobra.Command {
+func NewUpgradeCmd(upgradeUrl string, upgrade upgrade.Upgrade) *cobra.Command {
 
 	u := UpgradeCmd{
 		upgradeUrl:  upgradeUrl,
-		upgradeUtil: upgradeUtil,
+		upgradeUtil: upgrade,
 	}
 
 	return &cobra.Command{

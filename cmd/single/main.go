@@ -6,7 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/version/versionutil"
+	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -81,8 +82,8 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	defaultUpgradeUtil := cmd.DefaultUpgradeUtil{}
-	defaultUpgradeResolver := versionutil.DefaultVersionResolver{
+	defaultUpgradeUtil := upgrade.DefaultUpgrade{}
+	defaultUpgradeResolver := version_util.DefaultVersionResolver{
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultFileUtilService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},

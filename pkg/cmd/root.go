@@ -12,7 +12,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
-	"github.com/ZupIT/ritchie-cli/pkg/version/versionutil"
+	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 
 	"github.com/spf13/cobra"
@@ -187,12 +187,12 @@ func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 
 func verifyNewVersion(cmd *cobra.Command) {
 	if !isWhitelist(upgradeValidationWhiteList, cmd) {
-		resolver := versionutil.DefaultVersionResolver{
+		resolver := version_util.DefaultVersionResolver{
 			StableVersionUrl: StableVersionUrl,
 			FileUtilService:  fileutil.DefaultFileUtilService{},
 			HttpClient:       &http.Client{Timeout: 1 * time.Second},
 		}
-		versionutil.VerifyNewVersion(resolver, os.Stdout, Version)
+		version_util.VerifyNewVersion(resolver, os.Stdout, Version)
 	}
 }
 

@@ -1,4 +1,4 @@
-package versionutil
+package version_util
 
 import (
 	"encoding/json"

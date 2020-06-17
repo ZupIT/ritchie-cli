@@ -12,7 +12,8 @@ import (
 	"github.com/inconshreveable/go-update"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/version/versionutil"
+	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
 )
 
 type stubResolver struct {
@@ -42,7 +43,7 @@ func (u StubUpgradeUtil) Apply(reader io.Reader, opts update.Options) error {
 func TestUpgradeCmd(t *testing.T) {
 	type fields struct {
 		upgradeUrl  string
-		upgradeUtil UpgradeUtil
+		upgradeUtil upgrade.Upgrade
 	}
 	tests := []struct {
 		name                         string
@@ -136,7 +137,7 @@ func TestUpgradeCmd(t *testing.T) {
 func TestUpgradeUrl(t *testing.T) {
 	type args struct {
 		edition  api.Edition
-		resolver versionutil.Resolver
+		resolver version_util.Resolver
 	}
 	tests := []struct {
 		name string
