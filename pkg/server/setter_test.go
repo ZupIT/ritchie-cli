@@ -71,6 +71,13 @@ func TestSet(t *testing.T) {
 			},
 		},
 		{
+			name: "trailing slash on serverURL",
+			in:   in{cfg: Config{Organization: "org", URL: fmt.Sprintf("%s/", srvURL)}, hc: http.DefaultClient},
+			out: out{
+				status: 200,
+			},
+		},
+		{
 			name: "valid serverURL",
 			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: http.DefaultClient},
 			out: out{
