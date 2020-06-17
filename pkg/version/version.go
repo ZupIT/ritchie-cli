@@ -15,7 +15,7 @@ var (
 	// MsgUpgrade error message to inform user to upgrade rit version
 	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
-	stableVersionFileCache = "version-cache.json"
+	stableVersionFileCache = "stable-version-cache.json"
 )
 
 type DefaultVersionResolver struct {
