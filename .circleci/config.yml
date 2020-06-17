@@ -31,7 +31,6 @@ references:
         - qa
         - nightly
         - beta
-        - feature/packaging
 
   filters-release: &FILTERS_RELEASE
     branches:
