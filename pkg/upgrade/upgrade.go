@@ -1,17 +1,24 @@
 package upgrade
 
 import (
-	"io"
+	"fmt"
+	"runtime"
 
-	"github.com/inconshreveable/go-update"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/sv"
 )
 
-type Upgrade interface {
-	Apply(reader io.Reader, opts update.Options) error
-}
+func UpgradeUrl(edition api.Edition, resolver sv.Resolver) string {
+	stableVersion, err := resolver.StableVersion()
+	if err != nil {
+		return ""
+	}
 
-type DefaultUpgrade struct{}
+	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, runtime.GOOS, edition)
 
-func (u DefaultUpgrade) Apply(reader io.Reader, opts update.Options) error {
-	return update.Apply(reader, opts)
+	if runtime.GOOS == "windows" {
+		upgradeUrl += ".exe"
+	}
+
+	return upgradeUrl
 }

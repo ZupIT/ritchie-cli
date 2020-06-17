@@ -1,4 +1,4 @@
-package version_util
+package sv
 
 import (
 	"bytes"
@@ -55,7 +55,7 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 	type fields struct {
 		CurrentVersion   string
 		StableVersionUrl string
-		FileUtilService  fileutil.FileUtilService
+		FileUtilService  fileutil.Service
 		HttpClient       *http.Client
 	}
 	tests := []struct {

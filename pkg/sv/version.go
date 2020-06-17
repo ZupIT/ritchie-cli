@@ -1,4 +1,4 @@
-package version_util
+package sv
 
 import (
 	"encoding/json"
@@ -15,15 +15,15 @@ import (
 )
 
 var (
-	// MsgUpgrade error message to inform user to upgrade rit version
+	// MsgUpgrade error message to inform user to upgrade rit sv
 	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade\n"
 	// stableVersionFileCache is the file name to cache stableVersion
-	stableVersionFileCache = "stable-version-cache.json"
+	stableVersionFileCache = "sv-cache.json"
 )
 
 type DefaultVersionResolver struct {
 	StableVersionUrl string
-	FileUtilService  fileutil.FileUtilService
+	FileUtilService  fileutil.Service
 	HttpClient       *http.Client
 }
 
