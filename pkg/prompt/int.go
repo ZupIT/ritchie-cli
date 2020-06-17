@@ -19,6 +19,7 @@ func NewInputInt() inputInt {
 func (inputInt) Int(name string) (int64, error) {
 	prompt := promptui.Prompt{
 		Label:     name,
+		Pointer: promptui.PipeCursor,
 		Validate:  validateIntegerNumberInput,
 		Templates: defaultTemplate(),
 	}

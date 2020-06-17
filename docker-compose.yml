@@ -2,11 +2,11 @@
 version: '3'
 services:
   stubby4j:
-    image: joncanning/stubby4j
+    image: sandokandias/stubby4j-docker
     ports:
-      - "8787:8787"
       - "8882:8882"
     environment:
       STUBBY_PORT: 8882
     volumes:
       - ./testdata/stubby4j/integrations.yml:/usr/local/stubby.yml
+      - ./testdata/stubby4j/response.zip:/usr/local/response.zip

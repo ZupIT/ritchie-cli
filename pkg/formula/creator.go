@@ -14,10 +14,24 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-var ErrMakefileNotFound = errors.New("makefile not found")
-var ErrTreeJsonNotFound = errors.New("tree.json not found")
+const (
+	localTreeFile     = "%s/tree/tree.json"
+	nameModule        = "{{nameModule}}"
+	nameBin           = "{{bin-name}}"
+	nameBinFirstUpper = "{{bin-name-first-upper}}"
+)
+
+var (
+	ErrDontStartWithRit = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrTooShortCommand  = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrRepeatedCommand  = fmt.Errorf(prompt.Red, "this command already exists")
+	ErrTreeJsonNotFound = fmt.Errorf(prompt.Red, "tree.json not found")
+	ErrMakefileNotFound = fmt.Errorf(prompt.Red, "makefile not found")
+)
 
 type CreateManager struct {
 	FormPath    string
@@ -92,6 +106,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 
 	dirForm := strings.Join(d[1:], "/")
 	formulaName := strings.Join(d[1:], "_")
+	pkgName := d[len(d)-1]
 
 	var dir string
 	if new {
@@ -120,7 +135,7 @@ func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
 	if err != nil {
 		return err
 	}
-	err = createSrcFiles(dir, formulaName, lang)
+	err = createSrcFiles(dir, pkgName, lang)
 	if err != nil {
 		return err
 	}
@@ -158,22 +173,22 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 	s := strings.Split(fCmd, " ")
 
 	if s[0] != "rit" {
-		return errors.New("the formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+		return ErrDontStartWithRit
 	}
 
 	if len(s) <= 2 {
-		return errors.New("the formula's command needs at least 2 words following \"rit\" [ex.: rit group verb <noun>]")
+		return ErrTooShortCommand
 	}
 	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
 	u := s[len(s)-1]
 	for _, v := range trees {
 		for _, j := range v.Commands {
 			if j.Parent == cp && j.Usage == u {
-				return errors.New("this command already exists")
+				return ErrRepeatedCommand
+
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -274,8 +289,11 @@ func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
 	if err != nil {
 		return err
 	}
-	err = createDockerfile(srcDir, l.Dockerfile)
+	err = createDockerfile(pkg, srcDir, l.Dockerfile)
 	if err != nil {
+		return err
+	}
+	if err := createUmask(srcDir); err != nil {
 		return err
 	}
 
@@ -300,8 +318,14 @@ func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tpl))
 }
 
-func createDockerfile(dir, tpl string) error {
+func createDockerfile(pkg, dir, tpl string) error {
+	tpl = strings.ReplaceAll(tpl, "{{bin-name}}", pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/Dockerfile", dir), []byte(tpl))
+}
+
+func createUmask(dir string) error {
+	uMaskFile := fmt.Sprintf("%s/set_umask.sh", dir)
+	return fileutil.WriteFile(uMaskFile, []byte(tpl_shell.Umask))
 }
 
 func createGoModFile(dir, pkg string) error {
@@ -318,7 +342,7 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error 
 	}
 	tpl = strings.ReplaceAll(tpl, nameModule, pkg)
 	tpl = strings.ReplaceAll(tpl, nameBin, pkg)
-	return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
+	return fileutil.WriteFilePerm(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl), 0777)
 }
 
 func createConfigFile(dir string) error {

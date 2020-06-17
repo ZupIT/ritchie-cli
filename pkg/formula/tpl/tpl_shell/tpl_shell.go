@@ -3,7 +3,7 @@ package tpl_shell
 const (
 	Main = `#!/bin/sh
 
-. ./{{bin-name}}/{{bin-name}}.sh --source-only
+. $PWD/{{bin-name}}/{{bin-name}}.sh --source-only
 
 run $SAMPLE_TEXT $SAMPLE_LIST $SAMPLE_BOOL`
 
@@ -13,19 +13,24 @@ DIST=../dist
 DIST_DIR=$(DIST)/commons/bin
 build:
 	mkdir -p $(DIST_DIR)
-	cp main.sh $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name}} $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
+	cp main.sh $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name}} Dockerfile set_umask.sh $(DIST_DIR)
 	chmod +x $(DIST_DIR)/$(BINARY_NAME)`
 
 	Dockerfile = `
-FROM alpine:3.7
-
-WORKDIR /app
+FROM alpine:latest
 
 COPY . .
 
-RUN chmod +x main.sh
+RUN chmod +x set_umask.sh
+RUN chmod +x {{bin-name}}.sh
+RUN mkdir app
 
-ENTRYPOINT /app/main.sh`
+ENTRYPOINT ["./set_umask.sh"]
+CMD ["./{{bin-name}}.sh"]`
+
+	Umask = `#!/bin/sh
+umask 0011
+$1`
 
 	File = `#!/bin/sh
 run() {

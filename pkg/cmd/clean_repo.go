@@ -50,8 +50,7 @@ func (c cleanRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%q has been cleaned successfully\n", n)
-
+		prompt.Success(fmt.Sprintf("%q has been cleaned successfully", n))
 		return nil
 	}
 }
@@ -63,7 +62,7 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &f)
 		if err != nil {
-			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 
@@ -71,7 +70,7 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%q has been cleaned successfully\n", f.Name)
+		prompt.Success(fmt.Sprintf("%q has been cleaned successfully\n", f.Name))
 
 		return nil
 	}

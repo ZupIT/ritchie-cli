@@ -20,18 +20,23 @@ build:
 	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
 	echo 'node index.js' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)
 
-	cp -r $(BINARY_NAME_UNIX) index.js package.json {{bin-name}} $(DIST_DIR) && cp Dockerfile $(DIST_DIR)
+	cp -r . $(DIST_DIR)
 
 	#Clean files
 	rm $(BINARY_NAME_UNIX)`
+
 	Dockerfile = `
 FROM node:10
 
-WORKDIR /app
-
 COPY . .
 
-ENTRYPOINT node index.js`
+RUN chmod +x set_umask.sh
+
+WORKDIR /app
+
+ENTRYPOINT ["/set_umask.sh"]
+CMD ["node /index.js"]
+`
 
 	Run = `#!/bin/sh
 node index.js`

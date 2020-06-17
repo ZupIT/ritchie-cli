@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -61,9 +62,9 @@ func (s Setter) Set(cred credential.Detail) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-org", sess.Organization)
-	req.Header.Set("x-ctx", ctx.Current)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", sess.AccessToken))
+	req.Header.Set(headers.XOrg, sess.Organization)
+	req.Header.Set(headers.XCtx, ctx.Current)
+	req.Header.Set(headers.Authorization, sess.AccessToken)
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return err

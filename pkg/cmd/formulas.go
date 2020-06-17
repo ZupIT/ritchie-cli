@@ -5,51 +5,46 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
-	"github.com/spf13/cobra"
 )
 
 const (
-	fPath    = "fPath"
-	fBin     = "fBin"
-	fLBin    = "fLBin"
-	fMBin    = "fMBin"
-	fWBin    = "fWBin"
-	fBundle  = "fBundle"
-	fConfig  = "fConfig"
-	fRepoURL = "fRepoURL"
-	fRepoName = "fRepoName"
-	subcmd   = " SUBCOMMAND"
-	//Group formulas group
-	Group = "group"
+	subCommand = " SUBCOMMAND"
+	Group      = "group"
+	dockerFlag = "docker"
+	RootCmd    = "root"
 )
 
 type FormulaCommand struct {
-	coreCmds      []api.Command
-	treeManager   formula.TreeManager
-	formulaRunner formula.Runner
+	coreCmds      api.Commands
+	treeManager   formula.Manager
+	defaultRunner formula.Runner
+	dockerRunner  formula.Runner
 }
 
 func NewFormulaCommand(
-	coreCmds []api.Command,
-	treeManager formula.TreeManager,
-	formulaRunner formula.Runner) *FormulaCommand {
+	coreCmds api.Commands,
+	treeManager formula.Manager,
+	defaultRunner formula.Runner,
+	dockerRunner formula.Runner) *FormulaCommand {
 	return &FormulaCommand{
 		coreCmds:      coreCmds,
 		treeManager:   treeManager,
-		formulaRunner: formulaRunner,
+		defaultRunner: defaultRunner,
+		dockerRunner:  dockerRunner,
 	}
 }
 
 func (f FormulaCommand) Add(rootCmd *cobra.Command) error {
 	treeRep := f.treeManager.MergedTree(false)
 	commands := make(map[string]*cobra.Command)
-	commands["root"] = rootCmd
+	commands[RootCmd] = rootCmd
 
 	for _, cmd := range treeRep.Commands {
 		cmdPath := api.Command{Parent: cmd.Parent, Usage: cmd.Usage}
-
 		if !sliceutil.ContainsCmd(f.coreCmds, cmdPath) {
 			var newCmd *cobra.Command
 			if cmd.Formula.Path != "" {
@@ -68,52 +63,49 @@ func (f FormulaCommand) Add(rootCmd *cobra.Command) error {
 	return nil
 }
 
-func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
-	frm := cmd.Formula
-	annotations := make(map[string]string)
-	annotations[fPath] = frm.Path
-	annotations[fBin] = frm.Bin
-	annotations[fLBin] = frm.LBin
-	annotations[fMBin] = frm.MBin
-	annotations[fWBin] = frm.WBin
-	annotations[fBundle] = frm.Bundle
-	annotations[fConfig] = frm.Config
-	annotations[fRepoURL] = frm.RepoURL
-	annotations[fRepoName] = cmd.Repo
+func newSubCmd(cmd api.Command) *cobra.Command {
+	var group string
+	if cmd.Parent == RootCmd {
+		group = fmt.Sprintf("%s commands:", cmd.Repo)
+	}
 
 	c := &cobra.Command{
-		Annotations: annotations,
-		Use:         cmd.Usage,
+		Use:         cmd.Usage + subCommand,
 		Short:       cmd.Help,
 		Long:        cmd.Help,
-		RunE:        execFormulaFunc(f.formulaRunner),
+		Annotations: map[string]string{Group: group},
 	}
 	c.LocalFlags()
 	return c
 }
 
-func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args []string) error {
+func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
+	formulaCmd := &cobra.Command{
+		Use:   cmd.Usage,
+		Short: cmd.Help,
+		Long:  cmd.Help,
+	}
+
+	addFlags(formulaCmd)
+	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, cmd.Formula)
+
+	return formulaCmd
+}
+
+func (f FormulaCommand) execFormulaFunc(repo string, form api.Formula) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		fPath := cmd.Annotations[fPath]
-		fBin := cmd.Annotations[fBin]
-		fLBin := cmd.Annotations[fLBin]
-		fMBin := cmd.Annotations[fMBin]
-		fWBin := cmd.Annotations[fWBin]
-		fBundle := cmd.Annotations[fBundle]
-		fConf := cmd.Annotations[fConfig]
-		fRepoURL := cmd.Annotations[fRepoURL]
-		fRepoName := cmd.Annotations[fRepoName]
-		frm := formula.Definition{
-			Path:    fPath,
-			Bin:     fBin,
-			LBin:    fLBin,
-			MBin:    fMBin,
-			WBin:    fWBin,
-			Bundle:  fBundle,
-			Config:  fConf,
-			RepoURL: fRepoURL,
-			RepoName: fRepoName,
+		d := formula.Definition{
+			Path:     form.Path,
+			Bin:      form.Bin,
+			LBin:     form.LBin,
+			MBin:     form.MBin,
+			WBin:     form.WBin,
+			Bundle:   form.Bundle,
+			Config:   form.Config,
+			RepoURL:  form.RepoURL,
+			RepoName: repo,
 		}
+
 		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
 		if err != nil {
 			return err
@@ -122,20 +114,21 @@ func execFormulaFunc(formulaRunner formula.Runner) func(cmd *cobra.Command, args
 		if stdin {
 			inputType = api.Stdin
 		}
-		return formulaRunner.Run(frm, inputType)
+
+		docker, err := cmd.Flags().GetBool(dockerFlag)
+		if err != nil {
+			return err
+		}
+
+		if docker {
+			return f.dockerRunner.Run(d, inputType)
+		}
+
+		return f.defaultRunner.Run(d, inputType)
 	}
 }
 
-func newSubCmd(cmd api.Command) *cobra.Command {
-	group := ""
-	if cmd.Parent == "root" {
-		group = fmt.Sprintf("%s commands:", cmd.Repo)
-	}
-
-	return &cobra.Command{
-		Use:         cmd.Usage + subcmd,
-		Short:       cmd.Help,
-		Long:        cmd.Help,
-		Annotations: map[string]string{"group": group},
-	}
+func addFlags(cmd *cobra.Command) {
+	formulaFlags := cmd.Flags()
+	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside a docker container")
 }

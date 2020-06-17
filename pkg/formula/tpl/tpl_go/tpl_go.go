@@ -130,25 +130,33 @@ build:
 	mkdir -p $(DIST_MAC_DIR) $(DIST_LINUX_DIR) $(DIST_WIN_DIR)
 	export MODULE=$(GO111MODULE=on go list -m)
 	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_LINUX_DIR)/$(BIN_LINUX)' -v $(CMD_PATH) && cp -r . $(DIST_LINUX_DIR)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -tags release -o '$(DIST_LINUX_DIR)/$(BIN_LINUX)' $(CMD_PATH) && cp -r . $(DIST_LINUX_DIR)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_MAC_DIR)/$(BIN_MAC)' -v $(CMD_PATH) && cp Dockerfile $(DIST_MAC_DIR) && cp -r . $(DIST_LINUX_DIR)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -tags release -o '$(DIST_MAC_DIR)/$(BIN_MAC)' $(CMD_PATH) && cp -r . $(DIST_MAC_DIR)
 	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -tags release -ldflags '-X $(MODULE)/cmd.Version=$(VERSION) -X $(MODULE)/cmd.BuildDate=$(DATE)' -o '$(DIST_WIN_DIR)/$(BIN_WIN)' -v $(CMD_PATH) && cp Dockerfile $(DIST_WIN_DIR) && cp -r . $(DIST_LINUX_DIR)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -tags release -o '$(DIST_WIN_DIR)/$(BIN_WIN)' $(CMD_PATH) && cp -r . $(DIST_WIN_DIR)
 
 test:
 	$(GOTEST) -short ` + "`go list ./... | grep -v vendor/`"
 
 	Dockerfile = `
 FROM golang:alpine AS builder
-WORKDIR /app/
-COPY . .
+
+ADD . /app
+WORKDIR /app
 RUN go build -o main -v main.go
 
-FROM alpine:latest  
-WORKDIR /app/
-COPY --from=builder app/main .
-ENTRYPOINT ["./main"]`
+FROM alpine:latest
+
+
+COPY --from=builder /app/main main
+COPY --from=builder /app/set_umask.sh set_umask.sh
+RUN chmod +x main
+RUN chmod +x set_umask.sh
+
+WORKDIR /app
+ENTRYPOINT ["/set_umask.sh"]
+CMD ["/main"]`
 
 	MakefileMain = `#Makefiles
 {{formName}}={{formPath}}

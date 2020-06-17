@@ -1,5 +1,55 @@
 # Changelog
 
+## [1.0.0-beta.13](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.13) (2020-06-03)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.12...1.0.0-beta.13)
+
+**Fixed bugs:**
+
+- changed folder name [\#145](https://github.com/ZupIT/ritchie-cli/pull/145) ([victor-schumacher](https://github.com/victor-schumacher))
+
+**Merged pull requests:**
+
+- Release 1.0.0-beta.12 merge [\#144](https://github.com/ZupIT/ritchie-cli/pull/144) ([zup-ci](https://github.com/zup-ci))
+- \[FIX\] update local repo name [\#142](https://github.com/ZupIT/ritchie-cli/pull/142) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+
+## [1.0.0-beta.12](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.12) (2020-06-03)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.11...1.0.0-beta.12)
+
+**Merged pull requests:**
+
+- \[FIX\] changed go to compiled [\#143](https://github.com/ZupIT/ritchie-cli/pull/143) ([victor-schumacher](https://github.com/victor-schumacher))
+- Release 1.0.0-beta.11 merge [\#139](https://github.com/ZupIT/ritchie-cli/pull/139) ([zup-ci](https://github.com/zup-ci))
+
+## [1.0.0-beta.11](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.11) (2020-06-02)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.10...1.0.0-beta.11)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Update RIT CREATE FORMULA command [\#107](https://github.com/ZupIT/ritchie-cli/issues/107)
+- \[FEATURE\] update templates [\#136](https://github.com/ZupIT/ritchie-cli/pull/136) ([victor-schumacher](https://github.com/victor-schumacher))
+- \[FEATURE\] cmd init [\#123](https://github.com/ZupIT/ritchie-cli/pull/123) ([sandokandias](https://github.com/sandokandias))
+- \[FEATURE\] Formula creator improvements [\#104](https://github.com/ZupIT/ritchie-cli/pull/104) ([victor-schumacher](https://github.com/victor-schumacher))
+
+**Fixed bugs:**
+
+- \[BUG\] Slash in new formula's command generate a path error [\#108](https://github.com/ZupIT/ritchie-cli/issues/108)
+- \[FIX\] env runner formula [\#138](https://github.com/ZupIT/ritchie-cli/pull/138) ([marcosgmgm](https://github.com/marcosgmgm))
+- \[Fix\] Remove special char in prompt [\#137](https://github.com/ZupIT/ritchie-cli/pull/137) ([kaduartur](https://github.com/kaduartur))
+- \[FIX\] Rename field qtd to qty [\#135](https://github.com/ZupIT/ritchie-cli/pull/135) ([kaduartur](https://github.com/kaduartur))
+- fixed golang creator [\#132](https://github.com/ZupIT/ritchie-cli/pull/132) ([victor-schumacher](https://github.com/victor-schumacher))
+
+**Merged pull requests:**
+
+- \[fix\] change name Passphrase [\#134](https://github.com/ZupIT/ritchie-cli/pull/134) ([ernelio](https://github.com/ernelio))
+- Feature/improvements security [\#133](https://github.com/ZupIT/ritchie-cli/pull/133) ([ernelio](https://github.com/ernelio))
+- Feature/nightly [\#127](https://github.com/ZupIT/ritchie-cli/pull/127) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/stdin functional tests [\#126](https://github.com/ZupIT/ritchie-cli/pull/126) ([dmbarra](https://github.com/dmbarra))
+- \[FEATURE\] Improvements circleci [\#125](https://github.com/ZupIT/ritchie-cli/pull/125) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.10 merge [\#122](https://github.com/ZupIT/ritchie-cli/pull/122) ([zup-ci](https://github.com/zup-ci))
+
 ## [1.0.0-beta.10](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.10) (2020-05-27)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.9...1.0.0-beta.10)

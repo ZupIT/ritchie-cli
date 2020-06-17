@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -31,12 +32,6 @@ type inputIntMock struct{}
 
 func (inputIntMock) Int(name string) (int64, error) {
 	return 0, nil
-}
-
-type inputEmailMock struct{}
-
-func (inputEmailMock) Email(name string) (string, error) {
-	return "dennis@ritchie.io", nil
 }
 
 type inputPasswordMock struct{}
@@ -95,16 +90,6 @@ type formCreator struct{}
 
 func (formCreator) Create(cf formula.Create) (formula.CreateManager, error) {
 	return formula.CreateManager{}, nil
-}
-
-type userManagerMock struct{}
-
-func (userManagerMock) Create(u security.User) error {
-	return nil
-}
-
-func (userManagerMock) Delete(u security.User) error {
-	return nil
 }
 
 type ctxSetterMock struct{}
@@ -172,7 +157,7 @@ func (repoUpdaterMock) Update() error {
 
 type loginManagerMock struct{}
 
-func (loginManagerMock) Login() error {
+func (loginManagerMock) Login(security.User) error {
 	return nil
 }
 
@@ -203,6 +188,27 @@ func (credSettingsMock) Fields() (credential.Fields, error) {
 			},
 		},
 	}, nil
+}
+
+type runnerMock struct {
+	error error
+}
+
+func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType) error {
+	return r.error
+}
+
+type treeMock struct {
+	tree  formula.Tree
+	error error
+}
+
+func (t treeMock) Tree() (map[string]formula.Tree, error) {
+	return map[string]formula.Tree{"test": t.tree}, t.error
+}
+
+func (t treeMock) MergedTree(bool) formula.Tree {
+	return t.tree
 }
 
 type passphraseManagerMock struct{}

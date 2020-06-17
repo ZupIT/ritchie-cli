@@ -134,7 +134,7 @@ func NewGo() Go {
 		Makefile:   tpl_go.Makefile,
 		Dockerfile: tpl_go.Dockerfile,
 		Pkg: tpl_go.Pkg,
-		Compiled:   false,
+		Compiled:   true,
 		UpperCase:  false,
 	}}
 }

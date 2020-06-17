@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
@@ -43,8 +44,8 @@ func (dm TeamLoader) Load() error {
 		return err
 	}
 
-	req.Header.Set("x-org", sess.Organization)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", sess.AccessToken))
+	req.Header.Set(headers.XOrg, sess.Organization)
+	req.Header.Set(headers.Authorization, sess.AccessToken)
 	resp, err := dm.client.Do(req)
 	if err != nil {
 		return err

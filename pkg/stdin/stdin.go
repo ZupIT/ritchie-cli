@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-var (
+const (
 	MsgInvalidInput = "The STDIN inputs weren't informed correctly. Check the JSON used to execute the command."
 )
 

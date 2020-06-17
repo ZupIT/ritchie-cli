@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -13,9 +12,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var ErrNotAllowedCharacter = errors.New(`not allowed character on formula name \/,><@`)
+var (
+	ErrNotAllowedCharacter = fmt.Errorf(prompt.Red, `not allowed character on formula name \/,><@-`)
+)
 
-const notAllowedChars = `\/><,@`
+const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -57,14 +58,12 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		fmt.Println("Creating Formula ...")
-
 		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
 		if err != nil {
 			return err
 		}
 		homeDir, _ := os.UserHomeDir()
-		ritFormulasPath := fmt.Sprintf("%s/my-ritchie-formulas", homeDir)
+		ritFormulasPath := fmt.Sprintf("%s/ritchie-formulas-local", homeDir)
 		repoQuestion := fmt.Sprintf("Use default repo (%s)?", ritFormulasPath)
 		var localRepoDir string
 		choice, _ := c.Bool(repoQuestion, []string{"yes", "no"})
@@ -88,8 +87,9 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("Formula in %s successfully created!\n", lang)
-		fmt.Printf("Your formula is in %s", f.FormPath)
+		prompt.Success(fmt.Sprintf("%s formula successfully created!", lang))
+
+		prompt.Info(fmt.Sprintf("Formula path is %s", f.FormPath))
 
 		return nil
 	}
@@ -97,12 +97,11 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Creating Formula ...")
 
 		var cf formula.Create
 
 		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
-			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 
@@ -115,9 +114,8 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("Formula in %s successfully created!\n", cf.Lang)
-		fmt.Printf("Your formula is in %s\n", f.FormPath)
-
+		prompt.Success(fmt.Sprintf("%s formula successfully created!\n", cf.Lang))
+		prompt.Info(fmt.Sprintf("Formula path is %s \n", f.FormPath))
 		return nil
 	}
 }
