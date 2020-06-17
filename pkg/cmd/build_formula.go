@@ -145,19 +145,18 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 }
 
 func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
-	buildInfo := fmt.Sprintf(prompt.Info, "Building formula...")
+	buildInfo := fmt.Sprintf(prompt.Teal, "Building formula...")
 	s := spinner.New(buildInfo)
 	s.Start()
 	stderr, err := b.formula.Build(workspacePath, formulaPath)
 	if err != nil {
 		s.Stop()
 		msgFormatted := fmt.Sprintf("Build error: \n%s \n%s", string(stderr), err)
-		errMsg := fmt.Sprintf(prompt.Error, msgFormatted)
-		fmt.Println(errMsg)
+		prompt.Error(msgFormatted)
 	} else {
 		s.Stop()
-		fmt.Printf(prompt.Success, "✔ Build completed! \n")
-		fmt.Printf(prompt.Info, "Now you can run your formula with Ritchie!\n")
+		prompt.Success("✔ Build completed!")
+		prompt.Info("Now you can run your formula with Ritchie!")
 	}
 }
 

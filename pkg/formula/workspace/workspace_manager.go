@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	msgErrMakefileNotFound = fmt.Sprintf(prompt.Error, "Makefile not found, a valid formula workspace must have a Makefile")
-	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Error, "tree.json not found, a valid formula workspace must have a tree.json")
-	msgErrInvalidWorkspace = fmt.Sprintf(prompt.Error, "the formula workspace does not exist, please enter a valid workspace")
+	msgErrMakefileNotFound = fmt.Sprintf(prompt.Red, "Makefile not found, a valid formula workspace must have a Makefile")
+	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Red, "tree.json not found, a valid formula workspace must have a tree.json")
+	msgErrInvalidWorkspace = fmt.Sprintf(prompt.Red, "the formula workspace does not exist, please enter a valid workspace")
 	ErrInvalidWorkspace    = errors.New(msgErrInvalidWorkspace)
 	ErrTreeJsonNotFound    = errors.New(msgErrTreeJsonNotFound)
 	ErrMakefileNotFound    = errors.New(msgErrMakefileNotFound)
