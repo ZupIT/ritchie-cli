@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
-	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
-
 	"k8s.io/kubectl/pkg/util/templates"
+
+	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 
 	"github.com/spf13/cobra"
 
@@ -82,13 +82,13 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
-	defaultUpgrade := upgrade.DefaultUpgrade{}
-	defaultUpgradeResolver := version_util.DefaultVersionResolver{
+	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
+	defaultUpgradeResolver := version.DefaultVersionResolver{
 		StableVersionUrl: cmd.StableVersionUrl,
-		FileUtilService:  fileutil.DefaultFileUtilService{},
+		FileUtilService:  fileutil.DefaultService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
-	upgradeUrl := cmd.UpgradeUrl(api.Single, defaultUpgradeResolver)
+	upgradeUrl := upgrade.UpgradeUrl(api.Single, defaultUpgradeResolver)
 
 	rootCmd := cmd.NewSingleRootCmd(workspaceManager, sessionValidator)
 
@@ -103,7 +103,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, defaultUpgrade)
+	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(

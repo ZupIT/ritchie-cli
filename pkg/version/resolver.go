@@ -1,4 +1,4 @@
-package version_util
+package version
 
 type Resolver interface {
 	StableVersion() (string, error)

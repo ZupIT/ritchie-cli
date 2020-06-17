@@ -9,10 +9,11 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
-	"github.com/ZupIT/ritchie-cli/pkg/version/version_util"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 
 	"github.com/spf13/cobra"
@@ -28,7 +29,7 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	// Version contains the current version.
+	// Version contains the current version	.
 	Version = "dev"
 	// BuildDate contains a string with the build date.
 	BuildDate = "unknown"
@@ -86,7 +87,7 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
-		Version:            version(api.Single),
+		Version:            versionFlag(api.Single),
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
 		PersistentPreRunE:  o.PreRunFunc(),
@@ -112,7 +113,7 @@ func NewTeamRootCmd(wc workspace.Checker,
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
-		Version:            version(api.Team),
+		Version:            versionFlag(api.Team),
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
 		PersistentPreRunE:  o.PreRunFunc(),
@@ -187,12 +188,12 @@ func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 
 func verifyNewVersion(cmd *cobra.Command) {
 	if !isWhitelist(upgradeValidationWhiteList, cmd) {
-		resolver := version_util.DefaultVersionResolver{
+		resolver := version.DefaultVersionResolver{
 			StableVersionUrl: StableVersionUrl,
-			FileUtilService:  fileutil.DefaultFileUtilService{},
+			FileUtilService:  fileutil.DefaultService{},
 			HttpClient:       &http.Client{Timeout: 1 * time.Second},
 		}
-		version_util.VerifyNewVersion(resolver, os.Stdout, Version)
+		prompt.Warning(version.VerifyNewVersion(resolver, Version))
 	}
 }
 
@@ -200,7 +201,7 @@ func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
 	return sliceutil.Contains(whitelist, cmd.CommandPath())
 }
 
-func version(edition api.Edition) string {
+func versionFlag(edition api.Edition) string {
 	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
 }
 

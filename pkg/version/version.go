@@ -1,9 +1,7 @@
-package version_util
+package version
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -11,19 +9,18 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 var (
 	// MsgUpgrade error message to inform user to upgrade rit version
-	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade\n"
+	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
 )
 
 type DefaultVersionResolver struct {
 	StableVersionUrl string
-	FileUtilService  fileutil.FileUtilService
+	FileUtilService  fileutil.Service
 	HttpClient       *http.Client
 }
 
@@ -78,12 +75,13 @@ func (r DefaultVersionResolver) StableVersion() (string, error) {
 	}
 }
 
-func VerifyNewVersion(resolve Resolver, writer io.Writer, currentVersion string) {
+func VerifyNewVersion(resolve Resolver, currentVersion string) string {
 	stableVersion, err := resolve.StableVersion()
 	if err != nil {
-		return
+		return ""
 	}
 	if currentVersion != stableVersion {
-		_, _ = fmt.Fprintf(writer, prompt.Yellow, MsgRitUpgrade)
+		return MsgRitUpgrade
 	}
+	return ""
 }
