@@ -20,6 +20,7 @@ references:
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
     BUILD_IMAGE: *GOLANG_IMAGE
+    VERSION_PLACEHOLDER: 1.0.0-betaPLACEHOLDER
 
   filters: &FILTERS_DELIVERY
     branches:
@@ -270,6 +271,17 @@ jobs:
             . ./.circleci/scripts/version.sh
             make release
 
+  release_creator:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Checking if we need to release any new features
+          command: |
+            make release-creator
+
   rebase_nightly:
     environment:
       <<: *ENVIRONMENT
@@ -280,6 +292,17 @@ jobs:
           name: Rebase Nightly
           command: |
             make rebase-nightly
+
+  rebase_beta:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Rebase Beta
+          command: |
+            make rebase-beta
 
   unix_smoke_test:
     executor: ritchie-tests-executor
@@ -315,6 +338,16 @@ jobs:
 
 
 workflows:
+  release_trigger:
+    triggers:
+      - schedule:
+          cron: "0 10 * * 1"
+          filters:
+            branches:
+              only:
+                - beta
+    jobs:
+      - release_creator
   nightly:
     triggers:
       - schedule:
@@ -325,6 +358,31 @@ workflows:
                 - master
     jobs:
       - rebase_nightly
+  beta:
+    triggers:
+      - schedule:
+          cron: "0 8 * * 1,4"
+          filters:
+            branches:
+              only:
+                - nightly
+    jobs:
+      - build:
+          name: build-code
+      - windows_functional_test_team:
+          name: windows-functional-test-team-code
+          requires:
+            - build-code
+      - windows_functional_test_single:
+          name: windows-functional-test-single-code
+          requires:
+            - build-code
+      - rebase_beta:
+          name: release-beta
+          requires:
+            - windows-functional-test-team-code
+            - windows-functional-test-single-code
+
   build-for-requests:
     jobs:
       - lint:
@@ -360,18 +418,6 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-#      - windows_functional_test_team:
-#          name: windows-functional-test-team-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - build-code
-#      - windows_functional_test_single:
-#          name: windows-functional-test-single-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - build-code
   release:
     jobs:
       - build:
@@ -386,7 +432,6 @@ workflows:
             - build-code
       - release:
           name: release
-          type: approval
           filters:
             <<: *FILTERS_RELEASE
           requires:
@@ -395,6 +440,8 @@ workflows:
           name: unix-smoke-test
           filters:
             <<: *FILTERS_RELEASE
+          requires:
+            - release
   delivery:
     jobs:
       - build:

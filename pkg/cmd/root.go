@@ -24,7 +24,7 @@ const (
 	cmdShortDescription = "rit is a NoOps CLI"
 	cmdDescription      = `A CLI that developers can build and operate
 your applications without help from the infra staff.
-Complete documentation is available at https://github.com/ZupIT/ritchie-cli`
+Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
