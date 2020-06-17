@@ -35,8 +35,7 @@ func (b BuilderManager) Build(workspacePath, formulaPath string) ([]byte, error)
 		return nil, err
 	}
 
-	var cmd *exec.Cmd
-	cmd = exec.Command("make", "build")
+	cmd := exec.Command("make", "build")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
