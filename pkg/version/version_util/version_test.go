@@ -15,11 +15,11 @@ import (
 )
 
 type StubResolverVersions struct {
-	getStableVersion func() (string, error)
+	stableVersion func() (string, error)
 }
 
-func (r StubResolverVersions) GetStableVersion() (string, error) {
-	return r.getStableVersion()
+func (r StubResolverVersions) StableVersion() (string, error) {
+	return r.stableVersion()
 }
 
 type StubFileUtilService struct {
@@ -36,7 +36,7 @@ func (s StubFileUtilService) WriteFilePerm(path string, content []byte, perm int
 	return s.writeFilePerm(path, content, perm)
 }
 
-func TestDefaultVersionResolver_GetStableVersion(t *testing.T) {
+func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 
 	// case 1 Should get stableVersion
 	expectedResultCase1 := "1.0.0"
@@ -146,13 +146,13 @@ func TestDefaultVersionResolver_GetStableVersion(t *testing.T) {
 				FileUtilService:  tt.fields.FileUtilService,
 				HttpClient:       tt.fields.HttpClient,
 			}
-			got, err := r.GetStableVersion()
+			got, err := r.StableVersion()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetStableVersion() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("StableVersion() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("GetStableVersion() got = %v, want %v", got, tt.want)
+				t.Errorf("StableVersion() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -172,7 +172,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should not print warning",
 			args: args{
 				resolve: StubResolverVersions{
-					getStableVersion: func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", nil
 					},
 				},
@@ -184,7 +184,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should print warning",
 			args: args{
 				resolve: StubResolverVersions{
-					getStableVersion: func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.1", nil
 					},
 				},
@@ -193,10 +193,10 @@ func TestVerifyNewVersion(t *testing.T) {
 			wantWriter: fmt.Sprintf(prompt.Yellow, MsgRitUpgrade),
 		},
 		{
-			name: "Should not print on error in GetStableVersion",
+			name: "Should not print on error in StableVersion",
 			args: args{
 				resolve: StubResolverVersions{
-					getStableVersion: func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "", errors.New("any error")
 					},
 				},

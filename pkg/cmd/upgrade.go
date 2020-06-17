@@ -25,7 +25,7 @@ type UpgradeCmd struct {
 }
 
 func UpgradeUrl(edition api.Edition, resolver version_util.Resolver) string {
-	stableVersion, err := resolver.GetStableVersion()
+	stableVersion, err := resolver.StableVersion()
 	if err != nil {
 		return ""
 	}

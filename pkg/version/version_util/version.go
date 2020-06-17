@@ -32,7 +32,7 @@ type stableVersionCache struct {
 	ExpiresAt     int64  `json:"expiresAt"`
 }
 
-func (r DefaultVersionResolver) GetStableVersion() (string, error) {
+func (r DefaultVersionResolver) StableVersion() (string, error) {
 
 	cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
 	cacheData, err := r.FileUtilService.ReadFile(cachePath)
@@ -79,7 +79,7 @@ func (r DefaultVersionResolver) GetStableVersion() (string, error) {
 }
 
 func VerifyNewVersion(resolve Resolver, writer io.Writer, currentVersion string) {
-	stableVersion, err := resolve.GetStableVersion()
+	stableVersion, err := resolve.StableVersion()
 	if err != nil {
 		return
 	}

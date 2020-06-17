@@ -17,16 +17,11 @@ import (
 )
 
 type stubResolver struct {
-	getCurrentVersion func() (string, error)
-	getStableVersion  func() (string, error)
+	stableVersion func() (string, error)
 }
 
-func (r stubResolver) GetCurrentVersion() (string, error) {
-	return r.getCurrentVersion()
-}
-
-func (r stubResolver) GetStableVersion() (string, error) {
-	return r.getStableVersion()
+func (r stubResolver) StableVersion() (string, error) {
+	return r.stableVersion()
 }
 
 var stubUpgradeApplyExecutions = 0
@@ -149,11 +144,8 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Single,
 				resolver: stubResolver{
-					getStableVersion: func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", nil
-					},
-					getCurrentVersion: func() (string, error) {
-						return "1.1.0", nil
 					},
 				},
 			},
@@ -170,11 +162,8 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Team,
 				resolver: stubResolver{
-					getStableVersion: func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", nil
-					},
-					getCurrentVersion: func() (string, error) {
-						return "1.1.0", nil
 					},
 				},
 			},
@@ -191,11 +180,8 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Team,
 				resolver: stubResolver{
-					getStableVersion: func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", errors.New("some error")
-					},
-					getCurrentVersion: func() (string, error) {
-						return "1.1.0", nil
 					},
 				},
 			},
