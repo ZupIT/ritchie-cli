@@ -1,4 +1,4 @@
-package formula
+package build
 
 import (
 	"errors"
@@ -8,30 +8,33 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func setup() (string, string) {
-	workspacePath := fmt.Sprintf(FormCreatePathPattern, os.TempDir())
-	_ = fileutil.RemoveDir(workspacePath)
-	treeMan := NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
-	creator := NewCreator(os.TempDir(), treeMan)
+func setup() string {
+	treeMan := formula.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+	creator := formula.NewCreator(os.TempDir(), treeMan)
 
-	create := Create{
+	create := formula.Create{
 		FormulaCmd: "rit testing formula",
 		Lang:       "Go",
 	}
 
 	_, _ = creator.Create(create)
 
-	return workspacePath, fmt.Sprintf("%s/%s", creator.FormPath, "testing/formula")
+	return fmt.Sprintf("%s/%s", creator.FormPath, "testing/formula")
 }
 
 func TestBuild(t *testing.T) {
-	workspacePath, formulaPath := setup()
+	workspacePath := fmt.Sprintf(formula.FormCreatePathPattern, os.TempDir())
 	ritHome := fmt.Sprintf("%s/.rit", os.TempDir())
+	formulaPath := setup()
+	_ = fileutil.RemoveDir(ritHome)
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
+
+	// defer after(ritHome, workspacePath)
 
 	type in struct {
 		fileManager stream.FileListCopier
@@ -103,7 +106,6 @@ func TestBuild(t *testing.T) {
 
 	for _, tt := range testes {
 		t.Run(tt.name, func(t *testing.T) {
-			_ = fileutil.RemoveDir(ritHome)
 			builderManager := NewBuilder(ritHome, tt.in.dirManager, tt.in.fileManager)
 			_, got := builderManager.Build(workspacePath, formulaPath)
 
@@ -170,4 +172,10 @@ func (f fileManagerMock) List(string) ([]string, error) {
 
 func (f fileManagerMock) Copy(string, string) error {
 	return f.copyErr
+}
+
+type repoListerMock struct{}
+
+func (repoListerMock) List() ([]formula.Repository, error) {
+	return []formula.Repository{}, nil
 }

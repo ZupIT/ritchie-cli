@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/build"
+
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/spf13/cobra"
@@ -116,7 +118,7 @@ func buildCommands() *cobra.Command {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	formulaWorkspace := form_workspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := formula.NewBuilder(ritchieHomeDir, dirManager, fileManager)
+	formulaBuilder := build.NewBuilder(ritchieHomeDir, dirManager, fileManager)
 	watchManager := watcher.New(formulaBuilder, dirManager)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
 

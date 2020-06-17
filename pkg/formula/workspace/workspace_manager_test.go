@@ -7,10 +7,17 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestWorkspaceManager_Add(t *testing.T) {
+	cleanForm()
+	makefileDir := createDirWithMakefile()
+	treeDir := createDirWithTree()
+	fullDir := createFullDir()
+
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()
 	workspaceFile := fmt.Sprintf(workspacesPattern, tmpDir)
@@ -33,7 +40,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 			in: in{
 				workspace: Workspace{
 					Name: "zup",
-					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas",
+					Dir:  fullDir,
 				},
 				fileManager: fileManager,
 			},
@@ -44,18 +51,51 @@ func TestWorkspaceManager_Add(t *testing.T) {
 			in: in{
 				workspace: Workspace{
 					Name: "commons",
-					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
+					Dir:  fullDir,
 				},
 				fileManager: fileManager,
 			},
 			out: nil,
 		},
 		{
+			name: "invalid workspace",
+			in: in{
+				workspace: Workspace{
+					Name: "zup",
+					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
+				},
+				fileManager: fileManager,
+			},
+			out: ErrInvalidWorkspace,
+		},
+		{
+			name: "not found tree.json",
+			in: in{
+				workspace: Workspace{
+					Name: "zup",
+					Dir:  makefileDir,
+				},
+				fileManager: fileManager,
+			},
+			out: ErrTreeJsonNotFound,
+		},
+		{
+			name: "not found Makefile",
+			in: in{
+				workspace: Workspace{
+					Name: "zup",
+					Dir:  treeDir,
+				},
+				fileManager: fileManager,
+			},
+			out: ErrMakefileNotFound,
+		},
+		{
 			name: "read not found",
 			in: in{
 				workspace: Workspace{
 					Name: "commons",
-					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
+					Dir:  fullDir,
 				},
 				fileManager: fileManagerMock{exist: true, readErr: errors.New("not found file")},
 			},
@@ -66,7 +106,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 			in: in{
 				workspace: Workspace{
 					Name: "commons",
-					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
+					Dir:  fullDir,
 				},
 				fileManager: fileManagerMock{exist: true, read: []byte("error")},
 			},
@@ -77,9 +117,9 @@ func TestWorkspaceManager_Add(t *testing.T) {
 			in: in{
 				workspace: Workspace{
 					Name: "commons",
-					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
+					Dir:  fullDir,
 				},
-				fileManager: fileManagerMock{exist: false, writeErr: errors.New("write file error")},
+				fileManager: fileManagerMock{exist: true, read: []byte("{\"name\":\"name\"}"), writeErr: errors.New("write file error")},
 			},
 			out: errors.New("write file error"),
 		},
@@ -186,6 +226,44 @@ func TestManager_List(t *testing.T) {
 			}
 		})
 	}
+}
+
+func cleanForm() {
+	_ = fileutil.RemoveDir(os.TempDir() + "/customRepo")
+	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoMakefile")
+	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoTreejson")
+}
+
+func createDirWithMakefile() string {
+	dir := os.TempDir() + "/my-custom-repo-with-makefile"
+	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	makefilePath := fmt.Sprintf("%s/%s", dir, formula.Makefile)
+	_ = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
+	return dir
+}
+
+func createDirWithTree() string {
+	dir := os.TempDir() + "/my-custom-repo-with-tree"
+	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
+	treeJsonFile := fmt.Sprintf(formula.TreeCreatePathPattern, dir)
+	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
+	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte(""))
+	return dir
+}
+
+func createFullDir() string {
+	dir := os.TempDir() + "/my-custom-repo"
+	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
+	treeJsonFile := fmt.Sprintf(formula.TreeCreatePathPattern, dir)
+	makefilePath := fmt.Sprintf("%s/%s", dir, formula.Makefile)
+	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
+	makefile, _ := fileutil.ReadFile("../../testdata/Makefile")
+	_ = fileutil.CreateFileIfNotExist(makefilePath, makefile)
+	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte("{}"))
+
+	return dir
 }
 
 type fileManagerMock struct {

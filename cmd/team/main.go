@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/build"
 	"net/http"
 	"os"
 	"time"
@@ -131,7 +132,7 @@ func buildCommands() *cobra.Command {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	formulaWorkspace := form_workspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := formula.NewBuilder(ritchieHomeDir, dirManager, fileManager)
+	formulaBuilder := build.NewBuilder(ritchieHomeDir, dirManager, fileManager)
 	watchManager := watcher.New(formulaBuilder, dirManager)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
 
