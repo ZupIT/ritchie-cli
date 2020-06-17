@@ -313,7 +313,7 @@ jobs:
 
   win-package:
     executor:
-      name: win/default
+      name: windows-executor
     steps:
       - checkout
       - attach_workspace:
