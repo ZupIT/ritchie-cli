@@ -9,6 +9,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -28,7 +29,7 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	// Version contains the current sv.
+	// Version contains the current version	.
 	Version = "dev"
 	// BuildDate contains a string with the build date.
 	BuildDate = "unknown"
@@ -192,7 +193,7 @@ func verifyNewVersion(cmd *cobra.Command) {
 			FileUtilService:  fileutil.DefaultService{},
 			HttpClient:       &http.Client{Timeout: 1 * time.Second},
 		}
-		sv.VerifyNewVersion(resolver, os.Stdout, Version)
+		prompt.Warning(sv.VerifyNewVersion(resolver, Version))
 	}
 }
 

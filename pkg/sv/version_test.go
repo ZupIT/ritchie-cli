@@ -1,17 +1,14 @@
 package sv
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 type StubResolverVersions struct {
@@ -164,12 +161,12 @@ func TestVerifyNewVersion(t *testing.T) {
 		currentVersion string
 	}
 	tests := []struct {
-		name       string
-		args       args
-		wantWriter string
+		name string
+		args args
+		want string
 	}{
 		{
-			name: "Should not print warning",
+			name: "Should return empty when current version equals to stableVersion",
 			args: args{
 				resolve: StubResolverVersions{
 					stableVersion: func() (string, error) {
@@ -178,10 +175,10 @@ func TestVerifyNewVersion(t *testing.T) {
 				},
 				currentVersion: "1.0.0",
 			},
-			wantWriter: "",
+			want: "",
 		},
 		{
-			name: "Should print warning",
+			name: "Should return msg when current version it not equals to stableVersion",
 			args: args{
 				resolve: StubResolverVersions{
 					stableVersion: func() (string, error) {
@@ -190,10 +187,10 @@ func TestVerifyNewVersion(t *testing.T) {
 				},
 				currentVersion: "1.0.0",
 			},
-			wantWriter: fmt.Sprintf(prompt.Yellow, MsgRitUpgrade),
+			want: MsgRitUpgrade,
 		},
 		{
-			name: "Should not print on error in StableVersion",
+			name: "Should return empty on error in StableVersion ",
 			args: args{
 				resolve: StubResolverVersions{
 					stableVersion: func() (string, error) {
@@ -202,15 +199,13 @@ func TestVerifyNewVersion(t *testing.T) {
 				},
 				currentVersion: "1.0.0",
 			},
-			wantWriter: "",
+			want: "",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			writer := &bytes.Buffer{}
-			VerifyNewVersion(tt.args.resolve, writer, tt.args.currentVersion)
-			if gotWriter := writer.String(); gotWriter != tt.wantWriter {
-				t.Errorf("VerifyNewVersion() = %v, want %v", gotWriter, tt.wantWriter)
+			if got := VerifyNewVersion(tt.args.resolve, tt.args.currentVersion); got != tt.want {
+				t.Errorf("VerifyNewVersion() = %v, want %v", got, tt.want)
 			}
 		})
 	}
