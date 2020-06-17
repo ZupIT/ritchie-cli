@@ -22,7 +22,6 @@ var (
 )
 
 type DefaultVersionResolver struct {
-	CurrentVersion   string
 	StableVersionUrl string
 	FileUtilService  fileutil.FileUtilService
 	HttpClient       *http.Client
@@ -31,10 +30,6 @@ type DefaultVersionResolver struct {
 type stableVersionCache struct {
 	StableVersion string `json:"stableVersion"`
 	ExpiresAt     int64  `json:"expiresAt"`
-}
-
-func (r DefaultVersionResolver) GetCurrentVersion() (string, error) {
-	return r.CurrentVersion, nil
 }
 
 func (r DefaultVersionResolver) GetStableVersion() (string, error) {
@@ -83,16 +78,12 @@ func (r DefaultVersionResolver) GetStableVersion() (string, error) {
 	}
 }
 
-func VerifyNewVersion(resolve Resolver, writer io.Writer) {
+func VerifyNewVersion(resolve Resolver, writer io.Writer, currentVersion string) {
 	stableVersion, err := resolve.GetStableVersion()
 	if err != nil {
 		return
 	}
-	currentVersion, err := resolve.GetCurrentVersion()
-	if err != nil {
-		return
-	}
 	if currentVersion != stableVersion {
-		_, _ = fmt.Fprintf(writer, prompt.Warning, MsgRitUpgrade)
+		_, _ = fmt.Fprintf(writer, prompt.Yellow, MsgRitUpgrade)
 	}
 }

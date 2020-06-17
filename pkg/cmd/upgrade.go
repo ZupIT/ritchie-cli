@@ -68,27 +68,27 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
 		if u.upgradeUrl == "" {
-			fmt.Printf(prompt.Error, "Fail to resolve upgrade url.\n")
+			prompt.Error("Fail to resolve upgrade url.")
 			return errors.New("fail to resolve upgrade url")
 		}
 
 		resp, err := http.Get(u.upgradeUrl)
 		if err != nil {
-			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to download new version.\nErr:%s\n", err))
+			prompt.Error(fmt.Sprintf("Fail to download new version.\nErr:%s\n", err))
 			return err
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
-			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to download new version.\nStatus:%d\n", resp.StatusCode))
+			prompt.Error(fmt.Sprintf("Fail to download new version.\nStatus:%d\n", resp.StatusCode))
 			return fmt.Errorf("upgradeUrl return status:%d", resp.StatusCode)
 		}
 
 		err = u.upgradeUtil.Apply(resp.Body, update.Options{})
 		if err != nil {
-			fmt.Printf(prompt.Error, fmt.Sprintf("Fail to upgrade new version.\nErr:%s\n", err))
+			prompt.Error(fmt.Sprintf("Fail to upgrade new version.\nErr:%s\n", err))
 			return err
 		}
-		fmt.Printf(prompt.Success, "Rit upgrated with success\n")
+		prompt.Success("Rit upgrated with success\n")
 		return nil
 	}
 }

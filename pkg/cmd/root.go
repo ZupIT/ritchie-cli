@@ -188,12 +188,11 @@ func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 func verifyNewVersion(cmd *cobra.Command) {
 	if !isWhitelist(upgradeValidationWhiteList, cmd) {
 		resolver := versionutil.DefaultVersionResolver{
-			CurrentVersion:   Version,
 			StableVersionUrl: StableVersionUrl,
 			FileUtilService:  fileutil.DefaultFileUtilService{},
 			HttpClient:       &http.Client{Timeout: 1 * time.Second},
 		}
-		versionutil.VerifyNewVersion(resolver, os.Stdout)
+		versionutil.VerifyNewVersion(resolver, os.Stdout, Version)
 	}
 }
 

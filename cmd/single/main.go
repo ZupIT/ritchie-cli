@@ -83,7 +83,6 @@ func buildCommands() *cobra.Command {
 
 	defaultUpgradeUtil := cmd.DefaultUpgradeUtil{}
 	defaultUpgradeResolver := versionutil.DefaultVersionResolver{
-		CurrentVersion:   cmd.Version,
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultFileUtilService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},

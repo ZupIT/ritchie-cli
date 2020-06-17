@@ -15,12 +15,7 @@ import (
 )
 
 type StubResolverVersions struct {
-	getCurrentVersion func() (string, error)
-	getStableVersion  func() (string, error)
-}
-
-func (r StubResolverVersions) GetCurrentVersion() (string, error) {
-	return r.getCurrentVersion()
+	getStableVersion func() (string, error)
 }
 
 func (r StubResolverVersions) GetStableVersion() (string, error) {
@@ -39,121 +34,6 @@ func (s StubFileUtilService) ReadFile(path string) ([]byte, error) {
 
 func (s StubFileUtilService) WriteFilePerm(path string, content []byte, perm int32) error {
 	return s.writeFilePerm(path, content, perm)
-}
-
-func TestDefaultVersionResolver_GetCurrentVersion(t *testing.T) {
-	type fields struct {
-		CurrentVersion   string
-		StableVersionUrl string
-		FileUtilService  fileutil.FileUtilService
-		HttpClient       *http.Client
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		want    string
-		wantErr bool
-	}{
-		{
-			"should get current version",
-			fields{
-				"0.0.1",
-				"any url",
-				StubFileUtilService{},
-				&http.Client{},
-			},
-			"0.0.1",
-			false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := DefaultVersionResolver{
-				CurrentVersion:   tt.fields.CurrentVersion,
-				StableVersionUrl: tt.fields.StableVersionUrl,
-				FileUtilService:  tt.fields.FileUtilService,
-				HttpClient:       tt.fields.HttpClient,
-			}
-			got, err := r.GetCurrentVersion()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetCurrentVersion() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("GetCurrentVersion() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestVerifyNewVersion(t *testing.T) {
-	type args struct {
-		resolve Resolver
-	}
-	tests := []struct {
-		name       string
-		args       args
-		wantWriter string
-	}{
-		{
-			name: "Should not print warning",
-			args: args{StubResolverVersions{
-				getCurrentVersion: func() (string, error) {
-					return "1.0.0", nil
-				},
-				getStableVersion: func() (string, error) {
-					return "1.0.0", nil
-				},
-			}},
-			wantWriter: "",
-		},
-		{
-			name: "Should print warning",
-			args: args{StubResolverVersions{
-				getCurrentVersion: func() (string, error) {
-					return "1.0.0", nil
-				},
-				getStableVersion: func() (string, error) {
-					return "1.0.1", nil
-				},
-			}},
-			wantWriter: fmt.Sprintf(prompt.Warning, MsgRitUpgrade),
-		},
-		{
-			name: "Should not print on error in GetCurrentVersion",
-			args: args{StubResolverVersions{
-				getCurrentVersion: func() (string, error) {
-					return "", errors.New("any error")
-				},
-				getStableVersion: func() (string, error) {
-					return "1.0.1", nil
-				},
-			}},
-			wantWriter: "",
-		},
-		{
-			name: "Should not print on error in GetStableVersion",
-			args: args{StubResolverVersions{
-				getCurrentVersion: func() (string, error) {
-					return "1.0.0", nil
-				},
-				getStableVersion: func() (string, error) {
-					return "", errors.New("any error")
-				},
-			}},
-			wantWriter: "",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			writer := &bytes.Buffer{}
-			VerifyNewVersion(tt.args.resolve, writer)
-			if gotWriter := writer.String(); gotWriter != tt.wantWriter {
-				t.Errorf("VerifyNewVersion() = %v, want %v", gotWriter, tt.wantWriter)
-			}
-		})
-	}
 }
 
 func TestDefaultVersionResolver_GetStableVersion(t *testing.T) {
@@ -262,7 +142,6 @@ func TestDefaultVersionResolver_GetStableVersion(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := DefaultVersionResolver{
-				CurrentVersion:   tt.fields.CurrentVersion,
 				StableVersionUrl: tt.fields.StableVersionUrl,
 				FileUtilService:  tt.fields.FileUtilService,
 				HttpClient:       tt.fields.HttpClient,
@@ -274,6 +153,64 @@ func TestDefaultVersionResolver_GetStableVersion(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GetStableVersion() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestVerifyNewVersion(t *testing.T) {
+	type args struct {
+		resolve        Resolver
+		currentVersion string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantWriter string
+	}{
+		{
+			name: "Should not print warning",
+			args: args{
+				resolve: StubResolverVersions{
+					getStableVersion: func() (string, error) {
+						return "1.0.0", nil
+					},
+				},
+				currentVersion: "1.0.0",
+			},
+			wantWriter: "",
+		},
+		{
+			name: "Should print warning",
+			args: args{
+				resolve: StubResolverVersions{
+					getStableVersion: func() (string, error) {
+						return "1.0.1", nil
+					},
+				},
+				currentVersion: "1.0.0",
+			},
+			wantWriter: fmt.Sprintf(prompt.Yellow, MsgRitUpgrade),
+		},
+		{
+			name: "Should not print on error in GetStableVersion",
+			args: args{
+				resolve: StubResolverVersions{
+					getStableVersion: func() (string, error) {
+						return "", errors.New("any error")
+					},
+				},
+				currentVersion: "1.0.0",
+			},
+			wantWriter: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			writer := &bytes.Buffer{}
+			VerifyNewVersion(tt.args.resolve, writer, tt.args.currentVersion)
+			if gotWriter := writer.String(); gotWriter != tt.wantWriter {
+				t.Errorf("VerifyNewVersion() = %v, want %v", gotWriter, tt.wantWriter)
 			}
 		})
 	}
