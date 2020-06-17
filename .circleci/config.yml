@@ -360,18 +360,18 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-      - windows_functional_test_team:
-          name: windows-functional-test-team-code
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build-code
-      - windows_functional_test_single:
-          name: windows-functional-test-single-code
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build-code
+#      - windows_functional_test_team:
+#          name: windows-functional-test-team-code
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build-code
+#      - windows_functional_test_single:
+#          name: windows-functional-test-single-code
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build-code
   release:
     jobs:
       - build:
