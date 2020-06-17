@@ -530,8 +530,6 @@ workflows:
             - deb-package
             - rpm-package
             - win-package
-            - functional_test_single
-            - functional_test_team
       - deb-package:
           filters:
             <<: *FILTERS_DELIVERY
