@@ -131,7 +131,7 @@ jobs:
           name: Running Unit tests
           command: |
             mkdir -p $TEST_RESULTS_DIR
-            . sudo ./run-tests-ci.sh
+            . ./run-tests-ci.sh
       - store_test_results:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
