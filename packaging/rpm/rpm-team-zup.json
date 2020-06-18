@@ -1,0 +1,18 @@
+{
+    "name": "ritchiecli",
+    "summary": "RitchieCLI installer",
+    "description": "Install ritchie CLI",
+    "license": "LICENSE",
+    "changelog-cmd": "changelog rpm",
+    "url": "https://github.com/ZupIT/ritchie-cli",
+    "files": [
+        {
+            "from": "dist/linux/team/rit",
+            "to": "/usr/local/bin",
+            "base": "dist/linux/team",
+            "type": ""
+        }
+    ],
+    "preinst": "packaging/scripts/preinst.sh",
+    "postinst": "packaging/scripts/postinst-zup.sh"
+}

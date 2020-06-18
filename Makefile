@@ -106,11 +106,11 @@ unit-test:
 
 functional-test-single:
 	mkdir -p $(BIN)
-	$(GO_TEST) -v `go list ./functional/single/... | grep -v vendor/`
+	$(GOTEST) -v -count=1 -p 1 `go list ./functional/single/... | grep -v vendor/`
 
 functional-test-team:
 	mkdir -p $(BIN)
-	$(GO_TEST) -v `go list ./functional/team/... | grep -v vendor/`
+	$(GOTEST) -v -count=1 -p 1 `go list ./functional/team/... | grep -v vendor/`
 
 rebase-nightly:
 	git config --global user.email "$(GIT_EMAIL)"

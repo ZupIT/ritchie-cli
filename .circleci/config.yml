@@ -10,6 +10,9 @@ references:
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
     horus: &HORUS_IMAGE library/docker:dind
+    ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
+    centos: &CENTOS_IMAGE viniciusramosdefaria/centos-circleci:7.0
+    windows: &WINDOWS_IMAGE windows-server-2019
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -75,7 +78,19 @@ executors:
     resource_class: windows.medium
     shell: powershell.exe -ExecutionPolicy Unrestricted
     machine:
-      image: windows-server-2019
+      image: *WINDOWS_IMAGE
+
+  ubuntu-executor:
+    docker:
+      - image: *UBUNTU_IMAGE
+        user: root
+    working_directory: /workspace
+
+  centos-executor:
+    docker:
+      - image: *CENTOS_IMAGE
+        user: root
+    working_directory: /workspace
 
 jobs:
   lint:
@@ -197,7 +212,7 @@ jobs:
       - run:
           name: Running Functional tests for team
           command: |
-            go test -v (go list ./functional/team/... | grep -v vendor/)
+            go test -v -count=1 -p 1 (go list ./functional/team/... | grep -v vendor/)
 
   windows_functional_test_single:
     executor: windows-executor
@@ -218,7 +233,7 @@ jobs:
       - run:
           name: Running Functional tests for single
           command: |
-            go test -v (go list ./functional/single/... | grep -v vendor/)
+            go test -v -count=1 -p 1 (go list ./functional/single/... | grep -v vendor/)
 
 
   build:
@@ -258,6 +273,63 @@ jobs:
             . ./.circleci/scripts/bucket.sh
             . ./.circleci/scripts/credentials.sh
             make delivery
+
+  deb-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: ubuntu-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Generating package for debian
+          command: |
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/gen-deb.sh
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  rpm-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: centos-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Generating package for rpm
+          command: |
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/gen-rpm.sh
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  win-package:
+    executor:
+      name: windows-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          command: |
+            . ./.circleci/scripts/version.sh
+            echo $RELEASE_VERSION > release_version.txt
+          shell: bash.exe
+      - run:
+          command: |
+            .circleci/scripts/gen-win.ps1
+          shell: powershell.exe
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
 
   release:
     environment:
@@ -454,4 +526,21 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - build-code
-
+            - deb-package
+            - rpm-package
+            - win-package
+      - deb-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code
+      - rpm-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code
+      - win-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code
