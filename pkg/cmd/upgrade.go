@@ -34,7 +34,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 
 		err := u.Run(u.upgradeUrl)
 		if err != nil {
-			return fmt.Errorf(prompt.Red, err.Error() + "\n")
+			return fmt.Errorf(prompt.Red, err.Error()+"\n")
 		}
 		prompt.Success("Rit upgraded with success")
 		return nil
