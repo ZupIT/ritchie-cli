@@ -212,7 +212,7 @@ jobs:
       - run:
           name: Running Functional tests for team
           command: |
-            go test -v (go list ./functional/team/... | grep -v vendor/)
+            go test -v -count=1 -p 1 (go list ./functional/team/... | grep -v vendor/)
 
   windows_functional_test_single:
     executor: windows-executor
@@ -233,7 +233,7 @@ jobs:
       - run:
           name: Running Functional tests for single
           command: |
-            go test -v (go list ./functional/single/... | grep -v vendor/)
+            go test -v -count=1 -p 1 (go list ./functional/single/... | grep -v vendor/)
 
 
   build:
