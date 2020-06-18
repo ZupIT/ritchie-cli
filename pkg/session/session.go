@@ -11,6 +11,7 @@ type Session struct {
 	Organization string `json:"organization"`
 	Username     string `json:"username"`
 	Secret       string `json:"password"`
+	TTL          int64  `json:"ttl"`
 }
 
 type Manager interface {

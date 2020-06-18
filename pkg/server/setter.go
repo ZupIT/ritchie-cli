@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
@@ -47,6 +48,8 @@ func (s SetterManager) Set(cfg Config) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf(ServerErrPattern, cfg.URL, resp.Status)
 	}
+
+	cfg.URL = strings.TrimRight(cfg.URL, "/")
 
 	b, err := json.Marshal(cfg)
 	if err != nil {
