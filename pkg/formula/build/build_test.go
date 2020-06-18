@@ -6,35 +6,22 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
-func setup() string {
-	treeMan := formula.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
-	creator := formula.NewCreator(os.TempDir(), treeMan)
-
-	create := formula.Create{
-		FormulaCmd: "rit testing formula",
-		Lang:       "Go",
-	}
-
-	_, _ = creator.Create(create)
-
-	return fmt.Sprintf("%s/%s", creator.FormPath, "testing/formula")
-}
-
 func TestBuild(t *testing.T) {
-	workspacePath := fmt.Sprintf(formula.FormCreatePathPattern, os.TempDir())
-	ritHome := fmt.Sprintf("%s/.rit", os.TempDir())
-	formulaPath := setup()
-	_ = fileutil.RemoveDir(ritHome)
+	tmpDir := os.TempDir()
+	workspacePath := fmt.Sprintf("%s/ritchie-formulas-test", tmpDir)
+	formulaPath := fmt.Sprintf("%s/ritchie-formulas-test/testing/formula", tmpDir)
+	ritHome := fmt.Sprintf("%s/.my-rit", os.TempDir())
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	// defer after(ritHome, workspacePath)
+	_ = dirManager.Remove(ritHome)
+	_ = dirManager.Remove(workspacePath)
+	_ = dirManager.Create(workspacePath)
+	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
 	type in struct {
 		fileManager stream.FileListCopier
@@ -172,10 +159,4 @@ func (f fileManagerMock) List(string) ([]string, error) {
 
 func (f fileManagerMock) Copy(string, string) error {
 	return f.copyErr
-}
-
-type repoListerMock struct{}
-
-func (repoListerMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
 }

@@ -36,7 +36,7 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 					prompt.Info("Waiting for changes...")
 				}
 			case err := <-w.watcher.Error:
-				log.Fatalln(err)
+				prompt.Error(err.Error())
 			case <-w.watcher.Closed:
 				return
 			}
