@@ -410,7 +410,7 @@ workflows:
   release_trigger:
     triggers:
       - schedule:
-          cron: "0 10 * * 1"
+          cron: "0 13 * * 1"
           filters:
             branches:
               only:
@@ -430,7 +430,7 @@ workflows:
   beta:
     triggers:
       - schedule:
-          cron: "0 8 * * 1,4"
+          cron: "0 11 * * 2,4"
           filters:
             branches:
               only:
