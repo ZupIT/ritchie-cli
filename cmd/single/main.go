@@ -4,8 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"k8s.io/kubectl/pkg/util/templates"
+
+	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 
 	"github.com/spf13/cobra"
 
@@ -15,6 +19,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
@@ -77,6 +82,14 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
+	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
+	defaultUpgradeResolver := version.DefaultVersionResolver{
+		StableVersionUrl: cmd.StableVersionUrl,
+		FileUtilService:  fileutil.DefaultService{},
+		HttpClient:       &http.Client{Timeout: 1 * time.Second},
+	}
+	upgradeUrl := upgrade.UpgradeUrl(api.Single, defaultUpgradeResolver)
+
 	rootCmd := cmd.NewSingleRootCmd(workspaceManager, sessionValidator)
 
 	// level 1
@@ -90,6 +103,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
+	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
@@ -139,6 +153,7 @@ func buildCommands() *cobra.Command {
 				setCmd,
 				showCmd,
 				updateCmd,
+				upgradeCmd,
 			},
 		},
 	}
