@@ -2,10 +2,11 @@
 
 DEPLOYED_VERSION=$(curl -s https://commons-repo.ritchiecli.io/stable.txt)
 
-VERSION_TO_CHECK_AGAINST=$(echo "$VERSION_PLACEHOLDER" | sed "s/PLACEHOLDER//")
+DIFF_RESULT=$(git --no-pager log --oneline beta...${DEPLOYED_VERSION})
 
-if [ "$DEPLOYED_VERSION" == "$VERSION_TO_CHECK_AGAINST" ]; then
-    echo "RELEASE"
+if [ -z "$DIFF_RESULT" ]
+then
+      echo "ABORT"
+else
+      echo "RELEASE"
 fi
-
-echo "ABORT"

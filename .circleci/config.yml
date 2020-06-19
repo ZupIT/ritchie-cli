@@ -406,9 +406,6 @@ jobs:
             rit --version
             rit --version | grep "$RELEASE_VERSION"
 
-
-
-
 workflows:
   release_trigger:
     triggers:
