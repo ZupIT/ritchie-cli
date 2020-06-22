@@ -2,13 +2,18 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 
 	"github.com/spf13/cobra"
@@ -24,7 +29,7 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	// Version contains the current version.
+	// Version contains the current version	.
 	Version = "dev"
 	// BuildDate contains a string with the build date.
 	BuildDate = "unknown"
@@ -34,12 +39,16 @@ var (
 	// MsgSession error message for session not initialized
 	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
 
+	// Url to get Rit Stable Version
+	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+
 	singleWhitelist = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
+		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 
 	teamWhitelist = []string{
@@ -50,6 +59,11 @@ var (
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
+		fmt.Sprintf("%s upgrade", cmdUse),
+	}
+
+	upgradeValidationWhiteList = []string{
+		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 )
 
@@ -72,14 +86,15 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 	}
 
 	cmd := &cobra.Command{
-		Use:               cmdUse,
-		Version:           version(api.Single),
-		Short:             cmdShortDescription,
-		Long:              cmdDescription,
-		PersistentPreRunE: o.PreRunFunc(),
-		RunE:              runHelp,
-		SilenceErrors:     true,
-		TraverseChildren:  true,
+		Use:                cmdUse,
+		Version:            versionFlag(api.Single),
+		Short:              cmdShortDescription,
+		Long:               cmdDescription,
+		PersistentPreRunE:  o.PreRunFunc(),
+		PersistentPostRunE: o.PostRunFunc(),
+		RunE:               runHelp,
+		SilenceErrors:      true,
+		TraverseChildren:   true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -97,13 +112,14 @@ func NewTeamRootCmd(wc workspace.Checker,
 	}
 
 	cmd := &cobra.Command{
-		Use:               cmdUse,
-		Version:           version(api.Team),
-		Short:             cmdShortDescription,
-		Long:              cmdDescription,
-		PersistentPreRunE: o.PreRunFunc(),
-		RunE:              runHelp,
-		SilenceErrors:     true,
+		Use:                cmdUse,
+		Version:            versionFlag(api.Team),
+		Short:              cmdShortDescription,
+		Long:               cmdDescription,
+		PersistentPreRunE:  o.PreRunFunc(),
+		PersistentPostRunE: o.PostRunFunc(),
+		RunE:               runHelp,
+		SilenceErrors:      true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -156,11 +172,36 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 	}
 }
 
+func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		verifyNewVersion(cmd)
+		return nil
+	}
+}
+
+func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		verifyNewVersion(cmd)
+		return nil
+	}
+}
+
+func verifyNewVersion(cmd *cobra.Command) {
+	if !isWhitelist(upgradeValidationWhiteList, cmd) {
+		resolver := version.DefaultVersionResolver{
+			StableVersionUrl: StableVersionUrl,
+			FileUtilService:  fileutil.DefaultService{},
+			HttpClient:       &http.Client{Timeout: 1 * time.Second},
+		}
+		prompt.Warning(version.VerifyNewVersion(resolver, Version))
+	}
+}
+
 func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
 	return sliceutil.Contains(whitelist, cmd.CommandPath())
 }
 
-func version(edition api.Edition) string {
+func versionFlag(edition api.Edition) string {
 	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
 }
 
