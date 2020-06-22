@@ -38,7 +38,7 @@ func TestSet(t *testing.T) {
 
 	srvURL = httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		resp, _ := json.Marshal(otpResponse{Otp: true})
-		writer.Write(resp)
+		_, _ = writer.Write(resp)
 	})).URL
 	errNoSuchHost = fmt.Errorf("lookup %s: no such host", srvListener)
 	errNoSuchHostLong = fmt.Errorf("Get \"%s/otp\": %s", srvURL, errNoSuchHost)
