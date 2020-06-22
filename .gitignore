@@ -47,7 +47,7 @@ tags
 [._]*.un~
 
 ### VisualStudioCode ###
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -94,3 +94,5 @@ Temporary Items
 
 # Jenkins mvn
 settings.xml
+/change.log
+/pkg-build/

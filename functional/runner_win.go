@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,6 +19,9 @@ func (scenario *Scenario) runStdinForWindows() (bytes.Buffer, error) {
 	cmd := exec.Command("powershell", args...)
 	_, pipeWriter := io.Pipe()
 	cmd.Stdout = pipeWriter
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 
 	var b2 bytes.Buffer
 	cmd.Stdout = &b2
@@ -28,6 +34,7 @@ func (scenario *Scenario) runStdinForWindows() (bytes.Buffer, error) {
 	err = cmd.Wait()
 	if err != nil {
 		log.Printf("Error while running: %q", err)
+		b2 = stderr
 	}
 
 	pipeWriter.Close()
@@ -47,4 +54,27 @@ func setUpRitWin() {
 		log.Printf("Error when input number: %q", err)
 	}
 	fmt.Printf("%s\n", stdoutStderr)
+}
+
+func setUpClearSetupWindows() {
+	fmt.Println("Running Clear for Windows..")
+	myPath := "\\.rit\\"
+	usr, _ := user.Current()
+	dir := usr.HomeDir + myPath
+
+	d, err := os.Open(dir)
+	if err != nil {
+		log.Printf("Error Open dir: %q", err)
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		log.Printf("Error Readdirnames: %q", err)
+	}
+	for _, name := range names {
+		err := os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			log.Printf("Error cleaning repo rit: %q", err)
+		}
+	}
 }
