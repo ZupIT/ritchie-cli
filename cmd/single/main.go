@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/build"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -24,7 +24,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/watcher"
-	form_workspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
+	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security/secsingle"
@@ -131,8 +131,8 @@ func buildCommands() *cobra.Command {
 	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	formulaWorkspace := form_workspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := build.NewBuilder(ritchieHomeDir, dirManager, fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
+	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
 	watchManager := watcher.New(formulaBuilder, dirManager)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
 

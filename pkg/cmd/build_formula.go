@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -146,18 +147,18 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 
 func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 	buildInfo := fmt.Sprintf(prompt.Teal, "Building formula...")
-	s := spinner.New(buildInfo)
-	s.Start()
+	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
-	stderr, err := b.formula.Build(workspacePath, formulaPath)
-	if err != nil {
-		errorMsg := fmt.Sprintf("Build error: \n%s \n%s", string(stderr), err)
-		prompt.Error(errorMsg)
-	} else {
-		success := fmt.Sprintf(prompt.Green, "✔ Build completed!")
-		s.Success(success)
-		prompt.Info("Now you can run your formula with Ritchie!")
+
+	if err := b.formula.Build(workspacePath, formulaPath); err != nil {
+		errorMsg := fmt.Sprintf(prompt.Red, err)
+		s.Error(errors.New(errorMsg))
+		return
 	}
+
+	success := fmt.Sprintf(prompt.Green, "✔ Build completed!")
+	s.Success(success)
+	prompt.Info("Now you can run your formula with Ritchie!")
 }
 
 func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
