@@ -219,7 +219,7 @@ func (passphraseManagerMock) Save(security.Passphrase) error {
 
 type findSetterServerMock struct{}
 
-func (findSetterServerMock) Set(server.Config) error {
+func (findSetterServerMock) Set(*server.Config) error {
 	return nil
 }
 
