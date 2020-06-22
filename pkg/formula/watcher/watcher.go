@@ -59,17 +59,18 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 	}
 }
 
-func (w *WatchManager) build(workspacePath, formulaPath string) {
+func (w WatchManager) build(workspacePath, formulaPath string) {
 	buildInfo := fmt.Sprintf(prompt.Teal, "Building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
-	stderr, err := w.formula.Build(workspacePath, formulaPath)
-	if err != nil {
-		errorMsg := fmt.Sprintf("Build error: \n%s \n%s", string(stderr), err)
-		errorMsg = fmt.Sprintf(prompt.Red, errorMsg)
+
+	if err := w.formula.Build(workspacePath, formulaPath); err != nil {
+		errorMsg := fmt.Sprintf(prompt.Red, err)
 		s.Error(errors.New(errorMsg))
-	} else {
-		successMsg := fmt.Sprintf(prompt.Green, "✔ Build completed!")
-		s.Success(successMsg)
+		return
 	}
+
+	success := fmt.Sprintf(prompt.Green, "✔ Build completed!")
+	s.Success(success)
+	prompt.Info("Now you can run your formula with Ritchie!")
 }

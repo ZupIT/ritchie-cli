@@ -8,7 +8,7 @@ import (
 
 	"github.com/radovskyb/watcher"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/build"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -26,7 +26,7 @@ func TestWatch(t *testing.T) {
 	_ = dirManager.Create(workspacePath)
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
-	builderManager := build.NewBuilder(ritHome, dirManager, fileManager)
+	builderManager := builder.New(ritHome, dirManager, fileManager)
 
 	watchManager := New(builderManager, dirManager)
 
