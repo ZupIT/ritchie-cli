@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -34,6 +35,14 @@ func newClientErrNoSuchHost() *http.Client {
 }
 
 func TestSet(t *testing.T) {
+
+	srvURL = httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		resp, _ := json.Marshal(otpResponse{Otp: true})
+		writer.Write(resp)
+	})).URL
+	errNoSuchHost = fmt.Errorf("lookup %s: no such host", srvListener)
+	errNoSuchHostLong = fmt.Errorf("Get \"%s/otp\": %s", srvURL, errNoSuchHost)
+
 	type in struct {
 		cfg Config
 		hc  *http.Client
@@ -112,9 +121,9 @@ func TestSet(t *testing.T) {
 				defer srv.Close()
 			}
 
-			got := s.Set(in.cfg)
+			got := s.Set(&in.cfg)
 			if got != nil && got.Error() != out.err.Error() {
-				t.Errorf("Set(%s) got %v, want %v", in.cfg, got, out.err)
+				t.Errorf("Set(%v) got %v, want %v", in.cfg, got, out.err)
 			}
 		})
 	}
