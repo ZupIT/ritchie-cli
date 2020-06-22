@@ -8,7 +8,7 @@ require (
 	github.com/gofrs/flock v0.7.1
 	github.com/google/uuid v1.1.1
 	github.com/gosuri/uitable v0.0.4
-	github.com/janeczku/go-spinner v0.0.0-20150530144529-cf8ef1d64394
+	github.com/kaduartur/go-cli-spinner v1.0.0
 	github.com/manifoldco/promptui v0.7.0
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/onsi/ginkgo v1.12.3

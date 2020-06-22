@@ -3,14 +3,15 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
-	"github.com/ZupIT/ritchie-cli/pkg/spinner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -140,7 +141,6 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 		b.build(wspace.Dir, formulaPath)
 
 		return nil
-
 	}
 }
 
@@ -148,14 +148,14 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 	buildInfo := fmt.Sprintf(prompt.Teal, "Building formula...")
 	s := spinner.New(buildInfo)
 	s.Start()
+	time.Sleep(2 * time.Second)
 	stderr, err := b.formula.Build(workspacePath, formulaPath)
 	if err != nil {
-		s.Stop()
-		msgFormatted := fmt.Sprintf("Build error: \n%s \n%s", string(stderr), err)
-		prompt.Error(msgFormatted)
+		errorMsg := fmt.Sprintf("Build error: \n%s \n%s", string(stderr), err)
+		prompt.Error(errorMsg)
 	} else {
-		s.Stop()
-		prompt.Success("✔ Build completed!")
+		success := fmt.Sprintf(prompt.Green, "✔ Build completed!")
+		s.Success(success)
 		prompt.Info("Now you can run your formula with Ritchie!")
 	}
 }

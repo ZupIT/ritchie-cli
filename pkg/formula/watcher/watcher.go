@@ -1,15 +1,16 @@
 package watcher
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/radovskyb/watcher"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/spinner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -60,15 +61,15 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 
 func (w *WatchManager) build(workspacePath, formulaPath string) {
 	buildInfo := fmt.Sprintf(prompt.Teal, "Building formula...")
-	s := spinner.New(buildInfo)
-	s.Start()
+	s := spinner.StartNew(buildInfo)
+	time.Sleep(2 * time.Second)
 	stderr, err := w.formula.Build(workspacePath, formulaPath)
 	if err != nil {
-		s.Stop()
-		msgFormatted := fmt.Sprintf("Build error: \n%s", string(stderr))
-		prompt.Error(msgFormatted)
+		errorMsg := fmt.Sprintf("Build error: \n%s \n%s", string(stderr), err)
+		errorMsg = fmt.Sprintf(prompt.Red, errorMsg)
+		s.Error(errors.New(errorMsg))
 	} else {
-		s.Stop()
-		prompt.Success("✔ Build completed!")
+		successMsg := fmt.Sprintf(prompt.Green, "✔ Build completed!")
+		s.Success(successMsg)
 	}
 }
