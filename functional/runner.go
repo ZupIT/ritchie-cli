@@ -71,7 +71,7 @@ func RitTeamInit() {
 	if  os == "windows" {
 		// TODO setup Windows for TEAM
 	} else {
-		// TODO setup Linux for Team
+		setUpRitTeamUnix()
 	}
 	fmt.Println("Setup Done..")
 }

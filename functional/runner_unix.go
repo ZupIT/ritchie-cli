@@ -82,6 +82,32 @@ func setUpRitSingleUnix() {
 	}
 }
 
+func setUpRitTeamUnix(){
+	fmt.Println("Running Setup for Unix Team..")
+
+	fmt.Println("Running INIT")
+	initStepEcho := Step{Key: "", Value: "{\"organization\":\"zup\", \"url\":\"https://ritchie-server.itiaws.dev\"}", Action: "echo"}
+	initStepRit := Step{Key: "", Value: "init --stdin", Action: "rit"}
+	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepEcho, initStepRit}}
+
+	out, err := init.runStdinForUnix()
+	if err != nil {
+		log.Printf("Error when do init: %q", err)
+	}
+	fmt.Println(out)
+
+	fmt.Println("Running Login")
+	loginStepEcho := Step{Key: "", Value: "{\"username\":\"admin.ritchie\", \"password\":\"C@m@r0@m@r3l0\"}", Action: "echo"}
+	loginStepRit := Step{Key: "", Value: "login --stdin", Action: "rit"}
+	login := Scenario{Entry: "Running Init", Result: "", Steps: []Step{loginStepEcho, loginStepRit}}
+
+	out, err = login.runStdinForUnix()
+	if err != nil {
+		log.Printf("Error when do Login: %q", err)
+	}
+	fmt.Println(out)
+}
+
 func setUpClearSetupUnix() {
 	fmt.Println("Running Clear for Unix..")
 	myPath := "/.rit/"
