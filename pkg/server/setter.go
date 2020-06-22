@@ -8,18 +8,24 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
 const (
 	// ServerErrPattern error message pattern
 	ServerErrPattern = "Server (%s) returned %s"
+	otpUrlPattern    = "%s/otp"
 )
 
 var (
 	// ErrOrgIsRequired error message for org
 	ErrOrgIsRequired = errors.New("Organization is required")
 )
+
+type otpResponse struct {
+	Otp bool `json:"otp"`
+}
 
 type SetterManager struct {
 	serverFile string
@@ -33,7 +39,7 @@ func NewSetter(ritHomeDir string, hc *http.Client) Setter {
 	}
 }
 
-func (s SetterManager) Set(cfg Config) error {
+func (s SetterManager) Set(cfg *Config) error {
 	if cfg.Organization == "" {
 		return ErrOrgIsRequired
 	}
@@ -41,7 +47,14 @@ func (s SetterManager) Set(cfg Config) error {
 	if err := validator.IsValidURL(cfg.URL); err != nil {
 		return err
 	}
-	resp, err := s.httpClient.Get(cfg.URL)
+	cfg.URL = strings.TrimRight(cfg.URL, "/")
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(otpUrlPattern, cfg.URL), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set(headers.XOrg, cfg.Organization)
+	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -49,7 +62,11 @@ func (s SetterManager) Set(cfg Config) error {
 		return fmt.Errorf(ServerErrPattern, cfg.URL, resp.Status)
 	}
 
-	cfg.URL = strings.TrimRight(cfg.URL, "/")
+	var otpR otpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&otpR); err != nil {
+		return err
+	}
+	cfg.Otp = otpR.Otp
 
 	b, err := json.Marshal(cfg)
 	if err != nil {
