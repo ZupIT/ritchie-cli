@@ -56,12 +56,22 @@ func (scenario *Scenario) RunStdin() (string, error) {
 
 }
 
-func RitInit() {
+func RitSingleInit() {
 	os := runtime.GOOS
 	if  os == "windows" {
-		setUpRitWin()
+		setUpRitSingleWin()
 	} else {
-		setUpRitUnix()
+		setUpRitSingleUnix()
+	}
+	fmt.Println("Setup Done..")
+}
+
+func RitTeamInit() {
+	os := runtime.GOOS
+	if  os == "windows" {
+		// TODO setup Windows for TEAM
+	} else {
+		// TODO setup Linux for Team
 	}
 	fmt.Println("Setup Done..")
 }

@@ -59,7 +59,7 @@ func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
 	return b2, errorRit
 }
 
-func setUpRitUnix() {
+func setUpRitSingleUnix() {
 	fmt.Println("Running Setup for Unix..")
 	command := []string{initCmd}
 	_, stdin, out, _ := execRit(command)

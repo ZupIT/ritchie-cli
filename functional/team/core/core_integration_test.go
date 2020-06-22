@@ -17,6 +17,7 @@ func TestRitTeam(t *testing.T) {
 
 var _ = Describe("RitCore", func() {
 	BeforeSuite(func() {
+		functional.RitTeamInit()
 	})
 
 	scenariosCore := functional.LoadScenarios("core_feature.json")
