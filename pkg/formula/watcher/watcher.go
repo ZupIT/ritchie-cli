@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -32,7 +33,7 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 		for {
 			select {
 			case event := <-w.watcher.Event:
-				if !event.IsDir() {
+				if !event.IsDir() && !strings.Contains(event.Path, "/dist") {
 					w.build(workspacePath, formulaPath)
 					prompt.Info("Waiting for changes...")
 				}
@@ -44,8 +45,7 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 		}
 	}()
 
-	formulaSrc := fmt.Sprintf("%s/src", formulaPath)
-	if err := w.watcher.AddRecursive(formulaSrc); err != nil {
+	if err := w.watcher.AddRecursive(formulaPath); err != nil {
 		log.Fatalln(err)
 	}
 
