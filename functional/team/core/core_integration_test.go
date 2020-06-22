@@ -1,6 +1,8 @@
-package team
+package core
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -8,7 +10,15 @@ import (
 	"github.com/ZupIT/ritchie-cli/functional"
 )
 
+func TestRitTeam(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Rit Suite")
+}
+
 var _ = Describe("RitCore", func() {
+	BeforeSuite(func() {
+	})
+
 	scenariosCore := functional.LoadScenarios("core_feature.json")
 
 	DescribeTable("When running core command",
