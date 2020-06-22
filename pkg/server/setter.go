@@ -70,7 +70,9 @@ func (s SetterManager) Set(cfg Config) error {
 }
 
 func sslCertificationBase64(url string) (cert, addr string, err error) {
-	//TODO: Verificar se é https
+	if !strings.HasPrefix(url, "https") {
+		return "", "", nil
+	}
 	u := strings.Replace(url, "https://", "", 1)
 	s := strings.Split(u, ":")
 	addr = s[0]
