@@ -1,6 +1,7 @@
 package prompt
 
 import "fmt"
+import "github.com/gookit/color"
 
 const (
 	Teal   = "\033[1;36m%s\033[0m"
@@ -14,7 +15,7 @@ func Error(text string) {
 }
 
 func Warning(text string) {
-	fmt.Println(fmt.Sprintf(Yellow, text))
+	color.Info.Println(text)
 }
 
 func Success(text string) {
