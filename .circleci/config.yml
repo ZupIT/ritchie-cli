@@ -468,7 +468,6 @@ workflows:
            <<: *FILTERS_CHECK_CODE
          requires:
            - horus
-           - lint
       - build:
           name: build-code
           filters:
