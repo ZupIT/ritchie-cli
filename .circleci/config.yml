@@ -247,6 +247,10 @@ jobs:
             . ./.circleci/scripts/version.sh
             go mod download
             make build-circle
+      - run:
+          name: Persist version file
+          command: |
+            echo $RELEASE_VERSION > workspace/dist/release_version.txt
       - persist_to_workspace:
           root: dist
           paths:
@@ -317,11 +321,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: /workspace/dist
-      - run:
-          command: |
-            . ./.circleci/scripts/version.sh
-            echo $RELEASE_VERSION > release_version.txt
-          shell: bash.exe
       - run:
           command: |
             .circleci/scripts/gen-win.ps1
