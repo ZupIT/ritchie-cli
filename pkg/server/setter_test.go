@@ -14,8 +14,8 @@ import (
 const (
 	urlHttp = "http://localhost:8882"
 	urlHttpError = "http://localhost:8882/server/error"
-	urlHttps = "https://localhost"
-	urlHttpsError = "https://localhost:9999"
+	// urlHttps = "https://localhost"
+	// urlHttpsError = "https://localhost:9999"
 )
 
 var (
