@@ -1,6 +1,8 @@
 package server
 
 import (
+	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,9 +13,11 @@ import (
 )
 
 const (
-	urlHttp         = "http://localhost:8882"
+	urlHttp = "http://localhost:8882"
 	urlHttpErrorOtp = "http://localhost:8882/server/error/otp-json-parse-error"
-	urlHttpError    = "http://localhost:8882/server/error"
+	urlHttpError = "http://localhost:8882/server/error"
+	urlHttps = "https://localhost"
+	urlHttpsError = "https://localhost:9999"
 )
 
 var (
@@ -36,52 +40,69 @@ func newClientErrNoSuchHost() *http.Client {
 	}
 }
 
-func TestSet(t *testing.T) {
+func makeHttpClient() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	return client
+}
 
+func TestSet(t *testing.T) {
 	type in struct {
 		cfg Config
 		hc  *http.Client
 	}
 
 	tests := []struct {
-		name   string
-		in     in
+		name string
+		in   in
 		outErr error
 	}{
 		{
-			name:   "empty organization",
-			in:     in{cfg: Config{Organization: ""}},
+			name: "empty organization",
+			in:   in{cfg: Config{Organization: ""}},
 			outErr: ErrOrgIsRequired,
 		},
 		{
-			name:   "empty serverURL",
-			in:     in{cfg: Config{Organization: "org", URL: ""}},
+			name: "empty serverURL",
+			in:   in{cfg: Config{Organization: "org", URL: ""}},
 			outErr: validator.ErrInvalidURL,
 		},
 		{
-			name:   "invalid serverURL",
-			in:     in{cfg: Config{Organization: "org", URL: "invalid.server.URL"}},
+			name: "invalid serverURL",
+			in:   in{cfg: Config{Organization: "org", URL: "invalid.server.URL"}},
 			outErr: validator.ErrInvalidURL,
 		},
 		{
-			name:   "trailing slash on serverURL",
-			in:     in{cfg: Config{Organization: "org", URL: fmt.Sprintf("%s/", urlHttp)}, hc: http.DefaultClient},
+			name: "trailing slash on serverURL",
+			in:   in{cfg: Config{Organization: "org", URL: fmt.Sprintf("%s/", urlHttp)}, hc: http.DefaultClient},
 			outErr: nil,
 		},
 		{
-			name:   "valid serverURL http",
-			in:     in{cfg: Config{Organization: "org", URL: urlHttp}, hc: http.DefaultClient},
+			name: "valid serverURL http",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttp}, hc: http.DefaultClient},
 			outErr: nil,
 		},
 		{
-			name:   "no such host error",
-			in:     in{cfg: Config{Organization: "org", URL: urlHttp}, hc: newClientErrNoSuchHost()},
-			outErr: errNoSuchHostLong,
+			name: "no such host error",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttp}, hc: newClientErrNoSuchHost()},
+			outErr:  errNoSuchHostLong,
 		},
 		{
-			name:   "server error",
-			in:     in{cfg: Config{Organization: "org", URL: urlHttpError}, hc: http.DefaultClient},
-			outErr: fmt.Errorf(ServerErrPattern, urlHttpError, "500 Server Error"),
+			name: "server error",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttpError}, hc: http.DefaultClient},
+			outErr:    fmt.Errorf(ServerErrPattern, urlHttpError, "500 Server Error"),
+		},
+		{
+			name: "pinning server https",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttps}, hc: makeHttpClient()},
+			outErr: nil,
+		},
+		{
+			name: "pinning server https error",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttpsError}, hc: makeHttpClient()},
+			outErr: errors.New("dial tcp"),
 		},
 		{
 			name:   "Parse Otp Error",
@@ -107,3 +128,4 @@ func TestSet(t *testing.T) {
 		})
 	}
 }
+

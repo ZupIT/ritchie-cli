@@ -2,8 +2,9 @@ package sliceutil
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
 func TestContains(t *testing.T) {
@@ -32,6 +33,7 @@ func TestContainsCmd(t *testing.T) {
 	}{
 		{api.Command{Parent: "root_set", Usage: "credential"}, true},
 		{api.Command{Parent: "root", Usage: "notfound"}, false},
+		{api.Command{Parent: "root", Usage: "add"}, true},
 	}
 
 	for _, tt := range tests {
@@ -43,4 +45,45 @@ func TestContainsCmd(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRemove(t *testing.T) {
+	type in struct {
+		slice  []string
+		remove string
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		out  int
+	}{
+		{
+			name: "success",
+			in: in{
+				slice:  []string{"test_1", "test_2", "test_3"},
+				remove: "test_2",
+			},
+			out: 2,
+		},
+		{
+			name: "not remove any",
+			in: in{
+				slice:  []string{"test_1", "test_2", "test_3"},
+				remove: "test_0",
+			},
+			out: 3,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Remove(tt.in.slice, tt.in.remove)
+
+			if tt.out != len(got) {
+				t.Errorf("Remove(%s) got %v, want %v", tt.name, len(got), tt.out)
+			}
+		})
+	}
+
 }
