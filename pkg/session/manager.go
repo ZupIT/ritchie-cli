@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"github.com/ZupIT/ritchie-cli/pkg/crypto/cryptoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 var (
-	ErrNoSession = errors.New("please, you need to start a session")
+	ErrNoSession = errors.New(prompt.Red("please, you need to start a session"))
 )
 
 type DefaultManager struct {

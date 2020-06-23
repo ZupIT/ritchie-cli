@@ -1,27 +1,27 @@
 package prompt
 
-import "fmt"
-import "github.com/gookit/color"
+import (
+	"fmt"
 
-const (
-	Teal   = "\033[1;36m%s\033[0m"
-	Yellow = "\033[1;33m%s\033[0m"
-	Red    = "\033[1;31m%s\033[0m"
-	Green  = "\033[1;32m%s\033[0m"
+	"github.com/gookit/color"
 )
 
+func Red(text string) string {
+	return color.FgRed.Render(text)
+}
+
 func Error(text string) {
-	fmt.Println(fmt.Sprintf(Red, text))
+	fmt.Println(color.FgRed.Render(text))
 }
 
 func Warning(text string) {
-	color.Info.Println(text)
+	color.Warn.Println(text)
 }
 
 func Success(text string) {
-	fmt.Println(fmt.Sprintf(Green, text))
+	color.Success.Println(text)
 }
 
 func Info(text string) {
-	fmt.Println(fmt.Sprintf(Teal, text))
+	color.Bold.Println(text)
 }

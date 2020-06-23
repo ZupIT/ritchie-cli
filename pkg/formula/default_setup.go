@@ -19,12 +19,12 @@ import (
 )
 
 var (
-	ErrFormulaBinNotFound        = errors.New("formula bin not found")
-	ErrConfigFileNotFound        = errors.New("config file not found")
-	ErrUnknownFormulaDownload    = errors.New("unknown error when downloading your formula")
-	ErrUnknownConfigFileDownload = errors.New("unknown error when downloading your config file")
-	ErrCreateReqBundle           = errors.New("failed to create request for bundle download")
-	ErrCreateReqConfig           = errors.New("failed to create request for config download")
+	ErrFormulaBinNotFound        = errors.New(prompt.Red("formula bin not found"))
+	ErrConfigFileNotFound        = errors.New(prompt.Red("config file not found"))
+	ErrUnknownFormulaDownload    = errors.New(prompt.Red("unknown error when downloading your formula"))
+	ErrUnknownConfigFileDownload = errors.New(prompt.Red("unknown error when downloading your config file"))
+	ErrCreateReqBundle           = errors.New(prompt.Red("failed to create request for bundle download"))
+	ErrCreateReqConfig           = errors.New(prompt.Red("failed to create request for config download"))
 )
 
 type DefaultSetup struct {

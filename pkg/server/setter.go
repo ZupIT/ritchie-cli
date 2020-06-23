@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
@@ -18,7 +19,7 @@ const (
 
 var (
 	// ErrOrgIsRequired error message for org
-	ErrOrgIsRequired = errors.New("Organization is required")
+	ErrOrgIsRequired = errors.New(prompt.Red("Organization is required"))
 )
 
 type SetterManager struct {

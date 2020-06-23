@@ -9,6 +9,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -19,7 +20,7 @@ const (
 )
 
 var (
-	ErrFieldsNotFound = errors.New("fields not found")
+	ErrFieldsNotFound = errors.New(prompt.Red("fields not found"))
 )
 
 type Settings struct {
@@ -84,6 +85,6 @@ func (s Settings) Fields() (credential.Fields, error) {
 		if err != nil {
 			return nil, err
 		}
-		return nil, errors.New(string(b))
+		return nil, errors.New(prompt.Red(string(b)))
 	}
 }

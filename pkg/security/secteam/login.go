@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -59,7 +60,7 @@ func (l LoginManager) Login(user security.User) error {
 	}
 	err = l.sessionManager.Create(sess)
 	if err != nil {
-		return errors.New("error create session, clear your rit home")
+		return errors.New(prompt.Red("error create session, clear your rit home"))
 	}
 	return nil
 }
@@ -95,8 +96,8 @@ func requestLogin(user security.User, hc *http.Client, url, org string) (loginRe
 		}
 		return lr, err
 	case 401:
-		return lr, errors.New("login failed! Verify your credentials")
+		return lr, errors.New(prompt.Red("login failed! Verify your credentials"))
 	default:
-		return lr, errors.New("login failed")
+		return lr, errors.New(prompt.Red("login failed"))
 	}
 }

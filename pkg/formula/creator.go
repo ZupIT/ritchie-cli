@@ -26,11 +26,11 @@ const (
 )
 
 var (
-	ErrDontStartWithRit = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
-	ErrTooShortCommand  = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
-	ErrRepeatedCommand  = fmt.Errorf(prompt.Red, "this command already exists")
-	ErrTreeJsonNotFound = fmt.Errorf(prompt.Red, "tree.json not found")
-	ErrMakefileNotFound = fmt.Errorf(prompt.Red, "makefile not found")
+	ErrDontStartWithRit = errors.New(prompt.Red( "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]"))
+	ErrTooShortCommand  = errors.New(prompt.Red( "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]"))
+	ErrRepeatedCommand  = errors.New(prompt.Red( "this command already exists"))
+	ErrTreeJsonNotFound = errors.New(prompt.Red( "tree.json not found"))
+	ErrMakefileNotFound = errors.New(prompt.Red( "makefile not found"))
 )
 
 type CreateManager struct {
@@ -412,7 +412,7 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 			t.Commands = commands
 			return t, nil
 		} else {
-			return Tree{}, errors.New("Command already exist ")
+			return Tree{}, errors.New(prompt.Red("Command already exist "))
 		}
 
 	} else {

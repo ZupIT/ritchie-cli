@@ -19,6 +19,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
@@ -33,7 +34,7 @@ const (
 
 var (
 	// Errors
-	ErrNoRepoToShow = errors.New("no repositories to show")
+	ErrNoRepoToShow = errors.New(prompt.Red("no repositories to show"))
 )
 
 type RepoManager struct {
@@ -225,7 +226,7 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 
 	session, err := dm.sessionManager.Current()
 	if err != nil {
-		return errors.New("error restore current session")
+		return errors.New(prompt.Red("error restore current session"))
 	}
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {
