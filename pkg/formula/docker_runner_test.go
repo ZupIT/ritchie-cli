@@ -31,6 +31,7 @@ func TestDockerRunner_Run(t *testing.T) {
 		envMock  envResolverMock
 		inText   inputMock
 		inBool   inputMock
+		inPassword inputMock
 		preMock  *preRunnerMock
 		postMock *postRunnerMock
 	}
@@ -102,7 +103,7 @@ func TestDockerRunner_Run(t *testing.T) {
 			}
 
 			resolvers := env.Resolvers{"test": in.envMock}
-			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool)
+			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPassword)
 			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager)
 
 			got := dockerRunner.Run(def, api.Prompt)
