@@ -73,7 +73,7 @@ func buildCommands() *cobra.Command {
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	serverFinder := server.NewFinder(ritchieHomeDir)
-	serverSetter := server.NewSetter(ritchieHomeDir, makeHttpClientIgnoreSsl())
+	serverSetter := server.NewSetter(ritchieHomeDir, makeHttpClientIgnoreSsl(), resource.SkipTlsVerify)
 	serverFindSetter := server.NewFindSetter(serverFinder, serverSetter)
 
 	httpClient := makeHttpClient(serverFinder)
