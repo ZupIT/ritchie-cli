@@ -29,7 +29,7 @@ BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
 COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
 IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+|qa-.*")
-IS_BETA=$(shell echo $(VERSION) | egrep "^beta-.*")
+IS_BETA=$(shell echo $(VERSION) | egrep "^beta")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next-version.sh)
 
