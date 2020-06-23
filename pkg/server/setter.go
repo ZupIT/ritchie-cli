@@ -74,7 +74,8 @@ func sslCertificationBase64(url string) (cert, addr string, err error) {
 		return "", "", nil
 	}
 	u := strings.Replace(url, "https://", "", 1)
-	s := strings.Split(u, ":")
+
+	s := strings.Split(strings.Split(u, "/")[0], ":")
 	addr = s[0]
 	switch len(s) {
 	case 1:
@@ -92,16 +93,10 @@ func sslCertificationBase64(url string) (cert, addr string, err error) {
 		return cert, addr, err
 	}
 	connState := conn.ConnectionState()
-	for _, peerCert := range connState.PeerCertificates {
-		for _, dns := range peerCert.DNSNames {
-			if dns == s[0] {
-				der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
-				if err != nil {
-					return cert, addr, err
-				}
-				return base64.StdEncoding.EncodeToString(der), addr, nil
-			}
-		}
+	peerCert := connState.PeerCertificates[0]
+	der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
+	if err != nil {
+		return cert, addr, err
 	}
-	return cert, addr, errors.New("certificate not found")
+	return base64.StdEncoding.EncodeToString(der), addr, nil
 }

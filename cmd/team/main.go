@@ -66,9 +66,9 @@ func buildCommands() *cobra.Command {
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	serverFinder := server.NewFinder(ritchieHomeDir)
-	serverSetter := server.NewSetter(ritchieHomeDir, http.DefaultClient)
+	serverSetter := server.NewSetter(ritchieHomeDir, makeHttpClientIgnoreSsl())
 	serverFindSetter := server.NewFindSetter(serverFinder, serverSetter)
-	//TODO: Todos os clients com http pinado
+
 	httpClient := makeHttpClient(serverFinder)
 	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, httpClient, sessionManager)
 	repoLoader := formula.NewTeamLoader(serverFinder, httpClient, sessionManager, repoManager)
@@ -258,4 +258,12 @@ func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 		}
 		return c, nil
 	}
+}
+
+func makeHttpClientIgnoreSsl() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	return client
 }
