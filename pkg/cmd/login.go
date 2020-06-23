@@ -97,8 +97,6 @@ func (l loginCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success("Session created successfully!")
-
 		if err = l.Login(u); err != nil {
 			return err
 		}
