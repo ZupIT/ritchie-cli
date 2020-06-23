@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -14,8 +15,8 @@ import (
 const (
 	urlHttp = "http://localhost:8882"
 	urlHttpError = "http://localhost:8882/server/error"
-	// urlHttps = "https://localhost"
-	// urlHttpsError = "https://localhost:9999"
+	urlHttps = "https://localhost"
+	urlHttpsError = "https://localhost:9999"
 )
 
 var (
@@ -91,16 +92,16 @@ func TestSet(t *testing.T) {
 			in:   in{cfg: Config{Organization: "org", URL: urlHttpError}, hc: http.DefaultClient},
 			outErr:    fmt.Errorf(ServerErrPattern, urlHttpError, "500 Server Error"),
 		},
-		// {
-		// 	name: "pinning server https",
-		// 	in:   in{cfg: Config{Organization: "org", URL: urlHttps}, hc: makeHttpClient()},
-		// 	outErr: nil,
-		// },
-		// {
-		// 	name: "pinning server https error",
-		// 	in:   in{cfg: Config{Organization: "org", URL: urlHttpsError}, hc: makeHttpClient()},
-		// 	outErr: errors.New("dial tcp"),
-		// },
+		{
+			name: "pinning server https",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttps}, hc: makeHttpClient()},
+			outErr: nil,
+		},
+		{
+			name: "pinning server https error",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttpsError}, hc: makeHttpClient()},
+			outErr: errors.New("dial tcp"),
+		},
 	}
 
 	for _, tt := range tests {
