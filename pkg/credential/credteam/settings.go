@@ -85,6 +85,6 @@ func (s Settings) Fields() (credential.Fields, error) {
 		if err != nil {
 			return nil, err
 		}
-		return nil, errors.New(prompt.Red(string(b)))
+		return nil, errors.New(string(b))
 	}
 }

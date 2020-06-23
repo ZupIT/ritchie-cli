@@ -10,7 +10,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -84,6 +83,6 @@ func (f Finder) Find(provider string) (credential.Detail, error) {
 			return credential.Detail{}, err
 		}
 		log.Printf("Status code: %v", resp.StatusCode)
-		return credential.Detail{}, errors.New(prompt.Red(string(b)))
+		return credential.Detail{}, errors.New(string(b))
 	}
 }

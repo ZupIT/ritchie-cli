@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
@@ -59,7 +60,7 @@ func TestFields(t *testing.T) {
 		{
 			name: "server error",
 			out: out{
-				err:    errors.New("internal server error"),
+				err:    errors.New(prompt.Red("internal server error")),
 				status: 500,
 			},
 		},
