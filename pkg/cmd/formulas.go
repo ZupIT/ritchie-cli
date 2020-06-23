@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"

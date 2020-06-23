@@ -41,6 +41,8 @@ var (
 		{Parent: "root_update", Usage: "repo"},
 		{Parent: "root", Usage: "clean"},
 		{Parent: "root_clean", Usage: "repo"},
+		{Parent: "root", Usage: "build"},
+		{Parent: "root_build", Usage: "formula"},
 	}
 
 	SingleCoreCmds = CoreCmds
@@ -48,7 +50,7 @@ var (
 	TeamCoreCmds = append(
 		CoreCmds,
 		[]Command{
-			//temporarily removed {Parent: "root_create", Usage: "user"},
+			// temporarily removed {Parent: "root_create", Usage: "user"},
 			{Parent: "root_delete", Usage: "user"},
 			{Parent: "root", Usage: "login"},
 			{Parent: "root", Usage: "logout"},

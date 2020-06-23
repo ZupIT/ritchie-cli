@@ -200,3 +200,11 @@ type Setuper interface {
 type Creator interface {
 	Create(cf Create) (CreateManager, error)
 }
+
+type Builder interface {
+	Build(workspacePath, formulaPath string) error
+}
+
+type Watcher interface {
+	Watch(workspacePath, formulaPath string)
+}
