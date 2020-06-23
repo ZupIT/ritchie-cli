@@ -64,6 +64,8 @@ var (
 
 	upgradeValidationWhiteList = []string{
 		fmt.Sprintf("%s upgrade", cmdUse),
+		fmt.Sprintf("%s completion zsh", cmdUse),
+		fmt.Sprintf("%s completion bash", cmdUse),
 	}
 )
 
