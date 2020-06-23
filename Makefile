@@ -58,8 +58,14 @@ build: build-linux build-mac build-windows
 ifneq "$(BUCKET)" ""
 	echo $(BUCKET)
 	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
+ifneq "$(IS_RELEASE)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+endif
+ifneq "$(IS_BETA)" ""
+	echo -n "$(RELEASE_VERSION)" > beta.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "beta.txt"
+endif
 else
 	echo "NOT GONNA PUBLISH"
 endif
