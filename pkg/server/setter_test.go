@@ -1,23 +1,25 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"net"
 	"net/http"
-	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
+const (
+	urlHttp         = "http://localhost:8882"
+	urlHttpErrorOtp = "http://localhost:8882/server/error/otp-json-parse-error"
+	urlHttpError    = "http://localhost:8882/server/error"
+)
+
 var (
-	srvListener       = "127.0.0.1:57469"
-	srvURL            = fmt.Sprintf("http://%s", srvListener)
-	errNoSuchHost     = fmt.Errorf("lookup %s: no such host", srvListener)
-	errNoSuchHostLong = fmt.Errorf("Get \"%s\": %s", srvURL, errNoSuchHost)
+	errNoSuchHost     = fmt.Errorf("lookup %s: no such host", strings.Replace(urlHttp, "http://", "", 1))
+	errNoSuchHostLong = fmt.Errorf("Get \"%s/otp\": %s", urlHttp, errNoSuchHost)
+	errOtpParseError = fmt.Errorf("json: cannot unmarshal string into Go struct field otpResponse.otp of type bool")
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
@@ -36,111 +38,72 @@ func newClientErrNoSuchHost() *http.Client {
 
 func TestSet(t *testing.T) {
 
-	srvURL = httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		resp, _ := json.Marshal(otpResponse{Otp: true})
-		_, _ = writer.Write(resp)
-	})).URL
-	errNoSuchHost = fmt.Errorf("lookup %s: no such host", srvListener)
-	errNoSuchHostLong = fmt.Errorf("Get \"%s/otp\": %s", srvURL, errNoSuchHost)
-
 	type in struct {
 		cfg Config
 		hc  *http.Client
 	}
 
-	type out struct {
-		status int
-		err    error
-	}
-
 	tests := []struct {
-		name string
-		in   in
-		out  out
+		name   string
+		in     in
+		outErr error
 	}{
 		{
-			name: "empty organization",
-			in:   in{cfg: Config{Organization: ""}},
-			out: out{
-				err: ErrOrgIsRequired,
-			},
+			name:   "empty organization",
+			in:     in{cfg: Config{Organization: ""}},
+			outErr: ErrOrgIsRequired,
 		},
 		{
-			name: "empty serverURL",
-			in:   in{cfg: Config{Organization: "org", URL: ""}},
-			out: out{
-				err: validator.ErrInvalidURL,
-			},
+			name:   "empty serverURL",
+			in:     in{cfg: Config{Organization: "org", URL: ""}},
+			outErr: validator.ErrInvalidURL,
 		},
 		{
-			name: "invalid serverURL",
-			in:   in{cfg: Config{Organization: "org", URL: "invalid.server.URL"}},
-			out: out{
-				err: validator.ErrInvalidURL,
-			},
+			name:   "invalid serverURL",
+			in:     in{cfg: Config{Organization: "org", URL: "invalid.server.URL"}},
+			outErr: validator.ErrInvalidURL,
 		},
 		{
-			name: "trailing slash on serverURL",
-			in:   in{cfg: Config{Organization: "org", URL: fmt.Sprintf("%s/", srvURL)}, hc: http.DefaultClient},
-			out: out{
-				status: 200,
-			},
+			name:   "trailing slash on serverURL",
+			in:     in{cfg: Config{Organization: "org", URL: fmt.Sprintf("%s/", urlHttp)}, hc: http.DefaultClient},
+			outErr: nil,
 		},
 		{
-			name: "valid serverURL",
-			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: http.DefaultClient},
-			out: out{
-				status: 200,
-			},
+			name:   "valid serverURL http",
+			in:     in{cfg: Config{Organization: "org", URL: urlHttp}, hc: http.DefaultClient},
+			outErr: nil,
 		},
 		{
-			name: "no such host error",
-			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: newClientErrNoSuchHost()},
-			out: out{
-				err: errNoSuchHostLong,
-			},
+			name:   "no such host error",
+			in:     in{cfg: Config{Organization: "org", URL: urlHttp}, hc: newClientErrNoSuchHost()},
+			outErr: errNoSuchHostLong,
 		},
 		{
-			name: "server error",
-			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: http.DefaultClient},
-			out: out{
-				status: 500,
-				err:    fmt.Errorf(ServerErrPattern, srvURL, "500 Internal Server Error"),
-			},
+			name:   "server error",
+			in:     in{cfg: Config{Organization: "org", URL: urlHttpError}, hc: http.DefaultClient},
+			outErr: fmt.Errorf(ServerErrPattern, urlHttpError, "500 Server Error"),
+		},
+		{
+			name:   "Parse Otp Error",
+			in:     in{cfg: Config{Organization: "org", URL: urlHttpErrorOtp}, hc: http.DefaultClient},
+			outErr: errOtpParseError,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			out := tt.out
 			s := NewSetter(os.TempDir(), in.hc)
 
-			if in.cfg.URL != "" {
-				srv := mockServer(out.status)
-				defer srv.Close()
-			}
-
 			got := s.Set(&in.cfg)
-			if got != nil && got.Error() != out.err.Error() {
-				t.Errorf("Set(%v) got %v, want %v", in.cfg, got, out.err)
+			if tt.outErr != nil && got == nil {
+				t.Errorf("Set(%v) got %v, want %v", in.cfg, got, tt.outErr)
+			}
+			if got != nil && got.Error() != tt.outErr.Error() {
+				if !strings.Contains(got.Error(), tt.outErr.Error()) {
+					t.Errorf("Set(%v) got %v, want %v", in.cfg, got, tt.outErr)
+				}
 			}
 		})
 	}
-}
-
-func mockServer(status int) *httptest.Server {
-	l, err := net.Listen("tcp", srvListener)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		rw.WriteHeader(status)
-	}))
-	srv.Listener.Close()
-	srv.Listener = l
-	srv.Start()
-
-	return srv
 }
