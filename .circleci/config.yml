@@ -250,7 +250,7 @@ jobs:
       - run:
           name: Persist version file
           command: |
-            echo $RELEASE_VERSION > workspace/dist/release_version.txt
+            echo $RELEASE_VERSION > dist/release_version.txt
       - persist_to_workspace:
           root: dist
           paths:
