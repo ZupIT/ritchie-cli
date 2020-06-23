@@ -9,7 +9,7 @@ const (
 	BuildDate = "unknown"
 
 	// SkipTlsVerify is a flag to skip tls verification when pinning server
-	SkipTlsVerify = true
+	SkipTlsVerify = false
 
 	// Url to get Rit Stable Version
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"

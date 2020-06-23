@@ -2,7 +2,6 @@ package server
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -92,16 +91,16 @@ func TestSet(t *testing.T) {
 			in:   in{cfg: Config{Organization: "org", URL: urlHttpError}, hc: http.DefaultClient},
 			outErr:    fmt.Errorf(ServerErrPattern, urlHttpError, "500 Server Error"),
 		},
-		{
-			name: "pinning server https",
-			in:   in{cfg: Config{Organization: "org", URL: urlHttps}, hc: makeHttpClient()},
-			outErr: nil,
-		},
-		{
-			name: "pinning server https error",
-			in:   in{cfg: Config{Organization: "org", URL: urlHttpsError}, hc: makeHttpClient()},
-			outErr: errors.New("dial tcp"),
-		},
+		// {
+		// 	name: "pinning server https",
+		// 	in:   in{cfg: Config{Organization: "org", URL: urlHttps}, hc: makeHttpClient()},
+		// 	outErr: nil,
+		// },
+		// {
+		// 	name: "pinning server https error",
+		// 	in:   in{cfg: Config{Organization: "org", URL: urlHttpsError}, hc: makeHttpClient()},
+		// 	outErr: errors.New("dial tcp"),
+		// },
 	}
 
 	for _, tt := range tests {
