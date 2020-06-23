@@ -238,6 +238,8 @@ jobs:
 
   build:
     executor: ritchie-executor
+    environment:
+      <<: *ENVIRONMENT
     branches:
     steps:
       - checkout
@@ -250,6 +252,7 @@ jobs:
       - run:
           name: Persist version file
           command: |
+            . ./.circleci/scripts/version.sh
             echo $RELEASE_VERSION > dist/release_version.txt
       - persist_to_workspace:
           root: dist
@@ -257,6 +260,7 @@ jobs:
             - linux
             - darwin
             - windows
+            - release_version.txt
       - store_test_results:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
@@ -520,7 +524,6 @@ workflows:
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - build-code
             - deb-package
             - rpm-package
             - win-package
