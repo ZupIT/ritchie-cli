@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/resource"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -109,7 +110,7 @@ func buildCommands() *cobra.Command {
 	uhc := makeHttpClient(serverFinder)
 	uhc.Timeout =  1 * time.Second
 	defaultUpgradeResolver := version.DefaultVersionResolver{
-		StableVersionUrl: cmd.StableVersionUrl,
+		StableVersionUrl: resource.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultService{},
 		HttpClient:       uhc,
 	}
@@ -278,7 +279,7 @@ func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 
 func makeHttpClientIgnoreSsl() *http.Client {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: resource.SkipTlsVerify},
 	}
 	client := &http.Client{Transport: tr}
 	return client

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/resource"
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
@@ -87,7 +88,7 @@ func sslCertificationBase64(url string) (cert, addr string, err error) {
 	}
 
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: resource.SkipTlsVerify,
 	})
 	if err != nil {
 		return cert, addr, err

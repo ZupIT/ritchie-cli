@@ -10,6 +10,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/resource"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -29,18 +30,11 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	// Version contains the current version	.
-	Version = "dev"
-	// BuildDate contains a string with the build date.
-	BuildDate = "unknown"
 
 	// MsgInit error message for init cmd
 	MsgInit = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 	// MsgSession error message for session not initialized
 	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
-
-	// Url to get Rit Stable Version
-	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
 
 	singleWhitelist = []string{
 		fmt.Sprint(cmdUse),
@@ -191,11 +185,11 @@ func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 func verifyNewVersion(cmd *cobra.Command) {
 	if !isWhitelist(upgradeValidationWhiteList, cmd) {
 		resolver := version.DefaultVersionResolver{
-			StableVersionUrl: StableVersionUrl,
+			StableVersionUrl: resource.StableVersionUrl,
 			FileUtilService:  fileutil.DefaultService{},
 			HttpClient:       &http.Client{Timeout: 1 * time.Second},
 		}
-		prompt.Warning(version.VerifyNewVersion(resolver, Version))
+		prompt.Warning(version.VerifyNewVersion(resolver, resource.Version))
 	}
 }
 
@@ -204,7 +198,7 @@ func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
 }
 
 func versionFlag(edition api.Edition) string {
-	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
+	return fmt.Sprintf(versionMsg, resource.Version, edition, resource.BuildDate, runtime.Version())
 }
 
 func runHelp(cmd *cobra.Command, args []string) error {
