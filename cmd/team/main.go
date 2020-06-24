@@ -93,8 +93,9 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool)
+	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := formula.NewDefaultTeamSetup(ritchieHomeDir, httpClient, sessionManager)
+
 
 	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
 	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
