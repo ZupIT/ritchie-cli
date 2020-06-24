@@ -5,7 +5,6 @@ import (
 	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/resource"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
@@ -15,7 +14,7 @@ func UpgradeUrl(edition api.Edition, resolver version.Resolver) string {
 		return ""
 	}
 
-	upgradeUrl := fmt.Sprintf(resource.UpgradeUrlFormat, stableVersion, runtime.GOOS, edition)
+	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, runtime.GOOS, edition)
 
 	if runtime.GOOS == "windows" {
 		upgradeUrl += ".exe"
