@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -65,7 +64,7 @@ func (l loginCmd) runPrompt() CommandRunnerFunc {
 		if err := l.Load(); err != nil {
 			return err
 		}
-		fmt.Println("Login successfully!")
+		prompt.Success("Login successfully!")
 		return err
 	}
 }
@@ -77,9 +76,11 @@ func (l loginCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &u)
 		if err != nil {
-			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
+
+		prompt.Success("Session created successfully!")
 
 		if err = l.Login(u); err != nil {
 			return err
@@ -87,7 +88,8 @@ func (l loginCmd) runStdin() CommandRunnerFunc {
 		if err := l.Load(); err != nil {
 			return err
 		}
-		fmt.Println("Login successfully!")
+		prompt.Success("Session created successfully!")
 		return err
+
 	}
 }

@@ -10,6 +10,9 @@ references:
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
     horus: &HORUS_IMAGE library/docker:dind
+    ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
+    centos: &CENTOS_IMAGE viniciusramosdefaria/centos-circleci:7.0
+    windows: &WINDOWS_IMAGE windows-server-2019
 
   paths:
     test-results: &TEST_RESULTS_DIR bin
@@ -20,6 +23,7 @@ references:
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
     BUILD_IMAGE: *GOLANG_IMAGE
+    VERSION_PLACEHOLDER: 1.0.0-betaPLACEHOLDER
 
   filters: &FILTERS_DELIVERY
     branches:
@@ -74,7 +78,19 @@ executors:
     resource_class: windows.medium
     shell: powershell.exe -ExecutionPolicy Unrestricted
     machine:
-      image: windows-server-2019
+      image: *WINDOWS_IMAGE
+
+  ubuntu-executor:
+    docker:
+      - image: *UBUNTU_IMAGE
+        user: root
+    working_directory: /workspace
+
+  centos-executor:
+    docker:
+      - image: *CENTOS_IMAGE
+        user: root
+    working_directory: /workspace
 
 jobs:
   lint:
@@ -196,7 +212,7 @@ jobs:
       - run:
           name: Running Functional tests for team
           command: |
-            go test -v (go list ./functional/team/... | grep -v vendor/)
+            go test -v -count=1 -p 1 (go list ./functional/team/... | grep -v vendor/)
 
   windows_functional_test_single:
     executor: windows-executor
@@ -217,11 +233,13 @@ jobs:
       - run:
           name: Running Functional tests for single
           command: |
-            go test -v (go list ./functional/single/... | grep -v vendor/)
+            go test -v -count=1 -p 1 (go list ./functional/single/... | grep -v vendor/)
 
 
   build:
     executor: ritchie-executor
+    environment:
+      <<: *ENVIRONMENT
     branches:
     steps:
       - checkout
@@ -231,12 +249,18 @@ jobs:
             . ./.circleci/scripts/version.sh
             go mod download
             make build-circle
+      - run:
+          name: Persist version file
+          command: |
+            . ./.circleci/scripts/version.sh
+            echo $RELEASE_VERSION > dist/release_version.txt
       - persist_to_workspace:
           root: dist
           paths:
             - linux
             - darwin
             - windows
+            - release_version.txt
       - store_test_results:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
@@ -258,6 +282,58 @@ jobs:
             . ./.circleci/scripts/credentials.sh
             make delivery
 
+  deb-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: ubuntu-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Generating package for debian
+          command: |
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/gen-deb.sh
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  rpm-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: centos-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Generating package for rpm
+          command: |
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/gen-rpm.sh
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  win-package:
+    executor:
+      name: windows-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          command: |
+            .circleci/scripts/gen-win.ps1
+          shell: powershell.exe
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
   release:
     environment:
       <<: *ENVIRONMENT
@@ -270,6 +346,17 @@ jobs:
             . ./.circleci/scripts/version.sh
             make release
 
+  release_creator:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Checking if we need to release any new features
+          command: |
+            make release-creator
+
   rebase_nightly:
     environment:
       <<: *ENVIRONMENT
@@ -280,6 +367,17 @@ jobs:
           name: Rebase Nightly
           command: |
             make rebase-nightly
+
+  rebase_beta:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Rebase Beta
+          command: |
+            make rebase-beta
 
   unix_smoke_test:
     executor: ritchie-tests-executor
@@ -311,10 +409,17 @@ jobs:
             rit --version
             rit --version | grep "$RELEASE_VERSION"
 
-
-
-
 workflows:
+  release_trigger:
+    triggers:
+      - schedule:
+          cron: "0 13 * * 1"
+          filters:
+            branches:
+              only:
+                - beta
+    jobs:
+      - release_creator
   nightly:
     triggers:
       - schedule:
@@ -325,22 +430,41 @@ workflows:
                 - master
     jobs:
       - rebase_nightly
+  beta:
+    triggers:
+      - schedule:
+          cron: "0 11 * * 2,4"
+          filters:
+            branches:
+              only:
+                - nightly
+    jobs:
+      - build:
+          name: build-code
+      - windows_functional_test_team:
+          name: windows-functional-test-team-code
+          requires:
+            - build-code
+      - windows_functional_test_single:
+          name: windows-functional-test-single-code
+          requires:
+            - build-code
+      - rebase_beta:
+          name: release-beta
+          requires:
+            - windows-functional-test-team-code
+            - windows-functional-test-single-code
+
   build-for-requests:
     jobs:
       - lint:
           filters:
             <<: *FILTERS_CHECK_CODE
-      - horus:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - lint
       - unit_test:
          name: unit-test
          filters:
            <<: *FILTERS_CHECK_CODE
          requires:
-           - horus
            - lint
       - build:
           name: build-code
@@ -360,18 +484,6 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-#      - windows_functional_test_team:
-#          name: windows-functional-test-team-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - build-code
-#      - windows_functional_test_single:
-#          name: windows-functional-test-single-code
-#          filters:
-#            <<: *FILTERS_CHECK_CODE
-#          requires:
-#            - build-code
   release:
     jobs:
       - build:
@@ -385,7 +497,7 @@ workflows:
           requires:
             - build-code
       - release:
-          name: release
+          name: release-publish
           filters:
             <<: *FILTERS_RELEASE
           requires:
@@ -394,6 +506,8 @@ workflows:
           name: unix-smoke-test
           filters:
             <<: *FILTERS_RELEASE
+          requires:
+            - release-publish
   delivery:
     jobs:
       - build:
@@ -405,5 +519,21 @@ workflows:
           filters:
             <<: *FILTERS_DELIVERY
           requires:
+            - deb-package
+            - rpm-package
+            - win-package
+      - deb-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
             - build-code
-
+      - rpm-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code
+      - win-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code

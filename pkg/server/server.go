@@ -7,6 +7,8 @@ const (
 type Config struct {
 	Organization string `json:"organization"`
 	URL          string `json:"url"`
+	PinningKey   string `json:"pinningKey"`
+	PinningAddr  string `json:"pinningAddr"`
 }
 
 type Setter interface {

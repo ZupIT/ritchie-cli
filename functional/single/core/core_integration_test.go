@@ -1,6 +1,8 @@
-package single
+package core
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -8,7 +10,16 @@ import (
 	"github.com/ZupIT/ritchie-cli/functional"
 )
 
+func TestRitSingleCore(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Rit Suite Core")
+}
+
 var _ = Describe("RitCore", func() {
+	BeforeSuite(func() {
+		functional.RitInit()
+	})
+
 	scenariosCore := functional.LoadScenarios("core_feature.json")
 
 	DescribeTable("When running core command",

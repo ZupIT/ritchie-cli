@@ -21,6 +21,19 @@ type FileRemover interface {
 	Remove(path string) error
 }
 
+type FileLister interface {
+	List(file string) ([]string, error)
+}
+
+type FileCopier interface {
+	Copy(src, dst string) error
+}
+
+type FileListCopier interface {
+	FileLister
+	FileCopier
+}
+
 type FileReadExister interface {
 	FileReader
 	FileExister
@@ -80,5 +93,36 @@ func (f FileManager) Remove(path string) error {
 	if f.Exists(path) {
 		return os.Remove(path)
 	}
+	return nil
+}
+
+// List lists all files in dir path
+func (f FileManager) List(dir string) ([]string, error) {
+	fileInfos, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	var dirs []string
+	for _, f := range fileInfos {
+		n := f.Name()
+		if !f.IsDir() {
+			dirs = append(dirs, n)
+		}
+	}
+
+	return dirs, nil
+}
+
+func (f FileManager) Copy(src, dest string) error {
+	input, err := f.Read(src)
+	if err != nil {
+		return err
+	}
+
+	if err := f.Write(dest, input); err != nil {
+		return err
+	}
+
 	return nil
 }
