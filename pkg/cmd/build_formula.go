@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gookit/color"
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
 
@@ -147,17 +146,17 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 }
 
 func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
-	buildInfo := color.FgRed.Render("Building formula...")
+	buildInfo := prompt.Red("Building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
 
 	if err := b.formula.Build(workspacePath, formulaPath); err != nil {
-		errorMsg := color.FgRed.Render(err)
+		errorMsg := prompt.Red(err.Error())
 		s.Error(errors.New(errorMsg))
 		return
 	}
 
-	success := color.FgGreen.Render("✔ Build completed!")
+	success := prompt.Green("✔ Build completed!")
 	s.Success(success)
 	prompt.Info("Now you can run your formula with Ritchie!")
 }
