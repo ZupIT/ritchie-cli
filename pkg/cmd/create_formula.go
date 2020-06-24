@@ -99,7 +99,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		var cf formula.Create
 
 		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
+			prompt.PrintRed(stdin.MsgInvalidInput)
 			return err
 		}
 

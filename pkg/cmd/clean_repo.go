@@ -62,7 +62,7 @@ func (c cleanRepoCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &f)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
+			prompt.PrintRed(stdin.MsgInvalidInput)
 			return err
 		}
 

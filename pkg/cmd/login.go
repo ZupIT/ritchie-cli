@@ -76,7 +76,7 @@ func (l loginCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &u)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
+			prompt.PrintRed(stdin.MsgInvalidInput)
 			return err
 		}
 

@@ -62,7 +62,7 @@ func (d deleteRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		if len(repos) == 0 {
-			prompt.Error("You dont have any repository to delete")
+			prompt.PrintRed("You dont have any repository to delete")
 			return nil
 		}
 
@@ -95,7 +95,7 @@ func (d deleteRepoCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &dr)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
+			prompt.PrintRed(stdin.MsgInvalidInput)
 			return err
 		}
 

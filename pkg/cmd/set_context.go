@@ -80,7 +80,7 @@ func (s setContextCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &sc)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
+			prompt.PrintRed(stdin.MsgInvalidInput)
 			return err
 		}
 

@@ -108,7 +108,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 		pair := strings.Split(kv, "=")
 		if s := validate(pair); s != "" {
-			prompt.Error(s)
+			prompt.PrintRed(s)
 			continue
 		}
 
@@ -211,7 +211,7 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 
 		err := stdin.ReadJson(os.Stdin, &credDetail)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
+			prompt.PrintRed(stdin.MsgInvalidInput)
 			return credDetail, err
 		}
 
