@@ -2,7 +2,7 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.14...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.15...HEAD)
 
 **Implemented enhancements:**
 
@@ -38,7 +38,13 @@
 - change run-tests and scripts to windows [\#167](https://github.com/ZupIT/ritchie-cli/pull/167) ([viniciussousazup](https://github.com/viniciussousazup))
 - Fix smoke test for release [\#164](https://github.com/ZupIT/ritchie-cli/pull/164) ([dmbarra](https://github.com/dmbarra))
 - Feature/beta pipeline [\#163](https://github.com/ZupIT/ritchie-cli/pull/163) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
+## [1.0.0-beta.15](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.15) (2020-06-24)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.14...1.0.0-beta.15)
+
 - \[FIX\] Adding trapdoor to error while removing branch [\#152](https://github.com/ZupIT/ritchie-cli/pull/152) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
 
 ## [1.0.0-beta.14](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.14) (2020-06-24)
 
@@ -70,6 +76,8 @@
 - Fix/tpl [\#156](https://github.com/ZupIT/ritchie-cli/pull/156) ([victor-schumacher](https://github.com/victor-schumacher))
 - \[FEATURE\] Login prompt [\#154](https://github.com/ZupIT/ritchie-cli/pull/154) ([marcosgmgm](https://github.com/marcosgmgm))
 - Feature/windows functional tests [\#153](https://github.com/ZupIT/ritchie-cli/pull/153) ([dmbarra](https://github.com/dmbarra))
+- \[FIX\] Adding trapdoor to error while removing branch [\#152](https://github.com/ZupIT/ritchie-cli/pull/152) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
 - Release 1.0.0-beta.13 merge [\#147](https://github.com/ZupIT/ritchie-cli/pull/147) ([zup-ci](https://github.com/zup-ci))
 
 ## [1.0.0-beta.13](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.13) (2020-06-03)
