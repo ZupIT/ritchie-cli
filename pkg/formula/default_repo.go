@@ -33,7 +33,7 @@ const (
 
 var (
 	// Errors
-	ErrNoRepoToShow = prompt.Error("no repositories to show")
+	ErrNoRepoToShow = prompt.NewError("no repositories to show")
 )
 
 type RepoManager struct {
@@ -225,7 +225,7 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 
 	session, err := dm.sessionManager.Current()
 	if err != nil {
-		return prompt.Error("error restore current session")
+		return prompt.NewError("error restore current session")
 	}
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {

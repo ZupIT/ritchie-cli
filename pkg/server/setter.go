@@ -18,7 +18,7 @@ const (
 
 var (
 	// ErrOrgIsRequired error message for org
-	ErrOrgIsRequired = prompt.Error("Organization is required")
+	ErrOrgIsRequired = prompt.NewError("Organization is required")
 )
 
 type SetterManager struct {

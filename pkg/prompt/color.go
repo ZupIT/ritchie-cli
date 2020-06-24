@@ -7,16 +7,12 @@ import (
 	"github.com/gookit/color"
 )
 
-func Red(text string) string {
-	return color.FgRed.Render(text)
+func NewError(text string) error {
+	return errors.New(color.FgRed.Render(text))
 }
 
-func PrintRed(text string) {
-	fmt.Println(Red(text))
-}
-
-func Error(text string) error {
-	return errors.New(Red(text))
+func Error(text string) {
+	fmt.Println(color.FgRed.Render(text))
 }
 
 func Warning(text string) {
@@ -30,3 +26,4 @@ func Success(text string) {
 func Info(text string) {
 	color.Bold.Println(text)
 }
+

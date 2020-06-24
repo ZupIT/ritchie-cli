@@ -11,8 +11,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-var ErrNotEnableDocker = prompt.Error("this formula is not enabled to run in a container")
-var ErrDockerNotFound = prompt.Error("you must have the docker installed on the machine to run formulas inside a container")
+var ErrNotEnableDocker = prompt.NewError("this formula is not enabled to run in a container")
+var ErrDockerNotFound =  prompt.NewError("you must have the docker installed on the machine to run formulas inside a container")
 
 type DockerPreRunner struct {
 	sDefault Setuper

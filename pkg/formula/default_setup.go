@@ -18,12 +18,12 @@ import (
 )
 
 var (
-	ErrFormulaBinNotFound        = prompt.Error("formula bin not found")
-	ErrConfigFileNotFound        = prompt.Error("config file not found")
-	ErrUnknownFormulaDownload    = prompt.Error("unknown error when downloading your formula")
-	ErrUnknownConfigFileDownload = prompt.Error("unknown error when downloading your config file")
-	ErrCreateReqBundle           = prompt.Error("failed to create request for bundle download")
-	ErrCreateReqConfig           = prompt.Error("failed to create request for config download")
+	ErrFormulaBinNotFound        = prompt.NewError("formula bin not found")
+	ErrConfigFileNotFound        = prompt.NewError("config file not found")
+	ErrUnknownFormulaDownload    = prompt.NewError("unknown error when downloading your formula")
+	ErrUnknownConfigFileDownload = prompt.NewError("unknown error when downloading your config file")
+	ErrCreateReqBundle           = prompt.NewError("failed to create request for bundle download")
+	ErrCreateReqConfig           = prompt.NewError("failed to create request for config download")
 )
 
 type DefaultSetup struct {

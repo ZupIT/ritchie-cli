@@ -6,7 +6,7 @@ import (
 
 var (
 	// ErrPassphraseIsRequired error for required passphrase
-	ErrPassphraseIsRequired = prompt.Error("passphrase is required")
+	ErrPassphraseIsRequired = prompt.NewError("passphrase is required")
 )
 
 // Passphrase represents a security code defined by the user.

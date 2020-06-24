@@ -202,7 +202,7 @@ func (o initTeamCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &cfg)
 		if err != nil {
-			prompt.PrintRed(stdin.MsgInvalidInput)
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 

@@ -59,7 +59,7 @@ func TestFields(t *testing.T) {
 		{
 			name: "server error",
 			out: out{
-				err:    prompt.Error("internal server error"),
+				err:    prompt.NewError("internal server error"),
 				status: 500,
 			},
 		},

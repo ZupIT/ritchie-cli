@@ -15,7 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var ErrInputNotRecognized = prompt.Error("terminal input not recognized")
+var ErrInputNotRecognized = prompt.NewError("terminal input not recognized")
 
 type InputManager struct {
 	envResolvers env.Resolvers

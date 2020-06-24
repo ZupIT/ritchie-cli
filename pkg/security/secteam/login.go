@@ -59,7 +59,7 @@ func (l LoginManager) Login(user security.User) error {
 	}
 	err = l.sessionManager.Create(sess)
 	if err != nil {
-		return prompt.Error("error create session, clear your rit home")
+		return prompt.NewError("error create session, clear your rit home")
 	}
 	return nil
 }
@@ -95,8 +95,8 @@ func requestLogin(user security.User, hc *http.Client, url, org string) (loginRe
 		}
 		return lr, err
 	case 401:
-		return lr, prompt.Error("login failed! Verify your credentials")
+		return lr, prompt.NewError("login failed! Verify your credentials")
 	default:
-		return lr, prompt.Error("login failed")
+		return lr, prompt.NewError("login failed")
 	}
 }

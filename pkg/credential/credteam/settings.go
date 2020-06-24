@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	ErrFieldsNotFound = prompt.Error("fields not found")
+	ErrFieldsNotFound = prompt.NewError("fields not found")
 )
 
 type Settings struct {

@@ -28,7 +28,7 @@ const (
 
 var (
 	supportedAutocomplete = []string{bash, zsh}
-	ErrNotSupported       = prompt.Error("autocomplete for this terminal is not supported")
+	ErrNotSupported       = prompt.NewError("autocomplete for this terminal is not supported")
 )
 
 type GeneratorManager struct {

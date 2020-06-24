@@ -12,7 +12,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var ErrNotAllowedCharacter = prompt.Error(`not allowed character on formula name \/,><@-`)
+var ErrNotAllowedCharacter = prompt.NewError(`not allowed character on formula name \/,><@-`)
 
 const notAllowedChars = `\/><,@-`
 
@@ -99,7 +99,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		var cf formula.Create
 
 		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
-			prompt.PrintRed(stdin.MsgInvalidInput)
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 
