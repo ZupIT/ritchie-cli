@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gookit/color"
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/radovskyb/watcher"
 
@@ -60,17 +61,17 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 }
 
 func (w WatchManager) build(workspacePath, formulaPath string) {
-	buildInfo := fmt.Sprintf(prompt.Teal, "Building formula...")
+	buildInfo := color.Bold.Render("Building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
 
 	if err := w.formula.Build(workspacePath, formulaPath); err != nil {
-		errorMsg := fmt.Sprintf(prompt.Red, err)
+		errorMsg := color.FgRed.Render(err)
 		s.Error(errors.New(errorMsg))
 		return
 	}
 
-	success := fmt.Sprintf(prompt.Green, "✔ Build completed!")
+	success := color.Success.Render("✔ Build completed!")
 	s.Success(success)
 	prompt.Info("Now you can run your formula with Ritchie!")
 }
