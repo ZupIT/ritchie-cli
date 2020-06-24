@@ -4,6 +4,7 @@
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.15...HEAD)
 
+
 **Merged pull requests:**
 
 - Release 1.0.0-beta.15 merge [\#207](https://github.com/ZupIT/ritchie-cli/pull/207) ([zup-ci](https://github.com/zup-ci))
@@ -25,6 +26,9 @@
 
 - \[FEATURE\] rit build formula command [\#176](https://github.com/ZupIT/ritchie-cli/issues/176)
 - \[FEATURE\] Run formulas inside a docker container [\#80](https://github.com/ZupIT/ritchie-cli/issues/80)
+
+**Implemented enhancements:**
+
 - \[FEATURE\] Build formula with Ritchie-cli [\#180](https://github.com/ZupIT/ritchie-cli/pull/180) ([kaduartur](https://github.com/kaduartur))
 - cleanup, refactor and improvements regarding beta and nightly version [\#175](https://github.com/ZupIT/ritchie-cli/pull/175) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - Feature/rit upgrade [\#165](https://github.com/ZupIT/ritchie-cli/pull/165) ([viniciussousazup](https://github.com/viniciussousazup))
@@ -42,6 +46,13 @@
 **Closed issues:**
 
 - \[FEATURE\] Create a beautiful screen after login and logout [\#22](https://github.com/ZupIT/ritchie-cli/issues/22)
+
+
+**Fixed bugs:**
+
+- \[bug\] fix completion zsh,bash [\#194](https://github.com/ZupIT/ritchie-cli/pull/194) ([viniciussousazup](https://github.com/viniciussousazup))
+- \[FIX\] trailing slashes removed [\#166](https://github.com/ZupIT/ritchie-cli/pull/166) ([marcoscostazup](https://github.com/marcoscostazup))
+
 
 **Merged pull requests:**
 
@@ -65,6 +76,38 @@
 - change run-tests and scripts to windows [\#167](https://github.com/ZupIT/ritchie-cli/pull/167) ([viniciussousazup](https://github.com/viniciussousazup))
 - Fix smoke test for release [\#164](https://github.com/ZupIT/ritchie-cli/pull/164) ([dmbarra](https://github.com/dmbarra))
 - Feature/beta pipeline [\#163](https://github.com/ZupIT/ritchie-cli/pull/163) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
+
+## [1.0.0-beta.15](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.15) (2020-06-24)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.14...1.0.0-beta.15)
+
+- \[FIX\] Adding trapdoor to error while removing branch [\#152](https://github.com/ZupIT/ritchie-cli/pull/152) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
+
+## [1.0.0-beta.14](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.14) (2020-06-24)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.13...1.0.0-beta.14)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] rit build formula command [\#176](https://github.com/ZupIT/ritchie-cli/issues/176)
+- \[FEATURE\] Run formulas inside a docker container [\#80](https://github.com/ZupIT/ritchie-cli/issues/80)
+- \[Feature\] color messages [\#146](https://github.com/ZupIT/ritchie-cli/pull/146) ([victor-schumacher](https://github.com/victor-schumacher))
+- \[FEATURE\] run formula docker [\#113](https://github.com/ZupIT/ritchie-cli/pull/113) ([kaduartur](https://github.com/kaduartur))
+
+**Fixed bugs:**
+
+- \[BUG\] PWD environment variable error passed by formula runner [\#155](https://github.com/ZupIT/ritchie-cli/issues/155)
+- \[BUG\] RIT Team: set server with invalid URL [\#91](https://github.com/ZupIT/ritchie-cli/issues/91)
+
+**Closed issues:**
+
+- \[FEATURE\] Create a beautiful screen after login and logout [\#22](https://github.com/ZupIT/ritchie-cli/issues/22)
+
+**Merged pull requests:**
+
+
 - \[FIX\] Formulas messages [\#161](https://github.com/ZupIT/ritchie-cli/pull/161) ([kaduartur](https://github.com/kaduartur))
 - removed flags [\#160](https://github.com/ZupIT/ritchie-cli/pull/160) ([victor-schumacher](https://github.com/victor-schumacher))
 - Temporarily disable windows jobs [\#159](https://github.com/ZupIT/ritchie-cli/pull/159) ([dmbarra](https://github.com/dmbarra))
