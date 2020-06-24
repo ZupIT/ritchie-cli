@@ -1,22 +1,27 @@
 package server
 
 import (
+	"crypto/tls"
+	"errors"
 	"fmt"
-	"log"
-	"net"
 	"net/http"
-	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
+const (
+	urlHttp = "http://localhost:8882"
+	urlHttpError = "http://localhost:8882/server/error"
+	urlHttps = "https://localhost"
+	urlHttpsError = "https://localhost:9999"
+)
+
 var (
-	srvListener       = "127.0.0.1:57469"
-	srvURL            = fmt.Sprintf("http://%s", srvListener)
-	errNoSuchHost     = fmt.Errorf("lookup %s: no such host", srvListener)
-	errNoSuchHostLong = fmt.Errorf("Get \"%s\": %s", srvURL, errNoSuchHost)
+	errNoSuchHost     = fmt.Errorf("lookup %s: no such host", strings.Replace(urlHttp, "http://", "", 1))
+	errNoSuchHostLong = fmt.Errorf("Get \"%s\": %s", urlHttp, errNoSuchHost)
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
@@ -33,98 +38,87 @@ func newClientErrNoSuchHost() *http.Client {
 	}
 }
 
+func makeHttpClient() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	return client
+}
+
 func TestSet(t *testing.T) {
 	type in struct {
 		cfg Config
 		hc  *http.Client
 	}
 
-	type out struct {
-		status int
-		err    error
-	}
-
 	tests := []struct {
 		name string
 		in   in
-		out  out
+		outErr error
 	}{
 		{
 			name: "empty organization",
 			in:   in{cfg: Config{Organization: ""}},
-			out: out{
-				err: ErrOrgIsRequired,
-			},
+			outErr: ErrOrgIsRequired,
 		},
 		{
 			name: "empty serverURL",
 			in:   in{cfg: Config{Organization: "org", URL: ""}},
-			out: out{
-				err: validator.ErrInvalidURL,
-			},
+			outErr: validator.ErrInvalidURL,
 		},
 		{
 			name: "invalid serverURL",
 			in:   in{cfg: Config{Organization: "org", URL: "invalid.server.URL"}},
-			out: out{
-				err: validator.ErrInvalidURL,
-			},
+			outErr: validator.ErrInvalidURL,
 		},
 		{
-			name: "valid serverURL",
-			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: http.DefaultClient},
-			out: out{
-				status: 200,
-			},
+			name: "trailing slash on serverURL",
+			in:   in{cfg: Config{Organization: "org", URL: fmt.Sprintf("%s/", urlHttp)}, hc: http.DefaultClient},
+			outErr: nil,
+		},
+		{
+			name: "valid serverURL http",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttp}, hc: http.DefaultClient},
+			outErr: nil,
 		},
 		{
 			name: "no such host error",
-			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: newClientErrNoSuchHost()},
-			out: out{
-				err: errNoSuchHostLong,
-			},
+			in:   in{cfg: Config{Organization: "org", URL: urlHttp}, hc: newClientErrNoSuchHost()},
+			outErr:  errNoSuchHostLong,
 		},
 		{
 			name: "server error",
-			in:   in{cfg: Config{Organization: "org", URL: srvURL}, hc: http.DefaultClient},
-			out: out{
-				status: 500,
-				err:    fmt.Errorf(ServerErrPattern, srvURL, "500 Internal Server Error"),
-			},
+			in:   in{cfg: Config{Organization: "org", URL: urlHttpError}, hc: http.DefaultClient},
+			outErr:    fmt.Errorf(ServerErrPattern, urlHttpError, "500 Server Error"),
+		},
+		{
+			name: "pinning server https",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttps}, hc: makeHttpClient()},
+			outErr: nil,
+		},
+		{
+			name: "pinning server https error",
+			in:   in{cfg: Config{Organization: "org", URL: urlHttpsError}, hc: makeHttpClient()},
+			outErr: errors.New("dial tcp"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			out := tt.out
 			s := NewSetter(os.TempDir(), in.hc)
 
-			if in.cfg.URL != "" {
-				srv := mockServer(out.status)
-				defer srv.Close()
-			}
-
 			got := s.Set(in.cfg)
-			if got != nil && got.Error() != out.err.Error() {
-				t.Errorf("Set(%s) got %v, want %v", in.cfg, got, out.err)
+			if tt.outErr != nil && got == nil {
+				t.Errorf("Set(%s) got %v, want %v", in.cfg, got, tt.outErr)
+			}
+			if got != nil && got.Error() != tt.outErr.Error() {
+				if !strings.Contains(got.Error(), tt.outErr.Error()) {
+					t.Errorf("Set(%s) got %v, want %v", in.cfg, got, tt.outErr)
+				}
 			}
 		})
 	}
 }
 
-func mockServer(status int) *httptest.Server {
-	l, err := net.Listen("tcp", srvListener)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		rw.WriteHeader(status)
-	}))
-	srv.Listener.Close()
-	srv.Listener = l
-	srv.Start()
-
-	return srv
-}

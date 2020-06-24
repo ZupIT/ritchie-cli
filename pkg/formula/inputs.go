@@ -23,18 +23,21 @@ type InputManager struct {
 	prompt.InputList
 	prompt.InputText
 	prompt.InputBool
+	prompt.InputPassword
 }
 
 func NewInputManager(
 	env env.Resolvers,
 	inList prompt.InputList,
 	inText prompt.InputText,
-	inBool prompt.InputBool) InputManager {
+	inBool prompt.InputBool,
+	inPass prompt.InputPassword) InputManager {
 	return InputManager{
 		envResolvers: env,
 		InputList:    inList,
 		InputText:    inText,
 		InputBool:    inBool,
+		InputPassword: inPass,
 	}
 }
 
@@ -112,6 +115,8 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 		case "bool":
 			valBool, err = d.Bool(input.Label, items)
 			inputVal = strconv.FormatBool(valBool)
+		case "password":
+			inputVal , err = d.Password(input.Label)
 		default:
 			inputVal, err = d.resolveIfReserved(input)
 			if err != nil {
@@ -166,7 +171,7 @@ func persistCache(formulaPath, inputVal string, input Input, items []string) {
 		itemsBytes, _ := json.Marshal(items)
 		err := fileutil.WriteFile(cachePath, itemsBytes)
 		if err != nil {
-			fmt.Sprintln("Error in WriteFile")
+			fmt.Sprintln("Write file error")
 			return
 		}
 

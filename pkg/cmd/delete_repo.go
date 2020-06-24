@@ -36,7 +36,7 @@ func NewDeleteRepoCmd(dl formula.DelLister, il prompt.InputList, ib prompt.Input
 		Use:     "repo [NAME_REPOSITORY]",
 		Short:   "Delete a repository.",
 		Example: "rit delete repo [NAME_REPOSITORY]",
-		RunE: RunFuncE(d.runStdin(), d.runPrompt()),
+		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
 	}
 
 	cmd.LocalFlags()
@@ -62,7 +62,7 @@ func (d deleteRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		if len(repos) == 0 {
-			fmt.Println("You dont have any repository to delete")
+			prompt.Error("You dont have any repository to delete")
 			return nil
 		}
 
@@ -83,8 +83,7 @@ func (d deleteRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%q has been removed from your repositories\n", rn)
-
+		prompt.Info(fmt.Sprintf("%q has been removed from your repositories\n", rn))
 		return nil
 	}
 }
@@ -96,7 +95,7 @@ func (d deleteRepoCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &dr)
 		if err != nil {
-			fmt.Println("The STDIN inputs weren't informed correctly. Check the JSON used to execute the command.")
+			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 
@@ -104,8 +103,7 @@ func (d deleteRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		fmt.Printf("%q has been removed from your repositories\n", dr.Name)
-
+		prompt.Info(fmt.Sprintf("%q has been removed from your repositories\n", dr.Name))
 		return nil
 	}
 }
