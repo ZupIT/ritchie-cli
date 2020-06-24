@@ -30,15 +30,15 @@ var _ = Describe("RitCore", func() {
 		},
 
 		Entry("Set", scenariosCore[0]),
-		Entry("Add", scenariosCore[1]),
-		Entry("Completion", scenariosCore[2]),
-		Entry("Clean", scenariosCore[3]),
-		Entry("Create", scenariosCore[4]),
-		Entry("Delete", scenariosCore[5]),
-		Entry("List", scenariosCore[6]),
-		Entry("Show", scenariosCore[7]),
-		Entry("Update", scenariosCore[8]),
+		Entry("Add", scenariosCore[2]),
+		Entry("Completion", scenariosCore[4]),
+		Entry("Clean", scenariosCore[5]),
+		Entry("Create", scenariosCore[7]),
+		Entry("Delete", scenariosCore[8]),
+		Entry("List", scenariosCore[9]),
+		Entry("Show", scenariosCore[10]),
+		Entry("Update", scenariosCore[11]),
 
-		Entry("Set Server", scenariosCore[9]),
+		Entry("Set Server", scenariosCore[12]),
 	)
 })
