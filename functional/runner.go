@@ -44,7 +44,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 }
 
 func (scenario *Scenario) RunStdin() (string, error) {
-	fmt.Println("Running: " + scenario.Entry)
+	fmt.Println("Running STDIN: " + scenario.Entry)
 	os := runtime.GOOS
 	if  os == "windows" {
 		b2, err := scenario.runStdinForWindows()
@@ -62,6 +62,16 @@ func RitInit() {
 		setUpRitWin()
 	} else {
 		setUpRitUnix()
+	}
+	fmt.Println("Setup Done..")
+}
+
+func RitClearConfigs() {
+	os := runtime.GOOS
+	if  os == "windows" {
+		setUpClearSetupWindows()
+	} else {
+		setUpClearSetupUnix()
 	}
 	fmt.Println("Setup Done..")
 }
@@ -90,3 +100,4 @@ func scannerTerminal(out io.Reader) *bufio.Scanner {
 	scanner.Split(bufio.ScanLines)
 	return scanner
 }
+

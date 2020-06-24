@@ -28,6 +28,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 		envMock  envResolverMock
 		inText   inputMock
 		inBool   inputMock
+		inPass inputMock
 		preMock  *preRunnerMock
 		postMock *postRunnerMock
 	}
@@ -43,6 +44,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{text: ""},
 				inBool:  inputMock{boolean: true},
+				inPass: inputMock{text: "******"},
 			},
 			want: nil,
 		},
@@ -52,6 +54,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{text: "ok"},
 				inBool:  inputMock{boolean: true},
+				inPass: inputMock{text: "******"},
 				preMock: &preRunnerMock{
 					setup: Setup{},
 					error: ErrFormulaBinNotFound,
@@ -65,6 +68,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{err: errors.New("fail to resolve input")},
 				inBool:  inputMock{boolean: true},
+				inPass: inputMock{text: "******"},
 			},
 			want: errors.New("fail to resolve input"),
 		},
@@ -74,6 +78,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock:  envResolverMock{in: "ok"},
 				inText:   inputMock{text: "ok"},
 				inBool:   inputMock{boolean: true},
+				inPass: inputMock{text: "******"},
 				postMock: &postRunnerMock{error: errors.New("error in remove dir")},
 			},
 			want: errors.New("error in remove dir"),
@@ -99,7 +104,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 			}
 
 			resolvers := env.Resolvers{"test": in.envMock}
-			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool)
+			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
 			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager)
 
 			got := defaultRunner.Run(def, api.Prompt)
@@ -128,6 +133,10 @@ func (i inputMock) Text(string, bool) (string, error) {
 
 func (i inputMock) Bool(string, []string) (bool, error) {
 	return i.boolean, i.err
+}
+
+func (i inputMock) Password(string) (string, error) {
+	return i.text, i.err
 }
 
 type envResolverMock struct {

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if expr "$VERSION" : 'qa-*' >/dev/null; then
+if expr "$VERSION" : '^[0-9]\+.0.0-qa' >/dev/null; then
   echo "ritchie-cli-bucket234376412767550"
 elif expr "$VERSION" : '^[0-9]\+' >/dev/null; then
   echo "ritchie-cli-bucket152849730126474"
