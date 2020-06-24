@@ -93,8 +93,9 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool)
+	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := formula.NewDefaultTeamSetup(ritchieHomeDir, httpClient, sessionManager)
+
 
 	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
 	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
@@ -126,7 +127,7 @@ func buildCommands() *cobra.Command {
 	deleteCmd := cmd.NewDeleteCmd()
 	initCmd := cmd.NewTeamInitCmd(inputText, inputPassword, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader)
+	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()

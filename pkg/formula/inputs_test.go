@@ -37,6 +37,7 @@ func TestInputManager_Inputs(t *testing.T) {
 		iText  inputMock
 		iList  inputMock
 		iBool  inputMock
+		iPass inputMock
 		inType api.TermInputType
 		stdin  string
 	}
@@ -52,6 +53,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iText:  inputMock{text: DefaultCacheNewLabel},
 				iList:  inputMock{text: "test"},
 				iBool:  inputMock{boolean: false},
+				iPass: inputMock{text: "******"},
 				inType: api.Stdin,
 				stdin:  `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
 			},
@@ -63,6 +65,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iText:  inputMock{text: DefaultCacheNewLabel},
 				iList:  inputMock{text: "test"},
 				iBool:  inputMock{boolean: false},
+				iPass: inputMock{text: "******"},
 				inType: api.Prompt,
 			},
 			want: nil,
@@ -73,6 +76,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iText:  inputMock{text: DefaultCacheNewLabel},
 				iList:  inputMock{text: "test"},
 				iBool:  inputMock{boolean: false},
+				iPass: inputMock{text: "******"},
 				inType: api.TermInputType(3),
 			},
 			want: ErrInputNotRecognized,
@@ -85,8 +89,9 @@ func TestInputManager_Inputs(t *testing.T) {
 			iText := tt.in.iText
 			iList := tt.in.iList
 			iBool := tt.in.iBool
+			iPass := tt.in.iPass
 
-			inputManager := NewInputManager(resolvers, iList, iText, iBool)
+			inputManager := NewInputManager(resolvers, iList, iText, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 			if tt.in.inType == api.Stdin {
