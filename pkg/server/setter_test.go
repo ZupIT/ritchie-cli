@@ -114,7 +114,7 @@ func TestSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			s := NewSetter(os.TempDir(), in.hc)
+			s := NewSetter(os.TempDir(), in.hc, true)
 
 			got := s.Set(&in.cfg)
 			if tt.outErr != nil && got == nil {

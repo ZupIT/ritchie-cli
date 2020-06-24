@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/resource"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
@@ -39,7 +40,7 @@ func TestUpgradeUrl(t *testing.T) {
 				},
 			},
 			want: func() string {
-				expected := fmt.Sprintf(upgradeUrlFormat, "1.0.0", runtime.GOOS, api.Single)
+				expected := fmt.Sprintf(resource.UpgradeUrlFormat, "1.0.0", runtime.GOOS, api.Single)
 				if runtime.GOOS == "windows" {
 					expected += ".exe"
 				}
@@ -57,7 +58,7 @@ func TestUpgradeUrl(t *testing.T) {
 				},
 			},
 			want: func() string {
-				expected := fmt.Sprintf(upgradeUrlFormat, "1.0.0", runtime.GOOS, api.Team)
+				expected := fmt.Sprintf(resource.UpgradeUrlFormat, "1.0.0", runtime.GOOS, api.Team)
 				if runtime.GOOS == "windows" {
 					expected += ".exe"
 				}
