@@ -238,6 +238,8 @@ jobs:
 
   build:
     executor: ritchie-executor
+    environment:
+      <<: *ENVIRONMENT
     branches:
     steps:
       - checkout
@@ -247,12 +249,18 @@ jobs:
             . ./.circleci/scripts/version.sh
             go mod download
             make build-circle
+      - run:
+          name: Persist version file
+          command: |
+            . ./.circleci/scripts/version.sh
+            echo $RELEASE_VERSION > dist/release_version.txt
       - persist_to_workspace:
           root: dist
           paths:
             - linux
             - darwin
             - windows
+            - release_version.txt
       - store_test_results:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
@@ -317,11 +325,6 @@ jobs:
       - checkout
       - attach_workspace:
           at: /workspace/dist
-      - run:
-          command: |
-            . ./.circleci/scripts/version.sh
-            echo $RELEASE_VERSION > release_version.txt
-          shell: bash.exe
       - run:
           command: |
             .circleci/scripts/gen-win.ps1
@@ -457,17 +460,12 @@ workflows:
       - lint:
           filters:
             <<: *FILTERS_CHECK_CODE
-      - horus:
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - lint
       - unit_test:
          name: unit-test
          filters:
            <<: *FILTERS_CHECK_CODE
          requires:
-           - horus
+           - lint
       - build:
           name: build-code
           filters:
@@ -499,7 +497,7 @@ workflows:
           requires:
             - build-code
       - release:
-          name: release
+          name: release-publish
           filters:
             <<: *FILTERS_RELEASE
           requires:
@@ -509,7 +507,7 @@ workflows:
           filters:
             <<: *FILTERS_RELEASE
           requires:
-            - release
+            - release-publish
   delivery:
     jobs:
       - build:
@@ -521,7 +519,6 @@ workflows:
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - build-code
             - deb-package
             - rpm-package
             - win-package

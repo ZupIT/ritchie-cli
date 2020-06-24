@@ -108,3 +108,19 @@
 
   response:
     status: 401
+
+#Get 200 set server
+- request:
+    method: GET
+    url: /
+
+  response:
+    status: 200
+
+#Get 500 set server
+- request:
+    method: GET
+    url: ^/server/error$
+
+  response:
+    status: 500
