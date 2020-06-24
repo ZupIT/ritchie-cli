@@ -1,12 +1,18 @@
 package prompt
 
-import "github.com/manifoldco/promptui"
+import (
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/manifoldco/promptui"
+)
+
 
 type InputText interface {
 	Text(name string, required bool) (string, error)
 }
 
 type inputText struct{}
+
+type surveyText struct{}
 
 func NewInputText() inputText {
 	return inputText{}
@@ -33,3 +39,34 @@ func (inputText) Text(name string, required bool) (string, error) {
 
 	return prompt.Run()
 }
+
+func NewSurveyText() surveyText {
+	return surveyText{}
+}
+
+func (surveyText) Text(name string, required bool) (string, error) {
+
+	var value string
+
+	var validationQs []*survey.Question
+
+
+	if required{
+		validationQs = []*survey.Question{
+			{
+				Name:     "name",
+				Prompt:   &survey.Input{Message: name},
+				Validate: survey.Required,
+			},
+		}
+	}else {
+		validationQs = []*survey.Question{
+			{
+				Name:   "name",
+				Prompt: &survey.Input{Message: name},
+			},
+		}
+	}
+	return value, survey.Ask(validationQs, &name)
+}
+

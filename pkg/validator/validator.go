@@ -54,8 +54,8 @@ func HasMinValue(str string, min int) error {
 var ErrInvalidURL = errors.New("invalid URL")
 
 //IsValidURL validates the url format
-func IsValidURL(value string) error {
-	_, err := url.ParseRequestURI(value)
+func IsValidURL(value interface{}) error {
+	_, err := url.ParseRequestURI(value.(string))
 	if err != nil {
 		return ErrInvalidURL
 	}

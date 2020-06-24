@@ -30,8 +30,8 @@ func validateEmptyInput(input string) error {
 	return nil
 }
 
-func validateIntegerNumberInput(input string) error {
-	_, err := strconv.ParseInt(input, 0, 64)
+func validateIntegerNumberInput(input interface{}) error {
+	_, err := strconv.ParseInt(input.(string), 0, 64)
 	if err != nil {
 		return errors.New("invalid number")
 	}

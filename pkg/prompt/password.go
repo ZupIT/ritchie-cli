@@ -1,6 +1,9 @@
 package prompt
 
-import "github.com/manifoldco/promptui"
+import (
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/manifoldco/promptui"
+)
 
 const (
 	// PasswordType type
@@ -17,6 +20,12 @@ func NewInputPassword() inputPassword {
 	return inputPassword{}
 }
 
+type surveyPassword struct{}
+
+func NewSurveyPassword() surveyPassword {
+	return surveyPassword{}
+}
+
 // Password show a masked prompt and parse to string.
 func (inputPassword) Password(label string) (string, error) {
 	prompt := promptui.Prompt{
@@ -28,4 +37,15 @@ func (inputPassword) Password(label string) (string, error) {
 	}
 
 	return prompt.Run()
+}
+
+func (surveyPassword) Password(label string) (string, error)  {
+
+	password := ""
+	prompt := &survey.Password{
+		Message: label,
+	}
+
+	return password, survey.AskOne(prompt, &password)
+
 }

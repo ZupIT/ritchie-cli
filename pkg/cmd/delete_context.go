@@ -59,7 +59,7 @@ func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		ctx, err := d.List("All:", ctxHolder.All)
+		ctx, err := d.List("Contexts:", ctxHolder.All)
 		if err != nil {
 			return err
 		}
