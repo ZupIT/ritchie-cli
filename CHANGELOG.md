@@ -1,5 +1,77 @@
 # Changelog
 
+## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.14...HEAD)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Build formula with Ritchie-cli [\#180](https://github.com/ZupIT/ritchie-cli/pull/180) ([kaduartur](https://github.com/kaduartur))
+- cleanup, refactor and improvements regarding beta and nightly version [\#175](https://github.com/ZupIT/ritchie-cli/pull/175) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/rit upgrade [\#165](https://github.com/ZupIT/ritchie-cli/pull/165) ([viniciussousazup](https://github.com/viniciussousazup))
+- Feature/colors [\#162](https://github.com/ZupIT/ritchie-cli/pull/162) ([victor-schumacher](https://github.com/victor-schumacher))
+
+**Fixed bugs:**
+
+- \[bug\] fix completion zsh,bash [\#194](https://github.com/ZupIT/ritchie-cli/pull/194) ([viniciussousazup](https://github.com/viniciussousazup))
+- \[FIX\] trailing slashes removed [\#166](https://github.com/ZupIT/ritchie-cli/pull/166) ([marcoscostazup](https://github.com/marcoscostazup))
+
+**Merged pull requests:**
+
+- Revert "change pgk of init constant" [\#205](https://github.com/ZupIT/ritchie-cli/pull/205) ([marcosgmgm](https://github.com/marcosgmgm))
+- Revert "Bug/fix horus" [\#204](https://github.com/ZupIT/ritchie-cli/pull/204) ([marcosgmgm](https://github.com/marcosgmgm))
+- change pgk of init constant [\#203](https://github.com/ZupIT/ritchie-cli/pull/203) ([viniciussousazup](https://github.com/viniciussousazup))
+- changes [\#202](https://github.com/ZupIT/ritchie-cli/pull/202) ([ernelio](https://github.com/ernelio))
+- fix remove horus [\#201](https://github.com/ZupIT/ritchie-cli/pull/201) ([ernelio](https://github.com/ernelio))
+- Bug/fix horus [\#199](https://github.com/ZupIT/ritchie-cli/pull/199) ([viniciussousazup](https://github.com/viniciussousazup))
+- fix generate msi win [\#198](https://github.com/ZupIT/ritchie-cli/pull/198) ([ernelio](https://github.com/ernelio))
+- \[FEATURE\] Supporting password fields in formula config [\#197](https://github.com/ZupIT/ritchie-cli/pull/197) ([sandokandias](https://github.com/sandokandias))
+- fix generate version in windows [\#195](https://github.com/ZupIT/ritchie-cli/pull/195) ([ernelio](https://github.com/ernelio))
+- Fix/version msi release [\#193](https://github.com/ZupIT/ritchie-cli/pull/193) ([ernelio](https://github.com/ernelio))
+- fix msi release [\#192](https://github.com/ZupIT/ritchie-cli/pull/192) ([ernelio](https://github.com/ernelio))
+- \[FEATURE\] Pinning ssl [\#191](https://github.com/ZupIT/ritchie-cli/pull/191) ([marcosgmgm](https://github.com/marcosgmgm))
+- \[FIX\] Packaging changelog [\#184](https://github.com/ZupIT/ritchie-cli/pull/184) ([ernelio](https://github.com/ernelio))
+- \[Feature\] Improvements circleci [\#182](https://github.com/ZupIT/ritchie-cli/pull/182) ([ernelio](https://github.com/ernelio))
+- Feature/unix tests for init [\#174](https://github.com/ZupIT/ritchie-cli/pull/174) ([dmbarra](https://github.com/dmbarra))
+- Update ritchie-bot-config.yml [\#172](https://github.com/ZupIT/ritchie-cli/pull/172) ([viniciussousazup](https://github.com/viniciussousazup))
+- Feature/packaging [\#169](https://github.com/ZupIT/ritchie-cli/pull/169) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- change run-tests and scripts to windows [\#167](https://github.com/ZupIT/ritchie-cli/pull/167) ([viniciussousazup](https://github.com/viniciussousazup))
+- Fix smoke test for release [\#164](https://github.com/ZupIT/ritchie-cli/pull/164) ([dmbarra](https://github.com/dmbarra))
+- Feature/beta pipeline [\#163](https://github.com/ZupIT/ritchie-cli/pull/163) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- \[FIX\] Adding trapdoor to error while removing branch [\#152](https://github.com/ZupIT/ritchie-cli/pull/152) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
+## [1.0.0-beta.14](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.14) (2020-06-24)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.13...1.0.0-beta.14)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] rit build formula command [\#176](https://github.com/ZupIT/ritchie-cli/issues/176)
+- \[FEATURE\] Run formulas inside a docker container [\#80](https://github.com/ZupIT/ritchie-cli/issues/80)
+- \[Feature\] color messages [\#146](https://github.com/ZupIT/ritchie-cli/pull/146) ([victor-schumacher](https://github.com/victor-schumacher))
+- \[FEATURE\] run formula docker [\#113](https://github.com/ZupIT/ritchie-cli/pull/113) ([kaduartur](https://github.com/kaduartur))
+
+**Fixed bugs:**
+
+- \[BUG\] PWD environment variable error passed by formula runner [\#155](https://github.com/ZupIT/ritchie-cli/issues/155)
+- \[BUG\] RIT Team: set server with invalid URL [\#91](https://github.com/ZupIT/ritchie-cli/issues/91)
+
+**Closed issues:**
+
+- \[FEATURE\] Create a beautiful screen after login and logout [\#22](https://github.com/ZupIT/ritchie-cli/issues/22)
+
+**Merged pull requests:**
+
+- \[FIX\] Formulas messages [\#161](https://github.com/ZupIT/ritchie-cli/pull/161) ([kaduartur](https://github.com/kaduartur))
+- removed flags [\#160](https://github.com/ZupIT/ritchie-cli/pull/160) ([victor-schumacher](https://github.com/victor-schumacher))
+- Temporarily disable windows jobs [\#159](https://github.com/ZupIT/ritchie-cli/pull/159) ([dmbarra](https://github.com/dmbarra))
+- Feature/rework for workflows [\#158](https://github.com/ZupIT/ritchie-cli/pull/158) ([dmbarra](https://github.com/dmbarra))
+- \[FIX\] pwd shell [\#157](https://github.com/ZupIT/ritchie-cli/pull/157) ([marcosgmgm](https://github.com/marcosgmgm))
+- Fix/tpl [\#156](https://github.com/ZupIT/ritchie-cli/pull/156) ([victor-schumacher](https://github.com/victor-schumacher))
+- \[FEATURE\] Login prompt [\#154](https://github.com/ZupIT/ritchie-cli/pull/154) ([marcosgmgm](https://github.com/marcosgmgm))
+- Feature/windows functional tests [\#153](https://github.com/ZupIT/ritchie-cli/pull/153) ([dmbarra](https://github.com/dmbarra))
+- Release 1.0.0-beta.13 merge [\#147](https://github.com/ZupIT/ritchie-cli/pull/147) ([zup-ci](https://github.com/zup-ci))
+
 ## [1.0.0-beta.13](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.13) (2020-06-03)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.12...1.0.0-beta.13)
