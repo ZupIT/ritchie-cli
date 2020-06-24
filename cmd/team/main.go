@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
-	"github.com/ZupIT/ritchie-cli/pkg/resource"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -73,7 +72,7 @@ func buildCommands() *cobra.Command {
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	serverFinder := server.NewFinder(ritchieHomeDir)
-	serverSetter := server.NewSetter(ritchieHomeDir, makeHttpClientIgnoreSsl(), resource.SkipTlsVerify)
+	serverSetter := server.NewSetter(ritchieHomeDir, makeHttpClientIgnoreSsl())
 	serverFindSetter := server.NewFindSetter(serverFinder, serverSetter)
 
 	httpClient := makeHttpClient(serverFinder)
@@ -110,7 +109,7 @@ func buildCommands() *cobra.Command {
 	uhc := makeHttpClient(serverFinder)
 	uhc.Timeout =  1 * time.Second
 	defaultUpgradeResolver := version.DefaultVersionResolver{
-		StableVersionUrl: resource.StableVersionUrl,
+		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultService{},
 		HttpClient:       uhc,
 	}
@@ -279,7 +278,7 @@ func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 
 func makeHttpClientIgnoreSsl() *http.Client {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: resource.SkipTlsVerify},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
 	return client

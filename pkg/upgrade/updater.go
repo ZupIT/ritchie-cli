@@ -6,6 +6,10 @@ import (
 	"github.com/inconshreveable/go-update"
 )
 
+const (
+	upgradeUrlFormat = "https://commons-repo.ritchiecli.io/%s/%s/%s/rit"
+)
+
 type Updater interface {
 	Apply(reader io.Reader, opts update.Options) error
 }
