@@ -2,7 +2,6 @@ package credteam
 
 import (
 	"encoding/json"
-	"errors"
 	"reflect"
 	"testing"
 
@@ -60,7 +59,7 @@ func TestFields(t *testing.T) {
 		{
 			name: "server error",
 			out: out{
-				err:    errors.New(prompt.Red("internal server error")),
+				err:    prompt.Error("internal server error"),
 				status: 500,
 			},
 		},

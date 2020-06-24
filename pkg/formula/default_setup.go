@@ -2,7 +2,6 @@ package formula
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,12 +18,12 @@ import (
 )
 
 var (
-	ErrFormulaBinNotFound        = errors.New(prompt.Red("formula bin not found"))
-	ErrConfigFileNotFound        = errors.New(prompt.Red("config file not found"))
-	ErrUnknownFormulaDownload    = errors.New(prompt.Red("unknown error when downloading your formula"))
-	ErrUnknownConfigFileDownload = errors.New(prompt.Red("unknown error when downloading your config file"))
-	ErrCreateReqBundle           = errors.New(prompt.Red("failed to create request for bundle download"))
-	ErrCreateReqConfig           = errors.New(prompt.Red("failed to create request for config download"))
+	ErrFormulaBinNotFound        = prompt.Error("formula bin not found")
+	ErrConfigFileNotFound        = prompt.Error("config file not found")
+	ErrUnknownFormulaDownload    = prompt.Error("unknown error when downloading your formula")
+	ErrUnknownConfigFileDownload = prompt.Error("unknown error when downloading your config file")
+	ErrCreateReqBundle           = prompt.Error("failed to create request for bundle download")
+	ErrCreateReqConfig           = prompt.Error("failed to create request for config download")
 )
 
 type DefaultSetup struct {

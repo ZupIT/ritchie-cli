@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -13,9 +12,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var (
-	ErrNotAllowedCharacter = errors.New(prompt.Red(`not allowed character on formula name \/,><@-`))
-)
+var ErrNotAllowedCharacter = prompt.Error(`not allowed character on formula name \/,><@-`)
 
 const notAllowedChars = `\/><,@-`
 

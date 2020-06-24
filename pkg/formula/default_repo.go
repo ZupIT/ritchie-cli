@@ -3,7 +3,6 @@ package formula
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -34,7 +33,7 @@ const (
 
 var (
 	// Errors
-	ErrNoRepoToShow = errors.New(prompt.Red("no repositories to show"))
+	ErrNoRepoToShow = prompt.Error("no repositories to show")
 )
 
 type RepoManager struct {
@@ -226,7 +225,7 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 
 	session, err := dm.sessionManager.Current()
 	if err != nil {
-		return errors.New(prompt.Red("error restore current session"))
+		return prompt.Error("error restore current session")
 	}
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {

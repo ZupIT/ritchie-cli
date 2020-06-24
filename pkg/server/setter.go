@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -19,7 +18,7 @@ const (
 
 var (
 	// ErrOrgIsRequired error message for org
-	ErrOrgIsRequired = errors.New(prompt.Red("Organization is required"))
+	ErrOrgIsRequired = prompt.Error("Organization is required")
 )
 
 type SetterManager struct {

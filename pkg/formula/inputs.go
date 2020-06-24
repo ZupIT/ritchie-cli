@@ -2,7 +2,6 @@ package formula
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -16,7 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var ErrInputNotRecognized = errors.New(prompt.Red("terminal input not recognized"))
+var ErrInputNotRecognized = prompt.Error("terminal input not recognized")
 
 type InputManager struct {
 	envResolvers env.Resolvers

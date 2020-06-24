@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ErrNoSession = errors.New("session not started")
+	ErrNoSession = errors.New("please, you need to start a session")
 )
 
 type DefaultManager struct {

@@ -1,7 +1,6 @@
 package autocomplete
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -29,7 +28,7 @@ const (
 
 var (
 	supportedAutocomplete = []string{bash, zsh}
-	ErrNotSupported       = errors.New(prompt.Red("autocomplete for this terminal is not supported"))
+	ErrNotSupported       = prompt.Error("autocomplete for this terminal is not supported")
 )
 
 type GeneratorManager struct {

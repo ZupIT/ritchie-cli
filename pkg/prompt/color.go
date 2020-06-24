@@ -1,6 +1,7 @@
 package prompt
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gookit/color"
@@ -10,8 +11,12 @@ func Red(text string) string {
 	return color.FgRed.Render(text)
 }
 
-func Error(text string) {
-	fmt.Println(color.FgRed.Render(text))
+func PrintRed(text string) {
+	fmt.Println(Red(text))
+}
+
+func Error(text string) error {
+	return errors.New(Red(text))
 }
 
 func Warning(text string) {
