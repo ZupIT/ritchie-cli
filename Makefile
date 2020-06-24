@@ -28,8 +28,9 @@ DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
 COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
-IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+|qa-.*")
-IS_BETA=$(shell echo $(VERSION) | egrep "^beta")
+IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+-beta.[0-9]+")
+IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
+IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next-version.sh)
 SKIP_TLS_VERIFICATION_TEAM=true
@@ -62,13 +63,17 @@ build: build-linux build-mac build-windows
 ifneq "$(BUCKET)" ""
 	echo $(BUCKET)
 	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
-ifneq "$(IS_RELEASE)" ""
-	echo -n "$(RELEASE_VERSION)" > stable.txt
-	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+ifneq "$(IS_NIGHTLY)" ""
+	echo -n "$(RELEASE_VERSION)" > nightly.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "nightly.txt"
 endif
 ifneq "$(IS_BETA)" ""
 	echo -n "$(RELEASE_VERSION)" > beta.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "beta.txt"
+endif
+ifneq "$(IS_RELEASE)" ""
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 endif
 else
 	echo "NOT GONNA PUBLISH"
@@ -92,13 +97,17 @@ delivery:
 	@echo $(VERSION)
 ifneq "$(BUCKET)" ""
 	aws s3 sync dist s3://$(BUCKET)/$(RELEASE_VERSION) --include "*"
-ifneq "$(IS_RELEASE)" ""
-	echo -n "$(RELEASE_VERSION)" > stable.txt
-	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+ifneq "$(IS_NIGHTLY)" ""
+	echo -n "$(RELEASE_VERSION)" > nightly.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "nightly.txt"
 endif
 ifneq "$(IS_BETA)" ""
 	echo -n "$(RELEASE_VERSION)" > beta.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "beta.txt"
+endif
+ifneq "$(IS_RELEASE)" ""
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 endif
 else
 	echo "NOT GONNA PUBLISH"
