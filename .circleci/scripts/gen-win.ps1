@@ -39,7 +39,7 @@ Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\circlec
 
 Write-Output 'Setting Release Version Variable'
 
-$release_version=$(Get-Content .\release_version.txt)
+$release_version=$(Get-Content .\workspace\dist\release_version.txt)
 
 mkdir dist\installer
 
