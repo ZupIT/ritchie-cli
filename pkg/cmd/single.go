@@ -1,3 +1,3 @@
-package resource
+package cmd
 
 var CommonsRepoURL = ""
