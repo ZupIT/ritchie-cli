@@ -3,11 +3,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -20,19 +22,27 @@ const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
-	formula.Creator
-	prompt.InputText
-	prompt.InputList
-	prompt.InputBool
+	homeDir   string
+	formula   formula.CreateBuilder
+	workspace workspace.AddListValidator
+	inText    prompt.InputText
+	inList    prompt.InputList
 }
 
 // CreateFormulaCmd creates a new cmd instance
-func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.InputList, ib prompt.InputBool) *cobra.Command {
+func NewCreateFormulaCmd(
+	homeDir string,
+	formula formula.CreateBuilder,
+	workspace workspace.AddListValidator,
+	inText prompt.InputText,
+	inList prompt.InputList,
+) *cobra.Command {
 	c := createFormulaCmd{
-		cf,
-		it,
-		il,
-		ib,
+		homeDir,
+		formula,
+		workspace,
+		inText,
+		inList,
 	}
 
 	cmd := &cobra.Command{
@@ -49,50 +59,62 @@ func NewCreateFormulaCmd(cf formula.Creator, it prompt.InputText, il prompt.Inpu
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		fCmd, err := c.Text("Enter the new formula command [ex.: rit group verb noun]", true)
+		formulaCmd, err := c.inText.Text("Enter the new formula command [ex.: rit group verb noun]", true)
 		if err != nil {
 			return err
 		}
 
-		if strings.ContainsAny(fCmd, notAllowedChars) {
+		if strings.ContainsAny(formulaCmd, notAllowedChars) {
 			return ErrNotAllowedCharacter
 		}
 
-		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
+		lang, err := c.inList.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
 		if err != nil {
 			return err
 		}
-		homeDir, _ := os.UserHomeDir()
-		ritFormulasPath := fmt.Sprintf("%s/ritchie-formulas-local", homeDir)
-		repoQuestion := fmt.Sprintf("Use default repo (%s)?", ritFormulasPath)
-		var localRepoDir string
-		choice, _ := c.Bool(repoQuestion, []string{"yes", "no"})
-		if !choice {
-			pathQuestion := fmt.Sprintf("Enter your path [ex.:%s]", ritFormulasPath)
-			localRepoDir, err = c.Text(pathQuestion, true)
-			if err != nil {
-				return err
-			}
 
+		workspaces, err := c.workspace.List()
+		if err != nil {
+			return err
 		}
+
+		wspace, err := FormulaWorkspaceInput(c.homeDir, workspaces, c.inList, c.inText)
+		if err != nil {
+			return err
+		}
+
+		if err := c.workspace.Add(wspace); err != nil {
+			return err
+		}
+
+		formulaPath := formulaPath(wspace.Dir, formulaCmd)
 
 		cf := formula.Create{
-			FormulaCmd:   fCmd,
-			Lang:         lang,
-			LocalRepoDir: localRepoDir,
+			FormulaCmd:    formulaCmd,
+			Lang:          lang,
+			WorkspacePath: wspace.Dir,
+			FormulaPath:   formulaPath,
 		}
 
-		f, err := c.Create(cf)
-		if err != nil {
+		if err := c.formula.Create(cf); err != nil {
+			return err
+		}
+
+		if err := c.formula.Build(wspace.Dir, formulaPath); err != nil {
 			return err
 		}
 
 		prompt.Success(fmt.Sprintf("%s formula successfully created!", lang))
-
-		prompt.Info(fmt.Sprintf("Formula path is %s", f.FormPath))
+		prompt.Info(fmt.Sprintf("Formula path is %s", wspace.Dir))
 
 		return nil
 	}
+}
+
+func formulaPath(workspacePath, cmd string) string {
+	cc := strings.Split(cmd, " ")
+	formulaPath := strings.Join(cc[1:], "/")
+	return path.Join(workspacePath, formulaPath)
 }
 
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
@@ -109,13 +131,63 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		f, err := c.Create(cf)
-		if err != nil {
+		if err := c.formula.Create(cf); err != nil {
 			return err
 		}
 
 		prompt.Success(fmt.Sprintf("%s formula successfully created!\n", cf.Lang))
-		prompt.Info(fmt.Sprintf("Formula path is %s \n", f.FormPath))
+		prompt.Info(fmt.Sprintf("Formula path is %s \n", cf.WorkspacePath))
 		return nil
 	}
+}
+
+func FormulaWorkspaceInput(
+	homeDir string,
+	workspaces workspace.Workspaces,
+	inList prompt.InputList,
+	inText prompt.InputText,
+) (workspace.Workspace, error) {
+	defaultWorkspace := path.Join(homeDir, workspace.DefaultWorkspaceDir)
+	workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
+
+	var items []string
+	for k, v := range workspaces {
+		kv := fmt.Sprintf("%s (%s)", k, v)
+		items = append(items, kv)
+	}
+
+	items = append(items, newWorkspace)
+	selected, err := inList.List("Select a formula workspace: ", items)
+	if err != nil {
+		return workspace.Workspace{}, err
+	}
+
+	var workspaceName string
+	var workspacePath string
+	var wspace workspace.Workspace
+	if selected == newWorkspace {
+		workspaceName, err = inText.Text("Workspace name: ", true)
+		if err != nil {
+			return workspace.Workspace{}, err
+		}
+
+		workspacePath, err = inText.Text("Workspace path (e.g.: /home/user/github):", true)
+		if err != nil {
+			return workspace.Workspace{}, err
+		}
+
+		wspace = workspace.Workspace{
+			Name: strings.Title(workspaceName),
+			Dir:  workspacePath,
+		}
+	} else {
+		split := strings.Split(selected, " ")
+		workspaceName = split[0]
+		workspacePath = workspaces[workspaceName]
+		wspace = workspace.Workspace{
+			Name: strings.Title(workspaceName),
+			Dir:  workspacePath,
+		}
+	}
+	return wspace, nil
 }

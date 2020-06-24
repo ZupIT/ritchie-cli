@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	msgErrMakefileNotFound = fmt.Sprintf(prompt.Red, "Makefile not found, a valid formula workspace must have a Makefile")
+	msgErrMakefileNotFound = fmt.Sprintf(prompt.Red, "MakefilePath not found, a valid formula workspace must have a MakefilePath")
 	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Red, "tree.json not found, a valid formula workspace must have a tree.json")
 	msgErrInvalidWorkspace = fmt.Sprintf(prompt.Red, "the formula workspace does not exist, please enter a valid workspace")
 	ErrInvalidWorkspace    = errors.New(msgErrInvalidWorkspace)
@@ -25,15 +26,11 @@ type Manager struct {
 }
 
 func New(ritchieHome string, fileManager stream.FileWriteReadExister) Manager {
-	workspaceFile := fmt.Sprintf(workspacesPattern, ritchieHome)
+	workspaceFile := path.Join(ritchieHome, workspacesFile)
 	return Manager{workspaceFile: workspaceFile, file: fileManager}
 }
 
 func (m Manager) Add(workspace Workspace) error {
-	if err := m.Validate(workspace); err != nil {
-		return err
-	}
-
 	workspaces := Workspaces{}
 	if m.file.Exists(m.workspaceFile) {
 		file, err := m.file.Read(m.workspaceFile)
@@ -83,12 +80,12 @@ func (m Manager) Validate(workspace Workspace) error {
 		return ErrInvalidWorkspace
 	}
 
-	makefilePath := fmt.Sprintf(formula.MakefileCreatePathPattern, dir, formula.Makefile)
+	makefilePath := path.Join(dir, formula.MakefilePath)
 	if !m.file.Exists(makefilePath) {
 		return ErrMakefileNotFound
 	}
 
-	treePath := fmt.Sprintf(formula.TreeCreatePathPattern, dir)
+	treePath := path.Join(dir, formula.TreePath)
 	if !m.file.Exists(treePath) {
 		return ErrTreeJsonNotFound
 	}

@@ -1,25 +1,28 @@
-package formula
+package creator
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/thoas/go-funk"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
-	localTreeFile     = "%s/tree/tree.json"
 	nameModule        = "{{nameModule}}"
 	nameBin           = "{{bin-name}}"
 	nameBinFirstUpper = "{{bin-name-first-upper}}"
@@ -29,147 +32,70 @@ var (
 	ErrDontStartWithRit = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	ErrTooShortCommand  = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 	ErrRepeatedCommand  = fmt.Errorf(prompt.Red, "this command already exists")
-	ErrTreeJsonNotFound = fmt.Errorf(prompt.Red, "tree.json not found")
-	ErrMakefileNotFound = fmt.Errorf(prompt.Red, "makefile not found")
 )
 
 type CreateManager struct {
-	FormPath    string
-	treeManager TreeManager
+	treeManager formula.TreeManager
+	dir         stream.DirCreater
+	file        stream.FileWriteReadExister
 }
 
-func NewCreator(homePath string, tm TreeManager) CreateManager {
-	return CreateManager{FormPath: fmt.Sprintf(FormCreatePathPattern, homePath), treeManager: tm}
+func NewCreator(tm formula.TreeManager, dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
+	return CreateManager{treeManager: tm, dir: dir, file: file}
 }
 
-func (c CreateManager) Create(cf Create) (CreateManager, error) {
-	_ = fileutil.CreateDirIfNotExists(c.FormPath, os.ModePerm)
-	localRepoDir := cf.LocalRepoDir
-	fCmd := cf.FormulaCmd
-	lang := cf.Lang
-
-	if localRepoDir != "" {
-
-		if !existsTreeJson(localRepoDir) && existsMakefile(localRepoDir) {
-			return CreateManager{}, ErrTreeJsonNotFound
-		}
-		if !existsMakefile(localRepoDir) && existsTreeJson(localRepoDir) {
-			return CreateManager{}, ErrMakefileNotFound
-		}
-
-		c.FormPath = localRepoDir
-	}
-
-	trees, err := c.treeManager.Tree()
-	if err != nil {
-		return CreateManager{}, err
-	}
-
-	err = verifyCommand(fCmd, trees)
-	if err != nil {
-		return CreateManager{}, err
-	}
-
-	err = generateTreeJsonFile(c.FormPath, fCmd, lang)
-	if err != nil {
-		return CreateManager{}, err
-	}
-
-	if existsMakefile(c.FormPath) && existsTreeJson(c.FormPath) {
-		err = generateFormulaFiles(c.FormPath, fCmd, lang, false)
-		if err != nil {
-			return CreateManager{}, err
-		}
-	} else {
-		err = generateFormulaFiles(c.FormPath, fCmd, lang, true)
-		if err != nil {
-			return CreateManager{}, err
-		}
-	}
-
-	return c, nil
-}
-
-func existsTreeJson(formPath string) bool {
-	treePath := fmt.Sprintf(TreeCreatePathPattern, formPath)
-	return fileutil.Exists(treePath)
-}
-
-func existsMakefile(formPath string) bool {
-	makefilePath := fmt.Sprintf(MakefileCreatePathPattern, formPath, Makefile)
-	return fileutil.Exists(makefilePath)
-}
-
-func generateFormulaFiles(formPath, fCmd, lang string, new bool) error {
-
-	d := strings.Split(fCmd, " ")
-
-	dirForm := strings.Join(d[1:], "/")
-	formulaName := strings.Join(d[1:], "_")
-	pkgName := d[len(d)-1]
-
-	var dir string
-	if new {
-		dir = fmt.Sprintf("%s/%s", formPath, dirForm)
-		err := os.MkdirAll(dir, os.ModePerm)
-		if err != nil && !os.IsExist(err) {
-			return err
-		}
-		err = createMakefileMain(formPath, dirForm, formulaName)
-		if err != nil {
-			return err
-		}
-
-	} else {
-		dir = fmt.Sprintf("%s/%s", formPath, dirForm)
-		err := os.MkdirAll(dir, os.ModePerm)
-		if err != nil && !os.IsExist(err) {
-			return err
-		}
-		err = changeMakefileMain(formPath, fCmd, formulaName)
-		if err != nil {
-			return err
-		}
-	}
-	err := createConfigFile(dir)
-	if err != nil {
+func (c CreateManager) Create(cf formula.Create) error {
+	if err := c.isValidCmd(cf.FormulaCmd); err != nil {
 		return err
 	}
-	err = createSrcFiles(dir, pkgName, lang)
-	if err != nil {
+
+	if err := c.dir.Create(cf.WorkspacePath); err != nil {
 		return err
 	}
+
+	pkgName := cf.PkgName()
+	formulaName := cf.FormulaName()
+
+	if err := c.generateFormulaFiles(cf.FormulaPath, pkgName, cf.Lang); err != nil {
+		return err
+	}
+
+	if c.isNew(cf.WorkspacePath) {
+
+		if err := c.createScript(cf.WorkspacePath); err != nil {
+			return err
+		}
+
+		if err := c.createMakefileMain(cf.WorkspacePath, cf.FormulaPath, formulaName); err != nil {
+			return err
+		}
+
+		// Add the command to tree.json only when all other steps are successful
+		if err := c.generateTreeJsonFile(cf.WorkspacePath, cf.FormulaCmd, cf.Lang); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	if err := c.changeMakefileMain(cf.WorkspacePath, cf.FormulaCmd, formulaName); err != nil {
+		return err
+	}
+
+	// Add the command to tree.json only when all other steps are successful
+	if err := c.generateTreeJsonFile(cf.WorkspacePath, cf.FormulaCmd, cf.Lang); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func generateTreeJsonFile(formPath, fCmd, lang string) error {
-	tree := Tree{Commands: []api.Command{}}
-	dir := fmt.Sprintf(localTreeFile, formPath)
-	jsonFile, err := fileutil.ReadFile(dir)
-	if err != nil {
-		if err := fileutil.CreateDirIfNotExists(filepath.Dir(dir), 0755); err != nil {
-			return err
-		}
-	} else {
-		if err := json.Unmarshal(jsonFile, &tree); err != nil {
-			return err
-		}
-	}
-
-	tree, err = updateTree(fCmd, tree, lang, 0)
+func (c CreateManager) isValidCmd(fCmd string) error {
+	trees, err := c.treeManager.Tree()
 	if err != nil {
 		return err
 	}
-	treeJsonFile, _ := json.Marshal(&tree)
-	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, treeJsonFile, "", "\t"); err != nil {
-		return err
-	}
 
-	return fileutil.WriteFile(dir, prettyJSON.Bytes())
-}
-
-func verifyCommand(fCmd string, trees map[string]Tree) error {
 	s := strings.Split(fCmd, " ")
 
 	if s[0] != "rit" {
@@ -192,100 +118,140 @@ func verifyCommand(fCmd string, trees map[string]Tree) error {
 	return nil
 }
 
-func changeMakefileMain(formPath, fCmd, fName string) error {
-	d := strings.Split(fCmd, " ")
-	dir := fmt.Sprintf("%s/%s", formPath, Makefile)
-	tplFile, err := fileutil.ReadFile(dir)
+func (c CreateManager) generateTreeJsonFile(formPath, fCmd, lang string) error {
+	tree := formula.Tree{Commands: []api.Command{}}
+	treePath := path.Join(formPath, formula.TreePath)
+	if !c.file.Exists(treePath) {
+		if err := c.dir.Create(filepath.Dir(treePath)); err != nil {
+			return err
+		}
+	} else {
+		jsonFile, err := c.file.Read(treePath)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(jsonFile, &tree); err != nil {
+			return err
+		}
+	}
+
+	tree, err := updateTree(fCmd, tree, lang, 0)
 	if err != nil {
 		return err
 	}
-	variable := strings.ToUpper(fName) + "=" + strings.Join(d[1:], "/")
-	tplFile = []byte(strings.ReplaceAll(string(tplFile), "\nFORMULAS=", "\n"+variable+"\nFORMULAS="))
-	formulas := formulaValue(tplFile)
-	tplFile = []byte(strings.ReplaceAll(string(tplFile), formulas, formulas+" $("+strings.ToUpper(fName)+")"))
-	err = fileutil.WriteFile(dir, tplFile)
-	if err != nil {
+	treeJsonFile, _ := json.Marshal(&tree)
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, treeJsonFile, "", "\t"); err != nil {
 		return err
 	}
 
-	return nil
+	return c.file.Write(treePath, prettyJSON.Bytes())
 }
 
-func formulaValue(file []byte) string {
-	fileStr := string(file)
-	return strings.Split(strings.Split(fileStr, "FORMULAS=")[1], "\n")[0]
-}
-
-func createMakefileMain(dir, dirForm, name string) error {
-	tplFile := tpl_go.MakefileMain
+func (c CreateManager) createMakefileMain(dir, dirForm, name string) error {
+	tplFile := templates.MakefileMain
 
 	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
 	tplFile = strings.ReplaceAll(tplFile, "{{formPath}}", dirForm)
 
-	err := createScripts(dir)
-	if err != nil {
-		return err
-	}
-	return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tplFile))
+	return c.file.Write(path.Join(dir, formula.MakefilePath), []byte(tplFile))
 }
 
-func createScripts(dir string) error {
-	tplFile := tpl_go.CopyBinConfig
-
-	err := fileutil.WriteFilePerm(fmt.Sprintf("%s/copy-bin-configs.sh", dir), []byte(tplFile), 0755)
-	if err != nil {
+func (c CreateManager) generateFormulaFiles(formulaPath, pkgName, lang string) error {
+	if err := c.dir.Create(formulaPath); err != nil {
 		return err
 	}
 
-	tplFile = tpl_go.UnzipBinConfigs
+	if err := createConfigFile(formulaPath); err != nil {
+		return err
+	}
 
-	return fileutil.WriteFilePerm(fmt.Sprintf("%s/unzip-bin-configs.sh", dir), []byte(tplFile), 0755)
+	if err := c.createSrcFiles(formulaPath, pkgName, lang); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func createSrcFiles(dir, pkg, lang string) error {
+func (c CreateManager) changeMakefileMain(formPath, fCmd, fName string) error {
+	d := strings.Split(fCmd, " ")
+	makefilePath := path.Join(formPath, formula.MakefilePath)
+	makeFile, err := c.file.Read(makefilePath)
+	if err != nil {
+		return err
+	}
+
+	variable := strings.ToUpper(fName) + "=" + strings.Join(d[1:], "/")
+	makeFile = []byte(strings.ReplaceAll(string(makeFile), "\nFORMULAS=", "\n"+variable+"\nFORMULAS="))
+	formulas := formulaValue(makeFile)
+	makeFile = []byte(strings.ReplaceAll(string(makeFile), formulas, formulas+" $("+strings.ToUpper(fName)+")"))
+
+	if err = c.file.Write(makefilePath, makeFile); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c CreateManager) createScript(dir string) error {
+	tplFile := templates.CopyBinConfig
+
+	filePath := path.Join(dir, "/copy-bin-configs.sh")
+	if err := c.file.Write(filePath, []byte(tplFile)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c CreateManager) createSrcFiles(dir, pkg, lang string) error {
 	srcDir := fmt.Sprintf("%s/src", dir)
 	pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
-	err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm)
-	if err != nil {
+	if err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm); err != nil {
 		return err
 	}
 	switch lang {
-	case Golang:
+	case GoLang:
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
-		golang := NewGo()
+		golang := NewGo(c)
 		if err := golang.Create(srcDir, pkg, pkgDir, dir); err != nil {
-			return nil
+			return err
 		}
-	case Javalang:
-		java := NewJava()
+
+		if err := c.createWindowsBuild(srcDir, pkg, template_go.WindowsBuild); err != nil {
+			return err
+		}
+
+	case JavaLang:
+		java := NewJava(c)
 		if err := java.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case Nodelang:
-		node := NewNode()
+	case NodeLang:
+		node := NewNode(c)
 		if err := node.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case Pythonlang:
-		python := NewPython()
+	case PythonLang:
+		python := NewPython(c)
 		if err := python.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	default:
-		shell := NewShell()
-		if err = shell.Create(srcDir, pkg, pkgDir, dir); err != nil {
+		shell := NewShell(c)
+		if err := shell.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return nil
 		}
 	}
 	return nil
 }
 
-func createGenericFiles(srcDir, pkg, dir string, l Lang) error {
+func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l Lang) error {
 	err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase)
 	if err != nil {
 		return err
 	}
-	err = createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled)
+	err = c.createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled)
 	if err != nil {
 		return err
 	}
@@ -308,14 +274,22 @@ func createRunTemplate(dir, tpl string) error {
 	return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tpl), 0777)
 }
 
-func createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
+func (c CreateManager) createWindowsBuild(dir, name, tpl string) error {
+	tpl = strings.ReplaceAll(tpl, "{{name}}", name)
+
+	buildFile := path.Join(dir, "/build.bat")
+	return c.file.Write(buildFile, []byte(tpl))
+}
+
+func (c CreateManager) createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
+	makefilePath := path.Join(dir, formula.MakefilePath)
 	if compiled {
 		tpl = strings.ReplaceAll(tpl, "{{name}}", name)
 		tpl = strings.ReplaceAll(tpl, "{{form-path}}", pathName)
-		return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tpl))
+		return c.file.Write(makefilePath, []byte(tpl))
 	}
 	tpl = strings.ReplaceAll(tpl, nameBin, name)
-	return fileutil.WriteFile(fmt.Sprintf("%s/Makefile", dir), []byte(tpl))
+	return c.file.Write(makefilePath, []byte(tpl))
 }
 
 func createDockerfile(pkg, dir, tpl string) error {
@@ -325,11 +299,11 @@ func createDockerfile(pkg, dir, tpl string) error {
 
 func createUmask(dir string) error {
 	uMaskFile := fmt.Sprintf("%s/set_umask.sh", dir)
-	return fileutil.WriteFile(uMaskFile, []byte(tpl_shell.Umask))
+	return fileutil.WriteFile(uMaskFile, []byte(template_shell.Umask))
 }
 
 func createGoModFile(dir, pkg string) error {
-	tplFile := tpl_go.GoMod
+	tplFile := template_go.GoMod
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/go.mod", dir), []byte(tplFile))
 }
@@ -346,11 +320,11 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error 
 }
 
 func createConfigFile(dir string) error {
-	tplFile := tpl_go.Config
+	tplFile := templates.Config
 	return fileutil.WriteFile(fmt.Sprintf("%s/config.json", dir), []byte(tplFile))
 }
 
-func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
+func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, error) {
 	fc := splitFormulaCommand(fCmd)
 	parent := generateParent(fc, i)
 
@@ -363,7 +337,7 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 			pathValue := strings.Join(fc, "/")
 			fn := fc[len(fc)-1]
 			var commands []api.Command
-			if lang == Pythonlang {
+			if lang == PythonLang {
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
@@ -378,7 +352,7 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 					},
 					Parent: parent,
 				})
-			} else if lang == Golang {
+			} else if lang == GoLang {
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
@@ -412,7 +386,7 @@ func updateTree(fCmd string, t Tree, lang string, i int) (Tree, error) {
 			t.Commands = commands
 			return t, nil
 		} else {
-			return Tree{}, errors.New("Command already exist ")
+			return formula.Tree{}, ErrRepeatedCommand
 		}
 
 	} else {
@@ -455,4 +429,41 @@ func generateParent(fc []string, index int) string {
 
 func createPackageJson(dir, tpl string) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tpl))
+}
+
+func formulaValue(file []byte) string {
+	fileStr := string(file)
+	return strings.Split(strings.Split(fileStr, "FORMULAS=")[1], "\n")[0]
+}
+
+func (c CreateManager) existsTreeJson(workspacePath string) bool {
+	treePath := path.Join(workspacePath, formula.TreePath)
+	if !c.file.Exists(treePath) {
+		return false
+	}
+
+	read, err := c.file.Read(treePath)
+	if err != nil {
+		return false
+	}
+
+	return len(read) > 0
+}
+
+func (c CreateManager) existsMakefile(workspacePath string) bool {
+	makefilePath := path.Join(workspacePath, formula.MakefilePath)
+	if !c.file.Exists(makefilePath) {
+		return false
+	}
+
+	read, err := c.file.Read(makefilePath)
+	if err != nil {
+		return false
+	}
+
+	return len(read) > 0
+}
+
+func (c CreateManager) isNew(workspacePath string) bool {
+	return !c.existsMakefile(workspacePath) || !c.existsTreeJson(workspacePath)
 }

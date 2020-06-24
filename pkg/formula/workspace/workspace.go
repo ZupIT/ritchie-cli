@@ -1,9 +1,9 @@
 package workspace
 
 const (
-	workspacesPattern          = "%s/formula_workspaces.json"
-	DefaultWorkspaceName       = "Default"
-	DefaultWorkspaceDirPattern = "%s/ritchie-formulas-local"
+	workspacesFile       = "/formula_workspaces.json"
+	DefaultWorkspaceName = "Default"
+	DefaultWorkspaceDir  = "/ritchie-formulas-local"
 )
 
 type Workspaces map[string]string

@@ -10,27 +10,25 @@ import (
 )
 
 const (
-	PathPattern               = "%s/formulas/%s"
-	TmpDirPattern             = "%s/tmp/%s"
-	TmpBinDirPattern          = "%s/tmp/%s/%s"
-	DefaultConfig             = "config.json"
-	ConfigPattern             = "%s/%s"
-	CommandEnv                = "COMMAND"
-	PwdEnv                    = "PWD"
-	CPwdEnv                   = "CURRENT_PWD"
-	BinPattern                = "%s%s"
-	BinPathPattern            = "%s/bin"
-	windows                   = "windows"
-	darwin                    = "darwin"
-	linux                     = "linux"
-	EnvPattern                = "%s=%s"
-	CachePattern              = "%s/.%s.cache"
-	DefaultCacheNewLabel      = "Type new value?"
-	DefaultCacheQty           = 5
-	FormCreatePathPattern     = "%s/ritchie-formulas-local"
-	TreeCreatePathPattern     = "%s/tree/tree.json"
-	MakefileCreatePathPattern = "%s/%s"
-	Makefile                  = "Makefile"
+	PathPattern          = "%s/formulas/%s"
+	TmpDirPattern        = "%s/tmp/%s"
+	TmpBinDirPattern     = "%s/tmp/%s/%s"
+	DefaultConfig        = "config.json"
+	ConfigPattern        = "%s/%s"
+	CommandEnv           = "COMMAND"
+	PwdEnv               = "PWD"
+	CPwdEnv              = "CURRENT_PWD"
+	BinPattern           = "%s%s"
+	BinPathPattern       = "%s/bin"
+	Windows              = "windows"
+	Darwin               = "darwin"
+	Linux                = "linux"
+	EnvPattern           = "%s=%s"
+	CachePattern         = "%s/.%s.cache"
+	DefaultCacheNewLabel = "Type new value?"
+	DefaultCacheQty      = 5
+	TreePath             = "/tree/tree.json"
+	MakefilePath         = "/Makefile"
 )
 
 // Config type that represents formula config
@@ -58,9 +56,10 @@ type Cache struct {
 	NewLabel string `json:"newLabel"`
 }
 type Create struct {
-	FormulaCmd   string `json:"formulaCmd"`
-	Lang         string `json:"lang"`
-	LocalRepoDir string `json:"localRepoDir"`
+	FormulaCmd    string `json:"formulaCmd"`
+	Lang          string `json:"lang"`
+	WorkspacePath string `json:"workspacePath"`
+	FormulaPath   string `json:"formulaPath"`
 }
 
 // Definition type that represents a Formula
@@ -105,15 +104,15 @@ func (d *Definition) BinName() string {
 	bName := d.Bin
 	so := runtime.GOOS
 	switch so {
-	case windows:
+	case Windows:
 		if d.WBin != "" {
 			bName = d.WBin
 		}
-	case darwin:
+	case Darwin:
 		if d.MBin != "" {
 			bName = d.MBin
 		}
-	case linux:
+	case Linux:
 		if d.LBin != "" {
 			bName = d.LBin
 		}
@@ -123,7 +122,7 @@ func (d *Definition) BinName() string {
 
 	if strings.Contains(bName, "${so}") {
 		suffix := ""
-		if so == windows {
+		if so == Windows {
 			suffix = ".exe"
 		}
 		binSO := strings.ReplaceAll(bName, "${so}", so)
@@ -177,6 +176,16 @@ func (d *Definition) ConfigURL(configName string) string {
 	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
+func (c Create) FormulaName() string {
+	d := strings.Split(c.FormulaCmd, " ")
+	return strings.Join(d[1:], "_")
+}
+
+func (c Create) PkgName() string {
+	d := strings.Split(c.FormulaCmd, " ")
+	return d[len(d)-1]
+}
+
 type PreRunner interface {
 	PreRun(def Definition) (Setup, error)
 }
@@ -198,7 +207,7 @@ type Setuper interface {
 }
 
 type Creator interface {
-	Create(cf Create) (CreateManager, error)
+	Create(cf Create) error
 }
 
 type Builder interface {
@@ -207,4 +216,9 @@ type Builder interface {
 
 type Watcher interface {
 	Watch(workspacePath, formulaPath string)
+}
+
+type CreateBuilder interface {
+	Creator
+	Builder
 }

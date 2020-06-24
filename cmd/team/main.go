@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
-
 	"k8s.io/kubectl/pkg/util/templates"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
@@ -95,7 +96,14 @@ func buildCommands() *cobra.Command {
 	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
 	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
-	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
+	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
+	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
+	watchManager := watcher.New(formulaBuilder, dirManager)
+	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaBuilder)
 
 	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
 	defaultUpgradeResolver := version.DefaultVersionResolver{
@@ -142,13 +150,9 @@ func buildCommands() *cobra.Command {
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
-	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
-	watchManager := watcher.New(formulaBuilder, dirManager)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
+
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputList)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)

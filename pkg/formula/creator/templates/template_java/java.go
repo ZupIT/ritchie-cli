@@ -1,4 +1,4 @@
-package tpl_java
+package template_java
 
 const (
 	Main = `import {{bin-name}}.{{bin-name-first-upper}};

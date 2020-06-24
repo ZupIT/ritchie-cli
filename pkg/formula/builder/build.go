@@ -10,20 +10,25 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	commonsDir = "commons"
+const	commonsDir = "commons"
+
+var (
+	msgBuildOnWindows = fmt.Sprintf(prompt.Yellow, "This formula cannot be built on Windows. Just Golang formulas are available!")
+	ErrBuildOnWindows = errors.New(msgBuildOnWindows)
 )
 
 type Manager struct {
 	ritHome string
 	dir     stream.DirCreateListCopier
-	file    stream.FileListCopier
+	file    stream.FileCopyExistLister
 }
 
-func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileListCopier) Manager {
+func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExistLister) Manager {
 	return Manager{ritHome: ritHome, dir: dir, file: file}
 }
 
@@ -33,7 +38,19 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
-	cmd := exec.Command("make", "build")
+	so := runtime.GOOS
+	var cmd *exec.Cmd
+	switch so {
+	case formula.Windows:
+		winBuild := path.Join(formulaSrc, "build.bat")
+		if !m.file.Exists(winBuild) {
+			return ErrBuildOnWindows
+		}
+		cmd = exec.Command(winBuild)
+	default:
+		cmd = exec.Command("make", "build")
+	}
+
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 

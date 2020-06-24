@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"os"
 	"testing"
 )
 
 func TestNewCreateFormulaCmd(t *testing.T) {
-	cmd := NewCreateFormulaCmd(formCreator{}, inputTextMock{}, inputListMock{}, inputTrueMock{})
+	cmd := NewCreateFormulaCmd(os.TempDir(), formCreator{}, workspaceForm{}, inputTextMock{}, inputListMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewCreateFormulaCmd got %v", cmd)

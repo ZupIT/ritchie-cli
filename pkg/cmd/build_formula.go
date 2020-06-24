@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -35,8 +34,8 @@ type buildFormulaCmd struct {
 
 func NewBuildFormulaCmd(
 	userHomeDir string,
-	workManager workspace.AddListValidator,
 	formula formula.Builder,
+	workManager workspace.AddListValidator,
 	watcher formula.Watcher,
 	directory stream.DirListChecker,
 	inText prompt.InputText,
@@ -71,57 +70,17 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := fmt.Sprintf(workspace.DefaultWorkspaceDirPattern, b.userHomeDir)
-		if b.directory.Exists(defaultWorkspace) {
-			workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
-		}
-
-		var items []string
-		for k, v := range workspaces {
-			kv := fmt.Sprintf("%s (%s)", k, v)
-			items = append(items, kv)
-		}
-
-		items = append(items, newWorkspace)
-		selected, err := b.List("Select a formula workspace: ", items)
+		wspace, err := FormulaWorkspaceInput(b.userHomeDir, workspaces, b.InputList, b.InputText)
 		if err != nil {
 			return err
 		}
 
-		var workspaceName string
-		var workspacePath string
-		var wspace workspace.Workspace
-		if selected == newWorkspace {
-			workspaceName, err = b.Text("Workspace name: ", true)
-			if err != nil {
-				return err
-			}
+		if err := b.workspace.Validate(wspace); err != nil {
+			return err
+		}
 
-			workspacePath, err = b.Text("Workspace path (e.g.: /home/user/github):", true)
-			if err != nil {
-				return err
-			}
-
-			wspace = workspace.Workspace{
-				Name: strings.Title(workspaceName),
-				Dir:  workspacePath,
-			}
-
-			if err := b.workspace.Add(wspace); err != nil {
-				return err
-			}
-		} else {
-			split := strings.Split(selected, " ")
-			workspaceName = split[0]
-			workspacePath = workspaces[workspaceName]
-			wspace = workspace.Workspace{
-				Name: strings.Title(workspaceName),
-				Dir:  workspacePath,
-			}
-
-			if err := b.workspace.Validate(wspace); err != nil {
-				return err
-			}
+		if err := b.workspace.Add(wspace); err != nil {
+			return err
 		}
 
 		formulaPath, err := b.readFormulas(wspace.Dir)

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -20,7 +21,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()
-	workspaceFile := fmt.Sprintf(workspacesPattern, tmpDir)
+	workspaceFile := path.Join(tmpDir, workspacesFile)
 	if err := fileManager.Remove(workspaceFile); err != nil {
 		t.Error(err)
 	}
@@ -80,7 +81,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 			out: ErrTreeJsonNotFound,
 		},
 		{
-			name: "not found Makefile",
+			name: "not found MakefilePath",
 			in: in{
 				workspace: Workspace{
 					Name: "zup",
@@ -142,7 +143,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 func TestManager_List(t *testing.T) {
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()
-	workspaceFile := fmt.Sprintf(workspacesPattern, tmpDir)
+	workspaceFile := path.Join(tmpDir, workspacesFile)
 
 	type in struct {
 		workspaces  *Workspaces
@@ -237,7 +238,7 @@ func cleanForm() {
 func createDirWithMakefile() string {
 	dir := os.TempDir() + "/my-custom-repo-with-makefile"
 	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
-	makefilePath := fmt.Sprintf("%s/%s", dir, formula.Makefile)
+	makefilePath := fmt.Sprintf("%s/%s", dir, formula.MakefilePath)
 	_ = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
 	return dir
 }
@@ -245,7 +246,7 @@ func createDirWithMakefile() string {
 func createDirWithTree() string {
 	dir := os.TempDir() + "/my-custom-repo-with-tree"
 	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
-	treeJsonFile := fmt.Sprintf(formula.TreeCreatePathPattern, dir)
+	treeJsonFile := path.Join(dir, formula.TreePath)
 	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
 	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
 	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte(""))
@@ -255,11 +256,11 @@ func createDirWithTree() string {
 func createFullDir() string {
 	dir := os.TempDir() + "/my-custom-repo"
 	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
-	treeJsonFile := fmt.Sprintf(formula.TreeCreatePathPattern, dir)
-	makefilePath := fmt.Sprintf("%s/%s", dir, formula.Makefile)
+	treeJsonFile := path.Join(dir, formula.TreePath)
+	makefilePath := fmt.Sprintf("%s/%s", dir, formula.MakefilePath)
 	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
 	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
-	makefile, _ := fileutil.ReadFile("../../testdata/Makefile")
+	makefile, _ := fileutil.ReadFile("../../testdata/MakefilePath")
 	_ = fileutil.CreateFileIfNotExist(makefilePath, makefile)
 	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte("{}"))
 

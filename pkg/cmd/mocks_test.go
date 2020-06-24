@@ -5,6 +5,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
@@ -88,8 +89,26 @@ func (repoCleaner) Clean(name string) error {
 
 type formCreator struct{}
 
-func (formCreator) Create(cf formula.Create) (formula.CreateManager, error) {
-	return formula.CreateManager{}, nil
+func (formCreator) Create(cf formula.Create) error {
+	return nil
+}
+
+func (formCreator) Build(workspacePath, formulaPath string) error {
+	return nil
+}
+
+type workspaceForm struct{}
+
+func (workspaceForm) Add(workspace workspace.Workspace) error {
+	return nil
+}
+
+func (workspaceForm) List() (workspace.Workspaces, error) {
+	return workspace.Workspaces{}, nil
+}
+
+func (workspaceForm) Validate(workspace workspace.Workspace) error {
+	return nil
 }
 
 type ctxSetterMock struct{}
