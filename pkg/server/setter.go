@@ -27,18 +27,16 @@ var (
 type SetterManager struct {
 	serverFile string
 	httpClient *http.Client
-	insecureSSL bool
 }
 
-func NewSetter(ritHomeDir string, hc *http.Client, i bool) Setter {
+func NewSetter(ritHomeDir string, hc *http.Client) Setter {
 	return SetterManager{
 		serverFile: fmt.Sprintf(serverFilePattern, ritHomeDir),
 		httpClient: hc,
-		insecureSSL: i,
 	}
 }
 
-func (sm SetterManager) Set(cfg Config) error {
+func (s SetterManager) Set(cfg Config) error {
 	if cfg.Organization == "" {
 		return ErrOrgIsRequired
 	}
@@ -47,7 +45,7 @@ func (sm SetterManager) Set(cfg Config) error {
 		return err
 	}
 	cfg.URL = strings.TrimRight(cfg.URL, "/")
-	resp, err := sm.httpClient.Get(cfg.URL)
+	resp, err := s.httpClient.Get(cfg.URL)
 	if err != nil {
 		return err
 	}
@@ -55,7 +53,7 @@ func (sm SetterManager) Set(cfg Config) error {
 		return fmt.Errorf(ServerErrPattern, cfg.URL, resp.Status)
 	}
 
-	cfg.PinningKey, cfg.PinningAddr, err = sm.sslCertificationBase64(cfg.URL)
+	cfg.PinningKey, cfg.PinningAddr, err = sslCertificationBase64(cfg.URL)
 	if err != nil {
 		return fmt.Errorf("error pinning SSL server, verify your server url(%s)", cfg.URL)
 	}
@@ -65,13 +63,13 @@ func (sm SetterManager) Set(cfg Config) error {
 		return err
 	}
 
-	if err := fileutil.WriteFile(sm.serverFile, b); err != nil {
+	if err := fileutil.WriteFile(s.serverFile, b); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (sm SetterManager)sslCertificationBase64(url string) (cert, addr string, err error) {
+func sslCertificationBase64(url string) (cert, addr string, err error) {
 	if !strings.HasPrefix(url, "https") {
 		return "", "", nil
 	}
@@ -89,7 +87,7 @@ func (sm SetterManager)sslCertificationBase64(url string) (cert, addr string, er
 	}
 
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
-		InsecureSkipVerify: sm.insecureSSL,
+		InsecureSkipVerify: true,
 	})
 	if err != nil {
 		return cert, addr, err
