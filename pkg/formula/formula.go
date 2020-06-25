@@ -31,15 +31,18 @@ const (
 	TreeCreatePathPattern     = "%s/tree/tree.json"
 	MakefileCreatePathPattern = "%s/%s"
 	Makefile                  = "Makefile"
+	OutputFileName            = "OUTPUT.RIT"
+	OutputEnv                 = "RIT_OUTPUT_FILE"
 )
 
 // Config type that represents formula config
 type Config struct {
-	Name        string  `json:"name"`
-	Command     string  `json:"command"`
-	Description string  `json:"description"`
-	Language    string  `json:"language"`
-	Inputs      []Input `json:"inputs"`
+	Name        string   `json:"name"`
+	Command     string   `json:"command"`
+	Description string   `json:"description"`
+	Language    string   `json:"language"`
+	Inputs      []Input  `json:"inputs"`
+	Outputs     []Output `json:"outputs"`
 }
 
 // Input type that represents input config
@@ -50,6 +53,12 @@ type Input struct {
 	Label   string   `json:"label"`
 	Items   []string `json:"items"`
 	Cache   Cache    `json:"cache"`
+}
+
+// Output type that represents output config
+type Output struct {
+	Name  string `json:"name"`
+	Print bool   `json:"print"`
 }
 
 type Cache struct {

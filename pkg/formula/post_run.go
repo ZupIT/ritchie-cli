@@ -5,6 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 )
 
 type PostRunnerManager struct {
@@ -32,11 +33,17 @@ func (PostRunnerManager) PostRun(p Setup, docker bool) error {
 		return err
 	}
 
+	removeRitFiles(&df)
+
 	if err = fileutil.MoveFiles(p.tmpBinDir, p.pwd, df); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func removeRitFiles(df *[]string) {
+	sliceutil.Remove(*df, OutputFileName)
 }
 
 func removeWorkDir(tmpDir string) {

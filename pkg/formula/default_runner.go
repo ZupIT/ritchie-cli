@@ -2,8 +2,10 @@ package formula
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
@@ -24,13 +26,16 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
+	outputFile, _ := os.Create(OutputFileName)
 	cmd := exec.Command(setup.tmpBinFilePath)
 
 	cmd.Env = os.Environ()
 	pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, setup.pwd)
 	cPwdEnv := fmt.Sprintf(EnvPattern, CPwdEnv, setup.pwd)
+	outputEnv := fmt.Sprintf(EnvPattern, OutputEnv, outputFile.Name())
 	cmd.Env = append(cmd.Env, pwdEnv)
 	cmd.Env = append(cmd.Env, cPwdEnv)
+	cmd.Env = append(cmd.Env, outputEnv)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -48,9 +53,28 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
+	printOutEnvs(setup)
+
 	if err := d.PostRun(setup, false); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func printOutEnvs(setup Setup) {
+	fOutputs := map[string]string{}
+	f, _ := os.Open(OutputFileName)
+	b, _ := ioutil.ReadAll(f)
+	for _, c := range strings.Split(string(b), ";") {
+		l := strings.Split(c, "=")
+		if len(l) == 2 {
+			fOutputs[l[0]] = l[1]
+		}
+	}
+	for _, o := range setup.config.Outputs {
+		if _, exist := fOutputs[o.Name]; exist && o.Print == true {
+			fmt.Printf("%s=%s\n", o.Name, fOutputs[o.Name])
+		}
+	}
 }
