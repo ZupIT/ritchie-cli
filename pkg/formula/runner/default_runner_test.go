@@ -1,4 +1,4 @@
-package formula
+package runner
 
 import (
 	"errors"
@@ -9,16 +9,16 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-func TestDockerRunner_Run(t *testing.T) {
-	def := Definition{
+var RepoUrl = os.Getenv("REPO_URL")
+
+func TestDefaultRunner_Run(t *testing.T) {
+	def := formula.Definition{
 		Path:    "mock/test",
-		Bin:     "test-${so}",
-		LBin:    "test-${so}",
-		MBin:    "test-${so}",
-		WBin:    "test-${so}.exe",
-		Bundle:  "${so}.zip",
+		Bin:     "test-linux",
+		Bundle:  "linux.zip",
 		Config:  "config.json",
 		RepoURL: RepoUrl,
 	}
@@ -31,7 +31,7 @@ func TestDockerRunner_Run(t *testing.T) {
 		envMock  envResolverMock
 		inText   inputMock
 		inBool   inputMock
-		inPassword inputMock
+		inPass   inputMock
 		preMock  *preRunnerMock
 		postMock *postRunnerMock
 	}
@@ -45,8 +45,9 @@ func TestDockerRunner_Run(t *testing.T) {
 			name: "success",
 			in: in{
 				envMock: envResolverMock{in: "ok"},
-				inText:  inputMock{text: "ok"},
+				inText:  inputMock{text: ""},
 				inBool:  inputMock{boolean: true},
+				inPass:  inputMock{text: "******"},
 			},
 			want: nil,
 		},
@@ -56,8 +57,9 @@ func TestDockerRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{text: "ok"},
 				inBool:  inputMock{boolean: true},
+				inPass:  inputMock{text: "******"},
 				preMock: &preRunnerMock{
-					setup: Setup{},
+					setup: formula.Setup{},
 					error: ErrFormulaBinNotFound,
 				},
 			},
@@ -69,6 +71,7 @@ func TestDockerRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{err: errors.New("fail to resolve input")},
 				inBool:  inputMock{boolean: true},
+				inPass:  inputMock{text: "******"},
 			},
 			want: errors.New("fail to resolve input"),
 		},
@@ -78,6 +81,7 @@ func TestDockerRunner_Run(t *testing.T) {
 				envMock:  envResolverMock{in: "ok"},
 				inText:   inputMock{text: "ok"},
 				inBool:   inputMock{boolean: true},
+				inPass:   inputMock{text: "******"},
 				postMock: &postRunnerMock{error: errors.New("error in remove dir")},
 			},
 			want: errors.New("error in remove dir"),
@@ -88,14 +92,14 @@ func TestDockerRunner_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			var preRunner PreRunner
+			var preRunner formula.PreRunner
 			if in.preMock != nil {
 				preRunner = in.preMock
 			} else {
-				preRunner = NewDockerPreRunner(setup)
+				preRunner = NewDefaultPreRunner(setup)
 			}
 
-			var postRunner PostRunner
+			var postRunner formula.PostRunner
 			if in.postMock != nil {
 				postRunner = in.postMock
 			} else {
@@ -103,10 +107,10 @@ func TestDockerRunner_Run(t *testing.T) {
 			}
 
 			resolvers := env.Resolvers{"test": in.envMock}
-			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPassword)
-			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager)
+			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
+			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager)
 
-			got := dockerRunner.Run(def, api.Prompt)
+			got := defaultRunner.Run(def, api.Prompt)
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
@@ -114,4 +118,52 @@ func TestDockerRunner_Run(t *testing.T) {
 
 		})
 	}
+}
+
+type inputMock struct {
+	text    string
+	boolean bool
+	err     error
+}
+
+func (i inputMock) List(string, []string) (string, error) {
+	return i.text, i.err
+}
+
+func (i inputMock) Text(string, bool) (string, error) {
+	return i.text, i.err
+}
+
+func (i inputMock) Bool(string, []string) (bool, error) {
+	return i.boolean, i.err
+}
+
+func (i inputMock) Password(string) (string, error) {
+	return i.text, i.err
+}
+
+type envResolverMock struct {
+	in  string
+	err error
+}
+
+func (e envResolverMock) Resolve(string) (string, error) {
+	return e.in, e.err
+}
+
+type preRunnerMock struct {
+	setup formula.Setup
+	error error
+}
+
+func (p preRunnerMock) PreRun(formula.Definition) (formula.Setup, error) {
+	return p.setup, p.error
+}
+
+type postRunnerMock struct {
+	error error
+}
+
+func (p postRunnerMock) PostRun(formula.Setup, bool) error {
+	return p.error
 }

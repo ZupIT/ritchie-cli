@@ -1,8 +1,9 @@
-package formula
+package runner
 
 import (
 	"errors"
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"os"
 	"os/exec"
 
@@ -15,31 +16,31 @@ var ErrNotEnableDocker = errors.New("this formula is not enabled to run in a con
 var ErrDockerNotFound = errors.New("you must have the docker installed on the machine to run formulas inside a container")
 
 type DockerPreRunner struct {
-	sDefault Setuper
+	sDefault formula.Setuper
 }
 
-func NewDockerPreRunner(setuper Setuper) DockerPreRunner {
+func NewDockerPreRunner(setuper formula.Setuper) DockerPreRunner {
 	return DockerPreRunner{sDefault: setuper}
 }
 
-func (d DockerPreRunner) PreRun(def Definition) (Setup, error) {
+func (d DockerPreRunner) PreRun(def formula.Definition) (formula.Setup, error) {
 	setup, err := d.sDefault.Setup(def)
 	if err != nil {
-		return Setup{}, err
+		return formula.Setup{}, err
 	}
 
-	if err := validate(setup.tmpBinDir); err != nil {
-		return Setup{}, err
+	if err := validate(setup.TmpBinDir); err != nil {
+		return formula.Setup{}, err
 	}
 
 	containerId, err := uuid.NewRandom()
 	if err != nil {
-		return Setup{}, err
+		return formula.Setup{}, err
 	}
 
-	setup.containerId = containerId.String()
-	if err := buildImg(setup.containerId); err != nil {
-		return Setup{}, err
+	setup.ContainerId = containerId.String()
+	if err := buildImg(setup.ContainerId); err != nil {
+		return formula.Setup{}, err
 	}
 
 	return setup, nil

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/spf13/cobra"

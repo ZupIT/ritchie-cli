@@ -1,4 +1,4 @@
-package formula
+package runner
 
 import (
 	"net/http"
@@ -10,10 +10,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 func TestInputManager_Inputs(t *testing.T) {
-	def := Definition{
+	def := formula.Definition{
 		Path:    "mock/test",
 		Bin:     "test-${so}",
 		LBin:    "test-${so}",
@@ -37,7 +38,7 @@ func TestInputManager_Inputs(t *testing.T) {
 		iText  inputMock
 		iList  inputMock
 		iBool  inputMock
-		iPass inputMock
+		iPass  inputMock
 		inType api.TermInputType
 		stdin  string
 	}
@@ -50,10 +51,10 @@ func TestInputManager_Inputs(t *testing.T) {
 		{
 			name: "success stdin",
 			in: in{
-				iText:  inputMock{text: DefaultCacheNewLabel},
+				iText:  inputMock{text: formula.DefaultCacheNewLabel},
 				iList:  inputMock{text: "test"},
 				iBool:  inputMock{boolean: false},
-				iPass: inputMock{text: "******"},
+				iPass:  inputMock{text: "******"},
 				inType: api.Stdin,
 				stdin:  `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
 			},
@@ -62,10 +63,10 @@ func TestInputManager_Inputs(t *testing.T) {
 		{
 			name: "success prompt",
 			in: in{
-				iText:  inputMock{text: DefaultCacheNewLabel},
+				iText:  inputMock{text: formula.DefaultCacheNewLabel},
 				iList:  inputMock{text: "test"},
 				iBool:  inputMock{boolean: false},
-				iPass: inputMock{text: "******"},
+				iPass:  inputMock{text: "******"},
 				inType: api.Prompt,
 			},
 			want: nil,
@@ -73,10 +74,10 @@ func TestInputManager_Inputs(t *testing.T) {
 		{
 			name: "error unknown prompt",
 			in: in{
-				iText:  inputMock{text: DefaultCacheNewLabel},
+				iText:  inputMock{text: formula.DefaultCacheNewLabel},
 				iList:  inputMock{text: "test"},
 				iBool:  inputMock{boolean: false},
-				iPass: inputMock{text: "******"},
+				iPass:  inputMock{text: "******"},
 				inType: api.TermInputType(3),
 			},
 			want: ErrInputNotRecognized,

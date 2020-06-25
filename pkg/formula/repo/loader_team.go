@@ -1,4 +1,4 @@
-package formula
+package repo
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -15,10 +16,10 @@ type TeamLoader struct {
 	serverFinder server.Finder
 	client       *http.Client
 	session      session.Manager
-	Adder
+	formula.Adder
 }
 
-func NewTeamLoader(serverFinder server.Finder, client *http.Client, session session.Manager, adder Adder) TeamLoader {
+func NewTeamLoader(serverFinder server.Finder, client *http.Client, session session.Manager, adder formula.Adder) TeamLoader {
 	return TeamLoader{
 		serverFinder: serverFinder,
 		client:       client,
@@ -62,7 +63,7 @@ func (dm TeamLoader) Load() error {
 		return fmt.Errorf("%d - %s\n", resp.StatusCode, string(body))
 	}
 
-	var dd []Repository
+	var dd []formula.Repository
 	if err := json.Unmarshal(body, &dd); err != nil {
 		return err
 	}

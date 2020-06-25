@@ -12,6 +12,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
@@ -77,8 +81,8 @@ func buildCommands() *cobra.Command {
 	serverFindSetter := server.NewFindSetter(serverFinder, serverSetter)
 
 	httpClient := makeHttpClient(serverFinder)
-	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, httpClient, sessionManager)
-	repoLoader := formula.NewTeamLoader(serverFinder, httpClient, sessionManager, repoManager)
+	repoManager := repo.NewTeamRepoManager(ritchieHomeDir, serverFinder, httpClient, sessionManager)
+	repoLoader := repo.NewTeamLoader(serverFinder, httpClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		serverFinder,
@@ -88,22 +92,22 @@ func buildCommands() *cobra.Command {
 	credSetter := credteam.NewSetter(serverFinder, httpClient, sessionManager, ctxFinder)
 	credFinder := credteam.NewFinder(serverFinder, httpClient, sessionManager, ctxFinder)
 	credSettings := credteam.NewSettings(serverFinder, httpClient, sessionManager, ctxFinder)
-	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
-	formulaSetup := formula.NewDefaultTeamSetup(ritchieHomeDir, httpClient, sessionManager)
+	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
+	formulaSetup := runner.NewDefaultTeamSetup(ritchieHomeDir, httpClient, sessionManager)
 
 
-	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
-	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
-	postRunner := formula.NewPostRunner()
+	defaultPreRunner := runner.NewDefaultPreRunner(formulaSetup)
+	dockerPreRunner := runner.NewDockerPreRunner(formulaSetup)
+	postRunner := runner.NewPostRunner()
 
-	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
-	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
+	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
+	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)

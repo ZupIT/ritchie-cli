@@ -76,14 +76,14 @@ type Definition struct {
 }
 
 type Setup struct {
-	pwd            string
-	formulaPath    string
-	binPath        string
-	tmpDir         string
-	tmpBinDir      string
-	tmpBinFilePath string
-	config         Config
-	containerId    string
+	Pwd            string
+	FormulaPath    string
+	BinPath        string
+	TmpDir         string
+	TmpBinDir      string
+	TmpBinFilePath string
+	Config         Config
+	ContainerId    string
 }
 
 // FormulaPath builds the formula path from ritchie home

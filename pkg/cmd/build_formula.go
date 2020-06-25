@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"path"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -70,7 +71,12 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		wspace, err := FormulaWorkspaceInput(b.userHomeDir, workspaces, b.InputList, b.InputText)
+		defaultWorkspace := path.Join(b.userHomeDir, workspace.DefaultWorkspaceDir)
+		if b.directory.Exists(defaultWorkspace) {
+			workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
+		}
+
+		wspace, err := FormulaWorkspaceInput(workspaces, b.InputList, b.InputText)
 		if err != nil {
 			return err
 		}

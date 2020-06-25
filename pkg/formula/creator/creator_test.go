@@ -8,6 +8,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -36,7 +37,7 @@ func TestCreator(t *testing.T) {
 	jsonDir := createDirWithTree(dirManager, fileManager)
 	fullDir := createFullDir(dirManager, fileManager)
 
-	treeMan := formula.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
 
 	type in struct {
 		formCreate formula.Create

@@ -1,4 +1,4 @@
-package formula
+package runner
 
 import (
 	"errors"
@@ -6,16 +6,21 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
-func TestDefaultRunner_Run(t *testing.T) {
-	def := Definition{
+func TestDockerRunner_Run(t *testing.T) {
+	def := formula.Definition{
 		Path:    "mock/test",
-		Bin:     "test-linux",
-		Bundle:  "linux.zip",
+		Bin:     "test-${so}",
+		LBin:    "test-${so}",
+		MBin:    "test-${so}",
+		WBin:    "test-${so}.exe",
+		Bundle:  "${so}.zip",
 		Config:  "config.json",
 		RepoURL: RepoUrl,
 	}
@@ -25,12 +30,12 @@ func TestDefaultRunner_Run(t *testing.T) {
 	setup := NewDefaultSingleSetup(home, http.DefaultClient)
 
 	type in struct {
-		envMock  envResolverMock
-		inText   inputMock
-		inBool   inputMock
-		inPass inputMock
-		preMock  *preRunnerMock
-		postMock *postRunnerMock
+		envMock    envResolverMock
+		inText     inputMock
+		inBool     inputMock
+		inPassword inputMock
+		preMock    *preRunnerMock
+		postMock   *postRunnerMock
 	}
 
 	tests := []struct {
@@ -42,9 +47,8 @@ func TestDefaultRunner_Run(t *testing.T) {
 			name: "success",
 			in: in{
 				envMock: envResolverMock{in: "ok"},
-				inText:  inputMock{text: ""},
+				inText:  inputMock{text: "ok"},
 				inBool:  inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
 			},
 			want: nil,
 		},
@@ -54,9 +58,8 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{text: "ok"},
 				inBool:  inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
 				preMock: &preRunnerMock{
-					setup: Setup{},
+					setup: formula.Setup{},
 					error: ErrFormulaBinNotFound,
 				},
 			},
@@ -68,7 +71,6 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{err: errors.New("fail to resolve input")},
 				inBool:  inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
 			},
 			want: errors.New("fail to resolve input"),
 		},
@@ -78,7 +80,6 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock:  envResolverMock{in: "ok"},
 				inText:   inputMock{text: "ok"},
 				inBool:   inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
 				postMock: &postRunnerMock{error: errors.New("error in remove dir")},
 			},
 			want: errors.New("error in remove dir"),
@@ -89,14 +90,14 @@ func TestDefaultRunner_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			var preRunner PreRunner
+			var preRunner formula.PreRunner
 			if in.preMock != nil {
 				preRunner = in.preMock
 			} else {
-				preRunner = NewDefaultPreRunner(setup)
+				preRunner = NewDockerPreRunner(setup)
 			}
 
-			var postRunner PostRunner
+			var postRunner formula.PostRunner
 			if in.postMock != nil {
 				postRunner = in.postMock
 			} else {
@@ -104,10 +105,10 @@ func TestDefaultRunner_Run(t *testing.T) {
 			}
 
 			resolvers := env.Resolvers{"test": in.envMock}
-			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
-			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager)
+			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPassword)
+			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager)
 
-			got := defaultRunner.Run(def, api.Prompt)
+			got := dockerRunner.Run(def, api.Prompt)
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
@@ -115,52 +116,4 @@ func TestDefaultRunner_Run(t *testing.T) {
 
 		})
 	}
-}
-
-type inputMock struct {
-	text    string
-	boolean bool
-	err     error
-}
-
-func (i inputMock) List(string, []string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Text(string, bool) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Bool(string, []string) (bool, error) {
-	return i.boolean, i.err
-}
-
-func (i inputMock) Password(string) (string, error) {
-	return i.text, i.err
-}
-
-type envResolverMock struct {
-	in  string
-	err error
-}
-
-func (e envResolverMock) Resolve(string) (string, error) {
-	return e.in, e.err
-}
-
-type preRunnerMock struct {
-	setup Setup
-	error error
-}
-
-func (p preRunnerMock) PreRun(Definition) (Setup, error) {
-	return p.setup, p.error
-}
-
-type postRunnerMock struct {
-	error error
-}
-
-func (p postRunnerMock) PostRun(Setup, bool) error {
-	return p.error
 }

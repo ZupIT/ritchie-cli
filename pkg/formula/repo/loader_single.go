@@ -1,18 +1,20 @@
-package formula
+package repo
+
+import "github.com/ZupIT/ritchie-cli/pkg/formula"
 
 const commons = "commons"
 
 type SingleLoader struct {
 	treePath string
-	Adder
+	formula.Adder
 }
 
-func NewSingleLoader(treePath string, adder Adder) SingleLoader {
+func NewSingleLoader(treePath string, adder formula.Adder) SingleLoader {
 	return SingleLoader{Adder: adder, treePath: treePath}
 }
 
 func (m SingleLoader) Load() error {
-	r := Repository{
+	r := formula.Repository{
 		Priority: 0,
 		Name:     commons,
 		TreePath: m.treePath,

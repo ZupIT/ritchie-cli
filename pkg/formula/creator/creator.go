@@ -11,6 +11,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/thoas/go-funk"
@@ -35,12 +36,12 @@ var (
 )
 
 type CreateManager struct {
-	treeManager formula.TreeManager
+	treeManager tree.TreeManager
 	dir         stream.DirCreater
 	file        stream.FileWriteReadExister
 }
 
-func NewCreator(tm formula.TreeManager, dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
+func NewCreator(tm tree.TreeManager, dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
 	return CreateManager{treeManager: tm, dir: dir, file: file}
 }
 

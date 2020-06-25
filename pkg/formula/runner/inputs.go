@@ -1,4 +1,4 @@
-package formula
+package runner
 
 import (
 	"encoding/json"
@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -33,15 +35,15 @@ func NewInputManager(
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword) InputManager {
 	return InputManager{
-		envResolvers: env,
-		InputList:    inList,
-		InputText:    inText,
-		InputBool:    inBool,
+		envResolvers:  env,
+		InputList:     inList,
+		InputText:     inText,
+		InputBool:     inBool,
 		InputPassword: inPass,
 	}
 }
 
-func (d InputManager) Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error {
+func (d InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, inputType api.TermInputType) error {
 	switch inputType {
 	case api.Prompt:
 		if err := d.fromPrompt(cmd, setup); err != nil {
@@ -58,14 +60,14 @@ func (d InputManager) Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInput
 	return nil
 }
 
-func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup) error {
+func (d InputManager) fromStdin(cmd *exec.Cmd, setup formula.Setup) error {
 	data := make(map[string]interface{})
 	if err := stdin.ReadJson(cmd.Stdin, &data); err != nil {
 		fmt.Println("The stdin inputs weren't informed correctly. Check the JSON used to execute the command.")
 		return err
 	}
 
-	config := setup.config
+	config := setup.Config
 
 	for _, input := range config.Inputs {
 		var inputVal string
@@ -86,18 +88,18 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup Setup) error {
 		}
 	}
 	if len(config.Command) != 0 {
-		command := fmt.Sprintf(EnvPattern, CommandEnv, config.Command)
+		command := fmt.Sprintf(formula.EnvPattern, formula.CommandEnv, config.Command)
 		cmd.Env = append(cmd.Env, command)
 	}
 	return nil
 }
 
-func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
-	config := setup.config
+func (d InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
+	config := setup.Config
 	for _, input := range config.Inputs {
 		var inputVal string
 		var valBool bool
-		items, err := loadItems(input, setup.formulaPath)
+		items, err := loadItems(input, setup.FormulaPath)
 		if err != nil {
 			return err
 		}
@@ -116,7 +118,7 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 			valBool, err = d.Bool(input.Label, items)
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
-			inputVal , err = d.Password(input.Label)
+			inputVal, err = d.Password(input.Label)
 		default:
 			inputVal, err = d.resolveIfReserved(input)
 			if err != nil {
@@ -129,12 +131,12 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 		}
 
 		if len(inputVal) != 0 {
-			persistCache(setup.formulaPath, inputVal, input, items)
+			persistCache(setup.FormulaPath, inputVal, input, items)
 			addEnv(cmd, input.Name, inputVal)
 		}
 	}
 	if len(config.Command) != 0 {
-		command := fmt.Sprintf(EnvPattern, CommandEnv, config.Command)
+		command := fmt.Sprintf(formula.EnvPattern, formula.CommandEnv, config.Command)
 		cmd.Env = append(cmd.Env, command)
 	}
 	return nil
@@ -143,12 +145,12 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup Setup) error {
 // addEnv Add environment variable to run formulas.
 // add the variable inName=inValue to cmd.Env
 func addEnv(cmd *exec.Cmd, inName, inValue string) {
-	e := fmt.Sprintf(EnvPattern, strings.ToUpper(inName), inValue)
+	e := fmt.Sprintf(formula.EnvPattern, strings.ToUpper(inName), inValue)
 	cmd.Env = append(cmd.Env, e)
 }
 
-func persistCache(formulaPath, inputVal string, input Input, items []string) {
-	cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
+func persistCache(formulaPath, inputVal string, input formula.Input, items []string) {
+	cachePath := fmt.Sprintf(formula.CachePattern, formulaPath, strings.ToUpper(input.Name))
 	if input.Cache.Active {
 		if items == nil {
 			items = []string{inputVal}
@@ -161,7 +163,7 @@ func persistCache(formulaPath, inputVal string, input Input, items []string) {
 			}
 			items = append([]string{inputVal}, items...)
 		}
-		qtd := DefaultCacheQty
+		qtd := formula.DefaultCacheQty
 		if input.Cache.Qty != 0 {
 			qtd = input.Cache.Qty
 		}
@@ -178,8 +180,8 @@ func persistCache(formulaPath, inputVal string, input Input, items []string) {
 	}
 }
 
-func (d InputManager) loadInputValList(items []string, input Input) (string, error) {
-	newLabel := DefaultCacheNewLabel
+func (d InputManager) loadInputValList(items []string, input formula.Input) (string, error) {
+	newLabel := formula.DefaultCacheNewLabel
 	if input.Cache.Active {
 		if input.Cache.NewLabel != "" {
 			newLabel = input.Cache.NewLabel
@@ -197,9 +199,9 @@ func (d InputManager) loadInputValList(items []string, input Input) (string, err
 	return inputVal, err
 }
 
-func loadItems(input Input, formulaPath string) ([]string, error) {
+func loadItems(input formula.Input, formulaPath string) ([]string, error) {
 	if input.Cache.Active {
-		cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
+		cachePath := fmt.Sprintf(formula.CachePattern, formulaPath, strings.ToUpper(input.Name))
 		if fileutil.Exists(cachePath) {
 			fileBytes, err := fileutil.ReadFile(cachePath)
 			if err != nil {
@@ -227,7 +229,7 @@ func loadItems(input Input, formulaPath string) ([]string, error) {
 	}
 }
 
-func (d InputManager) resolveIfReserved(input Input) (string, error) {
+func (d InputManager) resolveIfReserved(input formula.Input) (string, error) {
 	s := strings.Split(input.Type, "_")
 	resolver := d.envResolvers[s[0]]
 	if resolver != nil {

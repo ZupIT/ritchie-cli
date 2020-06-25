@@ -1,4 +1,4 @@
-package formula
+package tree
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 const (
@@ -18,17 +19,17 @@ const (
 
 type TreeManager struct {
 	ritchieHome string
-	repoLister  Lister
+	repoLister  formula.Lister
 	coreCmds    []api.Command
 }
 
-func NewTreeManager(ritchieHome string, rl Lister, coreCmds []api.Command) TreeManager {
+func NewTreeManager(ritchieHome string, rl formula.Lister, coreCmds []api.Command) TreeManager {
 	return TreeManager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
 }
 
-func (d TreeManager) Tree() (map[string]Tree, error) {
-	trees := make(map[string]Tree)
-	trees[core] = Tree{d.coreCmds}
+func (d TreeManager) Tree() (map[string]formula.Tree, error) {
+	trees := make(map[string]formula.Tree)
+	trees[core] = formula.Tree{d.coreCmds}
 
 	treeLocal, err := d.localTree()
 	if err != nil {
@@ -51,11 +52,11 @@ func (d TreeManager) Tree() (map[string]Tree, error) {
 	return trees, nil
 }
 
-func (d TreeManager) MergedTree(core bool) Tree {
+func (d TreeManager) MergedTree(core bool) formula.Tree {
 	trees := make(map[string]api.Command)
-	treeMain := Tree{[]api.Command{}}
+	treeMain := formula.Tree{[]api.Command{}}
 	if core {
-		treeMain = Tree{d.coreCmds}
+		treeMain = formula.Tree{d.coreCmds}
 	}
 
 	for _, v := range treeMain.Commands {
@@ -97,18 +98,18 @@ func (d TreeManager) MergedTree(core bool) Tree {
 	return treeMain
 }
 
-func (d TreeManager) localTree() (Tree, error) {
+func (d TreeManager) localTree() (formula.Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeLocalCmdPattern, d.ritchieHome)
 	return loadTree(treeCmdFile)
 }
 
-func (d TreeManager) treeByRepo(repo string) (Tree, error) {
+func (d TreeManager) treeByRepo(repo string) (formula.Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repo)
 	return loadTree(treeCmdFile)
 }
 
-func loadTree(treeCmdFile string) (Tree, error) {
-	tree := Tree{}
+func loadTree(treeCmdFile string) (formula.Tree, error) {
+	tree := formula.Tree{}
 	if !fileutil.Exists(treeCmdFile) {
 		return tree, nil
 	}

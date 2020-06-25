@@ -3,6 +3,7 @@ package autocomplete
 import (
 	"errors"
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -32,10 +33,10 @@ var (
 )
 
 type GeneratorManager struct {
-	treeManager formula.TreeManager
+	treeManager tree.TreeManager
 }
 
-func NewGenerator(tm formula.TreeManager) GeneratorManager {
+func NewGenerator(tm tree.TreeManager) GeneratorManager {
 	return GeneratorManager{tm}
 }
 

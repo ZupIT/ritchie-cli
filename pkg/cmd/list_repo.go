@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 // listRepoCmd type for list repo command

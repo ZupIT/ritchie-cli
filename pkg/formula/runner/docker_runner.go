@@ -1,9 +1,11 @@
-package formula
+package runner
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -19,23 +21,23 @@ const (
 )
 
 type DockerRunner struct {
-	PreRunner
-	PostRunner
-	InputRunner
+	formula.PreRunner
+	formula.PostRunner
+	formula.InputRunner
 }
 
-func NewDockerRunner(preRunner PreRunner, postRunner PostRunner, inputRunner InputRunner) DockerRunner {
+func NewDockerRunner(preRunner formula.PreRunner, postRunner formula.PostRunner, inputRunner formula.InputRunner) DockerRunner {
 	return DockerRunner{preRunner, postRunner, inputRunner}
 }
 
-func (d DockerRunner) Run(def Definition, inputType api.TermInputType) error {
+func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) error {
 	setup, err := d.PreRun(def)
 	if err != nil {
 		return err
 	}
 
-	volume := fmt.Sprintf("%s:/app", setup.pwd)
-	args := []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.containerId, setup.containerId}
+	volume := fmt.Sprintf("%s:/app", setup.Pwd)
+	args := []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
 	cmd := exec.Command(docker, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin

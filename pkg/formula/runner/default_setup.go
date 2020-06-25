@@ -1,4 +1,4 @@
-package formula
+package runner
 
 import (
 	"encoding/json"
@@ -14,6 +14,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -53,75 +54,75 @@ func NewDefaultTeamSetup(ritchieHome string, c *http.Client, sess session.Manage
 	}
 }
 
-func (d DefaultSetup) Setup(def Definition) (Setup, error) {
+func (d DefaultSetup) Setup(def formula.Definition) (formula.Setup, error) {
 	pwd, _ := os.Getwd()
 	ritchieHome := d.ritchieHome
 	formulaPath := def.FormulaPath(ritchieHome)
 	config, err := d.loadConfig(formulaPath, def)
 	if err != nil {
-		return Setup{}, err
+		return formula.Setup{}, err
 	}
 
 	binName := def.BinName()
 	binPath := def.BinPath(formulaPath)
 	binFilePath := def.BinFilePath(binPath, binName)
 	if err := d.loadBundle(formulaPath, binFilePath, def); err != nil {
-		return Setup{}, err
+		return formula.Setup{}, err
 	}
 
 	tmpDir, tmpBinDir, err := createWorkDir(ritchieHome, binPath, def)
 	if err != nil {
-		return Setup{}, err
+		return formula.Setup{}, err
 	}
 
 	if err := os.Chdir(tmpBinDir); err != nil {
-		return Setup{}, err
+		return formula.Setup{}, err
 	}
 
 	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
 
-	s := Setup{
-		pwd:            pwd,
-		formulaPath:    formulaPath,
-		binPath:        binPath,
-		tmpDir:         tmpDir,
-		tmpBinDir:      tmpBinDir,
-		tmpBinFilePath: tmpBinFilePath,
-		config:         config,
+	s := formula.Setup{
+		Pwd:            pwd,
+		FormulaPath:    formulaPath,
+		BinPath:        binPath,
+		TmpDir:         tmpDir,
+		TmpBinDir:      tmpBinDir,
+		TmpBinFilePath: tmpBinFilePath,
+		Config:         config,
 	}
 
 	return s, nil
 }
 
-func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, error) {
+func (d DefaultSetup) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
 	configName := def.ConfigName()
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
 		url := def.ConfigURL(configName)
 		if !urlutil.IsURL(url) {
-			return Config{}, ErrInvalidRepoUrl
+			return formula.Config{}, ErrInvalidRepoUrl
 		}
 
 		prompt.Info("Downloading formula config...")
 		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
-			return Config{}, err
+			return formula.Config{}, err
 		}
 		prompt.Success("Formula config download completed!")
 	}
 
 	configFile, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		return Config{}, err
+		return formula.Config{}, err
 	}
 
-	var formulaConfig Config
+	var formulaConfig formula.Config
 	if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
-		return Config{}, err
+		return formula.Config{}, err
 	}
 	return formulaConfig, nil
 }
 
-func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def Definition) error {
+func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def formula.Definition) error {
 	if !fileutil.Exists(binFilePath) {
 		url := def.BundleURL()
 		if !urlutil.IsURL(url) {
@@ -243,7 +244,7 @@ func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string)
 	return nil
 }
 
-func createWorkDir(ritchieHome, binPath string, def Definition) (string, string, error) {
+func createWorkDir(ritchieHome, binPath string, def formula.Definition) (string, string, error) {
 	u := uuid.New().String()
 	tDir, tBDir := def.TmpWorkDirPath(ritchieHome, u)
 

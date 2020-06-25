@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"

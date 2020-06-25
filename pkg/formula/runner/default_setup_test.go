@@ -1,6 +1,7 @@
-package formula
+package runner
 
 import (
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"net/http"
 	"os"
 	"testing"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestDefaultSetup_Setup(t *testing.T) {
-	def := Definition{
+	def := formula.Definition{
 		Path:    "mock/test",
 		Bin:     "test-${so}",
 		LBin:    "test-${so}",

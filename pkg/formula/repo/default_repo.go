@@ -1,4 +1,4 @@
-package formula
+package repo
 
 import (
 	"context"
@@ -18,6 +18,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -48,7 +49,7 @@ type RepoManager struct {
 
 // ByPriority implements sort.Interface for []Repository based on
 // the Priority field.
-type ByPriority []Repository
+type ByPriority []formula.Repository
 
 func (a ByPriority) Len() int           { return len(a) }
 func (a ByPriority) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
@@ -78,7 +79,7 @@ func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Cl
 	}
 }
 
-func (dm RepoManager) Add(r Repository) error {
+func (dm RepoManager) Add(r formula.Repository) error {
 	err := os.MkdirAll(filepath.Dir(dm.cacheFile), os.ModePerm)
 	if err != nil && !os.IsExist(err) {
 		return err
@@ -99,7 +100,7 @@ func (dm RepoManager) Add(r Repository) error {
 	}
 
 	if !fileutil.Exists(dm.repoFile) {
-		wb, err := json.Marshal(RepositoryFile{})
+		wb, err := json.Marshal(formula.RepositoryFile{})
 		if err != nil {
 			return err
 		}
@@ -114,7 +115,7 @@ func (dm RepoManager) Add(r Repository) error {
 		return err
 	}
 
-	var repoFile RepositoryFile
+	var repoFile formula.RepositoryFile
 	if err := json.Unmarshal(rb, &repoFile); err != nil {
 		return err
 	}
@@ -152,7 +153,7 @@ func (dm RepoManager) Update() error {
 	var wg sync.WaitGroup
 	for _, v := range f.Values {
 		wg.Add(1)
-		go func(v Repository) {
+		go func(v formula.Repository) {
 			defer wg.Done()
 			if err := dm.loadTreeFile(v); err != nil {
 				fmt.Printf("...Unable to get an update from the %q formula repository (%s):\n\t%s\n", v.Name, v.TreePath, err)
@@ -206,14 +207,14 @@ func (dm RepoManager) Delete(name string) error {
 	return nil
 }
 
-func (dm RepoManager) List() ([]Repository, error) {
+func (dm RepoManager) List() ([]formula.Repository, error) {
 	f, err := dm.loadReposFromDisk()
 
 	if fileutil.IsNotExistErr(err) {
 		return nil, ErrNoRepoToShow
 	}
 	if len(f.Values) == 0 {
-		return []Repository{}, nil
+		return []formula.Repository{}, nil
 	}
 
 	sort.Sort(ByPriority(f.Values))
@@ -221,7 +222,7 @@ func (dm RepoManager) List() ([]Repository, error) {
 	return f.Values, nil
 }
 
-func (dm RepoManager) loadTreeFile(r Repository) error {
+func (dm RepoManager) loadTreeFile(r formula.Repository) error {
 
 	session, err := dm.sessionManager.Current()
 	if err != nil {
@@ -267,9 +268,9 @@ func (dm RepoManager) loadTreeFile(r Repository) error {
 	return nil
 }
 
-func (dm RepoManager) loadReposFromDisk() (RepositoryFile, error) {
+func (dm RepoManager) loadReposFromDisk() (formula.RepositoryFile, error) {
 	path := fmt.Sprintf(repositoryConfFilePattern, dm.homePath)
-	rf := RepositoryFile{}
+	rf := formula.RepositoryFile{}
 
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -289,7 +290,7 @@ func removeRepoCache(root string) error {
 	return os.Remove(root)
 }
 
-func writeFile(rf RepositoryFile, path string, perm os.FileMode) error {
+func writeFile(rf formula.RepositoryFile, path string, perm os.FileMode) error {
 	b, err := json.Marshal(rf)
 	if err != nil {
 		return err

@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
 	"strings"
+	"time"
 
+	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -78,7 +81,10 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		wspace, err := FormulaWorkspaceInput(c.homeDir, workspaces, c.inList, c.inText)
+		defaultWorkspace := path.Join(c.homeDir, workspace.DefaultWorkspaceDir)
+		workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
+
+		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText)
 		if err != nil {
 			return err
 		}
@@ -96,19 +102,41 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			FormulaPath:   formulaPath,
 		}
 
-		if err := c.formula.Create(cf); err != nil {
-			return err
-		}
+		c.create(cf, wspace.Dir, formulaPath)
 
-		if err := c.formula.Build(wspace.Dir, formulaPath); err != nil {
-			return err
-		}
-
-		prompt.Success(fmt.Sprintf("%s formula successfully created!", lang))
-		prompt.Info(fmt.Sprintf("Formula path is %s", wspace.Dir))
+		prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
+		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
 
 		return nil
 	}
+}
+
+func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath string) {
+	buildInfo := fmt.Sprintf(prompt.Teal, "Creating and building formula...")
+	s := spinner.StartNew(buildInfo)
+	time.Sleep(2 * time.Second)
+
+	if err := c.formula.Create(cf); err != nil {
+		errorMsg := fmt.Sprintf(prompt.Red, err)
+		s.Error(errors.New(errorMsg))
+		return
+	}
+
+	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
+		errorMsg := fmt.Sprintf(prompt.Red, err)
+		s.Error(errors.New(errorMsg))
+		return
+	}
+
+	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
+		errorMsg := fmt.Sprintf(prompt.Red, err)
+		s.Error(errors.New(errorMsg))
+		return
+	}
+
+	msg := fmt.Sprintf("✔ %s formula successfully created!", cf.Lang)
+	success := fmt.Sprintf(prompt.Green, msg)
+	s.Success(success)
 }
 
 func formulaPath(workspacePath, cmd string) string {
@@ -142,14 +170,10 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 }
 
 func FormulaWorkspaceInput(
-	homeDir string,
 	workspaces workspace.Workspaces,
 	inList prompt.InputList,
 	inText prompt.InputText,
 ) (workspace.Workspace, error) {
-	defaultWorkspace := path.Join(homeDir, workspace.DefaultWorkspaceDir)
-	workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
-
 	var items []string
 	for k, v := range workspaces {
 		kv := fmt.Sprintf("%s (%s)", k, v)
