@@ -81,12 +81,14 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if err := b.workspace.Validate(wspace); err != nil {
-			return err
-		}
+		if wspace.Dir != defaultWorkspace {
+			if err := b.workspace.Validate(wspace); err != nil {
+				return err
+			}
 
-		if err := b.workspace.Add(wspace); err != nil {
-			return err
+			if err := b.workspace.Add(wspace); err != nil {
+				return err
+			}
 		}
 
 		formulaPath, err := b.readFormulas(wspace.Dir)

@@ -89,8 +89,10 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		if err := c.workspace.Add(wspace); err != nil {
-			return err
+		if wspace.Dir != defaultWorkspace {
+			if err := c.workspace.Add(wspace); err != nil {
+				return err
+			}
 		}
 
 		formulaPath := formulaPath(wspace.Dir, formulaCmd)
