@@ -5,12 +5,10 @@ import (
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/spf13/cobra"
-
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 // cleanRepoCmd type for clean repo command
@@ -32,7 +30,7 @@ func NewCleanRepoCmd(cl formula.Cleaner, it prompt.InputText) *cobra.Command {
 		Use:     "repo",
 		Short:   "clean a repository.",
 		Example: "rit clean repo ",
-		RunE: RunFuncE(c.runStdin(), c.runPrompt()),
+		RunE:    RunFuncE(c.runStdin(), c.runPrompt()),
 	}
 
 	cmd.LocalFlags()
