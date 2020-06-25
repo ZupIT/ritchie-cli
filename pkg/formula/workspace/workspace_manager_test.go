@@ -229,6 +229,90 @@ func TestManager_List(t *testing.T) {
 	}
 }
 
+func TestValidate(t *testing.T) {
+	cleanForm()
+	makefileDir := createDirWithMakefile()
+	treeDir := createDirWithTree()
+	fullDir := createFullDir()
+
+	tmpDir := os.TempDir()
+	fileManager := stream.NewFileManager()
+	workspaceFile := path.Join(tmpDir, workspacesFile)
+	if err := fileManager.Remove(workspaceFile); err != nil {
+		t.Error(err)
+	}
+
+	type in struct {
+		workspace   Workspace
+		fileManager stream.FileWriteReadExister
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		out  error
+	}{
+		{
+			name: "valid",
+			in: in{
+				workspace: Workspace{
+					Name: "zup",
+					Dir:  fullDir,
+				},
+				fileManager: fileManager,
+			},
+			out: nil,
+		},
+		{
+			name: "invalid workspace",
+			in: in{
+				workspace: Workspace{
+					Name: "zup",
+					Dir:  "/home/user/invalid-workspace",
+				},
+				fileManager: fileManager,
+			},
+			out: ErrInvalidWorkspace,
+		},
+		{
+			name: "invalid Makefile not found",
+			in: in{
+				workspace: Workspace{
+					Name: "zup",
+					Dir:  treeDir,
+				},
+				fileManager: fileManager,
+			},
+			out: ErrMakefileNotFound,
+		},
+		{
+			name: "invalid tree.json not found",
+			in: in{
+				workspace: Workspace{
+					Name: "zup",
+					Dir:  makefileDir,
+				},
+				fileManager: fileManager,
+			},
+			out: ErrTreeJsonNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			in := tt.in
+
+			workspace := New(tmpDir, in.fileManager)
+			got := workspace.Validate(in.workspace)
+
+			if got != nil && got.Error() != tt.out.Error() {
+				t.Errorf("Validate(%s) got %v, out %v", tt.name, got, tt.out)
+			}
+		})
+	}
+
+}
+
 func cleanForm() {
 	_ = fileutil.RemoveDir(os.TempDir() + "/customRepo")
 	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoMakefile")

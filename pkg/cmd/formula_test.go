@@ -22,7 +22,7 @@ func TestFormulaCommand_Add(t *testing.T) {
 					Parent: "root_mock",
 					Usage:  "test",
 					Help:   "test for add",
-					Formula: api.Formula{
+					Formula: &api.Formula{
 						Path:    "mock/test",
 						Bin:     "test-${so}",
 						LBin:    "test-${so}",

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/docker/docker/pkg/urlutil"
 	"github.com/google/uuid"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -25,6 +26,7 @@ var (
 	ErrUnknownConfigFileDownload = errors.New("unknown error when downloading your config file")
 	ErrCreateReqBundle           = errors.New("failed to create request for bundle download")
 	ErrCreateReqConfig           = errors.New("failed to create request for config download")
+	ErrInvalidRepoUrl            = errors.New("RepoURL is invalid inside tree.json")
 )
 
 type DefaultSetup struct {
@@ -95,8 +97,12 @@ func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, er
 	configName := def.ConfigName()
 	configPath := def.ConfigPath(formulaPath, configName)
 	if !fileutil.Exists(configPath) {
-		prompt.Info("Downloading formula config...")
 		url := def.ConfigURL(configName)
+		if !urlutil.IsURL(url) {
+			return Config{}, ErrInvalidRepoUrl
+		}
+
+		prompt.Info("Downloading formula config...")
 		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
 			return Config{}, err
 		}
@@ -118,6 +124,10 @@ func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, er
 func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def Definition) error {
 	if !fileutil.Exists(binFilePath) {
 		url := def.BundleURL()
+		if !urlutil.IsURL(url) {
+			return ErrInvalidRepoUrl
+		}
+
 		name := def.BundleName()
 		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name, def.RepoName)
 		if err != nil {
@@ -133,7 +143,7 @@ func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def Definition
 }
 
 func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
-	prompt.Info( "Downloading formula...")
+	prompt.Info("Downloading formula...")
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", ErrCreateReqBundle
@@ -179,7 +189,7 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		return "", err
 	}
 
-	prompt.Success( "Formula download completed!")
+	prompt.Success("Formula download completed!")
 	return file, nil
 }
 

@@ -14,8 +14,8 @@ import (
 func TestDefaultRunner_Run(t *testing.T) {
 	def := Definition{
 		Path:    "mock/test",
-		Bin:     "test-Linux",
-		Bundle:  "Linux.zip",
+		Bin:     "test-linux",
+		Bundle:  "linux.zip",
 		Config:  "config.json",
 		RepoURL: RepoUrl,
 	}
