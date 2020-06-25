@@ -341,7 +341,7 @@ func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, 
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: api.Formula{
+					Formula: &api.Formula{
 						Path:   pathValue,
 						Bin:    "main.py",
 						LBin:   "main.py",
@@ -356,7 +356,7 @@ func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, 
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: api.Formula{
+					Formula: &api.Formula{
 						Path:   pathValue,
 						Bin:    fmt.Sprintf("%s-${so}", fn),
 						LBin:   fmt.Sprintf("%s-${so}", fn),
@@ -371,7 +371,7 @@ func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, 
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: api.Formula{
+					Formula: &api.Formula{
 						Path:   pathValue,
 						Bin:    fmt.Sprintf("%s.sh", fn),
 						LBin:   fmt.Sprintf("%s.sh", fn),
