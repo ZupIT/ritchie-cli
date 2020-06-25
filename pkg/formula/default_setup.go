@@ -77,6 +77,9 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 	}
 
 	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
+	if _, err := os.Create(OutputFileName); err != nil {
+		return Setup{}, err
+	}
 
 	s := Setup{
 		pwd:            pwd,
@@ -86,8 +89,8 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 		tmpBinDir:      tmpBinDir,
 		tmpBinFilePath: tmpBinFilePath,
 		config:         config,
+		outputFilePath: fmt.Sprintf("%s/%s", tmpBinDir, OutputFileName),
 	}
-
 	return s, nil
 }
 
@@ -133,7 +136,7 @@ func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def Definition
 }
 
 func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
-	prompt.Info( "Downloading formula...")
+	prompt.Info("Downloading formula...")
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", ErrCreateReqBundle
@@ -179,7 +182,7 @@ func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName str
 		return "", err
 	}
 
-	prompt.Success( "Formula download completed!")
+	prompt.Success("Formula download completed!")
 	return file, nil
 }
 

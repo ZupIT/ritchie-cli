@@ -92,6 +92,7 @@ type Setup struct {
 	tmpDir         string
 	tmpBinDir      string
 	tmpBinFilePath string
+	outputFilePath string
 	config         Config
 	containerId    string
 }

@@ -43,7 +43,7 @@ func (PostRunnerManager) PostRun(p Setup, docker bool) error {
 }
 
 func removeRitFiles(df *[]string) {
-	sliceutil.Remove(*df, OutputFileName)
+	*df = sliceutil.Remove(*df, OutputFileName)
 }
 
 func removeWorkDir(tmpDir string) {

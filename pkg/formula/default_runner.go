@@ -26,13 +26,12 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	outputFile, _ := os.Create(OutputFileName)
 	cmd := exec.Command(setup.tmpBinFilePath)
 
 	cmd.Env = os.Environ()
 	pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, setup.pwd)
 	cPwdEnv := fmt.Sprintf(EnvPattern, CPwdEnv, setup.pwd)
-	outputEnv := fmt.Sprintf(EnvPattern, OutputEnv, outputFile.Name())
+	outputEnv := fmt.Sprintf(EnvPattern, OutputEnv, setup.outputFilePath)
 	cmd.Env = append(cmd.Env, pwdEnv)
 	cmd.Env = append(cmd.Env, cPwdEnv)
 	cmd.Env = append(cmd.Env, outputEnv)
@@ -64,7 +63,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 
 func printOutEnvs(setup Setup) {
 	fOutputs := map[string]string{}
-	f, _ := os.Open(OutputFileName)
+	f, _ := os.Open(setup.outputFilePath)
 	b, _ := ioutil.ReadAll(f)
 	for _, c := range strings.Split(string(b), ";") {
 		l := strings.Split(c, "=")
