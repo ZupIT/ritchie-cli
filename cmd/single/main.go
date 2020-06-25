@@ -47,12 +47,13 @@ func buildCommands() *cobra.Command {
 	ritchieHomeDir := api.RitchieHomeDir()
 
 	// prompt
-	inputText := prompt.NewInputText()
-	inputInt := prompt.NewInputInt()
-	inputBool := prompt.NewInputBool()
-	inputPassword := prompt.NewInputPassword()
-	inputList := prompt.NewInputList()
-	inputURL := prompt.NewInputURL()
+	inputText := prompt.NewSurveyText()
+	inputInt := prompt.NewSurveyInt()
+	inputBool := prompt.NewSurveyBool()
+	inputPassword := prompt.NewSurveyPassword()
+	inputList := prompt.NewSurveyList()
+	inputURL := prompt.NewSurveyURL()
+	inputMultiline := prompt.NewSurveyMultiline()
 
 	// deps
 	sessionManager := session.NewManager(ritchieHomeDir)
@@ -117,7 +118,8 @@ func buildCommands() *cobra.Command {
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword)
+		inputPassword,
+		inputMultiline)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)

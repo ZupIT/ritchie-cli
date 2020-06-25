@@ -23,6 +23,7 @@ type setCredentialCmd struct {
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
+	prompt.InputMultiline
 }
 
 // NewSingleSetCredentialCmd creates a new cmd instance
@@ -31,8 +32,9 @@ func NewSingleSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword) *cobra.Command {
-	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip}
+	ip prompt.InputPassword,
+	im prompt.InputMultiline) *cobra.Command {
+	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip, im}
 
 	return newCmd(s)
 }
@@ -44,8 +46,9 @@ func NewTeamSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword) *cobra.Command {
-	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip}
+	ip prompt.InputPassword,
+	im prompt.InputMultiline) *cobra.Command {
+	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip, im}
 
 	return newCmd(s)
 }
@@ -101,7 +104,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	cred := credential.Credential{}
 	addMore := true
 	for addMore {
-		kv, err := s.Text("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+		kv, err := s.MultiLineText("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
 		if err != nil {
 			return credDetail, err
 		}
@@ -181,7 +184,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		}
 		credentials[field] = val
 	}
-	
+
 	credDetail.Credential = credentials
 	credDetail.Service = service
 
