@@ -490,12 +490,29 @@ workflows:
           name: build-code
           filters:
             <<: *FILTERS_RELEASE
+      - deb-package:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
+      - rpm-package:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
+      - win-package:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
       - delivery:
           name: delivery
           filters:
             <<: *FILTERS_RELEASE
           requires:
-            - build-code
+            - deb-package
+            - rpm-package
+            - win-package
       - release:
           name: release-publish
           filters:
