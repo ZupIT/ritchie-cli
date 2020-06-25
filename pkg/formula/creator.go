@@ -266,6 +266,11 @@ func createSrcFiles(dir, pkg, lang string) error {
 		if err := node.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
+	case PHPlang:
+		php := NewPHP()
+		if err := php.Create(srcDir, pkg, pkgDir, dir); err != nil {
+			return err
+		}
 	case Pythonlang:
 		python := NewPython()
 		if err := python.Create(srcDir, pkg, pkgDir, dir); err != nil {

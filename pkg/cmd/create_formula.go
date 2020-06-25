@@ -58,7 +58,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
+		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "PHP", "Python", "Shell"})
 		if err != nil {
 			return err
 		}
