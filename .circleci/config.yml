@@ -519,6 +519,12 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - delivery
+      - unix_smoke_test:
+          name: unix-smoke-test
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - release-publish
   delivery:
     jobs:
       - build:
