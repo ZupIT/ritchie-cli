@@ -16,11 +16,11 @@ type InputPassword interface {
 
 type inputPassword struct{}
 
+type surveyPassword struct{}
+
 func NewInputPassword() inputPassword {
 	return inputPassword{}
 }
-
-type surveyPassword struct{}
 
 func NewSurveyPassword() surveyPassword {
 	return surveyPassword{}

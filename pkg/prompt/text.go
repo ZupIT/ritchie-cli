@@ -18,6 +18,10 @@ func NewInputText() inputText {
 	return inputText{}
 }
 
+func NewSurveyText() surveyText {
+	return surveyText{}
+}
+
 // Text show a prompt and parse to string.
 func (inputText) Text(name string, required bool) (string, error) {
 	var prompt promptui.Prompt
@@ -38,10 +42,6 @@ func (inputText) Text(name string, required bool) (string, error) {
 	}
 
 	return prompt.Run()
-}
-
-func NewSurveyText() surveyText {
-	return surveyText{}
 }
 
 func (surveyText) Text(name string, required bool) (string, error) {
@@ -67,6 +67,6 @@ func (surveyText) Text(name string, required bool) (string, error) {
 			},
 		}
 	}
-	return value, survey.Ask(validationQs, &name)
+	return value, survey.Ask(validationQs, &value)
 }
 

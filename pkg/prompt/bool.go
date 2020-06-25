@@ -15,11 +15,11 @@ type InputBool interface {
 
 type inputBool struct{}
 
+type surveyBool struct{}
+
 func NewInputBool() inputBool {
 	return inputBool{}
 }
-
-type surveyBool struct{}
 
 func NewSurveyBool() surveyBool {
 	return surveyBool{}

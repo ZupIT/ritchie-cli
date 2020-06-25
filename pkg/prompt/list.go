@@ -11,8 +11,14 @@ type InputList interface {
 
 type inputList struct{}
 
+type surveyList struct{}
+
 func NewInputList() inputList {
 	return inputList{}
+}
+
+func NewSurveyList() surveyList {
+	return surveyList{}
 }
 
 // List show a prompt with options and parse to string.
@@ -24,12 +30,6 @@ func (inputList) List(name string, items []string) (string, error) {
 	}
 	_, result, err := prompt.Run()
 	return result, err
-}
-
-type surveyList struct{}
-
-func NewSurveyList() surveyList {
-	return surveyList{}
 }
 
 // List show a prompt with options and parse to string.

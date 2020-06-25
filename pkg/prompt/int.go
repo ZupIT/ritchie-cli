@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/manifoldco/promptui"
 )
 
 type InputInt interface {
@@ -12,35 +13,35 @@ type InputInt interface {
 
 type inputInt struct{}
 
+type surveyInt struct{}
+
 func NewInputInt() inputInt {
 	return inputInt{}
 }
 
-// Int show a prompt and parse to int.
-// func (inputInt) Int(name string) (int64, error) {
-// 	prompt := promptui.Prompt{
-// 		Label:     name,
-// 		Pointer: promptui.PipeCursor,
-// 		Validate:  validateIntegerNumberInput,
-// 		Templates: defaultTemplate(),
-// 	}
-//
-// 	promptResult, err := prompt.Run()
-// 	if err != nil {
-// 		return 0, err
-// 	}
-//
-// 	parseInt, err := strconv.ParseInt(promptResult, 0, 64)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-// 	return parseInt, nil
-// }
-
-type surveyInt struct{}
-
 func NewSurveyInt() surveyInt {
 	return surveyInt{}
+}
+
+//Int show a prompt and parse to int.
+func (inputInt) Int(name string) (int64, error) {
+	prompt := promptui.Prompt{
+		Label:     name,
+		Pointer: promptui.PipeCursor,
+		Validate:  validateIntIn,
+		Templates: defaultTemplate(),
+	}
+
+	promptResult, err := prompt.Run()
+	if err != nil {
+		return 0, err
+	}
+
+	parseInt, err := strconv.ParseInt(promptResult, 0, 64)
+	if err != nil {
+		return 0, err
+	}
+	return parseInt, nil
 }
 
 func (surveyInt) Int(name string) (int64, error) {
@@ -51,7 +52,7 @@ func (surveyInt) Int(name string) (int64, error) {
 		{
 			Name:     "name",
 			Prompt:   &survey.Input{Message: name},
-			Validate: validateIntegerNumberInput,
+			Validate: validateSurveyIntIn,
 		},
 	}
 	if err := survey.Ask(validationQs, &value); err != nil {
