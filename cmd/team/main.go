@@ -1,7 +1,13 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/base64"
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -66,27 +72,30 @@ func buildCommands() *cobra.Command {
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	serverFinder := server.NewFinder(ritchieHomeDir)
-	serverSetter := server.NewSetter(ritchieHomeDir, http.DefaultClient)
+	serverSetter := server.NewSetter(ritchieHomeDir, makeHttpClientIgnoreSsl())
 	serverFindSetter := server.NewFindSetter(serverFinder, serverSetter)
-	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, http.DefaultClient, sessionManager)
-	repoLoader := formula.NewTeamLoader(serverFinder, http.DefaultClient, sessionManager, repoManager)
+
+	httpClient := makeHttpClient(serverFinder)
+	repoManager := formula.NewTeamRepoManager(ritchieHomeDir, serverFinder, httpClient, sessionManager)
+	repoLoader := formula.NewTeamLoader(serverFinder, httpClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		serverFinder,
-		http.DefaultClient,
+		httpClient,
 		sessionManager)
 	logoutManager := secteam.NewLogoutManager(sessionManager)
-	credSetter := credteam.NewSetter(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
-	credFinder := credteam.NewFinder(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
-	credSettings := credteam.NewSettings(serverFinder, http.DefaultClient, sessionManager, ctxFinder)
+	credSetter := credteam.NewSetter(serverFinder, httpClient, sessionManager, ctxFinder)
+	credFinder := credteam.NewFinder(serverFinder, httpClient, sessionManager, ctxFinder)
+	credSettings := credteam.NewSettings(serverFinder, httpClient, sessionManager, ctxFinder)
 	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool)
-	formulaSetup := formula.NewDefaultTeamSetup(ritchieHomeDir, http.DefaultClient, sessionManager)
+	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
+	formulaSetup := formula.NewDefaultTeamSetup(ritchieHomeDir, httpClient, sessionManager)
+
 
 	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
 	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
@@ -98,10 +107,12 @@ func buildCommands() *cobra.Command {
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
 
 	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
+	uhc := makeHttpClient(serverFinder)
+	uhc.Timeout =  1 * time.Second
 	defaultUpgradeResolver := version.DefaultVersionResolver{
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultService{},
-		HttpClient:       &http.Client{Timeout: 1 * time.Second},
+		HttpClient:       uhc,
 	}
 	upgradeUrl := upgrade.UpgradeUrl(api.Team, defaultUpgradeResolver)
 
@@ -116,7 +127,7 @@ func buildCommands() *cobra.Command {
 	deleteCmd := cmd.NewDeleteCmd()
 	initCmd := cmd.NewTeamInitCmd(inputText, inputPassword, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader)
+	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -218,7 +229,58 @@ func buildCommands() *cobra.Command {
 }
 
 func sendMetrics(sm session.DefaultManager, sf server.Finder) {
-	hc := &http.Client{Timeout: 2 * time.Second}
+	hc := makeHttpClient(sf)
+	hc.Timeout = 2 * time.Second
 	metricsManager := metrics.NewSender(hc, sf, sm)
 	go metricsManager.SendCommand()
+}
+
+func makeHttpClient(finder server.Finder) *http.Client {
+	c, err := finder.Find()
+	if err != nil {
+		fmt.Println(fmt.Errorf(prompt.Red, "error load cli config, try run \"rit init\""))
+		os.Exit(1)
+	}
+	client := &http.Client{}
+	client.Transport = &http.Transport{
+		DialTLSContext: makeDialer(c.PinningKey, c.PinningAddr, true),
+	}
+	return client
+}
+
+type Dialer func(ctx context.Context, network, addr string) (net.Conn, error)
+
+func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
+	return func(ctx context.Context, network, addr string) (net.Conn, error) {
+		c, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: skipCAVerification})
+		if addr == pAddr {
+			if err != nil {
+				return c, err
+			}
+			connState := c.ConnectionState()
+			keyPinValid := false
+			for _, peerCert := range connState.PeerCertificates {
+				der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
+				if err != nil {
+					return nil, err
+				}
+				uEnc := base64.StdEncoding.EncodeToString(der)
+				if uEnc == pKey {
+					keyPinValid = true
+				}
+			}
+			if !keyPinValid {
+				return nil, errors.New("certificate of server not valid")
+			}
+		}
+		return c, nil
+	}
+}
+
+func makeHttpClientIgnoreSsl() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	return client
 }
