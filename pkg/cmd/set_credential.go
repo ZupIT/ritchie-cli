@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -101,12 +102,11 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	cred := credential.Credential{}
 	addMore := true
 	for addMore {
-		kv, err := s.Text("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+		pair, err := s.entryCredential()
 		if err != nil {
 			return credDetail, err
 		}
 
-		pair := strings.Split(kv, "=")
 		if s := validate(pair); s != "" {
 			prompt.Error(s)
 			continue
@@ -140,6 +140,62 @@ func validate(pair []string) string {
 	}
 
 	return ""
+}
+
+func (s setCredentialCmd) entryCredential() ([]string, error) {
+	var pair []string
+	var err error
+	var kv string
+
+	entries := map[string]string{
+		"File (input by file)":  "file",
+		"Prompt (manual entry)": "prompt",
+	}
+
+	var types []string
+	for k := range entries {
+		types = append(types, k)
+	}
+
+	typ, errTyp := s.List("Input type: ", types)
+	if errTyp != nil {
+		return nil, errTyp
+	}
+
+	if entries[typ] == "file" {
+		pair, err = s.inputFile()
+	} else {
+		kv, err = s.Text("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+		if err != nil {
+			return nil, err
+		}
+		pair = strings.Split(kv, "=")
+	}
+	return pair, err
+}
+
+func (s setCredentialCmd) inputFile() ([]string, error) {
+	var res []string
+
+	key, err := s.Text("Type key of your credential: ", true)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, key)
+
+	path, err := s.Text("Type the path to your file that contains the value of your credential: ", true)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, string(data))
+
+	return res, nil
+
 }
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
@@ -181,7 +237,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		}
 		credentials[field] = val
 	}
-	
+
 	credDetail.Credential = credentials
 	credDetail.Service = service
 
