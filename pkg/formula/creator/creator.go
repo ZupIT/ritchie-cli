@@ -36,12 +36,12 @@ var (
 )
 
 type CreateManager struct {
-	treeManager tree.TreeManager
+	treeManager tree.Manager
 	dir         stream.DirCreater
 	file        stream.FileWriteReadExister
 }
 
-func NewCreator(tm tree.TreeManager, dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
+func NewCreator(tm tree.Manager, dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
 	return CreateManager{treeManager: tm, dir: dir, file: file}
 }
 

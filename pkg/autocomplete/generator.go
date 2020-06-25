@@ -33,10 +33,10 @@ var (
 )
 
 type GeneratorManager struct {
-	treeManager tree.TreeManager
+	treeManager tree.Manager
 }
 
-func NewGenerator(tm tree.TreeManager) GeneratorManager {
+func NewGenerator(tm tree.Manager) GeneratorManager {
 	return GeneratorManager{tm}
 }
 

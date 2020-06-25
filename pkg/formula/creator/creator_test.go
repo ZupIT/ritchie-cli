@@ -284,10 +284,7 @@ func (repoListerMock) List() ([]formula.Repository, error) {
 }
 
 type dirManagerMock struct {
-	data      []string
 	createErr error
-	listErr   error
-	copyErr   error
 }
 
 func (d dirManagerMock) Create(string) error {

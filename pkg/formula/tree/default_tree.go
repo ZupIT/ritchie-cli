@@ -17,19 +17,19 @@ const (
 	local               = "LOCAL"
 )
 
-type TreeManager struct {
+type Manager struct {
 	ritchieHome string
 	repoLister  formula.Lister
 	coreCmds    []api.Command
 }
 
-func NewTreeManager(ritchieHome string, rl formula.Lister, coreCmds []api.Command) TreeManager {
-	return TreeManager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
+func NewTreeManager(ritchieHome string, rl formula.Lister, coreCmds []api.Command) Manager {
+	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
 }
 
-func (d TreeManager) Tree() (map[string]formula.Tree, error) {
+func (d Manager) Tree() (map[string]formula.Tree, error) {
 	trees := make(map[string]formula.Tree)
-	trees[core] = formula.Tree{d.coreCmds}
+	trees[core] = formula.Tree{Commands: d.coreCmds}
 
 	treeLocal, err := d.localTree()
 	if err != nil {
@@ -52,11 +52,11 @@ func (d TreeManager) Tree() (map[string]formula.Tree, error) {
 	return trees, nil
 }
 
-func (d TreeManager) MergedTree(core bool) formula.Tree {
+func (d Manager) MergedTree(core bool) formula.Tree {
 	trees := make(map[string]api.Command)
-	treeMain := formula.Tree{[]api.Command{}}
+	treeMain := formula.Tree{Commands: []api.Command{}}
 	if core {
-		treeMain = formula.Tree{d.coreCmds}
+		treeMain = formula.Tree{Commands: d.coreCmds}
 	}
 
 	for _, v := range treeMain.Commands {
@@ -98,12 +98,12 @@ func (d TreeManager) MergedTree(core bool) formula.Tree {
 	return treeMain
 }
 
-func (d TreeManager) localTree() (formula.Tree, error) {
+func (d Manager) localTree() (formula.Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeLocalCmdPattern, d.ritchieHome)
 	return loadTree(treeCmdFile)
 }
 
-func (d TreeManager) treeByRepo(repo string) (formula.Tree, error) {
+func (d Manager) treeByRepo(repo string) (formula.Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repo)
 	return loadTree(treeCmdFile)
 }
