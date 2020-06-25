@@ -14,15 +14,19 @@ const (
 `
 
 	Makefile = `# Make Run PHP
-BINARY_NAME={{bin-name}}.sh
+BINARY_NAME_UNIX={{bin-name}}.sh
 BINARY_NAME_WINDOWS={{bin-name}}.bat
 DIST=../dist
 DIST_DIR=$(DIST)/commons/bin
 build:
 	mkdir -p $(DIST_DIR)
-	cp index.php $(DIST_DIR) && cp -r {{bin-name}} Dockerfile set_umask.sh $(DIST_DIR)
-	chmod +x $(DIST_DIR)/index.php
-	echo 'php index.php' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)`
+	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
+	echo 'php index.php' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)
+
+	cp -r . $(DIST_DIR)
+
+	#Clean files
+	rm $(BINARY_NAME_UNIX)`
 
 	Dockerfile = `
 FROM php:7.4-cli

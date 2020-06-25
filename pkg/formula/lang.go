@@ -233,12 +233,17 @@ func (p PHP) Create(srcDir, pkg, pkgDir, dir string) error {
 		return err
 	}
 
+	if err := createRunTemplate(srcDir, p.Run); err != nil {
+		return err
+	}
+
 	if err := createPkgDir(pkgDir); err != nil {
 		return err
 	}
 
+	templatePHP := strings.ReplaceAll(p.File, nameBin, pkg)
 	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, p.FileFormat)
-	if err := fileutil.WriteFile(pkgFile, []byte(p.File)); err != nil {
+	if err := fileutil.WriteFile(pkgFile, []byte(templatePHP)); err != nil {
 		return err
 	}
 
