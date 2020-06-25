@@ -8,8 +8,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
-func UpgradeUrl(edition api.Edition, resolver version.Resolver) string {
-	stableVersion, err := resolver.StableVersion()
+func Url(edition api.Edition, resolver version.Resolver) string {
+	stableVersion, err := resolver.StableVersionForCmd()
 	if err != nil {
 		return ""
 	}

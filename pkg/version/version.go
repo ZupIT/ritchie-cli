@@ -30,7 +30,6 @@ type stableVersionCache struct {
 }
 
 func (r DefaultVersionResolver) StableVersion() (string, error) {
-
 	cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
 	cacheData, err := r.FileUtilService.ReadFile(cachePath)
 	cache := &stableVersionCache{}
@@ -39,8 +38,6 @@ func (r DefaultVersionResolver) StableVersion() (string, error) {
 	}
 
 	if err != nil || cache.ExpiresAt <= time.Now().Unix() {
-
-		api.RitchieHomeDir()
 
 		request, err := http.NewRequest(http.MethodGet, r.StableVersionUrl, nil)
 		if err != nil {
@@ -73,6 +70,38 @@ func (r DefaultVersionResolver) StableVersion() (string, error) {
 	} else {
 		return cache.StableVersion, nil
 	}
+}
+
+func (r DefaultVersionResolver) StableVersionForCmd() (string, error){
+	request, err := http.NewRequest(http.MethodGet, r.StableVersionUrl, nil)
+	if err != nil {
+		return "", err
+	}
+	response, err := r.HttpClient.Do(request)
+	if err != nil {
+		return "", err
+	}
+	stableVersionBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	stableVersion := string(stableVersionBytes)
+	stableVersion = strings.ReplaceAll(stableVersion, "\n", "")
+
+	newCache := stableVersionCache{
+		StableVersion: stableVersion,
+		ExpiresAt:     time.Now().Add(time.Hour * 10).Unix(),
+	}
+
+	newCacheJson, err := json.Marshal(newCache)
+
+	if err == nil {
+		cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
+		_ = r.FileUtilService.WriteFilePerm(cachePath, newCacheJson, 0600)
+	}
+
+	return stableVersion, nil
 }
 
 func VerifyNewVersion(resolve Resolver, currentVersion string) string {
