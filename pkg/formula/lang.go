@@ -208,8 +208,6 @@ func (n Node) Create(srcDir, pkg, pkgDir, dir string) error {
 	return nil
 }
 
-// ------------------------------------------------
-
 type PHP struct {
 	Lang
 }
@@ -249,8 +247,6 @@ func (p PHP) Create(srcDir, pkg, pkgDir, dir string) error {
 
 	return nil
 }
-
-// ------------------------------------------------
 
 type Shell struct {
 	Lang

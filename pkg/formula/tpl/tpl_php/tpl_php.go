@@ -3,12 +3,15 @@ package tpl_php
 const (
 	Index = `<?php
 
-	echo '123';
+include '{{bin-name}}/{{bin-name}}.php';
 
-// $input1 = os.environ.get('SAMPLE_TEXT')
-// $input2 = os.environ.get('SAMPLE_LIST')
-// $input3 = os.environ.get('SAMPLE_BOOL')
-// {{bin-name}}.Run(input1, input2, input3)
+	echo 'PHP formula start\n';
+
+	$input1 = getenv('SAMPLE_TEXT');
+	$input2 = getenv('SAMPLE_LIST');
+	$input3 = getenv('SAMPLE_BOOL');
+	
+	Run($input1, $input2, $input3);
 
 ?>
 `
@@ -50,10 +53,10 @@ php -f index.php
 	File = `<?php
 
 	function Run($input1, $input2, $input3) {
-		echo "Hello World!";
-		echo "You receive $input1 in text.";
-		echo "You receive $input2 in list.";
-		echo "You receive $input3 in boolean.";
+		echo "Hello World! \n";
+		echo "You receive $input1 in text. \n";
+		echo "You receive $input2 in list. \n";
+		echo "You receive $input3 in boolean. \n";
 	}
 ?>
 `
