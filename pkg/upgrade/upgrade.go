@@ -9,7 +9,7 @@ import (
 )
 
 func Url(edition api.Edition, resolver version.Resolver) string {
-	stableVersion, err := resolver.StableVersionForCmd()
+	stableVersion, err := resolver.StableVersion(true)
 	if err != nil {
 		return ""
 	}
