@@ -20,10 +20,12 @@ import (
 )
 
 const (
-	versionMsg          = "%s (%s)\n  Build date: %s\n  Built with: %s\n"
-	cmdUse              = "rit"
-	cmdShortDescription = "rit is a NoOps CLI"
-	cmdDescription      = `A CLI that developers can build and operate
+	latestVersionMsg            = "Latest available version: %s"
+	versionMsg                  = "%s (%s)\n  Build date: %s\n  Built with: %s\n"
+	versionMsgWithLatestVersion = "%s (%s)\n  %s\n  Build date: %s\n  Built with: %s\n"
+	cmdUse                      = "rit"
+	cmdShortDescription         = "rit is a NoOps CLI"
+	cmdDescription              = `A CLI that developers can build and operate
 your applications without help from the infra staff.
 Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
@@ -123,7 +125,6 @@ func NewTeamRootCmd(wc workspace.Checker,
 		SilenceErrors:      true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-
 	return cmd
 }
 
@@ -203,6 +204,15 @@ func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
 }
 
 func versionFlag(edition api.Edition) string {
+	resolver := version.DefaultVersionResolver{
+		StableVersionUrl: StableVersionUrl,
+		FileUtilService:  fileutil.DefaultService{},
+		HttpClient:       &http.Client{Timeout: 1 * time.Second},
+	}
+	latestVersion, err := resolver.StableVersion(false)
+	if err == nil && latestVersion != Version {
+		return fmt.Sprintf(versionMsgWithLatestVersion, Version, edition, fmt.Sprintf(prompt.Yellow, fmt.Sprintf(latestVersionMsg, latestVersion)), BuildDate, runtime.Version())
+	}
 	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
 }
 

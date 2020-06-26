@@ -13,7 +13,7 @@ import (
 
 var (
 	// MsgUpgrade error message to inform user to upgrade rit version
-	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade"
+	MsgRitUpgrade = "\nWarning: Rit has a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
 )
@@ -60,10 +60,10 @@ func updateCache(stableVersion string, cachePath string, fileUtilService fileuti
 	}
 }
 
-func (r DefaultVersionResolver) StableVersion(fromCmd bool) (string, error) {
+func (r DefaultVersionResolver) StableVersion(fromCache bool) (string, error) {
 	cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
 
-	if fromCmd {
+	if !fromCache {
 		stableVersion, err := requestStableVersion(r.StableVersionUrl, r.HttpClient)
 		if err != nil {
 			return stableVersion, err
@@ -93,7 +93,7 @@ func (r DefaultVersionResolver) StableVersion(fromCmd bool) (string, error) {
 }
 
 func VerifyNewVersion(resolve Resolver, currentVersion string) string {
-	stableVersion, err := resolve.StableVersion(false)
+	stableVersion, err := resolve.StableVersion(true)
 	if err != nil {
 		return ""
 	}
