@@ -11,7 +11,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/thoas/go-funk"
@@ -20,7 +20,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
@@ -29,27 +28,18 @@ const (
 	nameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
-var (
-	ErrDontStartWithRit = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
-	ErrTooShortCommand  = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
-	ErrRepeatedCommand  = fmt.Errorf(prompt.Red, "this command already exists")
-)
+var ErrRepeatedCommand = fmt.Errorf(prompt.Red, "this command already exists")
 
 type CreateManager struct {
-	treeManager tree.Manager
-	dir         stream.DirCreater
-	file        stream.FileWriteReadExister
+	dir  stream.DirCreater
+	file stream.FileWriteReadExister
 }
 
-func NewCreator(tm tree.Manager, dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
-	return CreateManager{treeManager: tm, dir: dir, file: file}
+func NewCreator(dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
+	return CreateManager{dir: dir, file: file}
 }
 
 func (c CreateManager) Create(cf formula.Create) error {
-	if err := c.isValidCmd(cf.FormulaCmd); err != nil {
-		return err
-	}
-
 	if err := c.dir.Create(cf.WorkspacePath); err != nil {
 		return err
 	}
@@ -71,16 +61,10 @@ func (c CreateManager) Create(cf formula.Create) error {
 			return err
 		}
 
-		// Add the command to tree.json only when all other steps are successful
-		if err := c.generateTreeJsonFile(cf.WorkspacePath, cf.FormulaCmd, cf.Lang); err != nil {
+	} else {
+		if err := c.changeMakefileMain(cf.WorkspacePath, cf.FormulaCmd, formulaName); err != nil {
 			return err
 		}
-
-		return nil
-	}
-
-	if err := c.changeMakefileMain(cf.WorkspacePath, cf.FormulaCmd, formulaName); err != nil {
-		return err
 	}
 
 	// Add the command to tree.json only when all other steps are successful
@@ -88,34 +72,6 @@ func (c CreateManager) Create(cf formula.Create) error {
 		return err
 	}
 
-	return nil
-}
-
-func (c CreateManager) isValidCmd(fCmd string) error {
-	trees, err := c.treeManager.Tree()
-	if err != nil {
-		return err
-	}
-
-	s := strings.Split(fCmd, " ")
-
-	if s[0] != "rit" {
-		return ErrDontStartWithRit
-	}
-
-	if len(s) <= 2 {
-		return ErrTooShortCommand
-	}
-	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
-	u := s[len(s)-1]
-	for _, v := range trees {
-		for _, j := range v.Commands {
-			if j.Parent == cp && j.Usage == u {
-				return ErrRepeatedCommand
-
-			}
-		}
-	}
 	return nil
 }
 

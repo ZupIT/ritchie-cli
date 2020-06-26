@@ -101,7 +101,6 @@ func buildCommands() *cobra.Command {
 	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewDefaultTeamSetup(ritchieHomeDir, httpClient, sessionManager)
 
-
 	defaultPreRunner := runner.NewDefaultPreRunner(formulaSetup)
 	dockerPreRunner := runner.NewDockerPreRunner(formulaSetup)
 	postRunner := runner.NewPostRunner()
@@ -112,7 +111,7 @@ func buildCommands() *cobra.Command {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
+	formulaCreator := creator.NewCreator(dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
 	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
 	watchManager := watcher.New(formulaBuilder, dirManager)
@@ -120,7 +119,7 @@ func buildCommands() *cobra.Command {
 
 	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
 	uhc := makeHttpClient(serverFinder)
-	uhc.Timeout =  1 * time.Second
+	uhc.Timeout = 1 * time.Second
 	defaultUpgradeResolver := version.DefaultVersionResolver{
 		StableVersionUrl: cmd.StableVersionUrl,
 		FileUtilService:  fileutil.DefaultService{},
@@ -166,7 +165,7 @@ func buildCommands() *cobra.Command {
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputList)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, treeManager, inputText, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)

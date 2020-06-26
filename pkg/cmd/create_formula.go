@@ -14,6 +14,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -22,17 +23,21 @@ import (
 
 var (
 	ErrNotAllowedCharacter = fmt.Errorf(prompt.Red, `not allowed character on formula name \/,><@-`)
+	ErrDontStartWithRit    = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrTooShortCommand     = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrRepeatedCommand     = fmt.Errorf(prompt.Red, "this command already exists")
 )
 
 const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
-	homeDir   string
-	formula   formula.CreateBuilder
-	workspace workspace.AddListValidator
-	inText    prompt.InputText
-	inList    prompt.InputList
+	homeDir     string
+	formula     formula.CreateBuilder
+	workspace   workspace.AddListValidator
+	treeManager tree.Manager
+	inText      prompt.InputText
+	inList      prompt.InputList
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -40,6 +45,7 @@ func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
 	workspace workspace.AddListValidator,
+	treeManager tree.Manager,
 	inText prompt.InputText,
 	inList prompt.InputList,
 ) *cobra.Command {
@@ -47,6 +53,7 @@ func NewCreateFormulaCmd(
 		homeDir,
 		formula,
 		workspace,
+		treeManager,
 		inText,
 		inList,
 	}
@@ -65,7 +72,7 @@ func NewCreateFormulaCmd(
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inText.Text("Enter the new formula command [ex.: rit group verb noun]", true)
+		formulaCmd, err := c.inText.TextWithValidate("Enter the new formula command [ex.: rit group verb noun]", c.cmdValidator)
 		if err != nil {
 			return err
 		}
@@ -109,6 +116,30 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 
 		c.create(cf, wspace.Dir, formulaPath)
 
+		return nil
+	}
+}
+
+func (c createFormulaCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		var cf formula.Create
+
+		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
+			prompt.Error(stdin.MsgInvalidInput)
+			return err
+		}
+
+		if strings.ContainsAny(cf.FormulaCmd, notAllowedChars) {
+			return ErrNotAllowedCharacter
+		}
+
+		if err := c.formula.Create(cf); err != nil {
+			return err
+		}
+
+		prompt.Success(fmt.Sprintf("%s formula successfully created!\n", cf.Lang))
+		prompt.Info(fmt.Sprintf("Formula path is %s \n", cf.WorkspacePath))
 		return nil
 	}
 }
@@ -158,28 +189,36 @@ func formulaPath(workspacePath, cmd string) string {
 	return path.Join(workspacePath, formulaPath)
 }
 
-func (c createFormulaCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-
-		var cf formula.Create
-
-		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
-			return err
-		}
-
-		if strings.ContainsAny(cf.FormulaCmd, notAllowedChars) {
-			return ErrNotAllowedCharacter
-		}
-
-		if err := c.formula.Create(cf); err != nil {
-			return err
-		}
-
-		prompt.Success(fmt.Sprintf("%s formula successfully created!\n", cf.Lang))
-		prompt.Info(fmt.Sprintf("Formula path is %s \n", cf.WorkspacePath))
-		return nil
+func (c createFormulaCmd) cmdValidator(cmd string) error {
+	if len(strings.TrimSpace(cmd)) < 1 {
+		return errors.New("this input must not be empty")
 	}
+
+	trees, err := c.treeManager.Tree()
+	if err != nil {
+		return err
+	}
+
+	s := strings.Split(cmd, " ")
+
+	if s[0] != "rit" {
+		return ErrDontStartWithRit
+	}
+
+	if len(s) <= 2 {
+		return ErrTooShortCommand
+	}
+	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
+	u := s[len(s)-1]
+	for _, v := range trees {
+		for _, j := range v.Commands {
+			if j.Parent == cp && j.Usage == u {
+				return ErrRepeatedCommand
+
+			}
+		}
+	}
+	return nil
 }
 
 func FormulaWorkspaceInput(

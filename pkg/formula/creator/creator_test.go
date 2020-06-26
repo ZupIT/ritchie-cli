@@ -20,7 +20,6 @@ const (
 	fCmdCorrectNode   = "rit scaffold generate test_node"
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
-	fCmdIncorrect     = "git scaffold generate testing"
 	langGo            = "Go"
 	langJava          = "Java"
 	langNode          = "Node"
@@ -148,22 +147,6 @@ func TestCreator(t *testing.T) {
 			},
 			out: out{
 				err: nil,
-			},
-		},
-		{
-			name: "command incorrect",
-			in: in{
-				formCreate: formula.Create{
-					FormulaCmd:    fCmdIncorrect,
-					Lang:          langGo,
-					WorkspacePath: fullDir,
-					FormulaPath:   path.Join(fullDir, "/scaffold/generate/testing"),
-				},
-				dir:  dirManager,
-				file: fileManager,
-			},
-			out: out{
-				err: ErrDontStartWithRit,
 			},
 		},
 		{
