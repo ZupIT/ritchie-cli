@@ -85,6 +85,43 @@ type (
 	}
 )
 
+type PreRunner interface {
+	PreRun(def Definition) (Setup, error)
+}
+
+type Runner interface {
+	Run(def Definition, inputType api.TermInputType) error
+}
+
+type PostRunner interface {
+	PostRun(p Setup, docker bool) error
+}
+
+type InputRunner interface {
+	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
+}
+
+type Setuper interface {
+	Setup(def Definition) (Setup, error)
+}
+
+type Creator interface {
+	Create(cf Create) error
+}
+
+type Builder interface {
+	Build(workspacePath, formulaPath string) error
+}
+
+type Watcher interface {
+	Watch(workspacePath, formulaPath string)
+}
+
+type CreateBuilder interface {
+	Creator
+	Builder
+}
+
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
 	return fmt.Sprintf(PathPattern, home, d.Path)
@@ -129,43 +166,6 @@ func (d *Definition) BinName() string {
 		return fmt.Sprintf(BinPattern, binSO, suffix)
 	}
 	return bName
-}
-
-type PreRunner interface {
-	PreRun(def Definition) (Setup, error)
-}
-
-type Runner interface {
-	Run(def Definition, inputType api.TermInputType) error
-}
-
-type PostRunner interface {
-	PostRun(p Setup, docker bool) error
-}
-
-type InputRunner interface {
-	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
-}
-
-type Setuper interface {
-	Setup(def Definition) (Setup, error)
-}
-
-type Creator interface {
-	Create(cf Create) error
-}
-
-type Builder interface {
-	Build(workspacePath, formulaPath string) error
-}
-
-type Watcher interface {
-	Watch(workspacePath, formulaPath string)
-}
-
-type CreateBuilder interface {
-	Creator
-	Builder
 }
 
 // BinName builds the bin name from definition params
