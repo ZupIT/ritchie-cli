@@ -183,7 +183,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should return empty when current version equals to stableVersion",
 			args: args{
 				resolve: StubResolverVersions{
-					stableVersion: func(fromCmd bool) (string, error) {
+					stableVersion: func(fromCache bool) (string, error) {
 						return "1.0.0", nil
 					},
 				},
@@ -195,7 +195,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should return msg when current version it not equals to stableVersion",
 			args: args{
 				resolve: StubResolverVersions{
-					stableVersion: func(fromCmd bool) (string, error) {
+					stableVersion: func(fromCache bool) (string, error) {
 						return "1.0.1", nil
 					},
 				},
@@ -207,7 +207,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should return empty on error in StableVersion ",
 			args: args{
 				resolve: StubResolverVersions{
-					stableVersion: func(fromCmd bool) (string, error) {
+					stableVersion: func(fromCache bool) (string, error) {
 						return "", errors.New("any error")
 					},
 				},

@@ -26,11 +26,11 @@ func (uf stubUrlFinder) Url(edition api.Edition, resolver version.Resolver) stri
 }
 
 type stubVersionResolver struct {
-	stableVersion func(fromCmd bool) (string, error)
+	stableVersion func(fromCache bool) (string, error)
 }
 
-func (vr stubVersionResolver) StableVersion(fromCmd bool) (string, error) {
-	return vr.stableVersion(fromCmd)
+func (vr stubVersionResolver) StableVersion(fromCache bool) (string, error) {
+	return vr.stableVersion(fromCache)
 }
 
 func TestUpgradeCmd_runFunc(t *testing.T) {
@@ -50,7 +50,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 			fields: fields{
 				edition: "tingle",
 				resolver: stubVersionResolver{
-					func(fromCmd bool) (string, error) {
+					func(fromCache bool) (string, error) {
 						return "1.0.0", nil
 					},
 				},

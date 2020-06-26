@@ -11,11 +11,11 @@ import (
 )
 
 type stubResolver struct {
-	stableVersion func(fromCmd bool) (string, error)
+	stableVersion func(fromCache bool) (string, error)
 }
 
-func (r stubResolver) StableVersion(fromCmd bool) (string, error) {
-	return r.stableVersion(fromCmd)
+func (r stubResolver) StableVersion(fromCache bool) (string, error) {
+	return r.stableVersion(fromCache)
 }
 
 func TestUpgradeUrl(t *testing.T) {
@@ -33,7 +33,7 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Single,
 				resolver: stubResolver{
-					stableVersion: func(fromCmd bool) (string, error) {
+					stableVersion: func(fromCache bool) (string, error) {
 						return "1.0.0", nil
 					},
 				},
@@ -51,7 +51,7 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Team,
 				resolver: stubResolver{
-					stableVersion: func(fromCmd bool) (string, error) {
+					stableVersion: func(fromCache bool) (string, error) {
 						return "1.0.0", nil
 					},
 				},
@@ -69,7 +69,7 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Team,
 				resolver: stubResolver{
-					stableVersion: func(fromCmd bool) (string, error) {
+					stableVersion: func(fromCache bool) (string, error) {
 						return "1.0.0", errors.New("some error")
 					},
 				},
