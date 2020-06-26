@@ -44,7 +44,7 @@ var (
 	// Url to get Rit Stable Version
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
 
-	singleWhitelist = []string{
+	singleIgnorelist = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
@@ -53,7 +53,7 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 
-	teamWhitelist = []string{
+	teamIgnorelist = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s login", cmdUse),
 		fmt.Sprintf("%s logout", cmdUse),
@@ -134,7 +134,7 @@ func (o *singleRootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if isWhitelist(singleWhitelist, cmd) {
+		if isWhitelist(singleIgnorelist, cmd) {
 			return nil
 		}
 
@@ -153,7 +153,7 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if isWhitelist(teamWhitelist, cmd) {
+		if isWhitelist(teamIgnorelist, cmd) {
 			return nil
 		}
 
@@ -211,7 +211,8 @@ func versionFlag(edition api.Edition) string {
 	}
 	latestVersion, err := resolver.StableVersion(true)
 	if err == nil && latestVersion != Version {
-		return fmt.Sprintf(versionMsgWithLatestVersion, Version, edition, fmt.Sprintf(prompt.Yellow, fmt.Sprintf(latestVersionMsg, latestVersion)), BuildDate, runtime.Version())
+		formattedLatestVersionMsg := fmt.Sprintf(prompt.Yellow, fmt.Sprintf(latestVersionMsg, latestVersion))
+		return fmt.Sprintf(versionMsgWithLatestVersion, Version, edition, formattedLatestVersionMsg, BuildDate, runtime.Version())
 	}
 	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
 }
