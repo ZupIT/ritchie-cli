@@ -3,7 +3,6 @@ package workspace
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"path"
 	"testing"
@@ -322,15 +321,15 @@ func cleanForm() {
 func createDirWithMakefile() string {
 	dir := os.TempDir() + "/my-custom-repo-with-makefile"
 	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
-	makefilePath := fmt.Sprintf("%s/%s", dir, formula.MakefilePath)
+	makefilePath := path.Join(dir, formula.MakefilePath)
 	_ = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
 	return dir
 }
 
 func createDirWithTree() string {
 	dir := os.TempDir() + "/my-custom-repo-with-tree"
-	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
 	treeJsonFile := path.Join(dir, formula.TreePath)
+	treeJsonDir := path.Dir(treeJsonFile)
 	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
 	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
 	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte(""))
@@ -339,9 +338,9 @@ func createDirWithTree() string {
 
 func createFullDir() string {
 	dir := os.TempDir() + "/my-custom-repo"
-	treeJsonDir := fmt.Sprintf("%s/%s", dir, "tree")
 	treeJsonFile := path.Join(dir, formula.TreePath)
-	makefilePath := fmt.Sprintf("%s/%s", dir, formula.MakefilePath)
+	treeJsonDir := path.Dir(treeJsonFile)
+	makefilePath := path.Join(dir, formula.MakefilePath)
 	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
 	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
 	makefile, _ := fileutil.ReadFile("../../testdata/MakefilePath")
