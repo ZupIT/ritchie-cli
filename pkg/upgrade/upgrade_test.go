@@ -11,11 +11,11 @@ import (
 )
 
 type stubResolver struct {
-	stableVersion func() (string, error)
+	stableVersion func(fromCmd bool) (string, error)
 }
 
-func (r stubResolver) StableVersion() (string, error) {
-	return r.stableVersion()
+func (r stubResolver) StableVersion(fromCmd bool) (string, error) {
+	return r.stableVersion(fromCmd)
 }
 
 func TestUpgradeUrl(t *testing.T) {
@@ -33,7 +33,7 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Single,
 				resolver: stubResolver{
-					stableVersion: func() (string, error) {
+					stableVersion: func(fromCmd bool) (string, error) {
 						return "1.0.0", nil
 					},
 				},
@@ -51,7 +51,7 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Team,
 				resolver: stubResolver{
-					stableVersion: func() (string, error) {
+					stableVersion: func(fromCmd bool) (string, error) {
 						return "1.0.0", nil
 					},
 				},
@@ -69,7 +69,7 @@ func TestUpgradeUrl(t *testing.T) {
 			args: args{
 				edition: api.Team,
 				resolver: stubResolver{
-					stableVersion: func() (string, error) {
+					stableVersion: func(fromCmd bool) (string, error) {
 						return "1.0.0", errors.New("some error")
 					},
 				},
@@ -80,7 +80,8 @@ func TestUpgradeUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := UpgradeUrl(tt.args.edition, tt.args.resolver); got != tt.want {
+			duf := DefaultUrlFinder{}
+			if got := duf.Url(tt.args.edition, tt.args.resolver); got != tt.want {
 				t.Errorf("UpgradeUrl() = %v, want %v", got, tt.want)
 			}
 		})

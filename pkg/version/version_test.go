@@ -12,11 +12,11 @@ import (
 )
 
 type StubResolverVersions struct {
-	stableVersion func() (string, error)
+	stableVersion func(fromCmd bool) (string, error)
 }
 
-func (r StubResolverVersions) StableVersion() (string, error) {
-	return r.stableVersion()
+func (r StubResolverVersions) StableVersion(fromCmd bool) (string, error) {
+	return r.stableVersion(fromCmd)
 }
 
 type StubFileUtilService struct {
@@ -25,7 +25,6 @@ type StubFileUtilService struct {
 }
 
 func (s StubFileUtilService) ReadFile(path string) ([]byte, error) {
-
 	return s.readFile(path)
 }
 
@@ -143,7 +142,7 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 				FileUtilService:  tt.fields.FileUtilService,
 				HttpClient:       tt.fields.HttpClient,
 			}
-			got, err := r.StableVersion()
+			got, err := r.StableVersion(false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("StableVersion() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -169,7 +168,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should return empty when current version equals to stableVersion",
 			args: args{
 				resolve: StubResolverVersions{
-					stableVersion: func() (string, error) {
+					stableVersion: func(fromCmd bool) (string, error) {
 						return "1.0.0", nil
 					},
 				},
@@ -181,7 +180,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should return msg when current version it not equals to stableVersion",
 			args: args{
 				resolve: StubResolverVersions{
-					stableVersion: func() (string, error) {
+					stableVersion: func(fromCmd bool) (string, error) {
 						return "1.0.1", nil
 					},
 				},
@@ -193,7 +192,7 @@ func TestVerifyNewVersion(t *testing.T) {
 			name: "Should return empty on error in StableVersion ",
 			args: args{
 				resolve: StubResolverVersions{
-					stableVersion: func() (string, error) {
+					stableVersion: func(fromCmd bool) (string, error) {
 						return "", errors.New("any error")
 					},
 				},

@@ -86,10 +86,10 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_ = NewUpgradeCmd(tt.fields.edition, tt.fields.resolver, tt.fields.Manager, tt.fields.UrlFinder)
-			// if err := u.Execute(); (err != nil) != tt.wantErr {
-			// 	t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
-			// }
+			u := NewUpgradeCmd(tt.fields.edition, tt.fields.resolver, tt.fields.Manager, tt.fields.UrlFinder)
+			if err := u.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }
