@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_java"
@@ -14,18 +15,13 @@ import (
 )
 
 const (
-	main        = "main"
-	Main        = "Main"
-	index       = "index"
-	PythonLang  = "Python"
-	PyFormat    = "py"
-	JavaLang    = "Java"
-	JavaFormat  = "java"
-	GoLang      = "Go"
-	GoFormat    = "go"
-	NodeLang    = "Node"
-	NodeFormat  = "js"
-	ShellFormat = "sh"
+	main       = "main"
+	Main       = "Main"
+	index      = "index"
+	PythonLang = "Python"
+	JavaLang   = "Java"
+	GoLang     = "Go"
+	NodeLang   = "Node"
 )
 
 type LangCreator interface {
@@ -55,7 +51,7 @@ type Python struct {
 func NewPython(c CreateManager) Python {
 	return Python{Lang{
 		CreateManager: c,
-		FileFormat:    PyFormat,
+		FileFormat:    fileextensions.Python,
 		StartFile:     main,
 		Main:          template_python.Main,
 		Makefile:      template_python.Makefile,
@@ -75,7 +71,7 @@ func (p Python) Create(srcDir, pkg, pkgDir, dir string) error {
 		return err
 	}
 
-	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, p.FileFormat)
+	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, p.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(p.File)); err != nil {
 		return err
 	}
@@ -90,7 +86,7 @@ type Java struct {
 func NewJava(c CreateManager) Java {
 	return Java{Lang{
 		CreateManager: c,
-		FileFormat:    JavaFormat,
+		FileFormat:    fileextensions.Java,
 		StartFile:     Main,
 		Main:          template_java.Main,
 		Makefile:      template_java.Makefile,
@@ -118,7 +114,7 @@ func (j Java) Create(srcDir, pkg, pkgDir, dir string) error {
 	templateFileJava := strings.ReplaceAll(j.File, nameBin, pkg)
 	firstUpper := strings.Title(strings.ToLower(pkg))
 	templateFileJava = strings.ReplaceAll(templateFileJava, nameBinFirstUpper, firstUpper)
-	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, firstUpper, j.FileFormat)
+	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, firstUpper, j.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(templateFileJava)); err != nil {
 		return err
 	}
@@ -133,7 +129,7 @@ type Go struct {
 func NewGo(c CreateManager) Go {
 	return Go{Lang{
 		CreateManager: c,
-		FileFormat:    GoFormat,
+		FileFormat:    fileextensions.Go,
 		StartFile:     main,
 		Main:          template_go.Main,
 		Makefile:      template_go.Makefile,
@@ -158,7 +154,7 @@ func (g Go) Create(srcDir, pkg, pkgDir, dir string) error {
 	}
 
 	templateGo := strings.ReplaceAll(g.Pkg, nameModule, pkg)
-	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, g.FileFormat)
+	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, g.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(templateGo)); err != nil {
 		return err
 	}
@@ -172,7 +168,7 @@ type Node struct {
 func NewNode(c CreateManager) Node {
 	return Node{Lang{
 		CreateManager: c,
-		FileFormat:    NodeFormat,
+		FileFormat:    fileextensions.JavaScript,
 		StartFile:     index,
 		Main:          template_node.Index,
 		Makefile:      template_node.Makefile,
@@ -203,7 +199,7 @@ func (n Node) Create(srcDir, pkg, pkgDir, dir string) error {
 	}
 
 	templateNode := strings.ReplaceAll(n.File, nameBin, pkg)
-	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, n.FileFormat)
+	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, n.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(templateNode)); err != nil {
 		return err
 	}
@@ -218,7 +214,7 @@ type Shell struct {
 func NewShell(c CreateManager) Shell {
 	return Shell{Lang{
 		CreateManager: c,
-		FileFormat:    ShellFormat,
+		FileFormat:    fileextensions.Shell,
 		StartFile:     main,
 		Main:          template_shell.Main,
 		Makefile:      template_shell.Makefile,
@@ -238,7 +234,7 @@ func (s Shell) Create(srcDir, pkg, pkgDir, dir string) error {
 		return err
 	}
 
-	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, s.FileFormat)
+	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, s.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(s.File)); err != nil {
 		return err
 	}

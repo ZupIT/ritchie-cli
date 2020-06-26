@@ -127,3 +127,30 @@ func TestConfigName(t *testing.T) {
 		})
 	}
 }
+
+func TestFormulaName(t *testing.T) {
+	const want = "create_test"
+	create := Create{
+		FormulaCmd: "rit create test",
+	}
+
+	got := create.FormulaName()
+
+	if want != got {
+		t.Errorf("FormulaName got %v, want %v", got, want)
+	}
+}
+
+
+func TestPkgName(t *testing.T) {
+	const want = "test"
+	create := Create{
+		FormulaCmd: "rit create test",
+	}
+
+	got := create.PkgName()
+
+	if want != got {
+		t.Errorf("PkgName got %v, want %v", got, want)
+	}
+}

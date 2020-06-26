@@ -39,6 +39,7 @@ CMD ["node /index.js"]
 `
 
 	Run = `#!/bin/sh
+npm install
 node index.js`
 
 	PackageJson = `{

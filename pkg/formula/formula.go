@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 )
 
 const (
@@ -20,9 +22,6 @@ const (
 	CPwdEnv              = "CURRENT_PWD"
 	BinPattern           = "%s%s"
 	BinPathPattern       = "%s/bin"
-	Windows              = "windows"
-	Darwin               = "darwin"
-	Linux                = "linux"
 	EnvPattern           = "%s=%s"
 	CachePattern         = "%s/.%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
@@ -104,15 +103,15 @@ func (d *Definition) BinName() string {
 	bName := d.Bin
 	so := runtime.GOOS
 	switch so {
-	case Windows:
+	case osutil.Windows:
 		if d.WBin != "" {
 			bName = d.WBin
 		}
-	case Darwin:
+	case osutil.Darwin:
 		if d.MBin != "" {
 			bName = d.MBin
 		}
-	case Linux:
+	case osutil.Linux:
 		if d.LBin != "" {
 			bName = d.LBin
 		}
@@ -122,8 +121,8 @@ func (d *Definition) BinName() string {
 
 	if strings.Contains(bName, "${so}") {
 		suffix := ""
-		if so == Windows {
-			suffix = ".exe"
+		if so == osutil.Windows {
+			suffix = fileextensions.Exe
 		}
 		binSO := strings.ReplaceAll(bName, "${so}", so)
 

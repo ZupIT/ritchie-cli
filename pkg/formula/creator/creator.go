@@ -120,7 +120,7 @@ func (c CreateManager) isValidCmd(fCmd string) error {
 }
 
 func (c CreateManager) generateTreeJsonFile(formPath, fCmd, lang string) error {
-	tree := formula.Tree{Commands: []api.Command{}}
+	treeCommands := formula.Tree{Commands: api.Commands{}}
 	treePath := path.Join(formPath, formula.TreePath)
 	if !c.file.Exists(treePath) {
 		if err := c.dir.Create(filepath.Dir(treePath)); err != nil {
@@ -131,16 +131,16 @@ func (c CreateManager) generateTreeJsonFile(formPath, fCmd, lang string) error {
 		if err != nil {
 			return err
 		}
-		if err := json.Unmarshal(jsonFile, &tree); err != nil {
+		if err := json.Unmarshal(jsonFile, &treeCommands); err != nil {
 			return err
 		}
 	}
 
-	tree, err := updateTree(fCmd, tree, lang, 0)
+	treeCommands, err := updateTree(fCmd, treeCommands, lang, 0)
 	if err != nil {
 		return err
 	}
-	treeJsonFile, _ := json.Marshal(&tree)
+	treeJsonFile, _ := json.Marshal(&treeCommands)
 	var prettyJSON bytes.Buffer
 	if err := json.Indent(&prettyJSON, treeJsonFile, "", "\t"); err != nil {
 		return err
@@ -313,11 +313,11 @@ func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error 
 	if uc {
 		tpl = strings.ReplaceAll(tpl, nameBin, pkg)
 		tpl = strings.ReplaceAll(tpl, nameBinFirstUpper, strings.Title(strings.ToLower(pkg)))
-		return fileutil.WriteFile(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl))
+		return fileutil.WriteFile(fmt.Sprintf("%s/%s%s", dir, startFile, fileFormat), []byte(tpl))
 	}
 	tpl = strings.ReplaceAll(tpl, nameModule, pkg)
 	tpl = strings.ReplaceAll(tpl, nameBin, pkg)
-	return fileutil.WriteFilePerm(fmt.Sprintf("%s/%s.%s", dir, startFile, fileFormat), []byte(tpl), 0777)
+	return fileutil.WriteFilePerm(fmt.Sprintf("%s/%s%s", dir, startFile, fileFormat), []byte(tpl), 0777)
 }
 
 func createConfigFile(dir string) error {

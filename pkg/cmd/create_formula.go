@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 	"time"
 
@@ -12,7 +13,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -106,9 +109,6 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 
 		c.create(cf, wspace.Dir, formulaPath)
 
-		prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
-		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
-
 		return nil
 	}
 }
@@ -124,9 +124,10 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
-		errorMsg := fmt.Sprintf(prompt.Red, err)
-		s.Error(errors.New(errorMsg))
+	// TODO: Remove this function after creating the build scripts for other languages ​​on windows
+	os := runtime.GOOS
+	if os == osutil.Windows && cf.Lang != creator.GoLang {
+		createSuccess(s, cf.Lang)
 		return
 	}
 
@@ -136,9 +137,19 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	msg := fmt.Sprintf("✔ %s formula successfully created!", cf.Lang)
+	createSuccess(s, cf.Lang)
+	buildSuccess(formulaPath, cf.FormulaCmd)
+}
+
+func createSuccess(s *spinner.Spinner, lang string) {
+	msg := fmt.Sprintf("✔ %s formula successfully created!", lang)
 	success := fmt.Sprintf(prompt.Green, msg)
 	s.Success(success)
+}
+
+func buildSuccess(formulaPath, formulaCmd string) {
+	prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
+	prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
 }
 
 func formulaPath(workspacePath, cmd string) string {
