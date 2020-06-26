@@ -14,7 +14,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -25,7 +24,6 @@ var (
 	ErrNotAllowedCharacter = fmt.Errorf(prompt.Red, `not allowed character on formula name \/,><@-`)
 	ErrDontStartWithRit    = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	ErrTooShortCommand     = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
-	ErrRepeatedCommand     = fmt.Errorf(prompt.Red, "this command already exists")
 )
 
 const notAllowedChars = `\/><,@-`
@@ -35,7 +33,6 @@ type createFormulaCmd struct {
 	homeDir     string
 	formula     formula.CreateBuilder
 	workspace   workspace.AddListValidator
-	treeManager tree.Manager
 	inText      prompt.InputText
 	inList      prompt.InputList
 }
@@ -45,7 +42,6 @@ func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
 	workspace workspace.AddListValidator,
-	treeManager tree.Manager,
 	inText prompt.InputText,
 	inList prompt.InputList,
 ) *cobra.Command {
@@ -53,7 +49,6 @@ func NewCreateFormulaCmd(
 		homeDir,
 		formula,
 		workspace,
-		treeManager,
 		inText,
 		inList,
 	}
@@ -194,29 +189,13 @@ func (c createFormulaCmd) cmdValidator(cmd string) error {
 		return errors.New("this input must not be empty")
 	}
 
-	trees, err := c.treeManager.Tree()
-	if err != nil {
-		return err
-	}
-
 	s := strings.Split(cmd, " ")
-
 	if s[0] != "rit" {
 		return ErrDontStartWithRit
 	}
 
 	if len(s) <= 2 {
 		return ErrTooShortCommand
-	}
-	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
-	u := s[len(s)-1]
-	for _, v := range trees {
-		for _, j := range v.Commands {
-			if j.Parent == cp && j.Usage == u {
-				return ErrRepeatedCommand
-
-			}
-		}
 	}
 	return nil
 }

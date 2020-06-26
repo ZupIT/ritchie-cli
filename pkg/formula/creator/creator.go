@@ -11,7 +11,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/thoas/go-funk"
@@ -20,6 +20,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
@@ -31,15 +32,20 @@ const (
 var ErrRepeatedCommand = fmt.Errorf(prompt.Red, "this command already exists")
 
 type CreateManager struct {
-	dir  stream.DirCreater
-	file stream.FileWriteReadExister
+	treeManager tree.Manager
+	dir         stream.DirCreater
+	file        stream.FileWriteReadExister
 }
 
-func NewCreator(dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
-	return CreateManager{dir: dir, file: file}
+func NewCreator(tm tree.Manager, dir stream.DirCreater, file stream.FileWriteReadExister) CreateManager {
+	return CreateManager{treeManager: tm, dir: dir, file: file}
 }
 
 func (c CreateManager) Create(cf formula.Create) error {
+	if err := c.isValidCmd(cf.FormulaCmd); err != nil {
+		return err
+	}
+
 	if err := c.dir.Create(cf.WorkspacePath); err != nil {
 		return err
 	}
@@ -72,6 +78,26 @@ func (c CreateManager) Create(cf formula.Create) error {
 		return err
 	}
 
+	return nil
+}
+
+func (c CreateManager) isValidCmd(fCmd string) error {
+	trees, err := c.treeManager.Tree()
+	if err != nil {
+		return err
+	}
+
+	s := strings.Split(fCmd, " ")
+	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
+	u := s[len(s)-1]
+	for _, v := range trees {
+		for _, j := range v.Commands {
+			if j.Parent == cp && j.Usage == u {
+				return ErrRepeatedCommand
+
+			}
+		}
+	}
 	return nil
 }
 

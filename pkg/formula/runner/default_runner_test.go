@@ -134,6 +134,10 @@ func (i inputMock) Text(string, bool) (string, error) {
 	return i.text, i.err
 }
 
+func (i inputMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return i.text, i.err
+}
+
 func (i inputMock) Bool(string, []string) (bool, error) {
 	return i.boolean, i.err
 }
