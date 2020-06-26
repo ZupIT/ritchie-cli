@@ -10,3 +10,11 @@ services:
     volumes:
       - ./testdata/stubby4j/integrations.yml:/usr/local/stubby.yml
       - ./testdata/stubby4j/response.zip:/usr/local/response.zip
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+    volumes:
+      - ./testdata/nginx/certs:/etc/nginx/certs
+      - ./testdata/nginx/conf/nginx.conf:/etc/nginx/conf.d/nginx.conf

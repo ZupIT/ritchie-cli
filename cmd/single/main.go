@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
@@ -21,11 +23,14 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/watcher"
+	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security/secsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/session/sesssingle"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 )
 
@@ -69,7 +74,7 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool)
+	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := formula.NewDefaultSingleSetup(ritchieHomeDir, http.DefaultClient)
 
 	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
@@ -103,6 +108,7 @@ func buildCommands() *cobra.Command {
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
+	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
 
 	// level 2
@@ -123,6 +129,12 @@ func buildCommands() *cobra.Command {
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
+	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
+	watchManager := watcher.New(formulaBuilder, dirManager)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
@@ -133,6 +145,7 @@ func buildCommands() *cobra.Command {
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
+	buildCmd.AddCommand(buildFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.SingleCoreCmds, treeManager, defaultRunner, dockerRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
@@ -153,6 +166,7 @@ func buildCommands() *cobra.Command {
 				setCmd,
 				showCmd,
 				updateCmd,
+				buildCmd,
 				upgradeCmd,
 			},
 		},
