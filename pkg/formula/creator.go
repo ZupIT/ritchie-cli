@@ -25,11 +25,11 @@ const (
 )
 
 var (
-	ErrDontStartWithRit = prompt.NewError( "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
-	ErrTooShortCommand  = prompt.NewError( "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
-	ErrRepeatedCommand  = prompt.NewError( "this command already exists")
-	ErrTreeJsonNotFound = prompt.NewError( "tree.json not found")
-	ErrMakefileNotFound = prompt.NewError( "makefile not found")
+	ErrDontStartWithRit = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrTooShortCommand  = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrRepeatedCommand  = prompt.NewError("this command already exists")
+	ErrTreeJsonNotFound = prompt.NewError("tree.json not found")
+	ErrMakefileNotFound = prompt.NewError("makefile not found")
 )
 
 type CreateManager struct {

@@ -7,22 +7,21 @@ import (
 	"github.com/gookit/color"
 )
 
-// Returns new error with red message
+// NewError returns new error with red message
 func NewError(text string) error {
 	return errors.New(Red(text))
 }
 
-// Returns a red string
+// Red returns a red string
 func Red(text string) string {
 	return color.FgRed.Render(text)
 }
 
-// Println with red message
+// Error is a Println with red message
 func Error(text string) {
 	fmt.Println(Red(text))
 }
 
-// The following functions follows red/error pattern
 func Green(text string) string {
 	return color.Success.Render(text)
 }
