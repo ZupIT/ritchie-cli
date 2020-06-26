@@ -52,7 +52,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	printOutEnvs(setup)
+	printOutEnvs(setup, cmd)
 
 	if err := d.PostRun(setup, false); err != nil {
 		return err
@@ -61,7 +61,23 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	return nil
 }
 
-func printOutEnvs(setup Setup) {
+func printOutEnvs(setup Setup, cmd *exec.Cmd) {
+
+	//Get From Env
+	tEnv := "TESTE_ENV"
+	println("tEnv:", os.Getenv(tEnv))
+	println(OutputEnv,":", os.Getenv(OutputEnv))
+	for _, e := range cmd.Env{
+		k := strings.Split(e,"=")
+		if k[0] == OutputEnv{
+			fmt.Printf("%s=%s\n", k[0], k[1])
+		}
+		if k[0] == tEnv{
+			fmt.Printf("%s=%s\n", k[0], k[1])
+		}
+	}
+
+	//Get From File
 	fOutputs := map[string]string{}
 	f, _ := os.Open(setup.outputFilePath)
 	b, _ := ioutil.ReadAll(f)
