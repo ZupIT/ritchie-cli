@@ -63,9 +63,8 @@ var (
 	}
 
 	upgradeValidationWhiteList = []string{
-		fmt.Sprintf("%s upgrade", cmdUse),
-		fmt.Sprintf("%s completion zsh", cmdUse),
-		fmt.Sprintf("%s completion bash", cmdUse),
+		fmt.Sprintf("%s login", cmdUse),
+		fmt.Sprintf("%s", cmdUse),
 	}
 )
 
@@ -189,7 +188,7 @@ func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 }
 
 func verifyNewVersion(cmd *cobra.Command) {
-	if !isWhitelist(upgradeValidationWhiteList, cmd) {
+	if isWhitelist(upgradeValidationWhiteList, cmd) {
 		resolver := version.DefaultVersionResolver{
 			StableVersionUrl: StableVersionUrl,
 			FileUtilService:  fileutil.DefaultService{},
