@@ -15,14 +15,16 @@ type UpgradeCmd struct {
 	edition api.Edition
 	upgrade.Manager
 	resolver version.Resolver
+	upgrade.UrlFinder
 }
 
-func NewUpgradeCmd(e api.Edition, r version.Resolver, manager upgrade.Manager) *cobra.Command {
+func NewUpgradeCmd(e api.Edition, r version.Resolver, m upgrade.Manager, uf upgrade.UrlFinder) *cobra.Command {
 
 	u := UpgradeCmd{
 		edition: e,
-		Manager:  manager,
+		Manager:  m,
 		resolver: r,
+		UrlFinder: uf,
 	}
 
 	return &cobra.Command{
@@ -35,7 +37,7 @@ func NewUpgradeCmd(e api.Edition, r version.Resolver, manager upgrade.Manager) *
 
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		upgradeUrl := upgrade.Url(u.edition, u.resolver)
+		upgradeUrl := u.Url(u.edition, u.resolver)
 		err := u.Run(upgradeUrl)
 		if err != nil {
 			return fmt.Errorf(prompt.Red, err.Error()+"\n")
