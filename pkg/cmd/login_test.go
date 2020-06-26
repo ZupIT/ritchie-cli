@@ -27,7 +27,7 @@ func TestNewLoginCmd(t *testing.T) {
 func Test_loginCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		LoginManager  security.LoginManager
-		Loader        formula.Loader
+		Loader        formula.RepoLoader
 		InputText     prompt.InputText
 		InputPassword prompt.InputPassword
 		Finder        server.Finder

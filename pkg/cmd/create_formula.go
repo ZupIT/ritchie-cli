@@ -14,7 +14,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -30,18 +29,18 @@ const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
-	homeDir     string
-	formula     formula.CreateBuilder
-	workspace   workspace.AddListValidator
-	inText      prompt.InputText
-	inList      prompt.InputList
+	homeDir   string
+	formula   formula.CreateBuilder
+	workspace formula.WorkspaceAddListValidator
+	inText    prompt.InputText
+	inList    prompt.InputList
 }
 
 // CreateFormulaCmd creates a new cmd instance
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
-	workspace workspace.AddListValidator,
+	workspace formula.WorkspaceAddListValidator,
 	inText prompt.InputText,
 	inList prompt.InputList,
 ) *cobra.Command {
@@ -86,8 +85,8 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := path.Join(c.homeDir, workspace.DefaultWorkspaceDir)
-		workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
+		defaultWorkspace := path.Join(c.homeDir, formula.DefaultWorkspaceDir)
+		workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
 
 		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText)
 		if err != nil {
@@ -201,10 +200,10 @@ func (c createFormulaCmd) cmdValidator(cmd string) error {
 }
 
 func FormulaWorkspaceInput(
-	workspaces workspace.Workspaces,
+	workspaces formula.Workspaces,
 	inList prompt.InputList,
 	inText prompt.InputText,
-) (workspace.Workspace, error) {
+) (formula.Workspace, error) {
 	var items []string
 	for k, v := range workspaces {
 		kv := fmt.Sprintf("%s (%s)", k, v)
@@ -214,24 +213,24 @@ func FormulaWorkspaceInput(
 	items = append(items, newWorkspace)
 	selected, err := inList.List("Select a formula workspace: ", items)
 	if err != nil {
-		return workspace.Workspace{}, err
+		return formula.Workspace{}, err
 	}
 
 	var workspaceName string
 	var workspacePath string
-	var wspace workspace.Workspace
+	var wspace formula.Workspace
 	if selected == newWorkspace {
 		workspaceName, err = inText.Text("Workspace name: ", true)
 		if err != nil {
-			return workspace.Workspace{}, err
+			return formula.Workspace{}, err
 		}
 
 		workspacePath, err = inText.Text("Workspace path (e.g.: /home/user/github):", true)
 		if err != nil {
-			return workspace.Workspace{}, err
+			return formula.Workspace{}, err
 		}
 
-		wspace = workspace.Workspace{
+		wspace = formula.Workspace{
 			Name: strings.Title(workspaceName),
 			Dir:  workspacePath,
 		}
@@ -239,7 +238,7 @@ func FormulaWorkspaceInput(
 		split := strings.Split(selected, " ")
 		workspaceName = split[0]
 		workspacePath = workspaces[workspaceName]
-		wspace = workspace.Workspace{
+		wspace = formula.Workspace{
 			Name: strings.Title(workspaceName),
 			Dir:  workspacePath,
 		}

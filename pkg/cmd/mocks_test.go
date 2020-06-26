@@ -5,7 +5,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
@@ -107,15 +106,15 @@ func (formCreator) Build(workspacePath, formulaPath string) error {
 
 type workspaceForm struct{}
 
-func (workspaceForm) Add(workspace workspace.Workspace) error {
+func (workspaceForm) Add(workspace formula.Workspace) error {
 	return nil
 }
 
-func (workspaceForm) List() (workspace.Workspaces, error) {
-	return workspace.Workspaces{}, nil
+func (workspaceForm) List() (formula.Workspaces, error) {
+	return formula.Workspaces{}, nil
 }
 
-func (workspaceForm) Validate(workspace workspace.Workspace) error {
+func (workspaceForm) Validate(workspace formula.Workspace) error {
 	return nil
 }
 

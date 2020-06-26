@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -25,7 +24,7 @@ const (
 
 type buildFormulaCmd struct {
 	userHomeDir string
-	workspace   workspace.AddListValidator
+	workspace   formula.WorkspaceAddListValidator
 	formula     formula.Builder
 	watcher     formula.Watcher
 	directory   stream.DirListChecker
@@ -36,7 +35,7 @@ type buildFormulaCmd struct {
 func NewBuildFormulaCmd(
 	userHomeDir string,
 	formula formula.Builder,
-	workManager workspace.AddListValidator,
+	workManager formula.WorkspaceAddListValidator,
 	watcher formula.Watcher,
 	directory stream.DirListChecker,
 	inText prompt.InputText,
@@ -71,9 +70,9 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := path.Join(b.userHomeDir, workspace.DefaultWorkspaceDir)
+		defaultWorkspace := path.Join(b.userHomeDir, formula.DefaultWorkspaceDir)
 		if b.directory.Exists(defaultWorkspace) {
-			workspaces[workspace.DefaultWorkspaceName] = defaultWorkspace
+			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
 		}
 
 		wspace, err := FormulaWorkspaceInput(workspaces, b.InputList, b.InputText)

@@ -1,32 +1,94 @@
 package workspace
 
-const (
-	workspacesFile       = "/formula_workspaces.json"
-	DefaultWorkspaceName = "Default"
-	DefaultWorkspaceDir  = "/ritchie-formulas-local"
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"path"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-type Workspaces map[string]string
+var (
+	msgErrMakefileNotFound = fmt.Sprintf(prompt.Red, "MakefilePath not found, a valid formula workspace must have a MakefilePath")
+	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Red, "tree.json not found, a valid formula workspace must have a tree.json")
+	msgErrInvalidWorkspace = fmt.Sprintf(prompt.Red, "the formula workspace does not exist, please enter a valid workspace")
+	ErrInvalidWorkspace    = errors.New(msgErrInvalidWorkspace)
+	ErrTreeJsonNotFound    = errors.New(msgErrTreeJsonNotFound)
+	ErrMakefileNotFound    = errors.New(msgErrMakefileNotFound)
+)
 
-type Workspace struct {
-	Name string `json:"name"`
-	Dir  string `json:"dir"`
+type Manager struct {
+	workspaceFile string
+	file          stream.FileWriteReadExister
 }
 
-type Adder interface {
-	Add(workspace Workspace) error
+func New(ritchieHome string, fileManager stream.FileWriteReadExister) Manager {
+	workspaceFile := path.Join(ritchieHome, formula.WorkspacesFile)
+	return Manager{workspaceFile: workspaceFile, file: fileManager}
 }
 
-type Lister interface {
-	List() (Workspaces, error)
+func (m Manager) Add(workspace formula.Workspace) error {
+	workspaces := formula.Workspaces{}
+	if m.file.Exists(m.workspaceFile) {
+		file, err := m.file.Read(m.workspaceFile)
+		if err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(file, &workspaces); err != nil {
+			return err
+		}
+	}
+
+	workspaces[workspace.Name] = workspace.Dir
+	content, err := json.Marshal(workspaces)
+	if err != nil {
+		return err
+	}
+
+	if err := m.file.Write(m.workspaceFile, content); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-type Validator interface {
-	Validate(workspace Workspace) error
+func (m Manager) List() (formula.Workspaces, error) {
+	workspaces := formula.Workspaces{}
+	if !m.file.Exists(m.workspaceFile) {
+		return formula.Workspaces{}, nil
+	}
+
+	file, err := m.file.Read(m.workspaceFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(file, &workspaces); err != nil {
+		return nil, err
+	}
+
+	return workspaces, nil
 }
 
-type AddListValidator interface {
-	Adder
-	Lister
-	Validator
+func (m Manager) Validate(workspace formula.Workspace) error {
+	dir := workspace.Dir
+	if !m.file.Exists(dir) {
+		return ErrInvalidWorkspace
+	}
+
+	makefilePath := path.Join(dir, formula.MakefilePath)
+	if !m.file.Exists(makefilePath) {
+		return ErrMakefileNotFound
+	}
+
+	treePath := path.Join(dir, formula.TreePath)
+	if !m.file.Exists(treePath) {
+		return ErrTreeJsonNotFound
+	}
+
+	return nil
 }

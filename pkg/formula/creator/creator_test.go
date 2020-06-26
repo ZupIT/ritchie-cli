@@ -9,7 +9,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -293,7 +292,7 @@ func (f fileManagerMock) Exists(string) bool {
 
 func cleanForm(dir stream.DirManager) {
 	tempDir := os.TempDir()
-	_ = dir.Remove(path.Join(tempDir, workspace.DefaultWorkspaceDir))
+	_ = dir.Remove(path.Join(tempDir, formula.DefaultWorkspaceDir))
 	_ = dir.Remove(path.Join(tempDir, "/customRepo"))
 	_ = dir.Remove(path.Join(tempDir, "/customRepoMakefile"))
 	_ = dir.Remove(path.Join(tempDir, "/customRepoTreejson"))

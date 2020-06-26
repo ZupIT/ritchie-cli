@@ -27,7 +27,7 @@ const (
 type initSingleCmd struct {
 	prompt.InputPassword
 	security.PassphraseManager
-	formula.Loader
+	formula.RepoLoader
 }
 
 type initTeamCmd struct {
@@ -37,14 +37,14 @@ type initTeamCmd struct {
 	prompt.InputBool
 	server.FindSetter
 	security.LoginManager
-	formula.Loader
+	formula.RepoLoader
 }
 
 // NewSingleInitCmd creates init command for single edition
 func NewSingleInitCmd(
 	ip prompt.InputPassword,
 	pm security.PassphraseManager,
-	rl formula.Loader) *cobra.Command {
+	rl formula.RepoLoader) *cobra.Command {
 
 	o := initSingleCmd{ip, pm, rl}
 
@@ -59,7 +59,7 @@ func NewTeamInitCmd(
 	ib prompt.InputBool,
 	fs server.FindSetter,
 	lm security.LoginManager,
-	rl formula.Loader) *cobra.Command {
+	rl formula.RepoLoader) *cobra.Command {
 
 	o := initTeamCmd{it, ip, iu, ib, fs, lm, rl}
 

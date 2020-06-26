@@ -30,60 +30,60 @@ const (
 	MakefilePath         = "/Makefile"
 )
 
-// Config type that represents formula config
-type Config struct {
-	Name        string  `json:"name"`
-	Command     string  `json:"command"`
-	Description string  `json:"description"`
-	Language    string  `json:"language"`
-	Inputs      []Input `json:"inputs"`
-}
+type (
+	Input struct {
+		Name    string   `json:"name"`
+		Type    string   `json:"type"`
+		Default string   `json:"default"`
+		Label   string   `json:"label"`
+		Items   []string `json:"items"`
+		Cache   Cache    `json:"cache"`
+	}
 
-// Input type that represents input config
-type Input struct {
-	Name    string   `json:"name"`
-	Type    string   `json:"type"`
-	Default string   `json:"default"`
-	Label   string   `json:"label"`
-	Items   []string `json:"items"`
-	Cache   Cache    `json:"cache"`
-}
+	Cache struct {
+		Active   bool   `json:"active"`
+		Qty      int    `json:"qty"`
+		NewLabel string `json:"newLabel"`
+	}
+	Create struct {
+		FormulaCmd    string `json:"formulaCmd"`
+		Lang          string `json:"lang"`
+		WorkspacePath string `json:"workspacePath"`
+		FormulaPath   string `json:"formulaPath"`
+	}
 
-type Cache struct {
-	Active   bool   `json:"active"`
-	Qty      int    `json:"qty"`
-	NewLabel string `json:"newLabel"`
-}
-type Create struct {
-	FormulaCmd    string `json:"formulaCmd"`
-	Lang          string `json:"lang"`
-	WorkspacePath string `json:"workspacePath"`
-	FormulaPath   string `json:"formulaPath"`
-}
+	Config struct {
+		Name        string  `json:"name"`
+		Command     string  `json:"command"`
+		Description string  `json:"description"`
+		Language    string  `json:"language"`
+		Inputs      []Input `json:"inputs"`
+	}
 
-// Definition type that represents a Formula
-type Definition struct {
-	Path     string
-	Bin      string
-	LBin     string
-	MBin     string
-	WBin     string
-	Bundle   string
-	Config   string
-	RepoURL  string
-	RepoName string
-}
+	// Definition type that represents a Formula
+	Definition struct {
+		Path     string
+		Bin      string
+		LBin     string
+		MBin     string
+		WBin     string
+		Bundle   string
+		Config   string
+		RepoURL  string
+		RepoName string
+	}
 
-type Setup struct {
-	Pwd            string
-	FormulaPath    string
-	BinPath        string
-	TmpDir         string
-	TmpBinDir      string
-	TmpBinFilePath string
-	Config         Config
-	ContainerId    string
-}
+	Setup struct {
+		Pwd            string
+		FormulaPath    string
+		BinPath        string
+		TmpDir         string
+		TmpBinDir      string
+		TmpBinFilePath string
+		Config         Config
+		ContainerId    string
+	}
+)
 
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
@@ -129,6 +129,43 @@ func (d *Definition) BinName() string {
 		return fmt.Sprintf(BinPattern, binSO, suffix)
 	}
 	return bName
+}
+
+type PreRunner interface {
+	PreRun(def Definition) (Setup, error)
+}
+
+type Runner interface {
+	Run(def Definition, inputType api.TermInputType) error
+}
+
+type PostRunner interface {
+	PostRun(p Setup, docker bool) error
+}
+
+type InputRunner interface {
+	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
+}
+
+type Setuper interface {
+	Setup(def Definition) (Setup, error)
+}
+
+type Creator interface {
+	Create(cf Create) error
+}
+
+type Builder interface {
+	Build(workspacePath, formulaPath string) error
+}
+
+type Watcher interface {
+	Watch(workspacePath, formulaPath string)
+}
+
+type CreateBuilder interface {
+	Creator
+	Builder
 }
 
 // BinName builds the bin name from definition params
@@ -183,41 +220,4 @@ func (c Create) FormulaName() string {
 func (c Create) PkgName() string {
 	d := strings.Split(c.FormulaCmd, " ")
 	return d[len(d)-1]
-}
-
-type PreRunner interface {
-	PreRun(def Definition) (Setup, error)
-}
-
-type Runner interface {
-	Run(def Definition, inputType api.TermInputType) error
-}
-
-type PostRunner interface {
-	PostRun(p Setup, docker bool) error
-}
-
-type InputRunner interface {
-	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
-}
-
-type Setuper interface {
-	Setup(def Definition) (Setup, error)
-}
-
-type Creator interface {
-	Create(cf Create) error
-}
-
-type Builder interface {
-	Build(workspacePath, formulaPath string) error
-}
-
-type Watcher interface {
-	Watch(workspacePath, formulaPath string)
-}
-
-type CreateBuilder interface {
-	Creator
-	Builder
 }

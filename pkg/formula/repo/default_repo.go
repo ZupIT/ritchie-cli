@@ -37,7 +37,7 @@ var (
 	ErrNoRepoToShow = errors.New("no repositories to show")
 )
 
-type RepoManager struct {
+type Manager struct {
 	repoFile       string
 	cacheFile      string
 	homePath       string
@@ -55,8 +55,8 @@ func (a ByPriority) Len() int           { return len(a) }
 func (a ByPriority) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByPriority) Less(i, j int) bool { return a[i].Priority < a[j].Priority }
 
-func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) RepoManager {
-	return RepoManager{
+func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) Manager {
+	return Manager{
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
 		homePath:       homePath,
@@ -66,8 +66,8 @@ func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) 
 	}
 }
 
-func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Client, sm session.Manager) RepoManager {
-	return RepoManager{
+func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Client, sm session.Manager) Manager {
+	return Manager{
 
 		repoFile:       fmt.Sprintf(repositoryConfFilePattern, homePath),
 		cacheFile:      fmt.Sprintf(repositoryCacheFolderPattern, homePath),
@@ -79,7 +79,7 @@ func NewTeamRepoManager(homePath string, serverFinder server.Finder, hc *http.Cl
 	}
 }
 
-func (dm RepoManager) Add(r formula.Repository) error {
+func (dm Manager) Add(r formula.Repository) error {
 	err := os.MkdirAll(filepath.Dir(dm.cacheFile), os.ModePerm)
 	if err != nil && !os.IsExist(err) {
 		return err
@@ -143,7 +143,7 @@ func (dm RepoManager) Add(r formula.Repository) error {
 	return nil
 }
 
-func (dm RepoManager) Update() error {
+func (dm Manager) Update() error {
 	f, err := dm.loadReposFromDisk()
 	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {
 		return ErrNoRepoToShow
@@ -168,7 +168,7 @@ func (dm RepoManager) Update() error {
 	return nil
 }
 
-func (dm RepoManager) Clean(n string) error {
+func (dm Manager) Clean(n string) error {
 	treeName := fmt.Sprintf(treeCacheFilePattern, dm.homePath, n)
 
 	if err := removeRepoCache(treeName); err != nil {
@@ -178,7 +178,7 @@ func (dm RepoManager) Clean(n string) error {
 	return nil
 }
 
-func (dm RepoManager) Delete(name string) error {
+func (dm Manager) Delete(name string) error {
 	f, err := dm.loadReposFromDisk()
 	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {
 		return ErrNoRepoToShow
@@ -207,7 +207,7 @@ func (dm RepoManager) Delete(name string) error {
 	return nil
 }
 
-func (dm RepoManager) List() ([]formula.Repository, error) {
+func (dm Manager) List() ([]formula.Repository, error) {
 	f, err := dm.loadReposFromDisk()
 
 	if fileutil.IsNotExistErr(err) {
@@ -222,7 +222,7 @@ func (dm RepoManager) List() ([]formula.Repository, error) {
 	return f.Values, nil
 }
 
-func (dm RepoManager) loadTreeFile(r formula.Repository) error {
+func (dm Manager) loadTreeFile(r formula.Repository) error {
 
 	session, err := dm.sessionManager.Current()
 	if err != nil {
@@ -268,7 +268,7 @@ func (dm RepoManager) loadTreeFile(r formula.Repository) error {
 	return nil
 }
 
-func (dm RepoManager) loadReposFromDisk() (formula.RepositoryFile, error) {
+func (dm Manager) loadReposFromDisk() (formula.RepositoryFile, error) {
 	path := fmt.Sprintf(repositoryConfFilePattern, dm.homePath)
 	rf := formula.RepositoryFile{}
 

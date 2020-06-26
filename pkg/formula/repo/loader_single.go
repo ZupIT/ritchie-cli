@@ -6,11 +6,11 @@ const commons = "commons"
 
 type SingleLoader struct {
 	treePath string
-	formula.Adder
+	formula.RepoAdder
 }
 
-func NewSingleLoader(treePath string, adder formula.Adder) SingleLoader {
-	return SingleLoader{Adder: adder, treePath: treePath}
+func NewSingleLoader(treePath string, adder formula.RepoAdder) SingleLoader {
+	return SingleLoader{RepoAdder: adder, treePath: treePath}
 }
 
 func (m SingleLoader) Load() error {

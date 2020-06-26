@@ -13,7 +13,7 @@ import (
 
 // cleanRepoCmd type for clean repo command
 type cleanRepoCmd struct {
-	formula.Cleaner
+	formula.RepoCleaner
 	prompt.InputText
 }
 
@@ -23,7 +23,7 @@ type cleanRepo struct {
 }
 
 // NewCleanRepoCmd creates a new cmd instance
-func NewCleanRepoCmd(cl formula.Cleaner, it prompt.InputText) *cobra.Command {
+func NewCleanRepoCmd(cl formula.RepoCleaner, it prompt.InputText) *cobra.Command {
 	c := &cleanRepoCmd{cl, it}
 
 	cmd := &cobra.Command{

@@ -16,15 +16,15 @@ type TeamLoader struct {
 	serverFinder server.Finder
 	client       *http.Client
 	session      session.Manager
-	formula.Adder
+	formula.RepoAdder
 }
 
-func NewTeamLoader(serverFinder server.Finder, client *http.Client, session session.Manager, adder formula.Adder) TeamLoader {
+func NewTeamLoader(serverFinder server.Finder, client *http.Client, session session.Manager, adder formula.RepoAdder) TeamLoader {
 	return TeamLoader{
 		serverFinder: serverFinder,
 		client:       client,
 		session:      session,
-		Adder:        adder,
+		RepoAdder:    adder,
 	}
 }
 

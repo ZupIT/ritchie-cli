@@ -21,13 +21,13 @@ func TestWorkspaceManager_Add(t *testing.T) {
 
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()
-	workspaceFile := path.Join(tmpDir, workspacesFile)
+	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	if err := fileManager.Remove(workspaceFile); err != nil {
 		t.Error(err)
 	}
 
 	type in struct {
-		workspace   Workspace
+		workspace   formula.Workspace
 		fileManager stream.FileWriteReadExister
 	}
 
@@ -39,7 +39,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "success create",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  fullDir,
 				},
@@ -50,7 +50,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "success edit",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "commons",
 					Dir:  fullDir,
 				},
@@ -61,7 +61,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "invalid workspace",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
 				},
@@ -72,7 +72,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "not found tree.json",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  makefileDir,
 				},
@@ -83,7 +83,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "not found MakefilePath",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  treeDir,
 				},
@@ -94,7 +94,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "read not found",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "commons",
 					Dir:  fullDir,
 				},
@@ -105,7 +105,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "unmarshal error",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "commons",
 					Dir:  fullDir,
 				},
@@ -116,7 +116,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		{
 			name: "write error",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "commons",
 					Dir:  fullDir,
 				},
@@ -143,10 +143,10 @@ func TestWorkspaceManager_Add(t *testing.T) {
 func TestManager_List(t *testing.T) {
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()
-	workspaceFile := path.Join(tmpDir, workspacesFile)
+	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 
 	type in struct {
-		workspaces  *Workspaces
+		workspaces  *formula.Workspaces
 		fileManager stream.FileWriteReadExister
 	}
 
@@ -163,7 +163,7 @@ func TestManager_List(t *testing.T) {
 		{
 			name: "success list",
 			in: in{
-				workspaces:  &Workspaces{"commons": "/home/user/ritchie-formulas"},
+				workspaces:  &formula.Workspaces{"commons": "/home/user/ritchie-formulas"},
 				fileManager: fileManager,
 			},
 			out: out{
@@ -237,13 +237,13 @@ func TestValidate(t *testing.T) {
 
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()
-	workspaceFile := path.Join(tmpDir, workspacesFile)
+	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	if err := fileManager.Remove(workspaceFile); err != nil {
 		t.Error(err)
 	}
 
 	type in struct {
-		workspace   Workspace
+		workspace   formula.Workspace
 		fileManager stream.FileWriteReadExister
 	}
 
@@ -255,7 +255,7 @@ func TestValidate(t *testing.T) {
 		{
 			name: "valid",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  fullDir,
 				},
@@ -266,7 +266,7 @@ func TestValidate(t *testing.T) {
 		{
 			name: "invalid workspace",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  "/home/user/invalid-workspace",
 				},
@@ -277,7 +277,7 @@ func TestValidate(t *testing.T) {
 		{
 			name: "invalid Makefile not found",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  treeDir,
 				},
@@ -288,7 +288,7 @@ func TestValidate(t *testing.T) {
 		{
 			name: "invalid tree.json not found",
 			in: in{
-				workspace: Workspace{
+				workspace: formula.Workspace{
 					Name: "zup",
 					Dir:  makefileDir,
 				},

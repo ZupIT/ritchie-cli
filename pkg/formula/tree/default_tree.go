@@ -19,11 +19,11 @@ const (
 
 type Manager struct {
 	ritchieHome string
-	repoLister  formula.Lister
+	repoLister  formula.RepoLister
 	coreCmds    []api.Command
 }
 
-func NewTreeManager(ritchieHome string, rl formula.Lister, coreCmds []api.Command) Manager {
+func NewTreeManager(ritchieHome string, rl formula.RepoLister, coreCmds []api.Command) Manager {
 	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
 }
 

@@ -33,7 +33,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 		InputBool     prompt.InputBool
 		FindSetter    server.FindSetter
 		LoginManager  security.LoginManager
-		Loader        formula.Loader
+		Loader        formula.RepoLoader
 	}
 	tests := []struct {
 		name    string

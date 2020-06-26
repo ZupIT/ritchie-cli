@@ -16,7 +16,7 @@ import (
 // loginCmd type for init command
 type loginCmd struct {
 	security.LoginManager
-	formula.Loader
+	formula.RepoLoader
 	prompt.InputText
 	prompt.InputPassword
 	server.Finder
@@ -33,11 +33,11 @@ func NewLoginCmd(
 	t prompt.InputText,
 	p prompt.InputPassword,
 	lm security.LoginManager,
-	fm formula.Loader,
+	fm formula.RepoLoader,
 	sf server.Finder) *cobra.Command {
 	l := loginCmd{
 		LoginManager:  lm,
-		Loader:        fm,
+		RepoLoader:    fm,
 		InputText:     t,
 		InputPassword: p,
 		Finder:        sf,
