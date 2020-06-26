@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -24,6 +25,32 @@ func TestNewTeamSetCredentialCmd(t *testing.T) {
 	}
 
 	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+}
+
+func TestNewSingleSetCredentialCmdWithEntryArchiveWithErrorInInputType(t *testing.T) {
+	errInput := errors.New("some error of input")
+	cmd := NewSingleSetCredentialCmd(
+		credSetterMock{},
+		inputTextMock{},
+		inputFalseMock{},
+		inputListCustomMock{
+			list: func(name string, list []string) (string, error) {
+				if name == MsgTypeEntry {
+					return "", errInput
+				}
+				return "some_input", nil
+			},
+		},
+		inputPasswordMock{},
+	)
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+	if cmd == nil {
+		t.Errorf("NewTeamSetCredentialCmd got %v", cmd)
+	}
+
+	if err := cmd.Execute(); err != errInput {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
 }

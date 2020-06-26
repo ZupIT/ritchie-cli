@@ -26,6 +26,11 @@ type setCredentialCmd struct {
 	prompt.InputPassword
 }
 
+// MsgTypeEntry used in select of type entrey credential
+const (
+	MsgTypeEntry = "Input type: "
+)
+
 // NewSingleSetCredentialCmd creates a new cmd instance
 func NewSingleSetCredentialCmd(
 	st credential.Setter,
@@ -157,7 +162,7 @@ func (s setCredentialCmd) entryCredential() ([]string, error) {
 		types = append(types, k)
 	}
 
-	typ, errTyp := s.List("Input type: ", types)
+	typ, errTyp := s.List(MsgTypeEntry, types)
 	if errTyp != nil {
 		return nil, errTyp
 	}
