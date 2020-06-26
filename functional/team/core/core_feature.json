@@ -11,6 +11,27 @@
         "result":"Set objects like credentials, etc."
     },
     {
+        "entry":"Set Context",
+        "steps":[
+            {
+                "key":"",
+                "value":"set context",
+                "action":"main"
+            },
+            {
+                "key":"All:",
+                "value":"Type new context?",
+                "action":"select"
+            },
+            {
+                "key":"New context:",
+                "value":"Leonidas",
+                "action":"sendkey"
+            }
+        ],
+        "result":"Set context successful!"
+    },
+    {
         "entry":"Add",
         "steps":[
             {
@@ -20,6 +41,32 @@
             }
         ],
         "result":"It can be used to add formulas, repositories and other objects.."
+    },
+    {
+        "entry":"Add Repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"add repo",
+                "action":"main"
+            },
+            {
+                "key":"Name of the repository:",
+                "value":"Leonidas",
+                "action":"sendkeys"
+            },
+            {
+                "key":"URL of the tree",
+                "value":"https://ritchie-server.itiaws.dev",
+                "action":"sendkeys"
+            },
+            {
+                "key":"Priority",
+                "value":"999",
+                "action":"sendkeys"
+            }
+        ],
+        "result":"Repository added"
     },
     {
         "entry":"Completion",
@@ -42,6 +89,22 @@
             }
         ],
         "result":"It can be used to clean formulas, repositories and other objects.."
+    },
+    {
+        "entry":"Clean Repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"clean repo",
+                "action":"main"
+            },
+            {
+                "key":"Name of the repository:",
+                "value":"Leonidas",
+                "action":"sendkeys"
+            }
+        ],
+        "result":"\"Leonidas\" has been cleaned successfully"
     },
     {
         "entry":"Create",

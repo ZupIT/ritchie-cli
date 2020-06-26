@@ -18,7 +18,7 @@ func TestRitSingleScaffold(t *testing.T) {
 
 var _ = Describe("RitScaffold", func() {
 	BeforeSuite(func() {
-		functional.RitInit()
+		functional.RitSingleInit()
 	})
 
 	scenariosScaffold := functional.LoadScenarios("scaffold_feature.json")

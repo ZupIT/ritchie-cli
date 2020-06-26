@@ -155,4 +155,6 @@ ifeq "$(GONNA_RELEASE)" "RELEASE"
 	git add .
 	git commit --allow-empty -m "release-$(NEXT_VERSION)"
 	git push $(GIT_REMOTE) HEAD:release-$(NEXT_VERSION)
+else
+	echo "NOT GONNA RELEASE"
 endif
