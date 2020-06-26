@@ -16,5 +16,5 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/spf13/cobra v1.0.0
 	github.com/thoas/go-funk v0.6.0
-	k8s.io/kubectl v0.18.4 // indirect
+	k8s.io/kubectl v0.18.4
 )
