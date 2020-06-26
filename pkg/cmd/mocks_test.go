@@ -64,6 +64,14 @@ func (inputListMock) List(name string, items []string) (string, error) {
 	return "item-mocked", nil
 }
 
+type inputListCustomMock struct {
+	list func(name string, items []string) (string, error)
+}
+
+func (m inputListCustomMock) List(name string, items []string) (string, error) {
+	return m.list(name, items)
+}
+
 type inputListCredMock struct{}
 
 func (inputListCredMock) List(name string, items []string) (string, error) {
