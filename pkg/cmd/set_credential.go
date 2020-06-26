@@ -28,7 +28,10 @@ type setCredentialCmd struct {
 
 // MsgTypeEntry used in select of type entrey credential
 const (
-	MsgTypeEntry = "Input type: "
+	MsgTypeEntry                = "Input type: "
+	MsgTypeEntryPath            = "Type the path to your file that contains the value of your credential: "
+	EntriesTypeCredentialFile   = "file"
+	EntriesTypeCredentialPrompt = "prompt"
 )
 
 // NewSingleSetCredentialCmd creates a new cmd instance
@@ -153,8 +156,8 @@ func (s setCredentialCmd) entryCredential() ([]string, error) {
 	var kv string
 
 	entries := map[string]string{
-		"File (input by file)":  "file",
-		"Prompt (manual entry)": "prompt",
+		"File (input by file)":  EntriesTypeCredentialFile,
+		"Prompt (manual entry)": EntriesTypeCredentialPrompt,
 	}
 
 	var types []string
@@ -188,7 +191,7 @@ func (s setCredentialCmd) inputFile() ([]string, error) {
 	}
 	res = append(res, key)
 
-	path, err := s.Text("Type the path to your file that contains the value of your credential: ", true)
+	path, err := s.Text(MsgTypeEntryPath, true)
 	if err != nil {
 		return nil, err
 	}

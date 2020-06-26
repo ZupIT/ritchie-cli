@@ -29,7 +29,7 @@ func TestNewTeamSetCredentialCmd(t *testing.T) {
 	}
 }
 
-func TestNewSingleSetCredentialCmdWithEntryArchiveWithErrorInInputType(t *testing.T) {
+func TestNewSingleSetCredentialCmdWithEntryArchive(t *testing.T) {
 	errInput := errors.New("some error of input")
 	cmd := NewSingleSetCredentialCmd(
 		credSetterMock{},
@@ -38,7 +38,10 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithErrorInInputType(t *testin
 		inputListCustomMock{
 			list: func(name string, list []string) (string, error) {
 				if name == MsgTypeEntry {
-					return "", errInput
+					return EntriesTypeCredentialFile, errInput
+				}
+				if name == MsgTypeEntryPath {
+					return "/test", errInput
 				}
 				return "some_input", nil
 			},
