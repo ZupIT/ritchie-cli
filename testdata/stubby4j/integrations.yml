@@ -112,15 +112,31 @@
 #Get 200 set server
 - request:
     method: GET
-    url: /
+    url: /otp$
 
   response:
     status: 200
+    body: >
+      {
+          "otp": true
+      }
 
 #Get 500 set server
 - request:
     method: GET
-    url: ^/server/error$
+    url: ^/server/error/otp$
 
   response:
     status: 500
+
+#Get 200 but wrong body on set server
+- request:
+    method: GET
+    url: ^/server/error/otp-json-parse-error/otp$
+
+  response:
+    status: 200
+    body: >
+      {
+          "otp": "true"
+      }

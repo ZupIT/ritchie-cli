@@ -47,7 +47,7 @@ func (f FormulaCommand) Add(rootCmd *cobra.Command) error {
 		cmdPath := api.Command{Parent: cmd.Parent, Usage: cmd.Usage}
 		if !sliceutil.ContainsCmd(f.coreCmds, cmdPath) {
 			var newCmd *cobra.Command
-			if cmd.Formula.Path != "" {
+			if cmd.Formula != nil && cmd.Formula.Path != "" {
 				newCmd = f.newFormulaCmd(cmd)
 			} else {
 				newCmd = newSubCmd(cmd)
@@ -87,7 +87,7 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	}
 
 	addFlags(formulaCmd)
-	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, cmd.Formula)
+	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, *cmd.Formula)
 
 	return formulaCmd
 }

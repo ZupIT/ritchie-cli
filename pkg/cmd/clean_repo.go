@@ -5,16 +5,15 @@ import (
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/spf13/cobra"
-
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 // cleanRepoCmd type for clean repo command
 type cleanRepoCmd struct {
-	formula.Cleaner
+	formula.RepoCleaner
 	prompt.InputText
 }
 
@@ -24,14 +23,14 @@ type cleanRepo struct {
 }
 
 // NewCleanRepoCmd creates a new cmd instance
-func NewCleanRepoCmd(cl formula.Cleaner, it prompt.InputText) *cobra.Command {
+func NewCleanRepoCmd(cl formula.RepoCleaner, it prompt.InputText) *cobra.Command {
 	c := &cleanRepoCmd{cl, it}
 
 	cmd := &cobra.Command{
 		Use:     "repo",
 		Short:   "clean a repository.",
 		Example: "rit clean repo ",
-		RunE: RunFuncE(c.runStdin(), c.runPrompt()),
+		RunE:    RunFuncE(c.runStdin(), c.runPrompt()),
 	}
 
 	cmd.LocalFlags()

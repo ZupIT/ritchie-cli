@@ -5,12 +5,14 @@ import (
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -25,7 +27,7 @@ const (
 type initSingleCmd struct {
 	prompt.InputPassword
 	security.PassphraseManager
-	formula.Loader
+	formula.RepoLoader
 }
 
 type initTeamCmd struct {
@@ -35,14 +37,14 @@ type initTeamCmd struct {
 	prompt.InputBool
 	server.FindSetter
 	security.LoginManager
-	formula.Loader
+	formula.RepoLoader
 }
 
 // NewSingleInitCmd creates init command for single edition
 func NewSingleInitCmd(
 	ip prompt.InputPassword,
 	pm security.PassphraseManager,
-	rl formula.Loader) *cobra.Command {
+	rl formula.RepoLoader) *cobra.Command {
 
 	o := initSingleCmd{ip, pm, rl}
 
@@ -57,9 +59,9 @@ func NewTeamInitCmd(
 	ib prompt.InputBool,
 	fs server.FindSetter,
 	lm security.LoginManager,
-	rl formula.Loader) *cobra.Command {
+	rl formula.RepoLoader) *cobra.Command {
 
-	o := initTeamCmd{it, ip,iu, ib, fs, lm, rl}
+	o := initTeamCmd{it, ip, iu, ib, fs, lm, rl}
 
 	return newInitCmd(o.runStdin(), o.runPrompt())
 }
@@ -162,7 +164,7 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		if err := o.Set(cfg); err != nil {
+		if err := o.Set(&cfg); err != nil {
 			return err
 		}
 
@@ -179,9 +181,18 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			if err != nil {
 				return err
 			}
+			var totp string
+			if cfg.Otp {
+				totp, err = o.Text(MsgOtp, true)
+				if err != nil {
+					return err
+				}
+			}
+
 			us := security.User{
 				Username: u,
 				Password: p,
+				Totp:     totp,
 			}
 			if err := o.Login(us); err != nil {
 				return err
@@ -206,7 +217,7 @@ func (o initTeamCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err := o.Set(cfg); err != nil {
+		if err := o.Set(&cfg); err != nil {
 			return err
 		}
 

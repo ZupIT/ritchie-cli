@@ -12,36 +12,36 @@ type RepositoryFile struct {
 	Values []Repository `json:"repositories,omitempty"`
 }
 
-type Adder interface {
+type RepoAdder interface {
 	Add(d Repository) error
 }
 
-type Lister interface {
+type RepoLister interface {
 	List() ([]Repository, error)
 }
 
-type Updater interface {
+type RepoUpdater interface {
 	Update() error
 }
 
-type Deleter interface {
+type RepoDeleter interface {
 	Delete(name string) error
 }
 
-type Cleaner interface {
+type RepoCleaner interface {
 	Clean(name string) error
 }
 
-type Loader interface {
+type RepoLoader interface {
 	Load() error
 }
 
-type AddLister interface {
-	Adder
-	Lister
+type RepoAddLister interface {
+	RepoAdder
+	RepoLister
 }
 
 type DelLister interface {
-	Deleter
-	Lister
+	RepoDeleter
+	RepoLister
 }

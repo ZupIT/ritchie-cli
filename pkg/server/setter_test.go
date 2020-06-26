@@ -14,6 +14,7 @@ import (
 
 const (
 	urlHttp = "http://localhost:8882"
+	urlHttpErrorOtp = "http://localhost:8882/server/error/otp-json-parse-error"
 	urlHttpError = "http://localhost:8882/server/error"
 	urlHttps = "https://localhost"
 	urlHttpsError = "https://localhost:9999"
@@ -21,7 +22,8 @@ const (
 
 var (
 	errNoSuchHost     = fmt.Errorf("lookup %s: no such host", strings.Replace(urlHttp, "http://", "", 1))
-	errNoSuchHostLong = fmt.Errorf("Get \"%s\": %s", urlHttp, errNoSuchHost)
+	errNoSuchHostLong = fmt.Errorf("Get \"%s/otp\": %s", urlHttp, errNoSuchHost)
+	errOtpParseError = fmt.Errorf("json: cannot unmarshal string into Go struct field otpResponse.otp of type bool")
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
@@ -102,6 +104,11 @@ func TestSet(t *testing.T) {
 			in:   in{cfg: Config{Organization: "org", URL: urlHttpsError}, hc: makeHttpClient()},
 			outErr: errors.New("dial tcp"),
 		},
+		{
+			name:   "Parse Otp Error",
+			in:     in{cfg: Config{Organization: "org", URL: urlHttpErrorOtp}, hc: http.DefaultClient},
+			outErr: errOtpParseError,
+		},
 	}
 
 	for _, tt := range tests {
@@ -109,13 +116,13 @@ func TestSet(t *testing.T) {
 			in := tt.in
 			s := NewSetter(os.TempDir(), in.hc)
 
-			got := s.Set(in.cfg)
+			got := s.Set(&in.cfg)
 			if tt.outErr != nil && got == nil {
-				t.Errorf("Set(%s) got %v, want %v", in.cfg, got, tt.outErr)
+				t.Errorf("Set(%v) got %v, want %v", in.cfg, got, tt.outErr)
 			}
 			if got != nil && got.Error() != tt.outErr.Error() {
 				if !strings.Contains(got.Error(), tt.outErr.Error()) {
-					t.Errorf("Set(%s) got %v, want %v", in.cfg, got, tt.outErr)
+					t.Errorf("Set(%v) got %v, want %v", in.cfg, got, tt.outErr)
 				}
 			}
 		})

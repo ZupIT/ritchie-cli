@@ -16,10 +16,18 @@ func (inputTextMock) Text(name string, required bool) (string, error) {
 	return "mocked text", nil
 }
 
+func (inputTextMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return "mocked text", nil
+}
+
 type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool) (string, error) {
 	return "username=ritchie", nil
+}
+
+func (inputSecretMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return "mocked text", nil
 }
 
 type inputURLMock struct{}
@@ -88,8 +96,26 @@ func (repoCleaner) Clean(name string) error {
 
 type formCreator struct{}
 
-func (formCreator) Create(cf formula.Create) (formula.CreateManager, error) {
-	return formula.CreateManager{}, nil
+func (formCreator) Create(cf formula.Create) error {
+	return nil
+}
+
+func (formCreator) Build(workspacePath, formulaPath string) error {
+	return nil
+}
+
+type workspaceForm struct{}
+
+func (workspaceForm) Add(workspace formula.Workspace) error {
+	return nil
+}
+
+func (workspaceForm) List() (formula.Workspaces, error) {
+	return formula.Workspaces{}, nil
+}
+
+func (workspaceForm) Validate(workspace formula.Workspace) error {
+	return nil
 }
 
 type ctxSetterMock struct{}
@@ -219,10 +245,76 @@ func (passphraseManagerMock) Save(security.Passphrase) error {
 
 type findSetterServerMock struct{}
 
-func (findSetterServerMock) Set(server.Config) error {
+func (findSetterServerMock) Set(*server.Config) error {
 	return nil
 }
 
 func (findSetterServerMock) Find() (server.Config, error) {
 	return server.Config{}, nil
+}
+
+type findSetterServerCustomMock struct {
+	set  func(*server.Config) error
+	find func() (server.Config, error)
+}
+
+func (m findSetterServerCustomMock) Set(ctx *server.Config) error {
+	return m.set(ctx)
+}
+
+func (m findSetterServerCustomMock) Find() (server.Config, error) {
+	return m.find()
+}
+
+type inputBoolCustomMock struct {
+	bool func(name string, items []string) (bool, error)
+}
+
+func (m inputBoolCustomMock) Bool(name string, items []string) (bool, error) {
+	return m.bool(name, items)
+}
+
+type inputTextCustomMock struct {
+	text             func(name string, required bool) (string, error)
+	textWithValidate func(name string, validate func(string) error) (string, error)
+}
+
+func (m inputTextCustomMock) Text(name string, required bool) (string, error) {
+	return m.text(name, required)
+}
+
+func (m inputTextCustomMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return m.textWithValidate(name, validate)
+}
+
+type loginManagerCustomMock struct {
+	login func(security.User) error
+}
+
+func (m loginManagerCustomMock) Login(user security.User) error {
+	return m.login(user)
+}
+
+type repoLoaderCustomMock struct {
+	load func() error
+}
+
+func (m repoLoaderCustomMock) Load() error {
+	return m.load()
+}
+
+type inputURLCustomMock struct {
+	url func(name, defaultValue string) (string, error)
+}
+
+func (m inputURLCustomMock) URL(name, defaultValue string) (string, error) {
+	return m.url(name, defaultValue)
+}
+
+type inputPasswordCustomMock struct {
+	password func(label string) (string, error)
+}
+
+func (m inputPasswordCustomMock) Password(label string) (string, error) {
+	return m.password(label)
 }

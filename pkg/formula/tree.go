@@ -3,7 +3,7 @@ package formula
 import "github.com/ZupIT/ritchie-cli/pkg/api"
 
 type Tree struct {
-	Commands []api.Command `json:"commands"`
+	Commands api.Commands `json:"commands"`
 }
 
 type Manager interface {

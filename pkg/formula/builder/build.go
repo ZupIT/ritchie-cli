@@ -10,20 +10,26 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	commonsDir = "commons"
+const commonsDir = "commons"
+
+var (
+	msgBuildOnWindows = fmt.Sprintf(prompt.Yellow, "This formula cannot be built on Windows. Just Golang formulas are available!")
+	ErrBuildOnWindows = errors.New(msgBuildOnWindows)
 )
 
 type Manager struct {
 	ritHome string
 	dir     stream.DirCreateListCopier
-	file    stream.FileListCopier
+	file    stream.FileCopyExistLister
 }
 
-func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileListCopier) Manager {
+func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExistLister) Manager {
 	return Manager{ritHome: ritHome, dir: dir, file: file}
 }
 
@@ -33,7 +39,20 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
-	cmd := exec.Command("make", "build")
+	so := runtime.GOOS
+	var cmd *exec.Cmd
+	switch so {
+	case osutil.Windows:
+		winBuild := path.Join(formulaSrc, "build.bat")
+		// TODO: Remove it after creating the build scripts for other languages ​​on windows
+		if !m.file.Exists(winBuild) {
+			return ErrBuildOnWindows
+		}
+		cmd = exec.Command(winBuild)
+	default:
+		cmd = exec.Command("make", "build")
+	}
+
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
@@ -104,7 +123,7 @@ func (m Manager) copyConfig(formulaPath string, distPath string) error {
 	}
 
 	for _, file := range files {
-		if strings.Contains(file, ".json") {
+		if strings.Contains(file, fileextensions.Json) {
 			copyFile := path.Join(formulaPath, "/", file)
 			distFile := path.Join(distPath, "/", file)
 			if err := m.file.Copy(copyFile, distFile); err != nil {
