@@ -1,13 +1,14 @@
 package formula
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 type DefaultRunner struct {
@@ -52,7 +53,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	printOutEnvs(setup, cmd)
+	printOutEnvs(setup)
 
 	if err := d.PostRun(setup, false); err != nil {
 		return err
@@ -61,35 +62,27 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	return nil
 }
 
-func printOutEnvs(setup Setup, cmd *exec.Cmd) {
+func printOutEnvs(setup Setup) {
 
-	//Get From Env
-	tEnv := "TESTE_ENV"
-	println("tEnv:", os.Getenv(tEnv))
-	println(OutputEnv,":", os.Getenv(OutputEnv))
-	for _, e := range cmd.Env{
-		k := strings.Split(e,"=")
-		if k[0] == OutputEnv{
-			fmt.Printf("%s=%s\n", k[0], k[1])
-		}
-		if k[0] == tEnv{
-			fmt.Printf("%s=%s\n", k[0], k[1])
-		}
-	}
-
-	//Get From File
-	fOutputs := map[string]string{}
 	f, _ := os.Open(setup.outputFilePath)
 	b, _ := ioutil.ReadAll(f)
-	for _, c := range strings.Split(string(b), ";") {
-		l := strings.Split(c, "=")
-		if len(l) == 2 {
-			fOutputs[l[0]] = l[1]
-		}
+	fOutputs := map[string]string{}
+	if err := json.Unmarshal(b, &fOutputs); err != nil {
+		prompt.Error("Fail to read json from output file")
+		return
+	}
+
+	if len(fOutputs) != len(setup.config.Outputs) {
+		prompt.Error("Output file return wrong size of outputs")
+		return
 	}
 	for _, o := range setup.config.Outputs {
-		if _, exist := fOutputs[o.Name]; exist && o.Print == true {
-			fmt.Printf("%s=%s\n", o.Name, fOutputs[o.Name])
+		v, exist := fOutputs[o.Name]
+		if !exist {
+			prompt.Error("Should return " + o.Name + " output on output file")
+		}
+		if o.Print == true {
+			fmt.Printf("%s=%s\n", o.Name, v)
 		}
 	}
 }
