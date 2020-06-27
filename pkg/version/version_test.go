@@ -96,6 +96,40 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "Should get stableVersion",
+			fields: fields{
+				fromCache:        true,
+				CurrentVersion:   "Any value",
+				StableVersionUrl: mockHttpCase1.URL,
+				FileUtilService: StubFileUtilService{
+					readFile: func(s string) ([]byte, error) {
+						return []byte{}, errors.New("some error")
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: mockHttpCase1.Client(),
+			},
+			want:    expectedResultCase1,
+			wantErr: false,
+		},
+		{
+			name: "Should return err when http.get fail",
+			fields: fields{
+				fromCache:        true,
+				CurrentVersion:   "Any value",
+				StableVersionUrl: "any value",
+				FileUtilService: StubFileUtilService{
+					readFile: func(s string) ([]byte, error) {
+						return []byte{}, errors.New("some error")
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: &http.Client{},
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
 			name: "Should get stableVersion from cache",
 			fields: fields{
 				fromCache:        true,
@@ -147,23 +181,13 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 				FileUtilService:  tt.fields.FileUtilService,
 				HttpClient:       tt.fields.HttpClient,
 			}
-			got, err := r.StableVersion(true)
+			got, err := r.StableVersion(tt.fields.fromCache)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("StableVersion() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
 				t.Errorf("StableVersion() got = %v, want %v", got, tt.want)
-			}
-			if !tt.fields.fromCache {
-				got, err = r.StableVersion(false)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("StableVersion() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-				if got != tt.want {
-					t.Errorf("StableVersion() got = %v, want %v", got, tt.want)
-				}
 			}
 		})
 	}
