@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -120,6 +122,42 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 		}
 	}
 
+	credentials, _ := ReadCredentialsJson()
+
+	var credentialList []string
+	for _, p := range credentials.SingleCredentials {
+		credentialList = append(credentialList, p.Provider)
+	}
+	chooseCredential, _ := s.List("Select your provider", credentialList)
+
+	if chooseCredential == "Add a new" {
+		var newCredential credential.SingleCredential
+		newProvider, _ := s.Text("Enter new provider name", true)
+		newCredential.Provider = newProvider
+		addMoreCredentials := true
+		for addMoreCredentials {
+			var newInput credential.Input
+			label, _ := s.Text("Enter credentials name", true)
+
+			typeList := []string{"text", "password"}
+			credentialType, _ := s.List("want to input the credential as a", typeList)
+
+			newInput.Type = credentialType
+			newInput.Label = label
+			newCredential.Inputs = append(newCredential.Inputs, newInput)
+			addMoreCredentials, _ = s.Bool("Add one more credential?", []string{"no", "yes"})
+		}
+
+		credentials.SingleCredentials = append(credentials.SingleCredentials, newCredential)
+
+		//add on json
+		idk, _ := json.Marshal(credentials.SingleCredentials)
+		home, _ := os.UserHomeDir()
+		providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", home)
+		err = ioutil.WriteFile(providerDir, idk, 0644)
+		
+	}
+
 	credDetail.Service = provider
 	credDetail.Credential = cred
 
@@ -181,7 +219,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		}
 		credentials[field] = val
 	}
-	
+
 	credDetail.Credential = credentials
 	credDetail.Service = service
 
@@ -246,4 +284,21 @@ func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
 
 	credDetail.Type = profiles[typ]
 	return nil
+}
+
+func ReadCredentialsJson() (credential.SingleCredentials, error) {
+	var credentials credential.SingleCredentials
+	home, _ := os.UserHomeDir()
+	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", home)
+	jsonFile, err := os.Open(providerDir)
+	if err != nil {
+		return credentials, err
+	}
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	err = json.Unmarshal(byteValue, &credentials)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return credentials, err
 }

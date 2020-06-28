@@ -133,7 +133,7 @@ func NewGo() Go {
 		Main:       tpl_go.Main,
 		Makefile:   tpl_go.Makefile,
 		Dockerfile: tpl_go.Dockerfile,
-		Pkg: tpl_go.Pkg,
+		Pkg:        tpl_go.Pkg,
 		Compiled:   true,
 		UpperCase:  false,
 	}}
@@ -153,7 +153,7 @@ func (g Go) Create(srcDir, pkg, pkgDir, dir string) error {
 	}
 
 	templateGo := strings.ReplaceAll(g.Pkg, nameModule, pkg)
-	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir,pkg ,g.FileFormat)
+	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, g.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(templateGo)); err != nil {
 		return err
 	}
