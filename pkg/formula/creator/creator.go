@@ -217,6 +217,11 @@ func (c CreateManager) createSrcFiles(dir, pkg, lang string) error {
 		if err := node.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
+	case PhpLang:
+		php := NewPhp(c)
+		if err := php.Create(srcDir, pkg, pkgDir, dir); err != nil {
+			return err
+		}
 	case PythonLang:
 		python := NewPython(c)
 		if err := python.Create(srcDir, pkg, pkgDir, dir); err != nil {

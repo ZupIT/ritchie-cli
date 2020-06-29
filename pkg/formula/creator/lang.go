@@ -12,17 +12,22 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_node"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_python"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_php"
 )
 
 const (
 	main       = "main"
 	Main       = "Main"
 	index      = "index"
-	PythonLang = "Python"
-	JavaLang   = "Java"
 	GoLang     = "Go"
+	JavaLang   = "Java"
 	NodeLang   = "Node"
+	PhpLang    = "Php"
+	PythonLang = "Python"
+	ShellLang  = "Shell"
 )
+
+var Languages = []string{GoLang, JavaLang, NodeLang, PhpLang, PythonLang, ShellLang}
 
 type LangCreator interface {
 	Create(srcDir, pkg, pkgDir, dir string) error
@@ -236,6 +241,47 @@ func (s Shell) Create(srcDir, pkg, pkgDir, dir string) error {
 
 	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, s.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(s.File)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type Php struct {
+	Lang
+}
+
+func NewPhp(c CreateManager) Php {
+	return Php{Lang{
+		CreateManager: c,
+		FileFormat:    fileextensions.Php,
+		StartFile:     index,
+		Main:          template_php.Index,
+		Makefile:      template_php.Makefile,
+		Run:           template_php.Run,
+		Dockerfile:    template_php.Dockerfile,
+		File:          template_php.File,
+		Compiled:      false,
+		UpperCase:     false,
+	}}
+}
+
+func (p Php) Create(srcDir, pkg, pkgDir, dir string) error {
+	if err := p.createGenericFiles(srcDir, pkg, dir, p.Lang); err != nil {
+		return err
+	}
+
+	if err := createRunTemplate(srcDir, p.Run); err != nil {
+		return err
+	}
+
+	if err := createPkgDir(pkgDir); err != nil {
+		return err
+	}
+
+	templatePHP := strings.ReplaceAll(p.File, nameBin, pkg)
+	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, p.FileFormat)
+	if err := fileutil.WriteFile(pkgFile, []byte(templatePHP)); err != nil {
 		return err
 	}
 

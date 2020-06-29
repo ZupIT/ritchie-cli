@@ -19,11 +19,13 @@ const (
 	fCmdCorrectNode   = "rit scaffold generate test_node"
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
+	fCmdCorrectPhp    = "rit scaffold generate test_php"
 	langGo            = "Go"
 	langJava          = "Java"
 	langNode          = "Node"
 	langPython        = "Python"
 	langShell         = "Shell"
+	langPhp           = "Php"
 )
 
 func TestCreator(t *testing.T) {
@@ -140,6 +142,22 @@ func TestCreator(t *testing.T) {
 					Lang:          langShell,
 					WorkspacePath: fullDir,
 					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_shell"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+			},
+			out: out{
+				err: nil,
+			},
+		},
+		{
+			name: "command correct-php",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdCorrectPhp,
+					Lang:          langPhp,
+					WorkspacePath: fullDir,
+					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_php"),
 				},
 				dir:  dirManager,
 				file: fileManager,
