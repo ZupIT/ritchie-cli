@@ -73,7 +73,7 @@ func printAndValidOutputEnvs(setup Setup) string {
 	resolveKey := func(name string) string { return strings.ToLower(name) }
 
 	if len(files) != len(setup.config.Outputs) {
-		return prompt.Red("Output file return wrong size of outputs")
+		return prompt.Red("Output dir not have all the outputs files")
 	}
 
 	for _, file := range files {

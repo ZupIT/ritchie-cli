@@ -76,6 +76,10 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 		return Setup{}, err
 	}
 
+	if err := os.Chdir(tmpBinDir); err != nil {
+		return Setup{}, err
+	}
+
 	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
 
 	s := Setup{
