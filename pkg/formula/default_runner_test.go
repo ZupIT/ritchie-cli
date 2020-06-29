@@ -122,8 +122,8 @@ func TestDefaultRunner_Run(t *testing.T) {
 func Test_printAndValidOutputDir(t *testing.T) {
 
 	tmpDir := os.TempDir() + "/Test_printAndValidOutputDir"
-	fileutil.CreateDirIfNotExists(tmpDir, 0755)
-	defer fileutil.RemoveDir(tmpDir)
+	_ = fileutil.CreateDirIfNotExists(tmpDir, 0755)
+	defer func() { _ = fileutil.RemoveDir(tmpDir) }()
 
 	type args struct {
 		setup Setup

@@ -53,7 +53,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	fmt.Printf(printAndValidOutputDir(setup))
+	fmt.Print(printAndValidOutputDir(setup))
 
 	if err := d.PostRun(setup, false); err != nil {
 		return err
@@ -93,7 +93,7 @@ func printAndValidOutputDir(setup Setup) string {
 		if !exist {
 			return prompt.Red("file:" + key + " not found in output dir")
 		}
-		if o.Print == true {
+		if o.Print {
 			result += fmt.Sprintf("%s=%s\n", key, v)
 		}
 	}
