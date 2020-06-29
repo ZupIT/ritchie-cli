@@ -77,7 +77,7 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 	}
 
 	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
-	if _, err := os.Create(OutputFileName); err != nil {
+	if err := ioutil.WriteFile(OutputFileName, []byte("{}"), 0755); err != nil {
 		return Setup{}, err
 	}
 

@@ -62,9 +62,12 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	return nil
 }
 
-func printOutEnvs(setup Setup) {
+func printOutEnvs(setup Setup){
 
-	f, _ := os.Open(setup.outputFilePath)
+	f, err := os.Open(setup.outputFilePath)
+	if err != nil {
+
+	}
 	b, _ := ioutil.ReadAll(f)
 	fOutputs := map[string]string{}
 	fOutputsPrint := map[string]string{}
@@ -87,7 +90,9 @@ func printOutEnvs(setup Setup) {
 		}
 	}
 
-	result, _ := json.Marshal(fOutputsPrint)
-	fmt.Printf(string(result))
+	if len(fOutputsPrint) > 0 {
+		result, _ := json.Marshal(fOutputsPrint)
+		fmt.Printf(string(result))
+	}
 
 }
