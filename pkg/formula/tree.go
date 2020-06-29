@@ -6,7 +6,7 @@ type Tree struct {
 	Commands api.Commands `json:"commands"`
 }
 
-type Manager interface {
+type TreeManager interface {
 	Tree() (map[string]Tree, error)
 	MergedTree(core bool) Tree
 }
