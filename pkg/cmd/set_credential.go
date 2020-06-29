@@ -104,28 +104,28 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	}
 	providerChoose, _ := s.List("Select your provider", credentialList)
 
-	if providerChoose == "New provider and credential" {
-		var newCredential credential.SingleCredential
-		newProvider, _ := s.Text("Enter new provider name:", true)
-		newCredential.Provider = newProvider
+	if providerChoose == "Add new" {
+		var c credential.SingleCredential
+		newProvider, _ := s.Text("Provider name:", true)
+		c.Provider = newProvider
 		credentialList = append(credentialList, newProvider)
 		addMoreCredentials := true
 		for addMoreCredentials {
 			var newInput credential.Input
-			label, _ := s.Text("Enter credentials name:", true)
+			label, _ := s.Text("Credential key/tag:", true)
 
 			typeList := []string{"text", "password"}
 			credentialType, _ := s.List("Want to input the credential as a:", typeList)
 
 			newInput.Type = credentialType
 			newInput.Label = label
-			newCredential.Inputs = append(newCredential.Inputs, newInput)
-			addMoreCredentials, _ = s.Bool("Add one more credential?", []string{"no", "yes"})
+			c.Inputs = append(c.Inputs, newInput)
+			addMoreCredentials, _ = s.Bool("Add one more?", []string{"no", "yes"})
 
 		}
-		credentials.SingleCredentials = append(credentials.SingleCredentials, newCredential)
+		credentials.SingleCredentials = append(credentials.SingleCredentials, c)
 
-		// add on json
+
 		idk, _ := json.Marshal(credentials)
 		home, _ := os.UserHomeDir()
 		providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", home)
@@ -136,11 +136,11 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 	providerChoose, _ = s.List("Select your provider", credentialList)
 
-	for _,t := range credentials.SingleCredentials {
-		if t.Provider == providerChoose{
-			for _, i := range t.Inputs {
+	for _,c := range credentials.SingleCredentials {
+		if c.Provider == providerChoose{
+			for _, i := range c.Inputs {
 				if i.Type == prompt.PasswordType {
-					cred[i.Label], _ = s.Password(i.Label)
+					cred[i.Label], _ = s.Password(i.Label)// ra du ken
 				} else {
 					cred[i.Label], _ = s.Text(i.Label, true)
 				}
@@ -153,6 +153,24 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 	return credDetail, nil
 }
+
+func ReadCredentialsJson() (credential.SingleCredentials, error) {
+	var credentials credential.SingleCredentials
+	home, _ := os.UserHomeDir()
+	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", home)
+	jsonFile, err := os.Open(providerDir)
+	if err != nil {
+		return credentials, err
+	}
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	err = json.Unmarshal(byteValue, &credentials)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return credentials, err
+}
+
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 	var credDetail credential.Detail
@@ -260,19 +278,4 @@ func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
 	return nil
 }
 
-func ReadCredentialsJson() (credential.SingleCredentials, error) {
-	var credentials credential.SingleCredentials
-	home, _ := os.UserHomeDir()
-	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", home)
-	jsonFile, err := os.Open(providerDir)
-	if err != nil {
-		return credentials, err
-	}
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	err = json.Unmarshal(byteValue, &credentials)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return credentials, err
-}
+
