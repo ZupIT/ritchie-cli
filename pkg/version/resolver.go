@@ -1,5 +1,6 @@
 package version
 
 type Resolver interface {
-	StableVersion(fromCache bool) (string, error)
+	StableVersion() (string, error)
+	UpdateCache() error
 }

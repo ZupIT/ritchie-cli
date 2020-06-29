@@ -209,7 +209,7 @@ func versionFlag(edition api.Edition) string {
 		FileUtilService:  fileutil.DefaultService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
-	latestVersion, err := resolver.StableVersion(true)
+	latestVersion, err := resolver.StableVersion()
 	if err == nil && latestVersion != Version {
 		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
 		return fmt.Sprintf(versionMsgWithLatestVersion, Version, edition, formattedLatestVersionMsg, BuildDate, runtime.Version())

@@ -35,8 +35,12 @@ func NewUpgradeCmd(e api.Edition, r version.Resolver, m upgrade.Manager, uf upgr
 
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
+		err := u.resolver.UpdateCache()
+		if err != nil {
+			return prompt.NewError(err.Error()+"\n")
+		}
 		upgradeUrl := u.Url(u.edition, u.resolver)
-		err := u.Run(upgradeUrl)
+		err = u.Run(upgradeUrl)
 		if err != nil {
 			return prompt.NewError(err.Error()+"\n")
 		}

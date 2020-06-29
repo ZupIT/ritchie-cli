@@ -15,7 +15,7 @@ type UrlFinder interface {
 type DefaultUrlFinder struct {}
 
 func (duf DefaultUrlFinder) Url(edition api.Edition, resolver version.Resolver) string {
-	stableVersion, err := resolver.StableVersion(false)
+	stableVersion, err := resolver.StableVersion()
 	if err != nil {
 		return ""
 	}

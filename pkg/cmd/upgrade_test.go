@@ -26,11 +26,16 @@ func (uf stubUrlFinder) Url(edition api.Edition, resolver version.Resolver) stri
 }
 
 type stubVersionResolver struct {
-	stableVersion func(fromCache bool) (string, error)
+	stableVersion func() (string, error)
+	updateCache func() error
 }
 
-func (vr stubVersionResolver) StableVersion(fromCache bool) (string, error) {
-	return vr.stableVersion(fromCache)
+func (vr stubVersionResolver) StableVersion() (string, error) {
+	return vr.stableVersion()
+}
+
+func (vr stubVersionResolver) UpdateCache() error {
+	return vr.updateCache()
 }
 
 func TestUpgradeCmd_runFunc(t *testing.T) {
@@ -50,8 +55,11 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 			fields: fields{
 				edition: "tingle",
 				resolver: stubVersionResolver{
-					func(fromCache bool) (string, error) {
+					func() (string, error) {
 						return "1.0.0", nil
+					},
+					func() error {
+						return nil
 					},
 				},
 				Manager: stubUpgradeManager{
@@ -68,8 +76,40 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Should return err",
+			name: "Should return err on UpdateCache",
 			fields: fields{
+				resolver: stubVersionResolver{
+					func() (string, error) {
+						return "", nil
+					},
+					func() error {
+						return errors.New("some error")
+					},
+				},
+				Manager: stubUpgradeManager{
+					func(upgradeUrl string) error {
+						return errors.New("some error")
+					},
+				},
+				UrlFinder: stubUrlFinder{
+					func(edition api.Edition, resolver version.Resolver) string {
+						return "any url"
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Should return err on Run",
+			fields: fields{
+				resolver: stubVersionResolver{
+					func() (string, error) {
+						return "", nil
+					},
+					func() error {
+						return nil
+					},
+				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
 						return errors.New("some error")
