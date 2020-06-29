@@ -121,19 +121,19 @@ SET BIN_WIN=%BINARY_NAME%-windows.exe
     SET CGO_ENABLED=0 
     SET GOOS=linux
     SET GOARCH=amd64
-    %GOBUILD% -tags release -o %DIST_LINUX_DIR%\%BIN_LINUX% -v %CMD_PATH% && xcopy ..\config.json %DIST_LINUX_DIR%\..\
+    %GOBUILD% -tags release -o %DIST_LINUX_DIR%\%BIN_LINUX% -v %CMD_PATH% && xcopy . %DIST_LINUX_DIR% /E /H /C /I && xcopy ..\config.json %DIST_LINUX_DIR%\..\
     GOTO DONE
 :darwin
     SET CGO_ENABLED=
 	SET GOOS=darwin
     SET GOARCH=amd64
-    %GOBUILD% -tags release -o %DIST_MAC_DIR%\%BIN_MAC% -v %CMD_PATH% && xcopy ..\config.json %DIST_MAC_DIR%\..\
+    %GOBUILD% -tags release -o %DIST_MAC_DIR%\%BIN_MAC% -v %CMD_PATH%  && xcopy . %DIST_MAC_DIR% /E /H /C /I && xcopy ..\config.json %DIST_MAC_DIR%\..\
     GOTO DONE
 :windows
     SET CGO_ENABLED=
 	SET GOOS=windows
     SET GOARCH=amd64
-    %GOBUILD% -tags release -o %DIST_WIN_DIR%\%BIN_WIN% -v %CMD_PATH% && xcopy ..\config.json %DIST_WIN_DIR%\..\
+    %GOBUILD% -tags release -o %DIST_WIN_DIR%\%BIN_WIN% -v %CMD_PATH% && xcopy . %DIST_WIN_DIR% /E /H /C /I && xcopy ..\config.json %DIST_WIN_DIR%\..\
     GOTO DONE
 :DONE`
 )
