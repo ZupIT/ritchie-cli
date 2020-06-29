@@ -166,7 +166,6 @@ func (d *Definition) BinFilePath(binPath, binName string) string {
 
 // OutputDir builds the output dir path from tmpBinDir
 func (d *Definition) OutputDir(tmpBinDir, u string) string {
-
 	return fmt.Sprintf(OutputDir, tmpBinDir, u)
 }
 
