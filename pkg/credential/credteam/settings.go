@@ -9,6 +9,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
@@ -19,7 +20,7 @@ const (
 )
 
 var (
-	ErrFieldsNotFound = errors.New("fields not found")
+	ErrFieldsNotFound = prompt.NewError("fields not found")
 )
 
 type Settings struct {
