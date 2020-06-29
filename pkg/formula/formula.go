@@ -31,8 +31,8 @@ const (
 	TreeCreatePathPattern     = "%s/tree/tree.json"
 	MakefileCreatePathPattern = "%s/%s"
 	Makefile                  = "Makefile"
-	OutputFileName            = "OUTPUT.RIT"
-	OutputEnv                 = "RIT_OUTPUT_FILE"
+	OutputDir                 = "%s/%s-output"
+	OutputEnv                 = "RIT_OUTPUT_DIR"
 )
 
 // Config type that represents formula config
@@ -92,7 +92,7 @@ type Setup struct {
 	tmpDir         string
 	tmpBinDir      string
 	tmpBinFilePath string
-	outputFilePath string
+	tmpOutputDir   string
 	config         Config
 	containerId    string
 }
@@ -162,6 +162,12 @@ func (d *Definition) BinPath(formula string) string {
 // BinFilePath builds the bin file path from binPath and binName
 func (d *Definition) BinFilePath(binPath, binName string) string {
 	return fmt.Sprintf("%s/%s", binPath, binName)
+}
+
+// OutputDir builds the output dir path from tmpBinDir
+func (d *Definition) OutputDir(tmpBinDir, u string) string {
+
+	return fmt.Sprintf(OutputDir, tmpBinDir, u)
 }
 
 // BundleURL builds the bundle url

@@ -1,11 +1,11 @@
 package formula
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -32,7 +32,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	cmd.Env = os.Environ()
 	pwdEnv := fmt.Sprintf(EnvPattern, PwdEnv, setup.pwd)
 	cPwdEnv := fmt.Sprintf(EnvPattern, CPwdEnv, setup.pwd)
-	outputEnv := fmt.Sprintf(EnvPattern, OutputEnv, setup.outputFilePath)
+	outputEnv := fmt.Sprintf(EnvPattern, OutputEnv, setup.tmpOutputDir)
 	cmd.Env = append(cmd.Env, pwdEnv)
 	cmd.Env = append(cmd.Env, cPwdEnv)
 	cmd.Env = append(cmd.Env, outputEnv)
@@ -53,7 +53,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	printOutEnvs(setup)
+	fmt.Printf(printAndValidOutputEnvs(setup))
 
 	if err := d.PostRun(setup, false); err != nil {
 		return err
@@ -62,37 +62,40 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	return nil
 }
 
-func printOutEnvs(setup Setup){
+func printAndValidOutputEnvs(setup Setup) string {
 
-	f, err := os.Open(setup.outputFilePath)
+	files, err := ioutil.ReadDir(setup.tmpOutputDir)
 	if err != nil {
-
+		return prompt.Red("Fail to read output dir")
 	}
-	b, _ := ioutil.ReadAll(f)
 	fOutputs := map[string]string{}
-	fOutputsPrint := map[string]string{}
-	if err := json.Unmarshal(b, &fOutputs); err != nil {
-		prompt.Error("Fail to read json from output file")
-		return
+
+	resolveKey := func(name string) string { return strings.ToLower(name) }
+
+	if len(files) != len(setup.config.Outputs) {
+		return prompt.Red("Output file return wrong size of outputs")
 	}
 
-	if len(fOutputs) != len(setup.config.Outputs) {
-		prompt.Error("Output file return wrong size of outputs")
-		return
+	for _, file := range files {
+		fName := fmt.Sprintf("%s/%s", setup.tmpOutputDir, file.Name())
+		key := resolveKey(file.Name())
+		f, err := ioutil.ReadFile(fName)
+		if err != nil {
+			return prompt.Red("fail to read file: " + fName)
+		}
+		fOutputs[key] = string(f)
 	}
+
+	var result string
 	for _, o := range setup.config.Outputs {
-		v, exist := fOutputs[o.Name]
+		key := resolveKey(o.Name)
+		v, exist := fOutputs[key]
 		if !exist {
-			prompt.Error("Should return " + o.Name + " output on output file")
+			return prompt.Red("file:" + key + " not found in output dir")
 		}
 		if o.Print == true {
-			fOutputsPrint[o.Name] = v
+			result += fmt.Sprintf("%s=%s\n", key, v)
 		}
 	}
-
-	if len(fOutputsPrint) > 0 {
-		result, _ := json.Marshal(fOutputsPrint)
-		fmt.Printf(string(result))
-	}
-
+	return result
 }

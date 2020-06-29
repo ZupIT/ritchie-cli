@@ -71,14 +71,12 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 		return Setup{}, err
 	}
 
-	if err := os.Chdir(tmpBinDir); err != nil {
+	tmpOutputDir, err := createOutputDir(tmpBinDir, def)
+	if err != nil {
 		return Setup{}, err
 	}
 
 	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
-	if err := ioutil.WriteFile(OutputFileName, []byte("{}"), 0755); err != nil {
-		return Setup{}, err
-	}
 
 	s := Setup{
 		pwd:            pwd,
@@ -88,9 +86,18 @@ func (d DefaultSetup) Setup(def Definition) (Setup, error) {
 		tmpBinDir:      tmpBinDir,
 		tmpBinFilePath: tmpBinFilePath,
 		config:         config,
-		outputFilePath: fmt.Sprintf("%s/%s", tmpBinDir, OutputFileName),
+		tmpOutputDir:   tmpOutputDir,
 	}
 	return s, nil
+}
+
+func createOutputDir(tmpBinDir string, def Definition) (string, error) {
+	u := uuid.New().String()
+	tmpOutputDir := def.OutputDir(tmpBinDir, u)
+	if err := fileutil.CreateDirIfNotExists(tmpOutputDir, 0755); err != nil {
+		return "", err
+	}
+	return tmpOutputDir, nil
 }
 
 func (d DefaultSetup) loadConfig(formulaPath string, def Definition) (Config, error) {
