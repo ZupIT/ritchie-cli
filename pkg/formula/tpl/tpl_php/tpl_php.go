@@ -5,13 +5,11 @@ const (
 
 include '{{bin-name}}/{{bin-name}}.php';
 
-	echo 'PHP formula start\n';
+$input1 = getenv('SAMPLE_TEXT');
+$input2 = getenv('SAMPLE_LIST');
+$input3 = getenv('SAMPLE_BOOL');
 
-	$input1 = getenv('SAMPLE_TEXT');
-	$input2 = getenv('SAMPLE_LIST');
-	$input3 = getenv('SAMPLE_BOOL');
-	
-	Run($input1, $input2, $input3);
+Run($input1, $input2, $input3);
 
 ?>
 `
@@ -32,17 +30,14 @@ build:
 	rm $(BINARY_NAME_UNIX)`
 
 	Dockerfile = `
-FROM php:7.4-cli
+FROM php:latest
 
 COPY . .
 
 RUN chmod +x set_umask.sh
-
-WORKDIR /app
-
+RUN mkdir app
 ENTRYPOINT ["/set_umask.sh"]
-
-CMD ["php", "./index.php"]`
+CMD ["php /index.php"]`
 
 Run = `#!/bin/sh
 
