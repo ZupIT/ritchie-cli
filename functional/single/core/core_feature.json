@@ -153,6 +153,11 @@
                 "action":"sendkey"
             },
             {
+                "key":"Input type:",
+                "value":"Prompt (manual entry)",
+                "action":"select"
+            },
+            {
                 "key":"Type your credential using the format",
                 "value":"email=email@email.com",
                 "action":"sendkey"
