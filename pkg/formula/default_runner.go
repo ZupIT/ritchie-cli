@@ -67,6 +67,7 @@ func printOutEnvs(setup Setup) {
 	f, _ := os.Open(setup.outputFilePath)
 	b, _ := ioutil.ReadAll(f)
 	fOutputs := map[string]string{}
+	fOutputsPrint := map[string]string{}
 	if err := json.Unmarshal(b, &fOutputs); err != nil {
 		prompt.Error("Fail to read json from output file")
 		return
@@ -82,7 +83,11 @@ func printOutEnvs(setup Setup) {
 			prompt.Error("Should return " + o.Name + " output on output file")
 		}
 		if o.Print == true {
-			fmt.Printf("%s=%s\n", o.Name, v)
+			fOutputsPrint[o.Name] = v
 		}
 	}
+
+	result, _ := json.Marshal(fOutputsPrint)
+	fmt.Printf(string(result))
+
 }
