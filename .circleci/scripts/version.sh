@@ -12,5 +12,4 @@ elif expr "$CIRCLE_BRANCH" : '^beta' >/dev/null; then
   export RELEASE_VERSION=$(echo "$VERSION_PLACEHOLDER" | sed "s/PLACEHOLDER/.pre.${BETA_VERSION}/")
 else
   export RELEASE_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
-  echo ""
 fi
