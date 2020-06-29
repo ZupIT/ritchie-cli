@@ -27,7 +27,7 @@ func (PostRunnerManager) PostRun(p Setup, docker bool) error {
 
 	defer removeWorkDir(p.tmpDir)
 
-	if err := RemoveTmpOutPutDir(p); err != nil {
+	if err := RemoveTmpOutputDir(p); err != nil {
 		return err
 	}
 
@@ -43,7 +43,7 @@ func (PostRunnerManager) PostRun(p Setup, docker bool) error {
 	return nil
 }
 
-func RemoveTmpOutPutDir(p Setup) error {
+func RemoveTmpOutputDir(p Setup) error {
 	return fileutil.RemoveDir(p.tmpOutputDir)
 }
 
