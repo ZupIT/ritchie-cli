@@ -29,7 +29,9 @@ const (
 	nameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
-var ErrRepeatedCommand = fmt.Errorf(prompt.Red, "this command already exists")
+var (
+	ErrRepeatedCommand = prompt.NewError("this command already exists")
+)
 
 type CreateManager struct {
 	treeManager tree.Manager

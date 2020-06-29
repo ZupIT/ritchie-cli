@@ -44,7 +44,7 @@ func (scenario *Scenario) runStdinForWindows() (bytes.Buffer, error) {
 	return b2, err
 }
 
-func setUpRitWin() {
+func setUpRitSingleWin() {
 	fmt.Println("Running Setup for Windows..")
 	args := []string{"-Command", "Write-Output", "'{\"passphrase\":\"test\"}'", "|", "rit", "init", "--stdin"}
 	cmd := exec.Command("powershell", args...)

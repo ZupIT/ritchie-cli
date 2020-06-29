@@ -1,10 +1,12 @@
 package security
 
-import "errors"
+import (
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
 
 var (
 	// ErrPassphraseIsRequired error for required passphrase
-	ErrPassphraseIsRequired = errors.New("passphrase is required")
+	ErrPassphraseIsRequired = prompt.NewError("passphrase is required")
 )
 
 // Passphrase represents a security code defined by the user.

@@ -20,9 +20,9 @@ import (
 )
 
 var (
-	ErrNotAllowedCharacter = fmt.Errorf(prompt.Red, `not allowed character on formula name \/,><@-`)
-	ErrDontStartWithRit    = fmt.Errorf(prompt.Red, "Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
-	ErrTooShortCommand     = fmt.Errorf(prompt.Red, "Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrNotAllowedCharacter = prompt.NewError(`not allowed character on formula name \/,><@-`)
+	ErrDontStartWithRit    = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrTooShortCommand     = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 )
 
 const notAllowedChars = `\/><,@-`
@@ -139,13 +139,13 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 }
 
 func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath string) {
-	buildInfo := fmt.Sprintf(prompt.Teal, "Creating and building formula...")
+	buildInfo := prompt.Bold("Creating and building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
 
 	if err := c.formula.Create(cf); err != nil {
-		errorMsg := fmt.Sprintf(prompt.Red, err)
-		s.Error(errors.New(errorMsg))
+		err := prompt.NewError(err.Error())
+		s.Error(err)
 		return
 	}
 
@@ -157,8 +157,8 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 	}
 
 	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
-		errorMsg := fmt.Sprintf(prompt.Red, err)
-		s.Error(errors.New(errorMsg))
+		err := prompt.NewError(err.Error())
+		s.Error(err)
 		return
 	}
 
@@ -168,7 +168,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 
 func createSuccess(s *spinner.Spinner, lang string) {
 	msg := fmt.Sprintf("✔ %s formula successfully created!", lang)
-	success := fmt.Sprintf(prompt.Green, msg)
+	success := prompt.Green(msg)
 	s.Success(success)
 }
 
