@@ -94,33 +94,7 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	var credDetail credential.Detail
-
-	provider, err := s.Text("Provider: ", true)
-	if err != nil {
-		return credDetail, err
-	}
-
 	cred := credential.Credential{}
-	addMore := true
-	for addMore {
-		kv, err := s.Text("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
-		if err != nil {
-			return credDetail, err
-		}
-
-		pair := strings.Split(kv, "=")
-		if s := validate(pair); s != "" {
-			prompt.Error(s)
-			continue
-		}
-
-		cred[pair[0]] = pair[1]
-
-		addMore, err = s.Bool("Add more fields?", []string{"yes", "no"})
-		if err != nil {
-			return credDetail, err
-		}
-	}
 
 	credentials, _ := ReadCredentialsJson()
 
@@ -128,56 +102,56 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	for _, p := range credentials.SingleCredentials {
 		credentialList = append(credentialList, p.Provider)
 	}
-	chooseCredential, _ := s.List("Select your provider", credentialList)
+	providerChoose, _ := s.List("Select your provider", credentialList)
 
-	if chooseCredential == "Add a new" {
+	if providerChoose == "New provider and credential" {
 		var newCredential credential.SingleCredential
-		newProvider, _ := s.Text("Enter new provider name", true)
+		newProvider, _ := s.Text("Enter new provider name:", true)
 		newCredential.Provider = newProvider
+		credentialList = append(credentialList, newProvider)
 		addMoreCredentials := true
 		for addMoreCredentials {
 			var newInput credential.Input
-			label, _ := s.Text("Enter credentials name", true)
+			label, _ := s.Text("Enter credentials name:", true)
 
 			typeList := []string{"text", "password"}
-			credentialType, _ := s.List("want to input the credential as a", typeList)
+			credentialType, _ := s.List("Want to input the credential as a:", typeList)
 
 			newInput.Type = credentialType
 			newInput.Label = label
 			newCredential.Inputs = append(newCredential.Inputs, newInput)
 			addMoreCredentials, _ = s.Bool("Add one more credential?", []string{"no", "yes"})
-		}
 
+		}
 		credentials.SingleCredentials = append(credentials.SingleCredentials, newCredential)
 
-		//add on json
-		idk, _ := json.Marshal(credentials.SingleCredentials)
+		// add on json
+		idk, _ := json.Marshal(credentials)
 		home, _ := os.UserHomeDir()
 		providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", home)
-		err = ioutil.WriteFile(providerDir, idk, 0644)
+		_ = ioutil.WriteFile(providerDir, idk, 0644)
 		
 	}
 
-	credDetail.Service = provider
+
+	providerChoose, _ = s.List("Select your provider", credentialList)
+
+	for _,t := range credentials.SingleCredentials {
+		if t.Provider == providerChoose{
+			for _, i := range t.Inputs {
+				if i.Type == prompt.PasswordType {
+					cred[i.Label], _ = s.Password(i.Label)
+				} else {
+					cred[i.Label], _ = s.Text(i.Label, true)
+				}
+			}
+		}
+	}
+
+	credDetail.Service = providerChoose
 	credDetail.Credential = cred
 
 	return credDetail, nil
-}
-
-func validate(pair []string) string {
-	if len(pair) < 2 {
-		return "Invalid key value credential"
-	}
-
-	if strings.TrimSpace(pair[0]) == "" {
-		return "The key must not be empty."
-	}
-
-	if strings.TrimSpace(pair[1]) == "" {
-		return "The value must not be empty."
-	}
-
-	return ""
 }
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
