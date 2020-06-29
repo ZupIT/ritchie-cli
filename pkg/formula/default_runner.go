@@ -76,14 +76,14 @@ func printAndValidOutputDir(setup Setup) string {
 		return prompt.Red("Output dir not have all the outputs files")
 	}
 
-	for _, file := range files {
-		fName := fmt.Sprintf("%s/%s", setup.tmpOutputDir, file.Name())
-		key := resolveKey(file.Name())
-		f, err := ioutil.ReadFile(fName)
+	for _, f := range files {
+		fName := fmt.Sprintf("%s/%s", setup.tmpOutputDir, f.Name())
+		key := resolveKey(f.Name())
+		b, err := ioutil.ReadFile(fName)
 		if err != nil {
 			return prompt.Red("fail to read file: " + fName)
 		}
-		fOutputs[key] = string(f)
+		fOutputs[key] = string(b)
 	}
 
 	var result string
