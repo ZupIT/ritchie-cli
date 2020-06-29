@@ -28,9 +28,6 @@ RUN mkdir app
 ENTRYPOINT ["./set_umask.sh"]
 CMD ["./{{bin-name}}.sh"]`
 
-	Umask = `#!/bin/sh
-umask 0011
-$1`
 
 	File = `#!/bin/sh
 run() {

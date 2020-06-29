@@ -106,4 +106,8 @@ init() {
 
 init
 `
+
+	Umask = `#!/bin/sh
+umask 0011
+$1`
 )
