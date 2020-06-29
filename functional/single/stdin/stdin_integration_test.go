@@ -17,7 +17,7 @@ func TestRitSingleStdin(t *testing.T) {
 
 var _ = Describe("RitStdin", func() {
 	BeforeSuite(func() {
-		functional.RitInit()
+		functional.RitSingleInit()
 	})
 
 	scenariosStdin := functional.LoadScenarios("stdin_feature.json")

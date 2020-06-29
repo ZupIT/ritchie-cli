@@ -12,9 +12,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var (
-	ErrNotAllowedCharacter = fmt.Errorf(prompt.Red, `not allowed character on formula name \/,><@-`)
-)
+var ErrNotAllowedCharacter = prompt.NewError(`not allowed character on formula name \/,><@-`)
 
 const notAllowedChars = `\/><,@-`
 
@@ -58,7 +56,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "Python", "Shell"})
+		lang, err := c.List("Choose the language: ", []string{"Go", "Java", "Node", "PHP", "Python", "Shell"})
 		if err != nil {
 			return err
 		}

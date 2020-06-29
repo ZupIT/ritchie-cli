@@ -16,7 +16,7 @@ func TestRitSingleInit(t *testing.T) {
 	RunSpecs(t, "Rit Suite Init")
 }
 
-var _ = Describe("RitInit", func() {
+var _ = Describe("RitSingleInit", func() {
 	BeforeEach(func() {
 		functional.RitClearConfigs()
 	})
@@ -45,7 +45,7 @@ var _ = Describe("RitInit", func() {
 
 })
 
-var _ = Describe("RitInit", func() {
+var _ = Describe("RitSingleInit", func() {
 	BeforeEach(func() {
 		functional.RitClearConfigs()
 	})
@@ -65,7 +65,7 @@ var _ = Describe("RitInit", func() {
 
 })
 
-var _ = Describe("RitInit STDIN Invalid", func() {
+var _ = Describe("RitSingleInit STDIN Invalid", func() {
 	BeforeEach(func() {
 		functional.RitClearConfigs()
 	})
