@@ -19,7 +19,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -289,7 +288,7 @@ func createDockerfile(pkg, dir, tpl string) error {
 
 func createUmask(dir string) error {
 	uMaskFile := fmt.Sprintf("%s/set_umask.sh", dir)
-	return fileutil.WriteFile(uMaskFile, []byte(template_shell.Umask))
+	return fileutil.WriteFile(uMaskFile, []byte(templates.Umask))
 }
 
 func createGoModFile(dir, pkg string) error {
@@ -351,7 +350,7 @@ func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, 
 						Bin:    fmt.Sprintf("%s-${so}", fn),
 						LBin:   fmt.Sprintf("%s-${so}", fn),
 						MBin:   fmt.Sprintf("%s-${so}", fn),
-						WBin:   fmt.Sprintf("%s-${so}.exe", fn),
+						WBin:   fmt.Sprintf("%s-${so}", fn),
 						Bundle: "${so}.zip",
 						Config: "config.json",
 					},
