@@ -70,7 +70,7 @@ func printAndValidOutputEnvs(setup Setup) string {
 	}
 	fOutputs := map[string]string{}
 
-	resolveKey := func(name string) string { return strings.ToLower(name) }
+	resolveKey := func(name string) string { return strings.ToUpper(name) }
 
 	if len(files) != len(setup.config.Outputs) {
 		return prompt.Red("Output dir not have all the outputs files")
