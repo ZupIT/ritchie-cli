@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,6 +19,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
@@ -34,7 +34,7 @@ const (
 
 var (
 	// Errors
-	ErrNoRepoToShow = errors.New("no repositories to show")
+	ErrNoRepoToShow = prompt.NewError("no repositories to show")
 )
 
 type Manager struct {
@@ -226,7 +226,7 @@ func (dm Manager) loadTreeFile(r formula.Repository) error {
 
 	session, err := dm.sessionManager.Current()
 	if err != nil {
-		return errors.New("error restore current session")
+		return prompt.NewError("error restore current session")
 	}
 	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
 	if err != nil {

@@ -2,7 +2,6 @@ package runner
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -21,13 +20,13 @@ import (
 )
 
 var (
-	ErrFormulaBinNotFound        = errors.New("formula bin not found")
-	ErrConfigFileNotFound        = errors.New("config file not found")
-	ErrUnknownFormulaDownload    = errors.New("unknown error when downloading your formula")
-	ErrUnknownConfigFileDownload = errors.New("unknown error when downloading your config file")
-	ErrCreateReqBundle           = errors.New("failed to create request for bundle download")
-	ErrCreateReqConfig           = errors.New("failed to create request for config download")
-	ErrInvalidRepoUrl            = errors.New("RepoURL is invalid inside tree.json")
+	ErrInvalidRepoUrl            = prompt.NewError("RepoURL is invalid inside tree.json")
+	ErrFormulaBinNotFound        = prompt.NewError("formula bin not found")
+	ErrConfigFileNotFound        = prompt.NewError("config file not found")
+	ErrUnknownFormulaDownload    = prompt.NewError("unknown error when downloading your formula")
+	ErrUnknownConfigFileDownload = prompt.NewError("unknown error when downloading your config file")
+	ErrCreateReqBundle           = prompt.NewError("failed to create request for bundle download")
+	ErrCreateReqConfig           = prompt.NewError("failed to create request for config download")
 )
 
 type DefaultSetup struct {

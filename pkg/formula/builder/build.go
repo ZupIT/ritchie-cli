@@ -19,7 +19,7 @@ import (
 const commonsDir = "commons"
 
 var (
-	msgBuildOnWindows = fmt.Sprintf(prompt.Yellow, "This formula cannot be built on Windows. Just Golang formulas are available!")
+	msgBuildOnWindows = prompt.Yellow("This formula cannot be built on Windows. Just Golang formulas are available!")
 	ErrBuildOnWindows = errors.New(msgBuildOnWindows)
 )
 

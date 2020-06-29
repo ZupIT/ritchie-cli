@@ -8,4 +8,5 @@ const (
 	Json       = ".json"
 	Python     = ".py"
 	Shell      = ".sh"
+	Php        = ".php"
 )

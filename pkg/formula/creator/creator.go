@@ -29,7 +29,9 @@ const (
 	nameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
-var ErrRepeatedCommand = fmt.Errorf(prompt.Red, "this command already exists")
+var (
+	ErrRepeatedCommand = prompt.NewError("this command already exists")
+)
 
 type CreateManager struct {
 	treeManager tree.Manager
@@ -213,6 +215,11 @@ func (c CreateManager) createSrcFiles(dir, pkg, lang string) error {
 	case NodeLang:
 		node := NewNode(c)
 		if err := node.Create(srcDir, pkg, pkgDir, dir); err != nil {
+			return err
+		}
+	case PhpLang:
+		php := NewPhp(c)
+		if err := php.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case PythonLang:

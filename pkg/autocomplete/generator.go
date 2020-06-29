@@ -1,13 +1,12 @@
 package autocomplete
 
 import (
-	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 )
 
@@ -29,14 +28,14 @@ const (
 
 var (
 	supportedAutocomplete = []string{bash, zsh}
-	ErrNotSupported       = errors.New("autocomplete for this terminal is not supported")
+	ErrNotSupported       = prompt.NewError("autocomplete for this terminal is not supported")
 )
 
 type GeneratorManager struct {
-	treeManager tree.Manager
+	treeManager formula.TreeManager
 }
 
-func NewGenerator(tm tree.Manager) GeneratorManager {
+func NewGenerator(tm formula.TreeManager) GeneratorManager {
 	return GeneratorManager{tm}
 }
 

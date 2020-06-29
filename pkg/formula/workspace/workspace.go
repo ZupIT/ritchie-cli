@@ -2,8 +2,6 @@ package workspace
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"path"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -12,12 +10,9 @@ import (
 )
 
 var (
-	msgErrMakefileNotFound = fmt.Sprintf(prompt.Red, "MakefilePath not found, a valid formula workspace must have a MakefilePath")
-	msgErrTreeJsonNotFound = fmt.Sprintf(prompt.Red, "tree.json not found, a valid formula workspace must have a tree.json")
-	msgErrInvalidWorkspace = fmt.Sprintf(prompt.Red, "the formula workspace does not exist, please enter a valid workspace")
-	ErrInvalidWorkspace    = errors.New(msgErrInvalidWorkspace)
-	ErrTreeJsonNotFound    = errors.New(msgErrTreeJsonNotFound)
-	ErrMakefileNotFound    = errors.New(msgErrMakefileNotFound)
+	ErrInvalidWorkspace = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
+	ErrTreeJsonNotFound = prompt.NewError("tree.json not found, a valid formula workspace must have a tree.json")
+	ErrMakefileNotFound = prompt.NewError("MakefilePath not found, a valid formula workspace must have a MakefilePath")
 )
 
 type Manager struct {
