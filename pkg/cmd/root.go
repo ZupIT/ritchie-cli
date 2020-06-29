@@ -211,7 +211,7 @@ func versionFlag(edition api.Edition) string {
 	}
 	latestVersion, err := resolver.StableVersion(true)
 	if err == nil && latestVersion != Version {
-		formattedLatestVersionMsg := fmt.Sprintf(prompt.Yellow, fmt.Sprintf(latestVersionMsg, latestVersion))
+		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
 		return fmt.Sprintf(versionMsgWithLatestVersion, Version, edition, formattedLatestVersionMsg, BuildDate, runtime.Version())
 	}
 	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
