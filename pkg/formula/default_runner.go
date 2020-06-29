@@ -53,7 +53,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 		return err
 	}
 
-	fmt.Printf(printAndValidOutputEnvs(setup))
+	fmt.Printf(printAndValidOutputDir(setup))
 
 	if err := d.PostRun(setup, false); err != nil {
 		return err
@@ -62,7 +62,7 @@ func (d DefaultRunner) Run(def Definition, inputType api.TermInputType) error {
 	return nil
 }
 
-func printAndValidOutputEnvs(setup Setup) string {
+func printAndValidOutputDir(setup Setup) string {
 
 	files, err := ioutil.ReadDir(setup.tmpOutputDir)
 	if err != nil {

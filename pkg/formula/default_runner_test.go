@@ -119,9 +119,9 @@ func TestDefaultRunner_Run(t *testing.T) {
 	}
 }
 
-func Test_printAndValidOutputEnvs(t *testing.T) {
+func Test_printAndValidOutputDir(t *testing.T) {
 
-	tmpDir := os.TempDir() + "/Test_printAndValidOutputEnvs"
+	tmpDir := os.TempDir() + "/Test_printAndValidOutputDir"
 	fileutil.CreateDirIfNotExists(tmpDir, 0755)
 	defer fileutil.RemoveDir(tmpDir)
 
@@ -256,8 +256,8 @@ func Test_printAndValidOutputEnvs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := printAndValidOutputEnvs(tt.args.setup); got != tt.want {
-				t.Errorf("printAndValidOutputEnvs() = %v, want %v", got, tt.want)
+			if got := printAndValidOutputDir(tt.args.setup); got != tt.want {
+				t.Errorf("printAndValidOutputDir() = %v, want %v", got, tt.want)
 			}
 		})
 	}
