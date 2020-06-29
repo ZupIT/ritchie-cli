@@ -2,6 +2,7 @@ package formula
 
 import (
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 func TestDefaultRunner_Run(t *testing.T) {
@@ -28,7 +30,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 		envMock  envResolverMock
 		inText   inputMock
 		inBool   inputMock
-		inPass inputMock
+		inPass   inputMock
 		preMock  *preRunnerMock
 		postMock *postRunnerMock
 	}
@@ -44,7 +46,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{text: ""},
 				inBool:  inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
+				inPass:  inputMock{text: "******"},
 			},
 			want: nil,
 		},
@@ -54,7 +56,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{text: "ok"},
 				inBool:  inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
+				inPass:  inputMock{text: "******"},
 				preMock: &preRunnerMock{
 					setup: Setup{},
 					error: ErrFormulaBinNotFound,
@@ -68,7 +70,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock: envResolverMock{in: "ok"},
 				inText:  inputMock{err: errors.New("fail to resolve input")},
 				inBool:  inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
+				inPass:  inputMock{text: "******"},
 			},
 			want: errors.New("fail to resolve input"),
 		},
@@ -78,7 +80,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				envMock:  envResolverMock{in: "ok"},
 				inText:   inputMock{text: "ok"},
 				inBool:   inputMock{boolean: true},
-				inPass: inputMock{text: "******"},
+				inPass:   inputMock{text: "******"},
 				postMock: &postRunnerMock{error: errors.New("error in remove dir")},
 			},
 			want: errors.New("error in remove dir"),
@@ -113,6 +115,150 @@ func TestDefaultRunner_Run(t *testing.T) {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
 			}
 
+		})
+	}
+}
+
+func Test_printAndValidOutputEnvs(t *testing.T) {
+
+	tmpDir := os.TempDir() + "/Test_printAndValidOutputEnvs"
+	fileutil.CreateDirIfNotExists(tmpDir, 0755)
+	defer fileutil.RemoveDir(tmpDir)
+
+	type args struct {
+		setup Setup
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Return empty string when dir is empty",
+			args: args{
+				setup: Setup{
+					config: Config{Outputs: []Output{}},
+					tmpOutputDir: func() string {
+						basePath := "/t-rit-return-empty"
+						path := tmpDir + basePath
+						_ = fileutil.CreateDirIfNotExists(path, 0755)
+						return path
+					}(),
+				},
+			},
+			want: "",
+		},
+		{
+			name: "Return only the outputs with printValue",
+			args: args{
+				setup: Setup{
+					config: Config{Outputs: []Output{
+						{
+							Name:  "X",
+							Print: true,
+						},
+						{
+							Name:  "Y",
+							Print: false,
+						},
+						{
+							Name:  "Z",
+							Print: true,
+						},
+					}},
+					tmpOutputDir: func() string {
+						basePath := "/t-rit-printed"
+						path := tmpDir + basePath
+						_ = fileutil.CreateDirIfNotExists(path, 0755)
+						_ = ioutil.WriteFile(path+"/x", []byte("1"), 0755)
+						_ = ioutil.WriteFile(path+"/y", []byte("2"), 0755)
+						_ = ioutil.WriteFile(path+"/z", []byte("3"), 0755)
+						return path
+					}(),
+				},
+			},
+			want: "X=1\nZ=3\n",
+		},
+		{
+			name: "Return Red when output dir not have all files",
+			args: args{
+				setup: Setup{
+					config: Config{Outputs: []Output{
+						{
+							Name:  "X",
+							Print: true,
+						},
+						{
+							Name:  "Y",
+							Print: false,
+						},
+						{
+							Name:  "Z",
+							Print: true,
+						},
+					}},
+					tmpOutputDir: func() string {
+						basePath := "/t-rit-err-all-files"
+						path := tmpDir + basePath
+						_ = fileutil.CreateDirIfNotExists(path, 0755)
+						_ = ioutil.WriteFile(path+"/x", []byte("1"), 0755)
+						_ = ioutil.WriteFile(path+"/z", []byte("3"), 0755)
+						return path
+					}(),
+				},
+			},
+			want: prompt.Red("Output dir not have all the outputs files"),
+		},
+		{
+			name: "Return Red when some output file is missing",
+			args: args{
+				setup: Setup{
+					config: Config{Outputs: []Output{
+						{
+							Name:  "X",
+							Print: true,
+						},
+						{
+							Name:  "Y",
+							Print: false,
+						},
+						{
+							Name:  "Z",
+							Print: true,
+						},
+					}},
+					tmpOutputDir: func() string {
+						basePath := "/t-rit-err-missing-files"
+						path := tmpDir + basePath
+						_ = fileutil.CreateDirIfNotExists(path, 0755)
+						_ = ioutil.WriteFile(path+"/x", []byte("1"), 0755)
+						_ = ioutil.WriteFile(path+"/z", []byte("3"), 0755)
+						_ = ioutil.WriteFile(path+"/w", []byte("3"), 0755)
+						return path
+					}(),
+				},
+			},
+			want: prompt.Red("file:Y not found in output dir"),
+		},
+		{
+			name: "Return Err when fail to read dir",
+			args: args{
+				setup: Setup{
+					config: Config{Outputs: []Output{}},
+					tmpOutputDir: func() string {
+						basePath := "/not-created-dir"
+						return basePath
+					}(),
+				},
+			},
+			want: prompt.Red("Fail to read output dir"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := printAndValidOutputEnvs(tt.args.setup); got != tt.want {
+				t.Errorf("printAndValidOutputEnvs() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
