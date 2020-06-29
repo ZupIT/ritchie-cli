@@ -30,18 +30,22 @@ func TestNewTeamSetCredentialCmd(t *testing.T) {
 }
 
 func TestNewSingleSetCredentialCmdWithEntryArchive(t *testing.T) {
-	errInput := errors.New("some error of input")
+	errPath := errors.New("some error of path")
 	cmd := NewSingleSetCredentialCmd(
 		credSetterMock{},
-		inputTextMock{},
+		inputTextCustomMock{
+			text: func(name string, required bool) (string, error) {
+				if name == MsgTypeEntryPath {
+					return "/test", errPath
+				}
+				return "some_path", nil
+			},
+		},
 		inputFalseMock{},
 		inputListCustomMock{
 			list: func(name string, list []string) (string, error) {
 				if name == MsgTypeEntry {
-					return EntriesTypeCredentialFile, errInput
-				}
-				if name == MsgTypeEntryPath {
-					return "/test", errInput
+					return EntriesTypeCredentialFile, nil
 				}
 				return "some_input", nil
 			},
@@ -53,7 +57,7 @@ func TestNewSingleSetCredentialCmdWithEntryArchive(t *testing.T) {
 		t.Errorf("NewTeamSetCredentialCmd got %v", cmd)
 	}
 
-	if err := cmd.Execute(); err != errInput {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	if err := cmd.Execute(); err != errPath {
+		t.Errorf("%s = '%v', want '%v'", cmd.Use, err, errPath)
 	}
 }
