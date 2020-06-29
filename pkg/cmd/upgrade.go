@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -40,7 +38,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		upgradeUrl := u.Url(u.edition, u.resolver)
 		err := u.Run(upgradeUrl)
 		if err != nil {
-			return fmt.Errorf(prompt.Red, err.Error()+"\n")
+			return prompt.NewError(err.Error()+"\n")
 		}
 		prompt.Success("Rit upgraded with success")
 		return nil

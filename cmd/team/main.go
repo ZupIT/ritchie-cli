@@ -238,7 +238,7 @@ func sendMetrics(sm session.DefaultManager, sf server.Finder) {
 func makeHttpClient(finder server.Finder) *http.Client {
 	c, err := finder.Find()
 	if err != nil {
-		fmt.Println(fmt.Errorf(prompt.Red, "error load cli config, try run \"rit init\""))
+		fmt.Println(prompt.NewError("error load cli config, try run \"rit init\""))
 		os.Exit(1)
 	}
 	client := &http.Client{}
