@@ -240,7 +240,7 @@ func sendMetrics(sm session.DefaultManager, sf server.Finder) {
 func makeHttpClient(finder server.Finder) *http.Client {
 	c, err := finder.Find()
 	if err != nil {
-		fmt.Println(fmt.Errorf(prompt.Red, "error load cli config, try run \"rit init\""))
+		fmt.Println(prompt.NewError("error load cli config, try run \"rit init\""))
 		os.Exit(1)
 	}
 	client := &http.Client{}
@@ -255,10 +255,10 @@ type Dialer func(ctx context.Context, network, addr string) (net.Conn, error)
 func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 	return func(ctx context.Context, network, addr string) (net.Conn, error) {
 		c, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: skipCAVerification})
+		if err != nil {
+			return c, err
+		}
 		if addr == pAddr {
-			if err != nil {
-				return c, err
-			}
 			connState := c.ConnectionState()
 			keyPinValid := false
 			for _, peerCert := range connState.PeerCertificates {

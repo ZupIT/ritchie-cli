@@ -9,6 +9,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_java"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_node"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_php"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_python"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tpl/tpl_shell"
 )
@@ -26,6 +27,8 @@ const (
 	Nodelang    = "Node"
 	NodeFormat  = "js"
 	ShellFormat = "sh"
+	PHPlang      = "PHP"
+	PHPFormat    = "php"
 )
 
 type LangCreator interface {
@@ -199,6 +202,46 @@ func (n Node) Create(srcDir, pkg, pkgDir, dir string) error {
 	templateNode := strings.ReplaceAll(n.File, nameBin, pkg)
 	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, n.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(templateNode)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type PHP struct {
+	Lang
+}
+
+func NewPHP() PHP {
+	return PHP{Lang{
+		FileFormat:  PHPFormat,
+		StartFile:   index,
+		Main:        tpl_php.Index,
+		Makefile:    tpl_php.Makefile,
+		Run:         tpl_php.Run,
+		Dockerfile:  tpl_php.Dockerfile,
+		File:        tpl_php.File,
+		Compiled:    false,
+		UpperCase:   false,
+	}}
+}
+
+func (p PHP) Create(srcDir, pkg, pkgDir, dir string) error {
+	if err := createGenericFiles(srcDir, pkg, dir, p.Lang); err != nil {
+		return err
+	}
+
+	if err := createRunTemplate(srcDir, p.Run); err != nil {
+		return err
+	}
+
+	if err := createPkgDir(pkgDir); err != nil {
+		return err
+	}
+
+	templatePHP := strings.ReplaceAll(p.File, nameBin, pkg)
+	pkgFile := fmt.Sprintf("%s/%s.%s", pkgDir, pkg, p.FileFormat)
+	if err := fileutil.WriteFile(pkgFile, []byte(templatePHP)); err != nil {
 		return err
 	}
 

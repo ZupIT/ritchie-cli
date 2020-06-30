@@ -14,12 +14,14 @@ const (
 	fCmdCorrectGo     = "rit scaffold generate test-go"
 	fCmdCorrectJava   = "rit scaffold generate test-java"
 	fCmdCorrectNode   = "rit scaffold generate test-node"
+	fCmdCorrectPHP 	  = "rit scaffold generate test-php"
 	fCmdCorrectPython = "rit scaffold generate test-python"
 	fCmdCorrectShell  = "rit scaffold generate test-shell"
 	fCmdIncorrect     = "git scaffold generate testing"
 	langGo            = "Go"
 	langJava          = "Java"
 	langNode          = "Node"
+	langPHP           = "PHP"
 	langPython        = "Python"
 	langShell         = "Shell"
 )
@@ -123,6 +125,16 @@ func TestCreator(t *testing.T) {
 			in: &Create{
 				FormulaCmd: fCmdCorrectNode,
 				Lang: langNode,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
+		{
+			name: "command correct-php",
+			in: &Create{
+				FormulaCmd: fCmdCorrectPHP,
+				Lang: langPHP,
 			},
 			out: &out{
 				err: nil,

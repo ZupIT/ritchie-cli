@@ -8,6 +8,7 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/gofrs/flock v0.7.1
 	github.com/google/uuid v1.1.1
+	github.com/gookit/color v1.2.5
 	github.com/gosuri/uitable v0.0.4
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/kaduartur/go-cli-spinner v1.0.0

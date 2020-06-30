@@ -17,7 +17,7 @@ func TestRitSingleCore(t *testing.T) {
 
 var _ = Describe("RitCore", func() {
 	BeforeSuite(func() {
-		functional.RitInit()
+		functional.RitSingleInit()
 	})
 
 	scenariosCore := functional.LoadScenarios("core_feature.json")
