@@ -287,3 +287,9 @@ type inputPasswordCustomMock struct {
 func (m inputPasswordCustomMock) Password(label string) (string, error) {
 	return m.password(label)
 }
+
+type InputMultilineMock struct{}
+
+func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
+	return "username=ritchie", nil
+}
