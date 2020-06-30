@@ -41,7 +41,7 @@ type RepoAddLister interface {
 	RepoLister
 }
 
-type DelLister interface {
+type RepoDelLister interface {
 	RepoDeleter
 	RepoLister
 }
