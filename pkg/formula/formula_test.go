@@ -35,7 +35,7 @@ func TestFormulaPath(t *testing.T) {
 
 func TestOutputDir(t *testing.T) {
 	const want = "/tmp/formulas/scaffold/coffee-java/uuid-outputs"
-	got := def.OutputDir("/tmp/formulas/scaffold/coffee-java","uuid")
+	got := def.OutputDir("/tmp/formulas/scaffold/coffee-java", "uuid")
 	if want != got {
 		t.Errorf("OutputDir got %v, want %v", got, want)
 	}
@@ -148,7 +148,6 @@ func TestFormulaName(t *testing.T) {
 		t.Errorf("FormulaName got %v, want %v", got, want)
 	}
 }
-
 
 func TestPkgName(t *testing.T) {
 	const want = "test"
