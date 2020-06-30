@@ -29,7 +29,7 @@ const (
 	DefaultCacheQty      = 5
 	TreePath             = "/tree/tree.json"
 	MakefilePath         = "/Makefile"
-	OutputDir            = "%s/%s-output"
+	OutputDir            = "%s/%s-outputs"
 )
 
 type (

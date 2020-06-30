@@ -33,6 +33,14 @@ func TestFormulaPath(t *testing.T) {
 	}
 }
 
+func TestOutputDir(t *testing.T) {
+	const want = "/tmp/formulas/scaffold/coffee-java/uuid-outputs"
+	got := def.OutputDir("/tmp/formulas/scaffold/coffee-java","uuid")
+	if want != got {
+		t.Errorf("OutputDir got %v, want %v", got, want)
+	}
+}
+
 func TestTmpWorkDirPath(t *testing.T) {
 	const hash = "e43c2b35-aa28-4833-b6d3-f1e89691fbd6"
 	const wantTmpDir = "/tmp/tmp/e43c2b35-aa28-4833-b6d3-f1e89691fbd6"
