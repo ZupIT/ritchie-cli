@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -24,6 +25,13 @@ type setCredentialCmd struct {
 	prompt.InputList
 	prompt.InputPassword
 }
+
+// MsgTypeEntry used in select of type entry credential
+const (
+	MsgTypeEntry              = "Input type: "
+	MsgTypeEntryPath          = "Type the path to your file that contains the value of your credential: "
+	EntriesTypeCredentialFile = "File (input by file)"
+)
 
 // NewSingleSetCredentialCmd creates a new cmd instance
 func NewSingleSetCredentialCmd(
@@ -101,12 +109,11 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	cred := credential.Credential{}
 	addMore := true
 	for addMore {
-		kv, err := s.Text("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+		pair, err := s.entryCredential()
 		if err != nil {
 			return credDetail, err
 		}
 
-		pair := strings.Split(kv, "=")
 		if s := validate(pair); s != "" {
 			prompt.Error(s)
 			continue
@@ -140,6 +147,62 @@ func validate(pair []string) string {
 	}
 
 	return ""
+}
+
+func (s setCredentialCmd) entryCredential() ([]string, error) {
+	var pair []string
+	var err error
+	var kv string
+
+	entries := map[string]string{
+		EntriesTypeCredentialFile: "file",
+		"Prompt (manual entry)":   "prompt",
+	}
+
+	var types []string
+	for k := range entries {
+		types = append(types, k)
+	}
+
+	typ, errTyp := s.List(MsgTypeEntry, types)
+	if errTyp != nil {
+		return nil, errTyp
+	}
+
+	if entries[typ] == "file" {
+		pair, err = s.inputFile()
+	} else {
+		kv, err = s.Text("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+		if err != nil {
+			return nil, err
+		}
+		pair = strings.Split(kv, "=")
+	}
+	return pair, err
+}
+
+func (s setCredentialCmd) inputFile() ([]string, error) {
+	var res []string
+
+	key, err := s.Text("Type key of your credential: ", true)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, key)
+
+	path, err := s.Text(MsgTypeEntryPath, true)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, string(data))
+
+	return res, nil
+
 }
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
@@ -181,7 +244,7 @@ func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
 		}
 		credentials[field] = val
 	}
-	
+
 	credDetail.Credential = credentials
 	credDetail.Service = service
 
