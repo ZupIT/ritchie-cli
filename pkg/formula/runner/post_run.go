@@ -28,6 +28,10 @@ func (PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 
 	defer removeWorkDir(p.TmpDir)
 
+	if err := RemoveTmpOutputDir(p); err != nil {
+		return err
+	}
+
 	df, err := fileutil.ListNewFiles(p.BinPath, p.TmpBinDir)
 	if err != nil {
 		return err
@@ -38,6 +42,10 @@ func (PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 	}
 
 	return nil
+}
+
+func RemoveTmpOutputDir(p formula.Setup) error {
+	return fileutil.RemoveDir(p.TmpOutputDir)
 }
 
 func removeWorkDir(tmpDir string) {

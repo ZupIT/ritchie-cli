@@ -74,6 +74,11 @@ func (d DefaultSetup) Setup(def formula.Definition) (formula.Setup, error) {
 		return formula.Setup{}, err
 	}
 
+	tmpOutputDir, err := createOutputDir(tmpBinDir, def)
+	if err != nil {
+		return formula.Setup{}, err
+	}
+
 	if err := os.Chdir(tmpBinDir); err != nil {
 		return formula.Setup{}, err
 	}
@@ -88,9 +93,19 @@ func (d DefaultSetup) Setup(def formula.Definition) (formula.Setup, error) {
 		TmpBinDir:      tmpBinDir,
 		TmpBinFilePath: tmpBinFilePath,
 		Config:         config,
+		TmpOutputDir:   tmpOutputDir,
 	}
 
 	return s, nil
+}
+
+func createOutputDir(tmpBinDir string, def formula.Definition) (string, error) {
+	u := uuid.New().String()
+	tmpOutputDir := def.OutputDir(tmpBinDir, u)
+	if err := fileutil.CreateDirIfNotExists(tmpOutputDir, 0755); err != nil {
+		return "", err
+	}
+	return tmpOutputDir, nil
 }
 
 func (d DefaultSetup) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
