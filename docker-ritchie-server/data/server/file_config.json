@@ -1,0 +1,202 @@
+{
+    "keycloak": {
+        "securityProviderConfig": {
+            "type": "keycloak",
+            "url": "http://keycloak:8080",
+            "realm": "ritchie",
+            "clientId": "user-login",
+            "clientSecret": "user-login",
+            "ttl": "36000"
+        },
+        "cliVersionPath": {
+            "provider": "s3",
+            "url": "https://commons-repo.ritchiecli.io/stable.txt"
+        },
+        "repositories": [
+            {
+                "name": "commons",
+                "priority": 0,
+                "treePath": "/tree/tree.json",
+                "serverUrl" : "http://localhost:3000",
+                "replaceRepoUrl" : "http://localhost:3000/formulas",
+                "provider": {
+                    "type": "HTTP",
+                    "remote": "https://commons-repo.ritchiecli.io"
+                }
+            }
+        ],
+        "credentials": {
+            "github": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "gitlab": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "aws": [
+                {
+                    "field": "accessKeyId",
+                    "type": "text"
+                },
+                {
+                    "field": "secretAccessKey",
+                    "type": "password"
+                }
+            ],
+            "darwin": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "password",
+                    "type": "password"
+                }
+            ],
+            "jenkins": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "email-zup": [
+                {
+                    "field": "email",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "kubeconfig": [
+                {
+                    "field": "base64config",
+                    "type": "text"
+                }
+            ]
+        }
+    },
+    "ldap": {
+        "securityProviderConfig": {
+            "type": "ldap",
+            "base": "dc=example,dc=org",
+            "host": "ldap",
+            "serverName": "ldap.example.org",
+            "port": "389",
+            "useSSL": "false",
+            "skipTLS": "true",
+            "insecureSkipVerify": "false",
+            "bindDN": "cn=admin,dc=example,dc=org",
+            "bindPassword": "admin",
+            "userFilter": "(uid=%s)",
+            "groupFilter": "(memberUid=%s)",
+            "attributeUsername": "uid",
+            "attributeName": "givenName",
+            "attributeEmail": "mail",
+            "ttl": "36000"
+        },
+        "cliVersionPath": {
+            "provider": "s3",
+            "url": "https://commons-repo.ritchiecli.io/stable.txt"
+        },
+        "repositories": [
+            {
+                "name": "commons",
+                "priority": 0,
+                "treePath": "/tree/tree.json",
+                "serverUrl" : "http://localhost:3000",
+                "replaceRepoUrl" : "http://localhost:3000/formulas",
+                "provider": {
+                    "type": "HTTP",
+                    "remote": "https://commons-repo.ritchiecli.io"
+                }
+            }
+        ],
+        "credentials": {
+            "github": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "gitlab": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "aws": [
+                {
+                    "field": "accessKeyId",
+                    "type": "text"
+                },
+                {
+                    "field": "secretAccessKey",
+                    "type": "password"
+                }
+            ],
+            "darwin": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "password",
+                    "type": "password"
+                }
+            ],
+            "jenkins": [
+                {
+                    "field": "username",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "email-zup": [
+                {
+                    "field": "email",
+                    "type": "text"
+                },
+                {
+                    "field": "token",
+                    "type": "password"
+                }
+            ],
+            "kubeconfig": [
+                {
+                    "field": "base64config",
+                    "type": "text"
+                }
+            ]
+        }
+    }
+}
