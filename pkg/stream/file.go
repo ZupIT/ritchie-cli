@@ -29,9 +29,10 @@ type FileCopier interface {
 	Copy(src, dst string) error
 }
 
-type FileListCopier interface {
+type FileCopyExistLister interface {
 	FileLister
 	FileCopier
+	FileExister
 }
 
 type FileReadExister interface {
