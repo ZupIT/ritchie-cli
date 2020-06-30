@@ -95,7 +95,7 @@ func(in Input)Run()  {
 	WindowsBuild = `:: Go parameters
 echo off
 SETLOCAL
-SET BINARY_NAME={{name}}
+SET BINARY_NAME={{bin-name}}
 SET GOCMD=go
 SET GOBUILD=%GOCMD% build
 SET GOTEST=%GOCMD% test

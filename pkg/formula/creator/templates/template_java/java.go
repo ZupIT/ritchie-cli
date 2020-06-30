@@ -14,23 +14,6 @@ public class Main {
     }
 }`
 
-	Makefile = `# Java Parameters
-BINARY_NAME_UNIX={{bin-name}}.sh
-BINARY_NAME_WINDOWS={{bin-name}}.bat
-DIST=../dist
-DIST_DIR=$(DIST)/commons/bin
-
-build:
-	mkdir -p $(DIST_DIR)
-	javac -source 1.8 -target 1.8 *.java
-	echo "Main-Class: Main" > manifest.txt
-	jar cvfm Main.jar manifest.txt *.class {{bin-name}}/*.class
-	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
-	cp run_template $(BINARY_NAME_WINDOWS) && chmod +x $(BINARY_NAME_WINDOWS)
-	cp Main.jar $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX) Dockerfile set_umask.sh $(DIST_DIR)
-	#Clean files
-	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
-
 	Dockerfile = `
 FROM alpine:latest
 USER root
@@ -101,4 +84,40 @@ public class {{bin-name-first-upper}} {
         this.input3 = input3;
     }
 }`
+
+	Makefile = `# Java Parameters
+BINARY_NAME_UNIX={{bin-name}}.sh
+BINARY_NAME_WINDOWS={{bin-name}}.bat
+DIST=../dist
+DIST_DIR=$(DIST)/commons/bin
+
+build:
+	mkdir -p $(DIST_DIR)
+	javac -source 1.8 -target 1.8 *.java
+	echo "Main-Class: Main" > manifest.txt
+	jar cvfm Main.jar manifest.txt *.class {{bin-name}}/*.class
+	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
+	sed '1d' run_template > $(BINARY_NAME_WINDOWS) && chmod +x $(BINARY_NAME_WINDOWS)
+	cp Main.jar $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX) Dockerfile set_umask.sh $(DIST_DIR)
+	#Clean files
+	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
+
+	WindowsBuild = `:: Java parameters
+echo off
+SETLOCAL
+SET BINARY_NAME_UNIX={{bin-name}}.sh
+SET BINARY_NAME_WINDOWS={{bin-name}}.bat
+SET DIST=..\dist
+SET DIST_DIR=%DIST%\commons\bin
+:build
+    mkdir %DIST_DIR%
+	javac -source 1.8 -target 1.8 *.java
+    echo Main-Class: Main > manifest.txt
+    jar cvfm Main.jar manifest.txt *.class {{bin-name}}/*.class
+    more +1 run_template > %BINARY_NAME_WINDOWS%
+    copy run_template %BINARY_NAME_UNIX%
+    for %%i in (Main.jar %BINARY_NAME_WINDOWS% %BINARY_NAME_UNIX% Dockerfile set_umask.sh) do copy %%i %DIST_DIR%
+    erase Main.jar manifest.txt *.class {{bin-name}}\*.class %BINARY_NAME_WINDOWS% %BINARY_NAME_UNIX%
+    GOTO DONE
+:DONE`
 )

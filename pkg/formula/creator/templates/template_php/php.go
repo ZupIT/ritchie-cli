@@ -14,21 +14,6 @@ Run($input1, $input2, $input3);
 ?>
 `
 
-	Makefile = `# Make Run PHP
-BINARY_NAME_UNIX={{bin-name}}.sh
-BINARY_NAME_WINDOWS={{bin-name}}.bat
-DIST=../dist
-DIST_DIR=$(DIST)/commons/bin
-build:
-	mkdir -p $(DIST_DIR)
-	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
-	echo 'php index.php' >> $(DIST_DIR)/$(BINARY_NAME_WINDOWS)
-
-	cp -r . $(DIST_DIR)
-
-	#Clean files
-	rm $(BINARY_NAME_UNIX)`
-
 	Dockerfile = `
 FROM php:latest
 
@@ -40,9 +25,7 @@ ENTRYPOINT ["/set_umask.sh"]
 CMD ["php /index.php"]`
 
 	Run = `#!/bin/sh
-
 php -f index.php
-
 `
 
 	File = `<?php
@@ -55,4 +38,34 @@ php -f index.php
 	}
 ?>
 `
+
+	Makefile = `# Make Run PHP
+BINARY_NAME_UNIX={{bin-name}}.sh
+BINARY_NAME_WINDOWS={{bin-name}}.bat
+DIST=../dist
+DIST_DIR=$(DIST)/commons/bin
+build:
+	mkdir -p $(DIST_DIR)
+	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
+	sed '1d' run_template > $(BINARY_NAME_WINDOWS) && chmod +x $(BINARY_NAME_WINDOWS)
+
+	cp -r . $(DIST_DIR)
+
+	#Clean files
+	rm $(BINARY_NAME_UNIX)`
+
+	WindowsBuild = `:: Php parameters
+echo off
+SETLOCAL
+SET BINARY_NAME_UNIX={{bin-name}}.sh
+SET BINARY_NAME_WINDOWS={{bin-name}}.bat
+SET DIST=..\dist
+SET DIST_DIR=%DIST%\commons\bin
+:build
+    mkdir %DIST_DIR%
+    more +1 run_template > %DIST_DIR%\%BINARY_NAME_WINDOWS%
+    copy run_template %DIST_DIR%\%BINARY_NAME_UNIX%
+    xcopy . %DIST_DIR% /E /H /C /I
+    GOTO DONE
+:DONE`
 )

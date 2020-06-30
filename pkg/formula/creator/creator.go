@@ -201,11 +201,6 @@ func (c CreateManager) createSrcFiles(dir, pkg, lang string) error {
 		if err := golang.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-
-		if err := c.createWindowsBuild(srcDir, pkg, template_go.WindowsBuild); err != nil {
-			return err
-		}
-
 	case JavaLang:
 		java := NewJava(c)
 		if err := java.Create(srcDir, pkg, pkgDir, dir); err != nil {
@@ -236,18 +231,22 @@ func (c CreateManager) createSrcFiles(dir, pkg, lang string) error {
 }
 
 func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l Lang) error {
-	err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase)
-	if err != nil {
+	if err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase); err != nil {
 		return err
 	}
-	err = c.createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled)
-	if err != nil {
+
+	if err := c.createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled); err != nil {
 		return err
 	}
-	err = createDockerfile(pkg, srcDir, l.Dockerfile)
-	if err != nil {
+
+	if err := c.createWindowsBuild(srcDir, pkg, l.WindowsBuild); err != nil {
 		return err
 	}
+
+	if err := createDockerfile(pkg, srcDir, l.Dockerfile); err != nil {
+		return err
+	}
+
 	if err := createUmask(srcDir); err != nil {
 		return err
 	}
@@ -264,7 +263,11 @@ func createRunTemplate(dir, tpl string) error {
 }
 
 func (c CreateManager) createWindowsBuild(dir, name, tpl string) error {
-	tpl = strings.ReplaceAll(tpl, "{{name}}", name)
+	if tpl == "" {
+		return nil
+	}
+
+	tpl = strings.ReplaceAll(tpl, nameBin, name)
 
 	buildFile := path.Join(dir, "/build.bat")
 	return c.file.Write(buildFile, []byte(tpl))

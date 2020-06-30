@@ -10,9 +10,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_java"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_node"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_php"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_python"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_php"
 )
 
 const (
@@ -98,6 +98,7 @@ func NewJava(c CreateManager) Java {
 		Run:           template_java.Run,
 		Dockerfile:    template_java.Dockerfile,
 		File:          template_java.File,
+		WindowsBuild:  template_java.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     true,
 	}}
@@ -140,6 +141,7 @@ func NewGo(c CreateManager) Go {
 		Makefile:      template_go.Makefile,
 		Dockerfile:    template_go.Dockerfile,
 		Pkg:           template_go.Pkg,
+		WindowsBuild:  template_go.WindowsBuild,
 		Compiled:      true,
 		UpperCase:     false,
 	}}
@@ -181,6 +183,7 @@ func NewNode(c CreateManager) Node {
 		Dockerfile:    template_node.Dockerfile,
 		PackageJson:   template_node.PackageJson,
 		File:          template_node.File,
+		WindowsBuild:  template_node.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     false,
 	}}
@@ -261,6 +264,7 @@ func NewPhp(c CreateManager) Php {
 		Run:           template_php.Run,
 		Dockerfile:    template_php.Dockerfile,
 		File:          template_php.File,
+		WindowsBuild:  template_php.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     false,
 	}}

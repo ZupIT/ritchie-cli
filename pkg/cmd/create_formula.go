@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"runtime"
 	"strings"
 	"time"
 
@@ -14,7 +13,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
-	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -149,12 +147,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	// TODO: Remove this function after creating the build scripts for other languages ​​on windows
-	os := runtime.GOOS
-	if os == osutil.Windows && cf.Lang != creator.GoLang {
-		createSuccess(s, cf.Lang)
-		return
-	}
+	createSuccess(s, cf.Lang)
 
 	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
 		err := prompt.NewError(err.Error())
@@ -162,7 +155,6 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	createSuccess(s, cf.Lang)
 	buildSuccess(formulaPath, cf.FormulaCmd)
 }
 
