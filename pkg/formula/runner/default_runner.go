@@ -75,7 +75,7 @@ func printAndValidOutputDir(setup formula.Setup) string {
 	resolveKey := func(name string) string { return strings.ToUpper(name) }
 
 	if len(files) != len(setup.Config.Outputs) {
-		return prompt.Red("Output dir not have all the outputs files")
+		return prompt.Red("Output dir size is different of outputs array in config.json")
 	}
 
 	for _, f := range files {

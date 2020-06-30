@@ -210,7 +210,7 @@ func Test_printAndValidOutputDir(t *testing.T) {
 					}(),
 				},
 			},
-			want: prompt.Red("Output dir not have all the outputs files"),
+			want: prompt.Red("Output dir size is different of outputs array in config.json"),
 		},
 		{
 			name: "Return Red when some output file is missing",
