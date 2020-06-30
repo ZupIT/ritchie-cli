@@ -16,10 +16,18 @@ func (inputTextMock) Text(name string, required bool) (string, error) {
 	return "mocked text", nil
 }
 
+func (inputTextMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return "mocked text", nil
+}
+
 type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool) (string, error) {
 	return "username=ritchie", nil
+}
+
+func (inputSecretMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return "mocked text", nil
 }
 
 type inputURLMock struct{}
@@ -88,8 +96,26 @@ func (repoCleaner) Clean(name string) error {
 
 type formCreator struct{}
 
-func (formCreator) Create(cf formula.Create) (formula.CreateManager, error) {
-	return formula.CreateManager{}, nil
+func (formCreator) Create(cf formula.Create) error {
+	return nil
+}
+
+func (formCreator) Build(workspacePath, formulaPath string) error {
+	return nil
+}
+
+type workspaceForm struct{}
+
+func (workspaceForm) Add(workspace formula.Workspace) error {
+	return nil
+}
+
+func (workspaceForm) List() (formula.Workspaces, error) {
+	return formula.Workspaces{}, nil
+}
+
+func (workspaceForm) Validate(workspace formula.Workspace) error {
+	return nil
 }
 
 type ctxSetterMock struct{}
@@ -249,11 +275,16 @@ func (m inputBoolCustomMock) Bool(name string, items []string) (bool, error) {
 }
 
 type inputTextCustomMock struct {
-	text func(name string, required bool) (string, error)
+	text             func(name string, required bool) (string, error)
+	textWithValidate func(name string, validate func(string) error) (string, error)
 }
 
 func (m inputTextCustomMock) Text(name string, required bool) (string, error) {
 	return m.text(name, required)
+}
+
+func (m inputTextCustomMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return m.textWithValidate(name, validate)
 }
 
 type loginManagerCustomMock struct {

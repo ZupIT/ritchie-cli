@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
@@ -32,7 +33,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 		InputBool     prompt.InputBool
 		FindSetter    server.FindSetter
 		LoginManager  security.LoginManager
-		Loader        formula.Loader
+		Loader        formula.RepoLoader
 	}
 	tests := []struct {
 		name    string
@@ -121,6 +122,9 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 						} else {
 							return "some_input", nil
 						}
+					},
+					textWithValidate: func(name string, validate func(string) error) (string, error) {
+						return "", nil
 					},
 				},
 				InputPassword: inputPasswordMock{},
