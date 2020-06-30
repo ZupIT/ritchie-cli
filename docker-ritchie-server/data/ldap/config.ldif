@@ -1,0 +1,54 @@
+# Entry 3: cn=users,dc=example,dc=org
+dn: cn=users,dc=example,dc=org
+cn: users
+gidnumber: 503
+objectclass: posixGroup
+objectclass: top
+
+# Entry 4: cn=User Test,cn=users,dc=example,dc=org
+dn: cn=User Test,cn=users,dc=example,dc=org
+cn: User test
+gidnumber: 503
+givenname: Test
+mail: test@test.com.br
+homedirectory: /home/users/user
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Zup
+uid: user
+uidnumber: 1001
+userpassword: user
+
+# Entry 5: cn=Admin Test,cn=users,dc=example,dc=org
+dn: cn=Admin Test,cn=users,dc=example,dc=org
+cn: Admin test
+gidnumber: 503
+givenname: Admin
+mail: adimin@test.com.br
+homedirectory: /home/users/admin
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Zup
+uid: admin
+uidnumber: 1002
+userpassword: admin
+
+#Groups
+# Entry 6: cn=rit_user,dc=example,dc=org
+dn: cn=rit_user,dc=example,dc=org
+cn: rit_user
+gidnumber: 504
+memberuid: user
+memberuid: admin
+objectclass: posixGroup
+objectclass: top
+
+# Entry 7: cn=rit_admin,dc=example,dc=org
+dn: cn=rit_admin,dc=example,dc=org
+cn: rit_admin
+gidnumber: 504
+memberuid: admin
+objectclass: posixGroup
+objectclass: top

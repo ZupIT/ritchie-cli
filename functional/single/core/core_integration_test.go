@@ -17,7 +17,7 @@ func TestRitSingleCore(t *testing.T) {
 
 var _ = Describe("RitCore", func() {
 	BeforeSuite(func() {
-		functional.RitInit()
+		functional.RitSingleInit()
 	})
 
 	scenariosCore := functional.LoadScenarios("core_feature.json")
@@ -30,17 +30,17 @@ var _ = Describe("RitCore", func() {
 		},
 
 		Entry("Show context", scenariosCore[0]),
-		Entry("Set context", scenariosCore[1]),
-		Entry("Delete context", scenariosCore[2]),
+		// Entry("Set context", scenariosCore[1]),
+		// Entry("Delete context", scenariosCore[2]),
 
 		Entry("Add", scenariosCore[3]),
-		Entry("Add new repo", scenariosCore[4]),
-		Entry("Clean repo", scenariosCore[5]),
+		// Entry("Add new repo", scenariosCore[4]),
+		// Entry("Clean repo", scenariosCore[5]),
 		Entry("List repo", scenariosCore[6]),
-		Entry("Delete repo", scenariosCore[7]),
+		// Entry("Delete repo", scenariosCore[7]),
 
 		Entry("Set", scenariosCore[8]),
-		Entry("Set Credential", scenariosCore[9]),
+		// Entry("Set Credential", scenariosCore[9]),
 
 		Entry("Completion", scenariosCore[10]),
 		Entry("Completion bash", scenariosCore[11]),

@@ -32,7 +32,7 @@ IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+-beta.[0-9]+")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
-NEXT_VERSION=$(shell ./.circleci/scripts/next-version.sh)
+NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
 
 build-linux:
 	mkdir -p $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE)
@@ -155,4 +155,6 @@ ifeq "$(GONNA_RELEASE)" "RELEASE"
 	git add .
 	git commit --allow-empty -m "release-$(NEXT_VERSION)"
 	git push $(GIT_REMOTE) HEAD:release-$(NEXT_VERSION)
+else
+	echo "NOT GONNA RELEASE"
 endif

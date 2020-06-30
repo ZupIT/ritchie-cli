@@ -89,7 +89,7 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 	case api.Team:
 		return s.teamPrompt()
 	default:
-		return credential.Detail{}, fmt.Errorf(prompt.Red, "invalid CLI build, no edition defined")
+		return credential.Detail{}, prompt.NewError("invalid CLI build, no edition defined")
 	}
 }
 
@@ -221,7 +221,7 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 		return credDetail, nil
 	}
 
-	return credDetail, fmt.Errorf(prompt.Red, "invalid CLI build, no edition defined")
+	return credDetail, prompt.NewError("invalid CLI build, no edition defined")
 }
 
 func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
