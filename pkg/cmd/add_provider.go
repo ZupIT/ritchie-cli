@@ -59,6 +59,7 @@ func (a addProviderCmd) runPrompt() CommandRunnerFunc {
 		// credentialData, _ := json.Marshal()
 		// _ = fileutil.WriteFile(providerDir, credentialData)
 
+		prompt.Success("New provider added ✓")
 		return nil
 	}
 }
