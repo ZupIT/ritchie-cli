@@ -106,8 +106,7 @@ func buildCommands() *cobra.Command {
 		FileUtilService:  fileutil.DefaultService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
-	upgradeUrl := upgrade.UpgradeUrl(api.Single, defaultUpgradeResolver)
-
+	defaultUrlFinder := upgrade.DefaultUrlFinder{}
 	rootCmd := cmd.NewSingleRootCmd(workspaceManager, sessionValidator)
 
 	// level 1
@@ -122,7 +121,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
+	upgradeCmd := cmd.NewUpgradeCmd(api.Single, defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(

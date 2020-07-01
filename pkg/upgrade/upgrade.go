@@ -8,7 +8,13 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
-func UpgradeUrl(edition api.Edition, resolver version.Resolver) string {
+type UrlFinder interface {
+	Url(edition api.Edition, resolver version.Resolver) string
+}
+
+type DefaultUrlFinder struct {}
+
+func (duf DefaultUrlFinder) Url(edition api.Edition, resolver version.Resolver) string {
 	stableVersion, err := resolver.StableVersion()
 	if err != nil {
 		return ""
