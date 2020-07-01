@@ -138,7 +138,7 @@ func buildCommands() *cobra.Command {
 	deleteCmd := cmd.NewDeleteCmd()
 	initCmd := cmd.NewTeamInitCmd(inputText, inputPassword, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder)
+	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder, httpClient)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()

@@ -1,9 +1,14 @@
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 
 	"github.com/spf13/cobra"
 
@@ -20,12 +25,14 @@ type loginCmd struct {
 	prompt.InputText
 	prompt.InputPassword
 	server.Finder
+	hc *http.Client
 }
 
 const (
 	MsgUsername = "Enter your username: "
 	MsgPassword = "Enter your password: "
 	MsgOtp      = "Enter your two factor authentication code: "
+	OtpURL      = "%s/otp"
 )
 
 // NewLoginCmd creates new cmd instance
@@ -34,13 +41,15 @@ func NewLoginCmd(
 	p prompt.InputPassword,
 	lm security.LoginManager,
 	fm formula.RepoLoader,
-	sf server.Finder) *cobra.Command {
+	sf server.Finder,
+	hc *http.Client) *cobra.Command {
 	l := loginCmd{
 		LoginManager:  lm,
 		RepoLoader:    fm,
 		InputText:     t,
 		InputPassword: p,
 		Finder:        sf,
+		hc:            hc,
 	}
 	return &cobra.Command{
 		Use:   "login",
@@ -65,7 +74,13 @@ func (l loginCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		var totp string
-		if cfg.Otp {
+
+		otpFlag, err := l.requestOtpFlag(cfg.URL, cfg.Organization)
+		if err != nil {
+			return err
+		}
+
+		if otpFlag {
 			totp, err = l.Text(MsgOtp, true)
 			if err != nil {
 				return err
@@ -85,6 +100,36 @@ func (l loginCmd) runPrompt() CommandRunnerFunc {
 		prompt.Success("Login successfully!")
 		return err
 	}
+}
+
+func (l loginCmd) requestOtpFlag(serverUrl string, org string) (bool, error) {
+	url := fmt.Sprintf(OtpURL, serverUrl)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("content-type", "application/json")
+	req.Header.Set(headers.XOrg, org)
+
+	resp, err := l.hc.Do(req)
+	if err != nil {
+		return false, err
+	}
+
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	bodyJson := struct {
+		Otp bool `json:"otp"`
+	}{}
+	err = json.Unmarshal(b, &bodyJson)
+	if err != nil {
+		return false, err
+	}
+	return bodyJson.Otp, nil
 }
 
 func (l loginCmd) runStdin() CommandRunnerFunc {

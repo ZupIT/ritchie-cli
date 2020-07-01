@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -12,13 +13,24 @@ import (
 )
 
 func TestNewLoginCmd(t *testing.T) {
-	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{}, findSetterServerMock{})
+	findSetterMock := findSetterServerCustomMock{
+		set: nil,
+		find: func() (server.Config, error) {
+			return server.Config{
+				Organization: "test",
+				URL:          "http://localhost:8882",
+				PinningKey:   "",
+				PinningAddr:  "",
+			}, nil
+		},
+	}
+
+	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{}, findSetterMock, &http.Client{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewLoginCmd got %v", cmd)
 
 	}
-
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
@@ -31,6 +43,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 		InputText     prompt.InputText
 		InputPassword prompt.InputPassword
 		Finder        server.Finder
+		Client        *http.Client
 	}
 	tests := []struct {
 		name    string
@@ -44,7 +57,18 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
-				Finder:        findSetterServerMock{},
+				Finder: findSetterServerCustomMock{
+					set: nil,
+					find: func() (server.Config, error) {
+						return server.Config{
+							Organization: "test",
+							URL:          "http://localhost:8882",
+							PinningKey:   "",
+							PinningAddr:  "",
+						}, nil
+					},
+				},
+				Client: http.DefaultClient,
 			},
 			wantErr: false,
 		},
@@ -182,6 +206,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				tt.fields.LoginManager,
 				tt.fields.Loader,
 				tt.fields.Finder,
+				tt.fields.Client,
 			)
 			l.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := l.Execute(); (err != nil) != tt.wantErr {

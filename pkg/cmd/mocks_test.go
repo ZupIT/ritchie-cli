@@ -187,6 +187,10 @@ func (loginManagerMock) Login(security.User) error {
 	return nil
 }
 
+func (loginManagerMock) requestOtpFlag() {
+
+}
+
 type logoutManagerMock struct{}
 
 func (logoutManagerMock) Logout() error {
