@@ -58,6 +58,6 @@ func TestNewSingleSetCredentialCmdWithEntryArchive(t *testing.T) {
 	}
 
 	if err := cmd.Execute(); err != errPath {
-		t.Errorf("%s = '%v', want '%v'", cmd.Use, err, errPath)
+		t.Errorf("%s = %q, want %q", cmd.Use, err, errPath)
 	}
 }
