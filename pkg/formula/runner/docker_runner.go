@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 
@@ -42,15 +43,15 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 		return err
 	}
 
-	volume := fmt.Sprintf("%s:/app", setup.Pwd)
+	volume := fmt.Sprintf("%s:/app", setup.TmpBinDir)
 	args := []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
 	cmd := exec.Command(docker, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
-	d.output.PrepareEnv(cmd, setup)
+	outputEnv := fmt.Sprintf(formula.EnvPattern, formula.OutputEnv, strings.Replace(setup.TmpOutputDir, setup.TmpBinDir,"/app",1))
+	cmd.Env = append(cmd.Env, outputEnv)
 
 	if err := d.Inputs(cmd, setup, inputType); err != nil {
 		return err
