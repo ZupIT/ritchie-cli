@@ -50,7 +50,7 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	outputEnv := fmt.Sprintf(formula.EnvPattern, formula.OutputEnv, strings.Replace(setup.TmpOutputDir, setup.TmpBinDir,"/app",1))
+	outputEnv := fmt.Sprintf(formula.EnvPattern, formula.OutputEnv, strings.Replace(setup.TmpOutputDir, setup.TmpBinDir, "/app", 1))
 	cmd.Env = append(cmd.Env, outputEnv)
 
 	if err := d.Inputs(cmd, setup, inputType); err != nil {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -135,7 +134,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 
 			got := defaultRunner.Run(def, api.Prompt)
 
-			if  (got != nil) != (tt.want != nil) {
+			if (got != nil) != (tt.want != nil) {
 				t.Errorf("Run() error = %v, wantErr %v", got, tt.want != nil)
 			}
 
@@ -175,9 +174,6 @@ func (i inputMock) Password(string) (string, error) {
 
 type outputMock struct {
 	validAndPrint func(setup formula.Setup) error
-}
-
-func (o outputMock) PrepareEnv(cmd *exec.Cmd, setup formula.Setup) {
 }
 
 func (o outputMock) ValidAndPrint(setup formula.Setup) error {

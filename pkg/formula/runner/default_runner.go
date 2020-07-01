@@ -37,10 +37,10 @@ func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType) 
 	cmd.Env = os.Environ()
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, setup.Pwd)
 	cPwdEnv := fmt.Sprintf(formula.EnvPattern, formula.CPwdEnv, setup.Pwd)
+	outputEnv := fmt.Sprintf(formula.EnvPattern, formula.OutputEnv, setup.TmpOutputDir)
 	cmd.Env = append(cmd.Env, pwdEnv)
 	cmd.Env = append(cmd.Env, cPwdEnv)
-
-	d.output.PrepareEnv(cmd, setup)
+	cmd.Env = append(cmd.Env, outputEnv)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

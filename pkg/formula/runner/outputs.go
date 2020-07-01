@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os/exec"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -21,11 +20,6 @@ func NewOutputManager(
 	return OutputManager{
 		writer: w,
 	}
-}
-
-func (o OutputManager) PrepareEnv(cmd *exec.Cmd, setup formula.Setup) {
-	outputEnv := fmt.Sprintf(formula.EnvPattern, formula.OutputEnv, setup.TmpOutputDir)
-	cmd.Env = append(cmd.Env, outputEnv)
 }
 
 func (o OutputManager) ValidAndPrint(setup formula.Setup) error {

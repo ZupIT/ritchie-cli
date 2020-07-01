@@ -112,7 +112,6 @@ type InputRunner interface {
 
 type OutputRunner interface {
 	ValidAndPrint(setup Setup) error
-	PrepareEnv(cmd *exec.Cmd, setup Setup)
 }
 
 type Setuper interface {
