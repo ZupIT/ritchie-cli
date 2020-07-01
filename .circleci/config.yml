@@ -94,18 +94,17 @@ executors:
 
 jobs:
   lint:
-    executor: ritchie-executor
+    executor: ritchie-tests-executor
     steps:
       - checkout
       - run:
           name: Install golangci-lint
           command: |
             download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
-            wget -O- -q $download | sh -s -- -b /go/bin/ v1.24.0
+            wget -O- -q $download |sudo sh -s -- -b /go/bin/ v1.24.0
       - run:
           name: lint
           command: |
-            go mod download
             /go/bin/golangci-lint run
   horus:
     executor: horus-executor
