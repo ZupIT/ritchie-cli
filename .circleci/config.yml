@@ -94,7 +94,7 @@ executors:
 
 jobs:
   lint:
-    executor: ritchie-executor
+    executor: ritchie-tests-executor
     steps:
       - checkout
       - run:
@@ -105,7 +105,6 @@ jobs:
       - run:
           name: lint
           command: |
-            go mod download
             /go/bin/golangci-lint run
   horus:
     executor: horus-executor
