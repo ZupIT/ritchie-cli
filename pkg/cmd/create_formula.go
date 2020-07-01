@@ -183,22 +183,6 @@ func formulaPath(workspacePath, cmd string) string {
 	return path.Join(workspacePath, formulaPath)
 }
 
-func (c createFormulaCmd) cmdValidator(cmd string) error {
-	if len(strings.TrimSpace(cmd)) < 1 {
-		return errors.New("this input must not be empty")
-	}
-
-	s := strings.Split(cmd, " ")
-	if s[0] != "rit" {
-		return ErrDontStartWithRit
-	}
-
-	if len(s) <= 2 {
-		return ErrTooShortCommand
-	}
-	return nil
-}
-
 func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 	if len(strings.TrimSpace(cmd.(string))) < 1 {
 		return errors.New("this input must not be empty")
