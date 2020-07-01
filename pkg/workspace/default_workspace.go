@@ -40,6 +40,11 @@ func (d DefaultChecker) Check() error {
 		return err
 	}
 
+
+	if err := fileutil.CreateDirIfNotExists(dirRepo, 0755); err != nil {
+		return err
+	}
+
 	if fileutil.Exists(repoFile) {
 		return nil
 	}
@@ -67,6 +72,12 @@ func (d DefaultChecker) Check() error {
 		return err
 	}
 	err = fileutil.WriteFile(repoFile, b)
+	if err != nil {
+		return err
+	}
+
+	myTest := fmt.Sprintf("%s/providers.json", dirRepo)
+	err = fileutil.WriteFile(myTest, b)
 	if err != nil {
 		return err
 	}

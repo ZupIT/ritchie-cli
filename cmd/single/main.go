@@ -122,6 +122,7 @@ func buildCommands() *cobra.Command {
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
+	addProviderCmd := cmd.NewAddProviderCmd(inputBool, inputText, inputList)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
 	listRepoCmd := cmd.NewListRepoCmd(repoManager)
@@ -137,7 +138,7 @@ func buildCommands() *cobra.Command {
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
-	addCmd.AddCommand(addRepoCmd)
+	addCmd.AddCommand(addRepoCmd, addProviderCmd)
 	cleanCmd.AddCommand(cleanRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)

@@ -88,6 +88,8 @@ func (o initSingleCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
+		// chamo a func do settings
+
 		return o.Load()
 	}
 }
