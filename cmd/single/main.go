@@ -112,33 +112,42 @@ func buildCommands() *cobra.Command {
 	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
 
 	// level 2
-	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
-		credSetter,
-		inputText,
-		inputBool,
-		inputList,
-		inputPassword)
-	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
-	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
-	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
-	addProviderCmd := cmd.NewAddProviderCmd(inputBool, inputText, inputList)
-	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
-	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
-	listRepoCmd := cmd.NewListRepoCmd(repoManager)
-	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
-	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
-	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
-	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
 	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
 	watchManager := watcher.New(formulaBuilder, dirManager)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaWorkspace, formulaBuilder, watchManager, dirManager, inputText, inputList)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(
+		userHomeDir,
+		formulaWorkspace,
+		formulaBuilder,
+		watchManager,
+		dirManager,
+		inputText,
+		inputList)
+
+	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
+		credSetter,
+		inputText,
+		inputBool,
+		inputList,
+		inputPassword,
+		fileManager)
+	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
+	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
+	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
+	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
+	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
+	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool,)
+	listRepoCmd := cmd.NewListRepoCmd(repoManager)
+	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
+	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
+	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
+
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
-	addCmd.AddCommand(addRepoCmd, addProviderCmd)
+	addCmd.AddCommand(addRepoCmd)
 	cleanCmd.AddCommand(cleanRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)

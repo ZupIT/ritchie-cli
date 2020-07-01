@@ -47,21 +47,6 @@ type Settings interface {
 	Fields() (Fields, error)
 }
 
-type (
-	Input struct {
-		Label string `json:"label"`
-		Type string `json:"type"`
-	}
-	SingleCredential struct {
-		Provider string `json:"provider"`
-		Inputs []Input `json:"input"`
-	}
-	SingleCredentials struct {
-		SingleCredentials []SingleCredential `json:"credentials"`
-	}
-)
-
-
 
 
 

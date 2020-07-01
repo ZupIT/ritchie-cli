@@ -1,38 +1,22 @@
 package credsingle
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
-
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-var file stream.FileWriteReadExister
-
-func ReadCredentialsJson() credential.Fields{
-	var fields credential.Fields
-
-	cBytes, _ := file.Read(providerPath())
-	_ = json.Unmarshal(cBytes, fields)
-
-	return fields
+type Settings struct {
+	file stream.FileWriteReadExister
 }
 
-func WriteCredentialsJson(fields credential.Fields) error {
-	fieldsData, _  := json.Marshal(fields)
-
-	err := file.Write(providerPath(), fieldsData); if err != nil {
-		return err
-	}
-
-	return nil
+func NewSettings(file stream.FileWriteReadExister) Settings {
+	return Settings{file: file}
 }
 
-func providerPath() string{
-	homeDir, _ := os.UserHomeDir()
-	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", homeDir)
-	return providerDir
-}
+
+
 // func write json
+// homeDir, _ := os.UserHomeDir()
+// providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", homeDir)
+
+// credentialData, _ := json.Marshal()
+// _ = fileutil.WriteFile(providerDir, credentialData)
