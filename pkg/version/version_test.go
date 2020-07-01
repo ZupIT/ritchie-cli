@@ -13,10 +13,15 @@ import (
 
 type StubResolverVersions struct {
 	stableVersion func() (string, error)
+	updateCache   func() error
 }
 
 func (r StubResolverVersions) StableVersion() (string, error) {
 	return r.stableVersion()
+}
+
+func (r StubResolverVersions) UpdateCache() error {
+	return r.updateCache()
 }
 
 type StubFileUtilService struct {
@@ -25,7 +30,6 @@ type StubFileUtilService struct {
 }
 
 func (s StubFileUtilService) ReadFile(path string) ([]byte, error) {
-
 	return s.readFile(path)
 }
 
@@ -135,6 +139,22 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 			want:    expectedResultCase4,
 			wantErr: false,
 		},
+		{
+			name: "Error on save cache",
+			fields: fields{
+				CurrentVersion:   "Any value",
+				StableVersionUrl: mockHttpCase1.URL,
+				FileUtilService: StubFileUtilService{
+					readFile: func(s string) ([]byte, error) {
+						return []byte{}, errors.New("some error")
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return errors.New("some error") },
+				},
+				HttpClient: mockHttpCase1.Client(),
+			},
+			want:    "",
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -206,6 +226,67 @@ func TestVerifyNewVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := VerifyNewVersion(tt.args.resolve, tt.args.currentVersion); got != tt.want {
 				t.Errorf("VerifyNewVersion() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDefaultVersionResolver_UpdateCache(t *testing.T) {
+
+	expectedResultCase1 := "1.0.0"
+
+	mockHttpCase1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(expectedResultCase1 + "\n"))
+	}))
+
+	type fields struct {
+		StableVersionUrl string
+		FileUtilService  fileutil.Service
+		HttpClient       *http.Client
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "error on requestStableVersion",
+			fields: fields{
+				StableVersionUrl: "any url",
+				FileUtilService: StubFileUtilService{
+					readFile: func(s string) ([]byte, error) {
+						return []byte{}, errors.New("some error")
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: &http.Client{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "success",
+			fields: fields{
+				StableVersionUrl: mockHttpCase1.URL,
+				FileUtilService: StubFileUtilService{
+					readFile: func(s string) ([]byte, error) {
+						return []byte{}, nil
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: mockHttpCase1.Client(),
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := DefaultVersionResolver{
+				StableVersionUrl: tt.fields.StableVersionUrl,
+				FileUtilService:  tt.fields.FileUtilService,
+				HttpClient:       tt.fields.HttpClient,
+			}
+			if err := r.UpdateCache(); (err != nil) != tt.wantErr {
+				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
