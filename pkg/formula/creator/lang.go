@@ -62,6 +62,7 @@ func NewPython(c CreateManager) Python {
 		Makefile:      template_python.Makefile,
 		Dockerfile:    template_python.Dockerfile,
 		File:          template_python.File,
+		WindowsBuild:  template_python.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     false,
 	}}
