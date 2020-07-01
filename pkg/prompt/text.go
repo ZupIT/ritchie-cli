@@ -8,12 +8,13 @@ import (
 
 type InputText interface {
 	Text(name string, required bool) (string, error)
-	TextWithValidate(name string, validate func(string) error) (string, error)
+	TextWithValidate(name string, validate func(interface{}) error) (string, error)
 }
 
 type inputText struct{}
 
 type surveyText struct{}
+
 
 func NewInputText() inputText {
 	return inputText{}
@@ -82,3 +83,18 @@ func (surveyText) Text(name string, required bool) (string, error) {
 	return value, survey.Ask(validationQs, &value)
 }
 
+func (surveyText) TextWithValidate(name string, validate func(interface{}) error) (string, error) {
+	var value string
+
+	validationQs := []*survey.Question{
+		{
+			Name:     "name",
+			Prompt:   &survey.Input{
+				Message:  name,
+			},
+			Validate: validate,
+		},
+	}
+
+	return value, survey.Ask(validationQs, &value)
+}

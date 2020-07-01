@@ -66,7 +66,7 @@ func NewCreateFormulaCmd(
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inText.TextWithValidate("Enter the new formula command [ex.: rit group verb noun]", c.cmdValidator)
+		formulaCmd, err := c.inText.TextWithValidate("Enter the new formula command [ex.: rit group verb noun]", c.surveyCmdValidator)
 		if err != nil {
 			return err
 		}
@@ -198,6 +198,23 @@ func (c createFormulaCmd) cmdValidator(cmd string) error {
 	}
 	return nil
 }
+
+func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
+	if len(strings.TrimSpace(cmd.(string))) < 1 {
+		return errors.New("this input must not be empty")
+	}
+
+	s := strings.Split(cmd.(string), " ")
+	if s[0] != "rit" {
+		return ErrDontStartWithRit
+	}
+
+	if len(s) <= 2 {
+		return ErrTooShortCommand
+	}
+	return nil
+}
+
 
 func FormulaWorkspaceInput(
 	workspaces formula.Workspaces,
