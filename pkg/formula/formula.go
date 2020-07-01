@@ -110,6 +110,11 @@ type InputRunner interface {
 	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
 }
 
+type OutputRunner interface {
+	ValidAndPrint(setup Setup) error
+	PrepareEnv(cmd *exec.Cmd, setup Setup)
+}
+
 type Setuper interface {
 	Setup(def Definition) (Setup, error)
 }

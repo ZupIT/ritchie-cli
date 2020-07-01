@@ -99,13 +99,14 @@ func buildCommands() *cobra.Command {
 	envResolvers[env.Credential] = credResolver
 
 	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
+	outputManager := runner.NewOutputManager(os.Stdout)
 	formulaSetup := runner.NewDefaultTeamSetup(ritchieHomeDir, httpClient, sessionManager)
 
 	defaultPreRunner := runner.NewDefaultPreRunner(formulaSetup)
 	dockerPreRunner := runner.NewDockerPreRunner(formulaSetup)
 	postRunner := runner.NewPostRunner()
 
-	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
+	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager, outputManager)
 	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
 	fileManager := stream.NewFileManager()
