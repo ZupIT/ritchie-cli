@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 // addRepoCmd type for add repo command
 type addRepoCmd struct {
-	formula.AddLister
+	formula.RepoAddLister
 	prompt.InputText
 	prompt.InputURL
 	prompt.InputInt
@@ -22,7 +23,7 @@ type addRepoCmd struct {
 
 // NewAddRepoCmd creates a new cmd instance
 func NewAddRepoCmd(
-	adl formula.AddLister,
+	adl formula.RepoAddLister,
 	it prompt.InputText,
 	iu prompt.InputURL,
 	ii prompt.InputInt,
@@ -39,16 +40,13 @@ func NewAddRepoCmd(
 		Use:     "repo",
 		Short:   "Add a repository.",
 		Example: "rit add repo ",
-		//1
 		RunE: RunFuncE(a.runStdin(), a.runPrompt()),
 	}
-	//2
 	cmd.LocalFlags()
 
 	return cmd
 }
 
-//3
 func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		rn, err := a.Text("Name of the repository: ", true)
@@ -95,7 +93,6 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-//4
 func (a addRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 

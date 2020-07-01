@@ -7,84 +7,119 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 )
 
 const (
-	PathPattern               = "%s/formulas/%s"
-	TmpDirPattern             = "%s/tmp/%s"
-	TmpBinDirPattern          = "%s/tmp/%s/%s"
-	DefaultConfig             = "config.json"
-	ConfigPattern             = "%s/%s"
-	CommandEnv                = "COMMAND"
-	PwdEnv                    = "PWD"
-	CPwdEnv                   = "CURRENT_PWD"
-	BinPattern                = "%s%s"
-	BinPathPattern            = "%s/bin"
-	windows                   = "windows"
-	darwin                    = "darwin"
-	linux                     = "linux"
-	EnvPattern                = "%s=%s"
-	CachePattern              = "%s/.%s.cache"
-	DefaultCacheNewLabel      = "Type new value?"
-	DefaultCacheQty           = 5
-	FormCreatePathPattern     = "%s/ritchie-formulas-local"
-	TreeCreatePathPattern     = "%s/tree/tree.json"
-	MakefileCreatePathPattern = "%s/%s"
-	Makefile                  = "Makefile"
+	PathPattern          = "%s/formulas/%s"
+	TmpDirPattern        = "%s/tmp/%s"
+	TmpBinDirPattern     = "%s/tmp/%s/%s"
+	DefaultConfig        = "config.json"
+	ConfigPattern        = "%s/%s"
+	CommandEnv           = "COMMAND"
+	PwdEnv               = "PWD"
+	CPwdEnv              = "CURRENT_PWD"
+	BinPattern           = "%s%s"
+	BinPathPattern       = "%s/bin"
+	EnvPattern           = "%s=%s"
+	CachePattern         = "%s/.%s.cache"
+	DefaultCacheNewLabel = "Type new value?"
+	DefaultCacheQty      = 5
+	TreePath             = "/tree/tree.json"
+	MakefilePath         = "/Makefile"
 )
 
-// Config type that represents formula config
-type Config struct {
-	Name        string  `json:"name"`
-	Command     string  `json:"command"`
-	Description string  `json:"description"`
-	Language    string  `json:"language"`
-	Inputs      []Input `json:"inputs"`
+type (
+	Input struct {
+		Name    string   `json:"name"`
+		Type    string   `json:"type"`
+		Default string   `json:"default"`
+		Label   string   `json:"label"`
+		Items   []string `json:"items"`
+		Cache   Cache    `json:"cache"`
+	}
+
+	Cache struct {
+		Active   bool   `json:"active"`
+		Qty      int    `json:"qty"`
+		NewLabel string `json:"newLabel"`
+	}
+	Create struct {
+		FormulaCmd    string `json:"formulaCmd"`
+		Lang          string `json:"lang"`
+		WorkspacePath string `json:"workspacePath"`
+		FormulaPath   string `json:"formulaPath"`
+	}
+
+	Config struct {
+		Name        string  `json:"name"`
+		Command     string  `json:"command"`
+		Description string  `json:"description"`
+		Language    string  `json:"language"`
+		Inputs      []Input `json:"inputs"`
+	}
+
+	// Definition type that represents a Formula
+	Definition struct {
+		Path     string
+		Bin      string
+		LBin     string
+		MBin     string
+		WBin     string
+		Bundle   string
+		Config   string
+		RepoURL  string
+		RepoName string
+	}
+
+	Setup struct {
+		Pwd            string
+		FormulaPath    string
+		BinPath        string
+		TmpDir         string
+		TmpBinDir      string
+		TmpBinFilePath string
+		Config         Config
+		ContainerId    string
+	}
+)
+
+type PreRunner interface {
+	PreRun(def Definition) (Setup, error)
 }
 
-// Input type that represents input config
-type Input struct {
-	Name    string   `json:"name"`
-	Type    string   `json:"type"`
-	Default string   `json:"default"`
-	Label   string   `json:"label"`
-	Items   []string `json:"items"`
-	Cache   Cache    `json:"cache"`
+type Runner interface {
+	Run(def Definition, inputType api.TermInputType) error
 }
 
-type Cache struct {
-	Active   bool   `json:"active"`
-	Qty      int    `json:"qty"`
-	NewLabel string `json:"newLabel"`
-}
-type Create struct {
-	FormulaCmd   string `json:"formulaCmd"`
-	Lang         string `json:"lang"`
-	LocalRepoDir string `json:"localRepoDir"`
+type PostRunner interface {
+	PostRun(p Setup, docker bool) error
 }
 
-// Definition type that represents a Formula
-type Definition struct {
-	Path     string
-	Bin      string
-	LBin     string
-	MBin     string
-	WBin     string
-	Bundle   string
-	Config   string
-	RepoURL  string
-	RepoName string
+type InputRunner interface {
+	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
 }
 
-type Setup struct {
-	pwd            string
-	formulaPath    string
-	binPath        string
-	tmpDir         string
-	tmpBinDir      string
-	tmpBinFilePath string
-	config         Config
-	containerId    string
+type Setuper interface {
+	Setup(def Definition) (Setup, error)
+}
+
+type Creator interface {
+	Create(cf Create) error
+}
+
+type Builder interface {
+	Build(workspacePath, formulaPath string) error
+}
+
+type Watcher interface {
+	Watch(workspacePath, formulaPath string)
+}
+
+type CreateBuilder interface {
+	Creator
+	Builder
 }
 
 // FormulaPath builds the formula path from ritchie home
@@ -105,15 +140,15 @@ func (d *Definition) BinName() string {
 	bName := d.Bin
 	so := runtime.GOOS
 	switch so {
-	case windows:
+	case osutil.Windows:
 		if d.WBin != "" {
 			bName = d.WBin
 		}
-	case darwin:
+	case osutil.Darwin:
 		if d.MBin != "" {
 			bName = d.MBin
 		}
-	case linux:
+	case osutil.Linux:
 		if d.LBin != "" {
 			bName = d.LBin
 		}
@@ -123,8 +158,8 @@ func (d *Definition) BinName() string {
 
 	if strings.Contains(bName, "${so}") {
 		suffix := ""
-		if so == windows {
-			suffix = ".exe"
+		if so == osutil.Windows {
+			suffix = fileextensions.Exe
 		}
 		binSO := strings.ReplaceAll(bName, "${so}", so)
 
@@ -177,34 +212,12 @@ func (d *Definition) ConfigURL(configName string) string {
 	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
-type PreRunner interface {
-	PreRun(def Definition) (Setup, error)
+func (c Create) FormulaName() string {
+	d := strings.Split(c.FormulaCmd, " ")
+	return strings.Join(d[1:], "_")
 }
 
-type Runner interface {
-	Run(def Definition, inputType api.TermInputType) error
-}
-
-type PostRunner interface {
-	PostRun(p Setup, docker bool) error
-}
-
-type InputRunner interface {
-	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
-}
-
-type Setuper interface {
-	Setup(def Definition) (Setup, error)
-}
-
-type Creator interface {
-	Create(cf Create) (CreateManager, error)
-}
-
-type Builder interface {
-	Build(workspacePath, formulaPath string) error
-}
-
-type Watcher interface {
-	Watch(workspacePath, formulaPath string)
+func (c Create) PkgName() string {
+	d := strings.Split(c.FormulaCmd, " ")
+	return d[len(d)-1]
 }
