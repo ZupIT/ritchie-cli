@@ -30,7 +30,7 @@ var _ = Describe("RitCore", func() {
 		},
 
 		Entry("Set", scenariosCore[0]),
-		Entry("Set Credential", scenariosCore[1]),
+		// Entry("Set Credential", scenariosCore[1]),
 		Entry("Set Context", scenariosCore[2]),
 		Entry("Create", scenariosCore[3]),
 		Entry("Delete", scenariosCore[4]),
