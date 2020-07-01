@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -10,7 +11,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-func Test_printAndValidOutputDir(t *testing.T) {
+func TestOutputManager_ValidAndPrint(t *testing.T) {
 
 	tmpDir := os.TempDir() + "/Test_printAndValidOutputDir"
 	_ = fileutil.CreateDirIfNotExists(tmpDir, 0755)
@@ -20,9 +21,10 @@ func Test_printAndValidOutputDir(t *testing.T) {
 		setup formula.Setup
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
 		{
 			name: "Return empty string when dir is empty",
@@ -37,7 +39,8 @@ func Test_printAndValidOutputDir(t *testing.T) {
 					}(),
 				},
 			},
-			want: "",
+			want:    "",
+			wantErr: false,
 		},
 		{
 			name: "Return only the outputs with printValue",
@@ -68,7 +71,8 @@ func Test_printAndValidOutputDir(t *testing.T) {
 					}(),
 				},
 			},
-			want: "X=1\nZ=3\n",
+			want:    "X=1\nZ=3\n",
+			wantErr: false,
 		},
 		{
 			name: "Return Red when output dir not have all files",
@@ -98,7 +102,8 @@ func Test_printAndValidOutputDir(t *testing.T) {
 					}(),
 				},
 			},
-			want: prompt.Red("Output dir size is different of outputs array in config.json"),
+			want:    prompt.Red("Output dir size is different of outputs array in config.json"),
+			wantErr: false,
 		},
 		{
 			name: "Return Red when some output file is missing",
@@ -129,7 +134,8 @@ func Test_printAndValidOutputDir(t *testing.T) {
 					}(),
 				},
 			},
-			want: prompt.Red("file:Y not found in output dir"),
+			want:    prompt.Red("file:Y not found in output dir"),
+			wantErr: false,
 		},
 		{
 			name: "Return Err when fail to read dir",
@@ -142,12 +148,20 @@ func Test_printAndValidOutputDir(t *testing.T) {
 					}(),
 				},
 			},
-			want: prompt.Red("Fail to read output dir"),
+			want:    prompt.Red("Fail to read output dir"),
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := printAndValidOutputDir(tt.args.setup); got != tt.want {
+			buffer := bytes.Buffer{}
+			o := OutputManager{
+				writer: &buffer,
+			}
+			if err := o.ValidAndPrint(tt.args.setup); (err != nil) != tt.wantErr {
+				t.Errorf("ValidAndPrint() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got := buffer.String(); got != tt.want {
 				t.Errorf("printAndValidOutputDir() = %v, want %v", got, tt.want)
 			}
 		})

@@ -23,7 +23,7 @@ func NewOutputManager(
 }
 
 func (o OutputManager) ValidAndPrint(setup formula.Setup) error {
-	_, err := fmt.Fprintf(o.writer, printAndValidOutputDir(setup))
+	_, err := o.writer.Write([]byte(printAndValidOutputDir(setup)))
 	return err
 }
 
