@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -56,74 +59,66 @@ func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
 
 func setUpRitSingleUnix() {
 	fmt.Println("Running Setup for Unix..")
-	// command := []string{initCmd}
-	// _, stdin, out, _ := execRit(command)
-	// scanner := scannerTerminal(out)
-	// for scanner.Scan() {
-	// 	m := scanner.Text()
-	// 	fmt.Println(m)
-	// 	if strings.Contains(m, cmd.MsgPhrase) {
-	// 		err := inputCommand(stdin, "12345\n")
-	// 		if err != nil {
-	// 			log.Printf("Error when input number: %q", err)
-	// 		}
-	// 		break
-	// 	}
-	// }
-	// scanner = scannerTerminal(out)
-	// for scanner.Scan() {
-	// 	m := scanner.Text()
-	// 	fmt.Println(m)
-	// }
+
+	fmt.Println("Running INIT")
+	initStepEcho := Step{Key: "", Value: "{\"passphrase\":\"12345\"}", Action: "echo"}
+	initStepRit := Step{Key: "", Value: "init --stdin", Action: "rit"}
+	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepEcho, initStepRit}}
+
+	_, err := init.runStdinForUnix()
+	if err != nil {
+		log.Printf("Error when do init: %q", err)
+	}
+
 }
 
 func setUpRitTeamUnix(){
 	fmt.Println("Running Setup for Unix Team..")
 
-	// fmt.Println("Running INIT")
-	// initStepEcho := Step{Key: "", Value: "{\"organization\":\"zup\", \"url\":\"https://ritchie-server.itiaws.dev\"}", Action: "echo"}
-	// initStepRit := Step{Key: "", Value: "init --stdin", Action: "rit"}
-	// init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepEcho, initStepRit}}
-	//
-	// out, err := init.runStdinForUnix()
-	// if err != nil {
-	// 	log.Printf("Error when do init: %q", err)
-	// }
-	// fmt.Println(out)
-	//
-	// fmt.Println("Running Login")
-	// loginStepEcho := Step{Key: "", Value: "{\"username\":\"admin.ritchie\", \"password\":\"C@m@r0@m@r3l0\"}", Action: "echo"}
-	// loginStepRit := Step{Key: "", Value: "login --stdin", Action: "rit"}
-	// login := Scenario{Entry: "Running Init", Result: "", Steps: []Step{loginStepEcho, loginStepRit}}
-	//
-	// out, err = login.runStdinForUnix()
-	// if err != nil {
-	// 	log.Printf("Error when do Login: %q", err)
-	// }
-	// fmt.Println(out)
+	fmt.Println("Running INIT")
+	initStepEcho := Step{Key: "", Value: "{\"organization\":\"zup\", \"url\":\"https://ritchie-server.itiaws.dev\"}", Action: "echo"}
+	initStepRit := Step{Key: "", Value: "init --stdin", Action: "rit"}
+	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepEcho, initStepRit}}
+
+	out, err := init.runStdinForUnix()
+	if err != nil {
+		log.Printf("Error when do init: %q", err)
+	}
+	fmt.Println(out)
+
+	fmt.Println("Running Login")
+	loginStepEcho := Step{Key: "", Value: "{\"username\":\"admin.ritchie\", \"password\":\"C@m@r0@m@r3l0\"}", Action: "echo"}
+	loginStepRit := Step{Key: "", Value: "login --stdin", Action: "rit"}
+	login := Scenario{Entry: "Running Init", Result: "", Steps: []Step{loginStepEcho, loginStepRit}}
+
+	out, err = login.runStdinForUnix()
+	if err != nil {
+		log.Printf("Error when do Login: %q", err)
+	}
+	fmt.Println(out)
 }
 
 func setUpClearSetupUnix() {
 	fmt.Println("Running Clear for Unix..")
-	// myPath := "/.rit/"
-	// usr, _ := user.Current()
-	// dir := usr.HomeDir + myPath
-	//
-	// d, err := os.Open(dir)
-	// if err != nil {
-	// 	log.Printf("Error Open dir: %q", err)
-	// }
-	// defer d.Close()
-	// names, err := d.Readdirnames(-1)
-	// if err != nil {
-	// 	log.Printf("Error Readdirnames: %q", err)
-	// }
-	// for _, name := range names {
-	// 	err := os.RemoveAll(filepath.Join(dir, name))
-	// 	if err != nil {
-	// 		log.Printf("Error cleaning repo rit: %q", err)
-	// 	}
-	// }
+	myPath := "/.rit/"
+	usr, _ := user.Current()
+	dir := usr.HomeDir + myPath
+
+	d, err := os.Open(dir)
+	if err != nil {
+		log.Printf("Error Open dir: %q", err)
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		log.Printf("Error Readdirnames: %q", err)
+	}
+	for _, name := range names {
+		err := os.RemoveAll(filepath.Join(dir, name))
+		if err != nil {
+			log.Printf("Error cleaning repo rit: %q", err)
+		}
+	}
 }
 
 func (scenario *Scenario) runStepsForUnix() (error, string) {

@@ -39,8 +39,8 @@ var _ = Describe("RitCore", func() {
 		Entry("List repo", scenariosCore[6]),
 		// Entry("Delete repo", scenariosCore[7]),
 
-		Entry("Set", scenariosCore[8]),
-		// Entry("Set Credential", scenariosCore[9]),
+		// Entry("Set Credential", scenariosCore[8]),
+		Entry("Set", scenariosCore[9]),
 
 		Entry("Completion", scenariosCore[10]),
 		Entry("Completion bash", scenariosCore[11]),

@@ -15,7 +15,7 @@ import (
 
 const (
 	rit     = "rit"
-	// initCmd = "init"
+	initCmd = "init"
 )
 
 type Step struct {

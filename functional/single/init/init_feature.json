@@ -147,6 +147,6 @@
             }
 
         ],
-        "result":"Error: passphrase is required"
+        "result":"passphrase is required"
     }
 ]
