@@ -107,7 +107,7 @@ func buildCommands() *cobra.Command {
 	postRunner := runner.NewPostRunner()
 
 	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager, outputManager)
-	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
+	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager, outputManager)
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)

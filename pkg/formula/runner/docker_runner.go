@@ -24,10 +24,16 @@ type DockerRunner struct {
 	formula.PreRunner
 	formula.PostRunner
 	formula.InputRunner
+	output formula.OutputRunner
 }
 
-func NewDockerRunner(preRunner formula.PreRunner, postRunner formula.PostRunner, inputRunner formula.InputRunner) DockerRunner {
-	return DockerRunner{preRunner, postRunner, inputRunner}
+func NewDockerRunner(
+	preRunner formula.PreRunner,
+	postRunner formula.PostRunner,
+	inputRunner formula.InputRunner,
+	outRunner formula.OutputRunner,
+) DockerRunner {
+	return DockerRunner{preRunner, postRunner, inputRunner, outRunner}
 }
 
 func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) error {
@@ -43,6 +49,8 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	d.output.PrepareEnv(cmd, setup)
 
 	if err := d.Inputs(cmd, setup, inputType); err != nil {
 		return err
@@ -65,6 +73,10 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 	}
 
 	if err := cmd.Wait(); err != nil {
+		return err
+	}
+
+	if err := d.output.ValidAndPrint(setup); err != nil {
 		return err
 	}
 

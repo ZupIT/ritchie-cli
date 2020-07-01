@@ -36,6 +36,7 @@ func TestDockerRunner_Run(t *testing.T) {
 		inPassword inputMock
 		preMock    *preRunnerMock
 		postMock   *postRunnerMock
+		outputR    formula.OutputRunner
 	}
 
 	tests := []struct {
@@ -84,6 +85,20 @@ func TestDockerRunner_Run(t *testing.T) {
 			},
 			want: errors.New("error in remove dir"),
 		},
+		{
+			name: "print and valid error",
+			in: in{
+				envMock: envResolverMock{in: "ok"},
+				inText:  inputMock{text: "ok"},
+				inBool:  inputMock{boolean: true},
+				outputR: outputMock{
+					validAndPrint: func(setup formula.Setup) error {
+						return errors.New("some Error on output")
+					},
+				},
+			},
+			want: errors.New("some Error on output"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -106,14 +121,58 @@ func TestDockerRunner_Run(t *testing.T) {
 
 			resolvers := env.Resolvers{"test": in.envMock}
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPassword)
-			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager)
+			var outputRunner formula.OutputRunner
+			if tt.in.outputR == nil {
+				outputRunner = NewOutputManager(os.Stdout)
+			} else {
+				outputRunner = tt.in.outputR
+			}
+			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager, outputRunner)
 
 			got := dockerRunner.Run(def, api.Prompt)
+
+			if  (got != nil) != (tt.want != nil) {
+				t.Errorf("Run() error = %v, wantErr %v", got, tt.want != nil)
+			}
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
 			}
 
+		})
+	}
+}
+
+func TestDockerRunner_Run1(t *testing.T) {
+	type fields struct {
+		PreRunner   formula.PreRunner
+		PostRunner  formula.PostRunner
+		InputRunner formula.InputRunner
+		output      formula.OutputRunner
+	}
+	type args struct {
+		def       formula.Definition
+		inputType api.TermInputType
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := DockerRunner{
+				PreRunner:   tt.fields.PreRunner,
+				PostRunner:  tt.fields.PostRunner,
+				InputRunner: tt.fields.InputRunner,
+				output:      tt.fields.output,
+			}
+			if err := d.Run(tt.args.def, tt.args.inputType); (err != nil) != tt.wantErr {
+				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }

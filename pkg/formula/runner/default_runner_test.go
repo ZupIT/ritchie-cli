@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -34,6 +35,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 		inPass   inputMock
 		preMock  *preRunnerMock
 		postMock *postRunnerMock
+		outputR  formula.OutputRunner
 	}
 
 	tests := []struct {
@@ -86,6 +88,21 @@ func TestDefaultRunner_Run(t *testing.T) {
 			},
 			want: errors.New("error in remove dir"),
 		},
+		{
+			name: "print and valid error",
+			in: in{
+				envMock: envResolverMock{in: "ok"},
+				inText:  inputMock{text: ""},
+				inBool:  inputMock{boolean: true},
+				inPass:  inputMock{text: "******"},
+				outputR: outputMock{
+					validAndPrint: func(setup formula.Setup) error {
+						return errors.New("some Error on output")
+					},
+				},
+			},
+			want: errors.New("some Error on output"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -108,10 +125,19 @@ func TestDefaultRunner_Run(t *testing.T) {
 
 			resolvers := env.Resolvers{"test": in.envMock}
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
-			outputManager := NewOutputManager(os.Stdout)
-			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager, outputManager)
+			var outputRunner formula.OutputRunner
+			if tt.in.outputR == nil {
+				outputRunner = NewOutputManager(os.Stdout)
+			} else {
+				outputRunner = tt.in.outputR
+			}
+			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager, outputRunner)
 
 			got := defaultRunner.Run(def, api.Prompt)
+
+			if  (got != nil) != (tt.want != nil) {
+				t.Errorf("Run() error = %v, wantErr %v", got, tt.want != nil)
+			}
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
@@ -145,6 +171,17 @@ func (i inputMock) Bool(string, []string) (bool, error) {
 
 func (i inputMock) Password(string) (string, error) {
 	return i.text, i.err
+}
+
+type outputMock struct {
+	validAndPrint func(setup formula.Setup) error
+}
+
+func (o outputMock) PrepareEnv(cmd *exec.Cmd, setup formula.Setup) {
+}
+
+func (o outputMock) ValidAndPrint(setup formula.Setup) error {
+	return o.validAndPrint(setup)
 }
 
 type envResolverMock struct {
