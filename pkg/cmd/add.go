@@ -14,7 +14,7 @@ It can be used to add formulas, repositories and other objects..
 func NewAddCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "add SUBCOMMAND",
-		Short: "add objects",
+		Short: "Add formulas (rit add formula(, repositories (rit add repo) and other objects",
 		Long:  descAddLong,
 	}
 }
