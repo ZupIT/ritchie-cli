@@ -325,11 +325,3 @@ type otpResolverMock struct {}
 func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
 	return otp.Response{Otp: true}, nil
 }
-
-type otpResolverCustomMock struct {
-	requestOtp func(url, organization string) (otp.Response, error)
-}
-
-func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Response, error) {
-	return m.requestOtp(url, organization)
-}
