@@ -175,6 +175,16 @@ func (credSetterMock) Set(d credential.Detail) error {
 
 type credSettingsMock struct{}
 
+type singleCredSettingsMock struct {}
+
+func (s singleCredSettingsMock) ReadCredentials() credential.Fields {
+	return nil
+}
+
+func (s singleCredSettingsMock) WriteCredentials(fields credential.Fields) error {
+	return nil
+}
+
 func (credSettingsMock) Fields() (credential.Fields, error) {
 	return credential.Fields{
 		"github": []credential.Field{

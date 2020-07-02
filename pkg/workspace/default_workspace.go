@@ -18,6 +18,7 @@ import (
 const (
 	repoDir  = "/repo"
 	repoFile = "/repositories.json"
+	providersFile = "/providers.json"
 )
 
 type DefaultChecker struct {
@@ -29,6 +30,7 @@ func NewChecker(ritchieHome string) DefaultChecker {
 }
 
 func (d DefaultChecker) Check() error {
+
 	dirRepo := fmt.Sprintf("%s%s", d.ritchieHome, repoDir)
 	repoFile := fmt.Sprintf("%s%s", dirRepo, repoFile)
 
@@ -72,12 +74,6 @@ func (d DefaultChecker) Check() error {
 		return err
 	}
 	err = fileutil.WriteFile(repoFile, b)
-	if err != nil {
-		return err
-	}
-
-	myTest := fmt.Sprintf("%s/providers.json", dirRepo)
-	err = fileutil.WriteFile(myTest, b)
 	if err != nil {
 		return err
 	}

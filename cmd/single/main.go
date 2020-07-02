@@ -55,6 +55,9 @@ func buildCommands() *cobra.Command {
 	inputURL := prompt.NewInputURL()
 
 	// deps
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
@@ -68,6 +71,7 @@ func buildCommands() *cobra.Command {
 	passphraseManager := secsingle.NewPassphraseManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
 	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
+	credSettings := credsingle.NewSingleSettings(fileManager)
 	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
@@ -85,7 +89,20 @@ func buildCommands() *cobra.Command {
 	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
 	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
+
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
+	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
+	watchManager := watcher.New(formulaBuilder, dirManager)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(
+		userHomeDir,
+		formulaWorkspace,
+		formulaBuilder,
+		watchManager,
+		dirManager,
+		inputText,
+		inputList)
+
 
 	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
 	defaultUpgradeResolver := version.DefaultVersionResolver{
@@ -112,28 +129,15 @@ func buildCommands() *cobra.Command {
 	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
 
 	// level 2
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
-	watchManager := watcher.New(formulaBuilder, dirManager)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(
-		userHomeDir,
-		formulaWorkspace,
-		formulaBuilder,
-		watchManager,
-		dirManager,
-		inputText,
-		inputList)
-
+	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
 		credSetter,
+		credSettings,
 		inputText,
 		inputBool,
 		inputList,
 		inputPassword,
-		fileManager)
-	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
+	)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -9,41 +8,39 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
-
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
 	credential.Settings
+	credential.SingleSettings
 	edition api.Edition
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
-	file stream.FileWriteReadExister
 }
 
 // NewSingleSetCredentialCmd creates a new cmd instance
 func NewSingleSetCredentialCmd(
 	st credential.Setter,
+	ss credential.SingleSettings,
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword,
-	file stream.FileWriteReadExister) *cobra.Command {
+	ip prompt.InputPassword,) *cobra.Command {
 	s := &setCredentialCmd{st,
 		nil,
+		ss,
 		api.Single,
 		it,
 		ib,
 		il,
 		ip,
-		file,
 	}
 
 	return newCmd(s)
@@ -59,12 +56,12 @@ func NewTeamSetCredentialCmd(
 	ip prompt.InputPassword) *cobra.Command {
 	s := &setCredentialCmd{st,
 		si,
+		nil,
 		api.Team,
 		it,
 		ib,
 		il,
-		ip,
-		nil}
+		ip}
 
 	return newCmd(s)
 }
@@ -110,9 +107,12 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 }
 
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
+
+	s.DefaultCredentials()
+
 	var credDetail credential.Detail
 	cred := credential.Credential{}
-	credentials := readCredentialsJson(s.file)
+	credentials := s.ReadCredentials()
 	var providerList []string
 	for k, _ := range credentials {
 		providerList = append(providerList, k)
@@ -136,7 +136,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 			addMoreCredentials, _ = s.Bool("Add one more?", []string{"no", "yes"})
 		}
 		credentials[newProvider] = newFields
-		_ = writeCredentialsJson(s.file, credentials)
+		_ = s.WriteCredentials(credentials)
 
 		providerChoose, _ = s.List("Select your provider", providerList)
 	}
@@ -154,38 +154,13 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	}
 
 	credDetail.Service = providerChoose
-	fmt.Println(cred)
 	credDetail.Credential = cred
 
 	return credDetail, nil
 }
 
-func readCredentialsJson(file stream.FileWriteReadExister) credential.Fields {
-	var fields credential.Fields
-
-	if file.Exists(providerPath()) {
-		cBytes, _ := file.Read(providerPath())
-		_ = json.Unmarshal(cBytes, &fields)
-	}
-
-	return fields
-}
-
-func writeCredentialsJson(file stream.FileWriteReadExister, fields credential.Fields) error {
-	fieldsData, _ := json.Marshal(fields)
-
-	err := file.Write(providerPath(), fieldsData)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func providerPath() string {
-	homeDir, _ := os.UserHomeDir()
-	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", homeDir)
-	return providerDir
+func credentialFileExists()bool{
+	return true
 }
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
