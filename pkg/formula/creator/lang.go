@@ -10,9 +10,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_java"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_node"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_php"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_python"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_php"
 )
 
 const (
