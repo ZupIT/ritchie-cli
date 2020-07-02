@@ -45,20 +45,26 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
-				Finder: findSetterServerCustomMock{
-					set: nil,
-					find: func() (server.Config, error) {
-						return server.Config{
-							Organization: "test",
-							URL:          "http://localhost:8882",
-							PinningKey:   "",
-							PinningAddr:  "",
-						}, nil
-					},
-				},
+				Finder: findSetterServerMock{},
 				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
+		},
+		{
+			name: "request otp returns error",
+			fields: fields{
+				LoginManager:  loginManagerMock{},
+				Loader:        repoLoaderMock{},
+				InputText:     inputTextMock{},
+				InputPassword: inputPasswordMock{},
+				Finder: findSetterServerMock{},
+				Resolver:      otpResolverCustomMock{
+					requestOtp: func(url, organization string) (otp.Response, error) {
+						return otp.Response{}, errors.New("some error")
+					},
+				},
+			},
+			wantErr: true,
 		},
 		{
 			name: "run with success when ask otp",

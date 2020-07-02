@@ -57,6 +57,24 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "otp request returns error",
+			fields: fields{
+				InputText:     inputTextMock{},
+				InputPassword: inputPasswordMock{},
+				InputURL:      inputURLMock{},
+				InputBool:     inputTrueMock{},
+				FindSetter:    findSetterServerMock{},
+				LoginManager:  loginManagerMock{},
+				Loader:        repoLoaderMock{},
+				Resolver:      otpResolverCustomMock{
+					requestOtp: func(url, organization string) (otp.Response, error) {
+						return otp.Response{}, errors.New("some error")
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "Return err when finder return err",
 			fields: fields{
 				InputText:     inputTextMock{},

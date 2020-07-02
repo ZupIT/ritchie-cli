@@ -28,7 +28,6 @@ const (
 	MsgUsername = "Enter your username: "
 	MsgPassword = "Enter your password: "
 	MsgOtp      = "Enter your two factor authentication code: "
-	OtpURL      = "%s/otp"
 )
 
 // NewLoginCmd creates new cmd instance
