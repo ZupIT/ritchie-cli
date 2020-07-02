@@ -176,7 +176,7 @@ type outputMock struct {
 	validAndPrint func(setup formula.Setup) error
 }
 
-func (o outputMock) ValidAndPrint(setup formula.Setup) error {
+func (o outputMock) Outputs(setup formula.Setup) error {
 	return o.validAndPrint(setup)
 }
 

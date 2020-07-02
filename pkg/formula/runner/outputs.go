@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -8,6 +9,11 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
+
+var (
+	ErrReadOutputDir  = errors.New(prompt.Red("fail to read output dir"))
+	ErrValidOutputDir = errors.New(prompt.Red("Output dir size is different of outputs array in config.json"))
 )
 
 type OutputManager struct {
@@ -22,23 +28,27 @@ func NewOutputManager(
 	}
 }
 
-func (o OutputManager) ValidAndPrint(setup formula.Setup) error {
-	_, err := o.writer.Write([]byte(printAndValidOutputDir(setup)))
+func (o OutputManager) Outputs(setup formula.Setup) error {
+	msg, err := printAndValidOutputDir(setup)
+	if err != nil {
+		return err
+	}
+	_, err = o.writer.Write([]byte(msg))
 	return err
 }
 
-func printAndValidOutputDir(setup formula.Setup) string {
+func printAndValidOutputDir(setup formula.Setup) (string, error) {
 
 	files, err := ioutil.ReadDir(setup.TmpOutputDir)
 	if err != nil {
-		return prompt.Red("Fail to read output dir")
+		return "", ErrReadOutputDir
 	}
 	fOutputs := map[string]string{}
 
 	resolveKey := func(name string) string { return strings.ToUpper(name) }
 
 	if len(files) != len(setup.Config.Outputs) {
-		return prompt.Red("Output dir size is different of outputs array in config.json")
+		return "", ErrValidOutputDir
 	}
 
 	for _, f := range files {
@@ -46,7 +56,7 @@ func printAndValidOutputDir(setup formula.Setup) string {
 		key := resolveKey(f.Name())
 		b, err := ioutil.ReadFile(fName)
 		if err != nil {
-			return prompt.Red("fail to read file: " + fName)
+			return "", errors.New(prompt.Red("fail to read file: " + fName))
 		}
 		fOutputs[key] = string(b)
 	}
@@ -56,11 +66,11 @@ func printAndValidOutputDir(setup formula.Setup) string {
 		key := resolveKey(o.Name)
 		v, exist := fOutputs[key]
 		if !exist {
-			return prompt.Red("file:" + key + " not found in output dir")
+			return "", errors.New(prompt.Red("file:" + key + " not found in output dir"))
 		}
 		if o.Print {
 			result += fmt.Sprintf("%s=%s\n", key, v)
 		}
 	}
-	return result
+	return result, nil
 }

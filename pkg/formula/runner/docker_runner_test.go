@@ -131,48 +131,14 @@ func TestDockerRunner_Run(t *testing.T) {
 
 			got := dockerRunner.Run(def, api.Prompt)
 
-			if  (got != nil) != (tt.want != nil) {
-				t.Errorf("Run() error = %v, wantErr %v", got, tt.want != nil)
+			if (got != nil) != (tt.want != nil) {
+				t.Errorf("Run(%s) error = %v, wantErr %v", tt.name, got, tt.want != nil)
 			}
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
 			}
 
-		})
-	}
-}
-
-func TestDockerRunner_Run1(t *testing.T) {
-	type fields struct {
-		PreRunner   formula.PreRunner
-		PostRunner  formula.PostRunner
-		InputRunner formula.InputRunner
-		output      formula.OutputRunner
-	}
-	type args struct {
-		def       formula.Definition
-		inputType api.TermInputType
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			d := DockerRunner{
-				PreRunner:   tt.fields.PreRunner,
-				PostRunner:  tt.fields.PostRunner,
-				InputRunner: tt.fields.InputRunner,
-				output:      tt.fields.output,
-			}
-			if err := d.Run(tt.args.def, tt.args.inputType); (err != nil) != tt.wantErr {
-				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
-			}
 		})
 	}
 }

@@ -25,7 +25,7 @@ type DockerRunner struct {
 	formula.PreRunner
 	formula.PostRunner
 	formula.InputRunner
-	output formula.OutputRunner
+	formula.OutputRunner
 }
 
 func NewDockerRunner(
@@ -77,7 +77,7 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 		return err
 	}
 
-	if err := d.output.ValidAndPrint(setup); err != nil {
+	if err := d.Outputs(setup); err != nil {
 		return err
 	}
 

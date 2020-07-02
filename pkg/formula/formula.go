@@ -111,7 +111,7 @@ type InputRunner interface {
 }
 
 type OutputRunner interface {
-	ValidAndPrint(setup Setup) error
+	Outputs(setup Setup) error
 }
 
 type Setuper interface {

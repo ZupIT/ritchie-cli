@@ -2,6 +2,7 @@ package runner
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -25,6 +26,7 @@ func TestOutputManager_ValidAndPrint(t *testing.T) {
 		args    args
 		want    string
 		wantErr bool
+		err     error
 	}{
 		{
 			name: "Return empty string when dir is empty",
@@ -75,7 +77,7 @@ func TestOutputManager_ValidAndPrint(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Return Red when output dir not have all files",
+			name: "Return Err when output dir not have all files",
 			args: args{
 				setup: formula.Setup{
 					Config: formula.Config{Outputs: []formula.Output{
@@ -102,11 +104,12 @@ func TestOutputManager_ValidAndPrint(t *testing.T) {
 					}(),
 				},
 			},
-			want:    prompt.Red("Output dir size is different of outputs array in config.json"),
-			wantErr: false,
+			want:    "",
+			wantErr: true,
+			err:     ErrValidOutputDir,
 		},
 		{
-			name: "Return Red when some output file is missing",
+			name: "Return when some output file is missing",
 			args: args{
 				setup: formula.Setup{
 					Config: formula.Config{Outputs: []formula.Output{
@@ -134,8 +137,9 @@ func TestOutputManager_ValidAndPrint(t *testing.T) {
 					}(),
 				},
 			},
-			want:    prompt.Red("file:Y not found in output dir"),
-			wantErr: false,
+			want:    "",
+			wantErr: true,
+			err:     errors.New(prompt.Red("file:Y not found in output dir")),
 		},
 		{
 			name: "Return Err when fail to read dir",
@@ -148,21 +152,25 @@ func TestOutputManager_ValidAndPrint(t *testing.T) {
 					}(),
 				},
 			},
-			want:    prompt.Red("Fail to read output dir"),
-			wantErr: false,
+			want:    "",
+			wantErr: true,
+			err:     ErrReadOutputDir,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			buffer := bytes.Buffer{}
-			o := OutputManager{
-				writer: &buffer,
-			}
-			if err := o.ValidAndPrint(tt.args.setup); (err != nil) != tt.wantErr {
-				t.Errorf("ValidAndPrint() error = %v, wantErr %v", err, tt.wantErr)
+			o := NewOutputManager(&buffer)
+
+			err := o.Outputs(tt.args.setup)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Outputs(%s) error = %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
 			if got := buffer.String(); got != tt.want {
-				t.Errorf("printAndValidOutputDir() = %v, want %v", got, tt.want)
+				t.Errorf("Outputs(%s) = %v, want %v", tt.name, got, tt.want)
+			}
+			if err != nil && tt.wantErr && err.Error() != tt.err.Error() {
+				t.Errorf("Outputs(%s) = err:%v, wantErr %v", tt.name, err, tt.err)
 			}
 		})
 	}
