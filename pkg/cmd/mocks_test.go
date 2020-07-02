@@ -7,6 +7,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
@@ -323,4 +324,17 @@ type InputMultilineMock struct{}
 
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
+}
+type otpResolverMock struct {}
+
+func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return otp.Response{Otp: true}, nil
+}
+
+type otpResolverCustomMock struct {
+	requestOtp func(url, organization string) (otp.Response, error)
+}
+
+func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return m.requestOtp(url, organization)
 }

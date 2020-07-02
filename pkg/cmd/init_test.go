@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -34,6 +35,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 		FindSetter    server.FindSetter
 		LoginManager  security.LoginManager
 		Loader        formula.RepoLoader
+		Resolver      otp.Resolver
 	}
 	tests := []struct {
 		name    string
@@ -50,8 +52,27 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				FindSetter:    findSetterServerMock{},
 				LoginManager:  loginManagerMock{},
 				Loader:        repoLoaderMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
+		},
+		{
+			name: "otp request returns error",
+			fields: fields{
+				InputText:     inputTextMock{},
+				InputPassword: inputPasswordMock{},
+				InputURL:      inputURLMock{},
+				InputBool:     inputTrueMock{},
+				FindSetter:    findSetterServerMock{},
+				LoginManager:  loginManagerMock{},
+				Loader:        repoLoaderMock{},
+				Resolver:      otpResolverCustomMock{
+					requestOtp: func(url, organization string) (otp.Response, error) {
+						return otp.Response{}, errors.New("some error")
+					},
+				},
+			},
+			wantErr: true,
 		},
 		{
 			name: "Return err when finder return err",
@@ -67,6 +88,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -87,6 +109,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -109,6 +132,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -142,6 +166,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -172,6 +197,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -194,6 +220,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -215,6 +242,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				FindSetter:    findSetterServerMock{},
 				LoginManager:  loginManagerMock{},
 				Loader:        repoLoaderMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -238,6 +266,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -269,6 +298,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -292,6 +322,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -310,12 +341,12 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 						}, nil
 					},
 					set: func(config *server.Config) error {
-						config.Otp = true
 						return nil
 					},
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -337,6 +368,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				FindSetter:   findSetterServerMock{},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -358,6 +390,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				FindSetter:    findSetterServerMock{},
 				LoginManager:  loginManagerMock{},
 				Loader:        repoLoaderMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -379,6 +412,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				FindSetter:   findSetterServerMock{},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -402,12 +436,12 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 						return server.Config{}, nil
 					},
 					set: func(config *server.Config) error {
-						config.Otp = true
 						return nil
 					},
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -424,7 +458,8 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 						return errors.New("some error")
 					},
 				},
-				Loader: repoLoaderMock{},
+				Loader:   repoLoaderMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -442,6 +477,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 						return errors.New("some errors")
 					},
 				},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -463,6 +499,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				FindSetter:   findSetterServerMock{},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -493,6 +530,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				},
 				LoginManager: loginManagerMock{},
 				Loader:       repoLoaderMock{},
+				Resolver:     otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -507,6 +545,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				tt.fields.FindSetter,
 				tt.fields.LoginManager,
 				tt.fields.Loader,
+				tt.fields.Resolver,
 			)
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {
