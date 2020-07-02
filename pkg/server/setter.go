@@ -17,8 +17,7 @@ import (
 
 const (
 	// ServerErrPattern error message pattern
-	ServerErrPattern = "Server (%s) returned %s"
-	otpUrlPattern    = "%s/otp"
+	ErrPattern = "server (%s) returned %s"
 )
 
 var (
@@ -26,9 +25,6 @@ var (
 	ErrOrgIsRequired = prompt.NewError("Organization is required")
 )
 
-type otpResponse struct {
-	Otp bool `json:"otp"`
-}
 
 type SetterManager struct {
 	serverFile string
@@ -52,6 +48,14 @@ func (s SetterManager) Set(cfg *Config) error {
 		return err
 	}
 	cfg.URL = strings.TrimRight(cfg.URL, "/")
+
+	resp, err := s.httpClient.Get(cfg.URL)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf(ErrPattern, cfg.URL, resp.Status)
+	}
 
 	cfg.PinningKey, cfg.PinningAddr, err = sslCertificationBase64(cfg.URL)
 	if err != nil {

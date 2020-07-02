@@ -7,6 +7,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
@@ -321,4 +322,18 @@ type inputPasswordCustomMock struct {
 
 func (m inputPasswordCustomMock) Password(label string) (string, error) {
 	return m.password(label)
+}
+
+type otpResolverMock struct {}
+
+func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return otp.Response{Otp: true}, nil
+}
+
+type otpResolverCustomMock struct {
+	requestOtp func(url, organization string) (otp.Response, error)
+}
+
+func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return m.requestOtp(url, organization)
 }

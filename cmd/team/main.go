@@ -15,6 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -127,6 +128,8 @@ func buildCommands() *cobra.Command {
 	}
 	defaultUrlFinder := upgrade.DefaultUrlFinder{}
 
+	otpResolver := otp.NewOtpResolver(httpClient)
+
 	// commands
 	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)
 
@@ -136,9 +139,18 @@ func buildCommands() *cobra.Command {
 	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewTeamInitCmd(inputText, inputPassword, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
+	initCmd := cmd.NewTeamInitCmd(
+		inputText,
+		inputPassword,
+		inputURL,
+		inputBool,
+		serverFindSetter,
+		loginManager,
+		repoLoader,
+		otpResolver,
+	)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder, httpClient)
+	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder, otpResolver)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()

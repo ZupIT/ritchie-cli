@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"errors"
-	"net/http"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
@@ -13,19 +13,7 @@ import (
 )
 
 func TestNewLoginCmd(t *testing.T) {
-	findSetterMock := findSetterServerCustomMock{
-		set: nil,
-		find: func() (server.Config, error) {
-			return server.Config{
-				Organization: "test",
-				URL:          "http://localhost:8882",
-				PinningKey:   "",
-				PinningAddr:  "",
-			}, nil
-		},
-	}
-
-	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{}, findSetterMock, &http.Client{})
+	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{}, findSetterServerMock{}, otpResolverMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewLoginCmd got %v", cmd)
@@ -43,7 +31,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 		InputText     prompt.InputText
 		InputPassword prompt.InputPassword
 		Finder        server.Finder
-		Client        *http.Client
+		Resolver      otp.Resolver
 	}
 	tests := []struct {
 		name    string
@@ -68,7 +56,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						}, nil
 					},
 				},
-				Client: http.DefaultClient,
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -81,11 +69,10 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputPassword: inputPasswordMock{},
 				Finder: findSetterServerCustomMock{
 					find: func() (server.Config, error) {
-						return server.Config{
-							Otp: true,
-						}, nil
+						return server.Config{}, nil
 					},
 				},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -101,6 +88,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, errors.New("some error")
 					},
 				},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -120,6 +108,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				},
 				InputPassword: inputPasswordMock{},
 				Finder:        findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -139,6 +128,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 					},
 				},
 				Finder: findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -159,11 +149,10 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputPassword: inputPasswordMock{},
 				Finder: findSetterServerCustomMock{
 					find: func() (server.Config, error) {
-						return server.Config{
-							Otp: true,
-						}, nil
+						return server.Config{}, nil
 					},
 				},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -179,6 +168,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
 				Finder:        findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -194,6 +184,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
 				Finder:        findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -206,7 +197,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				tt.fields.LoginManager,
 				tt.fields.Loader,
 				tt.fields.Finder,
-				tt.fields.Client,
+				tt.fields.Resolver,
 			)
 			l.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := l.Execute(); (err != nil) != tt.wantErr {
