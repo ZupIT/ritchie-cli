@@ -54,7 +54,8 @@ func NewTeamSetCredentialCmd(
 	ib prompt.InputBool,
 	il prompt.InputList,
 	ip prompt.InputPassword) *cobra.Command {
-	s := &setCredentialCmd{st,
+	s := &setCredentialCmd{
+		st,
 		si,
 		nil,
 		api.Team,

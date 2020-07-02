@@ -89,20 +89,7 @@ func buildCommands() *cobra.Command {
 	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
 	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
-
 	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
-	watchManager := watcher.New(formulaBuilder, dirManager)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(
-		userHomeDir,
-		formulaWorkspace,
-		formulaBuilder,
-		watchManager,
-		dirManager,
-		inputText,
-		inputList)
-
 
 	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
 	defaultUpgradeResolver := version.DefaultVersionResolver{
@@ -129,26 +116,35 @@ func buildCommands() *cobra.Command {
 	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
 
 	// level 2
-	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
 		credSetter,
 		credSettings,
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword,
-	)
+		inputPassword)
+	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
-	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool,)
+	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
 	listRepoCmd := cmd.NewListRepoCmd(repoManager)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
-
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
+	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
+	watchManager := watcher.New(formulaBuilder, dirManager)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(
+		userHomeDir,
+		formulaWorkspace,
+		formulaBuilder,
+		watchManager,
+		dirManager,
+		inputText,
+		inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
