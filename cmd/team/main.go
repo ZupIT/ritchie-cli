@@ -287,7 +287,7 @@ func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 				}
 				uEnc := base64.StdEncoding.EncodeToString(der)
 				if uEnc == pKey {
-					keyPinValid = true
+					keyPinValid = true //#nosec
 				}
 			}
 			if !keyPinValid {
