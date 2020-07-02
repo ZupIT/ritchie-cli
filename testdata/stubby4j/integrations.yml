@@ -126,3 +126,24 @@
   response:
     status: 200
     body: ""
+
+#Get 200 on /otp with true on body
+- request:
+    method: GET
+    url: /otp$
+
+  response:
+    status: 200
+    headers:
+      content-type: application/json
+    body: >
+      {
+        "otp": true
+      }
+
+- request:
+    method: GET
+    url: /request-fail/otp$
+
+  response:
+    status: 500
