@@ -257,38 +257,6 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			wantErr:     true,
 			wantedError: errReader,
 		},
-		{
-			name: "run archive with error in prompt entry credential",
-			editableFields: editableFields{
-				inputText: inputTextCustomMock{
-					text: func(name string, required bool) (string, error) {
-						if name == MsgTypeCredentialInPrompt {
-							return "", errEntry
-						}
-						return "some_input", nil
-					},
-				},
-				inputList: inputListMock{},
-			},
-			wantErr:     true,
-			wantedError: errEntry,
-		},
-		{
-			name: "run archive with error in prompt format entry credential",
-			editableFields: editableFields{
-				inputText: inputTextCustomMock{
-					text: func(name string, required bool) (string, error) {
-						if name == MsgTypeCredentialInPrompt {
-							return "some_input=", nil
-						}
-						return "some_input", nil
-					},
-				},
-				inputList: inputListMock{},
-			},
-			wantErr:     true,
-			wantedError: errEntry,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
