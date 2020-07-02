@@ -91,7 +91,7 @@ func sslCertificationBase64(url string) (cert, addr string, err error) {
 	}
 
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: true, //#nosec
 	})
 	if err != nil {
 		return cert, addr, err
