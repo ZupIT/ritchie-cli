@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/crypto/cryptoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )

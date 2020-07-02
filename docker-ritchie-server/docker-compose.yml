@@ -1,0 +1,46 @@
+version: '3.3'
+
+services:
+  server:
+    image: viniciusramosdefaria/ritchie-server:1.0.0-beta.7
+    volumes:
+      - ./data/server:/home/application
+    ports:
+      - "3000:3000"
+    command: ["/home/application/env.sh"]
+    user: root
+    depends_on:
+      - vault
+      - keycloak
+      - ldap
+
+  vault:
+    image: vault:1.3.0
+    volumes:
+      - ./data/vault/resources/vault.hcl:/vault/config/vault.hcl
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=87e7784b-d598-44fe-8962-c7c345a11eed
+      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+      - SKIP_SETCAP=true
+      - disable_mlock=true
+
+  keycloak:
+    image: jboss/keycloak:7.0.0
+    environment:
+      DB_VENDOR: H2
+      KEYCLOAK_IMPORT: /tmp/keycloak/ritchie.json
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    volumes:
+      - ./data/keycloak:/tmp/keycloak
+
+  ldap:
+    image: osixia/openldap
+    volumes:
+      - ./data/ldap/config.ldif:/container/service/slapd/assets/config/bootstrap/ldif/data.ldif
+    command: [--copy-service,  --loglevel, debug]
+    environment:
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_BASE_DN: dc=example,dc=org
+      LDAP_REPLICATION_HOSTS: ldap://ldap.example.org
+      LDAP_DOMAIN: example.org

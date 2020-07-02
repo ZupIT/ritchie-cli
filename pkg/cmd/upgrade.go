@@ -1,24 +1,28 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
 type UpgradeCmd struct {
-	upgradeUrl string
+	edition api.Edition
 	upgrade.Manager
+	resolver version.Resolver
+	upgrade.UrlFinder
 }
 
-func NewUpgradeCmd(upgradeUrl string, manager upgrade.Manager) *cobra.Command {
+func NewUpgradeCmd(e api.Edition, r version.Resolver, m upgrade.Manager, uf upgrade.UrlFinder) *cobra.Command {
 
 	u := UpgradeCmd{
-		upgradeUrl: upgradeUrl,
-		Manager:    manager,
+		edition: e,
+		Manager:  m,
+		resolver: r,
+		UrlFinder: uf,
 	}
 
 	return &cobra.Command{
@@ -31,10 +35,14 @@ func NewUpgradeCmd(upgradeUrl string, manager upgrade.Manager) *cobra.Command {
 
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
-		err := u.Run(u.upgradeUrl)
+		err := u.resolver.UpdateCache()
 		if err != nil {
-			return fmt.Errorf(prompt.Red, err.Error()+"\n")
+			return prompt.NewError(err.Error()+"\n")
+		}
+		upgradeUrl := u.Url(u.edition, u.resolver)
+		err = u.Run(upgradeUrl)
+		if err != nil {
+			return prompt.NewError(err.Error()+"\n")
 		}
 		prompt.Success("Rit upgraded with success")
 		return nil

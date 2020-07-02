@@ -40,6 +40,11 @@ type DirListChecker interface {
 	DirChecker
 }
 
+type DirCreateChecker interface {
+	DirCreater
+	DirChecker
+}
+
 type DirManager struct {
 	file FileCopier
 }

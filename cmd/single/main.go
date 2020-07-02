@@ -6,9 +6,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 
 	"k8s.io/kubectl/pkg/util/templates"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
@@ -65,31 +70,36 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	repoManager := formula.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
-	repoLoader := formula.NewSingleLoader(cmd.CommonsRepoURL, repoManager)
+	repoManager := repo.NewSingleRepoManager(ritchieHomeDir, http.DefaultClient, sessionManager)
+	repoLoader := repo.NewSingleLoader(cmd.CommonsRepoURL, repoManager)
 	sessionValidator := sesssingle.NewValidator(sessionManager)
 	passphraseManager := secsingle.NewPassphraseManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
 	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
 	credSettings := credsingle.NewSingleSettings(fileManager)
-	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds)
+
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 
-	inputManager := formula.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
-	formulaSetup := formula.NewDefaultSingleSetup(ritchieHomeDir, http.DefaultClient)
+	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
+	formulaSetup := runner.NewDefaultSingleSetup(ritchieHomeDir, http.DefaultClient)
 
-	defaultPreRunner := formula.NewDefaultPreRunner(formulaSetup)
-	dockerPreRunner := formula.NewDockerPreRunner(formulaSetup)
+	defaultPreRunner := runner.NewDefaultPreRunner(formulaSetup)
+	dockerPreRunner := runner.NewDockerPreRunner(formulaSetup)
 
-	postRunner := formula.NewPostRunner()
+	postRunner := runner.NewPostRunner()
 
-	defaultRunner := formula.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
-	dockerRunner := formula.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
+	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
+	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
-	formulaCreator := formula.NewCreator(userHomeDir, treeManager)
+	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
+	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
+	watchManager := watcher.New(formulaBuilder, dirManager)
+	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaBuilder)
 
 	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
 	defaultUpgradeResolver := version.DefaultVersionResolver{
@@ -97,8 +107,7 @@ func buildCommands() *cobra.Command {
 		FileUtilService:  fileutil.DefaultService{},
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
-	upgradeUrl := upgrade.UpgradeUrl(api.Single, defaultUpgradeResolver)
-
+	defaultUrlFinder := upgrade.DefaultUrlFinder{}
 	rootCmd := cmd.NewSingleRootCmd(workspaceManager, sessionValidator)
 
 	// level 1
@@ -113,7 +122,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(upgradeUrl, upgradeManager)
+	upgradeCmd := cmd.NewUpgradeCmd(api.Single, defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
@@ -133,18 +142,9 @@ func buildCommands() *cobra.Command {
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
-	createFormulaCmd := cmd.NewCreateFormulaCmd(formulaCreator, inputText, inputList, inputBool)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
-	watchManager := watcher.New(formulaBuilder, dirManager)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(
-		userHomeDir,
-		formulaWorkspace,
-		formulaBuilder,
-		watchManager,
-		dirManager,
-		inputText,
-		inputList)
+
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputList)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)

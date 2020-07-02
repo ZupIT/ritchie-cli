@@ -1,26 +1,44 @@
 package prompt
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
 
-const (
-	Teal   = "\033[1;36m%s\033[0m"
-	Yellow = "\033[1;33m%s\033[0m"
-	Red    = "\033[1;31m%s\033[0m"
-	Green  = "\033[1;32m%s\033[0m"
+	"github.com/gookit/color"
 )
 
+// NewError returns new error with red message
+func NewError(text string) error {
+	return errors.New(Red(text))
+}
+
+// Red returns a red string
+func Red(text string) string {
+	return color.FgRed.Render(text)
+}
+
+// Error is a Println with red message
 func Error(text string) {
-	fmt.Println(fmt.Sprintf(Red, text))
+	fmt.Println(Red(text))
 }
 
-func Warning(text string) {
-	fmt.Println(fmt.Sprintf(Yellow, text))
+func Green(text string) string {
+	return color.Success.Render(text)
 }
-
 func Success(text string) {
-	fmt.Println(fmt.Sprintf(Green, text))
+	fmt.Println(Green(text))
 }
 
+func Bold(text string) string {
+	return color.Bold.Render(text)
+}
 func Info(text string) {
-	fmt.Println(fmt.Sprintf(Teal, text))
+	fmt.Println(Bold(text))
+}
+
+func Yellow(text string) string {
+	return color.Warn.Render(text)
+}
+func Warning(text string) {
+	color.Warn.Println(text)
 }

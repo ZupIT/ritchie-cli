@@ -7,6 +7,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
@@ -16,10 +17,18 @@ func (inputTextMock) Text(name string, required bool) (string, error) {
 	return "mocked text", nil
 }
 
+func (inputTextMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return "mocked text", nil
+}
+
 type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool) (string, error) {
 	return "username=ritchie", nil
+}
+
+func (inputSecretMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return "mocked text", nil
 }
 
 type inputURLMock struct{}
@@ -88,8 +97,26 @@ func (repoCleaner) Clean(name string) error {
 
 type formCreator struct{}
 
-func (formCreator) Create(cf formula.Create) (formula.CreateManager, error) {
-	return formula.CreateManager{}, nil
+func (formCreator) Create(cf formula.Create) error {
+	return nil
+}
+
+func (formCreator) Build(workspacePath, formulaPath string) error {
+	return nil
+}
+
+type workspaceForm struct{}
+
+func (workspaceForm) Add(workspace formula.Workspace) error {
+	return nil
+}
+
+func (workspaceForm) List() (formula.Workspaces, error) {
+	return formula.Workspaces{}, nil
+}
+
+func (workspaceForm) Validate(workspace formula.Workspace) error {
+	return nil
 }
 
 type ctxSetterMock struct{}
@@ -262,11 +289,16 @@ func (m inputBoolCustomMock) Bool(name string, items []string) (bool, error) {
 }
 
 type inputTextCustomMock struct {
-	text func(name string, required bool) (string, error)
+	text             func(name string, required bool) (string, error)
+	textWithValidate func(name string, validate func(string) error) (string, error)
 }
 
 func (m inputTextCustomMock) Text(name string, required bool) (string, error) {
 	return m.text(name, required)
+}
+
+func (m inputTextCustomMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+	return m.textWithValidate(name, validate)
 }
 
 type loginManagerCustomMock struct {
@@ -299,4 +331,18 @@ type inputPasswordCustomMock struct {
 
 func (m inputPasswordCustomMock) Password(label string) (string, error) {
 	return m.password(label)
+}
+
+type otpResolverMock struct {}
+
+func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return otp.Response{Otp: true}, nil
+}
+
+type otpResolverCustomMock struct {
+	requestOtp func(url, organization string) (otp.Response, error)
+}
+
+func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return m.requestOtp(url, organization)
 }

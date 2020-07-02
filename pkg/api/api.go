@@ -43,6 +43,7 @@ var (
 		{Parent: "root_clean", Usage: "repo"},
 		{Parent: "root", Usage: "build"},
 		{Parent: "root_build", Usage: "formula"},
+		{Parent: "root", Usage: "upgrade"},
 	}
 
 	SingleCoreCmds = CoreCmds
@@ -63,22 +64,22 @@ type Command struct {
 	Parent  string  `json:"parent"`
 	Usage   string  `json:"usage"`
 	Help    string  `json:"help"`
-	Formula Formula `json:"formula,omitempty"`
-	Repo    string
+	Formula *Formula `json:"formula,omitempty"`
+	Repo    string  `json:"Repo,omitempty"`
 }
 
 type Commands []Command
 
 // Formula type
 type Formula struct {
-	Path    string `json:"path"`
-	Bin     string `json:"bin"`
-	LBin    string `json:"binLinux"`
-	MBin    string `json:"binDarwin"`
-	WBin    string `json:"binWindows"`
-	Bundle  string `json:"bundle"`
-	Config  string `json:"config"`
-	RepoURL string `json:"repoUrl"`
+	Path    string `json:"path,omitempty"`
+	Bin     string `json:"bin,omitempty"`
+	LBin    string `json:"binLinux,omitempty"`
+	MBin    string `json:"binDarwin,omitempty"`
+	WBin    string `json:"binWindows,omitempty"`
+	Bundle  string `json:"bundle,omitempty"`
+	Config  string `json:"config,omitempty"`
+	RepoURL string `json:"repoUrl,omitempty"`
 }
 
 // Edition type that represents Single or Team.

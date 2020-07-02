@@ -5,19 +5,20 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 func TestNewLoginCmd(t *testing.T) {
-	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{}, findSetterServerMock{})
+	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{}, findSetterServerMock{}, otpResolverMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewLoginCmd got %v", cmd)
 
 	}
-
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
@@ -26,10 +27,11 @@ func TestNewLoginCmd(t *testing.T) {
 func Test_loginCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		LoginManager  security.LoginManager
-		Loader        formula.Loader
+		Loader        formula.RepoLoader
 		InputText     prompt.InputText
 		InputPassword prompt.InputPassword
 		Finder        server.Finder
+		Resolver      otp.Resolver
 	}
 	tests := []struct {
 		name    string
@@ -43,9 +45,26 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
-				Finder:        findSetterServerMock{},
+				Finder: findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
+		},
+		{
+			name: "request otp returns error",
+			fields: fields{
+				LoginManager:  loginManagerMock{},
+				Loader:        repoLoaderMock{},
+				InputText:     inputTextMock{},
+				InputPassword: inputPasswordMock{},
+				Finder: findSetterServerMock{},
+				Resolver:      otpResolverCustomMock{
+					requestOtp: func(url, organization string) (otp.Response, error) {
+						return otp.Response{}, errors.New("some error")
+					},
+				},
+			},
+			wantErr: true,
 		},
 		{
 			name: "run with success when ask otp",
@@ -56,11 +75,10 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputPassword: inputPasswordMock{},
 				Finder: findSetterServerCustomMock{
 					find: func() (server.Config, error) {
-						return server.Config{
-							Otp: true,
-						}, nil
+						return server.Config{}, nil
 					},
 				},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -76,6 +94,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, errors.New("some error")
 					},
 				},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -95,6 +114,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				},
 				InputPassword: inputPasswordMock{},
 				Finder:        findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -114,6 +134,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 					},
 				},
 				Finder: findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -134,11 +155,10 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputPassword: inputPasswordMock{},
 				Finder: findSetterServerCustomMock{
 					find: func() (server.Config, error) {
-						return server.Config{
-							Otp: true,
-						}, nil
+						return server.Config{}, nil
 					},
 				},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -154,6 +174,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
 				Finder:        findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -169,6 +190,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
 				Finder:        findSetterServerMock{},
+				Resolver:      otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -181,6 +203,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				tt.fields.LoginManager,
 				tt.fields.Loader,
 				tt.fields.Finder,
+				tt.fields.Resolver,
 			)
 			l.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := l.Execute(); (err != nil) != tt.wantErr {
