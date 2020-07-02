@@ -283,7 +283,7 @@ func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 		return c, nil
 	}
 }
-
+/* #nosec */
 func makeHttpClientIgnoreSsl() *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //#nosec
