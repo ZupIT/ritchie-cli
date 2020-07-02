@@ -457,7 +457,7 @@ workflows:
   build-for-requests:
     jobs:
       - lint:
-          filters:
+          filters: 
             <<: *FILTERS_CHECK_CODE
       - horus:
           filters:
