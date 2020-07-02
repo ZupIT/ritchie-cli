@@ -17,7 +17,7 @@ func (inputTextMock) Text(name string, required bool) (string, error) {
 	return "mocked text", nil
 }
 
-func (inputTextMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+func (inputTextMock) TextWithValidate(name string, validate func(interface{}) error) (string, error) {
 	return "mocked text", nil
 }
 
@@ -27,7 +27,7 @@ func (inputSecretMock) Text(name string, required bool) (string, error) {
 	return "username=ritchie", nil
 }
 
-func (inputSecretMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+func (inputSecretMock) TextWithValidate(name string, validate func(interface{}) error) (string, error) {
 	return "mocked text", nil
 }
 
@@ -277,14 +277,14 @@ func (m inputBoolCustomMock) Bool(name string, items []string) (bool, error) {
 
 type inputTextCustomMock struct {
 	text             func(name string, required bool) (string, error)
-	textWithValidate func(name string, validate func(string) error) (string, error)
+	textWithValidate func(name string, validate func(interface{}) error) (string, error)
 }
 
 func (m inputTextCustomMock) Text(name string, required bool) (string, error) {
 	return m.text(name, required)
 }
 
-func (m inputTextCustomMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+func (m inputTextCustomMock) TextWithValidate(name string, validate func(interface{}) error) (string, error) {
 	return m.textWithValidate(name, validate)
 }
 
@@ -320,6 +320,11 @@ func (m inputPasswordCustomMock) Password(label string) (string, error) {
 	return m.password(label)
 }
 
+type InputMultilineMock struct{}
+
+func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
+	return "username=ritchie", nil
+}
 type otpResolverMock struct {}
 
 func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {

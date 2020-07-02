@@ -147,7 +147,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 							return "some_input", nil
 						}
 					},
-					textWithValidate: func(name string, validate func(string) error) (string, error) {
+					textWithValidate: func(name string, validate func(interface{}) error) (string, error) {
 						return "", nil
 					},
 				},
