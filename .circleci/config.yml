@@ -460,7 +460,7 @@ workflows:
       - lint:
           filters:
             <<: *FILTERS_CHECK_CODE
-3      - horus:
+      - horus:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
