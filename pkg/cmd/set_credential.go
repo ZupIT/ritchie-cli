@@ -23,6 +23,7 @@ type setCredentialCmd struct {
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
+	prompt.InputMultiline
 }
 
 // NewSingleSetCredentialCmd creates a new cmd instance
@@ -32,7 +33,8 @@ func NewSingleSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword) *cobra.Command {
+	ip prompt.InputPassword,
+	im prompt.InputMultiline) *cobra.Command {
 	s := &setCredentialCmd{
 		st,
 		nil,
@@ -41,8 +43,8 @@ func NewSingleSetCredentialCmd(
 		it,
 		ib,
 		il,
-		ip}
-
+		ip,
+		im}
 	return newCmd(s)
 }
 
@@ -53,7 +55,8 @@ func NewTeamSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword) *cobra.Command {
+	ip prompt.InputPassword,
+	im prompt.InputMultiline) *cobra.Command {
 	s := &setCredentialCmd{
 		st,
 		si,
@@ -62,8 +65,8 @@ func NewTeamSetCredentialCmd(
 		it,
 		ib,
 		il,
-		ip}
-
+		ip,
+	im}
 	return newCmd(s)
 }
 
@@ -129,7 +132,6 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 		var newField credential.Field
 		for addMoreCredentials {
 			newField.Name, _ = s.Text("Credential key/tag:", true)
-
 			typeList := []string{"text", "password"}
 			newField.Type, _ = s.List("Want to input the credential as a:", typeList)
 
