@@ -87,7 +87,6 @@ func buildCommands() *cobra.Command {
 	credSetter := credteam.NewSetter(serverFinder, httpClient, sessionManager, ctxFinder)
 	credFinder := credteam.NewFinder(serverFinder, httpClient, sessionManager, ctxFinder)
 	credSettings := credteam.NewSettings(serverFinder, httpClient, sessionManager, ctxFinder)
-
 	treeManager := formula.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)

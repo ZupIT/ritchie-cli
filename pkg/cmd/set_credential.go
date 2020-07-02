@@ -32,16 +32,16 @@ func NewSingleSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword,) *cobra.Command {
-	s := &setCredentialCmd{st,
+	ip prompt.InputPassword) *cobra.Command {
+	s := &setCredentialCmd{
+		st,
 		nil,
 		ss,
 		api.Single,
 		it,
 		ib,
 		il,
-		ip,
-	}
+		ip}
 
 	return newCmd(s)
 }
@@ -160,7 +160,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	return credDetail, nil
 }
 
-func credentialFileExists()bool{
+func credentialFileExists() bool {
 	return true
 }
 

@@ -177,6 +177,9 @@ type credSettingsMock struct{}
 
 type singleCredSettingsMock struct {}
 
+func (s singleCredSettingsMock) DefaultCredentials() {
+}
+
 func (s singleCredSettingsMock) ReadCredentials() credential.Fields {
 	return nil
 }
