@@ -86,12 +86,12 @@ func (s SetterManager) Set(cfg *Config) error {
 	}
 	return nil
 }
-/* nosec */
+
 func sslCertificationBase64(url string) (cert, addr string, err error) {
 	if !strings.HasPrefix(url, "https") {
 		return "", "", nil
 	}
-	u := strings.Replace(url, "https://", "", 1)
+	u := strings.Replace(url, "https://", "", 1)//#nosec
 
 	s := strings.Split(strings.Split(u, "/")[0], ":")
 	addr = s[0]
