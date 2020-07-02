@@ -86,7 +86,7 @@ func (s SetterManager) Set(cfg *Config) error {
 	}
 	return nil
 }
-
+/* nosec */
 func sslCertificationBase64(url string) (cert, addr string, err error) {
 	if !strings.HasPrefix(url, "https") {
 		return "", "", nil
