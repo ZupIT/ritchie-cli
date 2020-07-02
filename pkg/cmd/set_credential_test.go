@@ -34,40 +34,7 @@ func TestNewTeamSetCredentialCmd(t *testing.T) {
 	}
 }
 
-func TestNewSingleSetCredentialCmdWithEntryArchive(t *testing.T) {
-	errPath := errors.New("some error of path")
-	cmd := NewSingleSetCredentialCmd(
-		credSetterMock{},
-		inputTextCustomMock{
-			text: func(name string, required bool) (string, error) {
-				if name == MsgTypeEntryPath {
-					return "/test", errPath
-				}
-				return "some_path", nil
-			},
-		},
-		inputFalseMock{},
-		inputListCustomMock{
-			list: func(name string, list []string) (string, error) {
-				if name == MsgTypeEntry {
-					return EntriesTypeCredentialFile, nil
-				}
-				return "some_input", nil
-			},
-		},
-		inputPasswordMock{},
-	)
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	if cmd == nil {
-		t.Errorf("NewTeamSetCredentialCmd got %v", cmd)
-	}
-
-	if err := cmd.Execute(); err != errPath {
-		t.Errorf("%s = %q, want %q", cmd.Use, err, errPath)
-	}
-}
-
-func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
+func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 	errEntry := errors.New("some error of entry")
 
 	tmpfile := createTemporaryFile()
@@ -84,7 +51,7 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 		wantedError    error
 	}{
 		{
-			name: "run prompt with success",
+			name: "run set_credential with success when prompt entry selected",
 			editableFields: editableFields{
 				inputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
@@ -107,7 +74,7 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			wantedError: nil,
 		},
 		{
-			name: "run prompt with error in entry credential",
+			name: "run set_credential with error in entry credential when prompt entry selected",
 			editableFields: editableFields{
 				inputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
@@ -117,20 +84,27 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 						return "some_input", nil
 					},
 				},
-				inputList: inputListMock{},
+				inputList: inputListCustomMock{
+					list: func(name string, list []string) (string, error) {
+						if name == MsgTypeEntry {
+							return EntriesTypeCredentialPrompt, nil
+						}
+						return "some_input", nil
+					},
+				},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
 		},
 		{
-			name: "run archive with success",
+			name: "run set_credential with success when file entry selected",
 			editableFields: editableFields{
 				inputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
 						if name == MsgTypeEntryPath {
 							return tmpfile.Name(), nil
 						}
-						return "some_input=some_input", nil
+						return "some_input", nil
 					},
 				},
 				inputList: inputListCustomMock{
@@ -146,7 +120,7 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			wantedError: nil,
 		},
 		{
-			name: "run archive with error in type msg type entry",
+			name: "run set_credential with error in select type entry when file entry selected",
 			editableFields: editableFields{
 				inputText: inputTextMock{},
 				inputList: inputListCustomMock{
@@ -162,11 +136,11 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			wantedError: errEntry,
 		},
 		{
-			name: "run archive with error in type key file entry",
+			name: "run set_credential with error in key of credential when file entry selected",
 			editableFields: editableFields{
 				inputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
-						if name == "Type key of your credential: " {
+						if name == MsgTypeKeyCredential {
 							return "", errEntry
 						}
 						return "some_input", nil

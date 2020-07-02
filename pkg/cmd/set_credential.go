@@ -33,6 +33,7 @@ const (
 	EntriesTypeCredentialFile   = "File (input by file)"
 	EntriesTypeCredentialPrompt = "Prompt (manual entry)"
 	MsgTypeCredentialInPrompt   = "Type your credential using the format key=value (e.g. email=example@example.com): "
+	MsgTypeKeyCredential        = "Type key of your credential: "
 )
 
 // NewSingleSetCredentialCmd creates a new cmd instance
@@ -186,7 +187,7 @@ func (s setCredentialCmd) entryCredential() ([]string, error) {
 func (s setCredentialCmd) inputFile() ([]string, error) {
 	var res []string
 
-	key, err := s.Text("Type key of your credential: ", true)
+	key, err := s.Text(MsgTypeKeyCredential, true)
 	if err != nil {
 		return nil, err
 	}
