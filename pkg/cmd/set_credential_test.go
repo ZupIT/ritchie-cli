@@ -67,72 +67,6 @@ func TestNewSingleSetCredentialCmdWithEntryArchive(t *testing.T) {
 	}
 }
 
-func TestNewSingleSetCredentialCmdWithEntryArchiveWithError1(t *testing.T) {
-	errCredential := errors.New("some error of entry")
-	cmd := NewSingleSetCredentialCmd(
-		credSetterMock{},
-		inputTextCustomMock{
-			text: func(name string, required bool) (string, error) {
-				if name == MsgTypeCredentialInPrompt {
-					return "", errCredential
-				}
-				return "some_path", nil
-			},
-		},
-		inputFalseMock{},
-		inputListCustomMock{
-			list: func(name string, list []string) (string, error) {
-				if name == MsgTypeEntry {
-					return "", errCredential
-				}
-				return "some_input", nil
-			},
-		},
-		inputPasswordMock{},
-	)
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	if cmd == nil {
-		t.Errorf("NewTeamSetCredentialCmd got %v", cmd)
-	}
-
-	if err := cmd.Execute(); err != errCredential {
-		t.Errorf("%s = %q, want %q", cmd.Use, err, errCredential)
-	}
-}
-
-func TestNewSingleSetCredentialCmdWithEntryArchiveWithError2(t *testing.T) {
-	errEntry := errors.New("some error of entry")
-	cmd := NewSingleSetCredentialCmd(
-		credSetterMock{},
-		inputTextCustomMock{
-			text: func(name string, required bool) (string, error) {
-				if name == EntriesTypeCredentialPrompt {
-					return "", errEntry
-				}
-				return "some_path", nil
-			},
-		},
-		inputFalseMock{},
-		inputListCustomMock{
-			list: func(name string, list []string) (string, error) {
-				if name == MsgTypeEntry {
-					return EntriesTypeCredentialPrompt, nil
-				}
-				return "some_input", nil
-			},
-		},
-		inputPasswordMock{},
-	)
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	if cmd == nil {
-		t.Errorf("NewTeamSetCredentialCmd got %v", cmd)
-	}
-
-	if err := cmd.Execute(); err != errEntry {
-		t.Errorf("%s = %q, want %q", cmd.Use, err, errEntry)
-	}
-}
-
 func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 	errEntry := errors.New("some error of entry")
 
@@ -171,6 +105,22 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			},
 			wantErr:     false,
 			wantedError: nil,
+		},
+		{
+			name: "run prompt with error in entry credential",
+			editableFields: editableFields{
+				inputText: inputTextCustomMock{
+					text: func(name string, required bool) (string, error) {
+						if name == MsgTypeCredentialInPrompt {
+							return "", errEntry
+						}
+						return "some_input", nil
+					},
+				},
+				inputList: inputListMock{},
+			},
+			wantErr:     true,
+			wantedError: errEntry,
 		},
 		{
 			name: "run archive with success",
@@ -234,22 +184,6 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			wantErr:     true,
 			wantedError: errEntry,
 		},
-		{
-			name: "run archive with error in prompt entry credential",
-			editableFields: editableFields{
-				inputText: inputTextCustomMock{
-					text: func(name string, required bool) (string, error) {
-						if name == MsgTypeCredentialInPrompt {
-							return "", errEntry
-						}
-						return "some_input", nil
-					},
-				},
-				inputList: inputListMock{},
-			},
-			wantErr:     true,
-			wantedError: errEntry,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -268,10 +202,6 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			err := cmd.Execute()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("%s error = %v, wantErr %v", tt.name, err, tt.wantErr)
-			}
-
-			if tt.wantErr && err != tt.wantedError {
-				t.Errorf("%s error = %v, wantedError %v", tt.name, err, tt.wantedError)
 			}
 		})
 	}
