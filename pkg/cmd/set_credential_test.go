@@ -135,7 +135,7 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithError2(t *testing.T) {
 
 func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 	errEntry := errors.New("some error of entry")
-	errReader := errors.New("no such file or directory")
+
 	tmpfile := createTemporaryFile()
 	defer os.Remove(tmpfile.Name())
 
@@ -235,27 +235,20 @@ func TestNewSingleSetCredentialCmdWithEntryArchiveWithOptions(t *testing.T) {
 			wantedError: errEntry,
 		},
 		{
-			name: "run archive with error in type value file entry",
+			name: "run archive with error in prompt entry credential",
 			editableFields: editableFields{
 				inputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
-						if name == MsgTypeEntryPath {
+						if name == MsgTypeCredentialInPrompt {
 							return "", errEntry
 						}
 						return "some_input", nil
 					},
 				},
-				inputList: inputListCustomMock{
-					list: func(name string, list []string) (string, error) {
-						if name == MsgTypeEntry {
-							return EntriesTypeCredentialFile, nil
-						}
-						return "some_input", nil
-					},
-				},
+				inputList: inputListMock{},
 			},
 			wantErr:     true,
-			wantedError: errReader,
+			wantedError: errEntry,
 		},
 	}
 	for _, tt := range tests {
