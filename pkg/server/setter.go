@@ -103,7 +103,7 @@ func sslCertificationBase64(url string) (cert, addr string, err error) {
 	default:
 		return cert, addr, errors.New("url formatter error")
 	}
-
+	/* #nosec */
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
 		InsecureSkipVerify: true, //#nosec
 	})

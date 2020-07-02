@@ -256,7 +256,7 @@ func makeHttpClient(finder server.Finder) *http.Client {
 }
 
 type Dialer func(ctx context.Context, network, addr string) (net.Conn, error)
-
+/* #nosec */
 func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 	return func(ctx context.Context, network, addr string) (net.Conn, error) {
 		c, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: skipCAVerification}) //#	nosec
