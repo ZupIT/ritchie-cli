@@ -41,8 +41,9 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 	defer os.Remove(tmpfile.Name())
 
 	type editableFields struct {
-		inputText prompt.InputText
-		inputList prompt.InputList
+		inputText      prompt.InputText
+		inputList      prompt.InputList
+		InputMultiline prompt.InputMultiline
 	}
 	tests := []struct {
 		name           string
@@ -53,18 +54,19 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 		{
 			name: "run set_credential with success when prompt entry selected",
 			editableFields: editableFields{
-				inputText: inputTextCustomMock{
-					text: func(name string, required bool) (string, error) {
-						if name == MsgTypeCredentialInPrompt {
-							return "teste=teste", nil
-						}
-						return "some_input", nil
-					},
-				},
+				inputText: inputTextMock{},
 				inputList: inputListCustomMock{
 					list: func(name string, list []string) (string, error) {
 						if name == MsgTypeEntry {
 							return EntriesTypeCredentialPrompt, nil
+						}
+						return "some_input", nil
+					},
+				},
+				InputMultiline: InputMultilineCustomMock{
+					multiLineText: func(name string, required bool) (string, error) {
+						if name == MsgTypeCredentialInPrompt {
+							return "teste=teste", nil
 						}
 						return "some_input", nil
 					},
@@ -76,18 +78,19 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 		{
 			name: "run set_credential with error in entry credential when prompt entry selected",
 			editableFields: editableFields{
-				inputText: inputTextCustomMock{
-					text: func(name string, required bool) (string, error) {
-						if name == MsgTypeCredentialInPrompt {
-							return "", errEntry
-						}
-						return "some_input", nil
-					},
-				},
+				inputText: inputTextMock{},
 				inputList: inputListCustomMock{
 					list: func(name string, list []string) (string, error) {
 						if name == MsgTypeEntry {
 							return EntriesTypeCredentialPrompt, nil
+						}
+						return "some_input", nil
+					},
+				},
+				InputMultiline: InputMultilineCustomMock{
+					multiLineText: func(name string, required bool) (string, error) {
+						if name == MsgTypeCredentialInPrompt {
+							return "", errEntry
 						}
 						return "some_input", nil
 					},
@@ -115,6 +118,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 						return "some_input", nil
 					},
 				},
+				InputMultiline: InputMultilineMock{},
 			},
 			wantErr:     false,
 			wantedError: nil,
@@ -138,6 +142,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 						return "some_input", nil
 					},
 				},
+				InputMultiline: InputMultilineMock{},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
@@ -154,6 +159,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 						return "some_input", nil
 					},
 				},
+				InputMultiline: InputMultilineMock{},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
@@ -177,6 +183,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 						return "some_input", nil
 					},
 				},
+				InputMultiline: InputMultilineMock{},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
@@ -190,6 +197,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 				inputFalseMock{},
 				tt.editableFields.inputList,
 				inputPasswordMock{},
+				tt.editableFields.InputMultiline,
 			)
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if cmd == nil {

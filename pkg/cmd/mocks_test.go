@@ -333,7 +333,16 @@ type InputMultilineMock struct{}
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
 }
-type otpResolverMock struct {}
+
+type InputMultilineCustomMock struct {
+	multiLineText func(name string, required bool) (string, error)
+}
+
+func (m InputMultilineCustomMock) MultiLineText(name string, required bool) (string, error) {
+	return m.multiLineText(name, required)
+}
+
+type otpResolverMock struct{}
 
 func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
 	return otp.Response{Otp: true}, nil
