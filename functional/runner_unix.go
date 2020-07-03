@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/ZupIT/ritchie-cli/pkg/cmd"
 )
 
 func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
@@ -61,25 +59,17 @@ func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
 
 func setUpRitSingleUnix() {
 	fmt.Println("Running Setup for Unix..")
-	command := []string{initCmd}
-	_, stdin, out, _ := execRit(command)
-	scanner := scannerTerminal(out)
-	for scanner.Scan() {
-		m := scanner.Text()
-		fmt.Println(m)
-		if strings.Contains(m, cmd.MsgPhrase) {
-			err := inputCommand(stdin, "12345\n")
-			if err != nil {
-				log.Printf("Error when input number: %q", err)
-			}
-			break
-		}
+
+	fmt.Println("Running INIT")
+	initStepEcho := Step{Key: "", Value: "{\"passphrase\":\"12345\"}", Action: "echo"}
+	initStepRit := Step{Key: "", Value: "init --stdin", Action: "rit"}
+	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepEcho, initStepRit}}
+
+	_, err := init.runStdinForUnix()
+	if err != nil {
+		log.Printf("Error when do init: %q", err)
 	}
-	scanner = scannerTerminal(out)
-	for scanner.Scan() {
-		m := scanner.Text()
-		fmt.Println(m)
-	}
+
 }
 
 func setUpRitTeamUnix(){

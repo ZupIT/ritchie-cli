@@ -1,8 +1,10 @@
 package prompt
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/validator"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/manifoldco/promptui"
+
+	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
 type InputURL interface {
@@ -11,11 +13,16 @@ type InputURL interface {
 
 type inputURL struct{}
 
+type surveyURL struct{}
+
 func NewInputURL() inputURL {
 	return inputURL{}
 }
 
-// URL show a prompt and parse to string.
+func NewSurveyURL() surveyURL {
+	return surveyURL{}
+}
+
 func (inputURL) URL(name, defaultValue string) (string, error) {
 	prompt := promptui.Prompt{
 		Label:     name,
@@ -26,4 +33,21 @@ func (inputURL) URL(name, defaultValue string) (string, error) {
 	}
 
 	return prompt.Run()
+}
+
+func (surveyURL) URL(name, defaultValue string) (string, error) {
+	var value string
+
+	validationQs := []*survey.Question{
+		{
+			Name:     "name",
+			Prompt:   &survey.Input{
+				Message:  name,
+				Default:  defaultValue,
+			},
+			Validate: validator.IsValidSurveyURL,
+		},
+	}
+
+	return value, survey.Ask(validationQs, &value)
 }
