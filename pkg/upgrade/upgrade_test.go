@@ -12,10 +12,15 @@ import (
 
 type stubResolver struct {
 	stableVersion func() (string, error)
+	updateCache func() error
 }
 
 func (r stubResolver) StableVersion() (string, error) {
 	return r.stableVersion()
+}
+
+func (r stubResolver) UpdateCache() error {
+	return r.updateCache()
 }
 
 func TestUpgradeUrl(t *testing.T) {
@@ -80,7 +85,8 @@ func TestUpgradeUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := UpgradeUrl(tt.args.edition, tt.args.resolver); got != tt.want {
+			duf := DefaultUrlFinder{}
+			if got := duf.Url(tt.args.edition, tt.args.resolver); got != tt.want {
 				t.Errorf("UpgradeUrl() = %v, want %v", got, tt.want)
 			}
 		})

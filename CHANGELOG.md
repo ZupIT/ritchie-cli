@@ -2,13 +2,43 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.15...HEAD)
-
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.17...HEAD)
 
 **Merged pull requests:**
 
+- \[FIX\] improvements rit upgrade [\#215](https://github.com/ZupIT/ritchie-cli/pull/215) ([marcoscostazup](https://github.com/marcoscostazup))
+
+## [1.0.0-beta.17](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.17) (2020-06-30)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.15...1.0.0-beta.17)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Add to command `rit create formula` the build formula command [\#214](https://github.com/ZupIT/ritchie-cli/issues/214)
+- \[FEATURE\] Adding hello world template in PHP \(rit create formula\) [\#185](https://github.com/ZupIT/ritchie-cli/issues/185)
+- \[FEATURE\] Docker ritchie-server [\#219](https://github.com/ZupIT/ritchie-cli/pull/219) ([marcosgmgm](https://github.com/marcosgmgm))
+- \[FEATURE\] Adding hello world template in PHP \(Issue \#185\) [\#216](https://github.com/ZupIT/ritchie-cli/pull/216) ([antonioolf](https://github.com/antonioolf))
+- \[FEATURE\] Create formula and build [\#212](https://github.com/ZupIT/ritchie-cli/pull/212) ([kaduartur](https://github.com/kaduartur))
+
+**Fixed bugs:**
+
+- \[BUG\] Windows colors [\#196](https://github.com/ZupIT/ritchie-cli/issues/196)
+- \[BUG\] Create formula error [\#171](https://github.com/ZupIT/ritchie-cli/issues/171)
+- \[BUG\]Module Axios not found. [\#149](https://github.com/ZupIT/ritchie-cli/issues/149)
+- Fix/colors windows [\#200](https://github.com/ZupIT/ritchie-cli/pull/200) ([victor-schumacher](https://github.com/victor-schumacher))
+
+**Merged pull requests:**
+
+- \[fix\] Fix stable qa [\#226](https://github.com/ZupIT/ritchie-cli/pull/226) ([ernelio](https://github.com/ernelio))
+- \[feature\] Add integration test in core commands team. [\#224](https://github.com/ZupIT/ritchie-cli/pull/224) ([ernelio](https://github.com/ernelio))
+- \[FIX\] release creator [\#218](https://github.com/ZupIT/ritchie-cli/pull/218) ([ernelio](https://github.com/ernelio))
+- fix dialer when err [\#217](https://github.com/ZupIT/ritchie-cli/pull/217) ([viniciussousazup](https://github.com/viniciussousazup))
+- Feature/cli team tests [\#213](https://github.com/ZupIT/ritchie-cli/pull/213) ([dmbarra](https://github.com/dmbarra))
+- Fix delivery release packaging [\#211](https://github.com/ZupIT/ritchie-cli/pull/211) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.16 merge [\#208](https://github.com/ZupIT/ritchie-cli/pull/208) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.15 merge [\#207](https://github.com/ZupIT/ritchie-cli/pull/207) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.14 merge [\#206](https://github.com/ZupIT/ritchie-cli/pull/206) ([zup-ci](https://github.com/zup-ci))
+- \[FEATURE\] Change login and init to get totp [\#190](https://github.com/ZupIT/ritchie-cli/pull/190) ([viniciussousazup](https://github.com/viniciussousazup))
 
 ## [1.0.0-beta.15](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.15) (2020-06-24)
 
@@ -26,9 +56,6 @@
 
 - \[FEATURE\] rit build formula command [\#176](https://github.com/ZupIT/ritchie-cli/issues/176)
 - \[FEATURE\] Run formulas inside a docker container [\#80](https://github.com/ZupIT/ritchie-cli/issues/80)
-
-**Implemented enhancements:**
-
 - \[FEATURE\] Build formula with Ritchie-cli [\#180](https://github.com/ZupIT/ritchie-cli/pull/180) ([kaduartur](https://github.com/kaduartur))
 - cleanup, refactor and improvements regarding beta and nightly version [\#175](https://github.com/ZupIT/ritchie-cli/pull/175) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - Feature/rit upgrade [\#165](https://github.com/ZupIT/ritchie-cli/pull/165) ([viniciussousazup](https://github.com/viniciussousazup))
@@ -46,13 +73,6 @@
 **Closed issues:**
 
 - \[FEATURE\] Create a beautiful screen after login and logout [\#22](https://github.com/ZupIT/ritchie-cli/issues/22)
-
-
-**Fixed bugs:**
-
-- \[bug\] fix completion zsh,bash [\#194](https://github.com/ZupIT/ritchie-cli/pull/194) ([viniciussousazup](https://github.com/viniciussousazup))
-- \[FIX\] trailing slashes removed [\#166](https://github.com/ZupIT/ritchie-cli/pull/166) ([marcoscostazup](https://github.com/marcoscostazup))
-
 
 **Merged pull requests:**
 
@@ -76,38 +96,6 @@
 - change run-tests and scripts to windows [\#167](https://github.com/ZupIT/ritchie-cli/pull/167) ([viniciussousazup](https://github.com/viniciussousazup))
 - Fix smoke test for release [\#164](https://github.com/ZupIT/ritchie-cli/pull/164) ([dmbarra](https://github.com/dmbarra))
 - Feature/beta pipeline [\#163](https://github.com/ZupIT/ritchie-cli/pull/163) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
-
-
-## [1.0.0-beta.15](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.15) (2020-06-24)
-
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.14...1.0.0-beta.15)
-
-- \[FIX\] Adding trapdoor to error while removing branch [\#152](https://github.com/ZupIT/ritchie-cli/pull/152) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
-
-
-## [1.0.0-beta.14](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.14) (2020-06-24)
-
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.13...1.0.0-beta.14)
-
-**Implemented enhancements:**
-
-- \[FEATURE\] rit build formula command [\#176](https://github.com/ZupIT/ritchie-cli/issues/176)
-- \[FEATURE\] Run formulas inside a docker container [\#80](https://github.com/ZupIT/ritchie-cli/issues/80)
-- \[Feature\] color messages [\#146](https://github.com/ZupIT/ritchie-cli/pull/146) ([victor-schumacher](https://github.com/victor-schumacher))
-- \[FEATURE\] run formula docker [\#113](https://github.com/ZupIT/ritchie-cli/pull/113) ([kaduartur](https://github.com/kaduartur))
-
-**Fixed bugs:**
-
-- \[BUG\] PWD environment variable error passed by formula runner [\#155](https://github.com/ZupIT/ritchie-cli/issues/155)
-- \[BUG\] RIT Team: set server with invalid URL [\#91](https://github.com/ZupIT/ritchie-cli/issues/91)
-
-**Closed issues:**
-
-- \[FEATURE\] Create a beautiful screen after login and logout [\#22](https://github.com/ZupIT/ritchie-cli/issues/22)
-
-**Merged pull requests:**
-
-
 - \[FIX\] Formulas messages [\#161](https://github.com/ZupIT/ritchie-cli/pull/161) ([kaduartur](https://github.com/kaduartur))
 - removed flags [\#160](https://github.com/ZupIT/ritchie-cli/pull/160) ([victor-schumacher](https://github.com/victor-schumacher))
 - Temporarily disable windows jobs [\#159](https://github.com/ZupIT/ritchie-cli/pull/159) ([dmbarra](https://github.com/dmbarra))
@@ -298,6 +286,7 @@
 - Circleci project setup [\#29](https://github.com/ZupIT/ritchie-cli/pull/29) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - Feature/improve\_session\_validator [\#21](https://github.com/ZupIT/ritchie-cli/pull/21) ([kaduartur](https://github.com/kaduartur))
 - \[FEATURE\] updating issues contribution templates [\#20](https://github.com/ZupIT/ritchie-cli/pull/20) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+- \[Enhancement\] Contributing file [\#17](https://github.com/ZupIT/ritchie-cli/pull/17) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
 **Fixed bugs:**
 
@@ -329,7 +318,6 @@
 
 **Implemented enhancements:**
 
-- \[Enhancement\] Contributing file [\#17](https://github.com/ZupIT/ritchie-cli/pull/17) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - feature/prompt\_interface [\#14](https://github.com/ZupIT/ritchie-cli/pull/14) ([sandokandias](https://github.com/sandokandias))
 - \[Enhancement\] Contributing file [\#11](https://github.com/ZupIT/ritchie-cli/pull/11) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 

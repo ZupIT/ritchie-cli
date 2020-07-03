@@ -1,17 +1,18 @@
 package cmd
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 // updateRepoCmd type for update command
 type updateRepoCmd struct {
-	formula.Updater
+	formula.RepoUpdater
 }
 
 // NewUpdateRepoCmd creates a new cmd instance
-func NewUpdateRepoCmd(up formula.Updater) *cobra.Command {
+func NewUpdateRepoCmd(up formula.RepoUpdater) *cobra.Command {
 	u := &updateRepoCmd{up}
 
 	cmd := &cobra.Command{

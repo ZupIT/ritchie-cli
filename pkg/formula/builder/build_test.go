@@ -24,7 +24,7 @@ func TestBuild(t *testing.T) {
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
 	type in struct {
-		fileManager stream.FileListCopier
+		fileManager stream.FileCopyExistLister
 		dirManager  stream.DirCreateListCopier
 	}
 
@@ -151,6 +151,7 @@ type fileManagerMock struct {
 	data    []string
 	listErr error
 	copyErr error
+	exist   bool
 }
 
 func (f fileManagerMock) List(string) ([]string, error) {
@@ -159,4 +160,8 @@ func (f fileManagerMock) List(string) ([]string, error) {
 
 func (f fileManagerMock) Copy(string, string) error {
 	return f.copyErr
+}
+
+func (f fileManagerMock) Exists(string) bool {
+	return f.exist
 }

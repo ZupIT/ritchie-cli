@@ -13,7 +13,7 @@ import (
 
 var (
 	// MsgUpgrade error message to inform user to upgrade rit version
-	MsgRitUpgrade = "\nWarning: Rit have a new stable version.\nPlease run: rit upgrade"
+	MsgRitUpgrade = "\nWarning: Rit has a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
 )
@@ -29,50 +29,75 @@ type stableVersionCache struct {
 	ExpiresAt     int64  `json:"expiresAt"`
 }
 
-func (r DefaultVersionResolver) StableVersion() (string, error) {
+func (r DefaultVersionResolver) UpdateCache() error {
+	cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
 
+	stableVersion, err := requestStableVersion(r.StableVersionUrl, r.HttpClient)
+	if err != nil {
+		return err
+	}
+
+	err = saveCache(stableVersion, cachePath, r.FileUtilService)
+	return err
+}
+
+func (r DefaultVersionResolver) StableVersion() (string, error) {
 	cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
 	cacheData, err := r.FileUtilService.ReadFile(cachePath)
 	cache := &stableVersionCache{}
+
 	if err == nil {
 		err = json.Unmarshal(cacheData, cache)
 	}
 
 	if err != nil || cache.ExpiresAt <= time.Now().Unix() {
-
-		api.RitchieHomeDir()
-
-		request, err := http.NewRequest(http.MethodGet, r.StableVersionUrl, nil)
+		stableVersion, err := requestStableVersion(r.StableVersionUrl, r.HttpClient)
 		if err != nil {
 			return "", err
 		}
-		response, err := r.HttpClient.Do(request)
+		err = saveCache(stableVersion, cachePath, r.FileUtilService)
 		if err != nil {
 			return "", err
 		}
-		stableVersionBytes, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			return "", err
-		}
-
-		stableVersion := string(stableVersionBytes)
-		stableVersion = strings.ReplaceAll(stableVersion, "\n", "")
-
-		newCache := stableVersionCache{
-			StableVersion: stableVersion,
-			ExpiresAt:     time.Now().Add(time.Hour * 10).Unix(),
-		}
-
-		newCacheJson, err := json.Marshal(newCache)
-		if err == nil {
-			_ = r.FileUtilService.WriteFilePerm(cachePath, newCacheJson, 0600)
-		}
-
 		return stableVersion, nil
-
 	} else {
 		return cache.StableVersion, nil
 	}
+}
+
+func requestStableVersion(stableVersionUrl string, httpClient *http.Client) (string, error) {
+	request, err := http.NewRequest(http.MethodGet, stableVersionUrl, nil)
+	if err != nil {
+		return "", err
+	}
+
+	response, err := httpClient.Do(request)
+
+	if err != nil {
+		return "", err
+	}
+	stableVersionBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	stableVersion := string(stableVersionBytes)
+	stableVersion = strings.ReplaceAll(stableVersion, "\n", "")
+	return stableVersion, nil
+}
+
+func saveCache(stableVersion string, cachePath string, fileUtilService fileutil.Service) error {
+	newCache := stableVersionCache{
+		StableVersion: stableVersion,
+		ExpiresAt:     time.Now().Add(time.Hour * 10).Unix(),
+	}
+
+	newCacheJson, err := json.Marshal(newCache)
+	if err != nil {
+		return err
+	}
+	err = fileUtilService.WriteFilePerm(cachePath, newCacheJson, 0600)
+	return err
 }
 
 func VerifyNewVersion(resolve Resolver, currentVersion string) string {

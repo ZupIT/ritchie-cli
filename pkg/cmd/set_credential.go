@@ -24,6 +24,7 @@ type setCredentialCmd struct {
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
+	prompt.InputMultiline
 }
 
 // MsgTypeEntry used in select of type entry credential
@@ -42,8 +43,9 @@ func NewSingleSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword) *cobra.Command {
-	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip}
+	ip prompt.InputPassword,
+	im prompt.InputMultiline) *cobra.Command {
+	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip, im}
 
 	return newCmd(s)
 }
@@ -55,8 +57,9 @@ func NewTeamSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword) *cobra.Command {
-	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip}
+	ip prompt.InputPassword,
+	im prompt.InputMultiline) *cobra.Command {
+	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip, im}
 
 	return newCmd(s)
 }
@@ -175,7 +178,7 @@ func (s setCredentialCmd) entryCredential() ([]string, error) {
 	if entries[typ] == "file" {
 		pair, err = s.inputFile()
 	} else {
-		kv, err = s.Text(MsgTypeCredentialInPrompt, true)
+		kv, err = s.MultiLineText(MsgTypeCredentialInPrompt, true)
 		if err != nil {
 			return nil, err
 		}

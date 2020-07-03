@@ -3,9 +3,11 @@ package cmd
 import (
 	"os"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
+
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
@@ -15,10 +17,11 @@ import (
 // loginCmd type for init command
 type loginCmd struct {
 	security.LoginManager
-	formula.Loader
+	formula.RepoLoader
 	prompt.InputText
 	prompt.InputPassword
 	server.Finder
+	otp.Resolver
 }
 
 const (
@@ -32,14 +35,16 @@ func NewLoginCmd(
 	t prompt.InputText,
 	p prompt.InputPassword,
 	lm security.LoginManager,
-	fm formula.Loader,
-	sf server.Finder) *cobra.Command {
+	fm formula.RepoLoader,
+	sf server.Finder,
+	orv otp.Resolver) *cobra.Command {
 	l := loginCmd{
 		LoginManager:  lm,
-		Loader:        fm,
+		RepoLoader:    fm,
 		InputText:     t,
 		InputPassword: p,
 		Finder:        sf,
+		Resolver:      orv,
 	}
 	return &cobra.Command{
 		Use:   "login",
@@ -64,7 +69,13 @@ func (l loginCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		var totp string
-		if cfg.Otp {
+
+		otpResponse, err := l.RequestOtp(cfg.URL, cfg.Organization)
+		if err != nil {
+			return err
+		}
+
+		if otpResponse.Otp {
 			totp, err = l.Text(MsgOtp, true)
 			if err != nil {
 				return err

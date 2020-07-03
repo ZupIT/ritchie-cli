@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/spf13/cobra"
@@ -14,7 +15,7 @@ import (
 
 // deleteRepoCmd type for delete repo command
 type deleteRepoCmd struct {
-	repo formula.DelLister
+	repo formula.RepoDelLister
 	prompt.InputList
 	prompt.InputBool
 }
@@ -25,7 +26,7 @@ type deleteRepo struct {
 }
 
 // NewDeleteRepoCmd delete repository instance
-func NewDeleteRepoCmd(dl formula.DelLister, il prompt.InputList, ib prompt.InputBool) *cobra.Command {
+func NewDeleteRepoCmd(dl formula.RepoDelLister, il prompt.InputList, ib prompt.InputBool) *cobra.Command {
 	d := &deleteRepoCmd{
 		dl,
 		il,
