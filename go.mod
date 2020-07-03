@@ -3,6 +3,7 @@ module github.com/ZupIT/ritchie-cli
 go 1.14
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/docker/docker v0.7.3-0.20190327010347-be7ac8be2ae0
 	github.com/fatih/color v1.9.0 // indirect

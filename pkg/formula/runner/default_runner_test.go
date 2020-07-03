@@ -134,7 +134,7 @@ func (i inputMock) Text(string, bool) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+func (i inputMock) TextWithValidate(name string, validate func(interface{}) error) (string, error) {
 	return i.text, i.err
 }
 

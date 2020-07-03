@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"github.com/spf13/cobra"
 
@@ -38,6 +39,7 @@ type initTeamCmd struct {
 	server.FindSetter
 	security.LoginManager
 	formula.RepoLoader
+	otp.Resolver
 }
 
 // NewSingleInitCmd creates init command for single edition
@@ -59,9 +61,10 @@ func NewTeamInitCmd(
 	ib prompt.InputBool,
 	fs server.FindSetter,
 	lm security.LoginManager,
-	rl formula.RepoLoader) *cobra.Command {
+	rl formula.RepoLoader,
+	orv otp.Resolver) *cobra.Command {
 
-	o := initTeamCmd{it, ip, iu, ib, fs, lm, rl}
+	o := initTeamCmd{it, ip, iu, ib, fs, lm, rl, orv}
 
 	return newInitCmd(o.runStdin(), o.runPrompt())
 }
@@ -181,8 +184,13 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			if err != nil {
 				return err
 			}
+
+			otpResponse, err := o.RequestOtp(cfg.URL, cfg.Organization)
+			if err != nil {
+				return err
+			}
 			var totp string
-			if cfg.Otp {
+			if otpResponse.Otp {
 				totp, err = o.Text(MsgOtp, true)
 				if err != nil {
 					return err
