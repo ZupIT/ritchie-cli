@@ -19,6 +19,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+// ErrNotAllowedCharacter and other errors related to formula creation
 var (
 	ErrNotAllowedCharacter = prompt.NewError(`not allowed character on formula name \/,><@-`)
 	ErrDontStartWithRit    = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
@@ -36,7 +37,7 @@ type createFormulaCmd struct {
 	inList    prompt.InputList
 }
 
-// CreateFormulaCmd creates a new cmd instance
+// NewCreateFormulaCmd creates a new cmd instance
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
@@ -54,7 +55,7 @@ func NewCreateFormulaCmd(
 
 	cmd := &cobra.Command{
 		Use:     "formula",
-		Short:   "Create a new formula",
+		Short:   "Create a new formula (and a new local repository for test)",
 		Example: "rit create formula",
 		RunE:    RunFuncE(c.runStdin(), c.runPrompt()),
 	}
@@ -199,7 +200,7 @@ func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 	return nil
 }
 
-
+// FormulaWorkspaceInput is a function
 func FormulaWorkspaceInput(
 	workspaces formula.Workspaces,
 	inList prompt.InputList,
