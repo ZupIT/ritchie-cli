@@ -38,7 +38,7 @@ var _ = Describe("RitSingleInit", func() {
 		Entry("Delete repo", scenariosCore[5]),
 		Entry("Set Credential", scenariosCore[6]),
 		Entry("Update repo", scenariosCore[7]),
-		// Entry("Do init", scenariosCore[9]),
+		// Entry("Do init", scenariosCore[8]),
 	)
 
 })
@@ -57,7 +57,7 @@ var _ = Describe("RitSingleInit", func() {
 			Expect(out).To(ContainSubstring(scenario.Result))
 		},
 
-		Entry("Set Init STDIN", scenariosCore[10]),
+		Entry("Set Init STDIN", scenariosCore[9]),
 
 	)
 
@@ -77,7 +77,7 @@ var _ = Describe("RitSingleInit STDIN Invalid", func() {
 			Expect(out).To(ContainSubstring(scenario.Result))
 		},
 
-		Entry("Set Init STDIN without passphrase", scenariosCore[11]),
+		Entry("Set Init STDIN without passphrase", scenariosCore[10]),
 
 	)
 
