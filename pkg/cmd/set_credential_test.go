@@ -120,6 +120,29 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 			wantedError: nil,
 		},
 		{
+			name: "run set_credential with error in entry path when file entry selected",
+			editableFields: editableFields{
+				inputText: inputTextCustomMock{
+					text: func(name string, required bool) (string, error) {
+						if name == MsgTypeEntryPath {
+							return "", errEntry
+						}
+						return "some_input", nil
+					},
+				},
+				inputList: inputListCustomMock{
+					list: func(name string, list []string) (string, error) {
+						if name == MsgTypeEntry {
+							return EntriesTypeCredentialFile, nil
+						}
+						return "some_input", nil
+					},
+				},
+			},
+			wantErr:     true,
+			wantedError: errEntry,
+		},
+		{
 			name: "run set_credential with error in select type entry when file entry selected",
 			editableFields: editableFields{
 				inputText: inputTextMock{},
