@@ -34,10 +34,10 @@ var _ = Describe("RitSingleInit", func() {
 		Entry("Set context", scenariosCore[1]),
 		Entry("Delete context", scenariosCore[2]),
 		Entry("Add new repo", scenariosCore[3]),
-		Entry("List repo", scenariosCore[5]),
-		Entry("Delete repo", scenariosCore[6]),
-		Entry("Set Credential", scenariosCore[7]),
-		Entry("Update repo", scenariosCore[8]),
+		Entry("List repo", scenariosCore[4]),
+		Entry("Delete repo", scenariosCore[5]),
+		Entry("Set Credential", scenariosCore[6]),
+		Entry("Update repo", scenariosCore[7]),
 		// Entry("Do init", scenariosCore[9]),
 	)
 
