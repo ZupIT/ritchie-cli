@@ -1,4 +1,4 @@
-package template_java
+package java
 
 const (
 	Main = `import {{bin-name}}.{{bin-name-first-upper}};

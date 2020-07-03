@@ -1,4 +1,4 @@
-package template_shell
+package shell
 
 const (
 	Main = `#!/bin/sh

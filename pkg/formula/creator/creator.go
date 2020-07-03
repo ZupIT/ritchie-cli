@@ -18,7 +18,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/golang"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -295,7 +295,7 @@ func createUmask(dir string) error {
 }
 
 func createGoModFile(dir, pkg string) error {
-	tplFile := template_go.GoMod
+	tplFile := golang.GoMod
 	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
 	return fileutil.WriteFile(fmt.Sprintf("%s/go.mod", dir), []byte(tplFile))
 }

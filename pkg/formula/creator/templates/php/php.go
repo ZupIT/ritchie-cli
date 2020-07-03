@@ -1,4 +1,4 @@
-package template_php
+package php
 
 const (
 	Index = `<?php

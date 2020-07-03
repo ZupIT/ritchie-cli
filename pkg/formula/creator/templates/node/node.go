@@ -1,4 +1,4 @@
-package template_node
+package node
 
 const (
 	Index = `const run = require("./{{bin-name}}/{{bin-name}}")

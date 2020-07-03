@@ -1,4 +1,4 @@
-package template_go
+package golang
 
 const (
 	GoMod = `module {{nameModule}}

@@ -1,4 +1,4 @@
-package template_python
+package python
 
 const (
 	Main = `#!/usr/bin/python3

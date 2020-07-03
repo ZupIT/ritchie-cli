@@ -7,12 +7,12 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_java"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_node"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_php"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_python"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/golang"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/java"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/node"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/php"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/python"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/shell"
 )
 
 const (
@@ -58,11 +58,11 @@ func NewPython(c CreateManager) Python {
 		CreateManager: c,
 		FileFormat:    fileextensions.Python,
 		StartFile:     main,
-		Main:          template_python.Main,
-		Makefile:      template_python.Makefile,
-		Dockerfile:    template_python.Dockerfile,
-		File:          template_python.File,
-		WindowsBuild:  template_python.WindowsBuild,
+		Main:          python.Main,
+		Makefile:      python.Makefile,
+		Dockerfile:    python.Dockerfile,
+		File:          python.File,
+		WindowsBuild:  python.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     false,
 	}}
@@ -94,12 +94,12 @@ func NewJava(c CreateManager) Java {
 		CreateManager: c,
 		FileFormat:    fileextensions.Java,
 		StartFile:     Main,
-		Main:          template_java.Main,
-		Makefile:      template_java.Makefile,
-		Run:           template_java.Run,
-		Dockerfile:    template_java.Dockerfile,
-		File:          template_java.File,
-		WindowsBuild:  template_java.WindowsBuild,
+		Main:          java.Main,
+		Makefile:      java.Makefile,
+		Run:           java.Run,
+		Dockerfile:    java.Dockerfile,
+		File:          java.File,
+		WindowsBuild:  java.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     true,
 	}}
@@ -138,11 +138,11 @@ func NewGo(c CreateManager) Go {
 		CreateManager: c,
 		FileFormat:    fileextensions.Go,
 		StartFile:     main,
-		Main:          template_go.Main,
-		Makefile:      template_go.Makefile,
-		Dockerfile:    template_go.Dockerfile,
-		Pkg:           template_go.Pkg,
-		WindowsBuild:  template_go.WindowsBuild,
+		Main:          golang.Main,
+		Makefile:      golang.Makefile,
+		Dockerfile:    golang.Dockerfile,
+		Pkg:           golang.Pkg,
+		WindowsBuild:  golang.WindowsBuild,
 		Compiled:      true,
 		UpperCase:     false,
 	}}
@@ -178,13 +178,13 @@ func NewNode(c CreateManager) Node {
 		CreateManager: c,
 		FileFormat:    fileextensions.JavaScript,
 		StartFile:     index,
-		Main:          template_node.Index,
-		Makefile:      template_node.Makefile,
-		Run:           template_node.Run,
-		Dockerfile:    template_node.Dockerfile,
-		PackageJson:   template_node.PackageJson,
-		File:          template_node.File,
-		WindowsBuild:  template_node.WindowsBuild,
+		Main:          node.Index,
+		Makefile:      node.Makefile,
+		Run:           node.Run,
+		Dockerfile:    node.Dockerfile,
+		PackageJson:   node.PackageJson,
+		File:          node.File,
+		WindowsBuild:  node.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     false,
 	}}
@@ -225,10 +225,10 @@ func NewShell(c CreateManager) Shell {
 		CreateManager: c,
 		FileFormat:    fileextensions.Shell,
 		StartFile:     main,
-		Main:          template_shell.Main,
-		Makefile:      template_shell.Makefile,
-		Dockerfile:    template_shell.Dockerfile,
-		File:          template_shell.File,
+		Main:          shell.Main,
+		Makefile:      shell.Makefile,
+		Dockerfile:    shell.Dockerfile,
+		File:          shell.File,
 		Compiled:      false,
 		UpperCase:     false,
 	}}
@@ -260,12 +260,12 @@ func NewPhp(c CreateManager) Php {
 		CreateManager: c,
 		FileFormat:    fileextensions.Php,
 		StartFile:     index,
-		Main:          template_php.Index,
-		Makefile:      template_php.Makefile,
-		Run:           template_php.Run,
-		Dockerfile:    template_php.Dockerfile,
-		File:          template_php.File,
-		WindowsBuild:  template_php.WindowsBuild,
+		Main:          php.Index,
+		Makefile:      php.Makefile,
+		Run:           php.Run,
+		Dockerfile:    php.Dockerfile,
+		File:          php.File,
+		WindowsBuild:  php.WindowsBuild,
 		Compiled:      false,
 		UpperCase:     false,
 	}}
