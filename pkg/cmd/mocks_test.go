@@ -89,12 +89,6 @@ func (repoAdder) Add(d formula.Repository) error {
 	return nil
 }
 
-type repoCleaner struct{}
-
-func (repoCleaner) Clean(name string) error {
-	return nil
-}
-
 type formCreator struct{}
 
 func (formCreator) Create(cf formula.Create) error {
