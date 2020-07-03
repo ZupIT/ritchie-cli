@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	repoDir       = "/repo"
-	repoFile      = "/repositories.json"
+	repoDir  = "/repo"
+	repoFile = "/repositories.json"
 )
 
 type DefaultChecker struct {

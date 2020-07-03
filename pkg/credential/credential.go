@@ -33,7 +33,7 @@ type Field struct {
 }
 
 // Fields represents a collection of credential fields returned by the Server (Team).
-// Fields represents a collection of credential fields read on credentials.json (Single)
+// Fields are used on single to represents providers.json
 type Fields map[string][]Field
 
 type Setter interface {
@@ -53,8 +53,3 @@ type SingleSettings interface {
 	WriteCredentials(fields Fields) error
 	DefaultCredentials()
 }
-
-
-
-
-

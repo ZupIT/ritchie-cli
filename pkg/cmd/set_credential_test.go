@@ -5,7 +5,6 @@ import (
 )
 
 func TestNewSingleSetCredentialCmd(t *testing.T) {
-
 	cmd := NewSingleSetCredentialCmd(credSetterMock{}, singleCredSettingsMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{}, InputMultilineMock{})
 
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")

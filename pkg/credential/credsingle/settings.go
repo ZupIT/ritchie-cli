@@ -30,9 +30,11 @@ func (s SingleSettings) ReadCredentials() credential.Fields {
 }
 
 func (s SingleSettings) WriteCredentials(fields credential.Fields) error {
-	fieldsData, _ := json.Marshal(fields)
-
-	err := s.file.Write(providerPath(), fieldsData)
+	fieldsData, err := json.Marshal(fields)
+	if err != nil{
+		return err
+	}
+	err = s.file.Write(providerPath(), fieldsData)
 	if err != nil {
 		return err
 	}

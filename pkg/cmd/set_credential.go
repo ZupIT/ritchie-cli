@@ -121,27 +121,49 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	for k, _ := range credentials {
 		providerList = append(providerList, k)
 	}
-	providerChoose, _ := s.List("Select your provider", providerList)
-
+	providerChoose, err := s.List("Select your provider", providerList)
+	if err != nil{
+		return credDetail, err
+	}
 	if providerChoose == "Add a new" {
 		addMoreCredentials := true
-		newProvider, _ := s.Text("Enter your provider:", true)
+		newProvider, err := s.MultiLineText("Enter your provider:", true)
+		if err != nil{
+			return credDetail, err
+		}
 
 		providerList = append(providerList, newProvider)
+
 		var newFields []credential.Field
 		var newField credential.Field
 		for addMoreCredentials {
-			newField.Name, _ = s.Text("Credential key/tag:", true)
+			newField.Name, err = s.Text("Credential key/tag:", true)
+			if err != nil{
+				return credDetail, err
+			}
 			typeList := []string{"text", "password"}
-			newField.Type, _ = s.List("Want to input the credential as a:", typeList)
 
+			newField.Type, err = s.List("Want to input the credential as a:", typeList)
+			if err != nil{
+				return credDetail, err
+			}
 			newFields = append(newFields, newField)
-			addMoreCredentials, _ = s.Bool("Add one more?", []string{"no", "yes"})
+
+			addMoreCredentials, err = s.Bool("Add one more?", []string{"no", "yes"})
+			if err != nil{
+				return credDetail, err
+			}
 		}
 		credentials[newProvider] = newFields
-		_ = s.WriteCredentials(credentials)
+		err = s.WriteCredentials(credentials)
+		if err != nil{
+			return credDetail, err
+		}
 
-		providerChoose, _ = s.List("Select your provider", providerList)
+		providerChoose, err = s.List("Select your provider", providerList)
+		if err != nil{
+			return credDetail, err
+		}
 	}
 
 	inputs := credentials[providerChoose]
@@ -149,9 +171,15 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	for _, i := range inputs {
 		var value string
 		if i.Type == prompt.PasswordType {
-			value, _ = s.Password(i.Name)
+			value, err = s.Password(i.Name)
+			if err != nil{
+				return credDetail, err
+			}
 		} else {
-			value, _ = s.Text(i.Name, true)
+			value, err = s.MultiLineText(i.Name, true)
+			if err != nil{
+				return credDetail, err
+			}
 		}
 		cred[i.Name] = value
 	}
@@ -160,10 +188,6 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	credDetail.Credential = cred
 
 	return credDetail, nil
-}
-
-func credentialFileExists() bool {
-	return true
 }
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
