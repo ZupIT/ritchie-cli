@@ -1,6 +1,8 @@
-package java
+package template
 
 const (
+	StartFile = "Main"
+
 	Main = `import {{bin-name}}.{{bin-name-first-upper}};
 
 public class Main {

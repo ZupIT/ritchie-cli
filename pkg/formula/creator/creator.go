@@ -10,7 +10,13 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/golang"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/java"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/node"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/php"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/python"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/shell"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
@@ -18,14 +24,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/golang"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-)
-
-const (
-	nameModule        = "{{nameModule}}"
-	nameBin           = "{{bin-name}}"
-	nameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
 var (
@@ -133,7 +132,7 @@ func (c CreateManager) generateTreeJsonFile(formPath, fCmd, lang string) error {
 }
 
 func (c CreateManager) createMakefileMain(dir, dirForm, name string) error {
-	tplFile := templates.MakefileMain
+	tplFile := template.MakefileMain
 
 	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
 	tplFile = strings.ReplaceAll(tplFile, "{{formPath}}", dirForm)
@@ -178,7 +177,7 @@ func (c CreateManager) changeMakefileMain(formPath, fCmd, fName string) error {
 }
 
 func (c CreateManager) createScript(dir string) error {
-	tplFile := templates.CopyBinConfig
+	tplFile := template.CopyBinConfig
 
 	filePath := path.Join(dir, "/copy-bin-configs.sh")
 	if err := c.file.Write(filePath, []byte(tplFile)); err != nil {
@@ -188,49 +187,49 @@ func (c CreateManager) createScript(dir string) error {
 	return nil
 }
 
-func (c CreateManager) createSrcFiles(dir, pkg, lang string) error {
+func (c CreateManager) createSrcFiles(dir, pkg, language string) error {
 	srcDir := fmt.Sprintf("%s/src", dir)
 	pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
 	if err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm); err != nil {
 		return err
 	}
-	switch lang {
-	case GoLang:
+	switch language {
+	case formula.GoLang:
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
-		golang := NewGo(c)
-		if err := golang.Create(srcDir, pkg, pkgDir, dir); err != nil {
+		goCreator := golang.New(c, c.createGenericFiles)
+		if err := goCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case JavaLang:
-		java := NewJava(c)
-		if err := java.Create(srcDir, pkg, pkgDir, dir); err != nil {
+	case formula.JavaLang:
+		javaCreator := java.New(c, c.createGenericFiles)
+		if err := javaCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case NodeLang:
-		node := NewNode(c)
-		if err := node.Create(srcDir, pkg, pkgDir, dir); err != nil {
+	case formula.NodeLang:
+		nodeCreator := node.New(c, c.createGenericFiles)
+		if err := nodeCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case PhpLang:
-		php := NewPhp(c)
-		if err := php.Create(srcDir, pkg, pkgDir, dir); err != nil {
+	case formula.PhpLang:
+		phpCreator := php.New(c, c.createGenericFiles)
+		if err := phpCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	case PythonLang:
-		python := NewPython(c)
-		if err := python.Create(srcDir, pkg, pkgDir, dir); err != nil {
+	case formula.PythonLang:
+		pythonCreator := python.New(c, c.createGenericFiles)
+		if err := pythonCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
-	default:
-		shell := NewShell(c)
-		if err := shell.Create(srcDir, pkg, pkgDir, dir); err != nil {
+	case formula.ShellLang:
+		shellCreator := shell.New(c, c.createGenericFiles)
+		if err := shellCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return nil
 		}
 	}
 	return nil
 }
 
-func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l Lang) error {
+func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l formula.Lang) error {
 	if err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase); err != nil {
 		return err
 	}
@@ -254,20 +253,12 @@ func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l Lang) error
 	return nil
 }
 
-func createPkgDir(pkgDir string) error {
-	return fileutil.CreateDirIfNotExists(pkgDir, os.ModePerm)
-}
-
-func createRunTemplate(dir, tpl string) error {
-	return fileutil.WriteFilePerm(fmt.Sprintf("%s/run_template", dir), []byte(tpl), 0777)
-}
-
 func (c CreateManager) createWindowsBuild(dir, name, tpl string) error {
 	if tpl == "" {
 		return nil
 	}
 
-	tpl = strings.ReplaceAll(tpl, nameBin, name)
+	tpl = strings.ReplaceAll(tpl, formula.NameBin, name)
 
 	buildFile := path.Join(dir, "/build.bat")
 	return c.file.Write(buildFile, []byte(tpl))
@@ -280,7 +271,7 @@ func (c CreateManager) createMakefileForm(dir, name, pathName, tpl string, compi
 		tpl = strings.ReplaceAll(tpl, "{{form-path}}", pathName)
 		return c.file.Write(makefilePath, []byte(tpl))
 	}
-	tpl = strings.ReplaceAll(tpl, nameBin, name)
+	tpl = strings.ReplaceAll(tpl, formula.NameBin, name)
 	return c.file.Write(makefilePath, []byte(tpl))
 }
 
@@ -291,32 +282,26 @@ func createDockerfile(pkg, dir, tpl string) error {
 
 func createUmask(dir string) error {
 	uMaskFile := fmt.Sprintf("%s/set_umask.sh", dir)
-	return fileutil.WriteFile(uMaskFile, []byte(templates.Umask))
-}
-
-func createGoModFile(dir, pkg string) error {
-	tplFile := golang.GoMod
-	tplFile = strings.ReplaceAll(tplFile, nameModule, pkg)
-	return fileutil.WriteFile(fmt.Sprintf("%s/go.mod", dir), []byte(tplFile))
+	return fileutil.WriteFile(uMaskFile, []byte(template.Umask))
 }
 
 func createMainFile(dir, pkg, tpl, fileFormat, startFile string, uc bool) error {
 	if uc {
-		tpl = strings.ReplaceAll(tpl, nameBin, pkg)
-		tpl = strings.ReplaceAll(tpl, nameBinFirstUpper, strings.Title(strings.ToLower(pkg)))
+		tpl = strings.ReplaceAll(tpl, formula.NameBin, pkg)
+		tpl = strings.ReplaceAll(tpl, formula.NameBinFirstUpper, strings.Title(strings.ToLower(pkg)))
 		return fileutil.WriteFile(fmt.Sprintf("%s/%s%s", dir, startFile, fileFormat), []byte(tpl))
 	}
-	tpl = strings.ReplaceAll(tpl, nameModule, pkg)
-	tpl = strings.ReplaceAll(tpl, nameBin, pkg)
+	tpl = strings.ReplaceAll(tpl, formula.NameModule, pkg)
+	tpl = strings.ReplaceAll(tpl, formula.NameBin, pkg)
 	return fileutil.WriteFilePerm(fmt.Sprintf("%s/%s%s", dir, startFile, fileFormat), []byte(tpl), 0777)
 }
 
 func createConfigFile(dir string) error {
-	tplFile := templates.Config
+	tplFile := template.Config
 	return fileutil.WriteFile(fmt.Sprintf("%s/config.json", dir), []byte(tplFile))
 }
 
-func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, error) {
+func updateTree(fCmd string, t formula.Tree, language string, i int) (formula.Tree, error) {
 	fc := splitFormulaCommand(fCmd)
 	parent := generateParent(fc, i)
 
@@ -329,7 +314,7 @@ func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, 
 			pathValue := strings.Join(fc, "/")
 			fn := fc[len(fc)-1]
 			var commands []api.Command
-			if lang == PythonLang {
+			if language == formula.PythonLang {
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
@@ -344,7 +329,7 @@ func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, 
 					},
 					Parent: parent,
 				})
-			} else if lang == GoLang {
+			} else if language == formula.GoLang {
 				commands = append(t.Commands, api.Command{
 					Usage: fn,
 					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
@@ -392,7 +377,7 @@ func updateTree(fCmd string, t formula.Tree, lang string, i int) (formula.Tree, 
 		}
 	}
 
-	return updateTree(fCmd, t, lang, i+1)
+	return updateTree(fCmd, t, language, i+1)
 }
 
 func generateCommandHelp(parent string, fc []string, i int) string {
@@ -417,10 +402,6 @@ func generateParent(fc []string, index int) string {
 	} else {
 		return "root"
 	}
-}
-
-func createPackageJson(dir, tpl string) error {
-	return fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tpl))
 }
 
 func formulaValue(file []byte) string {

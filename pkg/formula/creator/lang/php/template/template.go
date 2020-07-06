@@ -1,6 +1,9 @@
-package php
+package template
 
 const (
+
+	StartFile = "index"
+
 	Index = `<?php
 
 include '{{bin-name}}/{{bin-name}}.php';

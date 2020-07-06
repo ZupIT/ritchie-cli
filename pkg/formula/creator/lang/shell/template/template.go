@@ -1,6 +1,8 @@
-package shell
+package template
 
 const (
+	StartFile = "main"
+
 	Main = `#!/bin/sh
 
 . $PWD/{{bin-name}}/{{bin-name}}.sh --source-only

@@ -5,16 +5,14 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-
 type InputText interface {
-	Text(name string, required bool) (string, error)
-	TextWithValidate(name string, validate func(interface{}) error) (string, error)
+	Text(name string, required bool, helper ...string) (string, error)
+	TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error)
 }
 
 type inputText struct{}
 
 type surveyText struct{}
-
 
 func NewInputText() inputText {
 	return inputText{}
@@ -46,7 +44,7 @@ func (inputText) Text(name string, required bool) (string, error) {
 	return prompt.Run()
 }
 
-func (inputText) TextWithValidate(name string, validate func(string) error) (string, error) {
+func (inputText) TextWithValidate(name string, validate func(string) error, helper ...string) (string, error) {
 	prompt := promptui.Prompt{
 		Label:     name,
 		Pointer:   promptui.PipeCursor,
@@ -57,43 +55,42 @@ func (inputText) TextWithValidate(name string, validate func(string) error) (str
 	return prompt.Run()
 }
 
-func (surveyText) Text(name string, required bool) (string, error) {
+func (surveyText) Text(name string, required bool, helper ...string) (string, error) {
 
-	var value string
-
-	var validationQs []*survey.Question
-
-
-	if required{
-		validationQs = []*survey.Question{
-			{
-				Name:     "name",
-				Prompt:   &survey.Input{Message: name},
-				Validate: survey.Required,
-			},
-		}
-	}else {
-		validationQs = []*survey.Question{
-			{
-				Name:   "name",
-				Prompt: &survey.Input{Message: name},
-			},
-		}
-	}
-	return value, survey.Ask(validationQs, &value)
-}
-
-func (surveyText) TextWithValidate(name string, validate func(interface{}) error) (string, error) {
 	var value string
 
 	validationQs := []*survey.Question{
 		{
+			Name: "name",
+		},
+	}
+
+	if required {
+		validationQs[0].Validate = survey.Required
+	}
+
+	if len(helper) > 0 {
+		validationQs[0].Prompt = &survey.Input{Message: name, Help: helper[0]}
+	} else {
+		validationQs[0].Prompt = &survey.Input{Message: name}
+	}
+
+	return value, survey.Ask(validationQs, &value)
+}
+
+func (surveyText) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	var value string
+	validationQs := []*survey.Question{
+		{
 			Name:     "name",
-			Prompt:   &survey.Input{
-				Message:  name,
-			},
 			Validate: validate,
 		},
+	}
+
+	if len(helper) > 0 {
+		validationQs[0].Prompt = &survey.Input{Message: name, Help: helper[0]}
+	} else {
+		validationQs[0].Prompt = &survey.Input{Message: name}
 	}
 
 	return value, survey.Ask(validationQs, &value)

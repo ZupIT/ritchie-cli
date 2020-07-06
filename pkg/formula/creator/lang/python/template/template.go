@@ -1,6 +1,8 @@
-package python
+package template
 
 const (
+	StartFile = "main"
+
 	Main = `#!/usr/bin/python3
 import os
 

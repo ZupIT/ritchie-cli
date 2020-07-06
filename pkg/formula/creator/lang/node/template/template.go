@@ -1,6 +1,8 @@
-package node
+package template
 
 const (
+	StartFile = "index"
+
 	Index = `const run = require("./{{bin-name}}/{{bin-name}}")
 
 const INPUT1 = process.env.SAMPLE_TEXT

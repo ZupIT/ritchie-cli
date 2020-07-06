@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -64,7 +63,11 @@ func NewCreateFormulaCmd(
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inText.TextWithValidate("Enter the new formula command [ex.: rit group verb noun]", c.surveyCmdValidator)
+		formulaCmd, err := c.inText.TextWithValidate(
+			"Enter the new formula command: ",
+			c.surveyCmdValidator,
+			"You must create your command based in this example [rit group verb noun]",
+		)
 		if err != nil {
 			return err
 		}
@@ -73,7 +76,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		lang, err := c.inList.List("Choose the language: ", creator.Languages)
+		lang, err := c.inList.List("Choose the language: ", formula.Languages)
 		if err != nil {
 			return err
 		}
@@ -190,7 +193,6 @@ func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 	}
 	return nil
 }
-
 
 func FormulaWorkspaceInput(
 	workspaces formula.Workspaces,

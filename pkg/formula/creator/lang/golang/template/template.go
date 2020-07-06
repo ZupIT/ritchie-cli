@@ -1,6 +1,9 @@
-package golang
+package template
 
 const (
+
+	StartFile = "main"
+
 	GoMod = `module {{nameModule}}
 
 go 1.14
