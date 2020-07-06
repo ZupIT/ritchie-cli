@@ -23,7 +23,7 @@
 # vendor/
 
 ### Go Patch ###
-/vendor/
+#/vendor/
 /Godeps/
 
 ### Vim ###
