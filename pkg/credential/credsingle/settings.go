@@ -32,12 +32,13 @@ func (s SingleSettings) ReadCredentials(path string) (credential.Fields, error) 
 	return fields, nil
 }
 
-func (s SingleSettings) WriteCredentials(fields credential.Fields) error {
+func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) error {
 	fieldsData, err := json.Marshal(fields)
 	if err != nil{
 		return err
 	}
-	err = s.file.Write(ProviderPath(), fieldsData)
+	finalPath := fmt.Sprintf("%s/providers.json", path)
+	err = s.file.Write(finalPath, fieldsData)
 	if err != nil {
 		return err
 	}
@@ -47,7 +48,7 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields) error {
 
 func (s SingleSettings) DefaultCredentials() {
 	if !s.file.Exists(ProviderPath()){
-		_ = s.WriteCredentials(NewDefaultCredentials())
+		_ = s.WriteCredentials(NewDefaultCredentials(),ProviderPath())
 	}
 }
 

@@ -160,7 +160,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 			}
 		}
 		credentials[newProvider] = newFields
-		err = s.WriteCredentials(credentials)
+		err = s.WriteCredentials(credentials, credsingle.ProviderPath())
 		if err != nil{
 			return credDetail, err
 		}

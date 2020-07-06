@@ -50,6 +50,6 @@ type Settings interface {
 
 type SingleSettings interface {
 	ReadCredentials(path string) (Fields, error)
-	WriteCredentials(fields Fields) error
+	WriteCredentials(fields Fields, path string) error
 	DefaultCredentials()
 }
