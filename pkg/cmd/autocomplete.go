@@ -62,8 +62,8 @@ func NewAutocompleteFish(g autocomplete.Generator) *cobra.Command {
 
 	return &cobra.Command{
 		Use:     fish.String(),
-		Short:   "Add fish autocomplete for terminal",
-		Long:    "Add fish autocomplete for terminal",
+		Short:   "Add fish(>3.X) autocomplete for terminal",
+		Long:    "Add fish(>3.X) autocomplete for terminal, fish 2.0 is not supported only fish 3.X",
 		Example: "rit completion fish",
 		RunE:    a.runFunc(),
 	}
