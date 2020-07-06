@@ -9,6 +9,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/spf13/cobra"
 )
 
 type inputTextMock struct{}
@@ -51,7 +52,7 @@ func (inputPasswordMock) Password(label string) (string, error) {
 
 type autocompleteGenMock struct{}
 
-func (autocompleteGenMock) Generate(s autocomplete.ShellName) (string, error) {
+func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command) (string, error) {
 	return "autocomplete", nil
 }
 
@@ -325,7 +326,8 @@ type InputMultilineMock struct{}
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
 }
-type otpResolverMock struct {}
+
+type otpResolverMock struct{}
 
 func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
 	return otp.Response{Otp: true}, nil

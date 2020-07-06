@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	zsh  autocomplete.ShellName = "zsh"
-	bash autocomplete.ShellName = "bash"
+	zsh        autocomplete.ShellName = "zsh"
+	bash       autocomplete.ShellName = "bash"
+	fish       autocomplete.ShellName = "fish"
+	powerShell autocomplete.ShellName = "powershell"
 )
 
 // autocompleteCmd type for set autocomplete command
@@ -54,10 +56,36 @@ func NewAutocompleteBash(g autocomplete.Generator) *cobra.Command {
 	}
 }
 
+// NewAutocompleteFish creates a new cmd instance fish
+func NewAutocompleteFish(g autocomplete.Generator) *cobra.Command {
+	a := &autocompleteCmd{g}
+
+	return &cobra.Command{
+		Use:     fish.String(),
+		Short:   "Add fish autocomplete for terminal",
+		Long:    "Add fish autocomplete for terminal",
+		Example: "rit completion fish",
+		RunE:    a.runFunc(),
+	}
+}
+
+// NewAutocompletePowerShell creates a new cmd instance PowerShell
+func NewAutocompletePowerShell(g autocomplete.Generator) *cobra.Command {
+	a := &autocompleteCmd{g}
+
+	return &cobra.Command{
+		Use:     powerShell.String(),
+		Short:   "Add powerShell autocomplete for terminal",
+		Long:    "Add powerShell autocomplete for terminal",
+		Example: "rit completion powershell",
+		RunE:    a.runFunc(),
+	}
+}
+
 func (a autocompleteCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		s := autocomplete.ShellName(cmd.Use)
-		c, err := a.Generate(s)
+		c, err := a.Generate(s, cmd)
 		if err != nil {
 			return err
 		}

@@ -62,7 +62,7 @@ func TestGenerate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := autocomplete.Generate(tt.in.shell)
+			got, err := autocomplete.Generate(tt.in.shell, nil)
 
 			if err != tt.out.err {
 				t.Errorf("Generator(%s) got %v, want %v", tt.name, err, tt.out.err)
