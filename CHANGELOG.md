@@ -2,10 +2,29 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.17...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.18...HEAD)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Change Login and Init behavior [\#236](https://github.com/ZupIT/ritchie-cli/pull/236) ([marcoscostazup](https://github.com/marcoscostazup))
+- \[FEATURE\] survey prompt [\#233](https://github.com/ZupIT/ritchie-cli/pull/233) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 
 **Merged pull requests:**
 
+- \[ENHANCEMENT\] simplify PR template [\#237](https://github.com/ZupIT/ritchie-cli/pull/237) ([sandokandias](https://github.com/sandokandias))
+- modifying final stuff [\#229](https://github.com/ZupIT/ritchie-cli/pull/229) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/surveyprompt [\#225](https://github.com/ZupIT/ritchie-cli/pull/225) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/surveyprompt [\#210](https://github.com/ZupIT/ritchie-cli/pull/210) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
+## [1.0.0-beta.18](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.18) (2020-07-06)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.17...1.0.0-beta.18)
+
+**Merged pull requests:**
+
+- fix lint timeout [\#235](https://github.com/ZupIT/ritchie-cli/pull/235) ([ernelio](https://github.com/ernelio))
+- \[fix\] lint killed [\#234](https://github.com/ZupIT/ritchie-cli/pull/234) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.17 merge [\#231](https://github.com/ZupIT/ritchie-cli/pull/231) ([zup-ci](https://github.com/zup-ci))
 - \[FIX\] improvements rit upgrade [\#215](https://github.com/ZupIT/ritchie-cli/pull/215) ([marcoscostazup](https://github.com/marcoscostazup))
 
 ## [1.0.0-beta.17](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.17) (2020-06-30)
