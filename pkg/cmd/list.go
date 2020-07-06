@@ -12,7 +12,7 @@ It can be used to list formulas, repositories and other objects.
 func NewListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list SUBCOMMAND",
-		Short: "list objects ",
+		Short: "List objects (repo and other)",
 		Long:  descListLong,
 	}
 }
