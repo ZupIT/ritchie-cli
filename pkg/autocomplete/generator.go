@@ -78,9 +78,7 @@ func loadToFish(cmd *cobra.Command) (string, error) {
 	if err := cmd.Root().GenFishCompletion(&buffer, true); err != nil {
 		return "", err
 	}
-	result := buffer.String()
-	result = strings.ReplaceAll(result, "% 2", "\\% 2")
-	return result, nil
+	return buffer.String(), nil
 }
 
 func loadToBash(t formula.Tree) string {
