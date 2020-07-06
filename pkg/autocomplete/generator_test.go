@@ -3,6 +3,8 @@ package autocomplete
 import (
 	"testing"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -50,6 +52,24 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 		{
+			name: "autocomplete fish",
+			in: &in{
+				shell: fish,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
+		{
+			name: "autocomplete powerShell",
+			in: &in{
+				shell: powerShell,
+			},
+			out: &out{
+				err: nil,
+			},
+		},
+		{
 			name: "autocomplete error",
 			in: &in{
 				shell: "err",
@@ -62,7 +82,7 @@ func TestGenerate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := autocomplete.Generate(tt.in.shell, nil)
+			got, err := autocomplete.Generate(tt.in.shell, &cobra.Command{})
 
 			if err != tt.out.err {
 				t.Errorf("Generator(%s) got %v, want %v", tt.name, err, tt.out.err)
