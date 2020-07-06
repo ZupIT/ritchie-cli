@@ -207,8 +207,8 @@ type singleCredSettingsMock struct {}
 func (s singleCredSettingsMock) DefaultCredentials() {
 }
 
-func (s singleCredSettingsMock) ReadCredentials() credential.Fields {
-	return nil
+func (s singleCredSettingsMock) ReadCredentials(path string) (credential.Fields, error) {
+	return nil, nil
 }
 
 func (s singleCredSettingsMock) WriteCredentials(fields credential.Fields) error {

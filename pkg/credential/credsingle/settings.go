@@ -17,16 +17,19 @@ func NewSingleSettings(file stream.FileWriteReadExister) SingleSettings {
 	return SingleSettings{file: file}
 }
 
-func (s SingleSettings) ReadCredentials() credential.Fields {
+func (s SingleSettings) ReadCredentials(path string) (credential.Fields, error) {
 
 	var fields credential.Fields
 
-	if s.file.Exists(providerPath()) {
-		cBytes, _ := s.file.Read(providerPath())
-		_ = json.Unmarshal(cBytes, &fields)
+	if s.file.Exists(path) {
+		cBytes, _ := s.file.Read(path)
+		err := json.Unmarshal(cBytes, &fields)
+		if err != nil{
+			return fields,err
+		}
 	}
 
-	return fields
+	return fields, nil
 }
 
 func (s SingleSettings) WriteCredentials(fields credential.Fields) error {
@@ -34,7 +37,7 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields) error {
 	if err != nil{
 		return err
 	}
-	err = s.file.Write(providerPath(), fieldsData)
+	err = s.file.Write(ProviderPath(), fieldsData)
 	if err != nil {
 		return err
 	}
@@ -43,12 +46,12 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields) error {
 }
 
 func (s SingleSettings) DefaultCredentials() {
-	if !s.file.Exists(providerPath()){
+	if !s.file.Exists(ProviderPath()){
 		_ = s.WriteCredentials(NewDefaultCredentials())
 	}
 }
 
-func providerPath() string {
+func ProviderPath() string {
 	homeDir, _ := os.UserHomeDir()
 	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", homeDir)
 	return providerDir

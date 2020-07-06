@@ -49,7 +49,7 @@ type Settings interface {
 }
 
 type SingleSettings interface {
-	ReadCredentials() Fields
+	ReadCredentials(path string) (Fields, error)
 	WriteCredentials(fields Fields) error
 	DefaultCredentials()
 }

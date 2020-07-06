@@ -9,6 +9,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -116,7 +117,11 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 	var credDetail credential.Detail
 	cred := credential.Credential{}
-	credentials := s.ReadCredentials()
+	credentials, err := s.ReadCredentials(credsingle.ProviderPath())
+	if err != nil {
+		return credential.Detail{}, err
+	}
+
 	var providerList []string
 	for k, _ := range credentials {
 		providerList = append(providerList, k)
