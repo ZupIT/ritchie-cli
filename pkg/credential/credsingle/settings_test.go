@@ -13,7 +13,3 @@ func TestNewDefaultCredentials(t *testing.T) {
 		t.Errorf("Default credentials cannot be empty")
 	}
 }
-
-func TestNewSingleSettings(t *testing.T) {
-
-}
