@@ -72,7 +72,7 @@ func NewTeamInitCmd(
 func newInitCmd(stdinFunc, promptFunc CommandRunnerFunc) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Init rit",
+		Short: "Initialize rit configuration",
 		Long:  "Initialize rit configuration",
 		RunE:  RunFuncE(stdinFunc, promptFunc),
 	}
