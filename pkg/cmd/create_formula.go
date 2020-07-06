@@ -26,11 +26,12 @@ const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
-	homeDir   string
-	formula   formula.CreateBuilder
-	workspace formula.WorkspaceAddListValidator
-	inText    prompt.InputText
-	inList    prompt.InputList
+	homeDir         string
+	formula         formula.CreateBuilder
+	workspace       formula.WorkspaceAddListValidator
+	inText          prompt.InputText
+	inTextValidator prompt.InputTextValidator
+	inList          prompt.InputList
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -39,6 +40,7 @@ func NewCreateFormulaCmd(
 	formula formula.CreateBuilder,
 	workspace formula.WorkspaceAddListValidator,
 	inText prompt.InputText,
+	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 ) *cobra.Command {
 	c := createFormulaCmd{
@@ -46,6 +48,7 @@ func NewCreateFormulaCmd(
 		formula,
 		workspace,
 		inText,
+		inTextValidator,
 		inList,
 	}
 
@@ -63,7 +66,7 @@ func NewCreateFormulaCmd(
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inText.TextWithValidate(
+		formulaCmd, err := c.inTextValidator.Text(
 			"Enter the new formula command: ",
 			c.surveyCmdValidator,
 			"You must create your command based in this example [rit group verb noun]",

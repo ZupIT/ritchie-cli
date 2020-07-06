@@ -4,24 +4,19 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-type SurveyText struct{}
+type SurveyTextValidator struct{}
 
-func NewSurveyText() SurveyText {
-	return SurveyText{}
+func NewSurveyTextValidator() SurveyTextValidator {
+	return SurveyTextValidator{}
 }
 
-func (SurveyText) Text(name string, required bool, helper ...string) (string, error) {
-
+func (SurveyTextValidator) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
 	var value string
-
 	validationQs := []*survey.Question{
 		{
-			Name: "name",
+			Name:     "name",
+			Validate: validate,
 		},
-	}
-
-	if required {
-		validationQs[0].Validate = survey.Required
 	}
 
 	if len(helper) > 0 {
@@ -32,4 +27,3 @@ func (SurveyText) Text(name string, required bool, helper ...string) (string, er
 
 	return value, survey.Ask(validationQs, &value)
 }
-

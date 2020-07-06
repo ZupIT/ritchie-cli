@@ -17,7 +17,9 @@ func (inputTextMock) Text(name string, required bool, helper ...string) (string,
 	return "mocked text", nil
 }
 
-func (inputTextMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
+type inputTextValidatorMock struct{}
+
+func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
 	return "mocked text", nil
 }
 
@@ -25,10 +27,6 @@ type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool, helper ...string) (string, error) {
 	return "username=ritchie", nil
-}
-
-func (inputSecretMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return "mocked text", nil
 }
 
 type inputURLMock struct{}
