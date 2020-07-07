@@ -48,7 +48,6 @@ var _ = Describe("RitCore", func() {
 		Entry("List repo", scenariosCore[16]),
 		Entry("Update", scenariosCore[17]),
 		// Entry("Update repo", scenariosCore[18]),
-		Entry("Clean", scenariosCore[19]),
 		// Entry("Clean repo", scenariosCore[20]),
 		// Entry("delete repo", scenariosCore[21]),
 	)

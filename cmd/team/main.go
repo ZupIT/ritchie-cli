@@ -138,7 +138,6 @@ func buildCommands() *cobra.Command {
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
-	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
 	initCmd := cmd.NewTeamInitCmd(
@@ -173,7 +172,6 @@ func buildCommands() *cobra.Command {
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
-	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
 	listRepoCmd := cmd.NewListRepoCmd(repoManager)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
@@ -185,7 +183,6 @@ func buildCommands() *cobra.Command {
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
 	addCmd.AddCommand(addRepoCmd)
-	cleanCmd.AddCommand(cleanRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)
@@ -205,7 +202,6 @@ func buildCommands() *cobra.Command {
 			Commands: []*cobra.Command{
 				addCmd,
 				autocompleteCmd,
-				cleanCmd,
 				createCmd,
 				deleteCmd,
 				initCmd,

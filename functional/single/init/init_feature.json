@@ -45,17 +45,6 @@
         "result":"To start using rit, you need to initialize rit first."
     },
     {
-        "entry":"Clean repo",
-        "steps":[
-            {
-                "key":"",
-                "value":"clean repo",
-                "action":"main"
-            }
-        ],
-        "result":"To start using rit, you need to initialize rit first."
-    },
-    {
         "entry":"List repo",
         "steps":[
             {
