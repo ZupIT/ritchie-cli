@@ -562,7 +562,6 @@ workflows:
           requires:
             - deb-package
             - rpm-package
-            - win-package
             - sign-bin
       - deb-package:
           filters:
