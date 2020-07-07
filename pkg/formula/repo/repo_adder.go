@@ -2,6 +2,7 @@ package repo
 
 import (
 	"encoding/json"
+	"net/http"
 	"path"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -12,6 +13,7 @@ const repositoriesPath = "/repo/repositories.json"
 
 type AddManager struct {
 	ritHome string
+	client  *http.Client
 	file    stream.FileWriteReadExister
 	dir     stream.DirCreater
 }
@@ -38,11 +40,32 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		}
 	}
 
-	if repo.Current {
-		repos = unsetCurrent(repos)
+	if repo.Current { // If the new repo has been set as current, you must set other repos to be non-current
+		repos = unsetCurrentRepo(repos)
 	}
 
 	repos[repo.Name] = repo
+	if err := ad.saveRepo(repoPath, repos); err != nil {
+		return err
+	}
+
+	ad.downloadRepo()
+
+	return nil
+}
+
+func (ad AddManager) downloadRepo(repo formula.Repo) error {
+	req, err := http.NewRequest(http.MethodGet, repo.ZipUrl)
+	if err != nil {
+		return err
+	}
+
+
+
+	return nil
+}
+
+func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
 	bytes, err := json.Marshal(repos)
 	if err != nil {
 		return err
@@ -60,7 +83,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	return nil
 }
 
-func unsetCurrent(repos formula.Repos) formula.Repos {
+func unsetCurrentRepo(repos formula.Repos) formula.Repos {
 	for k := range repos {
 		repo := repos[k]
 		if repo.Current {
