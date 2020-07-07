@@ -61,10 +61,20 @@ func NewAutocompleteFish(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 
 	return &cobra.Command{
-		Use:     fish.String(),
-		Short:   "Add fish(>3.X) autocomplete for terminal",
-		Long:    "Add fish(>3.X) autocomplete for terminal, fish 2.0 is not supported only fish 3.X",
-		Example: "rit completion fish",
+		Use:   fish.String(),
+		Short: "Add fish autocomplete for terminal --help to know how to use",
+		Long: `
+Add fish autocomplete for terminal
+Only fish >= version 3.X is supported (fish 2.X is not supported)
+
+To test run: 
+ $ rit completion fish | source
+
+To install run: 
+ $ echo "rit completion fish | source" >> ~/.config/fish/config.fish
+
+`,
+		Example: "rit completion fish | source",
 		RunE:    a.runFunc(),
 	}
 }
@@ -74,10 +84,16 @@ func NewAutocompletePowerShell(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 
 	return &cobra.Command{
-		Use:     powerShell.String(),
-		Short:   "Add powerShell autocomplete for terminal",
-		Long:    "Add powerShell autocomplete for terminal",
-		Example: "rit completion powershell",
+		Use:   powerShell.String(),
+		Short: "Add powerShell autocomplete for terminal --help to know how to use",
+		Long: `
+Add powerShell autocomplete for terminal
+Only powerShell >= version 5.X is supported
+
+To install run and after restart powerShell:
+	rit completion powershell >> $PROFILE
+`,
+		Example: "rit completion powershell >> $PROFILE",
 		RunE:    a.runFunc(),
 	}
 }

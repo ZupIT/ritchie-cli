@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -136,7 +137,7 @@ func (o *singleRootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if isWhitelist(singleIgnorelist, cmd) {
+		if isWhitelist(singleIgnorelist, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
 
@@ -203,6 +204,10 @@ func verifyNewVersion(cmd *cobra.Command) {
 
 func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
 	return sliceutil.Contains(whitelist, cmd.CommandPath())
+}
+
+func isCompleteCmd(cmd *cobra.Command) bool {
+	return strings.Contains(cmd.CommandPath(), "__complete")
 }
 
 func versionFlag(edition api.Edition) string {
