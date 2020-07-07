@@ -267,18 +267,13 @@ jobs:
       <<: *ENVIRONMENT
     steps:
       - checkout
+      - attach_workspace:
+          at: /workspace/dist
       - run:
           name: Install osslsigncode
           command: |
             sudo apt-get update -y
             sudo apt-get install -y osslsigncode
-      - attach_workspace:
-          at: /workspace/dist
-      - run:
-          name: Binary Signature Windows
-          command: |
-            ls -liah dist
-            ls -liah dist/installer
             ls -R dist
             osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecliteamzup.msi -out dist/installer/ritchiecliteamzup.msi
 
