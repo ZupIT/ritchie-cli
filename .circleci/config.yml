@@ -234,7 +234,6 @@ jobs:
           command: |
             go test -v -count=1 -p 1 (go list ./functional/single/... | grep -v vendor/)
 
-
   build:
     executor: ritchie-executor
     environment:
@@ -264,6 +263,23 @@ jobs:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
           path: *TEST_RESULTS_DIR
+
+  binary_signature:
+    executor: ritchie-tests-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Binary Signature Windows
+          command: |
+            sudo apt install osslsigncode -y
+            ls workspace
+            echo testing
+            ls
+            osslsigncode sign -pkcs12 ZupIT.pfx -pass $SIGN_CODE -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in ritchiecliteamzup.msi -out ritchiecliteamzup.msi
+
   delivery:
     executor: delivery-executor
     environment:
@@ -504,6 +520,11 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - win-package
       - delivery:
           name: delivery
           filters:
@@ -512,6 +533,7 @@ workflows:
             - deb-package
             - rpm-package
             - win-package
+            - sig-bin
       - release:
           name: release-publish
           filters:
@@ -538,6 +560,7 @@ workflows:
             - deb-package
             - rpm-package
             - win-package
+            - sig-bin
       - deb-package:
           filters:
             <<: *FILTERS_DELIVERY
@@ -553,3 +576,8 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - win-package
