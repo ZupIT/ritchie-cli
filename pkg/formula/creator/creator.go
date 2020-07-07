@@ -226,6 +226,11 @@ func (c CreateManager) createSrcFiles(dir, pkg, lang string) error {
 		if err := python.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
+	case RubyLang:
+		ruby := NewRuby(c)
+		if err := ruby.Create(srcDir, pkg, pkgDir, dir); err != nil {
+			return err
+		}
 	default:
 		shell := NewShell(c)
 		if err := shell.Create(srcDir, pkg, pkgDir, dir); err != nil {
@@ -418,6 +423,10 @@ func generateParent(fc []string, index int) string {
 
 func createPackageJson(dir, tpl string) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tpl))
+}
+
+func createGemfile(dir, tpl string) error {
+	return fileutil.WriteFile(fmt.Sprintf("%s/Gemfile", dir), []byte(tpl))
 }
 
 func formulaValue(file []byte) string {

@@ -10,9 +10,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_go"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_java"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_node"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_python"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_php"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_python"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_ruby"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/templates/template_shell"
 )
 
 const (
@@ -24,10 +25,11 @@ const (
 	NodeLang   = "Node"
 	PhpLang    = "Php"
 	PythonLang = "Python"
+	RubyLang   = "Ruby"
 	ShellLang  = "Shell"
 )
 
-var Languages = []string{GoLang, JavaLang, NodeLang, PhpLang, PythonLang, ShellLang}
+var Languages = []string{GoLang, JavaLang, NodeLang, PhpLang, PythonLang, RubyLang, ShellLang}
 
 type LangCreator interface {
 	Create(srcDir, pkg, pkgDir, dir string) error
@@ -206,6 +208,55 @@ func (n Node) Create(srcDir, pkg, pkgDir, dir string) error {
 	templateNode := strings.ReplaceAll(n.File, nameBin, pkg)
 	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, n.FileFormat)
 	if err := fileutil.WriteFile(pkgFile, []byte(templateNode)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type Ruby struct {
+	Lang
+	Gemfile string
+}
+
+func NewRuby(c CreateManager) Ruby {
+	return Ruby{
+		Lang: Lang{
+			CreateManager: c,
+			FileFormat:    fileextensions.Ruby,
+			StartFile:     index,
+			Main:          template_ruby.Index,
+			Makefile:      template_ruby.Makefile,
+			Run:           template_ruby.Run,
+			Dockerfile:    template_ruby.Dockerfile,
+			File:          template_ruby.File,
+			Compiled:      false,
+			UpperCase:     false,
+		},
+		Gemfile:      	   template_ruby.Gemfile,
+	}
+}
+
+func (n Ruby) Create(srcDir, pkg, pkgDir, dir string) error {
+	if err := n.createGenericFiles(srcDir, pkg, dir, n.Lang); err != nil {
+		return err
+	}
+
+	if err := createRunTemplate(srcDir, n.Run); err != nil {
+		return err
+	}
+
+	if err := createPkgDir(pkgDir); err != nil {
+		return err
+	}
+
+	if err := createGemfile(srcDir, n.Gemfile); err != nil {
+		return err
+	}
+
+	templateRuby := strings.ReplaceAll(n.File, nameBin, pkg)
+	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, n.FileFormat)
+	if err := fileutil.WriteFile(pkgFile, []byte(templateRuby)); err != nil {
 		return err
 	}
 
