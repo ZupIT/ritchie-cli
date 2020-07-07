@@ -110,7 +110,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
 			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager)
 
-			got := defaultRunner.Run(def, api.Prompt)
+			got := defaultRunner.Run(def, api.Prompt, "0")
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
