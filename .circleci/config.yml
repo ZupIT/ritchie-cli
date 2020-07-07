@@ -279,7 +279,10 @@ jobs:
             echo testing
             ls
             osslsigncode sign -pkcs12 ZupIT.pfx -pass $SIGN_CODE -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in ritchiecliteamzup.msi -out ritchiecliteamzup.msi
-
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - ritchiecliteamzup.msi
   delivery:
     executor: delivery-executor
     environment:
