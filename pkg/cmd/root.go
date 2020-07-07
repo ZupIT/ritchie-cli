@@ -63,6 +63,8 @@ var (
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
+		fmt.Sprintf("%s completion fish", cmdUse),
+		fmt.Sprintf("%s completion powershell", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
 		fmt.Sprintf("%s upgrade", cmdUse),
 	}
@@ -156,7 +158,7 @@ func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if isWhitelist(teamIgnorelist, cmd) {
+		if isWhitelist(teamIgnorelist, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
 
