@@ -522,6 +522,8 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - win-package
+            - deb-package
+            - rpm-package
       - delivery:
           name: delivery
           filters:
@@ -577,3 +579,5 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - win-package
+            - rpm-package
+            - deb-package
