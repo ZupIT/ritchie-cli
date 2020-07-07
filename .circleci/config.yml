@@ -267,13 +267,13 @@ jobs:
       <<: *ENVIRONMENT
     steps:
       - checkout
-      - attach_workspace:
-          at: /workspace/dist
       - run:
           name: Install osslsigncode
           command: |
             sudo apt-get update -y
             sudo apt-get install -y osslsigncode
+      - attach_workspace:
+          at: /workspace/dist
       - run:
           name: Binary Signature Windows
           command: |
