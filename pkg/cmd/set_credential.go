@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -25,6 +25,7 @@ type setCredentialCmd struct {
 	prompt.InputList
 	prompt.InputPassword
 	prompt.InputMultiline
+	stream.FileReadExister
 }
 
 // MsgTypeEntry used in select of type entry credential
@@ -44,8 +45,9 @@ func NewSingleSetCredentialCmd(
 	ib prompt.InputBool,
 	il prompt.InputList,
 	ip prompt.InputPassword,
-	im prompt.InputMultiline) *cobra.Command {
-	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip, im}
+	im prompt.InputMultiline,
+	fr stream.FileReadExister) *cobra.Command {
+	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip, im, fr}
 
 	return newCmd(s)
 }
@@ -58,8 +60,9 @@ func NewTeamSetCredentialCmd(
 	ib prompt.InputBool,
 	il prompt.InputList,
 	ip prompt.InputPassword,
-	im prompt.InputMultiline) *cobra.Command {
-	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip, im}
+	im prompt.InputMultiline,
+	fr stream.FileReadExister) *cobra.Command {
+	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip, im, fr}
 
 	return newCmd(s)
 }
@@ -201,7 +204,7 @@ func (s setCredentialCmd) inputFile() ([]string, error) {
 		return nil, err
 	}
 
-	data, err := ioutil.ReadFile(path)
+	data, err := s.FileReadExister.Read(path)
 	if err != nil {
 		return nil, err
 	}
