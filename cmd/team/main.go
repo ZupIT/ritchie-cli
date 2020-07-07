@@ -63,6 +63,7 @@ func buildCommands() *cobra.Command {
 
 	// prompt
 	inputText := prompt.NewSurveyText()
+	inputTextValidator := prompt.NewSurveyTextValidator()
 	// inputInt := prompt.NewSurveyInt()
 	inputBool := prompt.NewSurveyBool()
 	inputPassword := prompt.NewSurveyPassword()
@@ -181,7 +182,7 @@ func buildCommands() *cobra.Command {
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputList)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)

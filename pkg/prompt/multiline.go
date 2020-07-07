@@ -4,19 +4,13 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
+type SurveyMultiline struct{}
 
-type InputMultiline interface {
-	MultiLineText(name string, required bool) (string, error)
+func NewSurveyMultiline() SurveyMultiline {
+	return SurveyMultiline{}
 }
 
-
-type surveyMultiline struct{}
-
-func NewSurveyMultiline() surveyMultiline {
-	return surveyMultiline{}
-}
-
-func (surveyMultiline) MultiLineText(name string, required bool) (string, error) {
+func (SurveyMultiline) MultiLineText(name string, required bool) (string, error) {
 
 	var value string
 
