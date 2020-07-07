@@ -271,9 +271,13 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install osslsigncode
+          command: |
+            sudo apt-get update -y
+            sudo apt-get install -y osslsigncode
+      - run:
           name: Binary Signature Windows
           command: |
-            sudo apt install osslsigncode -y
             ls workspace
             echo testing
             ls
