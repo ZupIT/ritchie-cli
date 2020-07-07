@@ -264,7 +264,7 @@ jobs:
       - store_artifacts:
           path: *TEST_RESULTS_DIR
 
-  binary_signature:
+  sign-bin:
     executor: ritchie-tests-executor
     environment:
       <<: *ENVIRONMENT
