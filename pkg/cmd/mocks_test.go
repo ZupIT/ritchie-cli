@@ -355,3 +355,22 @@ type otpResolverCustomMock struct {
 func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Response, error) {
 	return m.requestOtp(url, organization)
 }
+
+type FileReadExisterMock struct {
+	FileReader interface {
+		Read(path string) ([]byte, error)
+	}
+	FileExister interface {
+		Exists(path string) bool
+	}
+}
+
+// Get calls GetFunc.
+func (mock *FileReadExisterMock) Read(path string) ([]byte, error) {
+	return mock.FileReader.Read(path)
+}
+
+// Put calls PutFunc.
+func (mock *FileReadExisterMock) Exists(path string) bool {
+	return mock.FileExister.Exists(path)
+}
