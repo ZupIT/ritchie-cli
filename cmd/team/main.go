@@ -114,7 +114,7 @@ func buildCommands() *cobra.Command {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	repoAdder := repo.NewAdder(ritchieHomeDir, dirManager, fileManager)
+	repoAdder := repo.NewAdder(ritchieHomeDir, http.DefaultClient, dirManager, fileManager)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)

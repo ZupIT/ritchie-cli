@@ -113,6 +113,8 @@ func (a AddRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
+		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", repository.Name)
+		prompt.Success(successMsg)
 		return nil
 	}
 }
@@ -142,7 +144,7 @@ func (a AddRepoCmd) tags(url string, token string) (formula.Tags, error) {
 	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
 	resp, err := a.client.Do(req)
 	if err != nil {
-		return formula.Tags{}, nil
+		return formula.Tags{}, err
 	}
 
 	defer resp.Body.Close()

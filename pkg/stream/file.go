@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 )
@@ -17,6 +18,10 @@ type FileWriter interface {
 	Write(path string, content []byte) error
 }
 
+type FileCreator interface {
+	Create(path string, data io.ReadCloser) error
+}
+
 type FileRemover interface {
 	Remove(path string) error
 }
@@ -29,14 +34,14 @@ type FileCopier interface {
 	Copy(src, dst string) error
 }
 
-type FileCopyExistLister interface {
-	FileLister
-	FileCopier
+type FileReadExister interface {
+	FileReader
 	FileExister
 }
 
-type FileReadExister interface {
-	FileReader
+type FileCopyExistLister interface {
+	FileLister
+	FileCopier
 	FileExister
 }
 
@@ -48,6 +53,14 @@ type FileWriteReadExister interface {
 
 type FileWriteReadExistRemover interface {
 	FileWriter
+	FileReader
+	FileExister
+	FileRemover
+}
+
+type FileWriteCreatorReadExistRemover interface {
+	FileWriter
+	FileCreator
 	FileReader
 	FileExister
 	FileRemover
@@ -87,6 +100,20 @@ func (f FileManager) Exists(path string) bool {
 // A successful call returns err == nil
 func (f FileManager) Write(path string, content []byte) error {
 	return ioutil.WriteFile(path, content, os.ModePerm)
+}
+
+func (f FileManager) Create(path string, data io.ReadCloser) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+	if _, err = io.Copy(file, data); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Remove removes the named file
