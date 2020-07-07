@@ -43,7 +43,7 @@ func TestSingleSettings_WriteCredentials(t *testing.T) {
 		t.Errorf("Error while write credentials: %s", err)
 	}
 
-	os.Remove(fmt.Sprintf("%s/providers.json", home))
+	_ = os.Remove(fmt.Sprintf("%s/providers.json", home))
 }
 
 func TestProviderPath(t *testing.T) {

@@ -123,13 +123,14 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	}
 
 	var providerList []string
-	for k, _ := range credentials {
+	for k := range credentials {
 		providerList = append(providerList, k)
 	}
 	providerChoose, err := s.List("Select your provider", providerList)
 	if err != nil{
 		return credDetail, err
 	}
+
 	if providerChoose == "Add a new" {
 		addMoreCredentials := true
 		newProvider, err := s.MultiLineText("Enter your provider:", true)

@@ -24,8 +24,8 @@ func (s SingleSettings) ReadCredentials(path string) (credential.Fields, error) 
 	if s.file.Exists(path) {
 		cBytes, _ := s.file.Read(path)
 		err := json.Unmarshal(cBytes, &fields)
-		if err != nil{
-			return fields,err
+		if err != nil {
+			return fields, err
 		}
 	}
 
@@ -34,7 +34,7 @@ func (s SingleSettings) ReadCredentials(path string) (credential.Fields, error) 
 
 func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) error {
 	fieldsData, err := json.Marshal(fields)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	finalPath := fmt.Sprintf("%s/providers.json", path)
@@ -47,8 +47,8 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) 
 }
 
 func (s SingleSettings) DefaultCredentials() {
-	if !s.file.Exists(ProviderPath()){
-		_ = s.WriteCredentials(NewDefaultCredentials(),ProviderPath())
+	if !s.file.Exists(ProviderPath()) {
+		_ = s.WriteCredentials(NewDefaultCredentials(), ProviderPath())
 	}
 }
 
@@ -86,11 +86,11 @@ func NewDefaultCredentials() credential.Fields {
 	}
 
 	var dc = credential.Fields{
-		"github":[]credential.Field{username,token},
-		"gitlab":[]credential.Field{username,token},
-		"aws":[]credential.Field{accessKeyId,secretAccessKey},
-		"jenkins":[]credential.Field{username,token},
-		"kubeconfig":[]credential.Field{base64config},
+		"github":     []credential.Field{username, token},
+		"gitlab":     []credential.Field{username, token},
+		"aws":        []credential.Field{accessKeyId, secretAccessKey},
+		"jenkins":    []credential.Field{username, token},
+		"kubeconfig": []credential.Field{base64config},
 	}
 
 	return dc
