@@ -170,7 +170,6 @@ jobs:
       - run:
           name: Running Functional tests for single
           command: |
-            go mod download
             make functional-test-single
 
   unix_functional_test_team:
@@ -189,7 +188,6 @@ jobs:
       - run:
           name: Running Functional tests for team
           command: |
-            go mod download
             make functional-test-team
 
   windows_functional_test_team:
