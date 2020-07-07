@@ -66,7 +66,7 @@ func (s Sender) SendCommand() {
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(headers.XOrg, session.Organization)
-	req.Header.Set(headers.Authorization, session.AccessToken)
+	req.Header.Set(headers.XAuthorization, session.AccessToken)
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return

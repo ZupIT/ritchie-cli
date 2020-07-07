@@ -53,7 +53,7 @@ func buildCommands() *cobra.Command {
 
 	// prompt
 	inputText := prompt.NewSurveyText()
-	inputInt := prompt.NewSurveyInt()
+	// inputInt := prompt.NewSurveyInt()
 	inputBool := prompt.NewSurveyBool()
 	inputPassword := prompt.NewSurveyPassword()
 	inputList := prompt.NewSurveyList()
@@ -93,6 +93,8 @@ func buildCommands() *cobra.Command {
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
+
+	repoAdder := repo.NewAdder(ritchieHomeDir, dirManager, fileManager)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -134,7 +136,7 @@ func buildCommands() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
+	addRepoCmd := cmd.NewAddRepoCmdV2(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
 	listRepoCmd := cmd.NewListRepoCmd(repoManager)

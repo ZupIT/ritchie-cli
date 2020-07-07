@@ -46,7 +46,7 @@ func (dm TeamLoader) Load() error {
 	}
 
 	req.Header.Set(headers.XOrg, sess.Organization)
-	req.Header.Set(headers.Authorization, sess.AccessToken)
+	req.Header.Set(headers.XAuthorization, sess.AccessToken)
 	resp, err := dm.client.Do(req)
 	if err != nil {
 		return err
