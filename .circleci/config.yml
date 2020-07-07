@@ -533,7 +533,7 @@ workflows:
             - deb-package
             - rpm-package
             - win-package
-            - sig-bin
+            - sign-bin
       - release:
           name: release-publish
           filters:
