@@ -264,7 +264,7 @@ jobs:
           path: *TEST_RESULTS_DIR
 
   sign-bin:
-    executor: ritchie-tests-executor
+    executor: ubuntu-executor
     environment:
       <<: *ENVIRONMENT
     steps:
