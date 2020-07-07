@@ -1,47 +1,37 @@
 package prompt
 
-import (
-	"errors"
-	"strconv"
-	"strings"
-
-	"github.com/manifoldco/promptui"
-)
-
-func defaultTemplate() *promptui.PromptTemplates {
-	return &promptui.PromptTemplates{
-		Prompt:  "{{ . }} ",
-		Valid:   "{{ . | bold }} ",
-		Invalid: "{{ . | red }} ",
-		Success: "{{ . | bold }} ",
-	}
+type InputText interface {
+	Text(name string, required bool, helper ...string) (string, error)
 }
 
-func defaultSelectTemplate(label string) *promptui.SelectTemplates {
-	return &promptui.SelectTemplates{
-		Label: label,
-	}
+type InputTextValidator interface {
+	Text(name string, validate func(interface{}) error, helper ...string) (string, error)
 }
 
-func validateEmptyInput(input string) error {
-	if len(strings.TrimSpace(input)) < 1 {
-		return errors.New("this input must not be empty")
-	}
-	return nil
+type InputBool interface {
+	Bool(name string, items []string) (bool, error)
 }
 
-func validateIntIn(input string) error {
-	_, err := strconv.ParseInt(input, 0, 64)
-	if err != nil {
-		return errors.New("invalid number")
-	}
-	return nil
+type InputPassword interface {
+	Password(label string) (string, error)
 }
 
-func validateSurveyIntIn(input interface{}) error {
-	_, err := strconv.ParseInt(input.(string), 0, 64)
-	if err != nil {
-		return errors.New("invalid number")
-	}
-	return nil
+type InputMultiline interface {
+	MultiLineText(name string, required bool) (string, error)
+}
+
+type InputList interface {
+	List(name string, items []string) (string, error)
+}
+
+type InputInt interface {
+	Int(name string) (int64, error)
+}
+
+type InputEmail interface {
+	Email(name string) (string, error)
+}
+
+type InputURL interface {
+	URL(name, defaultValue string) (string, error)
 }

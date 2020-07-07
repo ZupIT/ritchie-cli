@@ -6,7 +6,7 @@ import (
 )
 
 func TestNewCreateFormulaCmd(t *testing.T) {
-	cmd := NewCreateFormulaCmd(os.TempDir(), formCreator{}, workspaceForm{}, inputTextMock{}, inputListMock{})
+	cmd := NewCreateFormulaCmd(os.TempDir(), formCreator{}, workspaceForm{}, inputTextMock{}, inputTextValidatorMock{}, inputListMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewCreateFormulaCmd got %v", cmd)

@@ -130,11 +130,11 @@ func (i inputMock) List(string, []string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) Text(string, bool) (string, error) {
+func (i inputMock) Text(string, bool, ...string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) TextWithValidate(name string, validate func(interface{}) error) (string, error) {
+func (i inputMock) TextWithValidate(string, func(interface{}) error, ...string) (string, error) {
 	return i.text, i.err
 }
 
