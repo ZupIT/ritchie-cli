@@ -101,14 +101,14 @@ func (c CreateManager) generateFormulaFiles(fPath, pkgName, lang, fCmdName, work
 		return err
 	}
 
-	if err := c.createSrcFiles(fPath, pkgName, lang); err != nil {
+	if err := c.createSrcFiles(fPath, pkgName, lang, fCmdName); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c CreateManager) createSrcFiles(dir, pkg, language string) error {
+func (c CreateManager) createSrcFiles(dir, pkg, language, fCmdName string) error {
 	srcDir := fmt.Sprintf("%s/src", dir)
 	pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
 	if err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm); err != nil {
@@ -122,7 +122,7 @@ func (c CreateManager) createSrcFiles(dir, pkg, language string) error {
 			return err
 		}
 	case formula.JavaLang:
-		javaCreator := java.New(c, c.createGenericFiles)
+		javaCreator := java.New(c, c.createGenericFiles, fCmdName)
 		if err := javaCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
