@@ -2,44 +2,22 @@ package prompt
 
 import (
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/manifoldco/promptui"
 )
 
-type InputList interface {
-	List(name string, items []string) (string, error)
-}
+type SurveyList struct{}
 
-type inputList struct{}
-
-type surveyList struct{}
-
-func NewInputList() inputList {
-	return inputList{}
-}
-
-func NewSurveyList() surveyList {
-	return surveyList{}
+func NewSurveyList() SurveyList {
+	return SurveyList{}
 }
 
 // List show a prompt with options and parse to string.
-func (inputList) List(name string, items []string) (string, error) {
-	prompt := promptui.Select{
-		Items:     items,
-		Pointer: promptui.PipeCursor,
-		Templates: defaultSelectTemplate(name),
-	}
-	_, result, err := prompt.Run()
-	return result, err
-}
-
-// List show a prompt with options and parse to string.
-func (surveyList) List(name string, items []string) (string, error) {
+func (SurveyList) List(name string, items []string) (string, error) {
 	choice := ""
 	prompt := &survey.Select{
 		Message: name,
 		Options: items,
 	}
-	if err := survey.AskOne(prompt, &choice); err != nil{
+	if err := survey.AskOne(prompt, &choice); err != nil {
 		return "", err
 	}
 
