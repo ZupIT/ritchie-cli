@@ -212,9 +212,10 @@ func (d *Definition) ConfigURL(configName string) string {
 	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
 }
 
-func (c Create) FormulaName() string {
+// FormulaName remove rit from formulaCmd
+func (c Create) FormulaCmdName() string {
 	d := strings.Split(c.FormulaCmd, " ")
-	return strings.Join(d[1:], "_")
+	return strings.Join(d[1:], " ")
 }
 
 func (c Create) PkgName() string {

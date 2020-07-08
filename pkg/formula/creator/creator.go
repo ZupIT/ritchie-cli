@@ -1,12 +1,9 @@
 package creator
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -20,9 +17,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
-	"github.com/thoas/go-funk"
-
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
@@ -51,31 +45,19 @@ func (c CreateManager) Create(cf formula.Create) error {
 	}
 
 	pkgName := cf.PkgName()
-	formulaName := cf.FormulaName()
+	fCmdName := cf.FormulaCmdName()
 
-	if err := c.generateFormulaFiles(cf.FormulaPath, pkgName, cf.Lang); err != nil {
+	if err := c.generateFormulaFiles(cf.FormulaPath, pkgName, cf.Lang, fCmdName, cf.WorkspacePath); err != nil {
 		return err
 	}
 
 	if c.isNew(cf.WorkspacePath) {
-
-		if err := c.createScript(cf.WorkspacePath); err != nil {
+		if err := createGitIgnoreFile(cf.WorkspacePath); err != nil {
 			return err
 		}
-
-		if err := c.createMakefileMain(cf.WorkspacePath, cf.FormulaPath, formulaName); err != nil {
+		if err := createMainReadMe(cf.WorkspacePath); err != nil {
 			return err
 		}
-
-	} else {
-		if err := c.changeMakefileMain(cf.WorkspacePath, cf.FormulaCmd, formulaName); err != nil {
-			return err
-		}
-	}
-
-	// Add the command to tree.json only when all other steps are successful
-	if err := c.generateTreeJsonFile(cf.WorkspacePath, cf.FormulaCmd, cf.Lang); err != nil {
-		return err
 	}
 
 	return nil
@@ -101,86 +83,25 @@ func (c CreateManager) isValidCmd(fCmd string) error {
 	return nil
 }
 
-func (c CreateManager) generateTreeJsonFile(formPath, fCmd, lang string) error {
-	treeCommands := formula.Tree{Commands: api.Commands{}}
-	treePath := path.Join(formPath, formula.TreePath)
-	if !c.file.Exists(treePath) {
-		if err := c.dir.Create(filepath.Dir(treePath)); err != nil {
-			return err
-		}
-	} else {
-		jsonFile, err := c.file.Read(treePath)
-		if err != nil {
-			return err
-		}
-		if err := json.Unmarshal(jsonFile, &treeCommands); err != nil {
-			return err
-		}
-	}
+func (c CreateManager) generateFormulaFiles(fPath, pkgName, lang, fCmdName, workSpcPath string) error {
 
-	treeCommands, err := updateTree(fCmd, treeCommands, lang, 0)
-	if err != nil {
-		return err
-	}
-	treeJsonFile, _ := json.Marshal(&treeCommands)
-	var prettyJSON bytes.Buffer
-	if err := json.Indent(&prettyJSON, treeJsonFile, "", "\t"); err != nil {
+	if err := c.dir.Create(fPath); err != nil {
 		return err
 	}
 
-	return c.file.Write(treePath, prettyJSON.Bytes())
-}
-
-func (c CreateManager) createMakefileMain(dir, dirForm, name string) error {
-	tplFile := template.MakefileMain
-
-	tplFile = strings.ReplaceAll(tplFile, "{{formName}}", strings.ToUpper(name))
-	tplFile = strings.ReplaceAll(tplFile, "{{formPath}}", dirForm)
-
-	return c.file.Write(path.Join(dir, formula.MakefilePath), []byte(tplFile))
-}
-
-func (c CreateManager) generateFormulaFiles(formulaPath, pkgName, lang string) error {
-	if err := c.dir.Create(formulaPath); err != nil {
+	if err := createHelpFiles(fCmdName, workSpcPath); err != nil {
 		return err
 	}
 
-	if err := createConfigFile(formulaPath); err != nil {
+	if err := createReadMeFile(fCmdName, fPath); err != nil {
 		return err
 	}
 
-	if err := c.createSrcFiles(formulaPath, pkgName, lang); err != nil {
+	if err := createConfigFile(fPath); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (c CreateManager) changeMakefileMain(formPath, fCmd, fName string) error {
-	d := strings.Split(fCmd, " ")
-	makefilePath := path.Join(formPath, formula.MakefilePath)
-	makeFile, err := c.file.Read(makefilePath)
-	if err != nil {
-		return err
-	}
-
-	variable := strings.ToUpper(fName) + "=" + strings.Join(d[1:], "/")
-	makeFile = []byte(strings.ReplaceAll(string(makeFile), "\nFORMULAS=", "\n"+variable+"\nFORMULAS="))
-	formulas := formulaValue(makeFile)
-	makeFile = []byte(strings.ReplaceAll(string(makeFile), formulas, formulas+" $("+strings.ToUpper(fName)+")"))
-
-	if err = c.file.Write(makefilePath, makeFile); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c CreateManager) createScript(dir string) error {
-	tplFile := template.CopyBinConfig
-
-	filePath := path.Join(dir, "/copy-bin-configs.sh")
-	if err := c.file.Write(filePath, []byte(tplFile)); err != nil {
+	if err := c.createSrcFiles(fPath, pkgName, lang); err != nil {
 		return err
 	}
 
@@ -301,121 +222,34 @@ func createConfigFile(dir string) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/config.json", dir), []byte(tplFile))
 }
 
-func updateTree(fCmd string, t formula.Tree, language string, i int) (formula.Tree, error) {
-	fc := splitFormulaCommand(fCmd)
-	parent := generateParent(fc, i)
-
-	command := funk.Filter(t.Commands, func(command api.Command) bool {
-		return command.Usage == fc[i] && command.Parent == parent
-	}).([]api.Command)
-
-	if len(fc)-1 == i {
-		if len(command) == 0 {
-			pathValue := strings.Join(fc, "/")
-			fn := fc[len(fc)-1]
-			var commands []api.Command
-			if language == formula.PythonLang {
-				commands = append(t.Commands, api.Command{
-					Usage: fn,
-					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: &api.Formula{
-						Path:   pathValue,
-						Bin:    "main.py",
-						LBin:   "main.py",
-						MBin:   "main.py",
-						WBin:   fmt.Sprintf("%s.bat", fn),
-						Bundle: "${so}.zip",
-						Config: "config.json",
-					},
-					Parent: parent,
-				})
-			} else if language == formula.GoLang {
-				commands = append(t.Commands, api.Command{
-					Usage: fn,
-					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: &api.Formula{
-						Path:   pathValue,
-						Bin:    fmt.Sprintf("%s-${so}", fn),
-						LBin:   fmt.Sprintf("%s-${so}", fn),
-						MBin:   fmt.Sprintf("%s-${so}", fn),
-						WBin:   fmt.Sprintf("%s-${so}", fn),
-						Bundle: "${so}.zip",
-						Config: "config.json",
-					},
-					Parent: parent,
-				})
-			} else {
-				commands = append(t.Commands, api.Command{
-					Usage: fn,
-					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: &api.Formula{
-						Path:   pathValue,
-						Bin:    fmt.Sprintf("%s.sh", fn),
-						LBin:   fmt.Sprintf("%s.sh", fn),
-						MBin:   fmt.Sprintf("%s.sh", fn),
-						WBin:   fmt.Sprintf("%s.bat", fn),
-						Bundle: "${so}.zip",
-						Config: "config.json",
-					},
-					Parent: parent,
-				})
+func createHelpFiles(formulaCmdName, workSpacePath string) error {
+	dirs := strings.Split(formulaCmdName, " ")
+	for i := 0; i < len(dirs); i++ {
+		d := dirs[0 : i+1]
+		tPath := path.Join(workSpacePath, path.Join(d...))
+		helpPath := fmt.Sprintf("%s/help.txt", tPath)
+		if !fileutil.Exists(helpPath) {
+			err := fileutil.WriteFile(helpPath, []byte(template.Help))
+			if err != nil {
+				return err
 			}
-			t.Commands = commands
-			return t, nil
-		} else {
-			return formula.Tree{}, ErrRepeatedCommand
-		}
-
-	} else {
-		if len(command) == 0 {
-			commands := append(t.Commands, api.Command{
-				Usage:  fc[i],
-				Help:   generateCommandHelp(parent, fc, i),
-				Parent: parent,
-			})
-			t.Commands = commands
 		}
 	}
-
-	return updateTree(fCmd, t, language, i+1)
+	return nil
 }
 
-func generateCommandHelp(parent string, fc []string, i int) string {
-	var help string
-	if parent != "root" {
-		help = fc[i-1] + " " + fc[i]
-	} else {
-		help = fc[i] + " commands"
-	}
-	return help
+func createReadMeFile(formulaCmdName, formulaPath string) error {
+	tpl := strings.ReplaceAll(template.ReadMe, "{{FormulaCmd}}", formulaCmdName)
+	return fileutil.WriteFile(fmt.Sprintf("%s/README.md", formulaPath), []byte(tpl))
 }
 
-func splitFormulaCommand(formulaCommand string) []string {
-	return funk.Filter(strings.Split(formulaCommand, " "), func(input string) bool {
-		return input != "" && input != "rit"
-	}).([]string)
-}
-
-func generateParent(fc []string, index int) string {
-	if index > 0 {
-		return "root_" + strings.Join(fc[0:index], "_")
-	} else {
-		return "root"
-	}
-}
-
-func formulaValue(file []byte) string {
-	fileStr := string(file)
-	return strings.Split(strings.Split(fileStr, "FORMULAS=")[1], "\n")[0]
-}
-
-func (c CreateManager) existsTreeJson(workspacePath string) bool {
-	treePath := path.Join(workspacePath, formula.TreePath)
-	if !c.file.Exists(treePath) {
+func (c CreateManager) existsMainReadMe(workspacePath string) bool {
+	mainReadMePath := path.Join(workspacePath, "README.md")
+	if !c.file.Exists(mainReadMePath) {
 		return false
 	}
 
-	read, err := c.file.Read(treePath)
+	read, err := c.file.Read(mainReadMePath)
 	if err != nil {
 		return false
 	}
@@ -423,13 +257,23 @@ func (c CreateManager) existsTreeJson(workspacePath string) bool {
 	return len(read) > 0
 }
 
-func (c CreateManager) existsMakefile(workspacePath string) bool {
-	makefilePath := path.Join(workspacePath, formula.MakefilePath)
-	if !c.file.Exists(makefilePath) {
+func createGitIgnoreFile(workspacePath string) error {
+	tpl := template.GitIgnore
+	return fileutil.WriteFile(fmt.Sprintf("%s/.gitignore", workspacePath), []byte(tpl))
+}
+
+func createMainReadMe(workspacePath string) error {
+	tpl := template.MainReadMe
+	return fileutil.WriteFile(fmt.Sprintf("%s/README.md", workspacePath), []byte(tpl))
+}
+
+func (c CreateManager) existsGitIgnore(workspacePath string) bool {
+	gitIgnorePath := path.Join(workspacePath, ".gitignore")
+	if !c.file.Exists(gitIgnorePath) {
 		return false
 	}
 
-	read, err := c.file.Read(makefilePath)
+	read, err := c.file.Read(gitIgnorePath)
 	if err != nil {
 		return false
 	}
@@ -438,5 +282,5 @@ func (c CreateManager) existsMakefile(workspacePath string) bool {
 }
 
 func (c CreateManager) isNew(workspacePath string) bool {
-	return !c.existsMakefile(workspacePath) || !c.existsTreeJson(workspacePath)
+	return !c.existsGitIgnore(workspacePath) || !c.existsMainReadMe(workspacePath)
 }
