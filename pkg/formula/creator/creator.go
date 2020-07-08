@@ -243,20 +243,6 @@ func createReadMeFile(formulaCmdName, formulaPath string) error {
 	return fileutil.WriteFile(fmt.Sprintf("%s/README.md", formulaPath), []byte(tpl))
 }
 
-func (c CreateManager) existsMainReadMe(workspacePath string) bool {
-	mainReadMePath := path.Join(workspacePath, "README.md")
-	if !c.file.Exists(mainReadMePath) {
-		return false
-	}
-
-	read, err := c.file.Read(mainReadMePath)
-	if err != nil {
-		return false
-	}
-
-	return len(read) > 0
-}
-
 func createGitIgnoreFile(workspacePath string) error {
 	tpl := template.GitIgnore
 	return fileutil.WriteFile(fmt.Sprintf("%s/.gitignore", workspacePath), []byte(tpl))
@@ -274,6 +260,20 @@ func (c CreateManager) existsGitIgnore(workspacePath string) bool {
 	}
 
 	read, err := c.file.Read(gitIgnorePath)
+	if err != nil {
+		return false
+	}
+
+	return len(read) > 0
+}
+
+func (c CreateManager) existsMainReadMe(workspacePath string) bool {
+	mainReadMePath := path.Join(workspacePath, "README.md")
+	if !c.file.Exists(mainReadMePath) {
+		return false
+	}
+
+	read, err := c.file.Read(mainReadMePath)
 	if err != nil {
 		return false
 	}
