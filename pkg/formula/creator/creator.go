@@ -311,55 +311,14 @@ func updateTree(fCmd string, t formula.Tree, language string, i int) (formula.Tr
 
 	if len(fc)-1 == i {
 		if len(command) == 0 {
-			pathValue := strings.Join(fc, "/")
 			fn := fc[len(fc)-1]
 			var commands []api.Command
-			if language == formula.PythonLang {
-				commands = append(t.Commands, api.Command{
-					Usage: fn,
-					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: &api.Formula{
-						Path:   pathValue,
-						Bin:    "main.py",
-						LBin:   "main.py",
-						MBin:   "main.py",
-						WBin:   fmt.Sprintf("%s.bat", fn),
-						Bundle: "${so}.zip",
-						Config: "config.json",
-					},
-					Parent: parent,
-				})
-			} else if language == formula.GoLang {
-				commands = append(t.Commands, api.Command{
-					Usage: fn,
-					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: &api.Formula{
-						Path:   pathValue,
-						Bin:    fmt.Sprintf("%s-${so}", fn),
-						LBin:   fmt.Sprintf("%s-${so}", fn),
-						MBin:   fmt.Sprintf("%s-${so}", fn),
-						WBin:   fmt.Sprintf("%s-${so}", fn),
-						Bundle: "${so}.zip",
-						Config: "config.json",
-					},
-					Parent: parent,
-				})
-			} else {
-				commands = append(t.Commands, api.Command{
-					Usage: fn,
-					Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
-					Formula: &api.Formula{
-						Path:   pathValue,
-						Bin:    fmt.Sprintf("%s.sh", fn),
-						LBin:   fmt.Sprintf("%s.sh", fn),
-						MBin:   fmt.Sprintf("%s.sh", fn),
-						WBin:   fmt.Sprintf("%s.bat", fn),
-						Bundle: "${so}.zip",
-						Config: "config.json",
-					},
-					Parent: parent,
-				})
-			}
+			commands = append(t.Commands, api.Command{
+				Usage: fn,
+				Help:  fmt.Sprintf("%s %s", fc[i-1], fc[i]),
+				Formula: true,
+				Parent: parent,
+			})
 			t.Commands = commands
 			return t, nil
 		} else {

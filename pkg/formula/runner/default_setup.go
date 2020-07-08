@@ -2,19 +2,16 @@ package runner
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	"github.com/docker/docker/pkg/urlutil"
-	"github.com/google/uuid"
+	"os/exec"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
@@ -62,51 +59,86 @@ func (d DefaultSetup) Setup(def formula.Definition) (formula.Setup, error) {
 		return formula.Setup{}, err
 	}
 
-	binName := def.BinName()
-	binPath := def.BinPath(formulaPath)
-	binFilePath := def.BinFilePath(binPath, binName)
-	if err := d.loadBundle(formulaPath, binFilePath, def); err != nil {
+	binFilePath := def.BinFilePath(formulaPath)
+	if err := d.buildFormula(formulaPath, binFilePath, config); err != nil {
 		return formula.Setup{}, err
 	}
 
-	tmpDir, tmpBinDir, err := createWorkDir(ritchieHome, binPath, def)
+	tmpDir, err := createWorkDir(ritchieHome, formulaPath, def)
 	if err != nil {
 		return formula.Setup{}, err
 	}
 
-	if err := os.Chdir(tmpBinDir); err != nil {
+	if err := os.Chdir(tmpDir); err != nil {
 		return formula.Setup{}, err
 	}
 
-	tmpBinFilePath := def.BinFilePath(tmpBinDir, binName)
-
 	s := formula.Setup{
-		Pwd:            pwd,
-		FormulaPath:    formulaPath,
-		BinPath:        binPath,
-		TmpDir:         tmpDir,
-		TmpBinDir:      tmpBinDir,
-		TmpBinFilePath: tmpBinFilePath,
-		Config:         config,
+		Pwd:         pwd,
+		FormulaPath: formulaPath,
+		BinName:     def.BinName(),
+		BinPath:     def.BinPath(formulaPath),
+		TmpDir:      tmpDir,
+		Config:      config,
 	}
 
 	return s, nil
 }
 
-func (d DefaultSetup) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
-	configName := def.ConfigName()
-	configPath := def.ConfigPath(formulaPath, configName)
-	if !fileutil.Exists(configPath) {
-		url := def.ConfigURL(configName)
-		if !urlutil.IsURL(url) {
-			return formula.Config{}, ErrInvalidRepoUrl
-		}
+func (d DefaultSetup) buildFormula(formulaPath, binFilePath string, config formula.Config) error {
+	if !fileutil.Exists(binFilePath) {
+		prompt.Info("Building formula with docker...")
+		if config.DockerIB != "" {
+			volume := fmt.Sprintf("%s:/app", formulaPath)
+			args := []string{dockerRunCmd, "-v", volume, "--entrypoint", "'/bin/sh'", config.DockerIB, "-c",
+				"'cd /app/src && /usr/bin/make build'"}
+			cmd := exec.Command(docker, args...)
+			cmd.Env = os.Environ()
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Start(); err != nil {
+				prompt.Warning("Failed building formula with docker trying run local Makefile...")
+				return buildMakefileLocal(fmt.Sprintf("%s/src", formulaPath))
+			}
 
-		prompt.Info("Downloading formula config...")
-		if err := d.downloadConfig(url, formulaPath, configName, def.RepoName); err != nil {
-			return formula.Config{}, err
+			if err := cmd.Wait(); err != nil {
+				prompt.Warning("Failed building formula with docker trying run local Makefile...")
+				return buildMakefileLocal(fmt.Sprintf("%s/src", formulaPath))
+			}
+		} else {
+			return buildMakefileLocal(fmt.Sprintf("%s/src", formulaPath))
 		}
-		prompt.Success("Formula config download completed!")
+	}
+	return nil
+}
+
+func buildMakefileLocal(formulaSrcPath string) error {
+	prompt.Info("Building formula using local Makefile...")
+	if err := os.Chdir(formulaSrcPath); err != nil {
+		return err
+	}
+	cmd := exec.Command("make", "build")
+	cmd.Env = os.Environ()
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Start(); err != nil {
+		return errors.New("error build formula using make, verify your repository")
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return errors.New("error build formula using make, verify your repository")
+	}
+	return nil
+}
+
+func (d DefaultSetup) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
+	configPath := def.ConfigPath(formulaPath)
+	if !fileutil.Exists(configPath) {
+		return formula.Config{}, fmt.Errorf("Failed load config file for formula."+
+			"\nTry run rit update repo"+
+			"\nConfig file path: %s", configPath)
 	}
 
 	configFile, err := ioutil.ReadFile(configPath)
@@ -121,155 +153,16 @@ func (d DefaultSetup) loadConfig(formulaPath string, def formula.Definition) (fo
 	return formulaConfig, nil
 }
 
-func (d DefaultSetup) loadBundle(formulaPath, binFilePath string, def formula.Definition) error {
-	if !fileutil.Exists(binFilePath) {
-		url := def.BundleURL()
-		if !urlutil.IsURL(url) {
-			return ErrInvalidRepoUrl
-		}
+func createWorkDir(home, formulaPath string, def formula.Definition) (string, error) {
+	tDir := def.TmpWorkDirPath(home)
 
-		name := def.BundleName()
-		zipFile, err := d.downloadFormulaBundle(url, formulaPath, name, def.RepoName)
-		if err != nil {
-			return err
-		}
-
-		if err := unzipFile(zipFile, formulaPath); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (d DefaultSetup) downloadFormulaBundle(url, destPath, zipName, repoName string) (string, error) {
-	prompt.Info("Downloading formula...")
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return "", ErrCreateReqBundle
-	}
-
-	if d.edition == api.Team {
-		s, err := d.sessionManager.Current()
-		if err != nil {
-			return "", err
-		}
-		req.Header.Set(headers.XOrg, s.Organization)
-		req.Header.Set(headers.XRepoName, repoName)
-		req.Header.Set(headers.Authorization, s.AccessToken)
-	}
-
-	resp, err := d.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusNotFound:
-		return "", ErrFormulaBinNotFound
-	default:
-		return "", ErrUnknownFormulaDownload
-	}
-
-	file := fmt.Sprintf("%s/%s", destPath, zipName)
-
-	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
-		return "", err
-	}
-	out, err := os.Create(file)
-	if err != nil {
+	if err := fileutil.CreateDirIfNotExists(tDir, 0755); err != nil {
 		return "", err
 	}
 
-	defer out.Close()
-	if _, err = io.Copy(out, resp.Body); err != nil {
+	if err := fileutil.CopyDirectory(def.BinPath(formulaPath), tDir); err != nil {
 		return "", err
 	}
 
-	prompt.Success("Formula download completed!")
-	return file, nil
-}
-
-func (d DefaultSetup) downloadConfig(url, destPath, configName, repoName string) error {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return ErrCreateReqConfig
-	}
-
-	if d.edition == api.Team {
-		s, err := d.sessionManager.Current()
-		if err != nil {
-			return err
-		}
-		req.Header.Set(headers.XOrg, s.Organization)
-		req.Header.Set(headers.XRepoName, repoName)
-		req.Header.Set(headers.Authorization, s.AccessToken)
-	}
-
-	resp, err := d.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusNotFound:
-		return ErrConfigFileNotFound
-	default:
-		return ErrUnknownConfigFileDownload
-	}
-
-	file := fmt.Sprintf("%s/%s", destPath, configName)
-
-	if err := fileutil.CreateDirIfNotExists(destPath, 0755); err != nil {
-		return err
-	}
-
-	out, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	if _, err := io.Copy(out, resp.Body); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func createWorkDir(ritchieHome, binPath string, def formula.Definition) (string, string, error) {
-	u := uuid.New().String()
-	tDir, tBDir := def.TmpWorkDirPath(ritchieHome, u)
-
-	if err := fileutil.CreateDirIfNotExists(tBDir, 0755); err != nil {
-		return "", "", err
-	}
-
-	if err := fileutil.CopyDirectory(binPath, tBDir); err != nil {
-		return "", "", err
-	}
-
-	return tDir, tBDir, nil
-}
-
-func unzipFile(filename, destPath string) error {
-	if err := fileutil.CreateDirIfNotExists(destPath, 0655); err != nil {
-		return err
-	}
-
-	if err := fileutil.Unzip(filename, destPath); err != nil {
-		return err
-	}
-
-	if err := fileutil.RemoveFile(filename); err != nil {
-		return err
-	}
-
-	return nil
+	return tDir, nil
 }

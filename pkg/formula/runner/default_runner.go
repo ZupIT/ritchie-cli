@@ -26,7 +26,7 @@ func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType) 
 		return err
 	}
 
-	cmd := exec.Command(setup.TmpBinFilePath)
+	cmd := exec.Command(setup.BinName)
 
 	cmd.Env = os.Environ()
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, setup.Pwd)

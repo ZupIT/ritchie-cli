@@ -17,7 +17,7 @@ func (m SingleLoader) Load() error {
 	r := formula.Repository{
 		Priority: 0,
 		Name:     commons,
-		TreePath: m.treePath,
+		ZipUrl: m.treePath,
 	}
 
 	if err := m.Add(r); err != nil {

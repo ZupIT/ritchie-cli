@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -47,7 +49,7 @@ func (f FormulaCommand) Add(rootCmd *cobra.Command) error {
 		cmdPath := api.Command{Parent: cmd.Parent, Usage: cmd.Usage}
 		if !sliceutil.ContainsCmd(f.coreCmds, cmdPath) {
 			var newCmd *cobra.Command
-			if cmd.Formula != nil && cmd.Formula.Path != "" {
+			if cmd.Formula {
 				newCmd = f.newFormulaCmd(cmd)
 			} else {
 				newCmd = newSubCmd(cmd)
@@ -87,22 +89,17 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	}
 
 	addFlags(formulaCmd)
-	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, *cmd.Formula)
+	path := strings.ReplaceAll(strings.Replace(cmd.Parent, "root", "", 1), "_", string(os.PathSeparator))
+	path =  fmt.Sprintf("%s%s%s", path, string(os.PathSeparator), cmd.Usage)
+	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, path)
 
 	return formulaCmd
 }
 
-func (f FormulaCommand) execFormulaFunc(repo string, form api.Formula) func(cmd *cobra.Command, args []string) error {
+func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		d := formula.Definition{
-			Path:     form.Path,
-			Bin:      form.Bin,
-			LBin:     form.LBin,
-			MBin:     form.MBin,
-			WBin:     form.WBin,
-			Bundle:   form.Bundle,
-			Config:   form.Config,
-			RepoURL:  form.RepoURL,
+			Path:     path,
 			RepoName: repo,
 		}
 

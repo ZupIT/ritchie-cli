@@ -45,7 +45,7 @@ func printList(rr []formula.Repository) {
 	table := uitable.New()
 	table.AddRow("NAME", "URL")
 	for _, re := range rr {
-		table.AddRow(re.Name, re.TreePath)
+		table.AddRow(re.Name, re.ZipUrl)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)

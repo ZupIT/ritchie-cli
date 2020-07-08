@@ -121,7 +121,7 @@ func (dm Manager) Add(r formula.Repository) error {
 	}
 
 	if err := dm.loadTreeFile(r); err != nil {
-		return fmt.Errorf("looks like %q is not a valid formula repository or cannot be reached\n", r.TreePath)
+		return fmt.Errorf("looks like %q is not a valid formula repository or cannot be reached\n", r.ZipUrl)
 	}
 
 	added := false
@@ -156,7 +156,7 @@ func (dm Manager) Update() error {
 		go func(v formula.Repository) {
 			defer wg.Done()
 			if err := dm.loadTreeFile(v); err != nil {
-				fmt.Printf("...Unable to get an update from the %q formula repository (%s):\n\t%s\n", v.Name, v.TreePath, err)
+				fmt.Printf("...Unable to get an update from the %q formula repository (%s):\n\t%s\n", v.Name, v.ZipUrl, err)
 			} else {
 				fmt.Printf("...Successfully got an update from the %q formula repository\n", v.Name)
 			}
@@ -228,7 +228,7 @@ func (dm Manager) loadTreeFile(r formula.Repository) error {
 	if err != nil {
 		return prompt.NewError("error restore current session")
 	}
-	req, err := http.NewRequest(http.MethodGet, r.TreePath, nil)
+	req, err := http.NewRequest(http.MethodGet, r.ZipUrl, nil)
 	if err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func (dm Manager) loadTreeFile(r formula.Repository) error {
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("%d - failed to get index for %s\n", resp.StatusCode, r.TreePath)
+		return fmt.Errorf("%d - failed to get index for %s\n", resp.StatusCode, r.ZipUrl)
 	}
 
 	treeFile, err := fileutil.ReadAll(resp.Body)

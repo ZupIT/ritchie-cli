@@ -69,10 +69,10 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		ur, err := a.URL("URL of the tree [http(s)://host:port/tree.json]: ", "")
+		/*ur, err := a.URL("URL of the tree [http(s)://host:port/tree.json]: ", "")
 		if err != nil {
 			return err
-		}
+		}*/ //TODO: Feature KADU
 
 		pr, err := a.Int("Priority [ps.: 0 is higher priority, the lower higher the priority] :")
 		if err != nil {
@@ -82,7 +82,6 @@ func (a addRepoCmd) runPrompt() CommandRunnerFunc {
 		r := formula.Repository{
 			Priority: int(pr),
 			Name:     rn,
-			TreePath: ur,
 		}
 
 		if err = a.Add(r); err != nil {

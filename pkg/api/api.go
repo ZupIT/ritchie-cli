@@ -61,26 +61,15 @@ var (
 
 // Command type
 type Command struct {
-	Parent  string  `json:"parent"`
-	Usage   string  `json:"usage"`
-	Help    string  `json:"help"`
-	Formula *Formula `json:"formula,omitempty"`
-	Repo    string  `json:"Repo,omitempty"`
+	Id      string `json:"id"`
+	Parent  string `json:"parent"`
+	Usage   string `json:"usage"`
+	Help    string `json:"help"`
+	Formula bool   `json:"formula,omitempty"`
+	Repo    string `json:"Repo,omitempty"`
 }
 
 type Commands []Command
-
-// Formula type
-type Formula struct {
-	Path    string `json:"path,omitempty"`
-	Bin     string `json:"bin,omitempty"`
-	LBin    string `json:"binLinux,omitempty"`
-	MBin    string `json:"binDarwin,omitempty"`
-	WBin    string `json:"binWindows,omitempty"`
-	Bundle  string `json:"bundle,omitempty"`
-	Config  string `json:"config,omitempty"`
-	RepoURL string `json:"repoUrl,omitempty"`
-}
 
 // Edition type that represents Single or Team.
 type Edition string
