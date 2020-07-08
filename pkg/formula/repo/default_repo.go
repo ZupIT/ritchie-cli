@@ -236,7 +236,7 @@ func (dm Manager) loadTreeFile(r formula.Repository) error {
 	if dm.edition == api.Team {
 		req.Header.Set(headers.XOrg, session.Organization)
 		req.Header.Set(headers.XRepoName, r.Name)
-		req.Header.Set(headers.Authorization, session.AccessToken)
+		req.Header.Set(headers.XAuthorization, session.AccessToken)
 	}
 	resp, err := dm.httpClient.Do(req)
 	if err != nil {
