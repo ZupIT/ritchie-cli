@@ -45,9 +45,11 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) 
 	return nil
 }
 
-func (s SingleSettings) DefaultCredentials() error {
-	if !s.file.Exists(ProviderPath()) {
-		err := s.WriteCredentials(NewDefaultCredentials(), ProviderPath())
+// WriteDefault is a non override version of WriteCredentials
+// used to create providers.json if user dont have it
+func (s SingleSettings) WriteDefaultCredentials(path string) error {
+	if !s.file.Exists(path) {
+		err := s.WriteCredentials(NewDefaultCredentials(), path)
 		return err
 	}
 	return nil
@@ -60,7 +62,6 @@ func ProviderPath() string {
 }
 
 func NewDefaultCredentials() credential.Fields {
-
 	var username = credential.Field{
 		Name: "username",
 		Type: "text",

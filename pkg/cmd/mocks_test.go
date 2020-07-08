@@ -202,7 +202,7 @@ type credSettingsMock struct{}
 
 type singleCredSettingsMock struct {}
 
-func (s singleCredSettingsMock) DefaultCredentials() error {
+func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
 	return nil
 }
 

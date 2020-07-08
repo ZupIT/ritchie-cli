@@ -16,6 +16,8 @@ import (
 
 const addANew = "Add a new"
 
+var inputTypes = []string{"plain text", "secret"}
+
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
@@ -114,7 +116,7 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
-	err := s.DefaultCredentials()
+	err := s.WriteDefaultCredentials(credsingle.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
 	}
@@ -146,7 +148,6 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 			return credDetail, err
 		}
 		providerList = append(providerList, newProvider)
-		typeList := []string{"plain text", "secret"}
 
 		var newFields []credential.Field
 		var newField credential.Field
@@ -157,7 +158,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 				return credDetail, err
 			}
 
-			newField.Type, err = s.List("Select your field type:", typeList)
+			newField.Type, err = s.List("Select your field type:", inputTypes)
 			if err != nil {
 				return credDetail, err
 			}
@@ -181,7 +182,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 	for _, i := range inputs {
 		var value string
-		if i.Type == "secret" {
+		if i.Type == inputTypes[1] {
 			value, err = s.Password(i.Name + ":")
 			if err != nil {
 				return credDetail, err

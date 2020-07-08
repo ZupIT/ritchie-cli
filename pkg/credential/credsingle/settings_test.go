@@ -12,16 +12,10 @@ import (
 var fileManager = stream.NewFileManager()
 var credSettings = NewSingleSettings(fileManager)
 
-func TestNewDefaultCredentials(t *testing.T) {
-	defaultCredentials := NewDefaultCredentials()
-
-	if defaultCredentials == nil {
-		t.Errorf("Default credentials cannot be nill")
-	}
-
-	if len(defaultCredentials) <= 0 {
-		t.Errorf("Default credentials cannot be empty")
-	}
+func providersPath() string {
+	tempDir:= os.TempDir()
+	path := fmt.Sprintf("%s/providers.json", tempDir)
+	return path
 }
 
 func TestSingleSettings_ReadCredentials(t *testing.T) {
@@ -37,14 +31,19 @@ func TestSingleSettings_ReadCredentials(t *testing.T) {
 }
 
 func TestSingleSettings_WriteCredentials(t *testing.T) {
-	home, _ := os.UserHomeDir()
-	path := fmt.Sprintf("%s/providers.json", home)
-	err := credSettings.WriteCredentials(NewDefaultCredentials(), path)
+	err := credSettings.WriteCredentials(NewDefaultCredentials(), providersPath())
+	defer os.Remove(providersPath())
 	if err != nil {
 		t.Errorf("Error while write credentials: %s", err)
 	}
+}
 
-	_ = os.Remove(fmt.Sprintf("%s/providers.json", path))
+func TestSingleSettings_WriteDefaultCredentials(t *testing.T) {
+	err := credSettings.WriteDefaultCredentials(providersPath())
+	defer os.Remove(providersPath())
+	if err != nil {
+		t.Errorf("Error while write credentials: %s", err)
+	}
 }
 
 func TestProviderPath(t *testing.T) {
@@ -54,5 +53,17 @@ func TestProviderPath(t *testing.T) {
 
 	if providersJson != "providers.json" {
 		t.Errorf("Providers path must end on providers.json")
+	}
+}
+
+func TestNewDefaultCredentials(t *testing.T) {
+	defaultCredentials := NewDefaultCredentials()
+
+	if defaultCredentials == nil {
+		t.Errorf("Default credentials cannot be nill")
+	}
+
+	if len(defaultCredentials) <= 0 {
+		t.Errorf("Default credentials cannot be empty")
 	}
 }
