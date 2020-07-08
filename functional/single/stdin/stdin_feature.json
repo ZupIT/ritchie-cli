@@ -50,22 +50,6 @@
         "result":""
     },
     {
-        "entry":"Clean repo STDIN",
-        "steps":[
-            {
-                "key":"",
-                "value":"{\"name\":\"Leonidas\"}",
-                "action":"echo"
-            },
-            {
-                "key":"",
-                "value":"clean repo --stdin",
-                "action":"main"
-            }
-        ],
-        "result":"\"Leonidas\" has been cleaned successfully"
-    },
-    {
         "entry":"Delete repo STDIN",
         "steps":[
             {

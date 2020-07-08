@@ -115,7 +115,6 @@ func buildCommands() *cobra.Command {
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
-	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
 	initCmd := cmd.NewSingleInitCmd(inputPassword, passphraseManager)
@@ -140,11 +139,13 @@ func buildCommands() *cobra.Command {
 	addRepoCmd := cmd.NewAddRepoCmd(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
+	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
+	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
-	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
+	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteCtxCmd)
@@ -163,7 +164,6 @@ func buildCommands() *cobra.Command {
 			Commands: []*cobra.Command{
 				addCmd,
 				autocompleteCmd,
-				cleanCmd,
 				createCmd,
 				deleteCmd,
 				initCmd,

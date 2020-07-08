@@ -45,14 +45,6 @@ type RepositoryDeleter interface {
 	Delete(name string) error
 }
 
-type RepositoryCleaner interface {
-	Clean(name string) error
-}
-
-type RepositoryLoader interface {
-	Load() error
-}
-
 type RepositoryAddLister interface {
 	RepositoryAdder
 	RepositoryLister
