@@ -410,17 +410,6 @@ func generateParent(fc []string, index int) string {
 	}
 }
 
-<<<<<<< HEAD
-func createPackageJson(dir, tpl string) error {
-	return fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tpl))
-}
-
-func createGemfile(dir, tpl string) error {
-	return fileutil.WriteFile(fmt.Sprintf("%s/Gemfile", dir), []byte(tpl))
-}
-
-=======
->>>>>>> upstream/master
 func formulaValue(file []byte) string {
 	fileStr := string(file)
 	return strings.Split(strings.Split(fileStr, "FORMULAS=")[1], "\n")[0]
