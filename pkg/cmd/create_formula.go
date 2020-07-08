@@ -155,13 +155,15 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 
 	createSuccess(s, cf.Lang)
 
-	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
-		err := prompt.NewError(err.Error())
-		s.Error(err)
-		return
-	}
+	//Todo call build
 
-	buildSuccess(formulaPath, cf.FormulaCmd)
+	// if err := c.formula.Build(workspacePath, formulaPath); err != nil {
+	// 	err := prompt.NewError(err.Error())
+	// 	s.Error(err)
+	// 	return
+	// }
+	//
+	// buildSuccess(formulaPath, cf.FormulaCmd)
 }
 
 func createSuccess(s *spinner.Spinner, lang string) {
