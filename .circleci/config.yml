@@ -170,7 +170,6 @@ jobs:
       - run:
           name: Running Functional tests for single
           command: |
-            go mod download
             make functional-test-single
 
   unix_functional_test_team:
@@ -189,7 +188,6 @@ jobs:
       - run:
           name: Running Functional tests for team
           command: |
-            go mod download
             make functional-test-team
 
   windows_functional_test_team:
@@ -234,7 +232,6 @@ jobs:
           command: |
             go test -v -count=1 -p 1 (go list ./functional/single/... | grep -v vendor/)
 
-
   build:
     executor: ritchie-executor
     environment:
@@ -246,7 +243,6 @@ jobs:
           name: Running build
           command: |
             . ./.circleci/scripts/version.sh
-            go mod download
             make build-circle
       - run:
           name: Persist version file
@@ -264,6 +260,26 @@ jobs:
           path: *TEST_RESULTS_DIR
       - store_artifacts:
           path: *TEST_RESULTS_DIR
+
+  sign-bin:
+    executor: ubuntu-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Install osslsigncode
+          command: |
+            sudo apt-get update -y
+            sudo apt-get install -y osslsigncode
+            osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecliteamzup.msi -out dist/installer/ritchiecliteamzup.msi
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
   delivery:
     executor: delivery-executor
     environment:
@@ -504,14 +520,19 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - win-package
+            - deb-package
+            - rpm-package
       - delivery:
           name: delivery
           filters:
             <<: *FILTERS_RELEASE
           requires:
-            - deb-package
-            - rpm-package
-            - win-package
+            - sign-bin
       - release:
           name: release-publish
           filters:
@@ -535,9 +556,7 @@ workflows:
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - deb-package
-            - rpm-package
-            - win-package
+            - sign-bin
       - deb-package:
           filters:
             <<: *FILTERS_DELIVERY
@@ -553,3 +572,10 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - win-package
+            - rpm-package
+            - deb-package
