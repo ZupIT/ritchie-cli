@@ -18,12 +18,14 @@ const (
 	fCmdCorrectJava   = "rit scaffold generate test_java"
 	fCmdCorrectNode   = "rit scaffold generate test_node"
 	fCmdCorrectPython = "rit scaffold generate test_python"
+	fCmdCorrectRuby   = "rit scaffold generate test_ruby"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
 	fCmdCorrectPhp    = "rit scaffold generate test_php"
 	langGo            = "Go"
 	langJava          = "Java"
 	langNode          = "Node"
 	langPython        = "Python"
+	langRuby          = "Ruby"
 	langShell         = "Shell"
 	langPhp           = "Php"
 )
@@ -126,6 +128,22 @@ func TestCreator(t *testing.T) {
 					Lang:          langPython,
 					WorkspacePath: fullDir,
 					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_python"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+			},
+			out: out{
+				err: nil,
+			},
+		},
+		{
+			name: "command correct-ruby",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdCorrectRuby,
+					Lang:          langRuby,
+					WorkspacePath: fullDir,
+					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_ruby"),
 				},
 				dir:  dirManager,
 				file: fileManager,
