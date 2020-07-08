@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -23,7 +24,9 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 			name: "run with success",
 			fields: fields{
 				InputList:  inputListMock{},
+				InputInt: inputIntMock{},
 				RepoLister: repoListerNonEmptyMock{},
+				RepoPrioritySetter: repoPrioritySetterMock{},
 			},
 			wantErr: false,
 		},
@@ -31,7 +34,9 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 			name: "error on repoLister",
 			fields: fields{
 				InputList:  inputListMock{},
+				InputInt: inputIntMock{},
 				RepoLister: repoListerErrorMock{},
+				RepoPrioritySetter: repoPrioritySetterMock{},
 			},
 			wantErr: true,
 		},
@@ -39,7 +44,43 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 			name: "error on inputList",
 			fields: fields{
 				InputList:  inputListErrorMock{},
+				InputInt: inputIntMock{},
 				RepoLister: repoListerMock{},
+				RepoPrioritySetter: repoPrioritySetterMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error on inputInt",
+			fields: fields{
+				InputList:  inputListMock{},
+				InputInt: inputIntErrorMock{},
+				RepoLister: repoListerMock{},
+				RepoPrioritySetter: repoPrioritySetterMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "success pass on if r.Name == repoName",
+			fields: fields{
+				InputList:  inputListCustomMock{name: "repoName"},
+				InputInt: inputIntMock{},
+				RepoLister: repoListerNonEmptyMock{},
+				RepoPrioritySetter: repoPrioritySetterMock{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "error on setPriority",
+			fields: fields{
+				InputList:  inputListMock{},
+				InputInt: inputIntMock{},
+				RepoLister: repoListerMock{},
+				RepoPrioritySetter: repoPrioritySetterCustomMock{
+					setPriority: func(repo formula.Repo, priority int) error {
+						return errors.New("some error")
+					},
+				},
 			},
 			wantErr: true,
 		},

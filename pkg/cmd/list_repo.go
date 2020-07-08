@@ -11,12 +11,12 @@ import (
 
 // listRepoCmd type for list repo command
 type listRepoCmd struct {
-	formula.RepoLister
+	formula.RepositoryLister
 }
 
 // NewListRepoCmd creates a new cmd instance
-func NewListRepoCmd(ls formula.RepoLister) *cobra.Command {
-	l := &listRepoCmd{ls}
+func NewListRepoCmd(rl formula.RepositoryLister) *cobra.Command {
+	l := &listRepoCmd{rl}
 
 	cmd := &cobra.Command{
 		Use:     "repo",
@@ -41,11 +41,11 @@ func (l listRepoCmd) runFunc() CommandRunnerFunc {
 	}
 }
 
-func printList(rr []formula.Repository) {
+func printList(rr []formula.Repo) {
 	table := uitable.New()
-	table.AddRow("NAME", "URL")
+	table.AddRow("NAME", "VERSION", "PRIORITY")
 	for _, re := range rr {
-		table.AddRow(re.Name, re.TreePath)
+		table.AddRow(re.Name, re.Version, re.Priority)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
