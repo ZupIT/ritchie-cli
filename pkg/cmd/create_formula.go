@@ -198,10 +198,6 @@ func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 	return nil
 }
 
-<<<<<<< HEAD
-// FormulaWorkspaceInput is a function
-=======
->>>>>>> 09b1ec48cc0817e68c3c8b8d5f0804513fbefea2
 func FormulaWorkspaceInput(
 	workspaces formula.Workspaces,
 	inList prompt.InputList,
