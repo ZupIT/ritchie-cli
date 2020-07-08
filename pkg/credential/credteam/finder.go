@@ -59,7 +59,7 @@ func (f Finder) Find(provider string) (credential.Detail, error) {
 
 	req.Header.Set(headers.XOrg, session.Organization)
 	req.Header.Set(headers.XCtx, ctx.Current)
-	req.Header.Set(headers.Authorization, session.AccessToken)
+	req.Header.Set(headers.XAuthorization, session.AccessToken)
 	resp, err := f.httpClient.Do(req)
 	if err != nil {
 		return credential.Detail{}, err

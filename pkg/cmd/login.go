@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"github.com/spf13/cobra"
@@ -17,7 +16,6 @@ import (
 // loginCmd type for init command
 type loginCmd struct {
 	security.LoginManager
-	formula.RepoLoader
 	prompt.InputText
 	prompt.InputPassword
 	server.Finder
@@ -35,12 +33,10 @@ func NewLoginCmd(
 	t prompt.InputText,
 	p prompt.InputPassword,
 	lm security.LoginManager,
-	fm formula.RepoLoader,
 	sf server.Finder,
 	orv otp.Resolver) *cobra.Command {
 	l := loginCmd{
 		LoginManager:  lm,
-		RepoLoader:    fm,
 		InputText:     t,
 		InputPassword: p,
 		Finder:        sf,
@@ -89,9 +85,6 @@ func (l loginCmd) runPrompt() CommandRunnerFunc {
 		if err = l.Login(us); err != nil {
 			return err
 		}
-		if err := l.Load(); err != nil {
-			return err
-		}
 		prompt.Success("Login successfully!")
 		return err
 	}
@@ -109,9 +102,6 @@ func (l loginCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if err = l.Login(u); err != nil {
-			return err
-		}
-		if err := l.Load(); err != nil {
 			return err
 		}
 		prompt.Success("Session created successfully!")

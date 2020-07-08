@@ -8,8 +8,6 @@ github.com/Azure/go-ansiterm
 github.com/Azure/go-ansiterm/winterm
 # github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd
 github.com/MakeNowJust/heredoc
-# github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
-github.com/chzyer/readline
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/denisbrodbeck/machineid v1.0.1
@@ -62,9 +60,6 @@ github.com/inconshreveable/go-update/internal/osext
 github.com/inconshreveable/mousetrap
 # github.com/json-iterator/go v1.1.8
 github.com/json-iterator/go
-# github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a
-github.com/juju/ansiterm
-github.com/juju/ansiterm/tabwriter
 # github.com/kaduartur/go-cli-spinner v1.0.0
 ## explicit
 github.com/kaduartur/go-cli-spinner/pkg/spinner
@@ -73,13 +68,6 @@ github.com/kaduartur/go-cli-spinner/pkg/template
 github.com/kballard/go-shellquote
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/lunixbochs/vtclean v0.0.0-20180621232353-2d01aacdc34a
-github.com/lunixbochs/vtclean
-# github.com/manifoldco/promptui v0.7.0
-## explicit
-github.com/manifoldco/promptui
-github.com/manifoldco/promptui/list
-github.com/manifoldco/promptui/screenbuf
 # github.com/mattn/go-colorable v0.1.4
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.11
