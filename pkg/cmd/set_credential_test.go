@@ -2,16 +2,15 @@ package cmd
 
 import (
 	"errors"
-	"io/ioutil"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestNewSingleSetCredentialCmd(t *testing.T) {
-	cmd := NewSingleSetCredentialCmd(credSetterMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{}, InputMultilineMock{})
+
+	cmd := NewSingleSetCredentialCmd(credSetterMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{}, InputMultilineMock{}, FileManagerMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewSingleSetCredentialCmd got %v", cmd)
@@ -23,7 +22,7 @@ func TestNewSingleSetCredentialCmd(t *testing.T) {
 }
 
 func TestNewTeamSetCredentialCmd(t *testing.T) {
-	cmd := NewTeamSetCredentialCmd(credSetterMock{}, credSettingsMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{}, InputMultilineMock{})
+	cmd := NewTeamSetCredentialCmd(credSetterMock{}, credSettingsMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{}, InputMultilineMock{}, FileManagerMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewTeamSetCredentialCmd got %v", cmd)
@@ -37,13 +36,11 @@ func TestNewTeamSetCredentialCmd(t *testing.T) {
 func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 	errEntry := errors.New("some error of entry")
 
-	tmpfile := createTemporaryFile()
-	defer os.Remove(tmpfile.Name())
-
 	type editableFields struct {
 		inputText      prompt.InputText
 		inputList      prompt.InputList
 		InputMultiline prompt.InputMultiline
+		FileManager    stream.FileReadExister
 	}
 	tests := []struct {
 		name           string
@@ -71,6 +68,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 						return "some_input", nil
 					},
 				},
+				FileManager: FileManagerMock{},
 			},
 			wantErr:     false,
 			wantedError: nil,
@@ -95,6 +93,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 						return "some_input", nil
 					},
 				},
+				FileManager: FileManagerMock{},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
@@ -105,7 +104,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 				inputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
 						if name == MsgTypeEntryPath {
-							return tmpfile.Name(), nil
+							return "custom_path", nil
 						}
 						return "some_input", nil
 					},
@@ -119,6 +118,14 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 					},
 				},
 				InputMultiline: InputMultilineMock{},
+				FileManager: FileManagerCustomMock{
+					read: func(path string) ([]byte, error) {
+						if path == "custom_path" {
+							return []byte("Some response"), nil
+						}
+						return []byte(""), errEntry
+					},
+				},
 			},
 			wantErr:     false,
 			wantedError: nil,
@@ -143,6 +150,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 					},
 				},
 				InputMultiline: InputMultilineMock{},
+				FileManager:    FileManagerMock{},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
@@ -160,6 +168,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 					},
 				},
 				InputMultiline: InputMultilineMock{},
+				FileManager:    FileManagerMock{},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
@@ -184,6 +193,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 					},
 				},
 				InputMultiline: InputMultilineMock{},
+				FileManager:    FileManagerMock{},
 			},
 			wantErr:     true,
 			wantedError: errEntry,
@@ -198,6 +208,7 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 				tt.editableFields.inputList,
 				inputPasswordMock{},
 				tt.editableFields.InputMultiline,
+				tt.editableFields.FileManager,
 			)
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if cmd == nil {
@@ -210,23 +221,4 @@ func TestNewSingleSetCredentialCmdWithEntryFile(t *testing.T) {
 			}
 		})
 	}
-}
-
-func createTemporaryFile() *os.File {
-	content := []byte("temporary file's content")
-	tmpfile, err := ioutil.TempFile("", "example")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if _, err := tmpfile.Write(content); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := tmpfile.Close(); err != nil {
-		log.Fatal(err)
-	}
-
-	return tmpfile
 }

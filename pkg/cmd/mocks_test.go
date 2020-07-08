@@ -356,21 +356,29 @@ func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Respons
 	return m.requestOtp(url, organization)
 }
 
-type FileReadExisterMock struct {
-	FileReader interface {
-		Read(path string) ([]byte, error)
-	}
-	FileExister interface {
-		Exists(path string) bool
-	}
+type FileManagerMock struct{}
+
+// Read of FileManagerMock
+func (fm FileManagerMock) Read(path string) ([]byte, error) {
+	return []byte("Some response"), nil
 }
 
-// Get calls GetFunc.
-func (mock *FileReadExisterMock) Read(path string) ([]byte, error) {
-	return mock.FileReader.Read(path)
+// Exists of FileManagerMock
+func (fm FileManagerMock) Exists(path string) bool {
+	return true
 }
 
-// Put calls PutFunc.
-func (mock *FileReadExisterMock) Exists(path string) bool {
-	return mock.FileExister.Exists(path)
+type FileManagerCustomMock struct {
+	read   func(path string) ([]byte, error)
+	exists func(path string) bool
+}
+
+// Read of FileManagerCustomMock
+func (fmc FileManagerCustomMock) Read(path string) ([]byte, error) {
+	return fmc.read(path)
+}
+
+// Exists of FileManagerCustomMock
+func (fmc FileManagerCustomMock) Exists(path string) bool {
+	return fmc.exists(path)
 }
