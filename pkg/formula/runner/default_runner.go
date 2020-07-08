@@ -26,7 +26,12 @@ func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType) 
 		return err
 	}
 
-	cmd := exec.Command(setup.BinName)
+	cmd := &exec.Cmd{
+		Path: setup.BinName,
+		Stdout: os.Stdout,
+		Stdin: os.Stdin,
+		Stderr: os.Stderr,
+	}
 
 	cmd.Env = os.Environ()
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, setup.Pwd)
@@ -34,9 +39,6 @@ func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType) 
 	cmd.Env = append(cmd.Env, pwdEnv)
 	cmd.Env = append(cmd.Env, cPwdEnv)
 
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
 	if err := d.Inputs(cmd, setup, inputType); err != nil {
 		return err

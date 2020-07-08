@@ -3,8 +3,8 @@ package formula
 type Repository struct {
 	Priority int    `json:"priority"`
 	Name     string `json:"name"`
-	ZipUrl string `json:"zipUrl"`
-	Token string `json:"token,omitempty"`
+	ZipUrl   string `json:"zipUrl"`
+	Token    string `json:"token,omitempty"`
 }
 
 type RepositoryFile struct {

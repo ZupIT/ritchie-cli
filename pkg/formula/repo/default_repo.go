@@ -26,7 +26,7 @@ import (
 
 const (
 	// Files
-	repositoryConfFilePattern    = "%s/repo/repositories.json"
+	repositoryConfFilePattern    = "%s/repos/repositories.json"
 	repositoryCacheFolderPattern = "%s/repo/cache"
 	treeCacheFilePattern         = "%s/repo/cache/%s-tree.json"
 	providerPath                 = "%s/repositories"
