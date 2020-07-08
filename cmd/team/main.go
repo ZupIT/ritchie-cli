@@ -177,11 +177,13 @@ func buildCommands() *cobra.Command {
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
+	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
+	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
-	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
+	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)
