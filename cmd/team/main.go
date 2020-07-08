@@ -180,7 +180,7 @@ func buildCommands() *cobra.Command {
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
-	listRepoCmd := cmd.NewListRepoCmd(repoManager)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)

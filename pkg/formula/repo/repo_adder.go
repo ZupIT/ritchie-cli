@@ -2,7 +2,6 @@ package repo
 
 import (
 	"encoding/json"
-	"fmt"
 	"path"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -36,7 +35,6 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		if err := json.Unmarshal(read, &repos); err != nil {
 			return err
 		}
-		fmt.Println("after")
 	}
 
 	repos.Values = append(repos.Values, repo)
