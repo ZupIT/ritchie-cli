@@ -295,6 +295,31 @@ func TestCreator(t *testing.T) {
 	}
 }
 
+func TestCreatorFail(t *testing.T) {
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	cleanForm(dirManager)
+
+	fullDir := createFullDir(dirManager, fileManager)
+
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+
+	tests := []string{langGo, langJava, langNode, langPhp, langPython, langShell}
+
+	creatorMock := genericFileCreatorMock{ createErr: errors.New("error while creating language") }
+	creator := NewCreator(treeMan, dirManager, fileManager)
+	for _, tt := range tests {
+		t.Run(tt, func(t *testing.T) {
+			expected := errors.New("error while creating language")
+			formulaPath := path.Join(fullDir, "/scaffold/generate/test_ruby")
+			got := creator.createSrcFiles(formulaPath, "test_fail", tt, creatorMock)
+			if got == nil || got.Error() != expected.Error() {
+				t.Errorf("Create Formula Fail(%s) got %v, want %v", tt, got, expected)
+			}
+		})
+	}
+}
+
 type repoListerMock struct{}
 
 func (repoListerMock) List() ([]formula.Repository, error) {
@@ -324,6 +349,15 @@ func (f fileManagerMock) Read(string) ([]byte, error) {
 }
 func (f fileManagerMock) Exists(string) bool {
 	return f.exist
+}
+
+type genericFileCreatorMock struct {
+	createErr   error
+	GenericFileCreatorI
+}
+
+func (c genericFileCreatorMock) createGenericFiles(_, _, _ string, _ formula.Lang) error {
+	return c.createErr
 }
 
 func cleanForm(dir stream.DirManager) {

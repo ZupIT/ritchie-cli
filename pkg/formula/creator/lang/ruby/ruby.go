@@ -18,12 +18,10 @@ type Ruby struct {
 }
 
 func New(
-	c formula.Creator,
 	createGenericFiles func(srcDir, pkg, dir string, l formula.Lang) error,
 ) Ruby {
 	return Ruby{
 		Lang: formula.Lang{
-			Creator:      c,
 			FileFormat:   fileextensions.Ruby,
 			StartFile:    template.StartFile,
 			Main:         template.Index,
