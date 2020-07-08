@@ -94,7 +94,8 @@ executors:
 
 jobs:
   lint:
-    executor: ritchie-tests-executor
+    executor: ubuntu-executor
+    resource_class: large
     steps:
       - checkout
       - run:
