@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
@@ -13,21 +14,29 @@ import (
 )
 
 const (
-	repoDirPath  = "repo"
-	repoFilePath = "repositories.json"
+	reposDirName  = "repos"
+	reposFileName = "repositories.json"
 )
 
 type AddManager struct {
 	ritHome string
 	client  *http.Client
-	file    stream.FileWriteCreatorReadExistRemover
+	tree    formula.TreeGenerator
 	dir     stream.DirCreateListCopyRemover
+	file    stream.FileWriteCreatorReadExistRemover
 }
 
-func NewAdder(ritHome string, client *http.Client, dir stream.DirCreateListCopyRemover, file stream.FileWriteCreatorReadExistRemover) AddManager {
+func NewAdder(
+	ritHome string,
+	client *http.Client,
+	tree formula.TreeGenerator,
+	dir stream.DirCreateListCopyRemover,
+	file stream.FileWriteCreatorReadExistRemover,
+) AddManager {
 	return AddManager{
 		ritHome: ritHome,
 		client:  client,
+		tree:    tree,
 		dir:     dir,
 		file:    file,
 	}
@@ -39,7 +48,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	}
 
 	repos := formula.Repos{}
-	repoPath := path.Join(ad.ritHome, repoDirPath, repoFilePath)
+	repoPath := path.Join(ad.ritHome, reposDirName, reposFileName)
 	if ad.file.Exists(repoPath) {
 		read, err := ad.file.Read(repoPath)
 		if err != nil {
@@ -51,12 +60,26 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		}
 	}
 
-	if repo.Current { // If the new repo has been set as current, you must set other repos to be non-current
-		repos = unsetCurrentRepo(repos)
+	repos = setPriority(repo, repos)
+
+	if err := ad.saveRepo(repoPath, repos); err != nil {
+		return err
 	}
 
-	repos[repo.Name] = repo
-	if err := ad.saveRepo(repoPath, repos); err != nil {
+	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name)
+
+	tree, err := ad.tree.Generate(newRepoPath)
+	if err != nil {
+		return err
+	}
+
+	treeFilePath := path.Join(newRepoPath, "tree.json")
+	bytes, err := json.MarshalIndent(tree, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	if err := ad.file.Write(treeFilePath, bytes); err != nil {
 		return err
 	}
 
@@ -82,7 +105,7 @@ func (ad AddManager) downloadRepo(repo formula.Repo) error {
 
 	defer resp.Body.Close()
 
-	newRepoPath := path.Join(ad.ritHome, repoDirPath, repo.Name)
+	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name)
 	if err := ad.dir.Remove(newRepoPath); err != nil {
 		return err
 	}
@@ -139,15 +162,17 @@ func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
 	return nil
 }
 
-func unsetCurrentRepo(repos formula.Repos) formula.Repos {
-	for k := range repos {
-		repo := repos[k]
-		if repo.Current {
-			repo.Current = false
-			repos[k] = repo
-			break
+func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
+	repos = append(repos, repo)
+
+	for i := range repos {
+		r := repos[i]
+		if repo.Name != r.Name && r.Priority >= repo.Priority {
+			repos[i].Priority++
 		}
 	}
+
+	sort.Sort(repos)
 
 	return repos
 }

@@ -11,19 +11,19 @@ import (
 )
 
 const (
-	treeLocalCmdPattern = "%s/repo/local/tree.json"
-	treeRepoCmdPattern  = "%s/repo/cache/%s-tree.json"
+	treeLocalCmdPattern = "%s/repos/local/tree.json"
+	treeRepoCmdPattern  = "%s/repos/%s/tree.json"
 	core                = "CORE"
 	local               = "LOCAL"
 )
 
 type Manager struct {
 	ritchieHome string
-	repoLister  formula.RepoLister
+	repoLister  formula.RepositoryLister
 	coreCmds    []api.Command
 }
 
-func NewTreeManager(ritchieHome string, rl formula.RepoLister, coreCmds []api.Command) Manager {
+func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command) Manager {
 	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
 }
 
