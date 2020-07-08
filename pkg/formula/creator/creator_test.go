@@ -20,7 +20,6 @@ const (
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
 	fCmdCorrectPhp    = "rit scaffold generate test_php"
-	fCmdIncorrectChar = "rit @scaffold genera-te test"
 	langGo            = "Go"
 	langJava          = "Java"
 	langNode          = "Node"

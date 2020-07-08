@@ -96,7 +96,7 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
 		return nil
 	}
 }
@@ -140,31 +140,30 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 		return credDetail, err
 	}
 
-	for providerChoose == addANew {
-		newProvider, err := s.Text("Enter your provider:", true)
+	if providerChoose == addANew {
+		newProvider, err := s.Text("Define your provider name:", true)
 		if err != nil {
 			return credDetail, err
 		}
-
 		providerList = append(providerList, newProvider)
+		typeList := []string{"plain text", "secret"}
 
 		var newFields []credential.Field
 		var newField credential.Field
 		addMoreCredentials := true
 		for addMoreCredentials {
-			newField.Name, err = s.Text("Credential key/tag:", true)
+			newField.Name, err = s.Text("Define your field name: (ex.:token, secretAccessKey)", true)
 			if err != nil {
 				return credDetail, err
 			}
-			typeList := []string{"text", "password"}
 
-			newField.Type, err = s.List("Want to input the credential as a:", typeList)
+			newField.Type, err = s.List("Select your field type:", typeList)
 			if err != nil {
 				return credDetail, err
 			}
+
 			newFields = append(newFields, newField)
-
-			addMoreCredentials, err = s.Bool("Add one more?", []string{"no", "yes"})
+			addMoreCredentials, err = s.Bool("Add more credentials to this provider?", []string{"no", "yes"})
 			if err != nil {
 				return credDetail, err
 			}
@@ -175,19 +174,15 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 			return credDetail, err
 		}
 
-		providerChoose, err = s.List("Select your provider", providerList)
-		if err != nil {
-			return credDetail, err
-		}
-
+		providerChoose = newProvider
 	}
 
 	inputs := credentials[providerChoose]
 
 	for _, i := range inputs {
 		var value string
-		if i.Type == prompt.PasswordType {
-			value, err = s.Password(i.Name)
+		if i.Type == "secret" {
+			value, err = s.Password(i.Name + ":")
 			if err != nil {
 				return credDetail, err
 			}
@@ -263,7 +258,7 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
 		return nil
 	}
 }

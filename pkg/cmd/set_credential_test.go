@@ -15,8 +15,6 @@ func TestNewSingleSetCredentialCmd(t *testing.T) {
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
-
-
 }
 
 func TestNewTeamSetCredentialCmd(t *testing.T) {
