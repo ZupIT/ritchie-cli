@@ -311,7 +311,7 @@ func TestCreatorFail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt, func(t *testing.T) {
 			expected := errors.New("error while creating language")
-			formulaPath := path.Join(fullDir, "/scaffold/generate/test_ruby")
+			formulaPath := path.Join(fullDir, "/scaffold/generate/test_fail")
 			got := creator.createSrcFiles(formulaPath, "test_fail", tt, creatorMock)
 			if got == nil || got.Error() != expected.Error() {
 				t.Errorf("Create Formula Fail(%s) got %v, want %v", tt, got, expected)
