@@ -529,9 +529,6 @@ workflows:
           filters:
             <<: *FILTERS_RELEASE
           requires:
-            - deb-package
-            - rpm-package
-            - win-package
             - sign-bin
       - release:
           name: release-publish
@@ -556,8 +553,6 @@ workflows:
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - deb-package
-            - rpm-package
             - sign-bin
       - deb-package:
           filters:
