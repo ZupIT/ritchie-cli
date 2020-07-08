@@ -23,6 +23,7 @@ type AddRepoCmd struct {
 	prompt.InputURL
 	prompt.InputList
 	prompt.InputBool
+	prompt.InputInt
 }
 
 func NewAddRepoCmdV2(
@@ -33,6 +34,7 @@ func NewAddRepoCmdV2(
 	inUrl prompt.InputURL,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
+	inInt prompt.InputInt,
 ) *cobra.Command {
 	addRepo := AddRepoCmd{
 		client:        client,
@@ -42,6 +44,7 @@ func NewAddRepoCmdV2(
 		InputURL:      inUrl,
 		InputList:     inList,
 		InputBool:     inBool,
+		InputInt:      inInt,
 	}
 	cmd := &cobra.Command{
 		Use:     "repo",
@@ -96,17 +99,17 @@ func (a AddRepoCmd) runPrompt() CommandRunnerFunc {
 
 		zipUrl := tags[version]
 
-		current, err := a.Bool("Would you like to set this repository as the current?", []string{"yes", "no"})
+		priority, err := a.Int("What should be the priority of this repository")
 		if err != nil {
 			return err
 		}
 
 		repository := formula.Repo{
-			Name:    name,
-			Token:   token,
-			ZipUrl:  zipUrl,
-			Version: version,
-			Current: current,
+			Name:     name,
+			Token:    token,
+			ZipUrl:   zipUrl,
+			Version:  version,
+			Priority: int(priority),
 		}
 
 		if err := a.repo.Add(repository); err != nil {

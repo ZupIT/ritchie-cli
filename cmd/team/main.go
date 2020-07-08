@@ -64,7 +64,7 @@ func buildCommands() *cobra.Command {
 	// prompt
 	inputText := prompt.NewSurveyText()
 	inputTextValidator := prompt.NewSurveyTextValidator()
-	// inputInt := prompt.NewSurveyInt()
+	inputInt := prompt.NewSurveyInt()
 	inputBool := prompt.NewSurveyBool()
 	inputPassword := prompt.NewSurveyPassword()
 	inputList := prompt.NewSurveyList()
@@ -115,6 +115,8 @@ func buildCommands() *cobra.Command {
 	dirManager := stream.NewDirManager(fileManager)
 
 	repoAdder := repo.NewAdder(ritchieHomeDir, dirManager, fileManager)
+	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
+	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -174,8 +176,9 @@ func buildCommands() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmdV2(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool)
+	addRepoCmd := cmd.NewAddRepoCmdV2(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
+	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
 	listRepoCmd := cmd.NewListRepoCmd(repoManager)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
@@ -191,7 +194,7 @@ func buildCommands() *cobra.Command {
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
+	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
 	showCmd.AddCommand(showCtxCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	buildCmd.AddCommand(buildFormulaCmd)

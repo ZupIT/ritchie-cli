@@ -1,11 +1,15 @@
 package formula
 
 type Repo struct {
-	Name    string `json:"name"`
-	ZipUrl  string `json:"zipUrl"`
-	Version string `json:"version"`
-	Current bool   `json:"current"`
-	Token   string `json:"token,omitempty"`
+	Name     string `json:"name"`
+	ZipUrl   string `json:"zipUrl"`
+	Version  string `json:"version"`
+	Priority int    `json:"priority"`
+	Token    string `json:"token,omitempty"`
+}
+
+type RepoFile struct {
+	Values []Repo`json:"repositories,omitempty"`
 }
 
 type Repos map[string]Repo
@@ -22,7 +26,11 @@ type RepositoryAdder interface {
 }
 
 type RepositoryLister interface {
-	List() (Repos, error)
+	List() ([]Repo, error)
+}
+
+type RepositoryPrioritySetter interface {
+	SetPriority(repo Repo, priority int) error
 }
 
 type RepositoryUpdater interface {

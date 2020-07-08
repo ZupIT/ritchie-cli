@@ -32,6 +32,12 @@ const (
 	providerPath                 = "%s/repositories"
 )
 
+type ByPriorityOld []formula.Repository
+
+func (a ByPriorityOld) Len() int           { return len(a) }
+func (a ByPriorityOld) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByPriorityOld) Less(i, j int) bool { return a[i].Priority < a[j].Priority }
+
 var (
 	// Errors
 	ErrNoRepoToShow = prompt.NewError("no repositories to show")
@@ -46,14 +52,6 @@ type Manager struct {
 	serverFinder   server.Finder
 	edition        api.Edition
 }
-
-// ByPriority implements sort.Interface for []Repository based on
-// the Priority field.
-type ByPriority []formula.Repository
-
-func (a ByPriority) Len() int           { return len(a) }
-func (a ByPriority) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByPriority) Less(i, j int) bool { return a[i].Priority < a[j].Priority }
 
 func NewSingleRepoManager(homePath string, hc *http.Client, sm session.Manager) Manager {
 	return Manager{
@@ -217,7 +215,7 @@ func (dm Manager) List() ([]formula.Repository, error) {
 		return []formula.Repository{}, nil
 	}
 
-	sort.Sort(ByPriority(f.Values))
+	sort.Sort(ByPriorityOld(f.Values))
 
 	return f.Values, nil
 }
