@@ -9,6 +9,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+const AddNew = "Add a new"
+
 type SingleSettings struct {
 	file stream.FileWriteReadExister
 }
@@ -55,12 +57,6 @@ func (s SingleSettings) WriteDefaultCredentials(path string) error {
 	return nil
 }
 
-func ProviderPath() string {
-	homeDir, _ := os.UserHomeDir()
-	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", homeDir)
-	return providerDir
-}
-
 func NewDefaultCredentials() credential.Fields {
 	var username = credential.Field{
 		Name: "username",
@@ -97,4 +93,21 @@ func NewDefaultCredentials() credential.Fields {
 	}
 
 	return dc
+}
+
+func ProviderPath() string {
+	homeDir, _ := os.UserHomeDir()
+	providerDir := fmt.Sprintf("%s/.rit/repo/providers.json", homeDir)
+	return providerDir
+}
+
+func NewProviderArr(fields credential.Fields) []string {
+	var providerArr []string
+	for k := range fields {
+		if k != AddNew {
+			providerArr = append(providerArr, k)
+		}
+	}
+	providerArr = append(providerArr, AddNew)
+	return providerArr
 }

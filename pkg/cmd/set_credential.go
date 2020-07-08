@@ -14,8 +14,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const addANew = "Add a new"
-
 var inputTypes = []string{"plain text", "secret"}
 
 // setCredentialCmd type for set credential command
@@ -115,7 +113,6 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 }
 
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
-
 	err := s.WriteDefaultCredentials(credsingle.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
@@ -123,31 +120,24 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 	var credDetail credential.Detail
 	cred := credential.Credential{}
-	credentials, err := s.ReadCredentials(credsingle.ProviderPath())
 
+	credentials, err := s.ReadCredentials(credsingle.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
 	}
 
-	var providerList []string
-	for k := range credentials {
-		if k != addANew {
-			providerList = append(providerList, k)
-		}
-	}
-	providerList = append(providerList, addANew)
-
-	providerChoose, err := s.List("Select your provider", providerList)
+	providerArr := credsingle.NewProviderArr(credentials)
+	providerChoose, err := s.List("Select your provider", providerArr)
 	if err != nil {
 		return credDetail, err
 	}
 
-	if providerChoose == addANew {
+	if providerChoose == credsingle.AddNew {
 		newProvider, err := s.Text("Define your provider name:", true)
 		if err != nil {
 			return credDetail, err
 		}
-		providerList = append(providerList, newProvider)
+		providerArr = append(providerArr, newProvider)
 
 		var newFields []credential.Field
 		var newField credential.Field
@@ -195,7 +185,6 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 		}
 		cred[i.Name] = value
 	}
-
 	credDetail.Service = providerChoose
 	credDetail.Credential = cred
 
