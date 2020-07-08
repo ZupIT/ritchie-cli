@@ -14,6 +14,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+const addANew = "Add a new"
+
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
@@ -34,8 +36,7 @@ func NewSingleSetCredentialCmd(
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword,
-	im prompt.InputMultiline) *cobra.Command {
+	ip prompt.InputPassword) *cobra.Command {
 	s := &setCredentialCmd{
 		st,
 		nil,
@@ -45,7 +46,7 @@ func NewSingleSetCredentialCmd(
 		ib,
 		il,
 		ip,
-		im}
+		nil}
 	return newCmd(s)
 }
 
@@ -67,7 +68,7 @@ func NewTeamSetCredentialCmd(
 		ib,
 		il,
 		ip,
-	im}
+		im}
 	return newCmd(s)
 }
 
@@ -113,28 +114,35 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
-	s.DefaultCredentials()
+	err := s.DefaultCredentials()
+	if err != nil {
+		return credential.Detail{}, err
+	}
 
 	var credDetail credential.Detail
 	cred := credential.Credential{}
 	credentials, err := s.ReadCredentials(credsingle.ProviderPath())
+
 	if err != nil {
 		return credential.Detail{}, err
 	}
 
 	var providerList []string
 	for k := range credentials {
-		providerList = append(providerList, k)
+		if k != addANew {
+			providerList = append(providerList, k)
+		}
 	}
+	providerList = append(providerList, addANew)
+
 	providerChoose, err := s.List("Select your provider", providerList)
-	if err != nil{
+	if err != nil {
 		return credDetail, err
 	}
 
-	if providerChoose == "Add a new" {
-		addMoreCredentials := true
-		newProvider, err := s.MultiLineText("Enter your provider:", true)
-		if err != nil{
+	for providerChoose == addANew {
+		newProvider, err := s.Text("Enter your provider:", true)
+		if err != nil {
 			return credDetail, err
 		}
 
@@ -142,34 +150,36 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 
 		var newFields []credential.Field
 		var newField credential.Field
+		addMoreCredentials := true
 		for addMoreCredentials {
 			newField.Name, err = s.Text("Credential key/tag:", true)
-			if err != nil{
+			if err != nil {
 				return credDetail, err
 			}
 			typeList := []string{"text", "password"}
 
 			newField.Type, err = s.List("Want to input the credential as a:", typeList)
-			if err != nil{
+			if err != nil {
 				return credDetail, err
 			}
 			newFields = append(newFields, newField)
 
 			addMoreCredentials, err = s.Bool("Add one more?", []string{"no", "yes"})
-			if err != nil{
+			if err != nil {
 				return credDetail, err
 			}
 		}
 		credentials[newProvider] = newFields
 		err = s.WriteCredentials(credentials, credsingle.ProviderPath())
-		if err != nil{
+		if err != nil {
 			return credDetail, err
 		}
 
 		providerChoose, err = s.List("Select your provider", providerList)
-		if err != nil{
+		if err != nil {
 			return credDetail, err
 		}
+
 	}
 
 	inputs := credentials[providerChoose]
@@ -178,12 +188,12 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 		var value string
 		if i.Type == prompt.PasswordType {
 			value, err = s.Password(i.Name)
-			if err != nil{
+			if err != nil {
 				return credDetail, err
 			}
 		} else {
-			value, err = s.MultiLineText(i.Name, true)
-			if err != nil{
+			value, err = s.Text(i.Name, true)
+			if err != nil {
 				return credDetail, err
 			}
 		}

@@ -38,12 +38,13 @@ func TestSingleSettings_ReadCredentials(t *testing.T) {
 
 func TestSingleSettings_WriteCredentials(t *testing.T) {
 	home, _ := os.UserHomeDir()
-	err := credSettings.WriteCredentials(NewDefaultCredentials(), home)
+	path := fmt.Sprintf("%s/providers.json", home)
+	err := credSettings.WriteCredentials(NewDefaultCredentials(), path)
 	if err != nil {
 		t.Errorf("Error while write credentials: %s", err)
 	}
 
-	_ = os.Remove(fmt.Sprintf("%s/providers.json", home))
+	_ = os.Remove(fmt.Sprintf("%s/providers.json", path))
 }
 
 func TestProviderPath(t *testing.T) {

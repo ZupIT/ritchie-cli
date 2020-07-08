@@ -37,8 +37,7 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) 
 	if err != nil {
 		return err
 	}
-	finalPath := fmt.Sprintf("%s/providers.json", path)
-	err = s.file.Write(finalPath, fieldsData)
+	err = s.file.Write(path, fieldsData)
 	if err != nil {
 		return err
 	}
@@ -46,10 +45,12 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) 
 	return nil
 }
 
-func (s SingleSettings) DefaultCredentials() {
+func (s SingleSettings) DefaultCredentials() error {
 	if !s.file.Exists(ProviderPath()) {
-		_ = s.WriteCredentials(NewDefaultCredentials(), ProviderPath())
+		err := s.WriteCredentials(NewDefaultCredentials(), ProviderPath())
+		return err
 	}
+	return nil
 }
 
 func ProviderPath() string {
@@ -86,6 +87,7 @@ func NewDefaultCredentials() credential.Fields {
 	}
 
 	var dc = credential.Fields{
+		"Add a new":  []credential.Field{},
 		"github":     []credential.Field{username, token},
 		"gitlab":     []credential.Field{username, token},
 		"aws":        []credential.Field{accessKeyId, secretAccessKey},

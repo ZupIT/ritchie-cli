@@ -59,7 +59,6 @@ func buildCommands() *cobra.Command {
 	inputPassword := prompt.NewSurveyPassword()
 	inputList := prompt.NewSurveyList()
 	inputURL := prompt.NewSurveyURL()
-	inputMultiline := prompt.NewSurveyMultiline()
 
 	// deps
 	fileManager := stream.NewFileManager()
@@ -133,8 +132,7 @@ func buildCommands() *cobra.Command {
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword,
-		inputMultiline)
+		inputPassword)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
