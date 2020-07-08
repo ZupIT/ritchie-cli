@@ -274,9 +274,6 @@ jobs:
           command: |
             sudo apt-get update -y
             sudo apt-get install -y osslsigncode
-      - run:
-          name: Binary Signature Windows
-          command: |
             osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecliteamzup.msi -out dist/installer/ritchiecliteamzup.msi
       - persist_to_workspace:
           root: dist
@@ -528,14 +525,13 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - win-package
+            - deb-package
+            - rpm-package
       - delivery:
           name: delivery
           filters:
             <<: *FILTERS_RELEASE
           requires:
-            - deb-package
-            - rpm-package
-            - win-package
             - sign-bin
       - release:
           name: release-publish
@@ -560,8 +556,6 @@ workflows:
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - deb-package
-            - rpm-package
             - sign-bin
       - deb-package:
           filters:
@@ -583,3 +577,5 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - win-package
+            - rpm-package
+            - deb-package
