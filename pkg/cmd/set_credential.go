@@ -28,7 +28,6 @@ type setCredentialCmd struct {
 	stream.FileReadExister
 }
 
-// MsgTypeEntry used in select of type entry credential
 const (
 	MsgTypeEntry                = "Input type: "
 	MsgTypeEntryPath            = "Type the path to your file that contains the value of your credential: "
@@ -162,9 +161,10 @@ func (s setCredentialCmd) entryCredential() ([]string, error) {
 	var pair []string
 	var err error
 	var kv string
+	const file = "file"
 
 	entries := map[string]string{
-		EntriesTypeCredentialFile:   "file",
+		EntriesTypeCredentialFile:   file,
 		EntriesTypeCredentialPrompt: "prompt",
 	}
 
@@ -178,7 +178,7 @@ func (s setCredentialCmd) entryCredential() ([]string, error) {
 		return nil, errTyp
 	}
 
-	if entries[typ] == "file" {
+	if entries[typ] == file {
 		pair, err = s.inputFile()
 	} else {
 		kv, err = s.MultiLineText(MsgTypeCredentialInPrompt, true)
