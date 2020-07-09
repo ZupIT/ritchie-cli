@@ -18,7 +18,7 @@ func TestGenerate(t *testing.T) {
 	generator := NewGenerator(dirManager, fileManager)
 
 	adder := repo.NewAdder(os.TempDir(), http.DefaultClient, generator, dirManager, fileManager)
-	adder.Add(formula.Repo{
+	_ = adder.Add(formula.Repo{
 		Name:     "commons",
 		ZipUrl:   "http://localhost:8882/repos/ZupIT/ritchie-formulas/zipball/v2.0.0",
 		Version:  "v2.0.0",

@@ -6,7 +6,6 @@ import (
 )
 
 func TestNewAddRepoCmd(t *testing.T) {
-	t.Skip("Todo test")
 	cmd := NewAddRepoCmd(
 		&http.Client{},
 		repoAdder{},
@@ -18,6 +17,7 @@ func TestNewAddRepoCmd(t *testing.T) {
 		inputIntMock{},
 	)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+	t.Skip("Todo test")
 	if cmd == nil {
 		t.Errorf("NewAddRepoCmd got %v", cmd)
 

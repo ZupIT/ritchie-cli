@@ -147,34 +147,6 @@ func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
 	return s.Set(ctx)
 }
 
-type repoDeleterMock struct{}
-
-func (m repoDeleterMock) List() (formula.Repos, error) {
-	return formula.Repos{}, nil
-}
-
-func (repoDeleterMock) Delete(name string) error {
-	return nil
-}
-
-type repoListerMock struct{}
-
-func (repoListerMock) List() (formula.Repos, error) {
-	return formula.Repos{}, nil
-}
-
-type repoLoaderMock struct{}
-
-func (repoLoaderMock) Load() error {
-	return nil
-}
-
-type repoUpdaterMock struct{}
-
-func (repoUpdaterMock) Update() error {
-	return nil
-}
-
 type loginManagerMock struct{}
 
 func (loginManagerMock) Login(security.User) error {
@@ -301,14 +273,6 @@ type loginManagerCustomMock struct {
 
 func (m loginManagerCustomMock) Login(user security.User) error {
 	return m.login(user)
-}
-
-type repoLoaderCustomMock struct {
-	load func() error
-}
-
-func (m repoLoaderCustomMock) Load() error {
-	return m.load()
 }
 
 type inputURLCustomMock struct {
