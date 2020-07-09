@@ -9,6 +9,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/spf13/cobra"
 )
 
 type inputTextMock struct{}
@@ -49,7 +50,7 @@ func (inputPasswordMock) Password(label string) (string, error) {
 
 type autocompleteGenMock struct{}
 
-func (autocompleteGenMock) Generate(s autocomplete.ShellName) (string, error) {
+func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command) (string, error) {
 	return "autocomplete", nil
 }
 
@@ -193,6 +194,20 @@ func (credSetterMock) Set(d credential.Detail) error {
 }
 
 type credSettingsMock struct{}
+
+type singleCredSettingsMock struct {}
+
+func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
+	return nil
+}
+
+func (s singleCredSettingsMock) ReadCredentials(path string) (credential.Fields, error) {
+	return nil, nil
+}
+
+func (s singleCredSettingsMock) WriteCredentials(fields credential.Fields, path string) error {
+	return nil
+}
 
 func (credSettingsMock) Fields() (credential.Fields, error) {
 	return credential.Fields{

@@ -147,3 +147,13 @@
 
   response:
     status: 500
+
+- request:
+    method: GET
+    url: ^/repos/ZupIT/ritchie-formulas/zipball/v2.0.0$
+
+  response:
+    status: 200
+    headers:
+      content-type: application/zip
+    file: ritchie-formulas.zip
