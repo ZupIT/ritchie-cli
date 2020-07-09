@@ -10,13 +10,14 @@ const (
 run $SAMPLE_TEXT $SAMPLE_LIST $SAMPLE_BOOL`
 
 	Makefile = `# SH
-BINARY_NAME={{bin-name}}.sh
-DIST=../dist
-DIST_DIR=$(DIST)/commons/bin
+BINARY_NAME=run.sh
+DIST=../bin
+FOLDER_SRC={{bin-name}}
+
 build:
-	mkdir -p $(DIST_DIR)
-	cp main.sh $(DIST_DIR)/$(BINARY_NAME) && cp -r {{bin-name}} Dockerfile set_umask.sh $(DIST_DIR)
-	chmod +x $(DIST_DIR)/$(BINARY_NAME)`
+	mkdir -p $(DIST)
+	cp main.sh $(DIST)/$(BINARY_NAME) && cp -r $(FOLDER_SRC) $(DIST)
+	chmod +x $(DIST)/$(BINARY_NAME)`
 
 	Dockerfile = `
 FROM alpine:latest
@@ -29,7 +30,6 @@ RUN mkdir app
 
 ENTRYPOINT ["./set_umask.sh"]
 CMD ["./{{bin-name}}.sh"]`
-
 
 	File = `#!/bin/sh
 run() {

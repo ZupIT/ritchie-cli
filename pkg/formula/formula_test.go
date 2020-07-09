@@ -128,19 +128,18 @@ func TestConfigName(t *testing.T) {
 	}
 }
 
-func TestFormulaName(t *testing.T) {
-	const want = "create_test"
+func TestFormulaCmdName(t *testing.T) {
+	const want = "create test"
 	create := Create{
 		FormulaCmd: "rit create test",
 	}
 
-	got := create.FormulaName()
+	got := create.FormulaCmdName()
 
 	if want != got {
 		t.Errorf("FormulaName got %v, want %v", got, want)
 	}
 }
-
 
 func TestPkgName(t *testing.T) {
 	const want = "test"

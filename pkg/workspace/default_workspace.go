@@ -4,11 +4,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
-const (
-	repoDir  = "/repo"
-	repoFile = "/repositories.json"
-)
-
 type DefaultChecker struct {
 	ritchieHome string
 }

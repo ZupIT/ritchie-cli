@@ -39,10 +39,11 @@ type FileReadExister interface {
 	FileExister
 }
 
-type FileCopyExistLister interface {
+type FileCopyExistListerWriter interface {
 	FileLister
 	FileCopier
 	FileExister
+	FileWriter
 }
 
 type FileWriteReadExister interface {
