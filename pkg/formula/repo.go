@@ -45,6 +45,10 @@ type RepositoryDeleter interface {
 	Delete(name string) error
 }
 
+type RepositoryPrioritySetter interface {
+	SetPriority(repoName string, priority int) error
+}
+
 type RepositoryAddLister interface {
 	RepositoryAdder
 	RepositoryLister

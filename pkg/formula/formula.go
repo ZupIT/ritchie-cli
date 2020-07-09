@@ -1,27 +1,26 @@
 package formula
 
 import (
-	"fmt"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 )
 
 const (
-	PathPattern          = "%s/formulas/%s"
-	TmpDirPattern        = "%s/tmp/%s"
-	TmpBinDirPattern     = "%s/tmp/%s/%s"
+	ReposDir             = "repos"
+	TmpDir               = "tmp"
 	DefaultConfig        = "config.json"
-	ConfigPattern        = "%s/%s"
-	CommandEnv           = "COMMAND"
 	PwdEnv               = "PWD"
 	CPwdEnv              = "CURRENT_PWD"
-	BinPattern           = "%s%s"
-	BinPathPattern       = "%s/bin"
+	BinUnix              = "run.sh"
+	BinWindows           = "run.bat"
+	BinDir               = "bin"
 	EnvPattern           = "%s=%s"
 	CachePattern         = "%s/.%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
@@ -53,35 +52,24 @@ type (
 	}
 
 	Config struct {
-		Name        string  `json:"name"`
-		Command     string  `json:"command"`
-		Description string  `json:"description"`
-		Language    string  `json:"language"`
-		Inputs      []Input `json:"inputs"`
+		DockerIB string  `json:"dockerImageBuilder"`
+		Inputs   []Input `json:"inputs"`
 	}
 
 	// Definition type that represents a Formula
 	Definition struct {
 		Path     string
-		Bin      string
-		LBin     string
-		MBin     string
-		WBin     string
-		Bundle   string
-		Config   string
-		RepoURL  string
 		RepoName string
 	}
 
 	Setup struct {
-		Pwd            string
-		FormulaPath    string
-		BinPath        string
-		TmpDir         string
-		TmpBinDir      string
-		TmpBinFilePath string
-		Config         Config
-		ContainerId    string
+		Pwd         string
+		FormulaPath string
+		BinName     string
+		BinPath     string
+		TmpDir      string
+		Config      Config
+		ContainerId string
 	}
 )
 
@@ -124,92 +112,37 @@ type CreateBuilder interface {
 
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
-	return fmt.Sprintf(PathPattern, home, d.Path)
+	return filepath.Join(home, ReposDir, d.RepoName, d.Path)
 }
 
 // TmpWorkDirPath builds the tmp paths to run formula, first parameter is tmpDir created
 // second parameter is tmpBinDir
-func (d *Definition) TmpWorkDirPath(home, uuidHash string) (string, string) {
-	tmpDir := fmt.Sprintf(TmpDirPattern, home, uuidHash)
-	tmpBinDir := fmt.Sprintf(TmpBinDirPattern, home, uuidHash, d.Path)
-	return tmpDir, tmpBinDir
+func (d *Definition) TmpWorkDirPath(home string) string {
+	u := uuid.New().String()
+	return filepath.Join(home, TmpDir, u)
 }
 
-// BinName builds the bin name from definition params
+// BinFilePath builds the bin file path from formula path
+func (d *Definition) BinFilePath(fPath string) string {
+	return filepath.Join(fPath, BinDir, d.BinName())
+}
+
 func (d *Definition) BinName() string {
-	bName := d.Bin
-	so := runtime.GOOS
-	switch so {
-	case osutil.Windows:
-		if d.WBin != "" {
-			bName = d.WBin
-		}
-	case osutil.Darwin:
-		if d.MBin != "" {
-			bName = d.MBin
-		}
-	case osutil.Linux:
-		if d.LBin != "" {
-			bName = d.LBin
-		}
-	default:
-		bName = d.Bin
-	}
-
-	if strings.Contains(bName, "${so}") {
-		suffix := ""
-		if so == osutil.Windows {
-			suffix = fileextensions.Exe
-		}
-		binSO := strings.ReplaceAll(bName, "${so}", so)
-
-		return fmt.Sprintf(BinPattern, binSO, suffix)
+	bName := BinUnix
+	if runtime.GOOS == osutil.Windows {
+		bName = BinWindows
 	}
 	return bName
 }
 
-// BinName builds the bin name from definition params
-func (d *Definition) BundleName() string {
-	if strings.Contains(d.Bundle, "${so}") {
-		so := runtime.GOOS
-		bundleSO := strings.ReplaceAll(d.Bundle, "${so}", so)
-
-		return bundleSO
-	}
-	return d.Bundle
-}
-
-// BinPath builds the bin path from formula path
-func (d *Definition) BinPath(formula string) string {
-	return fmt.Sprintf(BinPathPattern, formula)
-}
-
-// BinFilePath builds the bin file path from binPath and binName
-func (d *Definition) BinFilePath(binPath, binName string) string {
-	return fmt.Sprintf("%s/%s", binPath, binName)
-}
-
-// BundleURL builds the bundle url
-func (d *Definition) BundleURL() string {
-	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, d.BundleName())
-}
-
-// ConfigName resolver de config name
-func (d *Definition) ConfigName() string {
-	if d.Config != "" {
-		return d.Config
-	}
-	return DefaultConfig
+// BinFilePath builds the bin file path from formula path
+func (d *Definition) BinPath(fPath string) string {
+	return filepath.Join(fPath, BinDir)
 }
 
 // ConfigPath builds the config path from formula path and config name
-func (d *Definition) ConfigPath(formulaPath, configName string) string {
-	return fmt.Sprintf(ConfigPattern, formulaPath, configName)
-}
-
-// ConfigURL builds the config url
-func (d *Definition) ConfigURL(configName string) string {
-	return fmt.Sprintf("%s/%s/%s", d.RepoURL, d.Path, configName)
+func (d *Definition) ConfigPath(formulaPath string) string {
+	return filepath.Join(formulaPath, DefaultConfig)
 }
 
 // FormulaName remove rit from formulaCmd

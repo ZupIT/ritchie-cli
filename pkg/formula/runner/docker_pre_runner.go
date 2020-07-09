@@ -24,12 +24,12 @@ func NewDockerPreRunner(setuper formula.Setuper) DockerPreRunner {
 }
 
 func (d DockerPreRunner) PreRun(def formula.Definition) (formula.Setup, error) {
-	setup, err := d.sDefault.Setup(def)
+	setup, err := d.sDefault.Setup(def) //TODO: Definir o setup para docker
 	if err != nil {
 		return formula.Setup{}, err
 	}
 
-	if err := validate(setup.TmpBinDir); err != nil {
+	if err := validate(setup.TmpDir); err != nil {
 		return formula.Setup{}, err
 	}
 

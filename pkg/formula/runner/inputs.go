@@ -86,10 +86,6 @@ func (d InputManager) fromStdin(cmd *exec.Cmd, setup formula.Setup) error {
 			addEnv(cmd, input.Name, inputVal)
 		}
 	}
-	if len(config.Command) != 0 {
-		command := fmt.Sprintf(formula.EnvPattern, formula.CommandEnv, config.Command)
-		cmd.Env = append(cmd.Env, command)
-	}
 	return nil
 }
 
@@ -133,10 +129,6 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			persistCache(setup.FormulaPath, inputVal, input, items)
 			addEnv(cmd, input.Name, inputVal)
 		}
-	}
-	if len(config.Command) != 0 {
-		command := fmt.Sprintf(formula.EnvPattern, formula.CommandEnv, config.Command)
-		cmd.Env = append(cmd.Env, command)
 	}
 	return nil
 }
