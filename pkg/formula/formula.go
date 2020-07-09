@@ -1,8 +1,8 @@
 package formula
 
 import (
-	"fmt"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -13,18 +13,14 @@ import (
 )
 
 const (
-	PathPattern          = "%s/repos/%s%s"
-	TmpDirPattern        = "%s/tmp/%s"
-	TmpBinDirPattern     = "%s/tmp/%s/%s"
+	ReposDir             = "repos"
+	TmpDir               = "tmp"
 	DefaultConfig        = "config.json"
-	ConfigPattern        = "%s/%s"
-	CommandEnv           = "COMMAND"
 	PwdEnv               = "PWD"
 	CPwdEnv              = "CURRENT_PWD"
 	BinUnix              = "run.sh"
 	BinWindows           = "run.bat"
-	BinRunPathPattern    = "%s/bin/%s"
-	BinPathPattern       = "%s/bin"
+	BinDir               = "bin"
 	EnvPattern           = "%s=%s"
 	CachePattern         = "%s/.%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
@@ -116,20 +112,19 @@ type CreateBuilder interface {
 
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
-	return fmt.Sprintf(PathPattern, home, d.RepoName, d.Path)
+	return filepath.Join(home, ReposDir, d.RepoName, d.Path)
 }
 
 // TmpWorkDirPath builds the tmp paths to run formula, first parameter is tmpDir created
 // second parameter is tmpBinDir
 func (d *Definition) TmpWorkDirPath(home string) string {
 	u := uuid.New().String()
-	tmpDir := fmt.Sprintf(TmpDirPattern, home, u)
-	return tmpDir
+	return filepath.Join(home, TmpDir, u)
 }
 
 // BinFilePath builds the bin file path from formula path
 func (d *Definition) BinFilePath(fPath string) string {
-	return fmt.Sprintf(BinRunPathPattern, fPath, d.BinName())
+	return filepath.Join(fPath, BinDir, d.BinName())
 }
 
 func (d *Definition) BinName() string {
@@ -142,12 +137,12 @@ func (d *Definition) BinName() string {
 
 // BinFilePath builds the bin file path from formula path
 func (d *Definition) BinPath(fPath string) string {
-	return fmt.Sprintf(BinPathPattern, fPath)
+	return filepath.Join(fPath, BinDir)
 }
 
 // ConfigPath builds the config path from formula path and config name
 func (d *Definition) ConfigPath(formulaPath string) string {
-	return fmt.Sprintf(ConfigPattern, formulaPath, DefaultConfig)
+	return filepath.Join(formulaPath, DefaultConfig)
 }
 
 func (c Create) FormulaName() string {
