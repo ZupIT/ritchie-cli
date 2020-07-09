@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -24,6 +25,13 @@ var (
 	ErrUnknownConfigFileDownload = prompt.NewError("unknown error when downloading your config file")
 	ErrCreateReqBundle           = prompt.NewError("failed to create request for bundle download")
 	ErrCreateReqConfig           = prompt.NewError("failed to create request for config download")
+)
+
+const (
+	makeCmd                = "make"
+	buildCmd               = "build"
+	volumeDockerPattern = "%s:/app"
+	src                 = "src"
 )
 
 type DefaultSetup struct {
@@ -89,7 +97,7 @@ func (d DefaultSetup) buildFormula(formulaPath, binFilePath string, config formu
 	if !fileutil.Exists(binFilePath) {
 		if config.DockerIB != "" {
 			prompt.Info("Building formula with docker...")
-			volume := fmt.Sprintf("%s:/app", formulaPath)
+			volume := fmt.Sprintf(volumeDockerPattern, formulaPath)
 			args := []string{dockerRunCmd, "-v", volume, "--entrypoint", "/bin/sh", config.DockerIB, "-c",
 				"cd /app/src && /usr/bin/make build"}
 			cmd := exec.Command(docker, args...)
@@ -99,16 +107,16 @@ func (d DefaultSetup) buildFormula(formulaPath, binFilePath string, config formu
 			cmd.Stderr = os.Stderr
 			if err := cmd.Start(); err != nil {
 				prompt.Warning("Failed building formula with docker trying run local Makefile...")
-				return buildMakefileLocal(fmt.Sprintf("%s/src", formulaPath))
+				return buildMakefileLocal(filepath.Join(formulaPath, src))
 			}
 
 			if err := cmd.Wait(); err != nil {
 				prompt.Warning("Failed building formula with docker trying run local Makefile...")
-				return buildMakefileLocal(fmt.Sprintf("%s/src", formulaPath))
+				return buildMakefileLocal(filepath.Join(formulaPath, src))
 			}
 			prompt.Info("\n\nSuccess building formula using docker...\n\n")
 		} else {
-			return buildMakefileLocal(fmt.Sprintf("%s/src", formulaPath))
+			return buildMakefileLocal(filepath.Join(formulaPath, src))
 		}
 	}
 	return nil
@@ -119,7 +127,7 @@ func buildMakefileLocal(formulaSrcPath string) error {
 	if err := os.Chdir(formulaSrcPath); err != nil {
 		return err
 	}
-	cmd := exec.Command("make", "build")
+	cmd := exec.Command(makeCmd, buildCmd)
 	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
