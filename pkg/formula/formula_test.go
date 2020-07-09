@@ -12,6 +12,12 @@ func TestMain(m *testing.M) {
 	home = os.TempDir()
 	def = Definition{
 		Path:     "scaffold/coffee-java",
+		Bin:      "coffee-java.sh",
+		LBin:     "coffee-java.sh",
+		MBin:     "coffee-java.sh",
+		WBin:     "coffee-java-${so}",
+		Bundle:   "commons.zip",
+		RepoURL:  "https://localhost:8080/formulas",
 		RepoName: "commons",
 	}
 
@@ -28,12 +34,18 @@ func TestFormulaPath(t *testing.T) {
 }
 
 func TestTmpWorkDirPath(t *testing.T) {
+	const hash = "e43c2b35-aa28-4833-b6d3-f1e89691fbd6"
 	const wantTmpDir = "/tmp/tmp/e43c2b35-aa28-4833-b6d3-f1e89691fbd6"
+	const wantTmpBinDir = "/tmp/tmp/e43c2b35-aa28-4833-b6d3-f1e89691fbd6/scaffold/coffee-java"
 
-	gotTmpDir := def.TmpWorkDirPath(home)
+	gotTmpDir, gotTmpBinDir := def.TmpWorkDirPath(home, hash)
 
 	if wantTmpDir != gotTmpDir {
 		t.Errorf("TmpWorkDirPath got tmp dir %v, want %v", gotTmpDir, wantTmpDir)
+	}
+
+	if wantTmpBinDir != gotTmpBinDir {
+		t.Errorf("TmpWorkDirPath got tmp bin dir %v, want %v", gotTmpBinDir, wantTmpBinDir)
 	}
 }
 

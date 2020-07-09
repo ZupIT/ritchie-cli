@@ -1,23 +1,12 @@
 package cmd
 
 import (
-	"net/http"
 	"testing"
 )
 
 func TestNewAddRepoCmd(t *testing.T) {
-	cmd := NewAddRepoCmd(
-		&http.Client{},
-		repoAdder{},
-		inputTextMock{},
-		inputPasswordMock{},
-		inputURLMock{},
-		inputListCredMock{},
-		inputTrueMock{},
-		inputIntMock{},
-	)
+	cmd := NewAddRepoCmd(repoAdder{}, inputTextMock{}, inputURLMock{}, inputIntMock{}, inputTrueMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	t.Skip("Todo test")
 	if cmd == nil {
 		t.Errorf("NewAddRepoCmd got %v", cmd)
 
