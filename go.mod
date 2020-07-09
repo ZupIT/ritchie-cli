@@ -5,9 +5,9 @@ go 1.14
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/denisbrodbeck/machineid v1.0.1
-	github.com/docker/docker v0.7.3-0.20190327010347-be7ac8be2ae0
+	github.com/docker/docker v0.7.3-0.20190327010347-be7ac8be2ae0 // indirect
 	github.com/fatih/color v1.9.0 // indirect
-	github.com/gofrs/flock v0.7.1
+	github.com/gofrs/flock v0.7.1 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gookit/color v1.2.5
 	github.com/gosuri/uitable v0.0.4
