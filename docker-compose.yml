@@ -10,6 +10,7 @@ services:
     volumes:
       - ./testdata/stubby4j/integrations.yml:/usr/local/stubby.yml
       - ./testdata/stubby4j/response.zip:/usr/local/response.zip
+      - ./testdata/stubby4j/ritchie-formulas.zip:/usr/local/ritchie-formulas.zip
 
   nginx:
     image: nginx:latest

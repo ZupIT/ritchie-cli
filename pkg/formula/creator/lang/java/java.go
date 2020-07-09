@@ -28,7 +28,6 @@ func New(
 			Creator:      c,
 			FileFormat:   fileextensions.Java,
 			StartFile:    template.StartFile,
-			Main:         template.Main,
 			Makefile:     template.Makefile,
 			Dockerfile:   template.Dockerfile,
 			File:         template.File,
@@ -41,35 +40,38 @@ func New(
 	}
 }
 
-func (j Java) Create(srcDir, pkg, pkgDir, dir string) error {
+func (j Java) Create(srcDir, pkg, dir string) error {
 	if err := j.createGenericFiles(srcDir, pkg, dir, j.Lang); err != nil {
 		return err
 	}
 
-	//Todo change it
-	fileutil.RemoveFile(path.Join(srcDir, "Main.java"))
-
 	artifactId := strings.ReplaceAll(j.fCmdName, " ", "-")
 	baseJavaDir := strings.Split("src/main/java/com/ritchie/formula", "/")
 	javaSrcDir := path.Join(srcDir, path.Join(baseJavaDir...))
+	firstUpper := strings.Title(strings.ToLower(pkg))
 
 	if err := fileutil.CreateDirIfNotExists(javaSrcDir, os.ModePerm); err != nil {
 		return err
 	}
 
-	firstUpper := strings.Title(strings.ToLower(pkg))
+	if err := createMainFile(firstUpper, pkg, javaSrcDir); err != nil {
+		return err
+	}
 
-	createMainFile(firstUpper, pkg, javaSrcDir)
+	if err := createPomFile(srcDir, artifactId); err != nil {
+		return err
+	}
 
-	pom := strings.ReplaceAll(template.Pom, "#rit{{artifactId}}", artifactId)
-	fileutil.WriteFile(path.Join(srcDir, "pom.xml"), []byte(pom))
-
-	err := createPkgFile(j, pkg, firstUpper, javaSrcDir)
-	if err != nil {
+	if err := createPkgFile(j, pkg, firstUpper, javaSrcDir); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func createPomFile(srcDir string, artifactId string) error {
+	pom := strings.ReplaceAll(template.Pom, "#rit{{artifactId}}", artifactId)
+	return fileutil.WriteFile(path.Join(srcDir, "pom.xml"), []byte(pom))
 }
 
 func createPkgFile(j Java, pkg string, firstUpper string, javaSrcDir string) error {
@@ -87,9 +89,9 @@ func createPkgFile(j Java, pkg string, firstUpper string, javaSrcDir string) err
 	return nil
 }
 
-func createMainFile(firstUpper string, pkg string, javaSrcDir string) {
+func createMainFile(firstUpper string, pkg string, javaSrcDir string) error {
 	mainFile := strings.ReplaceAll(template.Main, formula.NameBinFirstUpper, firstUpper)
 	mainFile = strings.ReplaceAll(mainFile, formula.NameBin, pkg)
 
-	fileutil.WriteFile(path.Join(javaSrcDir, "Main.java"), []byte(mainFile))
+	return fileutil.WriteFile(path.Join(javaSrcDir, "Main.java"), []byte(mainFile))
 }

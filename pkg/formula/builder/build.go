@@ -17,7 +17,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const commonsDir = "commons"
+const localRepoDir = "/repos/local"
 
 var (
 	msgBuildOnWindows = prompt.Yellow("This formula cannot be built on Windows.")
@@ -37,7 +37,7 @@ func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExi
 
 func (m Manager) Build(workspacePath, formulaPath string) error {
 
-	dest := path.Join(m.ritHome, "repos", "local")
+	dest := path.Join(m.ritHome, localRepoDir)
 
 	if err := m.dir.Create(dest); err != nil {
 		return err
@@ -99,20 +99,15 @@ func (m Manager) generateTree(dest string) error {
 	}
 
 	treeFilePath := path.Join(dest, "tree.json")
-	bytes, err := json.MarshalIndent(tree, "", "\t")
+	treeIndented, err := json.MarshalIndent(tree, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	if err := m.file.Write(treeFilePath, bytes); err != nil {
+	if err := m.file.Write(treeFilePath, treeIndented); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (m Manager) formulaDestPath(formulaPath, workspacePath string) string {
-	dest := strings.ReplaceAll(formulaPath, workspacePath, "")
-	return path.Join(m.ritHome, "/repos/local/", dest)
 }
 
 func (m Manager) copyWorkSpace(workspacePath string, dest string) error {

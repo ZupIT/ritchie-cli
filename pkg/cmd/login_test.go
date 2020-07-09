@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -13,7 +12,7 @@ import (
 )
 
 func TestNewLoginCmd(t *testing.T) {
-	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, repoLoaderMock{}, findSetterServerMock{}, otpResolverMock{})
+	cmd := NewLoginCmd(inputTextMock{}, inputPasswordMock{}, loginManagerMock{}, findSetterServerMock{}, otpResolverMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewLoginCmd got %v", cmd)
@@ -27,7 +26,6 @@ func TestNewLoginCmd(t *testing.T) {
 func Test_loginCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		LoginManager  security.LoginManager
-		Loader        formula.RepoLoader
 		InputText     prompt.InputText
 		InputPassword prompt.InputPassword
 		Finder        server.Finder
@@ -42,10 +40,9 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			name: "run with success",
 			fields: fields{
 				LoginManager:  loginManagerMock{},
-				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
-				Finder: findSetterServerMock{},
+				Finder:        findSetterServerMock{},
 				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
@@ -54,11 +51,10 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			name: "request otp returns error",
 			fields: fields{
 				LoginManager:  loginManagerMock{},
-				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
-				Finder: findSetterServerMock{},
-				Resolver:      otpResolverCustomMock{
+				Finder:        findSetterServerMock{},
+				Resolver: otpResolverCustomMock{
 					requestOtp: func(url, organization string) (otp.Response, error) {
 						return otp.Response{}, errors.New("some error")
 					},
@@ -70,7 +66,6 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			name: "run with success when ask otp",
 			fields: fields{
 				LoginManager:  loginManagerMock{},
-				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
 				Finder: findSetterServerCustomMock{
@@ -78,7 +73,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, nil
 					},
 				},
-				Resolver:      otpResolverMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -86,7 +81,6 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			name: "return err when find return err",
 			fields: fields{
 				LoginManager:  loginManagerMock{},
-				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
 				Finder: findSetterServerCustomMock{
@@ -94,7 +88,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, errors.New("some error")
 					},
 				},
-				Resolver:      otpResolverMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -102,7 +96,6 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			name: "return err when MsgUsername return err",
 			fields: fields{
 				LoginManager: loginManagerMock{},
-				Loader:       repoLoaderMock{},
 				InputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
 						if name == MsgUsername {
@@ -122,7 +115,6 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			name: "return err when MsgPassword return err",
 			fields: fields{
 				LoginManager: loginManagerMock{},
-				Loader:       repoLoaderMock{},
 				InputText:    inputTextMock{},
 				InputPassword: inputPasswordCustomMock{
 					password: func(label string) (string, error) {
@@ -133,8 +125,8 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						}
 					},
 				},
-				Finder: findSetterServerMock{},
-				Resolver:      otpResolverMock{},
+				Finder:   findSetterServerMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -142,7 +134,6 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			name: "return err when MsgOtp return err",
 			fields: fields{
 				LoginManager: loginManagerMock{},
-				Loader:       repoLoaderMock{},
 				InputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
 						if name == MsgOtp {
@@ -158,7 +149,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, nil
 					},
 				},
-				Resolver:      otpResolverMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -167,23 +158,6 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 			fields: fields{
 				LoginManager: loginManagerCustomMock{
 					login: func(user security.User) error {
-						return errors.New("some error")
-					},
-				},
-				Loader:        repoLoaderMock{},
-				InputText:     inputTextMock{},
-				InputPassword: inputPasswordMock{},
-				Finder:        findSetterServerMock{},
-				Resolver:      otpResolverMock{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "return err when load return err",
-			fields: fields{
-				LoginManager: loginManagerMock{},
-				Loader: repoLoaderCustomMock{
-					load: func() error {
 						return errors.New("some error")
 					},
 				},
@@ -201,7 +175,6 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				tt.fields.InputText,
 				tt.fields.InputPassword,
 				tt.fields.LoginManager,
-				tt.fields.Loader,
 				tt.fields.Finder,
 				tt.fields.Resolver,
 			)

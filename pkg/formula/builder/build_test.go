@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -17,6 +19,7 @@ func TestBuild(t *testing.T) {
 	ritHome := fmt.Sprintf("%s/.my-rit", os.TempDir())
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
+	defaultTreeManagerMock := tree.NewGenerator(dirManager, fileManager)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
@@ -26,6 +29,7 @@ func TestBuild(t *testing.T) {
 	type in struct {
 		fileManager stream.FileCopyExistListerWriter
 		dirManager  stream.DirCreateListCopier
+		tree        formula.TreeGenerator
 	}
 
 	testes := []struct {
@@ -38,6 +42,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManager,
+				tree:        defaultTreeManagerMock,
 			},
 			want: nil,
 		},
@@ -46,6 +51,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{listErr: errors.New("error to list dir")},
+				tree:        defaultTreeManagerMock,
 			},
 			want: errors.New("error to list dir"),
 		},
@@ -54,6 +60,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{createErr: errors.New("error to create dir")},
+				tree:        defaultTreeManagerMock,
 			},
 			want: errors.New("error to create dir"),
 		},
@@ -62,6 +69,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{data: []string{"linux"}, copyErr: errors.New("error to copy dir")},
+				tree:        defaultTreeManagerMock,
 			},
 			want: errors.New("error to copy dir"),
 		},
@@ -70,6 +78,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{data: []string{"commons"}, copyErr: errors.New("error to copy dir")},
+				tree:        defaultTreeManagerMock,
 			},
 			want: errors.New("error to copy dir"),
 		},
@@ -78,6 +87,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManagerMock{listErr: errors.New("error to list files")},
 				dirManager:  dirManager,
+				tree:        defaultTreeManagerMock,
 			},
 			want: errors.New("error to list files"),
 		},
@@ -86,6 +96,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManagerMock{copyErr: errors.New("error to copy files")},
 				dirManager:  dirManager,
+				tree:        defaultTreeManagerMock,
 			},
 			want: errors.New("error to copy files"),
 		},
@@ -93,7 +104,7 @@ func TestBuild(t *testing.T) {
 
 	for _, tt := range testes {
 		t.Run(tt.name, func(t *testing.T) {
-			builderManager := New(ritHome, tt.in.dirManager, tt.in.fileManager)
+			builderManager := New(ritHome, tt.in.dirManager, tt.in.fileManager, tt.in.tree)
 			got := builderManager.Build(workspacePath, formulaPath)
 
 			if got != nil && got.Error() != tt.want.Error() {
@@ -106,19 +117,19 @@ func TestBuild(t *testing.T) {
 					t.Errorf("Build(%s) did not create the Ritchie home directory", tt.name)
 				}
 
-				treeLocalFile := fmt.Sprintf("%s/repo/local/tree.json", ritHome)
+				treeLocalFile := fmt.Sprintf("%s/repos/local/tree.json", ritHome)
 				hasTreeLocalFile := fileManager.Exists(treeLocalFile)
 				if !hasTreeLocalFile {
 					t.Errorf("Build(%s) did not copy the tree local file", tt.name)
 				}
 
-				formulaFiles := fmt.Sprintf("%s/formulas/testing/formula/bin", ritHome)
+				formulaFiles := fmt.Sprintf("%s/repos/local/testing/formula/bin", ritHome)
 				files, err := fileManager.List(formulaFiles)
-				if err == nil && len(files) != 7 {
-					t.Errorf("Build(%s) did not copy formulas files", tt.name)
+				if err == nil && len(files) != 2 {
+					t.Errorf("Build(%s) did not generate bin files", tt.name)
 				}
 
-				configFile := fmt.Sprintf("%s/formulas/testing/formula/config.json", ritHome)
+				configFile := fmt.Sprintf("%s/repos/local/testing/formula/config.json", ritHome)
 				hasConfigFile := fileManager.Exists(configFile)
 				if !hasConfigFile {
 					t.Errorf("Build(%s) did not copy formula config", tt.name)
@@ -148,10 +159,11 @@ func (d dirManagerMock) Copy(string, string) error {
 }
 
 type fileManagerMock struct {
-	data    []string
-	listErr error
-	copyErr error
-	exist   bool
+	data     []string
+	listErr  error
+	copyErr  error
+	exist    bool
+	writeErr error
 }
 
 func (f fileManagerMock) List(string) ([]string, error) {
@@ -164,4 +176,8 @@ func (f fileManagerMock) Copy(string, string) error {
 
 func (f fileManagerMock) Exists(string) bool {
 	return f.exist
+}
+
+func (f fileManagerMock) Write(path string, content []byte) error {
+	return f.writeErr
 }

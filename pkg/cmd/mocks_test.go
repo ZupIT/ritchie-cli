@@ -80,11 +80,11 @@ func (inputListCredMock) List(name string, items []string) (string, error) {
 
 type repoAdder struct{}
 
-func (a repoAdder) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (a repoAdder) List() (formula.Repos, error) {
+	return formula.Repos{}, nil
 }
 
-func (repoAdder) Add(d formula.Repository) error {
+func (repoAdder) Add(d formula.Repo) error {
 	return nil
 }
 
@@ -149,8 +149,8 @@ func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
 
 type repoDeleterMock struct{}
 
-func (m repoDeleterMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (m repoDeleterMock) List() (formula.Repos, error) {
+	return formula.Repos{}, nil
 }
 
 func (repoDeleterMock) Delete(name string) error {
@@ -159,8 +159,8 @@ func (repoDeleterMock) Delete(name string) error {
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (repoListerMock) List() (formula.Repos, error) {
+	return formula.Repos{}, nil
 }
 
 type repoLoaderMock struct{}
@@ -195,7 +195,7 @@ func (credSetterMock) Set(d credential.Detail) error {
 
 type credSettingsMock struct{}
 
-type singleCredSettingsMock struct {}
+type singleCredSettingsMock struct{}
 
 func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
 	return nil

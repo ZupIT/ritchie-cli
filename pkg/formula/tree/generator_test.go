@@ -17,7 +17,6 @@ func TestGenerate(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	generator := NewGenerator(dirManager, fileManager)
 
-
 	adder := repo.NewAdder(os.TempDir(), http.DefaultClient, generator, dirManager, fileManager)
 	adder.Add(formula.Repo{
 		Name:     "commons",
@@ -25,8 +24,13 @@ func TestGenerate(t *testing.T) {
 		Version:  "v2.0.0",
 		Priority: 0,
 	})
-	
-	tree, err := generator.Generate(os.TempDir() + "/commons")
+
+	resultDir := os.TempDir() + "/commons"
+	_ = dirManager.Create(resultDir)
+	defer func() {
+		_ = dirManager.Remove(resultDir)
+	}()
+	tree, err := generator.Generate(resultDir)
 	if err != nil {
 		t.Error(err)
 	}

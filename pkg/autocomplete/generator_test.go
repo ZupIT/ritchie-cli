@@ -12,8 +12,8 @@ import (
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (repoListerMock) List() (formula.Repos, error) {
+	return formula.Repos{}, nil
 }
 
 func TestGenerate(t *testing.T) {

@@ -123,7 +123,7 @@ func (c CreateManager) createSrcFiles(dir, pkg, language, fCmdName string) error
 		}
 	case formula.JavaLang:
 		javaCreator := java.New(c, c.createGenericFiles, fCmdName)
-		if err := javaCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
+		if err := javaCreator.Create(srcDir, pkg, dir); err != nil {
 			return err
 		}
 	case formula.NodeLang:
@@ -151,8 +151,11 @@ func (c CreateManager) createSrcFiles(dir, pkg, language, fCmdName string) error
 }
 
 func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l formula.Lang) error {
-	if err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase); err != nil {
-		return err
+	if l.Main != "" {
+		err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := c.createMakefileForm(srcDir, pkg, dir, l.Makefile, l.Compiled); err != nil {
