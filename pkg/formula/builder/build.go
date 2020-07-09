@@ -36,35 +36,6 @@ func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExi
 }
 
 func (m Manager) Build(workspacePath, formulaPath string) error {
-	formulaSrc := path.Join(formulaPath, "/src")
-	if err := os.Chdir(formulaSrc); err != nil {
-		return err
-	}
-
-	so := runtime.GOOS
-	var cmd *exec.Cmd
-	switch so {
-	case osutil.Windows:
-		winBuild := path.Join(formulaSrc, "build.bat")
-		if !m.file.Exists(winBuild) {
-			return ErrBuildOnWindows
-		}
-		cmd = exec.Command(winBuild)
-	default:
-		cmd = exec.Command("make", "build")
-	}
-
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		if stderr.Bytes() != nil {
-			errMsg := fmt.Sprintf("Build error: \n%s \n%s", stderr.String(), err)
-			return errors.New(errMsg)
-		}
-
-		return err
-	}
 
 	dest := path.Join(m.ritHome, "repos", "local")
 
@@ -80,7 +51,45 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
+	err, done := m.buildFormulaBin(workspacePath, formulaPath, dest)
+	if done {
+		return err
+	}
+
 	return nil
+}
+
+func (m Manager) buildFormulaBin(workspacePath, formulaPath, dest string) (error, bool) {
+	formulaSrc := path.Join(strings.ReplaceAll(formulaPath, workspacePath, dest), "/src")
+	if err := os.Chdir(formulaSrc); err != nil {
+		return err, true
+	}
+
+	so := runtime.GOOS
+	var cmd *exec.Cmd
+	switch so {
+	case osutil.Windows:
+		winBuild := path.Join(formulaSrc, "build.bat")
+		if !m.file.Exists(winBuild) {
+			return ErrBuildOnWindows, true
+		}
+		cmd = exec.Command(winBuild)
+	default:
+		cmd = exec.Command("make", "build")
+	}
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		if stderr.Bytes() != nil {
+			errMsg := fmt.Sprintf("Build error: \n%s \n%s", stderr.String(), err)
+			return errors.New(errMsg), true
+		}
+
+		return err, true
+	}
+	return nil, false
 }
 
 func (m Manager) generateTree(dest string) error {
