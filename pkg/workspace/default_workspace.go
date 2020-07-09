@@ -1,17 +1,6 @@
 package workspace
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"path/filepath"
-	"strings"
-	"time"
-
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-
-	"github.com/gofrs/flock"
-
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
@@ -29,14 +18,14 @@ func NewChecker(ritchieHome string) DefaultChecker {
 }
 
 func (d DefaultChecker) Check() error {
-	dirRepo := fmt.Sprintf("%s%s", d.ritchieHome, repoDir)
-	repoFile := fmt.Sprintf("%s%s", dirRepo, repoFile)
+	/*dirRepo := fmt.Sprintf("%s%s", d.ritchieHome, repoDir)
+	repoFile := fmt.Sprintf("%s%s", dirRepo, repoFile)*/
 
 	if err := fileutil.CreateDirIfNotExists(d.ritchieHome, 0755); err != nil {
 		return err
 	}
 
-	if err := fileutil.CreateDirIfNotExists(dirRepo, 0755); err != nil {
+	/*if err := fileutil.CreateDirIfNotExists(dirRepo, 0755); err != nil {
 		return err
 	}
 
@@ -69,7 +58,7 @@ func (d DefaultChecker) Check() error {
 	err = fileutil.WriteFile(repoFile, b)
 	if err != nil {
 		return err
-	}
+	}*/
 
 	return nil
 }

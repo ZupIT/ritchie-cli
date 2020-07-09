@@ -64,7 +64,7 @@ func (s Setter) Set(cred credential.Detail) error {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set(headers.XOrg, sess.Organization)
 	req.Header.Set(headers.XCtx, ctx.Current)
-	req.Header.Set(headers.Authorization, sess.AccessToken)
+	req.Header.Set(headers.XAuthorization, sess.AccessToken)
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return err

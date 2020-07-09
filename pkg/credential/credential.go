@@ -32,7 +32,8 @@ type Field struct {
 	Type string `json:"type"`
 }
 
-// Fields represents a collection of credential fields that can be returned by the Server (Team Edition).
+// Fields represents a collection of credential fields returned by the Server (Team).
+// Fields are used on single to represents providers.json
 type Fields map[string][]Field
 
 type Setter interface {
@@ -45,4 +46,10 @@ type Finder interface {
 
 type Settings interface {
 	Fields() (Fields, error)
+}
+
+type SingleSettings interface {
+	ReadCredentials(path string) (Fields, error)
+	WriteCredentials(fields Fields, path string) error
+	WriteDefaultCredentials(path string) error
 }

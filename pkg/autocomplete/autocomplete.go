@@ -1,5 +1,7 @@
 package autocomplete
 
+import "github.com/spf13/cobra"
+
 type (
 	BashCommand struct {
 		LastCommand string
@@ -15,7 +17,7 @@ type (
 )
 
 type Generator interface {
-	Generate(s ShellName) (string, error)
+	Generate(s ShellName, cmd *cobra.Command) (string, error)
 }
 
 type ShellName string

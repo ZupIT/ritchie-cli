@@ -10,3 +10,7 @@ type TreeManager interface {
 	Tree() (map[string]Tree, error)
 	MergedTree(core bool) Tree
 }
+
+type TreeGenerator interface {
+	Generate(repoPath string) (Tree, error)
+}

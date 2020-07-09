@@ -39,8 +39,6 @@ var (
 		{Parent: "root_create", Usage: "formula"},
 		{Parent: "root", Usage: "update"},
 		{Parent: "root_update", Usage: "repo"},
-		{Parent: "root", Usage: "clean"},
-		{Parent: "root_clean", Usage: "repo"},
 		{Parent: "root", Usage: "build"},
 		{Parent: "root_build", Usage: "formula"},
 		{Parent: "root", Usage: "upgrade"},
