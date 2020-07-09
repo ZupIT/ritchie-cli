@@ -25,7 +25,7 @@ func NewSetPriorityCmd(il prompt.InputList, ii prompt.InputInt, rl formula.Repos
 	cmd := &cobra.Command{
 		Use:     "repo-priority",
 		Short:   "Set a repository priority",
-		Example: "rit set priority",
+		Example: "rit set repo-priority",
 		RunE:    s.runFunc(),
 	}
 	return cmd
