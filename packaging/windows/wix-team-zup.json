@@ -36,9 +36,9 @@
         ]
     },
     "hooks": [
-        {"when":"install", "command":"powershell.exe /c mkdir $HOME\\.rit"},
-        {"when":"install", "command":"powershell.exe /c  @{organization='zup';url='https://ritchie-server.zup.io'} | ConvertTo-Json | Add-Content -Path $HOME\\.rit\\server.json"},
-        {"when":"uninstall", "command":"powershell.exe /c rmdir $HOME\\.rit"}
+        {"when":"install", "command":"cmd.exe /c mkdir %systemdrive%%homepath%\\.rit"},
+        {"when":"install", "command":"cmd.exe /c echo {\"organization\":\"zup\",\"url\":\"https://ritchie-server.itiaws.dev\"} > %systemdrive%%homepath%\\.rit\\server.json"},
+        {"when":"uninstall", "command":"cmd.exe /c del %systemdrive%%homepath%\\.rit"}
     ],
     "choco": {
         "description": "ritchie cli",
