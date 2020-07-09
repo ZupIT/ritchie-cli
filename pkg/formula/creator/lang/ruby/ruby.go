@@ -56,9 +56,9 @@ func (n Ruby) Create(srcDir, pkg, pkgDir, dir string) error {
 		return err
 	}
 
-	templateNode := strings.ReplaceAll(n.File, formula.NameBin, pkg)
+	templateRuby := strings.ReplaceAll(n.File, formula.NameBin, pkg)
 	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, n.FileFormat)
-	if err := fileutil.WriteFile(pkgFile, []byte(templateNode)); err != nil {
+	if err := fileutil.WriteFile(pkgFile, []byte(templateRuby)); err != nil {
 		return err
 	}
 
