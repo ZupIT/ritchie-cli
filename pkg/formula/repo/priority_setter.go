@@ -2,11 +2,16 @@ package repo
 
 import (
 	"encoding/json"
+	"errors"
 	"path"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+)
+
+const (
+	repositoryDoNotExistError = "there is no repositories yet"
 )
 
 type SetPriorityManager struct {
@@ -26,16 +31,17 @@ func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister, dir str
 func (sm SetPriorityManager) SetPriority(repoName string, priority int) error {
 	var repos formula.Repos
 	repoPath := path.Join(sm.ritHome, reposDirName, reposFileName)
-	if sm.file.Exists(repoPath) {
-		read, err := sm.file.Read(repoPath)
-		if err != nil {
-			return err
-		}
-
-		if err := json.Unmarshal(read, &repos); err != nil {
-			return err
-		}
+	if !sm.file.Exists(repoPath) {
+		return errors.New(repositoryDoNotExistError)
 	}
+	read, err := sm.file.Read(repoPath)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(read, &repos); err != nil {
+			return err
+		}
 
 	for i, _ := range repos {
 		if repoName == repos[i].Name {

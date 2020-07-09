@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -11,7 +10,7 @@ import (
 )
 
 const (
-	newRepositoryPriority = "Now \"%s\" repository has priority %s"
+	newRepositoryPriority = "Now %q repository has priority %v"
 )
 
 type SetPriorityCmd struct {
@@ -24,7 +23,7 @@ type SetPriorityCmd struct {
 func NewSetPriorityCmd(il prompt.InputList, ii prompt.InputInt, rl formula.RepositoryLister, rs formula.RepositoryPrioritySetter) *cobra.Command {
 	s := SetPriorityCmd{il, ii, rl, rs}
 	cmd := &cobra.Command{
-		Use:     "priority",
+		Use:     "repo-priority",
 		Short:   "Set a repository priority",
 		Example: "rit set priority",
 		RunE:    s.runFunc(),
@@ -40,7 +39,7 @@ func (s SetPriorityCmd) runFunc() CommandRunnerFunc {
 		}
 
 		if len(repositories) == 0 {
-			prompt.Warning("You should add a repository first\nYou may run `rit add repo` command")
+			prompt.Warning("You should add a repository first")
 			return nil
 		}
 
@@ -72,8 +71,7 @@ func (s SetPriorityCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		priorityString := strconv.Itoa(int(priority))
-		successMsg := fmt.Sprintf(newRepositoryPriority, repoName, priorityString)
+		successMsg := fmt.Sprintf(newRepositoryPriority, repoName, priority)
 		prompt.Success(successMsg)
 		return nil
 	}
