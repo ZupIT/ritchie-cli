@@ -88,14 +88,13 @@ func (inputListMock) List(name string, items []string) (string, error) {
 	return "item-mocked", nil
 }
 
-type inputListCustomMock struct{
+type inputListCustomMock struct {
 	name string
 }
 
 func (m inputListCustomMock) List(name string, items []string) (string, error) {
 	return m.name, nil
 }
-
 
 type inputListCredMock struct{}
 
@@ -180,16 +179,16 @@ func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]formula.Repo, error) {
-	return []formula.Repo{}, nil
+func (repoListerMock) List() (formula.Repos, error) {
+	return formula.Repos{}, nil
 }
 
 type repoListerNonEmptyMock struct{}
 
-func (repoListerNonEmptyMock) List() ([]formula.Repo, error) {
-	return []formula.Repo{
+func (repoListerNonEmptyMock) List() (formula.Repos, error) {
+	return formula.Repos{
 		{
-			Name: "repoName",
+			Name:     "repoName",
 			Priority: 0,
 		},
 	}, nil
@@ -197,21 +196,21 @@ func (repoListerNonEmptyMock) List() ([]formula.Repo, error) {
 
 type repoListerErrorMock struct{}
 
-func (repoListerErrorMock) List() ([]formula.Repo, error) {
-	return []formula.Repo{}, errors.New("some error")
+func (repoListerErrorMock) List() (formula.Repos, error) {
+	return formula.Repos{}, errors.New("some error")
 }
 
-type repoPrioritySetterMock struct {}
+type repoPrioritySetterMock struct{}
 
-func (repoPrioritySetterMock) SetPriority(repo formula.Repo, priority int) error {
+func (repoPrioritySetterMock) SetPriority(repo string, priority int) error {
 	return nil
 }
 
 type repoPrioritySetterCustomMock struct {
-	setPriority func(repo formula.Repo, priority int) error
+	setPriority func(repo string, priority int) error
 }
 
-func (m repoPrioritySetterCustomMock) SetPriority(repo formula.Repo, priority int) error {
+func (m repoPrioritySetterCustomMock) SetPriority(repo string, priority int) error {
 	return m.setPriority(repo, priority)
 }
 
@@ -376,7 +375,8 @@ type InputMultilineMock struct{}
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
 }
-type otpResolverMock struct {}
+
+type otpResolverMock struct{}
 
 func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
 	return otp.Response{Otp: true}, nil
