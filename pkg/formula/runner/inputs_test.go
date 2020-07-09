@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"os/exec"
@@ -59,6 +60,18 @@ func TestInputManager_Inputs(t *testing.T) {
 				stdin:  `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
 			},
 			want: nil,
+		},
+		{
+			name: "error stdin",
+			in: in{
+				iText:  inputMock{text: formula.DefaultCacheNewLabel},
+				iList:  inputMock{text: "test"},
+				iBool:  inputMock{boolean: false},
+				iPass:  inputMock{text: "******"},
+				inType: api.Stdin,
+				stdin:  `{"sample_text":"test_text","sample_`,
+			},
+			want: errors.New("unexpected EOF"),
 		},
 		{
 			name: "success prompt",
