@@ -2,6 +2,7 @@ package builder
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -10,7 +11,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -26,11 +27,12 @@ var (
 type Manager struct {
 	ritHome string
 	dir     stream.DirCreateListCopier
-	file    stream.FileCopyExistLister
+	file    stream.FileCopyExistListerWriter
+	tree    formula.TreeGenerator
 }
 
-func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExistLister) Manager {
-	return Manager{ritHome: ritHome, dir: dir, file: file}
+func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExistListerWriter, tree formula.TreeGenerator) Manager {
+	return Manager{ritHome: ritHome, dir: dir, file: file, tree: tree}
 }
 
 func (m Manager) Build(workspacePath, formulaPath string) error {
@@ -64,93 +66,46 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
-	formulaDestPath := m.formulaDestPath(formulaPath, workspacePath)
+	dest := path.Join(m.ritHome, "repos", "local")
 
-	if err := m.copyDist(formulaPath, formulaDestPath); err != nil {
+	if err := m.dir.Create(dest); err != nil {
 		return err
 	}
 
-	if err := m.copyConfig(formulaPath, formulaDestPath); err != nil {
+	if err := m.copyWorkSpace(workspacePath, dest); err != nil {
 		return err
 	}
 
-	if err := m.copyTree(workspacePath); err != nil {
+	if err := m.generateTree(dest); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m Manager) copyDist(formulaPath, ritFormulaDistPath string) error {
-	formulaDist := path.Join(formulaPath, "/dist") // /dist directory that contains built formula
-	dirs, err := m.dir.List(formulaDist, false)
+func (m Manager) generateTree(dest string) error {
+	tree, err := m.tree.Generate(dest)
 	if err != nil {
 		return err
 	}
 
-	if err := m.dir.Create(ritFormulaDistPath); err != nil {
-		return err
-	}
-
-	so := runtime.GOOS
-	for _, dir := range dirs {
-		if dir == so { // The formula is compiled and generates a binary by S.O, for example Golang, C...
-			// Create formulaDistSODir for dist with the current S.O. example: "/dist/linux"
-			formulaDistSODir := path.Join(formulaDist, "/", so)
-			if err := m.dir.Copy(formulaDistSODir, ritFormulaDistPath); err != nil { // Copy formula dist by S.O. to ~/.rit/formulas/...
-				return err
-			}
-			break
-		}
-
-		if dir == commonsDir { // The formula is interpreted and needs other files to run, for example, Java, Node...
-			formulaCommonsDir := path.Join(formulaDist, "/", commonsDir)
-			if err := m.dir.Copy(formulaCommonsDir, ritFormulaDistPath); err != nil { // Copy formula dist commons to ~/.rit/formulas/...
-				return err
-			}
-			break
-		}
-	}
-
-	return nil
-}
-
-func (m Manager) copyConfig(formulaPath string, distPath string) error {
-	files, err := m.file.List(formulaPath)
+	treeFilePath := path.Join(dest, "tree.json")
+	bytes, err := json.MarshalIndent(tree, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	for _, file := range files {
-		if strings.Contains(file, fileextensions.Json) {
-			copyFile := path.Join(formulaPath, "/", file)
-			distFile := path.Join(distPath, "/", file)
-			if err := m.file.Copy(copyFile, distFile); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func (m Manager) copyTree(workspacePath string) error {
-	copyFile := path.Join(workspacePath, "/tree/tree.json")
-	destFile := path.Join(m.ritHome, "/repo/local/tree.json")
-	destDir := path.Join(m.ritHome, "/repo/local")
-
-	if err := m.dir.Create(destDir); err != nil {
+	if err := m.file.Write(treeFilePath, bytes); err != nil {
 		return err
 	}
-
-	if err := m.file.Copy(copyFile, destFile); err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (m Manager) formulaDestPath(formulaPath, workspacePath string) string {
 	dest := strings.ReplaceAll(formulaPath, workspacePath, "")
-	return path.Join(m.ritHome, "/formulas/", dest)
+	return path.Join(m.ritHome, "/repos/local/", dest)
+}
+
+func (m Manager) copyWorkSpace(workspacePath string, dest string) error {
+	return m.dir.Copy(workspacePath, dest)
 }

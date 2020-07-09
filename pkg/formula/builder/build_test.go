@@ -24,7 +24,7 @@ func TestBuild(t *testing.T) {
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
 	type in struct {
-		fileManager stream.FileCopyExistLister
+		fileManager stream.FileCopyExistListerWriter
 		dirManager  stream.DirCreateListCopier
 	}
 
