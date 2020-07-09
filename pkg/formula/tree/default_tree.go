@@ -103,8 +103,8 @@ func (d Manager) localTree() (formula.Tree, error) {
 	return loadTree(treeCmdFile)
 }
 
-func (d Manager) treeByRepo(repo string) (formula.Tree, error) {
-	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repo)
+func (d Manager) treeByRepo(repoName string) (formula.Tree, error) {
+	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repoName)
 	return loadTree(treeCmdFile)
 }
 

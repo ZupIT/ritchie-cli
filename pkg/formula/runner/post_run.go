@@ -28,12 +28,12 @@ func (PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 
 	defer removeWorkDir(p.TmpDir)
 
-	df, err := fileutil.ListNewFiles(p.BinPath, p.TmpBinDir)
+	df, err := fileutil.ListNewFiles(p.BinPath, p.TmpDir)
 	if err != nil {
 		return err
 	}
 
-	if err = fileutil.MoveFiles(p.TmpBinDir, p.Pwd, df); err != nil {
+	if err = fileutil.MoveFiles(p.TmpDir, p.Pwd, df); err != nil {
 		return err
 	}
 

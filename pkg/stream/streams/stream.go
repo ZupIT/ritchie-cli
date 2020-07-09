@@ -16,7 +16,6 @@ func Unzip(src string, dest string) error {
 		if err != nil {
 			return err
 		}
-		defer zippedFile.Close()
 
 		extractedFilePath := filepath.Join(
 			dest,
@@ -36,13 +35,14 @@ func Unzip(src string, dest string) error {
 			if err != nil {
 				return err
 			}
-			defer outputFile.Close()
 
 			_, err = io.Copy(outputFile, zippedFile)
 			if err != nil {
 				return err
 			}
+			outputFile.Close()
 		}
+		zippedFile.Close()
 	}
 	defer reader.Close()
 	return nil
