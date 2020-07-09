@@ -49,10 +49,9 @@ func (j Java) Create(srcDir, pkg, pkgDir, dir string) error {
 	//Todo change it
 	fileutil.RemoveFile(path.Join(srcDir, "Main.java"))
 
-	groupId := strings.ReplaceAll(j.fCmdName, " ", ".")
-	baseJavaDir := strings.Split("src/main/java", "/")
-	groupIdDir := strings.Split(groupId, ".")
-	javaSrcDir := path.Join(srcDir, path.Join(baseJavaDir...), path.Join(groupIdDir...))
+	artifactId := strings.ReplaceAll(j.fCmdName, " ", "-")
+	baseJavaDir := strings.Split("src/main/java/com/ritchie/formula", "/")
+	javaSrcDir := path.Join(srcDir, path.Join(baseJavaDir...))
 
 	if err := fileutil.CreateDirIfNotExists(javaSrcDir, os.ModePerm); err != nil {
 		return err
@@ -60,13 +59,12 @@ func (j Java) Create(srcDir, pkg, pkgDir, dir string) error {
 
 	firstUpper := strings.Title(strings.ToLower(pkg))
 
-	createMainFile(groupId, firstUpper, pkg, javaSrcDir)
+	createMainFile(firstUpper, pkg, javaSrcDir)
 
-	pom := strings.ReplaceAll(template.Pom, "#rit{{groupId}}", groupId)
-	pom = strings.ReplaceAll(pom, "#rit{{artifactId}}", pkg)
+	pom := strings.ReplaceAll(template.Pom, "#rit{{artifactId}}", artifactId)
 	fileutil.WriteFile(path.Join(srcDir, "pom.xml"), []byte(pom))
 
-	err := createPkgFile(j, pkg, groupId, firstUpper, javaSrcDir)
+	err := createPkgFile(j, pkg, firstUpper, javaSrcDir)
 	if err != nil {
 		return err
 	}
@@ -74,9 +72,8 @@ func (j Java) Create(srcDir, pkg, pkgDir, dir string) error {
 	return nil
 }
 
-func createPkgFile(j Java, pkg string, groupId string, firstUpper string, javaSrcDir string) error {
+func createPkgFile(j Java, pkg string, firstUpper string, javaSrcDir string) error {
 	templateFileJava := strings.ReplaceAll(j.File, formula.NameBin, pkg)
-	templateFileJava = strings.ReplaceAll(templateFileJava, "{{final-pkg}}", groupId)
 	templateFileJava = strings.ReplaceAll(templateFileJava, formula.NameBinFirstUpper, firstUpper)
 
 	templateFileDir := path.Join(javaSrcDir, pkg)
@@ -90,9 +87,8 @@ func createPkgFile(j Java, pkg string, groupId string, firstUpper string, javaSr
 	return nil
 }
 
-func createMainFile(groupId string, firstUpper string, pkg string, javaSrcDir string) {
-	mainFile := strings.ReplaceAll(template.Main, "{{final-pkg}}", groupId)
-	mainFile = strings.ReplaceAll(mainFile, formula.NameBinFirstUpper, firstUpper)
+func createMainFile(firstUpper string, pkg string, javaSrcDir string) {
+	mainFile := strings.ReplaceAll(template.Main, formula.NameBinFirstUpper, firstUpper)
 	mainFile = strings.ReplaceAll(mainFile, formula.NameBin, pkg)
 
 	fileutil.WriteFile(path.Join(javaSrcDir, "Main.java"), []byte(mainFile))

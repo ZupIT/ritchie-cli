@@ -3,9 +3,9 @@ package template
 const (
 	StartFile = "Main"
 
-	Main = `package {{final-pkg}};
+	Main = `package com.ritchie.formula;
 
-import {{final-pkg}}.{{bin-name}}.{{bin-name-first-upper}};
+import com.ritchie.formula.{{bin-name}}.{{bin-name-first-upper}};
 
 public class Main {
 
@@ -19,11 +19,19 @@ public class Main {
 }`
 
 	Dockerfile = `
+FROM maven:3.6.3-jdk-8 AS builder
+
+ADD . /app
+WORKDIR /app
+RUN mvn clean install
+
+
 FROM alpine:latest
 USER root
 
-COPY . .
-    
+COPY --from=builder /app/target/Main.jar Main.jar
+COPY --from=builder /app/set_umask.sh set_umask.sh
+
 RUN apk update
 RUN apk fetch openjdk8
 RUN apk add openjdk8
@@ -37,10 +45,9 @@ WORKDIR /app
 
 ENTRYPOINT ["../set_umask.sh"]
 
-
 CMD ["java -jar ../Main.jar"]`
 
-	File = `package {{final-pkg}}.{{bin-name}};
+	File = `package com.ritchie.formula.{{bin-name}};
 
 public class {{bin-name-first-upper}} {
 
@@ -86,11 +93,11 @@ public class {{bin-name-first-upper}} {
     }
 }`
 
-	Makefile = `# Go parameters
+	Makefile = `# Build parameters
 BIN_FOLDER=../bin
 SH=$(BIN_FOLDER)/run.sh
 BAT=$(BIN_FOLDER)/run.bat
-JAR_NAME={{bin-name}}.jar
+JAR_NAME=Main.jar
 
 build: mvn-build sh-unix bat-windows
 
@@ -134,7 +141,7 @@ SET DIST_DIR=%DIST%\commons\bin
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>#rit{{groupId}}</groupId>
+    <groupId>com.ritchie.formula</groupId>
     <artifactId>#rit{{artifactId}}</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -146,7 +153,7 @@ SET DIST_DIR=%DIST%\commons\bin
     </properties>
 
     <build>
-        <finalName>${project.artifactId}</finalName>
+        <finalName>Main</finalName>
         <plugins>
             <plugin>
                 <!-- Build an executable JAR -->
@@ -157,7 +164,7 @@ SET DIST_DIR=%DIST%\commons\bin
                     <archive>
                         <manifest>
                             <!-- <addClasspath>true</addClasspath> -->
-                            <mainClass>#rit{{groupId}}.Main</mainClass>
+                            <mainClass>com.ritchie.formula.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
