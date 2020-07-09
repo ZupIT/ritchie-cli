@@ -106,15 +106,15 @@ func (d DefaultSetup) buildFormula(formulaPath, binFilePath string, config formu
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Start(); err != nil {
-				prompt.Warning("Failed building formula with docker trying run local Makefile...")
+				prompt.Warning("Failed building formula with docker, trying with local Makefile...")
 				return buildMakefileLocal(filepath.Join(formulaPath, src))
 			}
 
 			if err := cmd.Wait(); err != nil {
-				prompt.Warning("Failed building formula with docker trying run local Makefile...")
+				prompt.Warning("Failed building formula with docker, trying with local Makefile...")
 				return buildMakefileLocal(filepath.Join(formulaPath, src))
 			}
-			prompt.Info("\n\nSuccess building formula using docker...\n\n")
+			prompt.Info("\n\nSuccessfully built formula using docker...\n\n")
 		} else {
 			return buildMakefileLocal(filepath.Join(formulaPath, src))
 		}
@@ -133,22 +133,22 @@ func buildMakefileLocal(formulaSrcPath string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
-		return errors.New("error build formula using make, verify your repository")
+		return errors.New("error building formula using make, verify your repository")
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return errors.New("error build formula using make, verify your repository")
+		return errors.New("error building formula using make, verify your repository")
 	}
 
-	prompt.Info("\n\nSuccess building formula using local Makefile...\n\n")
+	prompt.Info("\n\nSuccessfully built formula using local Makefile...\n\n")
 	return nil
 }
 
 func (d DefaultSetup) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
 	configPath := def.ConfigPath(formulaPath)
 	if !fileutil.Exists(configPath) {
-		return formula.Config{}, fmt.Errorf("Failed load config file for formula."+
-			"\nTry run rit update repo"+
+		return formula.Config{}, fmt.Errorf("Load of config file for formula failed."+
+			"\nTry running rit update repo"+
 			"\nConfig file path not found: %s", configPath)
 	}
 
