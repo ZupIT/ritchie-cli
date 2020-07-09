@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"github.com/spf13/cobra"
@@ -28,7 +27,6 @@ const (
 type initSingleCmd struct {
 	prompt.InputPassword
 	security.PassphraseManager
-	formula.RepoLoader
 }
 
 type initTeamCmd struct {
@@ -38,17 +36,12 @@ type initTeamCmd struct {
 	prompt.InputBool
 	server.FindSetter
 	security.LoginManager
-	formula.RepoLoader
 	otp.Resolver
 }
 
 // NewSingleInitCmd creates init command for single edition
-func NewSingleInitCmd(
-	ip prompt.InputPassword,
-	pm security.PassphraseManager,
-	rl formula.RepoLoader) *cobra.Command {
-
-	o := initSingleCmd{ip, pm, rl}
+func NewSingleInitCmd(ip prompt.InputPassword, pm security.PassphraseManager) *cobra.Command {
+	o := initSingleCmd{ip, pm}
 
 	return newInitCmd(o.runStdin(), o.runPrompt())
 }
@@ -61,10 +54,9 @@ func NewTeamInitCmd(
 	ib prompt.InputBool,
 	fs server.FindSetter,
 	lm security.LoginManager,
-	rl formula.RepoLoader,
 	orv otp.Resolver) *cobra.Command {
 
-	o := initTeamCmd{it, ip, iu, ib, fs, lm, rl, orv}
+	o := initTeamCmd{it, ip, iu, ib, fs, lm, orv}
 
 	return newInitCmd(o.runStdin(), o.runPrompt())
 }
@@ -92,7 +84,7 @@ func (o initSingleCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		return o.Load()
+		return nil
 	}
 }
 
@@ -114,7 +106,7 @@ func (o initSingleCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		return o.Load()
+		return nil
 	}
 }
 
@@ -203,9 +195,6 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 				Totp:     totp,
 			}
 			if err := o.Login(us); err != nil {
-				return err
-			}
-			if err := o.Load(); err != nil {
 				return err
 			}
 			fmt.Println("Login successfully!")

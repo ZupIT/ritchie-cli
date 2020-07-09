@@ -72,6 +72,13 @@ func buildCommands() *cobra.Command {
 	inputMultiline := prompt.NewSurveyMultiline()
 
 	// deps
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
+	treeGen := tree.NewGenerator(dirManager, fileManager)
+	repoAdder := repo.NewAdder(ritchieHomeDir, http.DefaultClient, treeGen, dirManager, fileManager)
+	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
+
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
@@ -84,8 +91,6 @@ func buildCommands() *cobra.Command {
 	serverFindSetter := server.NewFindSetter(serverFinder, serverSetter)
 
 	httpClient := makeHttpClient(serverFinder)
-	repoManager := repo.NewTeamRepoManager(ritchieHomeDir, serverFinder, httpClient, sessionManager)
-	repoLoader := repo.NewTeamLoader(serverFinder, httpClient, sessionManager, repoManager)
 	sessionValidator := sessteam.NewValidator(sessionManager)
 	loginManager := secteam.NewLoginManager(
 		serverFinder,
@@ -95,7 +100,7 @@ func buildCommands() *cobra.Command {
 	credSetter := credteam.NewSetter(serverFinder, httpClient, sessionManager, ctxFinder)
 	credFinder := credteam.NewFinder(serverFinder, httpClient, sessionManager, ctxFinder)
 	credSettings := credteam.NewSettings(serverFinder, httpClient, sessionManager, ctxFinder)
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoManager, api.TeamCoreCmds)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.TeamCoreCmds)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
@@ -110,13 +115,6 @@ func buildCommands() *cobra.Command {
 
 	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
 	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
-
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
-
-	repoAdder := repo.NewAdder(ritchieHomeDir, dirManager, fileManager)
-	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
-	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -142,7 +140,6 @@ func buildCommands() *cobra.Command {
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
-	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
 	initCmd := cmd.NewTeamInitCmd(
@@ -152,11 +149,10 @@ func buildCommands() *cobra.Command {
 		inputBool,
 		serverFindSetter,
 		loginManager,
-		repoLoader,
 		otpResolver,
 	)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder, otpResolver)
+	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, serverFinder, otpResolver)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -176,27 +172,21 @@ func buildCommands() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmdV2(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
-	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
-	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
-	listRepoCmd := cmd.NewListRepoCmd(repoLister)
-	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
+	addRepoCmd := cmd.NewAddRepoCmd(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
+	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
+	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
-	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
+	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
-	cleanCmd.AddCommand(cleanRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)
-	listCmd.AddCommand(listRepoCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
+	deleteCmd.AddCommand(deleteCtxCmd)
+	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
 	showCmd.AddCommand(showCtxCmd)
-	updateCmd.AddCommand(updateRepoCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.TeamCoreCmds, treeManager, defaultRunner, dockerRunner)
@@ -210,7 +200,6 @@ func buildCommands() *cobra.Command {
 			Commands: []*cobra.Command{
 				addCmd,
 				autocompleteCmd,
-				cleanCmd,
 				createCmd,
 				deleteCmd,
 				initCmd,

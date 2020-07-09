@@ -39,8 +39,6 @@ var (
 		{Parent: "root_create", Usage: "formula"},
 		{Parent: "root", Usage: "update"},
 		{Parent: "root_update", Usage: "repo"},
-		{Parent: "root", Usage: "clean"},
-		{Parent: "root_clean", Usage: "repo"},
 		{Parent: "root", Usage: "build"},
 		{Parent: "root_build", Usage: "formula"},
 		{Parent: "root", Usage: "upgrade"},
@@ -61,11 +59,12 @@ var (
 
 // Command type
 type Command struct {
-	Parent  string  `json:"parent"`
-	Usage   string  `json:"usage"`
-	Help    string  `json:"help"`
+	Id      string   `json:"id"`
+	Parent  string   `json:"parent"`
+	Usage   string   `json:"usage"`
+	Help    string   `json:"help"`
 	Formula *Formula `json:"formula,omitempty"`
-	Repo    string  `json:"Repo,omitempty"`
+	Repo    string   `json:"Repo,omitempty"`
 }
 
 type Commands []Command

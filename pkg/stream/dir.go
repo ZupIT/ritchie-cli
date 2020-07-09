@@ -35,6 +35,13 @@ type DirCreateListCopier interface {
 	DirCopier
 }
 
+type DirCreateListCopyRemover interface {
+	DirCreater
+	DirLister
+	DirCopier
+	DirRemover
+}
+
 type DirListChecker interface {
 	DirLister
 	DirChecker

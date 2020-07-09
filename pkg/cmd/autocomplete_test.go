@@ -41,3 +41,29 @@ func TestNewAutocompleteBash(t *testing.T) {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
 }
+
+func TestNewAutocompleteFish(t *testing.T) {
+	mock := autocompleteGenMock{}
+	cmd := NewAutocompleteFish(mock)
+	if cmd == nil {
+		t.Errorf("NewAutocompleteFish got %v", cmd)
+
+	}
+
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+}
+
+func TestNewAutocompletePowerShell(t *testing.T) {
+	mock := autocompleteGenMock{}
+	cmd := NewAutocompletePowerShell(mock)
+	if cmd == nil {
+		t.Errorf("NewAutocompletePowerShell got %v", cmd)
+
+	}
+
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+}

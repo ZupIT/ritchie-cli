@@ -1,47 +1,56 @@
 package formula
 
-type Repository struct {
-	Priority int    `json:"priority"`
+type Tag struct {
+	Name   string `json:"name"`
+	ZipUrl string `json:"zipball_url"`
+}
+
+type Tags map[string]string
+
+type Repo struct {
 	Name     string `json:"name"`
-	TreePath string `json:"treePath"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	ZipUrl   string `json:"zipUrl"`
+	Version  string `json:"version"`
+	Token    string `json:"token,omitempty"`
+	Priority int    `json:"priority"`
 }
 
-type RepositoryFile struct {
-	Values []Repository `json:"repositories,omitempty"`
+type Repos []Repo
+
+func (r Repos) Len() int {
+	return len(r)
 }
 
-type RepoAdder interface {
-	Add(d Repository) error
+func (r Repos) Less(i, j int) bool {
+	return r[i].Priority < r[j].Priority
 }
 
-type RepoLister interface {
-	List() ([]Repository, error)
+func (r Repos) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
 }
 
-type RepoUpdater interface {
+type RepositoryAdder interface {
+	Add(d Repo) error
+}
+
+type RepositoryLister interface {
+	List() (Repos, error)
+}
+
+type RepositoryUpdater interface {
 	Update() error
 }
 
-type RepoDeleter interface {
+type RepositoryDeleter interface {
 	Delete(name string) error
 }
 
-type RepoCleaner interface {
-	Clean(name string) error
+type RepositoryAddLister interface {
+	RepositoryAdder
+	RepositoryLister
 }
 
-type RepoLoader interface {
-	Load() error
-}
-
-type RepoAddLister interface {
-	RepoAdder
-	RepoLister
-}
-
-type RepoDelLister interface {
-	RepoDeleter
-	RepoLister
+type RepositoryDelLister interface {
+	RepositoryDeleter
+	RepositoryLister
 }
