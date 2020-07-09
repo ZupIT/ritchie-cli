@@ -308,13 +308,13 @@ func TestCreatorFail(t *testing.T) {
 
 	creatorMock := genericFileCreatorMock{ createErr: errors.New("error while creating language") }
 	creator := NewCreator(treeMan, dirManager, fileManager)
-	for _, tt := range tests {
-		t.Run(tt, func(t *testing.T) {
+	for _, language := range tests {
+		t.Run(language, func(t *testing.T) {
 			expected := errors.New("error while creating language")
 			formulaPath := path.Join(fullDir, "/scaffold/generate/test_fail")
-			got := creator.createSrcFiles(formulaPath, "test_fail", tt, creatorMock)
+			got := creator.createSrcFiles(formulaPath, "test_fail", language, creatorMock)
 			if got == nil || got.Error() != expected.Error() {
-				t.Errorf("Create Formula Fail(%s) got %v, want %v", tt, got, expected)
+				t.Errorf("Create Formula Fail(%s) got %v, want %v", language, got, expected)
 			}
 		})
 	}
