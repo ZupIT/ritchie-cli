@@ -3,6 +3,7 @@ package repo
 import (
 	"encoding/json"
 	"path"
+	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -22,9 +23,9 @@ func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister, dir str
 	}
 }
 
-func (sm SetPriorityManager) SetPriority(repo formula.Repo, priority int) error {
-	var repos formula.RepoFile
-	repoPath := path.Join(sm.ritHome, repositoriesPath)
+func (sm SetPriorityManager) SetPriority(repoName string, priority int) error {
+	var repos formula.Repos
+	repoPath := path.Join(sm.ritHome, reposDirName, reposFileName)
 	if sm.file.Exists(repoPath) {
 		read, err := sm.file.Read(repoPath)
 		if err != nil {
@@ -36,14 +37,17 @@ func (sm SetPriorityManager) SetPriority(repo formula.Repo, priority int) error 
 		}
 	}
 
-	for idx, r := range repos.Values {
-		if r.Name == repo.Name {
-			repos.Values[idx].Priority = priority
-			break
+	for i, _ := range repos {
+		if repoName == repos[i].Name {
+			repos[i].Priority = priority
+		} else if repos[i].Priority >= priority {
+			repos[i].Priority++
 		}
 	}
 
-	bytes, err := json.Marshal(repos)
+	sort.Sort(repos)
+
+	bytes, err := json.MarshalIndent(repos, "", "\t")
 	if err != nil {
 		return err
 	}

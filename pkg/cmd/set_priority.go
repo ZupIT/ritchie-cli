@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	newRepositoryPriority = "Now '%s' has priority %s"
+	newRepositoryPriority = "Now \"%s\" repository has priority %s"
 )
 
 type SetPriorityCmd struct {
@@ -39,12 +39,17 @@ func (s SetPriorityCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
+		if len(repositories) == 0 {
+			prompt.Warning("You should add a repository first\nYou may run `rit add repo` command")
+			return nil
+		}
+
 		var reposNames []string
 		for _, r := range repositories {
 			reposNames = append(reposNames, r.Name)
 		}
 
-		repoName, err := s.InputList.List("Repository list:", reposNames)
+		repoName, err := s.InputList.List("Repository:", reposNames)
 		if err != nil {
 			return err
 		}
@@ -62,7 +67,7 @@ func (s SetPriorityCmd) runFunc() CommandRunnerFunc {
 			}
 		}
 
-		err = s.SetPriority(repo, int(priority))
+		err = s.SetPriority(repo.Name, int(priority))
 		if err != nil {
 			return err
 		}
