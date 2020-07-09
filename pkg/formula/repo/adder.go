@@ -145,7 +145,7 @@ func (ad AddManager) downloadRepo(repo formula.Repo) error {
 }
 
 func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
-	bytes, err := json.Marshal(repos)
+	bytes, err := json.MarshalIndent(repos, "", "\t")
 	if err != nil {
 		return err
 	}

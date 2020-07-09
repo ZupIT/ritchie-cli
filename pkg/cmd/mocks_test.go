@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"errors"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
@@ -18,6 +20,10 @@ func (inputTextMock) Text(name string, required bool, helper ...string) (string,
 	return "mocked text", nil
 }
 
+func (inputTextMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return "mocked text", nil
+}
+
 type inputTextValidatorMock struct{}
 
 func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
@@ -30,6 +36,10 @@ func (inputSecretMock) Text(name string, required bool, helper ...string) (strin
 	return "username=ritchie", nil
 }
 
+func (inputSecretMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return "mocked text", nil
+}
+
 type inputURLMock struct{}
 
 func (inputURLMock) URL(name, defaultValue string) (string, error) {
@@ -40,6 +50,12 @@ type inputIntMock struct{}
 
 func (inputIntMock) Int(name string) (int64, error) {
 	return 0, nil
+}
+
+type inputIntErrorMock struct{}
+
+func (inputIntErrorMock) Int(name string) (int64, error) {
+	return 0, errors.New("some error")
 }
 
 type inputPasswordMock struct{}
@@ -72,10 +88,25 @@ func (inputListMock) List(name string, items []string) (string, error) {
 	return "item-mocked", nil
 }
 
+type inputListCustomMock struct{
+	name string
+}
+
+func (m inputListCustomMock) List(name string, items []string) (string, error) {
+	return m.name, nil
+}
+
+
 type inputListCredMock struct{}
 
 func (inputListCredMock) List(name string, items []string) (string, error) {
 	return "me", nil
+}
+
+type inputListErrorMock struct{}
+
+func (inputListErrorMock) List(name string, items []string) (string, error) {
+	return "item-mocked", errors.New("some error")
 }
 
 type repoAdder struct{}
@@ -159,8 +190,39 @@ func (repoDeleterMock) Delete(name string) error {
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (repoListerMock) List() ([]formula.Repo, error) {
+	return []formula.Repo{}, nil
+}
+
+type repoListerNonEmptyMock struct{}
+
+func (repoListerNonEmptyMock) List() ([]formula.Repo, error) {
+	return []formula.Repo{
+		{
+			Name: "repoName",
+			Priority: 0,
+		},
+	}, nil
+}
+
+type repoListerErrorMock struct{}
+
+func (repoListerErrorMock) List() ([]formula.Repo, error) {
+	return []formula.Repo{}, errors.New("some error")
+}
+
+type repoPrioritySetterMock struct {}
+
+func (repoPrioritySetterMock) SetPriority(repo formula.Repo, priority int) error {
+	return nil
+}
+
+type repoPrioritySetterCustomMock struct {
+	setPriority func(repo formula.Repo, priority int) error
+}
+
+func (m repoPrioritySetterCustomMock) SetPriority(repo formula.Repo, priority int) error {
+	return m.setPriority(repo, priority)
 }
 
 type repoLoaderMock struct{}
@@ -332,8 +394,7 @@ type InputMultilineMock struct{}
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
 }
-
-type otpResolverMock struct{}
+type otpResolverMock struct {}
 
 func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
 	return otp.Response{Otp: true}, nil

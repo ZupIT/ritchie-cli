@@ -78,6 +78,7 @@ func buildCommands() *cobra.Command {
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 	repoAdder := repo.NewAdder(ritchieHomeDir, http.DefaultClient, treeGen, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
+	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
@@ -155,6 +156,7 @@ func buildCommands() *cobra.Command {
 	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, serverFinder, otpResolver)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
+	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
@@ -185,7 +187,7 @@ func buildCommands() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteCtxCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
+	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
 	showCmd.AddCommand(showCtxCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
 
