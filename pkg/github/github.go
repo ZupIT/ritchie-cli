@@ -1,0 +1,61 @@
+package github
+
+import (
+	"fmt"
+	"io"
+	"strings"
+)
+
+const (
+	ZipUrlPattern  = "https://api.github.com/repos/%s/%s/zipball/%s"
+	TagsUrlPattern = "https://api.github.com/repos/%s/%s/tags"
+)
+
+type Tag struct {
+	Name string `json:"name"`
+}
+
+type Tags []Tag
+
+type RepoInfo struct {
+	Owner string
+	Repo  string
+	Token string
+}
+
+type Repositories interface {
+	Zipball(info RepoInfo, version string) (io.ReadCloser, error)
+	Tags(info RepoInfo) (Tags, error)
+}
+
+// NewRepoInfo returns the RepoInfo built by repository url
+// Repository url e.g. https://github.com/{{owner}}/{{repo}}
+func NewRepoInfo(url string, token string) RepoInfo {
+	split := strings.Split(url, "/")
+	repo := split[len(split)-1]
+	owner := split[len(split)-2]
+
+	return RepoInfo{
+		Owner: owner,
+		Repo:  repo,
+		Token: token,
+	}
+}
+
+// ZipUrl returns the GitHub API URL for download zipball repository
+// e.g. https://api.github.com/repos/{{owner}}/{{repo}}/zipball/{{tag-version}}
+func (in RepoInfo) ZipUrl(version string) string {
+	return fmt.Sprintf(ZipUrlPattern, in.Owner, in.Repo, version)
+}
+
+// TagsUrl returns the GitHub API URL for get all tags
+// e.g. https://api.github.com/repos/{{owner}}/{{repo}}/tags
+func (in RepoInfo) TagsUrl() string {
+	return fmt.Sprintf(TagsUrlPattern, in.Owner, in.Repo)
+}
+
+// TokenHeader returns the Authorization value formatted for Github API integration
+// e.g. "token f39c5aca-858f-4a04-9ca3-5104d02b9c56"
+func (in RepoInfo) TokenHeader() string {
+	return fmt.Sprintf("token %s", in.Token)
+}

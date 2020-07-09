@@ -13,7 +13,7 @@ const (
 	root        = "root"
 	rootPattern = "root_%s"
 	helpFile    = "help.txt"
-	configFile	= "config.json"
+	configFile  = "config.json"
 )
 
 type GeneratorManager struct {
@@ -88,15 +88,14 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 		}
 
 		cmd := api.Command{
-			Id:      fmt.Sprintf("%s_%s", cmd.Id, dir),
-			Parent:  cmd.Id,
-			Usage:   dir,
-			Help:    string(helpFile),
+			Id:     fmt.Sprintf("%s_%s", cmd.Id, dir),
+			Parent: cmd.Id,
+			Usage:  dir,
+			Help:   string(helpFile),
 		}
 
 		configFilePath := path.Join(formulaPath, configFile)
-
-		if ge.file.Exists(configFilePath) { // Check if help.txt exist
+		if ge.file.Exists(configFilePath) { // Case config.json exists, set cmd.Formula as true
 			cmd.Formula = true
 		}
 

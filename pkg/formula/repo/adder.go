@@ -3,12 +3,11 @@ package repo
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"path"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -20,7 +19,7 @@ const (
 
 type AddManager struct {
 	ritHome string
-	client  *http.Client
+	github  github.Repositories
 	tree    formula.TreeGenerator
 	dir     stream.DirCreateListCopyRemover
 	file    stream.FileWriteCreatorReadExistRemover
@@ -28,14 +27,14 @@ type AddManager struct {
 
 func NewAdder(
 	ritHome string,
-	client *http.Client,
+	github github.Repositories,
 	tree formula.TreeGenerator,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileWriteCreatorReadExistRemover,
 ) AddManager {
 	return AddManager{
 		ritHome: ritHome,
-		client:  client,
+		github:  github,
 		tree:    tree,
 		dir:     dir,
 		file:    file,
@@ -87,23 +86,13 @@ func (ad AddManager) Add(repo formula.Repo) error {
 }
 
 func (ad AddManager) downloadRepo(repo formula.Repo) error {
-	req, err := http.NewRequest(http.MethodGet, repo.ZipUrl, nil)
+	repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+	zipball, err := ad.github.Zipball(repoInfo, repo.Version)
 	if err != nil {
 		return err
 	}
 
-	if repo.Token != "" {
-		authToken := fmt.Sprintf("token %s", repo.Token)
-		req.Header.Add(headers.Authorization, authToken)
-	}
-
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	resp, err := ad.client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
+	defer zipball.Close()
 
 	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name)
 	if err := ad.dir.Remove(newRepoPath); err != nil {
@@ -115,7 +104,7 @@ func (ad AddManager) downloadRepo(repo formula.Repo) error {
 	}
 
 	zipFile := path.Join(newRepoPath, fmt.Sprintf("%s.zip", repo.Name))
-	if err := ad.file.Create(zipFile, resp.Body); err != nil {
+	if err := ad.file.Create(zipFile, zipball); err != nil {
 		return err
 	}
 
@@ -163,7 +152,20 @@ func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
 }
 
 func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
-	repos = append(repos, repo)
+	exist := func() bool {
+		for i := range repos {
+			r := repos[i]
+			if repo.Name == r.Name {
+				repos[i].Priority = repo.Priority
+				return true
+			}
+		}
+		return false
+	}
+
+	if !exist() {
+		repos = append(repos, repo)
+	}
 
 	for i := range repos {
 		r := repos[i]

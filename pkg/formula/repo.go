@@ -1,15 +1,8 @@
 package formula
 
-type Tag struct {
-	Name   string `json:"name"`
-	ZipUrl string `json:"zipball_url"`
-}
-
-type Tags map[string]string
-
 type Repo struct {
 	Name     string `json:"name"`
-	ZipUrl   string `json:"zipUrl"`
+	Url      string `json:"url"`
 	Version  string `json:"version"`
 	Token    string `json:"token,omitempty"`
 	Priority int    `json:"priority"`

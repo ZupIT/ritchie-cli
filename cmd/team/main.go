@@ -15,6 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"k8s.io/kubectl/pkg/util/templates"
@@ -75,9 +76,11 @@ func buildCommands() *cobra.Command {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
+	gitRepo := github.NewRepoManager(http.DefaultClient)
 	treeGen := tree.NewGenerator(dirManager, fileManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, http.DefaultClient, treeGen, dirManager, fileManager)
+	repoAdder := repo.NewAdder(ritchieHomeDir, gitRepo, treeGen, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
+	repoAddLister := repo.NewAddLister(repoAdder, repoLister)
 	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
 	sessionManager := session.NewManager(ritchieHomeDir)
@@ -174,7 +177,8 @@ func buildCommands() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoAddLister, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
@@ -185,6 +189,7 @@ func buildCommands() *cobra.Command {
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
+	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteCtxCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)

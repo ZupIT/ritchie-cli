@@ -1,25 +1,22 @@
 package cmd
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
+	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 type AddRepoCmd struct {
 	client *http.Client
-	repo   formula.RepositoryAdder
+	repo   formula.RepositoryAddLister
+	github github.Repositories
 	prompt.InputText
 	prompt.InputPassword
 	prompt.InputURL
@@ -29,8 +26,8 @@ type AddRepoCmd struct {
 }
 
 func NewAddRepoCmd(
-	client *http.Client,
-	repo formula.RepositoryAdder,
+	repo formula.RepositoryAddLister,
+	github github.Repositories,
 	inText prompt.InputText,
 	inPass prompt.InputPassword,
 	inUrl prompt.InputURL,
@@ -39,8 +36,8 @@ func NewAddRepoCmd(
 	inInt prompt.InputInt,
 ) *cobra.Command {
 	addRepo := AddRepoCmd{
-		client:        client,
 		repo:          repo,
+		github:        github,
 		InputText:     inText,
 		InputURL:      inUrl,
 		InputList:     inList,
@@ -59,49 +56,65 @@ func NewAddRepoCmd(
 	return cmd
 }
 
-func (a AddRepoCmd) runPrompt() CommandRunnerFunc {
+func (ad AddRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		name, err := a.Text("Repository name: ", true)
+		name, err := ad.Text("Repository name: ", true)
 		if err != nil {
 			return err
 		}
 
-		isPrivate, err := a.Bool("Is a private repository? ", []string{"no", "yes"})
+		repos, err := ad.repo.List()
+		if err != nil {
+			return err
+		}
+
+		for i := range repos {
+			repo := repos[i]
+			if repo.Name == name {
+				prompt.Warning(fmt.Sprintf("Your repository %q is gonna be overwritten.", repo.Name))
+				choice, _ := ad.Bool("Want to proceed?", []string{"yes", "no"})
+				if !choice {
+					prompt.Info("Operation cancelled")
+					return nil
+				}
+			}
+		}
+
+		isPrivate, err := ad.Bool("Is a private repository? ", []string{"no", "yes"})
 		if err != nil {
 			return err
 		}
 
 		var token string
 		if isPrivate {
-			token, err = a.Password("Personal access tokens: ")
+			token, err = ad.Password("Personal access tokens: ")
 			if err != nil {
 				return err
 			}
 		}
 
-		url, err := a.URL("Repository URL: ", "https://github.com/kaduartur/ritchie-formulas")
+		url, err := ad.URL("Repository URL: ", "https://github.com/kaduartur/ritchie-formulas")
 		if err != nil {
 			return err
 		}
 
-		tags, err := a.tags(url, token)
+		gitRepoInfo := github.NewRepoInfo(url, token)
+		tags, err := ad.github.Tags(gitRepoInfo)
 		if err != nil {
 			return err
 		}
 
 		var tagNames []string
-		for k := range tags {
-			tagNames = append(tagNames, k)
+		for i := range tags {
+			tagNames = append(tagNames, tags[i].Name)
 		}
 
-		version, err := a.List("Select a tag version: ", tagNames)
+		version, err := ad.List("Select a tag version: ", tagNames)
 		if err != nil {
 			return err
 		}
 
-		zipUrl := tags[version]
-
-		priority, err := a.Int("Set the priority [ps.: 0 is higher priority, the lower higher the priority] :")
+		priority, err := ad.Int("Set the priority [ps.: 0 is higher priority, the lower higher the priority] :")
 		if err != nil {
 			return err
 		}
@@ -109,12 +122,12 @@ func (a AddRepoCmd) runPrompt() CommandRunnerFunc {
 		repository := formula.Repo{
 			Name:     name,
 			Token:    token,
-			ZipUrl:   zipUrl,
+			Url:      url,
 			Version:  version,
 			Priority: int(priority),
 		}
 
-		if err := a.repo.Add(repository); err != nil {
+		if err := ad.repo.Add(repository); err != nil {
 			return err
 		}
 
@@ -124,7 +137,7 @@ func (a AddRepoCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (a AddRepoCmd) runStdin() CommandRunnerFunc {
+func (ad AddRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
 		r := formula.Repo{}
@@ -135,7 +148,7 @@ func (a AddRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err := a.repo.Add(r); err != nil {
+		if err := ad.repo.Add(r); err != nil {
 			return err
 		}
 
@@ -143,57 +156,4 @@ func (a AddRepoCmd) runStdin() CommandRunnerFunc {
 		prompt.Success(successMsg)
 		return nil
 	}
-}
-
-func (a AddRepoCmd) tags(url string, token string) (formula.Tags, error) {
-	apiUrl, err := tagsUrl(url)
-	if err != nil {
-		return formula.Tags{}, err
-	}
-
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
-	if err != nil {
-		return formula.Tags{}, err
-	}
-
-	if token != "" {
-		authToken := fmt.Sprintf("token %s", token)
-		req.Header.Add(headers.Authorization, authToken)
-	}
-
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	resp, err := a.client.Do(req)
-	if err != nil {
-		return formula.Tags{}, err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		b, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return formula.Tags{}, err
-		}
-		return formula.Tags{}, errors.New(string(b))
-	}
-
-	var tags []formula.Tag
-	if err := json.NewDecoder(resp.Body).Decode(&tags); err != nil {
-		return formula.Tags{}, err
-	}
-
-	tagsUrl := make(formula.Tags)
-	for _, tag := range tags {
-		tagsUrl[tag.Name] = tag.ZipUrl
-	}
-
-	return tagsUrl, nil
-}
-
-func tagsUrl(url string) (string, error) {
-	split := strings.Split(url, "/")
-	repo := split[len(split)-1]
-	owner := split[len(split)-2]
-
-	return fmt.Sprintf("https://api.github.com/repos/%s/%s/tags", owner, repo), nil
 }
