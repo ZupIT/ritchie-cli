@@ -45,7 +45,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
-				Finder: findSetterServerMock{},
+				Finder:        findSetterServerMock{},
 				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
@@ -57,8 +57,8 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 				Loader:        repoLoaderMock{},
 				InputText:     inputTextMock{},
 				InputPassword: inputPasswordMock{},
-				Finder: findSetterServerMock{},
-				Resolver:      otpResolverCustomMock{
+				Finder:        findSetterServerMock{},
+				Resolver: otpResolverCustomMock{
 					requestOtp: func(url, organization string) (otp.Response, error) {
 						return otp.Response{}, errors.New("some error")
 					},
@@ -78,7 +78,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, nil
 					},
 				},
-				Resolver:      otpResolverMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -94,7 +94,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, errors.New("some error")
 					},
 				},
-				Resolver:      otpResolverMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -133,8 +133,8 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						}
 					},
 				},
-				Finder: findSetterServerMock{},
-				Resolver:      otpResolverMock{},
+				Finder:   findSetterServerMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},
@@ -158,7 +158,7 @@ func Test_loginCmd_runPrompt(t *testing.T) {
 						return server.Config{}, nil
 					},
 				},
-				Resolver:      otpResolverMock{},
+				Resolver: otpResolverMock{},
 			},
 			wantErr: true,
 		},

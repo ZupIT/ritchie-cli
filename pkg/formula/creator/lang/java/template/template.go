@@ -3,7 +3,9 @@ package template
 const (
 	StartFile = "Main"
 
-	Main = `import {{bin-name}}.{{bin-name-first-upper}};
+	Main = `package com.ritchie.formula;
+
+import com.ritchie.formula.{{bin-name}}.{{bin-name-first-upper}};
 
 public class Main {
 
@@ -17,11 +19,19 @@ public class Main {
 }`
 
 	Dockerfile = `
+FROM maven:3.6.3-jdk-8 AS builder
+
+ADD . /app
+WORKDIR /app
+RUN mvn clean install
+
+
 FROM alpine:latest
 USER root
 
-COPY . .
-    
+COPY --from=builder /app/target/Main.jar Main.jar
+COPY --from=builder /app/set_umask.sh set_umask.sh
+
 RUN apk update
 RUN apk fetch openjdk8
 RUN apk add openjdk8
@@ -35,13 +45,9 @@ WORKDIR /app
 
 ENTRYPOINT ["../set_umask.sh"]
 
-
 CMD ["java -jar ../Main.jar"]`
 
-	Run = `#!/bin/sh
-java -jar Main.jar`
-
-	File = `package {{bin-name}};
+	File = `package com.ritchie.formula.{{bin-name}};
 
 public class {{bin-name-first-upper}} {
 
@@ -87,22 +93,29 @@ public class {{bin-name-first-upper}} {
     }
 }`
 
-	Makefile = `# Java Parameters
-BINARY_NAME_UNIX={{bin-name}}.sh
-BINARY_NAME_WINDOWS={{bin-name}}.bat
-DIST=../dist
-DIST_DIR=$(DIST)/commons/bin
+	Makefile = `# Build parameters
+BIN_FOLDER=../bin
+SH=$(BIN_FOLDER)/run.sh
+BAT=$(BIN_FOLDER)/run.bat
+JAR_NAME=Main.jar
 
-build:
-	mkdir -p $(DIST_DIR)
-	javac -source 1.8 -target 1.8 *.java
-	echo "Main-Class: Main" > manifest.txt
-	jar cvfm Main.jar manifest.txt *.class {{bin-name}}/*.class
-	cp run_template $(BINARY_NAME_UNIX) && chmod +x $(BINARY_NAME_UNIX)
-	sed '1d' run_template > $(BINARY_NAME_WINDOWS) && chmod +x $(BINARY_NAME_WINDOWS)
-	cp Main.jar $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX) Dockerfile set_umask.sh $(DIST_DIR)
+build: mvn-build sh-unix bat-windows
+
+mvn-build:
+	mkdir -p $(BIN_FOLDER)
+	mvn clean install
+	cp target/$(JAR_NAME) $(BIN_FOLDER)/$(JAR_NAME)
 	#Clean files
-	rm Main.jar manifest.txt *.class {{bin-name}}/*.class $(BINARY_NAME_WINDOWS) $(BINARY_NAME_UNIX)`
+	rm -Rf target
+
+sh-unix:
+	echo '#!/bin/sh' > $(SH)
+	echo 'java -jar $(JAR_NAME)' >> $(SH)
+	chmod +x $(SH)
+
+bat-windows:
+	echo '@ECHO OFF' > $(BAT)
+	echo 'java -jar $(JAR_NAME)' >> $(BAT)`
 
 	WindowsBuild = `:: Java parameters
 echo off
@@ -122,4 +135,51 @@ SET DIST_DIR=%DIST%\commons\bin
     erase Main.jar manifest.txt *.class {{bin-name}}\*.class %BINARY_NAME_WINDOWS% %BINARY_NAME_UNIX%
     GOTO DONE
 :DONE`
+	Pom = `
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.ritchie.formula</groupId>
+    <artifactId>#rit{{artifactId}}</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+    </properties>
+
+    <build>
+        <finalName>Main</finalName>
+        <plugins>
+            <plugin>
+                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- <addClasspath>true</addClasspath> -->
+                            <mainClass>com.ritchie.formula.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
+`
 )

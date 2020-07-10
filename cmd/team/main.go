@@ -127,7 +127,7 @@ func buildCommands() *cobra.Command {
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
-	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager)
+	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager, treeGen)
 	watchManager := watcher.New(formulaBuilder, dirManager)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaBuilder)
 
@@ -164,7 +164,6 @@ func buildCommands() *cobra.Command {
 	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, serverFinder, otpResolver)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
-	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
@@ -184,6 +183,8 @@ func buildCommands() *cobra.Command {
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
@@ -197,6 +198,7 @@ func buildCommands() *cobra.Command {
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteCtxCmd)
+	listCmd.AddCommand(listRepoCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
 	showCmd.AddCommand(showCtxCmd)
 	buildCmd.AddCommand(buildFormulaCmd)

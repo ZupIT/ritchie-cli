@@ -1,7 +1,6 @@
 package template
 
 const (
-
 	StartFile = "main"
 
 	GoMod = `module {{nameModule}}
@@ -30,28 +29,47 @@ func main() {
 }`
 
 	Makefile = `# Go parameters
-BINARY_NAME={{name}}
+BIN_FOLDER=../bin
+SH=$(BIN_FOLDER)/run.sh
+BAT=$(BIN_FOLDER)/run.bat
+BIN_NAME=main
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOTEST=$(GOCMD) test
 CMD_PATH=./main.go
-DIST=../dist
-DIST_MAC_DIR=$(DIST)/darwin/bin
-BIN_MAC=$(BINARY_NAME)-darwin
-DIST_LINUX_DIR=$(DIST)/linux/bin
-BIN_LINUX=$(BINARY_NAME)-linux
-DIST_WIN_DIR=$(DIST)/windows/bin
-BIN_WIN=$(BINARY_NAME)-windows.exe
+BIN_FOLDER_DARWIN=$(BIN_FOLDER)/darwin
+BIN_DARWIN=$(BIN_FOLDER_DARWIN)/$(BIN_NAME)
+BIN_FOLDER_LINUX=$(BIN_FOLDER)/linux
+BIN_LINUX=$(BIN_FOLDER_LINUX)/$(BIN_NAME)
+BIN_FOLDER_WINDOWS=$(BIN_FOLDER)/windows
+BIN_WINDOWS=$(BIN_FOLDER_WINDOWS)/$(BIN_NAME).exe
 
-build:
-	mkdir -p $(DIST_MAC_DIR) $(DIST_LINUX_DIR) $(DIST_WIN_DIR)
+
+build: go-build sh-unix bat-windows
+
+go-build:
+	mkdir -p $(BIN_FOLDER_DARWIN) $(BIN_FOLDER_LINUX) $(BIN_FOLDER_WINDOWS)
 	export MODULE=$(GO111MODULE=on go list -m)
 	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -tags release -o '$(DIST_LINUX_DIR)/$(BIN_LINUX)' $(CMD_PATH) && cp -r . $(DIST_LINUX_DIR)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o '$(BIN_LINUX)' -v $(CMD_PATH)
 	#MAC
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -tags release -o '$(DIST_MAC_DIR)/$(BIN_MAC)' $(CMD_PATH) && cp -r . $(DIST_MAC_DIR)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o '$(BIN_DARWIN)' -v $(CMD_PATH)
 	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -tags release -o '$(DIST_WIN_DIR)/$(BIN_WIN)' $(CMD_PATH) && cp -r . $(DIST_WIN_DIR)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o '$(BIN_WINDOWS)' -v $(CMD_PATH)
+
+sh-unix:
+	echo '#!/bin/sh' > $(SH)
+	echo 'if [ $$(uname) = "Darwin" ]; then' >> $(SH)
+	echo '  ./darwin/$(BIN_NAME)' >> $(SH)
+	echo 'else' >> $(SH)
+	echo '  ./linux/$(BIN_NAME)' >> $(SH)
+	echo 'fi' >> $(SH)
+	chmod +x $(SH)
+
+bat-windows:
+	echo '@ECHO OFF' > $(BAT)
+	echo 'cd windows' >> $(BAT)
+	echo 'start $(BIN_NAME).exe' >> $(BAT)
 
 test:
 	$(GOTEST) -short ` + "`go list ./... | grep -v vendor/`"
