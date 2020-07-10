@@ -16,12 +16,10 @@ type Python struct {
 }
 
 func New(
-	c formula.Creator,
 	createGenericFiles func(srcDir, pkg, dir string, l formula.Lang) error,
 ) Python {
 	return Python{
 		Lang: formula.Lang{
-			Creator:      c,
 			FileFormat:   fileextensions.Python,
 			StartFile:    template.StartFile,
 			Main:         template.Main,
