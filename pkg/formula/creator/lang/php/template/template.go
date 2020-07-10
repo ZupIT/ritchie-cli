@@ -1,7 +1,6 @@
 package template
 
 const (
-
 	StartFile = "index"
 
 	Index = `<?php
@@ -18,7 +17,7 @@ Run($input1, $input2, $input3);
 `
 
 	Dockerfile = `
-FROM php:latest
+FROM php:7.4.8
 
 COPY . .
 

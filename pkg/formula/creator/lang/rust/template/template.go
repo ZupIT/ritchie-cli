@@ -51,17 +51,20 @@ edition = "2018"
 [dependencies]`
 
 	Dockerfile = `
-FROM rust:latest
-WORKDIR /app
+FROM rust:1.44.1
 
 COPY . .
-
+	
 RUN chmod +x set_umask.sh
-
+	
 RUN cargo install --path .
-
+RUN cargo build
+	
 ENTRYPOINT ["/set_umask.sh"]
-CMD ["app"]
+	
+CMD ["/target/debug/rust"]
+	
+WORKDIR /app
 `
 
 	Makefile = `# Make Run Rust
