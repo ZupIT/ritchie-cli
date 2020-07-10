@@ -24,7 +24,7 @@ func NewDockerPreRunner(setuper formula.Setuper) DockerPreRunner {
 }
 
 func (d DockerPreRunner) PreRun(def formula.Definition) (formula.Setup, error) {
-	setup, err := d.sDefault.Setup(def) //TODO: Definir o setup para docker
+	setup, err := d.sDefault.Setup(def)
 	if err != nil {
 		return formula.Setup{}, err
 	}
@@ -63,7 +63,7 @@ func validate(tmpBinDir string) error {
 }
 
 func buildImg(containerId string) error {
-	fmt.Println("Building docker image...")
+	prompt.Info("Building docker image to run...")
 	args := []string{dockerBuildCmd, "-t", containerId, "."}
 	cmd := exec.Command(docker, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
@@ -76,6 +76,6 @@ func buildImg(containerId string) error {
 		return err
 	}
 
-	fmt.Println("Docker image was built :)")
+	prompt.Success("Docker image was built :)")
 	return nil
 }
