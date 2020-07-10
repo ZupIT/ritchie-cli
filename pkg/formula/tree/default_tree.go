@@ -46,7 +46,7 @@ func (d Manager) Tree() (map[string]formula.Tree, error) {
 		if err != nil {
 			return nil, err
 		}
-		trees[v.Name] = treeRepo
+		trees[v.Name.String()] = treeRepo
 	}
 
 	return trees, nil
@@ -87,7 +87,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		for _, c := range treeRepo.Commands {
 			key := c.Parent + "_" + c.Usage
 			if trees[key].Usage == "" {
-				c.Repo = r.Name
+				c.Repo = r.Name.String()
 				trees[key] = c
 				cc = append(cc, c)
 			}
@@ -103,7 +103,7 @@ func (d Manager) localTree() (formula.Tree, error) {
 	return loadTree(treeCmdFile)
 }
 
-func (d Manager) treeByRepo(repoName string) (formula.Tree, error) {
+func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repoName)
 	return loadTree(treeCmdFile)
 }

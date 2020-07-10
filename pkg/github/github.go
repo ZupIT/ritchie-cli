@@ -17,6 +17,15 @@ type Tag struct {
 
 type Tags []Tag
 
+func (t Tags) Names() []string {
+	var tags []string
+	for i := range t {
+		tags = append(tags, t[i].Name)
+	}
+
+	return tags
+}
+
 type RepoInfo struct {
 	Owner string
 	Repo  string

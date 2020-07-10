@@ -26,7 +26,6 @@ func NewGenerator(dir stream.DirLister, file stream.FileReadExister) GeneratorMa
 }
 
 func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
-
 	dirs, err := ge.dir.List(repoPath, false)
 	if err != nil {
 		return formula.Tree{}, err

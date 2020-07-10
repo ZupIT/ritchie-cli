@@ -78,9 +78,14 @@ func buildCommands() *cobra.Command {
 
 	gitRepo := github.NewRepoManager(http.DefaultClient)
 	treeGen := tree.NewGenerator(dirManager, fileManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, gitRepo, treeGen, dirManager, fileManager)
+
+	repoCreator := repo.NewCreator(ritchieHomeDir, gitRepo, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
-	repoAddLister := repo.NewAddLister(repoAdder, repoLister)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoCreator, treeGen, dirManager, fileManager)
+	repoListCreator := repo.NewListCreator(repoLister, repoCreator)
+	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListCreator, treeGen, fileManager)
+	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
+	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
 	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
 	sessionManager := session.NewManager(ritchieHomeDir)
@@ -178,7 +183,7 @@ func buildCommands() *cobra.Command {
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoAddLister, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)

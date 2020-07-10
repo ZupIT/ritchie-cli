@@ -2,14 +2,11 @@ package repo
 
 import (
 	"encoding/json"
-	"fmt"
 	"path"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 const (
@@ -19,7 +16,7 @@ const (
 
 type AddManager struct {
 	ritHome string
-	github  github.Repositories
+	repo    formula.RepositoryCreator
 	tree    formula.TreeGenerator
 	dir     stream.DirCreateListCopyRemover
 	file    stream.FileWriteCreatorReadExistRemover
@@ -27,14 +24,14 @@ type AddManager struct {
 
 func NewAdder(
 	ritHome string,
-	github github.Repositories,
+	repo formula.RepositoryCreator,
 	tree formula.TreeGenerator,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileWriteCreatorReadExistRemover,
 ) AddManager {
 	return AddManager{
 		ritHome: ritHome,
-		github:  github,
+		repo:    repo,
 		tree:    tree,
 		dir:     dir,
 		file:    file,
@@ -42,7 +39,7 @@ func NewAdder(
 }
 
 func (ad AddManager) Add(repo formula.Repo) error {
-	if err := ad.downloadRepo(repo); err != nil {
+	if err := ad.repo.Create(repo); err != nil {
 		return err
 	}
 
@@ -65,7 +62,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		return err
 	}
 
-	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name)
+	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name.String())
 
 	tree, err := ad.tree.Generate(newRepoPath)
 	if err != nil {
@@ -79,54 +76,6 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	}
 
 	if err := ad.file.Write(treeFilePath, bytes); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (ad AddManager) downloadRepo(repo formula.Repo) error {
-	repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
-	zipball, err := ad.github.Zipball(repoInfo, repo.Version)
-	if err != nil {
-		return err
-	}
-
-	defer zipball.Close()
-
-	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name)
-	if err := ad.dir.Remove(newRepoPath); err != nil {
-		return err
-	}
-
-	if err := ad.dir.Create(newRepoPath); err != nil {
-		return err
-	}
-
-	zipFile := path.Join(newRepoPath, fmt.Sprintf("%s.zip", repo.Name))
-	if err := ad.file.Create(zipFile, zipball); err != nil {
-		return err
-	}
-
-	if err := streams.Unzip(zipFile, newRepoPath); err != nil {
-		return err
-	}
-
-	if err := ad.file.Remove(zipFile); err != nil {
-		return err
-	}
-
-	dirs, err := ad.dir.List(newRepoPath, false)
-	if err != nil {
-		return err
-	}
-
-	src := path.Join(newRepoPath, dirs[0])
-	if err := ad.dir.Copy(src, newRepoPath); err != nil {
-		return err
-	}
-
-	if err := ad.dir.Remove(src); err != nil {
 		return err
 	}
 

@@ -70,7 +70,7 @@ func (ad AddRepoCmd) runPrompt() CommandRunnerFunc {
 
 		for i := range repos {
 			repo := repos[i]
-			if repo.Name == name {
+			if repo.Name == formula.RepoName(name) {
 				prompt.Warning(fmt.Sprintf("Your repository %q is gonna be overwritten.", repo.Name))
 				choice, _ := ad.Bool("Want to proceed?", []string{"yes", "no"})
 				if !choice {
@@ -109,21 +109,21 @@ func (ad AddRepoCmd) runPrompt() CommandRunnerFunc {
 			tagNames = append(tagNames, tags[i].Name)
 		}
 
-		version, err := ad.List("Select a tag version: ", tagNames)
+		version, err := ad.List("Select a tag version:", tagNames)
 		if err != nil {
 			return err
 		}
 
-		priority, err := ad.Int("Set the priority [ps.: 0 is higher priority, the lower higher the priority] :")
+		priority, err := ad.Int("Set the priority:", "0 is higher priority, the lower higher the priority")
 		if err != nil {
 			return err
 		}
 
 		repository := formula.Repo{
-			Name:     name,
+			Name:     formula.RepoName(name),
+			Version:  formula.RepoVersion(version),
 			Token:    token,
 			Url:      url,
-			Version:  version,
 			Priority: int(priority),
 		}
 

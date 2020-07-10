@@ -40,12 +40,13 @@ func (s SetPriorityCmd) runFunc() CommandRunnerFunc {
 
 		if len(repositories) == 0 {
 			prompt.Warning("You should add a repository first")
+			prompt.Info("Command: rit add repo")
 			return nil
 		}
 
 		var reposNames []string
 		for _, r := range repositories {
-			reposNames = append(reposNames, r.Name)
+			reposNames = append(reposNames, r.Name.String())
 		}
 
 		repoName, err := s.InputList.List("Repository:", reposNames)
@@ -60,7 +61,7 @@ func (s SetPriorityCmd) runFunc() CommandRunnerFunc {
 
 		var repo formula.Repo
 		for _, r := range repositories {
-			if r.Name == repoName {
+			if r.Name == formula.RepoName(repoName) {
 				repo = r
 				break
 			}
