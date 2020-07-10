@@ -9,6 +9,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -21,6 +22,7 @@ const (
 	fCmdCorrectRuby   = "rit scaffold generate test_ruby"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
 	fCmdCorrectPhp    = "rit scaffold generate test_php"
+	fCmdRepeatedPhp   = "rit scaffold generate test_php"
 	langGo            = "Go"
 	langJava          = "Java"
 	langNode          = "Node"
@@ -182,6 +184,22 @@ func TestCreator(t *testing.T) {
 			},
 			out: out{
 				err: nil,
+			},
+		},
+		{
+			name: "command duplicated-php",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdRepeatedPhp,
+					Lang:          langPhp,
+					WorkspacePath: fullDir,
+					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_php"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+			},
+			out: out{
+				err: prompt.NewError("this command already exists"),
 			},
 		},
 		{
