@@ -66,7 +66,7 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				FindSetter:    findSetterServerMock{},
 				LoginManager:  loginManagerMock{},
 				Loader:        repoLoaderMock{},
-				Resolver:      otpResolverCustomMock{
+				Resolver: otpResolverCustomMock{
 					requestOtp: func(url, organization string) (otp.Response, error) {
 						return otp.Response{}, errors.New("some error")
 					},

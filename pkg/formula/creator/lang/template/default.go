@@ -1,24 +1,6 @@
 package template
 
 const (
-	MakefileMain = `#Makefiles
-{{formName}}={{formPath}}
-FORMULAS=$({{formName}})
-
-PWD_INITIAL=$(shell pwd)
-
-FORM_TO_UPPER  = $(shell echo $(form) | tr  '[:lower:]' '[:upper:]')
-FORM = $($(FORM_TO_UPPER))
-
-build:bin
-
-bin:
-	echo "Init pwd: $(PWD_INITIAL)"
-	echo "Formulas bin: $(FORMULAS)"
-	for formula in $(FORMULAS); do cd $$formula/src && make build && cd $(PWD_INITIAL); done
-	./copy-bin-configs.sh "$(FORMULAS)"
-`
-
 	Config = `{
   "description": "Sample inputs in Ritchie.",
   "inputs" : [
@@ -48,66 +30,128 @@ bin:
     }
   ]
 }`
-
-	CopyBinConfig = `#!/bin/sh
-
-FORMULAS="$1"
-
-create_formulas_dir() {
-  mkdir -p formulas/"$formula"
-}
-
-find_config_files() {
-  files=$(find "$formula" -type f -name "*config.json")
-}
-
-copy_config_files() {
-  for file in $files; do
-    cp "$file" formulas/"$formula"
-  done
-}
-
-copy_formula_bin() {
-  cp -rf "$formula"/dist formulas/"$formula"
-}
-
-rm_formula_bin() {
-  rm -rf "$formula"/dist
-}
-
-create_formula_checksum() {
-  find "${formula}"/dist -type f -exec md5sum {} \; | sort -k 2 | md5sum | cut -f1 -d ' ' > formulas/"${formula}.md5"
-}
-` +
-		"\ncompact_formula_bin_and_remove_them() {\n" +
-		"for bin_dir in `find formulas/\"$formula\" -type d -name \"dist\"`; do\n" +
-		"for binary in `ls -1 $bin_dir`; do\n" +
-		"cd  ${bin_dir}/${binary}\n" +
-		"zip -r \"${binary}.zip\" \"bin\"\n" +
-		"mv \"${binary}\".zip ../../\n" +
-		`cd - || exit
-    done;
-    rm -rf "${bin_dir}"
-  done
-}
-
-
-init() {
-  for formula in $FORMULAS; do
-    create_formulas_dir
-    find_config_files
-    copy_config_files
-    create_formula_checksum
-    copy_formula_bin
-    rm_formula_bin
-    compact_formula_bin_and_remove_them
-  done
-}
-
-init
-`
-
 	Umask = `#!/bin/sh
 umask 0011
 $1`
+	ReadMe = `
+## {{FormulaCmd}}
+
+### command
+` + "```" + `bash
+$ rit {{FormulaCmd}}
+` + "```" + `
+
+### description
+ //TODO explain how to use this command
+`
+	Help      = `//TODO add some help msg`
+	GitIgnore = `
+# Created by https://www.gitignore.io
+
+### Go ###
+# Binaries for programs and plugins
+*.dll
+*.so
+*.dylib
+
+/bin/
+**/bin/*
+/dist/
+**/dist/*
+/test/tests.*
+/test/coverage.*
+
+# Test binary, built with " go test -c "
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+# Persistent undo
+[._]*.un~
+
+### VisualStudioCode ###
+.vscode/*
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# End of https://www.gitignore.io/api/macos
+
+# End of https://www.gitignore.io/api/macos
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
+`
+	MainReadMe = `
+[Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-formulas/blob/master/CONTRIBUTING.md)
+
+## Documentation
+
+This repository contains rit formulas which can be executed by the [ritchie-cli](https://github.com/ZupIT/ritchie-cli).
+
+- [Gitbook](https://docs.ritchiecli.io)
+
+## Build and test formulas locally
+
+` + "```" + `bash
+$ rit build formula
+` + "```" + `
+
+## Contribute to the repository with your formulas
+
+1. Fork the repository
+2. Create a branch: ` + "`" + ` git checkout -b <branch_name>` + "`" + `
+3. Check the step by step of [how to create formulas on Ritchie](https://docs.ritchiecli.io/getting-started/creating-formulas)
+4. Add your formulas to the repository and commit your implementation: ` + "`" + `git commit -m '<commit_message>'` + "`" + `
+5. Push your branch: ` + "`" + `git push origin <project_name>/<location>` + "`" + `
+6. Open a pull request on the repository for analysis.
+`
 )
