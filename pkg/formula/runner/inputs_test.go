@@ -62,7 +62,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			want: nil,
 		},
 		{
-			name: "error stdin",
+			name: "error stdin json broken",
 			in: in{
 				iText:  inputMock{text: formula.DefaultCacheNewLabel},
 				iList:  inputMock{text: "test"},

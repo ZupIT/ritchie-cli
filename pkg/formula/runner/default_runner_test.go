@@ -13,6 +13,7 @@ import (
 )
 
 var RepoUrl = os.Getenv("REPO_URL")
+const verboseFlag = "0"
 
 func TestDefaultRunner_Run(t *testing.T) {
 	def := formula.Definition{
@@ -110,7 +111,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
 			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager)
 
-			got := defaultRunner.Run(def, api.Prompt, "0")
+			got := defaultRunner.Run(def, api.Prompt, verboseFlag)
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)

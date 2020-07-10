@@ -108,7 +108,7 @@ func TestDockerRunner_Run(t *testing.T) {
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPassword)
 			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager)
 
-			got := dockerRunner.Run(def, api.Prompt, "0")
+			got := dockerRunner.Run(def, api.Prompt, verboseFlag)
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
