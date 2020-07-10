@@ -1,6 +1,7 @@
 package cryptoutil
 
 import (
+	"encoding/hex"
 	"os"
 	"testing"
 )
@@ -32,5 +33,21 @@ func TestSumHash(t *testing.T) {
 	hash := SumHash("12345678")
 	if len(hash) == 0 {
 		t.Errorf("SumHash got an empty hash")
+	}
+}
+
+func TestEncodedHash(t *testing.T) {
+	str := []byte("ritchie")
+	encoded := EncodeHash(str)
+	decoded, err := hex.DecodeString(encoded)
+
+	if err != nil {
+		t.Errorf("Encode to string failed")
+	}
+
+	for i := range str {
+		if str[i] != decoded[i] {
+			t.Errorf("Encode to string failed, got %v, want ritchie", decoded)
+		}
 	}
 }
