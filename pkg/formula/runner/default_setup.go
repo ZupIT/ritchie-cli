@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -31,7 +30,6 @@ const (
 	makeCmd                = "make"
 	buildCmd               = "build"
 	volumeDockerPattern = "%s:/app"
-	src                 = "src"
 )
 
 type DefaultSetup struct {
@@ -99,32 +97,32 @@ func (d DefaultSetup) buildFormula(formulaPath, binFilePath string, config formu
 			prompt.Info("Building formula with docker...")
 			volume := fmt.Sprintf(volumeDockerPattern, formulaPath)
 			args := []string{dockerRunCmd, "-v", volume, "--entrypoint", "/bin/sh", config.DockerIB, "-c",
-				"cd /app/src && /usr/bin/make build"}
+				"cd /app && /usr/bin/make build"}
 			cmd := exec.Command(docker, args...)
 			cmd.Env = os.Environ()
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Start(); err != nil {
-				prompt.Warning("Failed building formula with docker trying run local Makefile...")
-				return buildMakefileLocal(filepath.Join(formulaPath, src))
+				prompt.Warning("Failed building formula with docker, trying with local Makefile...")
+				return buildMakefileLocal(formulaPath)
 			}
 
 			if err := cmd.Wait(); err != nil {
-				prompt.Warning("Failed building formula with docker trying run local Makefile...")
-				return buildMakefileLocal(filepath.Join(formulaPath, src))
+				prompt.Warning("Failed building formula with docker, trying with local Makefile...")
+				return buildMakefileLocal(formulaPath)
 			}
-			prompt.Info("\n\nSuccess building formula using docker...\n\n")
+			prompt.Info("\n\nSuccessfully built formula using docker...\n\n")
 		} else {
-			return buildMakefileLocal(filepath.Join(formulaPath, src))
+			return buildMakefileLocal(formulaPath)
 		}
 	}
 	return nil
 }
 
-func buildMakefileLocal(formulaSrcPath string) error {
+func buildMakefileLocal(formulaPath string) error {
 	prompt.Info("Building formula using local Makefile...")
-	if err := os.Chdir(formulaSrcPath); err != nil {
+	if err := os.Chdir(formulaPath); err != nil {
 		return err
 	}
 	cmd := exec.Command(makeCmd, buildCmd)
@@ -133,22 +131,22 @@ func buildMakefileLocal(formulaSrcPath string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
-		return errors.New("error build formula using make, verify your repository")
+		return errors.New("error building formula using make, verify your repository")
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return errors.New("error build formula using make, verify your repository")
+		return errors.New("error building formula using make, verify your repository")
 	}
 
-	prompt.Info("\n\nSuccess building formula using local Makefile...\n\n")
+	prompt.Info("\n\nSuccessfully built formula using local Makefile...\n\n")
 	return nil
 }
 
 func (d DefaultSetup) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
 	configPath := def.ConfigPath(formulaPath)
 	if !fileutil.Exists(configPath) {
-		return formula.Config{}, fmt.Errorf("Failed load config file for formula."+
-			"\nTry run rit update repo"+
+		return formula.Config{}, fmt.Errorf("Load of config file for formula failed."+
+			"\nTry running rit update repo"+
 			"\nConfig file path not found: %s", configPath)
 	}
 
