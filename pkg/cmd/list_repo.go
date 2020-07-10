@@ -7,6 +7,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
+
+const (
+	totalReposMsg = "There are %v repos"
+	totalOneRepoMsg = "There is 1 repo"
 )
 
 type ListRepoCmd struct {
@@ -32,6 +38,12 @@ func (lr ListRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		printRepos(repos)
+
+		if len(repos) != 1 {
+			prompt.Info(fmt.Sprintf(totalReposMsg, len(repos)))
+		} else {
+			prompt.Info(totalOneRepoMsg)
+		}
 
 		return nil
 	}

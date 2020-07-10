@@ -18,6 +18,7 @@ func NewLister(ritHome string, file stream.FileReadExister) ListManager {
 	return ListManager{ritHome: ritHome, file: file}
 }
 
+// Returns an empty repo if there is no repositories.json
 func (li ListManager) List() (formula.Repos, error) {
 	repos := formula.Repos{}
 	reposFilePath := path.Join(li.ritHome, reposDirName, reposFileName)
