@@ -6,13 +6,14 @@ const (
 	NodeLang          = "Node"
 	PhpLang           = "Php"
 	PythonLang        = "Python"
+	RustLang          = "Rust"
 	ShellLang         = "Shell"
 	NameBin           = "{{bin-name}}"
 	NameModule        = "{{nameModule}}"
 	NameBinFirstUpper = "{{bin-name-first-upper}}"
 )
 
-var Languages = []string{GoLang, JavaLang, NodeLang, PhpLang, PythonLang, ShellLang}
+var Languages = []string{GoLang, JavaLang, NodeLang, PhpLang, PythonLang, RustLang, ShellLang}
 
 type LangCreator interface {
 	Create(srcDir, pkg, pkgDir, dir string) error

@@ -9,4 +9,5 @@ const (
 	Python     = ".py"
 	Shell      = ".sh"
 	Php        = ".php"
+	Rust       = ".rs"
 )
