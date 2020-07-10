@@ -37,7 +37,6 @@
     },
     "hooks": [
         {"when":"install", "command":"cmd.exe /c mkdir %systemdrive%%homepath%\\.rit"},
-        {"when":"install", "command":"cmd.exe /c setx /M PATH \"%PATH%;C:\\Program Files (x86)\\rit\""},
         {"when":"install", "command":"cmd.exe /c echo {\"organization\":\"zup\",\"url\":\"https://ritchie-server.zup.io\"} > %systemdrive%%homepath%\\.rit\\server.json"},
         {"when":"uninstall", "command":"cmd.exe /c del /s /q %systemdrive%%homepath%\\.rit"}
     ],
