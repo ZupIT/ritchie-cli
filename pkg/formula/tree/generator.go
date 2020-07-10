@@ -76,6 +76,10 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			return cmds, nil
 		}
 
+		if dir == "bin" { // Ignore /bin directory
+			continue
+		}
+
 		formulaPath := path.Join(dirPath, dir)
 		helpFilePath := path.Join(formulaPath, helpFile)
 		var helpFile []byte
