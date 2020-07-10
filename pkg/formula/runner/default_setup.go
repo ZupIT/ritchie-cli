@@ -112,7 +112,7 @@ func (d DefaultSetup) buildFormula(formulaPath, binFilePath string, config formu
 				prompt.Warning("Failed building formula with docker, trying with local Makefile...")
 				return buildMakefileLocal(formulaPath)
 			}
-			prompt.Info("\n\nSuccessfully built formula using docker...\n\n")
+			prompt.Success("Successfully built formula using docker...")
 		} else {
 			return buildMakefileLocal(formulaPath)
 		}
@@ -138,7 +138,7 @@ func buildMakefileLocal(formulaPath string) error {
 		return errors.New("error building formula using make, verify your repository")
 	}
 
-	prompt.Info("\n\nSuccessfully built formula using local Makefile...\n\n")
+	prompt.Success("Successfully built formula using local Makefile...")
 	return nil
 }
 
