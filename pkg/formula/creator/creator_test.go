@@ -9,6 +9,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -20,8 +21,9 @@ const (
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectRuby   = "rit scaffold generate test_ruby"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
-	fCmdCorrectPhp    = "rit scaffold generate test_php"
 	fCmdCorrectRust   = "rit scaffold generate test_rust"
+	fCmdCorrectPhp    = "rit scaffold generate test_php"
+	fCmdRepeatedPhp   = "rit scaffold generate test_php"
 	langGo            = "Go"
 	langJava          = "Java"
 	langNode          = "Node"
@@ -171,6 +173,22 @@ func TestCreator(t *testing.T) {
 			},
 		},
 		{
+			name: "command correct-rust",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdCorrectRust,
+					Lang:          langRust,
+					WorkspacePath: fullDir,
+					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_rust"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+			},
+			out: out{
+				err: nil,
+			},
+		},
+		{
 			name: "command correct-php",
 			in: in{
 				formCreate: formula.Create{
@@ -187,19 +205,19 @@ func TestCreator(t *testing.T) {
 			},
 		},
 		{
-			name: "command correct-rust",
+			name: "command duplicated-php",
 			in: in{
 				formCreate: formula.Create{
-					FormulaCmd:    fCmdCorrectRust,
-					Lang:          langRust,
+					FormulaCmd:    fCmdRepeatedPhp,
+					Lang:          langPhp,
 					WorkspacePath: fullDir,
-					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_rust"),
+					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_php"),
 				},
 				dir:  dirManager,
 				file: fileManager,
 			},
 			out: out{
-				err: nil,
+				err: prompt.NewError("this command already exists"),
 			},
 		},
 		{
@@ -324,7 +342,7 @@ func TestCreatorFail(t *testing.T) {
 
 	tests := []string{langGo, langJava, langNode, langPhp, langPython, langShell}
 
-	creatorMock := genericFileCreatorMock{ createErr: errors.New("error while creating language") }
+	creatorMock := genericFileCreatorMock{createErr: errors.New("error while creating language")}
 	creator := NewCreator(treeMan, dirManager, fileManager)
 	for _, language := range tests {
 		t.Run(language, func(t *testing.T) {
@@ -370,7 +388,7 @@ func (f fileManagerMock) Exists(string) bool {
 }
 
 type genericFileCreatorMock struct {
-	createErr   error
+	createErr error
 	GenericFileCreatorI
 }
 

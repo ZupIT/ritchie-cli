@@ -20,7 +20,7 @@ func NewDefaultRunner(preRunner formula.PreRunner, postRunner formula.PostRunner
 	return DefaultRunner{preRunner, postRunner, inRunner}
 }
 
-func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType) error {
+func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType, verboseFlag string) error {
 	setup, err := d.PreRun(def)
 	if err != nil {
 		return err
@@ -31,8 +31,10 @@ func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType) 
 	cmd.Env = os.Environ()
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, setup.Pwd)
 	cPwdEnv := fmt.Sprintf(formula.EnvPattern, formula.CPwdEnv, setup.Pwd)
+	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, verboseFlag)
 	cmd.Env = append(cmd.Env, pwdEnv)
 	cmd.Env = append(cmd.Env, cPwdEnv)
+	cmd.Env = append(cmd.Env, verboseEnv)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
