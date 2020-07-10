@@ -45,9 +45,13 @@ func TestEncodedHash(t *testing.T) {
 		t.Errorf("Encode to string failed")
 	}
 
+	if len(str) != len(decoded) {
+		t.Errorf("Encode to string failed, got %v, wanted %v", decoded, str)
+	}
+
 	for i := range str {
 		if str[i] != decoded[i] {
-			t.Errorf("Encode to string failed, got %v, want ritchie", decoded)
+			t.Errorf("Encode to string failed, got %v, wanted %v", decoded, str)
 		}
 	}
 }
