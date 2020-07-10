@@ -59,9 +59,11 @@ func buildCommands() *cobra.Command {
 	inputPassword := prompt.NewSurveyPassword()
 	inputList := prompt.NewSurveyList()
 	inputURL := prompt.NewSurveyURL()
-	inputMultiline := prompt.NewSurveyMultiline()
 
 	// deps
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
@@ -75,7 +77,9 @@ func buildCommands() *cobra.Command {
 	passphraseManager := secsingle.NewPassphraseManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
 	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
+	credSettings := credsingle.NewSingleSettings(fileManager)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds)
+
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
@@ -91,9 +95,6 @@ func buildCommands() *cobra.Command {
 
 	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
 	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
-
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -127,11 +128,11 @@ func buildCommands() *cobra.Command {
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
 		credSetter,
+		credSettings,
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword,
-		inputMultiline)
+		inputPassword)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)

@@ -17,12 +17,10 @@ type Php struct {
 }
 
 func New(
-	c formula.Creator,
 	createGenericFiles func(srcDir, pkg, dir string, l formula.Lang) error,
 ) Php {
 	return Php{
 		Lang: formula.Lang{
-			Creator:      c,
 			FileFormat:   fileextensions.Php,
 			StartFile:    template.StartFile,
 			Main:         template.Index,

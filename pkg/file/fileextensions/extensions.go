@@ -7,6 +7,7 @@ const (
 	JavaScript = ".js"
 	Json       = ".json"
 	Python     = ".py"
+	Ruby       = ".rb"
 	Shell      = ".sh"
 	Php        = ".php"
 	Rust       = ".rs"

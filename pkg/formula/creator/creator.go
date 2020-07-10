@@ -15,6 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/node"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/php"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/python"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/ruby"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/rust"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/shell"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/template"
@@ -31,6 +32,14 @@ import (
 var (
 	ErrRepeatedCommand = prompt.NewError("this command already exists")
 )
+
+type GenericFileCreatorI interface {
+	createGenericFiles(sourceDirectory, pkg, directory string, language formula.Lang) error
+}
+
+type GenericFileCreator struct {
+	file stream.FileWriteReadExister
+}
 
 type CreateManager struct {
 	treeManager tree.Manager
@@ -150,7 +159,8 @@ func (c CreateManager) generateFormulaFiles(formulaPath, pkgName, lang string) e
 		return err
 	}
 
-	if err := c.createSrcFiles(formulaPath, pkgName, lang); err != nil {
+	genericFileCreator := GenericFileCreator{file: c.file}
+	if err := c.createSrcFiles(formulaPath, pkgName, lang, genericFileCreator); err != nil {
 		return err
 	}
 
@@ -188,7 +198,7 @@ func (c CreateManager) createScript(dir string) error {
 	return nil
 }
 
-func (c CreateManager) createSrcFiles(dir, pkg, language string) error {
+func (c CreateManager) createSrcFiles(dir, pkg, language string, genericFileCreator GenericFileCreatorI) error {
 	srcDir := fmt.Sprintf("%s/src", dir)
 	pkgDir := fmt.Sprintf("%s/%s", srcDir, pkg)
 	if err := fileutil.CreateDirIfNotExists(srcDir, os.ModePerm); err != nil {
@@ -197,45 +207,50 @@ func (c CreateManager) createSrcFiles(dir, pkg, language string) error {
 	switch language {
 	case formula.GoLang:
 		pkgDir := fmt.Sprintf("%s/pkg/%s", srcDir, pkg)
-		goCreator := golang.New(c, c.createGenericFiles)
+		goCreator := golang.New(genericFileCreator.createGenericFiles)
 		if err := goCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case formula.JavaLang:
-		javaCreator := java.New(c, c.createGenericFiles)
+		javaCreator := java.New(genericFileCreator.createGenericFiles)
 		if err := javaCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case formula.NodeLang:
-		nodeCreator := node.New(c, c.createGenericFiles)
+		nodeCreator := node.New(genericFileCreator.createGenericFiles)
 		if err := nodeCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case formula.PhpLang:
-		phpCreator := php.New(c, c.createGenericFiles)
+		phpCreator := php.New(genericFileCreator.createGenericFiles)
 		if err := phpCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case formula.PythonLang:
-		pythonCreator := python.New(c, c.createGenericFiles)
+		pythonCreator := python.New(genericFileCreator.createGenericFiles)
 		if err := pythonCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case formula.RustLang:
-		rustCreator := rust.New(c, c.createGenericFiles)
+		rustCreator := rust.New(genericFileCreator.createGenericFiles)
 		if err := rustCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
+	case formula.RubyLang:
+		rubyCreator := ruby.New(genericFileCreator.createGenericFiles)
+		if err := rubyCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
+			return err
+		}
 	case formula.ShellLang:
-		shellCreator := shell.New(c, c.createGenericFiles)
+		shellCreator := shell.New(genericFileCreator.createGenericFiles)
 		if err := shellCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
-			return nil
+			return err
 		}
 	}
 	return nil
 }
 
-func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l formula.Lang) error {
+func (c GenericFileCreator) createGenericFiles(srcDir, pkg, dir string, l formula.Lang) error {
 	if err := createMainFile(srcDir, pkg, l.Main, l.FileFormat, l.StartFile, l.UpperCase); err != nil {
 		return err
 	}
@@ -259,7 +274,7 @@ func (c CreateManager) createGenericFiles(srcDir, pkg, dir string, l formula.Lan
 	return nil
 }
 
-func (c CreateManager) createWindowsBuild(dir, name, tpl string) error {
+func (c GenericFileCreator) createWindowsBuild(dir, name, tpl string) error {
 	if tpl == "" {
 		return nil
 	}
@@ -270,7 +285,7 @@ func (c CreateManager) createWindowsBuild(dir, name, tpl string) error {
 	return c.file.Write(buildFile, []byte(tpl))
 }
 
-func (c CreateManager) createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
+func (c GenericFileCreator) createMakefileForm(dir, name, pathName, tpl string, compiled bool) error {
 	makefilePath := path.Join(dir, formula.MakefilePath)
 	if compiled {
 		tpl = strings.ReplaceAll(tpl, "{{name}}", name)

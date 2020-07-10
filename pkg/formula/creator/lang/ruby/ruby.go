@@ -1,4 +1,4 @@
-package node
+package ruby
 
 import (
 	"fmt"
@@ -8,36 +8,37 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileextensions"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/node/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/ruby/template"
 )
 
-type Node struct {
+type Ruby struct {
 	formula.Lang
 	createGenericFiles func(srcDir, pkg, dir string, l formula.Lang) error
+	Gemfile string
 }
 
 func New(
 	createGenericFiles func(srcDir, pkg, dir string, l formula.Lang) error,
-) Node {
-	return Node{
+) Ruby {
+	return Ruby{
 		Lang: formula.Lang{
-			FileFormat:   fileextensions.JavaScript,
+			FileFormat:   fileextensions.Ruby,
 			StartFile:    template.StartFile,
 			Main:         template.Index,
 			Makefile:     template.Makefile,
 			Run:          template.Run,
 			Dockerfile:   template.Dockerfile,
-			PackageJson:  template.PackageJson,
 			File:         template.File,
 			WindowsBuild: template.WindowsBuild,
 			Compiled:     false,
 			UpperCase:    false,
 		},
 		createGenericFiles: createGenericFiles,
+		Gemfile:      template.Gemfile,
 	}
 }
 
-func (n Node) Create(srcDir, pkg, pkgDir, dir string) error {
+func (n Ruby) Create(srcDir, pkg, pkgDir, dir string) error {
 	if err := n.createGenericFiles(srcDir, pkg, dir, n.Lang); err != nil {
 		return err
 	}
@@ -51,19 +52,19 @@ func (n Node) Create(srcDir, pkg, pkgDir, dir string) error {
 		return err
 	}
 
-	if err := createPackageJson(srcDir, n.PackageJson); err != nil {
+	if err := createGemfile(srcDir, n.Gemfile); err != nil {
 		return err
 	}
 
-	templateNode := strings.ReplaceAll(n.File, formula.NameBin, pkg)
+	templateRuby := strings.ReplaceAll(n.File, formula.NameBin, pkg)
 	pkgFile := fmt.Sprintf("%s/%s%s", pkgDir, pkg, n.FileFormat)
-	if err := fileutil.WriteFile(pkgFile, []byte(templateNode)); err != nil {
+	if err := fileutil.WriteFile(pkgFile, []byte(templateRuby)); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func createPackageJson(dir, tpl string) error {
-	return fileutil.WriteFile(fmt.Sprintf("%s/package.json", dir), []byte(tpl))
+func createGemfile(dir, tpl string) error {
+	return fileutil.WriteFile(fmt.Sprintf("%s/Gemfile", dir), []byte(tpl))
 }

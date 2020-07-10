@@ -8,16 +8,19 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
-
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
+
+var inputTypes = []string{"plain text", "secret"}
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
 	credential.Settings
+	credential.SingleSettings
 	edition api.Edition
 	prompt.InputText
 	prompt.InputBool
@@ -29,13 +32,21 @@ type setCredentialCmd struct {
 // NewSingleSetCredentialCmd creates a new cmd instance
 func NewSingleSetCredentialCmd(
 	st credential.Setter,
+	ss credential.SingleSettings,
 	it prompt.InputText,
 	ib prompt.InputBool,
 	il prompt.InputList,
-	ip prompt.InputPassword,
-	im prompt.InputMultiline) *cobra.Command {
-	s := &setCredentialCmd{st, nil, api.Single, it, ib, il, ip, im}
-
+	ip prompt.InputPassword) *cobra.Command {
+	s := &setCredentialCmd{
+		st,
+		nil,
+		ss,
+		api.Single,
+		it,
+		ib,
+		il,
+		ip,
+		nil}
 	return newCmd(s)
 }
 
@@ -48,8 +59,16 @@ func NewTeamSetCredentialCmd(
 	il prompt.InputList,
 	ip prompt.InputPassword,
 	im prompt.InputMultiline) *cobra.Command {
-	s := &setCredentialCmd{st, si, api.Team, it, ib, il, ip, im}
-
+	s := &setCredentialCmd{
+		st,
+		si,
+		nil,
+		api.Team,
+		it,
+		ib,
+		il,
+		ip,
+		im}
 	return newCmd(s)
 }
 
@@ -77,7 +96,7 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
 		return nil
 	}
 }
@@ -94,55 +113,82 @@ func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
 }
 
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
-	var credDetail credential.Detail
+	err := s.WriteDefaultCredentials(credsingle.ProviderPath())
+	if err != nil {
+		return credential.Detail{}, err
+	}
 
-	provider, err := s.Text("Provider: ", true)
+	var credDetail credential.Detail
+	cred := credential.Credential{}
+
+	credentials, err := s.ReadCredentials(credsingle.ProviderPath())
+	if err != nil {
+		return credential.Detail{}, err
+	}
+
+	providerArr := credsingle.NewProviderArr(credentials)
+	providerChoose, err := s.List("Select your provider", providerArr)
 	if err != nil {
 		return credDetail, err
 	}
 
-	cred := credential.Credential{}
-	addMore := true
-	for addMore {
-		kv, err := s.MultiLineText("Type your credential using the format key=value (e.g. email=example@example.com): ", true)
+	if providerChoose == credsingle.AddNew {
+		newProvider, err := s.Text("Define your provider name:", true)
+		if err != nil {
+			return credDetail, err
+		}
+		providerArr = append(providerArr, newProvider)
+
+		var newFields []credential.Field
+		var newField credential.Field
+		addMoreCredentials := true
+		for addMoreCredentials {
+			newField.Name, err = s.Text("Define your field name: (ex.:token, secretAccessKey)", true)
+			if err != nil {
+				return credDetail, err
+			}
+
+			newField.Type, err = s.List("Select your field type:", inputTypes)
+			if err != nil {
+				return credDetail, err
+			}
+
+			newFields = append(newFields, newField)
+			addMoreCredentials, err = s.Bool("Add more credentials to this provider?", []string{"no", "yes"})
+			if err != nil {
+				return credDetail, err
+			}
+		}
+		credentials[newProvider] = newFields
+		err = s.WriteCredentials(credentials, credsingle.ProviderPath())
 		if err != nil {
 			return credDetail, err
 		}
 
-		pair := strings.Split(kv, "=")
-		if s := validate(pair); s != "" {
-			prompt.Error(s)
-			continue
-		}
-
-		cred[pair[0]] = pair[1]
-
-		addMore, err = s.Bool("Add more fields?", []string{"yes", "no"})
-		if err != nil {
-			return credDetail, err
-		}
+		providerChoose = newProvider
 	}
 
-	credDetail.Service = provider
+	inputs := credentials[providerChoose]
+
+	for _, i := range inputs {
+		var value string
+		if i.Type == inputTypes[1] {
+			value, err = s.Password(i.Name + ":")
+			if err != nil {
+				return credDetail, err
+			}
+		} else {
+			value, err = s.Text(i.Name, true)
+			if err != nil {
+				return credDetail, err
+			}
+		}
+		cred[i.Name] = value
+	}
+	credDetail.Service = providerChoose
 	credDetail.Credential = cred
 
 	return credDetail, nil
-}
-
-func validate(pair []string) string {
-	if len(pair) < 2 {
-		return "Invalid key value credential"
-	}
-
-	if strings.TrimSpace(pair[0]) == "" {
-		return "The key must not be empty."
-	}
-
-	if strings.TrimSpace(pair[1]) == "" {
-		return "The value must not be empty."
-	}
-
-	return ""
 }
 
 func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
@@ -202,7 +248,7 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
 		return nil
 	}
 }
