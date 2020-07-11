@@ -38,7 +38,7 @@ func (dr DeleteRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		if len(repos) == 0 {
-			prompt.Warning("You should add a repository first")
+			prompt.Warning("You don't have any repositories")
 			return nil
 		}
 
@@ -48,9 +48,11 @@ func (dr DeleteRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		repo, err := dr.InputList.List("Repository:", reposNames)
-
-		err = dr.Delete(repo)
 		if err != nil {
+			return err
+		}
+
+		if err = dr.Delete(repo); err != nil {
 			return err
 		}
 

@@ -23,13 +23,10 @@ func NewDeleter(ritHome string, file stream.FileWriteReadExister, dir stream.Dir
 }
 
 func (dm DeleteManager) Delete(repoName string) error {
-	err := dm.deleteFromReposFile(repoName)
-	if err != nil {
+	if err := dm.deleteFromReposFile(repoName); err != nil {
 		return err
 	}
-
-	err = dm.deleteRepoDir(repoName)
-	if err != nil {
+	if err := dm.deleteRepoDir(repoName); err != nil {
 		return err
 	}
 	return nil
@@ -37,8 +34,7 @@ func (dm DeleteManager) Delete(repoName string) error {
 
 func (dm DeleteManager) deleteRepoDir(repoName string) error {
 	path := path.Join(dm.ritHome, reposDirName, repoName)
-	err := dm.dir.Remove(path)
-	if err != nil {
+	if err := dm.dir.Remove(path); err != nil {
 		return err
 	}
 	return nil
