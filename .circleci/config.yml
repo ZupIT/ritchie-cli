@@ -32,6 +32,11 @@ references:
         - nightly
         - beta
 
+  filters-legacy: &FILTERS_LEGACY
+    branches:
+      only:
+        - legacy-.*
+
   filters-release: &FILTERS_RELEASE
     branches:
       only:
@@ -580,3 +585,37 @@ workflows:
             - win-package
             - rpm-package
             - deb-package
+  legacy:
+    jobs:
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_LEGACY
+      - deb-package:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - build-code
+      - rpm-package:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - build-code
+      - win-package:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - win-package
+            - deb-package
+            - rpm-package
+      - delivery:
+          name: delivery
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - sign-bin
