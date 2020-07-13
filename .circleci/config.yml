@@ -462,19 +462,20 @@ workflows:
     jobs:
       - build:
           name: build-code
-      - windows_functional_test_team:
-          name: windows-functional-test-team-code
-          requires:
-            - build-code
-      - windows_functional_test_single:
-          name: windows-functional-test-single-code
-          requires:
-            - build-code
+#      - windows_functional_test_team:
+#          name: windows-functional-test-team-code
+#          requires:
+#            - build-code
+#      - windows_functional_test_single:
+#          name: windows-functional-test-single-code
+#          requires:
+#            - build-code
       - rebase_beta:
           name: release-beta
           requires:
-            - windows-functional-test-team-code
-            - windows-functional-test-single-code
+            - build-code
+#            - windows-functional-test-team-code
+#            - windows-functional-test-single-code
 
   build-for-requests:
     jobs:
