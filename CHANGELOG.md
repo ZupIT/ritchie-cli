@@ -2,10 +2,63 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.17...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.20...HEAD)
+
+**Implemented enhancements:**
+
+- \[Feature\] Adding ruby language support [\#252](https://github.com/ZupIT/ritchie-cli/pull/252) ([henriquemoraes8](https://github.com/henriquemoraes8))
+- Feature/verbose flag [\#250](https://github.com/ZupIT/ritchie-cli/pull/250) ([antonioolf](https://github.com/antonioolf))
 
 **Merged pull requests:**
 
+- Add signature in single [\#265](https://github.com/ZupIT/ritchie-cli/pull/265) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.19 merge [\#259](https://github.com/ZupIT/ritchie-cli/pull/259) ([zup-ci](https://github.com/zup-ci))
+
+## [1.0.0-beta.20](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.20) (2020-07-13)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.19...1.0.0-beta.20)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Adding hello world template in RUBY \(rit create formula\) [\#186](https://github.com/ZupIT/ritchie-cli/issues/186)
+- \[FEATURE\] Enhancement of the rit set credential command on single version [\#177](https://github.com/ZupIT/ritchie-cli/issues/177)
+
+## [1.0.0-beta.19](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.19) (2020-07-08)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.18...1.0.0-beta.19)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Check the possibility of using vendor [\#47](https://github.com/ZupIT/ritchie-cli/issues/47)
+- \[FEATURE\] List and add on set credentials [\#241](https://github.com/ZupIT/ritchie-cli/pull/241) ([victor-schumacher](https://github.com/victor-schumacher))
+- \[FEATURE\] Change Login and Init behavior [\#236](https://github.com/ZupIT/ritchie-cli/pull/236) ([marcoscostazup](https://github.com/marcoscostazup))
+- \[FEATURE\] survey prompt [\#233](https://github.com/ZupIT/ritchie-cli/pull/233) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- \[FEATURE\] Build formulas on Windows [\#232](https://github.com/ZupIT/ritchie-cli/pull/232) ([kaduartur](https://github.com/kaduartur))
+
+**Fixed bugs:**
+
+- \[FIX\] run go mod vendor [\#247](https://github.com/ZupIT/ritchie-cli/pull/247) ([kaduartur](https://github.com/kaduartur))
+
+**Merged pull requests:**
+
+- \[fix\] Signature bin windows [\#251](https://github.com/ZupIT/ritchie-cli/pull/251) ([ernelio](https://github.com/ernelio))
+- Feature/sign bin [\#248](https://github.com/ZupIT/ritchie-cli/pull/248) ([ernelio](https://github.com/ernelio))
+- \[FEATURE\] Add glide and vendor in project [\#244](https://github.com/ZupIT/ritchie-cli/pull/244) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.18 merge [\#243](https://github.com/ZupIT/ritchie-cli/pull/243) ([zup-ci](https://github.com/zup-ci))
+- \[ENHANCEMENT\] simplify PR template [\#237](https://github.com/ZupIT/ritchie-cli/pull/237) ([sandokandias](https://github.com/sandokandias))
+- modifying final stuff [\#229](https://github.com/ZupIT/ritchie-cli/pull/229) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/surveyprompt [\#225](https://github.com/ZupIT/ritchie-cli/pull/225) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/surveyprompt [\#210](https://github.com/ZupIT/ritchie-cli/pull/210) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+
+## [1.0.0-beta.18](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.18) (2020-07-06)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.17...1.0.0-beta.18)
+
+**Merged pull requests:**
+
+- fix lint timeout [\#235](https://github.com/ZupIT/ritchie-cli/pull/235) ([ernelio](https://github.com/ernelio))
+- \[fix\] lint killed [\#234](https://github.com/ZupIT/ritchie-cli/pull/234) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.17 merge [\#231](https://github.com/ZupIT/ritchie-cli/pull/231) ([zup-ci](https://github.com/zup-ci))
 - \[FIX\] improvements rit upgrade [\#215](https://github.com/ZupIT/ritchie-cli/pull/215) ([marcoscostazup](https://github.com/marcoscostazup))
 
 ## [1.0.0-beta.17](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.17) (2020-06-30)
@@ -38,7 +91,6 @@
 - Release 1.0.0-beta.16 merge [\#208](https://github.com/ZupIT/ritchie-cli/pull/208) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.15 merge [\#207](https://github.com/ZupIT/ritchie-cli/pull/207) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.14 merge [\#206](https://github.com/ZupIT/ritchie-cli/pull/206) ([zup-ci](https://github.com/zup-ci))
-- \[FEATURE\] Change login and init to get totp [\#190](https://github.com/ZupIT/ritchie-cli/pull/190) ([viniciussousazup](https://github.com/viniciussousazup))
 
 ## [1.0.0-beta.15](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.15) (2020-06-24)
 
@@ -88,6 +140,7 @@
 - Fix/version msi release [\#193](https://github.com/ZupIT/ritchie-cli/pull/193) ([ernelio](https://github.com/ernelio))
 - fix msi release [\#192](https://github.com/ZupIT/ritchie-cli/pull/192) ([ernelio](https://github.com/ernelio))
 - \[FEATURE\] Pinning ssl [\#191](https://github.com/ZupIT/ritchie-cli/pull/191) ([marcosgmgm](https://github.com/marcosgmgm))
+- \[FEATURE\] Change login and init to get totp [\#190](https://github.com/ZupIT/ritchie-cli/pull/190) ([viniciussousazup](https://github.com/viniciussousazup))
 - \[FIX\] Packaging changelog [\#184](https://github.com/ZupIT/ritchie-cli/pull/184) ([ernelio](https://github.com/ernelio))
 - \[Feature\] Improvements circleci [\#182](https://github.com/ZupIT/ritchie-cli/pull/182) ([ernelio](https://github.com/ernelio))
 - Feature/unix tests for init [\#174](https://github.com/ZupIT/ritchie-cli/pull/174) ([dmbarra](https://github.com/dmbarra))
