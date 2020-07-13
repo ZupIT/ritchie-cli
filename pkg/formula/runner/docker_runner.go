@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -24,10 +25,11 @@ type DockerRunner struct {
 	formula.PreRunner
 	formula.PostRunner
 	formula.InputRunner
+	ctxFinder rcontext.Finder
 }
 
-func NewDockerRunner(preRunner formula.PreRunner, postRunner formula.PostRunner, inputRunner formula.InputRunner) DockerRunner {
-	return DockerRunner{preRunner, postRunner, inputRunner}
+func NewDockerRunner(preRunner formula.PreRunner, postRunner formula.PostRunner, inputRunner formula.InputRunner, ctxFinder rcontext.Finder) DockerRunner {
+	return DockerRunner{preRunner, postRunner, inputRunner, ctxFinder}
 }
 
 func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType, verboseFlag string) error {
@@ -62,6 +64,15 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType, v
 		if err := fileutil.AppendFileData(envFile, []byte(e+"\n")); err != nil {
 			return err
 		}
+	}
+
+	ctx, err := d.ctxFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	if err := fileutil.AppendFileData(envFile, []byte("CONTEXT="+ctx.Current+"\n")); err != nil {
+		return err
 	}
 
 	if err := cmd.Start(); err != nil {
