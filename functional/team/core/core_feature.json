@@ -82,7 +82,7 @@
                 "action":"main"
             }
         ],
-        "result":"Delete objects like users, etc."
+        "result":"Delete objects like contexts and repo"
     },
     {
         "entry":"Delete context",
@@ -115,7 +115,7 @@
                 "action":"main"
             }
         ],
-        "result":"Show objects like context, organization etc."
+        "result":"Show contexts"
     },
     {
         "entry":"Show context",
