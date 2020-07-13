@@ -81,6 +81,9 @@ func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath s
 	if err := createHelpFiles(fCmdName, workSpcPath); err != nil {
 		return err
 	}
+	if err := c.createUmaskFile(fPath); err != nil {
+
+	}
 
 	if err := c.applyLangTemplate(lang, fPath, workSpcPath); err != nil {
 		return err
@@ -128,6 +131,10 @@ func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string
 	}
 
 	return nil
+}
+
+func (c CreateManager) createUmaskFile(fPath string) error {
+	return c.file.Write(path.Join(fPath, "set_umask.sh"), []byte(template.Umask))
 }
 
 func createHelpFiles(formulaCmdName, workSpacePath string) error {

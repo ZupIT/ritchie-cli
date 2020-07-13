@@ -23,7 +23,7 @@ var (
 	ErrTooShortCommand     = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 )
 
-const notAllowedChars = `\/><,@-`
+const notAllowedChars = `\/><,@`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {

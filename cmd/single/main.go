@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -80,6 +81,7 @@ func buildCommands() *cobra.Command {
 
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
+	tplManager := template.NewManager()
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
@@ -107,7 +109,7 @@ func buildCommands() *cobra.Command {
 	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
 	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
 
-	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
+	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
 	formulaBuilder := builder.New(ritchieHomeDir, dirManager, fileManager, treeGen)
 	watchManager := watcher.New(formulaBuilder, dirManager)
@@ -156,7 +158,7 @@ func buildCommands() *cobra.Command {
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
