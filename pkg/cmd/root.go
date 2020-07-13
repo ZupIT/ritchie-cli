@@ -1,23 +1,22 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
-	"os"
+	"path"
 	"runtime"
 	"strings"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
-	"github.com/ZupIT/ritchie-cli/pkg/workspace"
-
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -36,14 +35,10 @@ var (
 	Version = "dev"
 	// BuildDate contains a string with the build date.
 	BuildDate = "unknown"
-
-	// MsgInit error message for init cmd
-	MsgInit = "To start using rit, you need to initialize rit first.\nCommand: rit init"
-	// MsgSession error message for session not initialized
-	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
-
 	// Url to get Rit Stable Version
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+
+	ErrRitInit = errors.New("To start using rit, you need to initialize rit first.\nCommand: rit init")
 
 	singleIgnorelist = []string{
 		fmt.Sprint(cmdUse),
@@ -56,42 +51,19 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 
-	teamIgnorelist = []string{
-		fmt.Sprint(cmdUse),
-		fmt.Sprintf("%s login", cmdUse),
-		fmt.Sprintf("%s logout", cmdUse),
-		fmt.Sprintf("%s help", cmdUse),
-		fmt.Sprintf("%s completion zsh", cmdUse),
-		fmt.Sprintf("%s completion bash", cmdUse),
-		fmt.Sprintf("%s completion fish", cmdUse),
-		fmt.Sprintf("%s completion powershell", cmdUse),
-		fmt.Sprintf("%s init", cmdUse),
-		fmt.Sprintf("%s upgrade", cmdUse),
-	}
-
 	upgradeValidationWhiteList = []string{
 		fmt.Sprint(cmdUse),
-		fmt.Sprintf("%s login", cmdUse),
 	}
 )
 
-type singleRootCmd struct {
-	workspaceChecker workspace.Checker
-	sessionValidator session.Validator
+type RootCmd struct {
+	ritchieHome string
+	dir         stream.DirCreateChecker
 }
 
-type teamRootCmd struct {
-	workspaceChecker workspace.Checker
-	serverFinder     server.Finder
-	sessionValidator session.Validator
-}
-
-// NewSingleRootCmd creates the root command for single edition.
-func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command {
-	o := &singleRootCmd{
-		workspaceChecker: wc,
-		sessionValidator: sv,
-	}
+// NewRootCmd creates the root command for single edition.
+func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker) *cobra.Command {
+	o := &RootCmd{ritchieHome: ritchieHome, dir: dir}
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
@@ -109,33 +81,9 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 	return cmd
 }
 
-// NewTeamRootCmd creates the root command for team edition.
-func NewTeamRootCmd(wc workspace.Checker,
-	sf server.Finder,
-	sv session.Validator) *cobra.Command {
-	o := &teamRootCmd{
-		workspaceChecker: wc,
-		serverFinder:     sf,
-		sessionValidator: sv,
-	}
-
-	cmd := &cobra.Command{
-		Use:                cmdUse,
-		Version:            versionFlag(api.Team),
-		Short:              cmdShortDescription,
-		Long:               cmdDescription,
-		PersistentPreRunE:  o.PreRunFunc(),
-		PersistentPostRunE: o.PostRunFunc(),
-		RunE:               runHelp,
-		SilenceErrors:      true,
-	}
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	return cmd
-}
-
-func (o *singleRootCmd) PreRunFunc() CommandRunnerFunc {
+func (ro *RootCmd) PreRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if err := o.workspaceChecker.Check(); err != nil {
+		if err := ro.dir.Create(ro.ritchieHome); err != nil {
 			return err
 		}
 
@@ -143,50 +91,16 @@ func (o *singleRootCmd) PreRunFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		if err := o.sessionValidator.Validate(); err != nil {
-			fmt.Println(MsgInit)
-			os.Exit(0)
+		commonsRepoPath := path.Join(ro.ritchieHome, "repos", "commons")
+		if !ro.dir.Exists(commonsRepoPath) {
+			return ErrRitInit
 		}
 
 		return nil
 	}
 }
 
-func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		if err := o.workspaceChecker.Check(); err != nil {
-			return err
-		}
-
-		if isWhitelist(teamIgnorelist, cmd) || isCompleteCmd(cmd) {
-			return nil
-		}
-
-		cfg, err := o.serverFinder.Find()
-		if err != nil {
-			return err
-		} else if cfg.URL == "" {
-			fmt.Println(MsgInit)
-			os.Exit(0)
-		}
-
-		if err := o.sessionValidator.Validate(); err != nil {
-			fmt.Println(MsgSession)
-			os.Exit(0)
-		}
-
-		return nil
-	}
-}
-
-func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		verifyNewVersion(cmd)
-		return nil
-	}
-}
-
-func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
+func (ro *RootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		verifyNewVersion(cmd)
 		return nil

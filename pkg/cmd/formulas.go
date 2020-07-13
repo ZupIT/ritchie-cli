@@ -17,7 +17,7 @@ const (
 	subCommand = " SUBCOMMAND"
 	Group      = "group"
 	dockerFlag = "docker"
-	RootCmd    = "root"
+	rootCmd    = "root"
 )
 
 type FormulaCommand struct {
@@ -40,10 +40,10 @@ func NewFormulaCommand(
 	}
 }
 
-func (f FormulaCommand) Add(rootCmd *cobra.Command) error {
+func (f FormulaCommand) Add(root *cobra.Command) error {
 	treeRep := f.treeManager.MergedTree(false)
 	commands := make(map[string]*cobra.Command)
-	commands[RootCmd] = rootCmd
+	commands[rootCmd] = root
 
 	for _, cmd := range treeRep.Commands {
 		cmdPath := api.Command{Parent: cmd.Parent, Usage: cmd.Usage}
@@ -67,8 +67,8 @@ func (f FormulaCommand) Add(rootCmd *cobra.Command) error {
 
 func newSubCmd(cmd api.Command) *cobra.Command {
 	var group string
-	if cmd.Parent == RootCmd {
-		group = fmt.Sprintf("%s commands:", cmd.Repo)
+	if cmd.Parent == rootCmd {
+		group = fmt.Sprintf("%s repo commands:", cmd.Repo)
 	}
 
 	c := &cobra.Command{

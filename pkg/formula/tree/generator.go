@@ -3,6 +3,7 @@ package tree
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -48,7 +49,7 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 			Id:     fmt.Sprintf(rootPattern, dir),
 			Parent: root,
 			Usage:  dir,
-			Help:   string(helpFile),
+			Help:   strings.TrimSuffix(string(helpFile), "\n"),
 		}
 
 		commands = append(commands, cmd)
@@ -94,7 +95,7 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			Id:     fmt.Sprintf("%s_%s", cmd.Id, dir),
 			Parent: cmd.Id,
 			Usage:  dir,
-			Help:   string(helpFile),
+			Help:  strings.TrimSuffix(string(helpFile), "\n"),
 		}
 
 		configFilePath := path.Join(formulaPath, configFile)

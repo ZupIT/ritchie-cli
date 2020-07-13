@@ -1,6 +1,4 @@
 # Go parameters
-TEAM=team
-SINGLE=single
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build
 GO_CLEAN=$(GO_CMD) clean
@@ -8,26 +6,19 @@ GO_TEST=$(GO_CMD) test
 GO_TOOL_COVER=$(GO_CMD) tool cover
 GO_GET=$(GO_CMD) get
 BINARY_NAME=rit
-SINGLE_CMD_PATH=./cmd/$(SINGLE)/main.go
-TEAM_CMD_PATH=./cmd/$(TEAM)/main.go
+CMD_PATH=./cmd/main.go
 BIN=bin
 DIST=dist
 DIST_MAC=$(DIST)/darwin
-DIST_MAC_TEAM=$(DIST_MAC)/$(TEAM)
-DIST_MAC_SINGLE=$(DIST_MAC)/$(SINGLE)
 DIST_LINUX=$(DIST)/linux
-DIST_LINUX_TEAM=$(DIST_LINUX)/$(TEAM)
-DIST_LINUX_SINGLE=$(DIST_LINUX)/$(SINGLE)
 DIST_WIN=$(DIST)/windows
-DIST_WIN_TEAM=$(DIST_WIN)/$(TEAM)
-DIST_WIN_SINGLE=$(DIST_WIN)/$(SINGLE)
 VERSION=$(RELEASE_VERSION)
 GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
-COMMONS_REPO_URL=https://commons-repo.ritchiecli.io/tree/tree.json
+COMMONS_REPO_URL=https://github.com/kaduartur/ritchie-formulas
 IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+-beta.[0-9]+")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
@@ -36,25 +27,16 @@ GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
 
 build-linux:
-	mkdir -p $(DIST_LINUX_TEAM) $(DIST_LINUX_SINGLE)
-	#LINUX
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
-	#LINUX SINGLE
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.CommonsRepoURL=$(COMMONS_REPO_URL)' -o ./$(DIST_LINUX_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
+	mkdir -p $(DIST_LINUX)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-mac:
-	mkdir -p $(DIST_MAC_TEAM) $(DIST_MAC_SINGLE)
-	#MAC
-	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC_TEAM)/$(BINARY_NAME) -v $(TEAM_CMD_PATH)
-	#MAC SINGLE
-	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.CommonsRepoURL=$(COMMONS_REPO_URL)' -o ./$(DIST_MAC_SINGLE)/$(BINARY_NAME) -v $(SINGLE_CMD_PATH)
+	mkdir -p $(DIST_MAC)
+	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-windows:
-	mkdir -p $(DIST_WIN_TEAM) $(DIST_WIN_SINGLE)
-	#WINDOWS 64
-	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN_TEAM)/$(BINARY_NAME).exe -v $(TEAM_CMD_PATH)
-	#WINDOWS 64 SINGLE
-	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE) -X $(MODULE)/pkg/cmd.CommonsRepoURL=$(COMMONS_REPO_URL)' -o ./$(DIST_WIN_SINGLE)/$(BINARY_NAME).exe -v $(SINGLE_CMD_PATH)
+	mkdir -p $(DIST_WIN)
+	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN)/$(BINARY_NAME).exe -v $(CMD_PATH)
 
 build: build-linux build-mac build-windows
 ifneq "$(BUCKET)" ""
