@@ -8,10 +8,6 @@ import (
 
 const (
 	ritchieHomePattern = "%s/.rit"
-	// Team version
-	Team = Edition("team")
-	// Single version
-	Single = Edition("single")
 	// CoreCmdsDesc commands group description
 	CoreCmdsDesc = "core commands:"
 )
@@ -44,18 +40,6 @@ var (
 		{Parent: "root_build", Usage: "formula"},
 		{Parent: "root", Usage: "upgrade"},
 	}
-
-	SingleCoreCmds = CoreCmds
-
-	TeamCoreCmds = append(
-		CoreCmds,
-		[]Command{
-			// temporarily removed {Parent: "root_create", Usage: "user"},
-			{Parent: "root_delete", Usage: "user"},
-			{Parent: "root", Usage: "login"},
-			{Parent: "root", Usage: "logout"},
-		}...,
-	)
 )
 
 // Command type
@@ -69,9 +53,6 @@ type Command struct {
 }
 
 type Commands []Command
-
-// Edition type that represents Single or Team.
-type Edition string
 
 // TermInputType represents the source of the inputs will be readed
 type TermInputType int

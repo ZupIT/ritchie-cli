@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
-	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
 const (
@@ -29,34 +25,10 @@ type initSingleCmd struct {
 	security.PassphraseManager
 }
 
-type initTeamCmd struct {
-	prompt.InputText
-	prompt.InputPassword
-	prompt.InputURL
-	prompt.InputBool
-	server.FindSetter
-	security.LoginManager
-	otp.Resolver
-}
 
 // NewSingleInitCmd creates init command for single edition
 func NewSingleInitCmd(ip prompt.InputPassword, pm security.PassphraseManager) *cobra.Command {
 	o := initSingleCmd{ip, pm}
-
-	return newInitCmd(o.runStdin(), o.runPrompt())
-}
-
-// NewTeamInitCmd creates init command for team edition
-func NewTeamInitCmd(
-	it prompt.InputText,
-	ip prompt.InputPassword,
-	iu prompt.InputURL,
-	ib prompt.InputBool,
-	fs server.FindSetter,
-	lm security.LoginManager,
-	orv otp.Resolver) *cobra.Command {
-
-	o := initTeamCmd{it, ip, iu, ib, fs, lm, orv}
 
 	return newInitCmd(o.runStdin(), o.runPrompt())
 }
@@ -103,118 +75,6 @@ func (o initSingleCmd) runStdin() CommandRunnerFunc {
 
 		p := security.Passphrase(obj.Passphrase)
 		if err := o.Save(p); err != nil {
-			return err
-		}
-
-		return nil
-	}
-}
-
-func (o initTeamCmd) runPrompt() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		cfg, err := o.Find()
-		if err != nil {
-			return err
-		}
-
-		if cfg.Organization != "" && len(cfg.Organization) > 0 {
-			m := fmt.Sprintf(msgOrganizationAlreadyExists, cfg.Organization)
-			y, err := o.Bool(m, []string{"no", "yes"})
-			if err != nil {
-				return err
-			}
-			if y {
-				org, err := o.Text(MsgOrganization, true)
-				if err != nil {
-					return err
-				}
-				cfg.Organization = org
-			}
-		} else {
-			org, err := o.Text(MsgOrganization, true)
-			if err != nil {
-				return err
-			}
-			cfg.Organization = org
-		}
-
-		if err := validator.IsValidURL(cfg.URL); err != nil {
-			u, err := o.URL(MsgServerURL, "")
-			if err != nil {
-				return err
-			}
-			cfg.URL = u
-		} else {
-			m := fmt.Sprintf(msgServerURLAlreadyExists, cfg.URL)
-			y, err := o.Bool(m, []string{"no", "yes"})
-			if err != nil {
-				return err
-			}
-			if y {
-				u, err := o.URL(MsgServerURL, "")
-				if err != nil {
-					return err
-				}
-				cfg.URL = u
-			}
-		}
-
-		if err := o.Set(&cfg); err != nil {
-			return err
-		}
-
-		y, err := o.Bool(MsgLogin, []string{"no", "yes"})
-		if err != nil {
-			return err
-		}
-		if y {
-			u, err := o.Text(MsgUsername, true)
-			if err != nil {
-				return err
-			}
-			p, err := o.Password(MsgPassword)
-			if err != nil {
-				return err
-			}
-
-			otpResponse, err := o.RequestOtp(cfg.URL, cfg.Organization)
-			if err != nil {
-				return err
-			}
-			var totp string
-			if otpResponse.Otp {
-				totp, err = o.Text(MsgOtp, true)
-				if err != nil {
-					return err
-				}
-			}
-
-			us := security.User{
-				Username: u,
-				Password: p,
-				Totp:     totp,
-			}
-			if err := o.Login(us); err != nil {
-				return err
-			}
-			fmt.Println("Login successfully!")
-		}
-
-		return nil
-	}
-}
-
-func (o initTeamCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		cfg := server.Config{}
-
-		err := stdin.ReadJson(os.Stdin, &cfg)
-		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
-			return err
-		}
-
-		if err := o.Set(&cfg); err != nil {
 			return err
 		}
 
