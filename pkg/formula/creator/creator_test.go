@@ -36,7 +36,7 @@ func TestCreator(t *testing.T) {
 	_ = dirManager.Remove(resultDir)
 	_ = dirManager.Create(resultDir)
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds)
 
 	tplM := template.NewManager("../../../testdata")
 
