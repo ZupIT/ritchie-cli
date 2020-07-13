@@ -233,7 +233,7 @@ type runnerMock struct {
 	error error
 }
 
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType) error {
+func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, verboseFlag string) error {
 	return r.error
 }
 

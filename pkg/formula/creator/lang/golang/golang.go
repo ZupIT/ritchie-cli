@@ -17,12 +17,10 @@ type Go struct {
 }
 
 func New(
-	c formula.Creator,
 	createGenericFiles func(srcDir, pkg, dir string, l formula.Lang) error,
 ) Go {
 	return Go{
 		Lang: formula.Lang{
-			Creator:      c,
 			FileFormat:   fileextensions.Go,
 			StartFile:    template.StartFile,
 			Main:         template.Main,

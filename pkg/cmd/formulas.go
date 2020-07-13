@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -12,10 +13,11 @@ import (
 )
 
 const (
-	subCommand = " SUBCOMMAND"
-	Group      = "group"
-	dockerFlag = "docker"
-	RootCmd    = "root"
+	subCommand  = " SUBCOMMAND"
+	Group       = "group"
+	dockerFlag  = "docker"
+	verboseFlag = "verbose"
+	RootCmd     = "root"
 )
 
 type FormulaCommand struct {
@@ -120,15 +122,24 @@ func (f FormulaCommand) execFormulaFunc(repo string, form api.Formula) func(cmd 
 			return err
 		}
 
-		if docker {
-			return f.dockerRunner.Run(d, inputType)
+		v, err := cmd.Flags().GetBool(verboseFlag)
+
+		if err != nil {
+			return err
 		}
 
-		return f.defaultRunner.Run(d, inputType)
+		verbose := strconv.FormatBool(v)
+
+		if docker {
+			return f.dockerRunner.Run(d, inputType, verbose)
+		}
+
+		return f.defaultRunner.Run(d, inputType, verbose)
 	}
 }
 
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
 	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside a docker container")
+	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
 }

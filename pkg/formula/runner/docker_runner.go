@@ -30,7 +30,7 @@ func NewDockerRunner(preRunner formula.PreRunner, postRunner formula.PostRunner,
 	return DockerRunner{preRunner, postRunner, inputRunner}
 }
 
-func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) error {
+func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType, verboseFlag string) error {
 	setup, err := d.PreRun(def)
 	if err != nil {
 		return err
@@ -40,6 +40,10 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 	args := []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
 	cmd := exec.Command(docker, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Env = os.Environ()
+
+	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, verboseFlag)
+	cmd.Env = append(cmd.Env, verboseEnv)
+
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

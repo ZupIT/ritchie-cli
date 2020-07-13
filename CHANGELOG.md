@@ -2,15 +2,34 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.18...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.19...HEAD)
 
 **Implemented enhancements:**
 
+- \[FEATURE\] Enhancement of the rit set credential command on single version [\#177](https://github.com/ZupIT/ritchie-cli/issues/177)
+
+## [1.0.0-beta.19](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.19) (2020-07-08)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.18...1.0.0-beta.19)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Check the possibility of using vendor [\#47](https://github.com/ZupIT/ritchie-cli/issues/47)
+- \[FEATURE\] List and add on set credentials [\#241](https://github.com/ZupIT/ritchie-cli/pull/241) ([victor-schumacher](https://github.com/victor-schumacher))
 - \[FEATURE\] Change Login and Init behavior [\#236](https://github.com/ZupIT/ritchie-cli/pull/236) ([marcoscostazup](https://github.com/marcoscostazup))
 - \[FEATURE\] survey prompt [\#233](https://github.com/ZupIT/ritchie-cli/pull/233) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- \[FEATURE\] Build formulas on Windows [\#232](https://github.com/ZupIT/ritchie-cli/pull/232) ([kaduartur](https://github.com/kaduartur))
+
+**Fixed bugs:**
+
+- \[FIX\] run go mod vendor [\#247](https://github.com/ZupIT/ritchie-cli/pull/247) ([kaduartur](https://github.com/kaduartur))
 
 **Merged pull requests:**
 
+- \[fix\] Signature bin windows [\#251](https://github.com/ZupIT/ritchie-cli/pull/251) ([ernelio](https://github.com/ernelio))
+- Feature/sign bin [\#248](https://github.com/ZupIT/ritchie-cli/pull/248) ([ernelio](https://github.com/ernelio))
+- \[FEATURE\] Add glide and vendor in project [\#244](https://github.com/ZupIT/ritchie-cli/pull/244) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.18 merge [\#243](https://github.com/ZupIT/ritchie-cli/pull/243) ([zup-ci](https://github.com/zup-ci))
 - \[ENHANCEMENT\] simplify PR template [\#237](https://github.com/ZupIT/ritchie-cli/pull/237) ([sandokandias](https://github.com/sandokandias))
 - modifying final stuff [\#229](https://github.com/ZupIT/ritchie-cli/pull/229) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - Feature/surveyprompt [\#225](https://github.com/ZupIT/ritchie-cli/pull/225) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
