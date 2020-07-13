@@ -51,9 +51,9 @@ func (lr ListRepoCmd) runFunc() CommandRunnerFunc {
 
 func printRepos(repos formula.Repos) {
 	table := uitable.New()
-	table.AddRow("PRIORITY", "NAME", "VERSION")
+	table.AddRow("NAME", "VERSION", "PRIORITY")
 	for _, repo := range repos {
-		table.AddRow(repo.Priority, repo.Name, repo.Version)
+		table.AddRow(repo.Name, repo.Version, repo.Priority)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
