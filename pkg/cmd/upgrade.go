@@ -3,23 +3,20 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
 type UpgradeCmd struct {
-	edition api.Edition
 	upgrade.Manager
 	resolver version.Resolver
 	upgrade.UrlFinder
 }
 
-func NewUpgradeCmd(e api.Edition, r version.Resolver, m upgrade.Manager, uf upgrade.UrlFinder) *cobra.Command {
+func NewUpgradeCmd(r version.Resolver, m upgrade.Manager, uf upgrade.UrlFinder) *cobra.Command {
 
 	u := UpgradeCmd{
-		edition: e,
 		Manager:  m,
 		resolver: r,
 		UrlFinder: uf,
@@ -39,7 +36,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return prompt.NewError(err.Error()+"\n")
 		}
-		upgradeUrl := u.Url(u.edition, u.resolver)
+		upgradeUrl := u.Url(u.resolver)
 		err = u.Run(upgradeUrl)
 		if err != nil {
 			return prompt.NewError(err.Error()+"\n")

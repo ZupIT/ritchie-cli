@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -36,23 +35,12 @@ type DefaultSetup struct {
 	ritchieHome    string
 	client         *http.Client
 	sessionManager session.Manager
-	edition        api.Edition
 }
 
 func NewDefaultSingleSetup(ritchieHome string, c *http.Client) DefaultSetup {
 	return DefaultSetup{
 		ritchieHome: ritchieHome,
 		client:      c,
-		edition:     api.Single,
-	}
-}
-
-func NewDefaultTeamSetup(ritchieHome string, c *http.Client, sess session.Manager) DefaultSetup {
-	return DefaultSetup{
-		ritchieHome:    ritchieHome,
-		client:         c,
-		sessionManager: sess,
-		edition:        api.Team,
 	}
 }
 
