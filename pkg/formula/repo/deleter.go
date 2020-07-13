@@ -22,7 +22,7 @@ func NewDeleter(ritHome string, file stream.FileWriteReadExister, dir stream.Dir
 	}
 }
 
-func (dm DeleteManager) Delete(repoName string) error {
+func (dm DeleteManager) Delete(repoName formula.RepoName) error {
 	if err := dm.deleteRepoDir(repoName); err != nil {
 		return err
 	}
@@ -32,19 +32,19 @@ func (dm DeleteManager) Delete(repoName string) error {
 	return nil
 }
 
-func (dm DeleteManager) deleteRepoDir(repoName string) error {
-	path := path.Join(dm.ritHome, reposDirName, repoName)
-	if err := dm.dir.Remove(path); err != nil {
+func (dm DeleteManager) deleteRepoDir(repoName formula.RepoName) error {
+	repoPath := path.Join(dm.ritHome, reposDirName, repoName.String())
+	if err := dm.dir.Remove(repoPath); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (dm DeleteManager) deleteFromReposFile(repoName string) error {
+func (dm DeleteManager) deleteFromReposFile(repoName formula.RepoName) error {
 	repos := formula.Repos{}
 
-	path := path.Join(dm.ritHome, reposDirName, reposFileName)
-	file, err := dm.file.Read(path)
+	repoFilePath := path.Join(dm.ritHome, reposDirName, reposFileName)
+	file, err := dm.file.Read(repoFilePath)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (dm DeleteManager) deleteFromReposFile(repoName string) error {
 		return err
 	}
 
-	if err = dm.file.Write(path, newFile); err != nil {
+	if err = dm.file.Write(repoFilePath, newFile); err != nil {
 		return err
 	}
 

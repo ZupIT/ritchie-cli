@@ -25,7 +25,7 @@ type InputList interface {
 }
 
 type InputInt interface {
-	Int(name string) (int64, error)
+	Int(name string, helper ...string) (int64, error)
 }
 
 type InputEmail interface {

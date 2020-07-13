@@ -1,18 +1,11 @@
 package formula
 
-type Tag struct {
-	Name   string `json:"name"`
-	ZipUrl string `json:"zipball_url"`
-}
-
-type Tags map[string]string
-
 type Repo struct {
-	Name     string `json:"name"`
-	ZipUrl   string `json:"zipUrl"`
-	Version  string `json:"version"`
-	Token    string `json:"token,omitempty"`
-	Priority int    `json:"priority"`
+	Name     RepoName    `json:"name"`
+	Version  RepoVersion `json:"version"`
+	Url      string      `json:"url"`
+	Token    string      `json:"token,omitempty"`
+	Priority int         `json:"priority"`
 }
 
 type Repos []Repo
@@ -29,8 +22,20 @@ func (r Repos) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
+type RepoName string
+
+func (r RepoName) String() string {
+	return string(r)
+}
+
+type RepoVersion string
+
+func (r RepoVersion) String() string {
+	return string(r)
+}
+
 type RepositoryAdder interface {
-	Add(d Repo) error
+	Add(repo Repo) error
 }
 
 type RepositoryLister interface {
@@ -38,15 +43,19 @@ type RepositoryLister interface {
 }
 
 type RepositoryUpdater interface {
-	Update() error
+	Update(name RepoName, version RepoVersion) error
 }
 
 type RepositoryDeleter interface {
-	Delete(name string) error
+	Delete(name RepoName) error
 }
 
 type RepositoryPrioritySetter interface {
-	SetPriority(repoName string, priority int) error
+	SetPriority(name RepoName, priority int) error
+}
+
+type RepositoryCreator interface {
+	Create(repo Repo) error
 }
 
 type RepositoryAddLister interface {
@@ -57,4 +66,14 @@ type RepositoryAddLister interface {
 type RepositoryDelLister interface {
 	RepositoryDeleter
 	RepositoryLister
+}
+
+type RepositoryListCreator interface {
+	RepositoryLister
+	RepositoryCreator
+}
+
+type RepositoryListUpdater interface {
+	RepositoryLister
+	RepositoryUpdater
 }

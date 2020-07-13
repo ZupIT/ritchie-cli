@@ -28,7 +28,7 @@ func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister, dir str
 	}
 }
 
-func (sm SetPriorityManager) SetPriority(repoName string, priority int) error {
+func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int) error {
 	var repos formula.Repos
 	repoPath := path.Join(sm.ritHome, reposDirName, reposFileName)
 	if !sm.file.Exists(repoPath) {

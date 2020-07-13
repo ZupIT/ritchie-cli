@@ -44,7 +44,7 @@ func (dr DeleteRepoCmd) runFunc() CommandRunnerFunc {
 
 		var reposNames []string
 		for _, r := range repos {
-			reposNames = append(reposNames, r.Name)
+			reposNames = append(reposNames, r.Name.String())
 		}
 
 		repo, err := dr.InputList.List("Repository:", reposNames)
@@ -52,7 +52,7 @@ func (dr DeleteRepoCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if err = dr.Delete(repo); err != nil {
+		if err = dr.Delete(formula.RepoName(repo)); err != nil {
 			return err
 		}
 

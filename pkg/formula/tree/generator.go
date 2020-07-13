@@ -13,7 +13,7 @@ const (
 	root        = "root"
 	rootPattern = "root_%s"
 	helpFile    = "help.txt"
-	configFile	= "config.json"
+	configFile  = "config.json"
 )
 
 type GeneratorManager struct {
@@ -26,7 +26,6 @@ func NewGenerator(dir stream.DirLister, file stream.FileReadExister) GeneratorMa
 }
 
 func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
-
 	dirs, err := ge.dir.List(repoPath, false)
 	if err != nil {
 		return formula.Tree{}, err
@@ -77,6 +76,10 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			return cmds, nil
 		}
 
+		if dir == "bin" { // Ignore /bin directory
+			continue
+		}
+
 		formulaPath := path.Join(dirPath, dir)
 		helpFilePath := path.Join(formulaPath, helpFile)
 		var helpFile []byte
@@ -88,15 +91,14 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 		}
 
 		cmd := api.Command{
-			Id:      fmt.Sprintf("%s_%s", cmd.Id, dir),
-			Parent:  cmd.Id,
-			Usage:   dir,
-			Help:    string(helpFile),
+			Id:     fmt.Sprintf("%s_%s", cmd.Id, dir),
+			Parent: cmd.Id,
+			Usage:  dir,
+			Help:   string(helpFile),
 		}
 
 		configFilePath := path.Join(formulaPath, configFile)
-
-		if ge.file.Exists(configFilePath) { // Check if help.txt exist
+		if ge.file.Exists(configFilePath) { // Case config.json exists, set cmd.Formula as true
 			cmd.Formula = true
 		}
 

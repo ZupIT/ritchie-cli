@@ -2,15 +2,11 @@ package repo
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
 	"path"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 const (
@@ -20,7 +16,7 @@ const (
 
 type AddManager struct {
 	ritHome string
-	client  *http.Client
+	repo    formula.RepositoryCreator
 	tree    formula.TreeGenerator
 	dir     stream.DirCreateListCopyRemover
 	file    stream.FileWriteCreatorReadExistRemover
@@ -28,14 +24,14 @@ type AddManager struct {
 
 func NewAdder(
 	ritHome string,
-	client *http.Client,
+	repo formula.RepositoryCreator,
 	tree formula.TreeGenerator,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileWriteCreatorReadExistRemover,
 ) AddManager {
 	return AddManager{
 		ritHome: ritHome,
-		client:  client,
+		repo:    repo,
 		tree:    tree,
 		dir:     dir,
 		file:    file,
@@ -43,7 +39,7 @@ func NewAdder(
 }
 
 func (ad AddManager) Add(repo formula.Repo) error {
-	if err := ad.downloadRepo(repo); err != nil {
+	if err := ad.repo.Create(repo); err != nil {
 		return err
 	}
 
@@ -66,7 +62,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		return err
 	}
 
-	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name)
+	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name.String())
 
 	tree, err := ad.tree.Generate(newRepoPath)
 	if err != nil {
@@ -80,64 +76,6 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	}
 
 	if err := ad.file.Write(treeFilePath, bytes); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (ad AddManager) downloadRepo(repo formula.Repo) error {
-	req, err := http.NewRequest(http.MethodGet, repo.ZipUrl, nil)
-	if err != nil {
-		return err
-	}
-
-	if repo.Token != "" {
-		authToken := fmt.Sprintf("token %s", repo.Token)
-		req.Header.Add(headers.Authorization, authToken)
-	}
-
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	resp, err := ad.client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name)
-	if err := ad.dir.Remove(newRepoPath); err != nil {
-		return err
-	}
-
-	if err := ad.dir.Create(newRepoPath); err != nil {
-		return err
-	}
-
-	zipFile := path.Join(newRepoPath, fmt.Sprintf("%s.zip", repo.Name))
-	if err := ad.file.Create(zipFile, resp.Body); err != nil {
-		return err
-	}
-
-	if err := streams.Unzip(zipFile, newRepoPath); err != nil {
-		return err
-	}
-
-	if err := ad.file.Remove(zipFile); err != nil {
-		return err
-	}
-
-	dirs, err := ad.dir.List(newRepoPath, false)
-	if err != nil {
-		return err
-	}
-
-	src := path.Join(newRepoPath, dirs[0])
-	if err := ad.dir.Copy(src, newRepoPath); err != nil {
-		return err
-	}
-
-	if err := ad.dir.Remove(src); err != nil {
 		return err
 	}
 
@@ -163,7 +101,20 @@ func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
 }
 
 func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
-	repos = append(repos, repo)
+	exist := func() bool {
+		for i := range repos {
+			r := repos[i]
+			if repo.Name == r.Name {
+				repos[i].Priority = repo.Priority
+				return true
+			}
+		}
+		return false
+	}
+
+	if !exist() {
+		repos = append(repos, repo)
+	}
 
 	for i := range repos {
 		r := repos[i]

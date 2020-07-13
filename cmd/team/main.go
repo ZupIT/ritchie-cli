@@ -15,6 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"k8s.io/kubectl/pkg/util/templates"
@@ -75,9 +76,16 @@ func buildCommands() *cobra.Command {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
+	gitRepo := github.NewRepoManager(http.DefaultClient)
 	treeGen := tree.NewGenerator(dirManager, fileManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, http.DefaultClient, treeGen, dirManager, fileManager)
+
+	repoCreator := repo.NewCreator(ritchieHomeDir, gitRepo, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoCreator, treeGen, dirManager, fileManager)
+	repoListCreator := repo.NewListCreator(repoLister, repoCreator)
+	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListCreator, treeGen, fileManager)
+	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
+	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
 	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
 	sessionManager := session.NewManager(ritchieHomeDir)
@@ -173,7 +181,8 @@ func buildCommands() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(http.DefaultClient, repoAdder, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
@@ -186,6 +195,7 @@ func buildCommands() *cobra.Command {
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
+	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)

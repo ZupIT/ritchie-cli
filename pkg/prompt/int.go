@@ -15,17 +15,22 @@ func NewSurveyInt() SurveyInt {
 	return SurveyInt{}
 }
 
-func (SurveyInt) Int(name string) (int64, error) {
-
+func (SurveyInt) Int(name string, helper ...string) (int64, error) {
 	var value string
 
 	validationQs := []*survey.Question{
 		{
-			Name:     "name",
-			Prompt:   &survey.Input{Message: name},
+			Name: "name",
 			Validate: validateSurveyIntIn,
 		},
 	}
+
+	if len(helper) > 0 {
+		validationQs[0].Prompt = &survey.Input{Message: name, Help: helper[0]}
+	} else {
+		validationQs[0].Prompt = &survey.Input{Message: name}
+	}
+
 	if err := survey.Ask(validationQs, &value); err != nil {
 		return 0, err
 	}
