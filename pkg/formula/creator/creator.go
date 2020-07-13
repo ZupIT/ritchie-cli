@@ -146,7 +146,9 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 		tPath := path.Join(workSpacePath, path.Join(d...))
 		helpPath := fmt.Sprintf("%s/help.txt", tPath)
 		if !c.file.Exists(helpPath) {
-			err := c.file.Write(helpPath, []byte(template.Help))
+			folderName := path.Base(tPath)
+			tpl := strings.ReplaceAll(template.Help, "{{folderName}}", folderName)
+			err := c.file.Write(helpPath, []byte(tpl))
 			if err != nil {
 				return err
 			}
