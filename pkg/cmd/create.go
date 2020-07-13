@@ -8,7 +8,7 @@ import (
 func NewCreateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "create SUBCOMMAND",
-		Short: "Create objects (users, formulas and other)",
+		Short: "Create formulas",
 		Long:  `Create objects like users, etc.`,
 	}
 }

@@ -12,7 +12,7 @@ It can be used to update formulas, repositories and etc.
 func NewUpdateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "update SUBCOMMAND",
-		Short: "Update objects (repo and others)",
+		Short: "Update repositories",
 		Long:  descUpdateLong,
 	}
 }

@@ -22,7 +22,7 @@ type autocompleteCmd struct {
 func NewAutocompleteCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "completion SUBCOMMAND",
-		Short:   "Add autocomplete for terminal (bash or zsh)",
+		Short:   "Add autocomplete for terminal (bash, zsh)",
 		Long:    `Add autocomplete for terminal, Available for (bash, zsh).`,
 		Example: "rit completion zsh",
 	}
