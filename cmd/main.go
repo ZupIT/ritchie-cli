@@ -10,6 +10,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/github"
+	"github.com/ZupIT/ritchie-cli/pkg/session/validator"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -35,7 +36,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security/secsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
-	"github.com/ZupIT/ritchie-cli/pkg/session/sesssingle"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/workspace"
 )
@@ -85,11 +85,11 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	sessionValidator := sesssingle.NewValidator(sessionManager)
+	sessionValidator := validator.NewValidator(sessionManager)
 	passphraseManager := secsingle.NewPassphraseManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
 	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.SingleCoreCmds)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds)
 	credSettings := credsingle.NewSingleSettings(fileManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
@@ -133,7 +133,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(api.Single, defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
+	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
 
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
@@ -169,7 +169,7 @@ func buildCommands() *cobra.Command {
 	showCmd.AddCommand(showCtxCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
 
-	formulaCmd := cmd.NewFormulaCommand(api.SingleCoreCmds, treeManager, defaultRunner, dockerRunner)
+	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, defaultRunner, dockerRunner)
 	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}

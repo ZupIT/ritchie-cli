@@ -8,10 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
@@ -22,8 +20,8 @@ import (
 
 const (
 	latestVersionMsg            = "Latest available version: %s"
-	versionMsg                  = "%s (%s)\n  Build date: %s\n  Built with: %s\n"
-	versionMsgWithLatestVersion = "%s (%s)\n  %s\n  Build date: %s\n  Built with: %s\n"
+	versionMsg                  = "%s\n  Build date: %s\n  Built with: %s\n"
+	versionMsgWithLatestVersion = "%s\n  %s\n  Build date: %s\n  Built with: %s\n"
 	cmdUse                      = "rit"
 	cmdShortDescription         = "rit is a NoOps CLI"
 	cmdDescription              = `A CLI that developers can build and operate
@@ -80,12 +78,6 @@ type singleRootCmd struct {
 	sessionValidator session.Validator
 }
 
-type teamRootCmd struct {
-	workspaceChecker workspace.Checker
-	serverFinder     server.Finder
-	sessionValidator session.Validator
-}
-
 // NewSingleRootCmd creates the root command for single edition.
 func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command {
 	o := &singleRootCmd{
@@ -95,9 +87,9 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
-		Version:            versionFlag(api.Single),
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
+		Version:            versionFlag(),
 		PersistentPreRunE:  o.PreRunFunc(),
 		PersistentPostRunE: o.PostRunFunc(),
 		RunE:               runHelp,
@@ -106,30 +98,6 @@ func NewSingleRootCmd(wc workspace.Checker, sv session.Validator) *cobra.Command
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
-	return cmd
-}
-
-// NewTeamRootCmd creates the root command for team edition.
-func NewTeamRootCmd(wc workspace.Checker,
-	sf server.Finder,
-	sv session.Validator) *cobra.Command {
-	o := &teamRootCmd{
-		workspaceChecker: wc,
-		serverFinder:     sf,
-		sessionValidator: sv,
-	}
-
-	cmd := &cobra.Command{
-		Use:                cmdUse,
-		Version:            versionFlag(api.Team),
-		Short:              cmdShortDescription,
-		Long:               cmdDescription,
-		PersistentPreRunE:  o.PreRunFunc(),
-		PersistentPostRunE: o.PostRunFunc(),
-		RunE:               runHelp,
-		SilenceErrors:      true,
-	}
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	return cmd
 }
 
@@ -152,41 +120,7 @@ func (o *singleRootCmd) PreRunFunc() CommandRunnerFunc {
 	}
 }
 
-func (o *teamRootCmd) PreRunFunc() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		if err := o.workspaceChecker.Check(); err != nil {
-			return err
-		}
-
-		if isWhitelist(teamIgnorelist, cmd) || isCompleteCmd(cmd) {
-			return nil
-		}
-
-		cfg, err := o.serverFinder.Find()
-		if err != nil {
-			return err
-		} else if cfg.URL == "" {
-			fmt.Println(MsgInit)
-			os.Exit(0)
-		}
-
-		if err := o.sessionValidator.Validate(); err != nil {
-			fmt.Println(MsgSession)
-			os.Exit(0)
-		}
-
-		return nil
-	}
-}
-
 func (o *singleRootCmd) PostRunFunc() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		verifyNewVersion(cmd)
-		return nil
-	}
-}
-
-func (o *teamRootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		verifyNewVersion(cmd)
 		return nil
@@ -212,7 +146,7 @@ func isCompleteCmd(cmd *cobra.Command) bool {
 	return strings.Contains(cmd.CommandPath(), "__complete")
 }
 
-func versionFlag(edition api.Edition) string {
+func versionFlag() string {
 	resolver := version.DefaultVersionResolver{
 		StableVersionUrl: StableVersionUrl,
 		FileUtilService:  fileutil.DefaultService{},
@@ -221,9 +155,9 @@ func versionFlag(edition api.Edition) string {
 	latestVersion, err := resolver.StableVersion()
 	if err == nil && latestVersion != Version {
 		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
-		return fmt.Sprintf(versionMsgWithLatestVersion, Version, edition, formattedLatestVersionMsg, BuildDate, runtime.Version())
+		return fmt.Sprintf(versionMsgWithLatestVersion, Version, formattedLatestVersionMsg, BuildDate, runtime.Version())
 	}
-	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
+	return fmt.Sprintf(versionMsg, Version, BuildDate, runtime.Version())
 }
 
 func runHelp(cmd *cobra.Command, args []string) error {
