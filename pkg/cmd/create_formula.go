@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/template"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -32,24 +33,27 @@ type createFormulaCmd struct {
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
+	tplM            template.Manager
 }
 
 // CreateFormulaCmd creates a new cmd instance
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
+	tplM template.Manager,
 	workspace formula.WorkspaceAddListValidator,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 ) *cobra.Command {
 	c := createFormulaCmd{
-		homeDir,
-		formula,
-		workspace,
-		inText,
-		inTextValidator,
-		inList,
+		homeDir:         homeDir,
+		formula:         formula,
+		workspace:       workspace,
+		inText:          inText,
+		inTextValidator: inTextValidator,
+		inList:          inList,
+		tplM:            tplM,
 	}
 
 	cmd := &cobra.Command{
@@ -79,7 +83,12 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		lang, err := c.inList.List("Choose the language: ", formula.Languages)
+		languages, err := c.tplM.Languages()
+		if err != nil {
+			return err
+		}
+
+		lang, err := c.inList.List("Choose the language: ", languages)
 		if err != nil {
 			return err
 		}
