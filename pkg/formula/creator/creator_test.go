@@ -7,7 +7,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -19,13 +19,11 @@ const (
 	fCmdCorrectNode   = "rit scaffold generate test_node"
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
-	fCmdCorrectPhp    = "rit scaffold generate test_php"
 	langGo            = "go"
-	langJava          = "Java"
-	langNode          = "Node"
-	langPython        = "Python"
-	langShell         = "Shell"
-	langPhp           = "Php"
+	langJava          = "java"
+	langNode          = "node"
+	langPython        = "python"
+	langShell         = "bash shell"
 )
 
 func TestCreator(t *testing.T) {
@@ -40,7 +38,7 @@ func TestCreator(t *testing.T) {
 
 	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
 
-	tplM := template.NewManagerCustom("../../../testdata/templates/crete_formula")
+	tplM := template.NewManager("../../../testdata")
 
 	type in struct {
 		formCreate formula.Create
@@ -91,70 +89,74 @@ func TestCreator(t *testing.T) {
 				err: nil,
 			},
 		},
-		// {
-		// 	name: "command correct-java",
-		// 	in: in{
-		// 		formCreate: formula.Create{
-		// 			FormulaCmd:    fCmdCorrectJava,
-		// 			Lang:          langJava,
-		// 			WorkspacePath: resultDir,
-		// 			FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_java"),
-		// 		},
-		// 		dir:  dirManager,
-		// 		file: fileManager,
-		// 	},
-		// 	out: out{
-		// 		err: nil,
-		// 	},
-		// },
-		// {
-		// 	name: "command correct-node",
-		// 	in: in{
-		// 		formCreate: formula.Create{
-		// 			FormulaCmd:    fCmdCorrectNode,
-		// 			Lang:          langNode,
-		// 			WorkspacePath: resultDir,
-		// 			FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_node"),
-		// 		},
-		// 		dir:  dirManager,
-		// 		file: fileManager,
-		// 	},
-		// 	out: out{
-		// 		err: nil,
-		// 	},
-		// },
-		// {
-		// 	name: "command correct-python",
-		// 	in: in{
-		// 		formCreate: formula.Create{
-		// 			FormulaCmd:    fCmdCorrectPython,
-		// 			Lang:          langPython,
-		// 			WorkspacePath: resultDir,
-		// 			FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_python"),
-		// 		},
-		// 		dir:  dirManager,
-		// 		file: fileManager,
-		// 	},
-		// 	out: out{
-		// 		err: nil,
-		// 	},
-		// },
-		// {
-		// 	name: "command correct-shell",
-		// 	in: in{
-		// 		formCreate: formula.Create{
-		// 			FormulaCmd:    fCmdCorrectShell,
-		// 			Lang:          langShell,
-		// 			WorkspacePath: resultDir,
-		// 			FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_shell"),
-		// 		},
-		// 		dir:  dirManager,
-		// 		file: fileManager,
-		// 	},
-		// 	out: out{
-		// 		err: nil,
-		// 	},
-		// },
+		{
+			name: "command correct-java",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdCorrectJava,
+					Lang:          langJava,
+					WorkspacePath: resultDir,
+					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_java"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+				tplM: tplM,
+			},
+			out: out{
+				err: nil,
+			},
+		},
+		{
+			name: "command correct-node",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdCorrectNode,
+					Lang:          langNode,
+					WorkspacePath: resultDir,
+					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_node"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+				tplM: tplM,
+			},
+			out: out{
+				err: nil,
+			},
+		},
+		{
+			name: "command correct-python",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdCorrectPython,
+					Lang:          langPython,
+					WorkspacePath: resultDir,
+					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_python"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+				tplM: tplM,
+			},
+			out: out{
+				err: nil,
+			},
+		},
+		{
+			name: "command correct-shell",
+			in: in{
+				formCreate: formula.Create{
+					FormulaCmd:    fCmdCorrectShell,
+					Lang:          langShell,
+					WorkspacePath: resultDir,
+					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_shell"),
+				},
+				dir:  dirManager,
+				file: fileManager,
+				tplM: tplM,
+			},
+			out: out{
+				err: nil,
+			},
+		},
 	}
 
 	for _, tt := range tests {

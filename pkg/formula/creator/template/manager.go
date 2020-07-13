@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"path"
 	"strings"
-
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
 const (
@@ -29,23 +27,16 @@ type File struct {
 	IsDir bool
 }
 
-func NewManager() Manager {
-	return DefaultManager{}
-}
-
-func NewManagerCustom(templateDir string) Manager {
-	return DefaultManager{templateDir}
+func NewManager(ritchieHome string) Manager {
+	return DefaultManager{ritchieHome}
 }
 
 type DefaultManager struct {
-	customTemplateDir string
+	ritchieHome string
 }
 
 func (tm DefaultManager) templateDir() string {
-	if tm.customTemplateDir != "" {
-		return tm.customTemplateDir
-	}
-	return path.Join(api.RitchieHomeDir(), path.Join(templatePath...))
+	return path.Join(tm.ritchieHome, path.Join(templatePath...))
 }
 
 func (tm DefaultManager) Languages() ([]string, error) {

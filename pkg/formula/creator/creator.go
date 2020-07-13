@@ -6,11 +6,10 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -78,11 +77,11 @@ func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath s
 		return err
 	}
 
-	if err := createHelpFiles(fCmdName, workSpcPath); err != nil {
+	if err := c.createHelpFiles(fCmdName, workSpcPath); err != nil {
 		return err
 	}
 	if err := c.createUmaskFile(fPath); err != nil {
-
+		return err
 	}
 
 	if err := c.applyLangTemplate(lang, fPath, workSpcPath); err != nil {
@@ -110,11 +109,14 @@ func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string
 				return err
 			}
 		} else {
-			tpl, err := c.file.Read(f.Path)
+			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, workspacePath)
 			if err != nil {
 				return err
 			}
-			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, workspacePath)
+			if c.file.Exists(newPath) {
+				continue
+			}
+			tpl, err := c.file.Read(f.Path)
 			if err != nil {
 				return err
 			}
@@ -137,14 +139,14 @@ func (c CreateManager) createUmaskFile(fPath string) error {
 	return c.file.Write(path.Join(fPath, "set_umask.sh"), []byte(template.Umask))
 }
 
-func createHelpFiles(formulaCmdName, workSpacePath string) error {
+func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) error {
 	dirs := strings.Split(formulaCmdName, " ")
 	for i := 0; i < len(dirs); i++ {
 		d := dirs[0 : i+1]
 		tPath := path.Join(workSpacePath, path.Join(d...))
 		helpPath := fmt.Sprintf("%s/help.txt", tPath)
-		if !fileutil.Exists(helpPath) {
-			err := fileutil.WriteFile(helpPath, []byte(template.Help))
+		if !c.file.Exists(helpPath) {
+			err := c.file.Write(helpPath, []byte(template.Help))
 			if err != nil {
 				return err
 			}
