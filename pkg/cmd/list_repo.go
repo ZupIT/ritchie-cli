@@ -7,6 +7,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
+
+const (
+	totalReposMsg = "There are %v repos"
+	totalOneRepoMsg = "There is 1 repo"
 )
 
 type ListRepoCmd struct {
@@ -33,15 +39,21 @@ func (lr ListRepoCmd) runFunc() CommandRunnerFunc {
 
 		printRepos(repos)
 
+		if len(repos) != 1 {
+			prompt.Info(fmt.Sprintf(totalReposMsg, len(repos)))
+		} else {
+			prompt.Info(totalOneRepoMsg)
+		}
+
 		return nil
 	}
 }
 
 func printRepos(repos formula.Repos) {
 	table := uitable.New()
-	table.AddRow("PRIORITY", "NAME", "VERSION")
+	table.AddRow("NAME", "VERSION", "PRIORITY")
 	for _, repo := range repos {
-		table.AddRow(repo.Priority, repo.Name, repo.Version)
+		table.AddRow(repo.Name, repo.Version, repo.Priority)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
