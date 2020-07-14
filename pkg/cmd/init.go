@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -28,7 +29,6 @@ type InitCmd struct {
 	git  github.Repositories
 }
 
-// NewInitCmd creates init command for single edition
 func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories) *cobra.Command {
 	o := InitCmd{repo: repo, git: git}
 
@@ -50,7 +50,7 @@ func (in InitCmd) runPrompt() CommandRunnerFunc {
 			Priority: 0,
 		}
 
-		s := spinner.StartNew("We are adding the commons repository, wait a moment, please...")
+		s := spinner.StartNew("Adding the commons repository...")
 		time.Sleep(time.Second * 2)
 
 		repoInfo := github.NewRepoInfo(repo.Url, repo.Token)

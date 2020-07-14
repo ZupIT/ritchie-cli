@@ -11,7 +11,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -21,8 +20,8 @@ import (
 
 const (
 	latestVersionMsg            = "Latest available version: %s"
-	versionMsg                  = "%s (%s)\n  Build date: %s\n  Built with: %s\n"
-	versionMsgWithLatestVersion = "%s (%s)\n  %s\n  Build date: %s\n  Built with: %s\n"
+	versionMsg                  = "%s\n  Build date: %s\n  Built with: %s\n"
+	versionMsgWithLatestVersion = "%s\n  %s\n  Build date: %s\n  Built with: %s\n"
 	cmdUse                      = "rit"
 	cmdShortDescription         = "rit is a NoOps CLI"
 	cmdDescription              = `A CLI that developers can build and operate
@@ -67,9 +66,9 @@ func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker) *cobra.Command 
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
-		Version:            versionFlag(api.Single),
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
+		Version:            versionFlag(),
 		PersistentPreRunE:  o.PreRunFunc(),
 		PersistentPostRunE: o.PostRunFunc(),
 		RunE:               runHelp,
@@ -126,7 +125,7 @@ func isCompleteCmd(cmd *cobra.Command) bool {
 	return strings.Contains(cmd.CommandPath(), "__complete")
 }
 
-func versionFlag(edition api.Edition) string {
+func versionFlag() string {
 	resolver := version.DefaultVersionResolver{
 		StableVersionUrl: StableVersionUrl,
 		FileUtilService:  fileutil.DefaultService{},
@@ -135,11 +134,11 @@ func versionFlag(edition api.Edition) string {
 	latestVersion, err := resolver.StableVersion()
 	if err == nil && latestVersion != Version {
 		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
-		return fmt.Sprintf(versionMsgWithLatestVersion, Version, edition, formattedLatestVersionMsg, BuildDate, runtime.Version())
+		return fmt.Sprintf(versionMsgWithLatestVersion, Version, formattedLatestVersionMsg, BuildDate, runtime.Version())
 	}
-	return fmt.Sprintf(versionMsg, Version, edition, BuildDate, runtime.Version())
+	return fmt.Sprintf(versionMsg, Version, BuildDate, runtime.Version())
 }
 
-func runHelp(cmd *cobra.Command, args []string) error {
+func runHelp(cmd *cobra.Command, _ []string) error {
 	return cmd.Help()
 }

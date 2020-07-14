@@ -18,7 +18,6 @@ MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
-COMMONS_REPO_URL=https://github.com/kaduartur/ritchie-formulas
 IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+-beta.[0-9]+")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
@@ -110,13 +109,9 @@ clean:
 unit-test:
 	./run-tests.sh
 
-functional-test-single:
+functional-test:
 	mkdir -p $(BIN)
-	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/single/... | grep -v vendor/`
-
-functional-test-team:
-	mkdir -p $(BIN)
-	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/team/... | grep -v vendor/`
+	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/... | grep -v vendor/`
 
 rebase-nightly:
 	git config --global user.email "$(GIT_EMAIL)"

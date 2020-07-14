@@ -7,7 +7,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -21,7 +20,6 @@ type setCredentialCmd struct {
 	credential.Setter
 	credential.Settings
 	credential.SingleSettings
-	edition api.Edition
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
@@ -41,34 +39,11 @@ func NewSingleSetCredentialCmd(
 		st,
 		nil,
 		ss,
-		api.Single,
 		it,
 		ib,
 		il,
 		ip,
 		nil}
-	return newCmd(s)
-}
-
-// NewTeamSetCredentialCmd creates a new cmd instance
-func NewTeamSetCredentialCmd(
-	st credential.Setter,
-	si credential.Settings,
-	it prompt.InputText,
-	ib prompt.InputBool,
-	il prompt.InputList,
-	ip prompt.InputPassword,
-	im prompt.InputMultiline) *cobra.Command {
-	s := &setCredentialCmd{
-		st,
-		si,
-		nil,
-		api.Team,
-		it,
-		ib,
-		il,
-		ip,
-		im}
 	return newCmd(s)
 }
 
@@ -102,14 +77,7 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 }
 
 func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
-	switch s.edition {
-	case api.Single:
-		return s.singlePrompt()
-	case api.Team:
-		return s.teamPrompt()
-	default:
-		return credential.Detail{}, prompt.NewError("invalid CLI build, no edition defined")
-	}
+	return s.singlePrompt()
 }
 
 func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
@@ -191,52 +159,6 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 	return credDetail, nil
 }
 
-func (s setCredentialCmd) teamPrompt() (credential.Detail, error) {
-	var credDetail credential.Detail
-
-	cfg, err := s.Fields()
-	if err != nil {
-		return credDetail, err
-	}
-
-	providers := make([]string, 0, len(cfg))
-	for k := range cfg {
-		providers = append(providers, k)
-	}
-
-	if err := s.profile(&credDetail); err != nil {
-		return credDetail, err
-	}
-
-	service, err := s.List("Provider: ", providers)
-	if err != nil {
-		return credDetail, err
-	}
-
-	credentials := make(map[string]string)
-	fields := cfg[service]
-	for _, f := range fields {
-		var val string
-		var err error
-		field := strings.ToLower(f.Name)
-		lab := fmt.Sprintf("%s %s: ", strings.Title(service), f.Name)
-		if f.Type == prompt.PasswordType {
-			val, err = s.Password(lab)
-		} else {
-			val, err = s.Text(lab, true)
-		}
-		if err != nil {
-			return credDetail, err
-		}
-		credentials[field] = val
-	}
-
-	credDetail.Credential = credentials
-	credDetail.Service = service
-
-	return credDetail, nil
-}
-
 func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		cred, err := s.stdinResolver()
@@ -256,18 +178,12 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 	var credDetail credential.Detail
 
-	if s.edition == api.Single || s.edition == api.Team {
-
-		err := stdin.ReadJson(os.Stdin, &credDetail)
-		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
-			return credDetail, err
-		}
-
-		return credDetail, nil
+	err := stdin.ReadJson(os.Stdin, &credDetail)
+	if err != nil {
+		prompt.Error(stdin.MsgInvalidInput)
+		return credDetail, err
 	}
-
-	return credDetail, prompt.NewError("invalid CLI build, no edition defined")
+	return credDetail, nil
 }
 
 func (s setCredentialCmd) profile(credDetail *credential.Detail) error {

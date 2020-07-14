@@ -1,4 +1,4 @@
-package sesssingle
+package validator
 
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/session"

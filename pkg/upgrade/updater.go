@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	upgradeUrlFormat = "https://commons-repo.ritchiecli.io/%s/%s/%s/rit"
+	upgradeUrlFormat = "https://commons-repo.ritchiecli.io/2/%s/%s/rit" //TODO: Define new url for upgrade
 )
 
 type Updater interface {
