@@ -9,6 +9,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
+	"github.com/spf13/cobra"
 )
 
 type inputTextMock struct{}
@@ -49,7 +50,7 @@ func (inputPasswordMock) Password(label string) (string, error) {
 
 type autocompleteGenMock struct{}
 
-func (autocompleteGenMock) Generate(s autocomplete.ShellName) (string, error) {
+func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command) (string, error) {
 	return "autocomplete", nil
 }
 
