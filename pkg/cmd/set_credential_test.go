@@ -5,11 +5,11 @@ import (
 )
 
 func TestNewSingleSetCredentialCmd(t *testing.T) {
-	cmd := NewSingleSetCredentialCmd(credSetterMock{}, singleCredSettingsMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{})
+	cmd := NewSetCredentialCmd(credSetterMock{}, singleCredSettingsMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{})
 
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
-		t.Errorf("NewSingleSetCredentialCmd got %v", cmd)
+		t.Errorf("NewSetCredentialCmd got %v", cmd)
 	}
 
 	if err := cmd.Execute(); err != nil {

@@ -8,7 +8,6 @@ import (
 
 const (
 	ritchieHomePattern = "%s/.rit"
-	// CoreCmdsDesc commands group description
 	CoreCmdsDesc = "core commands:"
 )
 

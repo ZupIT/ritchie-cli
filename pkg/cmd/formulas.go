@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	subCommand = " SUBCOMMAND"
-	Group      = "group"
-	dockerFlag = "docker"
-	rootCmd    = "root"
+	subCommand  = " SUBCOMMAND"
+	Group       = "group"
+	dockerFlag  = "docker"
+	rootCmdName = "root"
 )
 
 type FormulaCommand struct {
@@ -43,7 +43,7 @@ func NewFormulaCommand(
 func (f FormulaCommand) Add(root *cobra.Command) error {
 	treeRep := f.treeManager.MergedTree(false)
 	commands := make(map[string]*cobra.Command)
-	commands[rootCmd] = root
+	commands[rootCmdName] = root
 
 	for _, cmd := range treeRep.Commands {
 		cmdPath := api.Command{Parent: cmd.Parent, Usage: cmd.Usage}
@@ -67,7 +67,7 @@ func (f FormulaCommand) Add(root *cobra.Command) error {
 
 func newSubCmd(cmd api.Command) *cobra.Command {
 	var group string
-	if cmd.Parent == rootCmd {
+	if cmd.Parent == rootCmdName {
 		group = fmt.Sprintf("%s repo commands:", cmd.Repo)
 	}
 
@@ -90,7 +90,7 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 
 	addFlags(formulaCmd)
 	path := strings.ReplaceAll(strings.Replace(cmd.Parent, "root", "", 1), "_", string(os.PathSeparator))
-	path =  fmt.Sprintf("%s%s%s", path, string(os.PathSeparator), cmd.Usage)
+	path = fmt.Sprintf("%s%s%s", path, string(os.PathSeparator), cmd.Usage)
 	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, path)
 
 	return formulaCmd

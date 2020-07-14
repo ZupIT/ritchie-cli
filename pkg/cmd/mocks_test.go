@@ -3,15 +3,14 @@ package cmd
 import (
 	"errors"
 
+	"github.com/docker/docker/api/server"
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/ZupIT/ritchie-cli/pkg/security"
-	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
-	"github.com/spf13/cobra"
 )
 
 type inputTextMock struct{}
@@ -226,18 +225,6 @@ func (repoUpdaterMock) Update() error {
 	return nil
 }
 
-type loginManagerMock struct{}
-
-func (loginManagerMock) Login(security.User) error {
-	return nil
-}
-
-type logoutManagerMock struct{}
-
-func (logoutManagerMock) Logout() error {
-	return nil
-}
-
 type credSetterMock struct{}
 
 func (credSetterMock) Set(d credential.Detail) error {
@@ -296,12 +283,6 @@ func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
 }
 
-type passphraseManagerMock struct{}
-
-func (passphraseManagerMock) Save(security.Passphrase) error {
-	return nil
-}
-
 type findSetterServerMock struct{}
 
 func (findSetterServerMock) Set(*server.Config) error {
@@ -346,14 +327,6 @@ func (m inputTextCustomMock) TextWithValidate(name string, validate func(interfa
 	return m.textWithValidate(name, validate)
 }
 
-type loginManagerCustomMock struct {
-	login func(security.User) error
-}
-
-func (m loginManagerCustomMock) Login(user security.User) error {
-	return m.login(user)
-}
-
 type inputURLCustomMock struct {
 	url func(name, defaultValue string) (string, error)
 }
@@ -374,18 +347,4 @@ type InputMultilineMock struct{}
 
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
-}
-
-type otpResolverMock struct{}
-
-func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
-	return otp.Response{Otp: true}, nil
-}
-
-type otpResolverCustomMock struct {
-	requestOtp func(url, organization string) (otp.Response, error)
-}
-
-func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Response, error) {
-	return m.requestOtp(url, organization)
 }

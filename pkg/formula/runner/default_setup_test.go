@@ -1,13 +1,13 @@
 package runner
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"net/http"
 	"os"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 func TestDefaultSetup_Setup(t *testing.T) {
@@ -25,7 +25,6 @@ func TestDefaultSetup_Setup(t *testing.T) {
 	home := os.TempDir()
 
 	type in struct {
-		sess   session.Manager
 		config string
 		bundle string
 	}
@@ -38,24 +37,12 @@ func TestDefaultSetup_Setup(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				sess: sessManagerMock{sess: session.Session{
-					AccessToken:  "1234",
-					Organization: "my-org",
-					Username:     "fakename",
-					Secret:       "1234",
-				}},
 			},
 			want: nil,
 		},
 		{
 			name: "config not found",
 			in: in{
-				sess: sessManagerMock{sess: session.Session{
-					AccessToken:  "1234",
-					Organization: "my-org",
-					Username:     "fakename",
-					Secret:       "1234",
-				}},
 				config: "config-not-found",
 			},
 			want: ErrConfigFileNotFound,
@@ -63,12 +50,6 @@ func TestDefaultSetup_Setup(t *testing.T) {
 		{
 			name: "bundle not found",
 			in: in{
-				sess: sessManagerMock{sess: session.Session{
-					AccessToken:  "1234",
-					Organization: "my-org",
-					Username:     "fakename",
-					Secret:       "1234",
-				}},
 				bundle: "bundle-not-found",
 			},
 			want: ErrFormulaBinNotFound,
@@ -96,20 +77,4 @@ func TestDefaultSetup_Setup(t *testing.T) {
 
 		})
 	}
-}
-
-type sessManagerMock struct {
-	sess  session.Session
-	error error
-}
-
-func (s sessManagerMock) Create(session.Session) error {
-	return s.error
-}
-func (s sessManagerMock) Current() (session.Session, error) {
-	return s.sess, s.error
-}
-
-func (s sessManagerMock) Destroy() error {
-	return s.error
 }

@@ -30,16 +30,12 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	// Version contains the current version	.
 	Version = "dev"
-	// BuildDate contains a string with the build date.
 	BuildDate = "unknown"
-	// Url to get Rit Stable Version
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
-
 	ErrRitInit = errors.New("To start using rit, you need to initialize rit first.\nCommand: rit init")
 
-	singleIgnorelist = []string{
+	whitelist = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
@@ -50,19 +46,18 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 
-	upgradeValidationWhiteList = []string{
+	upgradeWhitelist = []string{
 		fmt.Sprint(cmdUse),
 	}
 )
 
-type RootCmd struct {
+type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
 }
 
-// NewRootCmd creates the root command for single edition.
 func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker) *cobra.Command {
-	o := &RootCmd{ritchieHome: ritchieHome, dir: dir}
+	o := &rootCmd{ritchieHome: ritchieHome, dir: dir}
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
@@ -80,13 +75,13 @@ func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker) *cobra.Command 
 	return cmd
 }
 
-func (ro *RootCmd) PreRunFunc() CommandRunnerFunc {
+func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := ro.dir.Create(ro.ritchieHome); err != nil {
 			return err
 		}
 
-		if isWhitelist(singleIgnorelist, cmd) || isCompleteCmd(cmd) {
+		if isWhitelist(whitelist, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
 
@@ -99,7 +94,7 @@ func (ro *RootCmd) PreRunFunc() CommandRunnerFunc {
 	}
 }
 
-func (ro *RootCmd) PostRunFunc() CommandRunnerFunc {
+func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		verifyNewVersion(cmd)
 		return nil
@@ -107,7 +102,7 @@ func (ro *RootCmd) PostRunFunc() CommandRunnerFunc {
 }
 
 func verifyNewVersion(cmd *cobra.Command) {
-	if isWhitelist(upgradeValidationWhiteList, cmd) {
+	if isWhitelist(upgradeWhitelist, cmd) {
 		resolver := version.DefaultVersionResolver{
 			StableVersionUrl: StableVersionUrl,
 			FileUtilService:  fileutil.DefaultService{},
