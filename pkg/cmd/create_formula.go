@@ -55,7 +55,7 @@ func NewCreateFormulaCmd(
 
 	cmd := &cobra.Command{
 		Use:     "formula",
-		Short:   "Create a new formula (and a new local repository for test)",
+		Short:   "Create a new formula",
 		Example: "rit create formula",
 		RunE:    RunFuncE(c.runStdin(), c.runPrompt()),
 	}
