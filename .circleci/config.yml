@@ -35,7 +35,7 @@ references:
   filters-legacy: &FILTERS_LEGACY
     branches:
       only:
-        - legacy-.*
+        - legacy-[1-9]+.*
 
   filters-release: &FILTERS_RELEASE
     branches:
