@@ -2,9 +2,26 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.19...HEAD)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.20...HEAD)
 
 **Implemented enhancements:**
+
+- \[Feature\] Adding ruby language support [\#252](https://github.com/ZupIT/ritchie-cli/pull/252) ([henriquemoraes8](https://github.com/henriquemoraes8))
+- Feature/verbose flag [\#250](https://github.com/ZupIT/ritchie-cli/pull/250) ([antonioolf](https://github.com/antonioolf))
+
+**Merged pull requests:**
+
+- Add signature in single [\#265](https://github.com/ZupIT/ritchie-cli/pull/265) ([ernelio](https://github.com/ernelio))
+- Release 1.0.0-beta.19 merge [\#259](https://github.com/ZupIT/ritchie-cli/pull/259) ([zup-ci](https://github.com/zup-ci))
+
+## [1.0.0-beta.20](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.20) (2020-07-13)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.19...1.0.0-beta.20)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Adding hello world template in RUBY \(rit create formula\) [\#186](https://github.com/ZupIT/ritchie-cli/issues/186)
 
 - \[FEATURE\] Enhancement of the rit set credential command on single version [\#177](https://github.com/ZupIT/ritchie-cli/issues/177)
 
@@ -23,6 +40,7 @@
 **Fixed bugs:**
 
 - \[FIX\] run go mod vendor [\#247](https://github.com/ZupIT/ritchie-cli/pull/247) ([kaduartur](https://github.com/kaduartur))
+
 
 **Merged pull requests:**
 
@@ -76,7 +94,6 @@
 - Release 1.0.0-beta.16 merge [\#208](https://github.com/ZupIT/ritchie-cli/pull/208) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.15 merge [\#207](https://github.com/ZupIT/ritchie-cli/pull/207) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.14 merge [\#206](https://github.com/ZupIT/ritchie-cli/pull/206) ([zup-ci](https://github.com/zup-ci))
-- \[FEATURE\] Change login and init to get totp [\#190](https://github.com/ZupIT/ritchie-cli/pull/190) ([viniciussousazup](https://github.com/viniciussousazup))
 
 ## [1.0.0-beta.15](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.15) (2020-06-24)
 
@@ -126,6 +143,7 @@
 - Fix/version msi release [\#193](https://github.com/ZupIT/ritchie-cli/pull/193) ([ernelio](https://github.com/ernelio))
 - fix msi release [\#192](https://github.com/ZupIT/ritchie-cli/pull/192) ([ernelio](https://github.com/ernelio))
 - \[FEATURE\] Pinning ssl [\#191](https://github.com/ZupIT/ritchie-cli/pull/191) ([marcosgmgm](https://github.com/marcosgmgm))
+- \[FEATURE\] Change login and init to get totp [\#190](https://github.com/ZupIT/ritchie-cli/pull/190) ([viniciussousazup](https://github.com/viniciussousazup))
 - \[FIX\] Packaging changelog [\#184](https://github.com/ZupIT/ritchie-cli/pull/184) ([ernelio](https://github.com/ernelio))
 - \[Feature\] Improvements circleci [\#182](https://github.com/ZupIT/ritchie-cli/pull/182) ([ernelio](https://github.com/ernelio))
 - Feature/unix tests for init [\#174](https://github.com/ZupIT/ritchie-cli/pull/174) ([dmbarra](https://github.com/dmbarra))
