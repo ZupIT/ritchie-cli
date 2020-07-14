@@ -265,33 +265,6 @@
         "result":"Successfully got an update"
     },
     {
-        "entry":"Clean",
-        "steps":[
-            {
-                "key":"",
-                "value":"clean",
-                "action":"main"
-            }
-        ],
-        "result":"It can be used to clean formulas, repositories and other objects.."
-    },
-    {
-        "entry":"Clean Repo",
-        "steps":[
-            {
-                "key":"",
-                "value":"clean repo",
-                "action":"main"
-            },
-            {
-                "key":"Name of the repository:",
-                "value":"Leonidas",
-                "action":"sendkey"
-            }
-        ],
-        "result":"\"Leonidas\" has been cleaned successfully"
-    },
-    {
         "entry":"Delete repo",
         "steps":[
             {

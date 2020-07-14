@@ -1,8 +1,11 @@
 package autocomplete
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
+
+	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -24,10 +27,12 @@ const (
 	bashPattern             = "%s\n%s"
 	bash                    = "bash"
 	zsh                     = "zsh"
+	fish                    = "fish"
+	powerShell              = "powershell"
 )
 
 var (
-	supportedAutocomplete = []string{bash, zsh}
+	supportedAutocomplete = []string{bash, zsh, fish, powerShell}
 	ErrNotSupported       = prompt.NewError("autocomplete for this terminal is not supported")
 )
 
@@ -39,20 +44,41 @@ func NewGenerator(tm formula.TreeManager) GeneratorManager {
 	return GeneratorManager{tm}
 }
 
-func (d GeneratorManager) Generate(s ShellName) (string, error) {
+func (d GeneratorManager) Generate(s ShellName, cmd *cobra.Command) (string, error) {
 	if !sliceutil.Contains(supportedAutocomplete, s.String()) {
 		return "", ErrNotSupported
 	}
 	t := d.treeManager.MergedTree(true)
 
 	var autocomplete string
+	var err error
 	switch s.String() {
 	case bash:
 		autocomplete = fmt.Sprintf(bashPattern, "#!/bin/bash", loadToBash(t))
 	case zsh:
 		autocomplete = loadToZsh(t)
+	case fish:
+		autocomplete, err = loadToFish(cmd)
+	case powerShell:
+		autocomplete, err = loadToPowerShell(cmd)
 	}
-	return autocomplete, nil
+	return autocomplete, err
+}
+
+func loadToPowerShell(cmd *cobra.Command) (string, error) {
+	buffer := bytes.Buffer{}
+	if err := cmd.Root().GenPowerShellCompletion(&buffer); err != nil {
+		return "", err
+	}
+	return buffer.String(), nil
+}
+
+func loadToFish(cmd *cobra.Command) (string, error) {
+	buffer := bytes.Buffer{}
+	if err := cmd.Root().GenFishCompletion(&buffer, true); err != nil {
+		return "", err
+	}
+	return buffer.String(), nil
 }
 
 func loadToBash(t formula.Tree) string {

@@ -168,16 +168,6 @@ func (dm Manager) Update() error {
 	return nil
 }
 
-func (dm Manager) Clean(n string) error {
-	treeName := fmt.Sprintf(treeCacheFilePattern, dm.homePath, n)
-
-	if err := removeRepoCache(treeName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (dm Manager) Delete(name string) error {
 	f, err := dm.loadReposFromDisk()
 	if fileutil.IsNotExistErr(err) || len(f.Values) == 0 {

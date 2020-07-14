@@ -92,22 +92,6 @@
         "result":""
     },
     {
-        "entry":"Clean repo",
-        "steps":[
-            {
-                "key":"",
-                "value":"clean repo",
-                "action":"main"
-            },
-            {
-                "key":"Name of the repository:",
-                "value":"Leonidas",
-                "action":"sendkey"
-            }
-        ],
-        "result":"\"Leonidas\" has been cleaned successfully"
-    },
-    {
         "entry":"List repo",
         "steps":[
             {

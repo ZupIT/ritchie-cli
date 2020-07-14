@@ -28,10 +28,6 @@ type RepoDeleter interface {
 	Delete(name string) error
 }
 
-type RepoCleaner interface {
-	Clean(name string) error
-}
-
 type RepoLoader interface {
 	Load() error
 }

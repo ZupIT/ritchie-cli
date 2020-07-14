@@ -114,7 +114,6 @@ func buildCommands() *cobra.Command {
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
-	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
 	initCmd := cmd.NewSingleInitCmd(inputPassword, passphraseManager, repoLoader)
@@ -137,19 +136,19 @@ func buildCommands() *cobra.Command {
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoManager, inputText, inputURL, inputInt, inputBool)
-	cleanRepoCmd := cmd.NewCleanRepoCmd(repoManager, inputText)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoManager, inputList, inputBool)
 	listRepoCmd := cmd.NewListRepoCmd(repoManager)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(repoManager)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
+	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
+	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
-	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)
+	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
-	cleanCmd.AddCommand(cleanRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)
 	listCmd.AddCommand(listRepoCmd)
@@ -169,7 +168,6 @@ func buildCommands() *cobra.Command {
 			Commands: []*cobra.Command{
 				addCmd,
 				autocompleteCmd,
-				cleanCmd,
 				createCmd,
 				deleteCmd,
 				initCmd,
