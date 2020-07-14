@@ -7,27 +7,26 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/security"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 type inputTextMock struct{}
 
-func (inputTextMock) Text(name string, required bool) (string, error) {
+func (inputTextMock) Text(name string, required bool, helper ...string) (string, error) {
 	return "mocked text", nil
 }
 
-func (inputTextMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+type inputTextValidatorMock struct{}
+
+func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
 	return "mocked text", nil
 }
 
 type inputSecretMock struct{}
 
-func (inputSecretMock) Text(name string, required bool) (string, error) {
+func (inputSecretMock) Text(name string, required bool, helper ...string) (string, error) {
 	return "username=ritchie", nil
-}
-
-func (inputSecretMock) TextWithValidate(name string, validate func(string) error) (string, error) {
-	return "mocked text", nil
 }
 
 type inputURLMock struct{}
@@ -201,6 +200,20 @@ func (credSetterMock) Set(d credential.Detail) error {
 
 type credSettingsMock struct{}
 
+type singleCredSettingsMock struct {}
+
+func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
+	return nil
+}
+
+func (s singleCredSettingsMock) ReadCredentials(path string) (credential.Fields, error) {
+	return nil, nil
+}
+
+func (s singleCredSettingsMock) WriteCredentials(fields credential.Fields, path string) error {
+	return nil
+}
+
 func (credSettingsMock) Fields() (credential.Fields, error) {
 	return credential.Fields{
 		"github": []credential.Field{
@@ -220,7 +233,7 @@ type runnerMock struct {
 	error error
 }
 
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType) error {
+func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, verboseFlag string) error {
 	return r.error
 }
 
@@ -276,14 +289,14 @@ func (m inputBoolCustomMock) Bool(name string, items []string) (bool, error) {
 
 type inputTextCustomMock struct {
 	text             func(name string, required bool) (string, error)
-	textWithValidate func(name string, validate func(string) error) (string, error)
+	textWithValidate func(name string, validate func(interface{}) error) (string, error)
 }
 
-func (m inputTextCustomMock) Text(name string, required bool) (string, error) {
+func (m inputTextCustomMock) Text(name string, required bool, helper ...string) (string, error) {
 	return m.text(name, required)
 }
 
-func (m inputTextCustomMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+func (m inputTextCustomMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
 	return m.textWithValidate(name, validate)
 }
 
@@ -317,4 +330,24 @@ type inputPasswordCustomMock struct {
 
 func (m inputPasswordCustomMock) Password(label string) (string, error) {
 	return m.password(label)
+}
+
+type InputMultilineMock struct{}
+
+func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
+	return "username=ritchie", nil
+}
+
+type otpResolverMock struct{}
+
+func (m otpResolverMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return otp.Response{Otp: true}, nil
+}
+
+type otpResolverCustomMock struct {
+	requestOtp func(url, organization string) (otp.Response, error)
+}
+
+func (m otpResolverCustomMock) RequestOtp(url, organization string) (otp.Response, error) {
+	return m.requestOtp(url, organization)
 }

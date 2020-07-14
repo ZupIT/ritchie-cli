@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
+
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.20...HEAD)
 
 **Implemented enhancements:**
@@ -21,6 +22,7 @@
 **Implemented enhancements:**
 
 - \[FEATURE\] Adding hello world template in RUBY \(rit create formula\) [\#186](https://github.com/ZupIT/ritchie-cli/issues/186)
+
 - \[FEATURE\] Enhancement of the rit set credential command on single version [\#177](https://github.com/ZupIT/ritchie-cli/issues/177)
 
 ## [1.0.0-beta.19](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.19) (2020-07-08)
@@ -38,6 +40,7 @@
 **Fixed bugs:**
 
 - \[FIX\] run go mod vendor [\#247](https://github.com/ZupIT/ritchie-cli/pull/247) ([kaduartur](https://github.com/kaduartur))
+
 
 **Merged pull requests:**
 

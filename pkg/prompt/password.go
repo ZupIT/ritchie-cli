@@ -1,31 +1,22 @@
 package prompt
 
-import "github.com/manifoldco/promptui"
-
-const (
-	// PasswordType type
-	PasswordType = "password"
+import (
+	"github.com/AlecAivazis/survey/v2"
 )
 
-type InputPassword interface {
-	Password(label string) (string, error)
+const PasswordType = "password"
+
+type SurveyPassword struct{}
+
+func NewSurveyPassword() SurveyPassword {
+	return SurveyPassword{}
 }
 
-type inputPassword struct{}
-
-func NewInputPassword() inputPassword {
-	return inputPassword{}
-}
-
-// Password show a masked prompt and parse to string.
-func (inputPassword) Password(label string) (string, error) {
-	prompt := promptui.Prompt{
-		Label:     label,
-		Pointer: promptui.PipeCursor,
-		Mask:      '*',
-		Validate:  validateEmptyInput,
-		Templates: defaultTemplate(),
+func (SurveyPassword) Password(label string) (string, error) {
+	password := ""
+	prompt := &survey.Password{
+		Message: label,
 	}
 
-	return prompt.Run()
+	return password, survey.AskOne(prompt, &password)
 }

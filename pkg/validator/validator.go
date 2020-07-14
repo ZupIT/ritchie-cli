@@ -62,10 +62,28 @@ func IsValidURL(value string) error {
 	return nil
 }
 
+//IsValidURL validates the url format
+func IsValidSurveyURL(value interface{}) error {
+	_, err := url.ParseRequestURI(value.(string))
+	if err != nil {
+		return ErrInvalidURL
+	}
+	return nil
+}
+
+
 //IsValidEmail validate the email format
 func IsValidEmail(email string) error {
 	rgx := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	if !rgx.MatchString(email) {
+		return fmt.Errorf("%s is not a valid email", email)
+	}
+	return nil
+}
+
+func IsValidSurveyEmail(email interface{}) error {
+	rgx := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	if !rgx.MatchString(email.(string)) {
 		return fmt.Errorf("%s is not a valid email", email)
 	}
 	return nil

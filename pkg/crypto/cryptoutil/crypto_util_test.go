@@ -27,3 +27,10 @@ func TestDecrypt(t *testing.T) {
 		t.Errorf("Decrypt got %v, want %v", got, want)
 	}
 }
+
+func TestSumHash(t *testing.T) {
+	hash := SumHash("12345678")
+	if len(hash) == 0 {
+		t.Errorf("SumHash got an empty hash")
+	}
+}

@@ -1,47 +1,35 @@
 package prompt
 
-import "github.com/manifoldco/promptui"
+import (
+	"github.com/AlecAivazis/survey/v2"
+)
 
-type InputText interface {
-	Text(name string, required bool) (string, error)
-	TextWithValidate(name string, validate func(string) error) (string, error)
+type SurveyText struct{}
+
+func NewSurveyText() SurveyText {
+	return SurveyText{}
 }
 
-type inputText struct{}
+func (SurveyText) Text(name string, required bool, helper ...string) (string, error) {
 
-func NewInputText() inputText {
-	return inputText{}
-}
+	var value string
 
-// Text show a prompt and parse to string.
-func (inputText) Text(name string, required bool) (string, error) {
-	var prompt promptui.Prompt
+	validationQs := []*survey.Question{
+		{
+			Name: "name",
+		},
+	}
 
 	if required {
-		prompt = promptui.Prompt{
-			Label:     name,
-			Pointer:   promptui.PipeCursor,
-			Validate:  validateEmptyInput,
-			Templates: defaultTemplate(),
-		}
+		validationQs[0].Validate = survey.Required
+	}
+
+	if len(helper) > 0 {
+		validationQs[0].Prompt = &survey.Input{Message: name, Help: helper[0]}
 	} else {
-		prompt = promptui.Prompt{
-			Label:     name,
-			Pointer:   promptui.PipeCursor,
-			Templates: defaultTemplate(),
-		}
+		validationQs[0].Prompt = &survey.Input{Message: name}
 	}
 
-	return prompt.Run()
+	return value, survey.Ask(validationQs, &value)
 }
 
-func (inputText) TextWithValidate(name string, validate func(string) error) (string, error) {
-	prompt := promptui.Prompt{
-		Label:     name,
-		Pointer:   promptui.PipeCursor,
-		Validate:  validate,
-		Templates: defaultTemplate(),
-	}
-
-	return prompt.Run()
-}

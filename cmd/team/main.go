@@ -15,6 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -61,12 +62,14 @@ func buildCommands() *cobra.Command {
 	ritchieHomeDir := api.RitchieHomeDir()
 
 	// prompt
-	inputText := prompt.NewInputText()
-	inputInt := prompt.NewInputInt()
-	inputBool := prompt.NewInputBool()
-	inputPassword := prompt.NewInputPassword()
-	inputList := prompt.NewInputList()
-	inputURL := prompt.NewInputURL()
+	inputText := prompt.NewSurveyText()
+	inputTextValidator := prompt.NewSurveyTextValidator()
+	inputInt := prompt.NewSurveyInt()
+	inputBool := prompt.NewSurveyBool()
+	inputPassword := prompt.NewSurveyPassword()
+	inputList := prompt.NewSurveyList()
+	inputURL := prompt.NewSurveyURL()
+	inputMultiline := prompt.NewSurveyMultiline()
 
 	// deps
 	sessionManager := session.NewManager(ritchieHomeDir)
@@ -127,6 +130,8 @@ func buildCommands() *cobra.Command {
 	}
 	defaultUrlFinder := upgrade.DefaultUrlFinder{}
 
+	otpResolver := otp.NewOtpResolver(httpClient)
+
 	// commands
 	rootCmd := cmd.NewTeamRootCmd(workspaceManager, serverFinder, sessionValidator)
 
@@ -136,9 +141,18 @@ func buildCommands() *cobra.Command {
 	cleanCmd := cmd.NewCleanCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewTeamInitCmd(inputText, inputPassword, inputURL, inputBool, serverFindSetter, loginManager, repoLoader)
+	initCmd := cmd.NewTeamInitCmd(
+		inputText,
+		inputPassword,
+		inputURL,
+		inputBool,
+		serverFindSetter,
+		loginManager,
+		repoLoader,
+		otpResolver,
+	)
 	listCmd := cmd.NewListCmd()
-	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder)
+	loginCmd := cmd.NewLoginCmd(inputText, inputPassword, loginManager, repoLoader, serverFinder, otpResolver)
 	logoutCmd := cmd.NewLogoutCmd(logoutManager)
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -153,7 +167,8 @@ func buildCommands() *cobra.Command {
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword)
+		inputPassword,
+		inputMultiline)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
@@ -165,7 +180,7 @@ func buildCommands() *cobra.Command {
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputList)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)

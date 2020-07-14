@@ -109,34 +109,41 @@
   response:
     status: 401
 
-#Get 200 set server
+#Get 500 set server
+- request:
+    method: GET
+    url: ^/server/error$
+
+  response:
+    status: 500
+
+
+#Get 200 on / with empty body
+- request:
+    method: GET
+    url: ^/
+
+  response:
+    status: 200
+    body: ""
+
+#Get 200 on /otp with true on body
 - request:
     method: GET
     url: /otp$
 
   response:
     status: 200
+    headers:
+      content-type: application/json
     body: >
       {
-          "otp": true
+        "otp": true
       }
 
-#Get 500 set server
 - request:
     method: GET
-    url: ^/server/error/otp$
+    url: /request-fail/otp$
 
   response:
     status: 500
-
-#Get 200 but wrong body on set server
-- request:
-    method: GET
-    url: ^/server/error/otp-json-parse-error/otp$
-
-  response:
-    status: 200
-    body: >
-      {
-          "otp": "true"
-      }

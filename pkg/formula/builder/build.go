@@ -19,7 +19,7 @@ import (
 const commonsDir = "commons"
 
 var (
-	msgBuildOnWindows = prompt.Yellow("This formula cannot be built on Windows. Just Golang formulas are available!")
+	msgBuildOnWindows = prompt.Yellow("This formula cannot be built on Windows.")
 	ErrBuildOnWindows = errors.New(msgBuildOnWindows)
 )
 
@@ -44,7 +44,6 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 	switch so {
 	case osutil.Windows:
 		winBuild := path.Join(formulaSrc, "build.bat")
-		// TODO: Remove it after creating the build scripts for other languages ​​on windows
 		if !m.file.Exists(winBuild) {
 			return ErrBuildOnWindows
 		}

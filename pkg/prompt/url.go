@@ -1,29 +1,30 @@
 package prompt
 
 import (
+	"github.com/AlecAivazis/survey/v2"
+
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
-	"github.com/manifoldco/promptui"
 )
 
-type InputURL interface {
-	URL(name, defaultValue string) (string, error)
+type SurveyURL struct{}
+
+func NewSurveyURL() SurveyURL {
+	return SurveyURL{}
 }
 
-type inputURL struct{}
+func (SurveyURL) URL(name, defaultValue string) (string, error) {
+	var value string
 
-func NewInputURL() inputURL {
-	return inputURL{}
-}
-
-// URL show a prompt and parse to string.
-func (inputURL) URL(name, defaultValue string) (string, error) {
-	prompt := promptui.Prompt{
-		Label:     name,
-		Pointer: promptui.PipeCursor,
-		Default:   defaultValue,
-		Validate:  validator.IsValidURL,
-		Templates: defaultTemplate(),
+	validationQs := []*survey.Question{
+		{
+			Name: "name",
+			Prompt: &survey.Input{
+				Message: name,
+				Default: defaultValue,
+			},
+			Validate: validator.IsValidSurveyURL,
+		},
 	}
 
-	return prompt.Run()
+	return value, survey.Ask(validationQs, &value)
 }

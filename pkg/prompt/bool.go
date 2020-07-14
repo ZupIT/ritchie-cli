@@ -1,33 +1,28 @@
 package prompt
 
-import "github.com/manifoldco/promptui"
+import (
+	"github.com/AlecAivazis/survey/v2"
+)
 
 var (
 	boolOpts = map[string]bool{"yes": true, "no": false, "true": true, "false": false}
 )
 
-type InputBool interface {
-	Bool(name string, items []string) (bool, error)
+type SurveyBool struct{}
+
+func NewSurveyBool() SurveyBool {
+	return SurveyBool{}
 }
 
-type inputBool struct{}
-
-func NewInputBool() inputBool {
-	return inputBool{}
-}
-
-// Bool show a prompt with options and parse to bool.
-func (inputBool) Bool(name string, items []string) (bool, error) {
-	prompt := promptui.Select{
-		Items:     items,
-		Pointer: promptui.PipeCursor,
-		Templates: defaultSelectTemplate(name),
+func (SurveyBool) Bool(name string, items []string) (bool, error) {
+	choice := ""
+	prompt := &survey.Select{
+		Message: name,
+		Options: items,
 	}
-	_, result, err := prompt.Run()
-	if err != nil {
+	if err := survey.AskOne(prompt, &choice); err != nil {
 		return false, err
 	}
 
-	b := boolOpts[result]
-	return b, err
+	return boolOpts[choice], nil
 }

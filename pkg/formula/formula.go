@@ -20,6 +20,7 @@ const (
 	CommandEnv           = "COMMAND"
 	PwdEnv               = "PWD"
 	CPwdEnv              = "CURRENT_PWD"
+	VerboseEnv           = "VERBOSE_MODE"
 	BinPattern           = "%s%s"
 	BinPathPattern       = "%s/bin"
 	EnvPattern           = "%s=%s"
@@ -90,7 +91,7 @@ type PreRunner interface {
 }
 
 type Runner interface {
-	Run(def Definition, inputType api.TermInputType) error
+	Run(def Definition, inputType api.TermInputType, verboseFlag string) error
 }
 
 type PostRunner interface {

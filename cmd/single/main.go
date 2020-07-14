@@ -52,14 +52,18 @@ func buildCommands() *cobra.Command {
 	ritchieHomeDir := api.RitchieHomeDir()
 
 	// prompt
-	inputText := prompt.NewInputText()
-	inputInt := prompt.NewInputInt()
-	inputBool := prompt.NewInputBool()
-	inputPassword := prompt.NewInputPassword()
-	inputList := prompt.NewInputList()
-	inputURL := prompt.NewInputURL()
+	inputText := prompt.NewSurveyText()
+	inputTextValidator := prompt.NewSurveyTextValidator()
+	inputInt := prompt.NewSurveyInt()
+	inputBool := prompt.NewSurveyBool()
+	inputPassword := prompt.NewSurveyPassword()
+	inputList := prompt.NewSurveyList()
+	inputURL := prompt.NewSurveyURL()
 
 	// deps
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
 	sessionManager := session.NewManager(ritchieHomeDir)
 	workspaceManager := workspace.NewChecker(ritchieHomeDir)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
@@ -73,7 +77,9 @@ func buildCommands() *cobra.Command {
 	passphraseManager := secsingle.NewPassphraseManager(sessionManager)
 	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
 	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
+	credSettings := credsingle.NewSingleSettings(fileManager)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoManager, api.SingleCoreCmds)
+
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
@@ -89,9 +95,6 @@ func buildCommands() *cobra.Command {
 
 	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
 	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
-
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -125,6 +128,7 @@ func buildCommands() *cobra.Command {
 	// level 2
 	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
 		credSetter,
+		credSettings,
 		inputText,
 		inputBool,
 		inputList,
@@ -140,7 +144,7 @@ func buildCommands() *cobra.Command {
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputList)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash)

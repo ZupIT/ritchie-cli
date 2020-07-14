@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if expr "$CIRCLE_BRANCH" : 'qa' >/dev/null; then
-  export RELEASE_VERSION="${CIRCLE_BUILD_NUM}.0.0-qa.1"
+  export RELEASE_VERSION="1.0.0-qa"
 elif expr "$CIRCLE_BRANCH" : '^release-.*' >/dev/null; then
   export RELEASE_VERSION=$(echo "$CIRCLE_BRANCH" | cut -d '-' -f 2-)
 elif expr "$CIRCLE_BRANCH" : '^nightly' >/dev/null; then
@@ -10,6 +10,8 @@ elif expr "$CIRCLE_BRANCH" : '^nightly' >/dev/null; then
 elif expr "$CIRCLE_BRANCH" : '^beta' >/dev/null; then
   BETA_VERSION=$(expr $(curl -s https://commons-repo.ritchiecli.io/stable.txt| rev | cut -d . -f -1|rev) + 1)
   export RELEASE_VERSION=$(echo "$VERSION_PLACEHOLDER" | sed "s/PLACEHOLDER/.pre.${BETA_VERSION}/")
+elif expr "$CIRCLE_BRANCH" : '^legacy-.*' >/dev/null; then
+  export RELEASE_VERSION=$(echo "${CIRCLE_BRANCH}.legacy" | cut -d '-' -f 2-)
 else
   export RELEASE_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
 fi

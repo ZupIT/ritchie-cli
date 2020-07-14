@@ -13,6 +13,7 @@ import (
 )
 
 var RepoUrl = os.Getenv("REPO_URL")
+const verboseFlag = "0"
 
 func TestDefaultRunner_Run(t *testing.T) {
 	def := formula.Definition{
@@ -110,7 +111,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
 			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager)
 
-			got := defaultRunner.Run(def, api.Prompt)
+			got := defaultRunner.Run(def, api.Prompt, verboseFlag)
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
@@ -130,11 +131,11 @@ func (i inputMock) List(string, []string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) Text(string, bool) (string, error) {
+func (i inputMock) Text(string, bool, ...string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) TextWithValidate(name string, validate func(string) error) (string, error) {
+func (i inputMock) TextWithValidate(string, func(interface{}) error, ...string) (string, error) {
 	return i.text, i.err
 }
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"runtime"
 	"strings"
 	"time"
 
@@ -13,8 +12,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
-	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -29,11 +26,12 @@ const notAllowedChars = `\/><,@-`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
-	homeDir   string
-	formula   formula.CreateBuilder
-	workspace formula.WorkspaceAddListValidator
-	inText    prompt.InputText
-	inList    prompt.InputList
+	homeDir         string
+	formula         formula.CreateBuilder
+	workspace       formula.WorkspaceAddListValidator
+	inText          prompt.InputText
+	inTextValidator prompt.InputTextValidator
+	inList          prompt.InputList
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -42,6 +40,7 @@ func NewCreateFormulaCmd(
 	formula formula.CreateBuilder,
 	workspace formula.WorkspaceAddListValidator,
 	inText prompt.InputText,
+	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 ) *cobra.Command {
 	c := createFormulaCmd{
@@ -49,6 +48,7 @@ func NewCreateFormulaCmd(
 		formula,
 		workspace,
 		inText,
+		inTextValidator,
 		inList,
 	}
 
@@ -66,7 +66,11 @@ func NewCreateFormulaCmd(
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inText.TextWithValidate("Enter the new formula command [ex.: rit group verb noun]", c.cmdValidator)
+		formulaCmd, err := c.inTextValidator.Text(
+			"Enter the new formula command: ",
+			c.surveyCmdValidator,
+			"You must create your command based in this example [rit group verb noun]",
+		)
 		if err != nil {
 			return err
 		}
@@ -75,7 +79,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		lang, err := c.inList.List("Choose the language: ", creator.Languages)
+		lang, err := c.inList.List("Choose the language: ", formula.Languages)
 		if err != nil {
 			return err
 		}
@@ -149,12 +153,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	// TODO: Remove this function after creating the build scripts for other languages ​​on windows
-	os := runtime.GOOS
-	if os == osutil.Windows && cf.Lang != creator.GoLang {
-		createSuccess(s, cf.Lang)
-		return
-	}
+	createSuccess(s, cf.Lang)
 
 	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
 		err := prompt.NewError(err.Error())
@@ -162,7 +161,6 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	createSuccess(s, cf.Lang)
 	buildSuccess(formulaPath, cf.FormulaCmd)
 }
 
@@ -183,12 +181,12 @@ func formulaPath(workspacePath, cmd string) string {
 	return path.Join(workspacePath, formulaPath)
 }
 
-func (c createFormulaCmd) cmdValidator(cmd string) error {
-	if len(strings.TrimSpace(cmd)) < 1 {
+func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
+	if len(strings.TrimSpace(cmd.(string))) < 1 {
 		return errors.New("this input must not be empty")
 	}
 
-	s := strings.Split(cmd, " ")
+	s := strings.Split(cmd.(string), " ")
 	if s[0] != "rit" {
 		return ErrDontStartWithRit
 	}
