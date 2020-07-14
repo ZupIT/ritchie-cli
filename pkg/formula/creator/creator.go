@@ -19,14 +19,14 @@ var (
 
 type CreateManager struct {
 	treeManager tree.Manager
-	dir         stream.DirCreater
+	dir         stream.DirCreateChecker
 	file        stream.FileWriteReadExister
 	tplM        template.Manager
 }
 
 func NewCreator(
 	tm tree.Manager,
-	dir stream.DirCreater,
+	dir stream.DirCreateChecker,
 	file stream.FileWriteReadExister,
 	tplM template.Manager,
 ) CreateManager {
@@ -34,7 +34,7 @@ func NewCreator(
 }
 
 func (c CreateManager) Create(cf formula.Create) error {
-	if err := c.isValidCmd(cf.FormulaCmd); err != nil {
+	if err := c.isValidCmd(cf.FormulaPath); err != nil {
 		return err
 	}
 
@@ -51,23 +51,12 @@ func (c CreateManager) Create(cf formula.Create) error {
 	return nil
 }
 
-func (c CreateManager) isValidCmd(fCmd string) error {
-	trees, err := c.treeManager.Tree()
-	if err != nil {
-		return err
+func (c CreateManager) isValidCmd(fPath string) error {
+
+	if c.dir.Exists(fPath) {
+		return ErrRepeatedCommand
 	}
 
-	s := strings.Split(fCmd, " ")
-	cp := fmt.Sprintf("root_%s", strings.Join(s[1:len(s)-1], "_"))
-	u := s[len(s)-1]
-	for _, v := range trees {
-		for _, j := range v.Commands {
-			if j.Parent == cp && j.Usage == u {
-				return ErrRepeatedCommand
-
-			}
-		}
-	}
 	return nil
 }
 

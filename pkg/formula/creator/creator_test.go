@@ -42,7 +42,7 @@ func TestCreator(t *testing.T) {
 
 	type in struct {
 		formCreate formula.Create
-		dir        stream.DirCreater
+		dir        stream.DirCreateChecker
 		file       stream.FileWriteReadExister
 		tplM       template.Manager
 	}
@@ -63,7 +63,12 @@ func TestCreator(t *testing.T) {
 					FormulaCmd:    fCmdExists,
 					Lang:          langGo,
 					WorkspacePath: resultDir,
-					FormulaPath:   path.Join(resultDir, "/add/repo"),
+					FormulaPath: func() string {
+						fp := path.Join(resultDir, "/add/repo")
+						_ = dirManager.Remove(fp)
+						_ = dirManager.Create(fp)
+						return fp
+					}(),
 				},
 				dir:  dirManager,
 				file: fileManager,
@@ -176,29 +181,4 @@ type repoListerMock struct{}
 
 func (repoListerMock) List() (formula.Repos, error) {
 	return formula.Repos{}, nil
-}
-
-type dirManagerMock struct {
-	createErr error
-}
-
-func (d dirManagerMock) Create(string) error {
-	return d.createErr
-}
-
-type fileManagerMock struct {
-	data     []byte
-	writeErr error
-	readErr  error
-	exist    bool
-}
-
-func (f fileManagerMock) Write(string, []byte) error {
-	return f.writeErr
-}
-func (f fileManagerMock) Read(string) ([]byte, error) {
-	return f.data, f.readErr
-}
-func (f fileManagerMock) Exists(string) bool {
-	return f.exist
 }
