@@ -32,6 +32,11 @@ references:
         - nightly
         - beta
 
+  filters-legacy: &FILTERS_LEGACY
+    branches:
+      only:
+        - legacy-.*
+
   filters-release: &FILTERS_RELEASE
     branches:
       only:
@@ -457,19 +462,20 @@ workflows:
     jobs:
       - build:
           name: build-code
-      - windows_functional_test_team:
-          name: windows-functional-test-team-code
-          requires:
-            - build-code
-      - windows_functional_test_single:
-          name: windows-functional-test-single-code
-          requires:
-            - build-code
+#      - windows_functional_test_team:
+#          name: windows-functional-test-team-code
+#          requires:
+#            - build-code
+#      - windows_functional_test_single:
+#          name: windows-functional-test-single-code
+#          requires:
+#            - build-code
       - rebase_beta:
           name: release-beta
           requires:
-            - windows-functional-test-team-code
-            - windows-functional-test-single-code
+            - build-code
+#            - windows-functional-test-team-code
+#            - windows-functional-test-single-code
 
   build-for-requests:
     jobs:
@@ -580,3 +586,37 @@ workflows:
             - win-package
             - rpm-package
             - deb-package
+  legacy:
+    jobs:
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_LEGACY
+      - deb-package:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - build-code
+      - rpm-package:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - build-code
+      - win-package:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - win-package
+            - deb-package
+            - rpm-package
+      - delivery:
+          name: delivery
+          filters:
+            <<: *FILTERS_LEGACY
+          requires:
+            - sign-bin
