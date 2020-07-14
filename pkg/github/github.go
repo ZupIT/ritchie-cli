@@ -7,12 +7,13 @@ import (
 )
 
 const (
-	ZipUrlPattern  = "https://api.github.com/repos/%s/%s/zipball/%s"
-	TagsUrlPattern = "https://api.github.com/repos/%s/%s/tags"
+	ZipUrlPattern       = "https://api.github.com/repos/%s/%s/zipball/%s"
+	TagsUrlPattern      = "https://api.github.com/repos/%s/%s/releases"
+	LatestTagUrlPattern = "https://api.github.com/repos/%s/%s/releases/latest"
 )
 
 type Tag struct {
-	Name string `json:"name"`
+	Name string `json:"tag_name"`
 }
 
 type Tags []Tag
@@ -35,6 +36,7 @@ type RepoInfo struct {
 type Repositories interface {
 	Zipball(info RepoInfo, version string) (io.ReadCloser, error)
 	Tags(info RepoInfo) (Tags, error)
+	LatestTag(info RepoInfo) (Tag, error)
 }
 
 // NewRepoInfo returns the RepoInfo built by repository url
@@ -61,6 +63,12 @@ func (in RepoInfo) ZipUrl(version string) string {
 // e.g. https://api.github.com/repos/{{owner}}/{{repo}}/tags
 func (in RepoInfo) TagsUrl() string {
 	return fmt.Sprintf(TagsUrlPattern, in.Owner, in.Repo)
+}
+
+// LatestTagUrl returns the GitHub API URL for get latest tag release
+// https://api.github.com/repos/:owner/:repo/releases/latest
+func (in RepoInfo) LatestTagUrl() string {
+	return fmt.Sprintf(LatestTagUrlPattern, in.Owner, in.Repo)
 }
 
 // TokenHeader returns the Authorization value formatted for Github API integration

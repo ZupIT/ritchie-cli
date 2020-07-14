@@ -14,11 +14,11 @@ import (
 )
 
 func TestNewSingleInitCmd(t *testing.T) {
-	cmd := NewSingleInitCmd(inputPasswordMock{}, passphraseManagerMock{}, repoLoaderMock{})
+	cmd := NewInitCmd(inputPasswordMock{}, passphraseManagerMock{}, repoLoaderMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 	if cmd == nil {
-		t.Errorf("NewSingleInitCmd got %v", cmd)
+		t.Errorf("NewInitCmd got %v", cmd)
 	}
 
 	if err := cmd.Execute(); err != nil {
