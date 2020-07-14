@@ -16,7 +16,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-// ErrNotAllowedCharacter and other errors related to formula creation
 var (
 	ErrNotAllowedCharacter = prompt.NewError(`not allowed character on formula name \/,><@-`)
 	ErrDontStartWithRit    = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
