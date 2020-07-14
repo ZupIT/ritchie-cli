@@ -1,82 +1,73 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"time"
+
+	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/security"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	MsgPhrase                    = "Define a passphrase for your machine: "
-	MsgOrganization              = "Enter your organization: "
-	msgOrganizationAlreadyExists = "The organization (%s) already exists. Do you like to override?"
-	MsgServerURL                 = "URL of the server [http(s)://host]: "
-	msgServerURLAlreadyExists    = "The server URL(%s) already exists. Do you like to override?"
-	MsgLogin                     = "You can perform login to your organization now, or later using [rit login] command. Perform now?"
-)
+const UsageMsg = ` How to contribute new formulas to the Ritchie community?
+ You must fork the Github repository "https://github.com/ZupIT/ritchie-formulas" 
+ and then follow the step by step below:
+  ∙ git clone https://github.com/{{your_github_user}}/ritchie-formulas
+  ∙ Run the command "rit create formula" and add the location where you cloned your 
+    repository. Rit will create a formula template that you can already test.
+  ∙ Open the project with your favorite text editor.
+  ∙ In order to test your new formula, you can run the command "rit build formula" or
+    "rit build formula --watch" to have automatic updates when editing your formula.`
 
-type initSingleCmd struct {
-	prompt.InputPassword
-	security.PassphraseManager
+var CommonsRepoURL = "https://github.com/kaduartur/ritchie-formulas"
+
+type InitCmd struct {
+	repo formula.RepositoryAdder
+	git  github.Repositories
 }
 
+func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories) *cobra.Command {
+	o := InitCmd{repo: repo, git: git}
 
-// NewSingleInitCmd creates init command for single edition
-func NewSingleInitCmd(ip prompt.InputPassword, pm security.PassphraseManager) *cobra.Command {
-	o := initSingleCmd{ip, pm}
-
-	return newInitCmd(o.runStdin(), o.runPrompt())
-}
-
-func newInitCmd(stdinFunc, promptFunc CommandRunnerFunc) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Init rit",
 		Long:  "Initialize rit configuration",
-		RunE:  RunFuncE(stdinFunc, promptFunc),
+		RunE:  o.runPrompt(),
 	}
-	cmd.LocalFlags()
+
 	return cmd
 }
 
-func (o initSingleCmd) runPrompt() CommandRunnerFunc {
+func (in InitCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		pass, err := o.Password(MsgPhrase)
+		repo := formula.Repo{
+			Name:     "commons",
+			Url:      CommonsRepoURL,
+			Priority: 0,
+		}
+
+		s := spinner.StartNew("Adding the commons repository...")
+		time.Sleep(time.Second * 2)
+
+		repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+
+		tag, err := in.git.LatestTag(repoInfo)
 		if err != nil {
 			return err
 		}
 
-		p := security.Passphrase(pass)
-		if err := o.Save(p); err != nil {
+		repo.Version = formula.RepoVersion(tag.Name)
+
+		if err := in.repo.Add(repo); err != nil {
 			return err
 		}
 
-		return nil
-	}
-}
-
-func (o initSingleCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-
-		obj := struct {
-			Passphrase string `json:"passphrase"`
-		}{}
-
-		err := stdin.ReadJson(os.Stdin, &obj)
-		if err != nil {
-			fmt.Println(stdin.MsgInvalidInput)
-			return err
-		}
-
-		p := security.Passphrase(obj.Passphrase)
-		if err := o.Save(p); err != nil {
-			return err
-		}
+		s.Success(prompt.Green("Okay, now you can use rit.\n"))
+		prompt.Info(UsageMsg)
 
 		return nil
 	}

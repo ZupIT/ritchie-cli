@@ -27,17 +27,14 @@ NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
 
 build-linux:
 	mkdir -p $(DIST_LINUX)
-	#LINUX
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-mac:
 	mkdir -p $(DIST_MAC)
-	#MAC
 	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-windows:
 	mkdir -p $(DIST_WIN)
-	#WINDOWS
 	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN)/$(BINARY_NAME).exe -v $(CMD_PATH)
 
 build: build-linux build-mac build-windows

@@ -52,15 +52,15 @@ func (re RepoManager) Tags(info RepoInfo) (Tags, error) {
 	}
 
 	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	resp, err := re.client.Do(req)
+	res, err := re.client.Do(req)
 	if err != nil {
 		return Tags{}, err
 	}
 
-	defer resp.Body.Close()
+	defer res.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		b, err := ioutil.ReadAll(resp.Body)
+	if res.StatusCode != http.StatusOK {
+		b, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return Tags{}, err
 		}
@@ -68,9 +68,45 @@ func (re RepoManager) Tags(info RepoInfo) (Tags, error) {
 	}
 
 	var tags Tags
-	if err := json.NewDecoder(resp.Body).Decode(&tags); err != nil {
+	if err := json.NewDecoder(res.Body).Decode(&tags); err != nil {
 		return Tags{}, err
 	}
 
 	return tags, nil
+}
+
+func (re RepoManager) LatestTag(info RepoInfo) (Tag, error) {
+	apiUrl := info.LatestTagUrl()
+	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	if err != nil {
+		return Tag{}, err
+	}
+
+	if info.Token != "" {
+		authToken := info.TokenHeader()
+		req.Header.Add(headers.Authorization, authToken)
+	}
+
+	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
+	res, err := re.client.Do(req)
+	if err != nil {
+		return Tag{}, err
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return Tag{}, err
+		}
+		return Tag{}, errors.New(string(b))
+	}
+
+	var tag Tag
+	if err := json.NewDecoder(res.Body).Decode(&tag); err != nil {
+		return Tag{}, err
+	}
+
+	return tag, nil
 }

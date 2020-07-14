@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,11 +14,16 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+var (
+	ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
+	ErrCommonsRepoName  = errors.New("the name \"commons\" is not valid for the repository name, try to enter another name")
+)
+
 type AddRepoCmd struct {
 	client *http.Client
 	repo   formula.RepositoryAddLister
 	github github.Repositories
-	prompt.InputText
+	prompt.InputTextValidator
 	prompt.InputPassword
 	prompt.InputURL
 	prompt.InputList
@@ -28,7 +34,7 @@ type AddRepoCmd struct {
 func NewAddRepoCmd(
 	repo formula.RepositoryAddLister,
 	github github.Repositories,
-	inText prompt.InputText,
+	inText prompt.InputTextValidator,
 	inPass prompt.InputPassword,
 	inUrl prompt.InputURL,
 	inList prompt.InputList,
@@ -36,14 +42,14 @@ func NewAddRepoCmd(
 	inInt prompt.InputInt,
 ) *cobra.Command {
 	addRepo := AddRepoCmd{
-		repo:          repo,
-		github:        github,
-		InputText:     inText,
-		InputURL:      inUrl,
-		InputList:     inList,
-		InputBool:     inBool,
-		InputInt:      inInt,
-		InputPassword: inPass,
+		repo:               repo,
+		github:             github,
+		InputTextValidator: inText,
+		InputURL:           inUrl,
+		InputList:          inList,
+		InputBool:          inBool,
+		InputInt:           inInt,
+		InputPassword:      inPass,
 	}
 	cmd := &cobra.Command{
 		Use:     "repo",
@@ -58,7 +64,7 @@ func NewAddRepoCmd(
 
 func (ad AddRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		name, err := ad.Text("Repository name: ", true)
+		name, err := ad.Text("Repository name: ", ad.repoNameValidator)
 		if err != nil {
 			return err
 		}
@@ -156,4 +162,17 @@ func (ad AddRepoCmd) runStdin() CommandRunnerFunc {
 		prompt.Success(successMsg)
 		return nil
 	}
+}
+
+func (ad AddRepoCmd) repoNameValidator(text interface{}) error {
+	in := text.(string)
+	if in == "" {
+		return ErrRepoNameNotEmpty
+	}
+
+	if in == "commons" {
+		return ErrCommonsRepoName
+	}
+
+	return nil
 }
