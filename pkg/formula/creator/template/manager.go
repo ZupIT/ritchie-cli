@@ -13,7 +13,7 @@ const (
 )
 
 var (
-	templatePath = []string{"repos", "commons", "templates", "crete_formula"}
+	templatePath = []string{"repos", "commons", "templates", "create_formula"}
 )
 
 type Manager interface {
