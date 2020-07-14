@@ -17,6 +17,7 @@ FROM node:10
 COPY . .
 
 RUN chmod +x set_umask.sh
+RUN npm i
 
 WORKDIR /app
 
