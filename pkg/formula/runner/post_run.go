@@ -50,11 +50,7 @@ func removeContainer(imgName string) error {
 	args := []string{dockerRemoveCmd, imgName}
 	cmd := exec.Command(docker, args...)
 
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	if err := cmd.Wait(); err != nil {
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 

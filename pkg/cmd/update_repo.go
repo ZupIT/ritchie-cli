@@ -3,15 +3,17 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-type UpdateRepoCmd struct {
+type updateRepoCmd struct {
 	client *http.Client
 	repo   formula.RepositoryListUpdater
 	github github.Repositories
@@ -34,7 +36,7 @@ func NewUpdateRepoCmd(
 	inBool prompt.InputBool,
 	inInt prompt.InputInt,
 ) *cobra.Command {
-	updateRepo := UpdateRepoCmd{
+	updateRepo := updateRepoCmd{
 		client:        client,
 		repo:          repo,
 		github:        github,
@@ -57,7 +59,7 @@ func NewUpdateRepoCmd(
 	return cmd
 }
 
-func (up UpdateRepoCmd) runPrompt() CommandRunnerFunc {
+func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repos, err := up.repo.List()
 		if err != nil {
@@ -104,8 +106,23 @@ func (up UpdateRepoCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (up UpdateRepoCmd) runStdin() CommandRunnerFunc {
+func (up updateRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
+		r := formula.Repo{}
+
+		err := stdin.ReadJson(os.Stdin, &r)
+		if err != nil {
+			prompt.Error(stdin.MsgInvalidInput)
+			return err
+		}
+
+		if err := up.repo.Update(r.Name, r.Version); err != nil {
+			return err
+		}
+
+		successMsg := fmt.Sprintf("The %q repository was updated with success to version %q", r.Name, r.Version)
+		prompt.Success(successMsg)
+
 		return nil
 	}
 }

@@ -60,11 +60,7 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 		}
 	}
 
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	if err := cmd.Wait(); err != nil {
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 

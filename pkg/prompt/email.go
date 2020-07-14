@@ -1,9 +1,10 @@
 package prompt
 
 import (
-	"github.com/AlecAivazis/survey/v2"
+	"fmt"
+	"regexp"
 
-	"github.com/ZupIT/ritchie-cli/pkg/validator"
+	"github.com/AlecAivazis/survey/v2"
 )
 
 type SurveyEmail struct{}
@@ -22,9 +23,17 @@ func (SurveyEmail) Email(name string) (string, error) {
 			Prompt: &survey.Input{
 				Message: name,
 			},
-			Validate: validator.IsValidSurveyEmail,
+			Validate: isValidSurveyEmail,
 		},
 	}
 
 	return value, survey.Ask(validationQs, &value)
+}
+
+func isValidSurveyEmail(email interface{}) error {
+	rgx := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	if !rgx.MatchString(email.(string)) {
+		return fmt.Errorf("%s is not a valid email", email)
+	}
+	return nil
 }

@@ -27,7 +27,7 @@ func TestInputManager_Inputs(t *testing.T) {
 
 	home := os.TempDir()
 	_ = fileutil.RemoveDir(home + "/formulas")
-	defaultSetup := NewDefaultSingleSetup(home, http.DefaultClient)
+	defaultSetup := NewDefaultSetup(home, http.DefaultClient)
 	preRunner := NewDefaultPreRunner(defaultSetup)
 	setup, err := preRunner.PreRun(def)
 	if err != nil {

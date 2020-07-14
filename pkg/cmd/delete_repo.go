@@ -13,14 +13,14 @@ const (
 	deleteSuccessMsg = "Repository %q was deleted with success"
 )
 
-type DeleteRepoCmd struct {
+type deleteRepoCmd struct {
 	formula.RepositoryLister
 	prompt.InputList
 	formula.RepositoryDeleter
 }
 
 func NewDeleteRepoCmd(rl formula.RepositoryLister, il prompt.InputList, rd formula.RepositoryDeleter) *cobra.Command {
-	dr := DeleteRepoCmd{rl, il, rd}
+	dr := deleteRepoCmd{rl, il, rd}
 	cmd := &cobra.Command{
 		Use:     "repo",
 		Short:   "Delete a repository",
@@ -30,7 +30,7 @@ func NewDeleteRepoCmd(rl formula.RepositoryLister, il prompt.InputList, rd formu
 	return cmd
 }
 
-func (dr DeleteRepoCmd) runFunc() CommandRunnerFunc {
+func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repos, err := dr.RepositoryLister.List()
 		if err != nil {

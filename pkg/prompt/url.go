@@ -1,9 +1,10 @@
 package prompt
 
 import (
-	"github.com/AlecAivazis/survey/v2"
+	"errors"
+	"net/url"
 
-	"github.com/ZupIT/ritchie-cli/pkg/validator"
+	"github.com/AlecAivazis/survey/v2"
 )
 
 type SurveyURL struct{}
@@ -22,9 +23,17 @@ func (SurveyURL) URL(name, defaultValue string) (string, error) {
 				Message: name,
 				Default: defaultValue,
 			},
-			Validate: validator.IsValidSurveyURL,
+			Validate: isValidSurveyURL,
 		},
 	}
 
 	return value, survey.Ask(validationQs, &value)
+}
+
+func isValidSurveyURL(value interface{}) error {
+	_, err := url.ParseRequestURI(value.(string))
+	if err != nil {
+		return errors.New("invalid URL")
+	}
+	return nil
 }
