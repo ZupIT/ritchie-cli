@@ -148,7 +148,7 @@
                 "action":"main"
             }
         ],
-        "result":"Add autocomplete for terminal, Available for (bash, zsh)."
+        "result":"Add autocomplete for terminal, Available for (zsh, bash, fish, powershell)."
     },
     {
         "entry":"Completion bash",

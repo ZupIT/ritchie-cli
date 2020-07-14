@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -15,6 +16,8 @@ const (
 	powerShell autocomplete.ShellName = "powershell"
 )
 
+var supportedShell = []string{zsh.String(), bash.String(), fish.String(), powerShell.String()}
+
 // autocompleteCmd type for set autocomplete command
 type autocompleteCmd struct {
 	autocomplete.Generator
@@ -22,10 +25,11 @@ type autocompleteCmd struct {
 
 // NewAutocompleteCmd creates a new cmd instance
 func NewAutocompleteCmd() *cobra.Command {
+	shells := strings.Join(supportedShell, ", ")
 	return &cobra.Command{
 		Use:     "completion SUBCOMMAND",
-		Short:   "Add autocomplete for terminal (bash, zsh)",
-		Long:    `Add autocomplete for terminal, Available for (bash, zsh).`,
+		Short:   "Add autocomplete for terminal (" + shells + ")",
+		Long:    `Add autocomplete for terminal, Available for (` + shells + `).`,
 		Example: "rit completion zsh",
 	}
 }
