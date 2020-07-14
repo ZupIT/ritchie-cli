@@ -19,7 +19,7 @@ var (
 	ErrCommonsRepoName  = errors.New("the name \"commons\" is not valid for the repository name, try to enter another name")
 )
 
-type AddRepoCmd struct {
+type addRepoCmd struct {
 	client *http.Client
 	repo   formula.RepositoryAddLister
 	github github.Repositories
@@ -41,7 +41,7 @@ func NewAddRepoCmd(
 	inBool prompt.InputBool,
 	inInt prompt.InputInt,
 ) *cobra.Command {
-	addRepo := AddRepoCmd{
+	addRepo := addRepoCmd{
 		repo:               repo,
 		github:             github,
 		InputTextValidator: inText,
@@ -62,7 +62,7 @@ func NewAddRepoCmd(
 	return cmd
 }
 
-func (ad AddRepoCmd) runPrompt() CommandRunnerFunc {
+func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		name, err := ad.Text("Repository name: ", ad.repoNameValidator)
 		if err != nil {
@@ -143,7 +143,7 @@ func (ad AddRepoCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (ad AddRepoCmd) runStdin() CommandRunnerFunc {
+func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
 		r := formula.Repo{}
@@ -164,7 +164,7 @@ func (ad AddRepoCmd) runStdin() CommandRunnerFunc {
 	}
 }
 
-func (ad AddRepoCmd) repoNameValidator(text interface{}) error {
+func (ad addRepoCmd) repoNameValidator(text interface{}) error {
 	in := text.(string)
 	if in == "" {
 		return ErrRepoNameNotEmpty

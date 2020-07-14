@@ -18,43 +18,37 @@ var inputTypes = []string{"plain text", "secret"}
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
-	credential.Settings
 	credential.SingleSettings
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
-	prompt.InputMultiline
 }
 
-// NewSingleSetCredentialCmd creates a new cmd instance
-func NewSingleSetCredentialCmd(
-	st credential.Setter,
-	ss credential.SingleSettings,
-	it prompt.InputText,
-	ib prompt.InputBool,
-	il prompt.InputList,
-	ip prompt.InputPassword) *cobra.Command {
+// NewSetCredentialCmd creates a new cmd instance
+func NewSetCredentialCmd(
+	credSetter credential.Setter,
+	credSetting credential.SingleSettings,
+	inText prompt.InputText,
+	inBool prompt.InputBool,
+	inList prompt.InputList,
+	inPass prompt.InputPassword,
+) *cobra.Command {
 	s := &setCredentialCmd{
-		st,
-		nil,
-		ss,
-		it,
-		ib,
-		il,
-		ip,
-		nil}
-	return newCmd(s)
-}
+		Setter:         credSetter,
+		SingleSettings: credSetting,
+		InputText:      inText,
+		InputBool:      inBool,
+		InputList:      inList,
+		InputPassword:  inPass,
+	}
 
-func newCmd(s *setCredentialCmd) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "credential",
 		Short: "Set credential",
 		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
 		RunE:  RunFuncE(s.runStdin(), s.runPrompt()),
 	}
-
 	cmd.LocalFlags()
 
 	return cmd
@@ -62,7 +56,7 @@ func newCmd(s *setCredentialCmd) *cobra.Command {
 
 func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		cred, err := s.promptResolver()
+		cred, err := s.prompt()
 		if err != nil {
 			return err
 		}
@@ -76,11 +70,7 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (s setCredentialCmd) promptResolver() (credential.Detail, error) {
-	return s.singlePrompt()
-}
-
-func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
+func (s setCredentialCmd) prompt() (credential.Detail, error) {
 	err := s.WriteDefaultCredentials(credsingle.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
@@ -178,8 +168,7 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 	var credDetail credential.Detail
 
-	err := stdin.ReadJson(os.Stdin, &credDetail)
-	if err != nil {
+	if err := stdin.ReadJson(os.Stdin, &credDetail); err != nil {
 		prompt.Error(stdin.MsgInvalidInput)
 		return credDetail, err
 	}

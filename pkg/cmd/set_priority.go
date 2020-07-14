@@ -13,25 +13,37 @@ const (
 	newRepositoryPriority = "Now %q repository has priority %v"
 )
 
-type SetPriorityCmd struct {
+type setPriorityCmd struct {
 	prompt.InputList
 	prompt.InputInt
 	formula.RepositoryLister
 	formula.RepositoryPrioritySetter
 }
 
-func NewSetPriorityCmd(il prompt.InputList, ii prompt.InputInt, rl formula.RepositoryLister, rs formula.RepositoryPrioritySetter) *cobra.Command {
-	s := SetPriorityCmd{il, ii, rl, rs}
+func NewSetPriorityCmd(
+	inList prompt.InputList,
+	inInt prompt.InputInt,
+	repoLister formula.RepositoryLister,
+	repoPriority formula.RepositoryPrioritySetter,
+) *cobra.Command {
+	s := setPriorityCmd{
+		InputList:                inList,
+		InputInt:                 inInt,
+		RepositoryLister:         repoLister,
+		RepositoryPrioritySetter: repoPriority,
+	}
+
 	cmd := &cobra.Command{
 		Use:     "repo-priority",
 		Short:   "Set a repository priority",
 		Example: "rit set repo-priority",
 		RunE:    s.runFunc(),
 	}
+
 	return cmd
 }
 
-func (s SetPriorityCmd) runFunc() CommandRunnerFunc {
+func (s setPriorityCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repositories, err := s.RepositoryLister.List()
 		if err != nil {

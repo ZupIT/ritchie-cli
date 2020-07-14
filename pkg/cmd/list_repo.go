@@ -15,12 +15,12 @@ const (
 	totalOneRepoMsg = "There is 1 repo"
 )
 
-type ListRepoCmd struct {
+type listRepoCmd struct {
 	formula.RepositoryLister
 }
 
 func NewListRepoCmd(rl formula.RepositoryLister) *cobra.Command {
-	lr := ListRepoCmd{rl}
+	lr := listRepoCmd{rl}
 	cmd := &cobra.Command{
 		Use:     "repo",
 		Short:   "Show a list with all your available repositories",
@@ -30,7 +30,7 @@ func NewListRepoCmd(rl formula.RepositoryLister) *cobra.Command {
 	return cmd
 }
 
-func (lr ListRepoCmd) runFunc() CommandRunnerFunc {
+func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repos, err := lr.List()
 		if err != nil {

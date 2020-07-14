@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/docker/docker/api/server"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/security"
-	"github.com/ZupIT/ritchie-cli/pkg/server"
 )
 
 func TestNewSingleInitCmd(t *testing.T) {
@@ -32,10 +31,6 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 		InputPassword prompt.InputPassword
 		InputURL      prompt.InputURL
 		InputBool     prompt.InputBool
-		FindSetter    server.FindSetter
-		LoginManager  security.LoginManager
-		Loader        formula.RepoLoader
-		Resolver      otp.Resolver
 	}
 	tests := []struct {
 		name    string
@@ -49,10 +44,6 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				InputPassword: inputPasswordMock{},
 				InputURL:      inputURLMock{},
 				InputBool:     inputFalseMock{},
-				FindSetter:    findSetterServerMock{},
-				LoginManager:  loginManagerMock{},
-				Loader:        repoLoaderMock{},
-				Resolver:      otpResolverMock{},
 			},
 			wantErr: false,
 		},
@@ -63,10 +54,6 @@ func Test_initTeamCmd_runPrompt(t *testing.T) {
 				InputPassword: inputPasswordMock{},
 				InputURL:      inputURLMock{},
 				InputBool:     inputTrueMock{},
-				FindSetter:    findSetterServerMock{},
-				LoginManager:  loginManagerMock{},
-				Loader:        repoLoaderMock{},
-				Resolver: otpResolverCustomMock{
 					requestOtp: func(url, organization string) (otp.Response, error) {
 						return otp.Response{}, errors.New("some error")
 					},

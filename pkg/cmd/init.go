@@ -24,13 +24,13 @@ const UsageMsg = ` How to contribute new formulas to the Ritchie community?
 
 var CommonsRepoURL = "https://github.com/kaduartur/ritchie-formulas"
 
-type InitCmd struct {
+type initCmd struct {
 	repo formula.RepositoryAdder
 	git  github.Repositories
 }
 
 func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories) *cobra.Command {
-	o := InitCmd{repo: repo, git: git}
+	o := initCmd{repo: repo, git: git}
 
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -42,7 +42,7 @@ func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories) *cobra.Co
 	return cmd
 }
 
-func (in InitCmd) runPrompt() CommandRunnerFunc {
+func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repo := formula.Repo{
 			Name:     "commons",

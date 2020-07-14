@@ -12,32 +12,25 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 )
 
 var (
-	ErrInvalidRepoUrl            = prompt.NewError("RepoURL is invalid inside tree.json")
 	ErrFormulaBinNotFound        = prompt.NewError("formula bin not found")
 	ErrConfigFileNotFound        = prompt.NewError("config file not found")
-	ErrUnknownFormulaDownload    = prompt.NewError("unknown error when downloading your formula")
-	ErrUnknownConfigFileDownload = prompt.NewError("unknown error when downloading your config file")
-	ErrCreateReqBundle           = prompt.NewError("failed to create request for bundle download")
-	ErrCreateReqConfig           = prompt.NewError("failed to create request for config download")
 )
 
 const (
-	makeCmd                = "make"
-	buildCmd               = "build"
+	makeCmd             = "make"
+	buildCmd            = "build"
 	volumeDockerPattern = "%s:/app"
 )
 
 type DefaultSetup struct {
-	ritchieHome    string
-	client         *http.Client
-	sessionManager session.Manager
+	ritchieHome string
+	client      *http.Client
 }
 
-func NewDefaultSingleSetup(ritchieHome string, c *http.Client) DefaultSetup {
+func NewDefaultSetup(ritchieHome string, c *http.Client) DefaultSetup {
 	return DefaultSetup{
 		ritchieHome: ritchieHome,
 		client:      c,

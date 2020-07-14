@@ -25,7 +25,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 
 	home := os.TempDir()
 	_ = fileutil.RemoveDir(home + "/formulas")
-	setup := NewDefaultSingleSetup(home, http.DefaultClient)
+	setup := NewDefaultSetup(home, http.DefaultClient)
 
 	type in struct {
 		envMock  envResolverMock

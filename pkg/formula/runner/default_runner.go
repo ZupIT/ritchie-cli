@@ -44,11 +44,7 @@ func (d DefaultRunner) Run(def formula.Definition, inputType api.TermInputType) 
 		return err
 	}
 
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	if err := cmd.Wait(); err != nil {
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 

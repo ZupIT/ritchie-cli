@@ -6,8 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"k8s.io/kubectl/pkg/util/templates"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
@@ -33,7 +34,6 @@ import (
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/ZupIT/ritchie-cli/pkg/session"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -75,15 +75,14 @@ func buildCommands() *cobra.Command {
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, fileManager, dirManager)
 	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
-	sessionManager := session.NewManager(ritchieHomeDir)
 	tplManager := template.NewManager(api.RitchieHomeDir())
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder, sessionManager)
-	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder, sessionManager)
+	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder)
+	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds)
 	credSettings := credsingle.NewSingleSettings(fileManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
@@ -92,7 +91,7 @@ func buildCommands() *cobra.Command {
 	envResolvers[env.Credential] = credResolver
 
 	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
-	formulaSetup := runner.NewDefaultSingleSetup(ritchieHomeDir, http.DefaultClient)
+	formulaSetup := runner.NewDefaultSetup(ritchieHomeDir, http.DefaultClient)
 
 	defaultPreRunner := runner.NewDefaultPreRunner(formulaSetup)
 	dockerPreRunner := runner.NewDockerPreRunner(formulaSetup)
@@ -131,7 +130,7 @@ func buildCommands() *cobra.Command {
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
 
 	// level 2
-	setCredentialCmd := cmd.NewSingleSetCredentialCmd(
+	setCredentialCmd := cmd.NewSetCredentialCmd(
 		credSetter,
 		credSettings,
 		inputText,
