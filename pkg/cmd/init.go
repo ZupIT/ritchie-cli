@@ -6,6 +6,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
+	"github.com/ZupIT/ritchie-cli/pkg/validator"
 
 	"github.com/spf13/cobra"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/security"
 	"github.com/ZupIT/ritchie-cli/pkg/server"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
-	"github.com/ZupIT/ritchie-cli/pkg/validator"
 )
 
 const (
@@ -92,6 +92,8 @@ func (o initSingleCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
+		tutorialInit()
+
 		return o.Load()
 	}
 }
@@ -113,6 +115,8 @@ func (o initSingleCmd) runStdin() CommandRunnerFunc {
 		if err := o.Save(p); err != nil {
 			return err
 		}
+
+		tutorialInit()
 
 		return o.Load()
 	}
@@ -211,6 +215,8 @@ func (o initTeamCmd) runPrompt() CommandRunnerFunc {
 			fmt.Println("Login successfully!")
 		}
 
+		tutorialInit()
+
 		return nil
 	}
 }
@@ -231,4 +237,8 @@ func (o initTeamCmd) runStdin() CommandRunnerFunc {
 
 		return nil
 	}
+}
+
+func tutorialInit() {
+	prompt.Info("\n[TUTORIAL] The next step is \"rit set context\"")
 }
