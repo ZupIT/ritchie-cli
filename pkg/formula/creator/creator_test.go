@@ -21,7 +21,6 @@ const (
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectRuby   = "rit scaffold generate test_ruby"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
-	fCmdCorrectRust   = "rit scaffold generate test_rust"
 	fCmdCorrectPhp    = "rit scaffold generate test_php"
 	fCmdRepeatedPhp   = "rit scaffold generate test_php"
 	langGo            = "Go"
@@ -31,7 +30,6 @@ const (
 	langRuby          = "Ruby"
 	langShell         = "Shell"
 	langPhp           = "Php"
-	langRust          = "Rust"
 )
 
 func TestCreator(t *testing.T) {
@@ -164,22 +162,6 @@ func TestCreator(t *testing.T) {
 					Lang:          langShell,
 					WorkspacePath: fullDir,
 					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_shell"),
-				},
-				dir:  dirManager,
-				file: fileManager,
-			},
-			out: out{
-				err: nil,
-			},
-		},
-		{
-			name: "command correct-rust",
-			in: in{
-				formCreate: formula.Create{
-					FormulaCmd:    fCmdCorrectRust,
-					Lang:          langRust,
-					WorkspacePath: fullDir,
-					FormulaPath:   path.Join(fullDir, "/scaffold/generate/test_rust"),
 				},
 				dir:  dirManager,
 				file: fileManager,

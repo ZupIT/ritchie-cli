@@ -16,7 +16,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/php"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/python"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/ruby"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/rust"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/shell"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/lang/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -229,11 +228,6 @@ func (c CreateManager) createSrcFiles(dir, pkg, language string, genericFileCrea
 	case formula.PythonLang:
 		pythonCreator := python.New(genericFileCreator.createGenericFiles)
 		if err := pythonCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
-			return err
-		}
-	case formula.RustLang:
-		rustCreator := rust.New(genericFileCreator.createGenericFiles)
-		if err := rustCreator.Create(srcDir, pkg, pkgDir, dir); err != nil {
 			return err
 		}
 	case formula.RubyLang:

@@ -10,5 +10,4 @@ const (
 	Ruby       = ".rb"
 	Shell      = ".sh"
 	Php        = ".php"
-	Rust       = ".rs"
 )
