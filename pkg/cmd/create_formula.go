@@ -141,12 +141,8 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		if err := c.formula.Create(cf); err != nil {
-			return err
-		}
+		c.create(cf, cf.WorkspacePath, cf.FormulaPath)
 
-		prompt.Success(fmt.Sprintf("%s formula successfully created!\n", cf.Lang))
-		prompt.Info(fmt.Sprintf("Formula path is %s \n", cf.WorkspacePath))
 		return nil
 	}
 }
