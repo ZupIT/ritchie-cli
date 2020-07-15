@@ -71,8 +71,8 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 }
 
 func (s setCredentialCmd) prompt() (credential.Detail, error) {
-	err := s.WriteDefaultCredentials(credsingle.ProviderPath())
-	if err != nil {
+
+	if err := s.WriteDefaultCredentials(credsingle.ProviderPath()); err != nil {
 		return credential.Detail{}, err
 	}
 
@@ -118,8 +118,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 			}
 		}
 		credentials[newProvider] = newFields
-		err = s.WriteCredentials(credentials, credsingle.ProviderPath())
-		if err != nil {
+		if err = s.WriteCredentials(credentials, credsingle.ProviderPath()); err != nil {
 			return credDetail, err
 		}
 
@@ -136,7 +135,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 				return credDetail, err
 			}
 		} else {
-			value, err = s.Text(i.Name, true)
+			value, err = s.Text(i.Name+":", true)
 			if err != nil {
 				return credDetail, err
 			}
@@ -173,31 +172,4 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 		return credDetail, err
 	}
 	return credDetail, nil
-}
-
-func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
-	profiles := map[string]credential.Type{
-		"ME (for you)":               credential.Me,
-		"OTHER (for another user)":   credential.Other,
-		"ORG (for the organization)": credential.Org,
-	}
-	var types []string
-	for k := range profiles {
-		types = append(types, k)
-	}
-
-	typ, err := s.List("Profile to add credential: ", types)
-	if err != nil {
-		return err
-	}
-
-	if profiles[typ] == credential.Other {
-		credDetail.Username, err = s.Text("Username: ", true)
-		if err != nil {
-			return err
-		}
-	}
-
-	credDetail.Type = profiles[typ]
-	return nil
 }
