@@ -1,4 +1,4 @@
-package credsingle
+package set
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 
 func TestSet(t *testing.T) {
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, ctxFinder, sessManager)
+	setter := NewSetter(tmp, credential.ctxFinder, sessManager)
 
 	tests := []struct {
 		name string
@@ -18,7 +18,7 @@ func TestSet(t *testing.T) {
 	}{
 		{
 			name: "github credential",
-			in:   githubCred,
+			in:   credential.githubCred,
 			out:  nil,
 		},
 	}

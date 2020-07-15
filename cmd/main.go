@@ -8,6 +8,8 @@ import (
 
 	"k8s.io/kubectl/pkg/util/templates"
 
+	"github.com/ZupIT/ritchie-cli/pkg/credential/find"
+	"github.com/ZupIT/ritchie-cli/pkg/credential/set"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
@@ -23,7 +25,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -78,10 +79,10 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder)
-	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder)
+	credSetter := set.NewSetter(ritchieHomeDir, ctxFinder)
+	credFinder := find.NewFinder(ritchieHomeDir, ctxFinder)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds)
-	credSettings := credsingle.NewSingleSettings(fileManager)
+	credSettings := set.NewSingleSettings(fileManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
@@ -134,6 +135,7 @@ func buildCommands() *cobra.Command {
 		inputBool,
 		inputList,
 		inputPassword)
+	listCredentialCmd := cmd.NewListCredentialCmd(credSettings)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
@@ -156,6 +158,7 @@ func buildCommands() *cobra.Command {
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd)
 	listCmd.AddCommand(listRepoCmd)
+	listCmd.AddCommand(listCredentialCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
 	showCmd.AddCommand(showCtxCmd)
 	buildCmd.AddCommand(buildFormulaCmd)

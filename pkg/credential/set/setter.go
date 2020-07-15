@@ -1,4 +1,4 @@
-package credsingle
+package set
 
 import (
 	"encoding/json"
@@ -33,12 +33,12 @@ func (s Setter) Set(cred credential.Detail) error {
 		return err
 	}
 
-	dir := Dir(s.homePath, ctx.Current)
+	dir := credential.Dir(s.homePath, ctx.Current)
 	if err := fileutil.CreateDirIfNotExists(dir, 0700); err != nil {
 		return err
 	}
 
-	credFile := File(s.homePath, ctx.Current, cred.Service)
+	credFile := credential.File(s.homePath, ctx.Current, cred.Service)
 	if err := fileutil.WriteFilePerm(credFile, cb, 0600); err != nil {
 		return err
 	}

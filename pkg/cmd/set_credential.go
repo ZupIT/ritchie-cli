@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
+	"github.com/ZupIT/ritchie-cli/pkg/credential/set"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -17,8 +17,8 @@ var inputTypes = []string{"plain text", "secret"}
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
-	credential.Setter
-	credential.SingleSettings
+	set.Setter
+	set.SingleSettings
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
@@ -27,8 +27,8 @@ type setCredentialCmd struct {
 
 // NewSetCredentialCmd creates a new cmd instance
 func NewSetCredentialCmd(
-	credSetter credential.Setter,
-	credSetting credential.SingleSettings,
+	credSetter set.Setter,
+	credSetting set.SingleSettings,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
@@ -72,25 +72,25 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 
 func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
-	if err := s.WriteDefaultCredentials(credsingle.ProviderPath()); err != nil {
+	if err := s.WriteDefaultCredentials(set.ProviderPath()); err != nil {
 		return credential.Detail{}, err
 	}
 
 	var credDetail credential.Detail
 	cred := credential.Credential{}
 
-	credentials, err := s.ReadCredentials(credsingle.ProviderPath())
+	credentials, err := s.ReadCredentials(set.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
 	}
 
-	providerArr := credsingle.NewProviderArr(credentials)
+	providerArr := set.NewProviderArr(credentials)
 	providerChoose, err := s.List("Select your provider", providerArr)
 	if err != nil {
 		return credDetail, err
 	}
 
-	if providerChoose == credsingle.AddNew {
+	if providerChoose == set.AddNew {
 		newProvider, err := s.Text("Define your provider name:", true)
 		if err != nil {
 			return credDetail, err
@@ -118,7 +118,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 			}
 		}
 		credentials[newProvider] = newFields
-		if err = s.WriteCredentials(credentials, credsingle.ProviderPath()); err != nil {
+		if err = s.WriteCredentials(credentials, set.ProviderPath()); err != nil {
 			return credDetail, err
 		}
 

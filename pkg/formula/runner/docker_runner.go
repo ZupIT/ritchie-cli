@@ -47,7 +47,6 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType) e
 	if err := d.Inputs(cmd, setup, inputType); err != nil {
 		return err
 	}
-
 	for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
 		if !fileutil.Exists(envFile) {
 			if err := fileutil.WriteFile(envFile, []byte(e+"\n")); err != nil {

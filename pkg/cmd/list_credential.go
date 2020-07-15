@@ -7,16 +7,16 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
+	"github.com/ZupIT/ritchie-cli/pkg/credential/set"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 type listCredentialCmd struct {
-	credential.SingleSettings
+	set.SingleSettings
 }
 
 func NewListCredentialCmd(
-	ss credential.SingleSettings) *cobra.Command {
+	ss set.SingleSettings) *cobra.Command {
 	l := &listCredentialCmd{ss}
 
 	cmd := &cobra.Command{
@@ -66,7 +66,7 @@ func printCredentialsTable(fields credential.Fields) {
 
 func (l listCredentialCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data, err := l.ReadCredentials(credsingle.ProviderPath())
+		data, err := l.ReadCredentials(set.ProviderPath())
 		if err != nil {
 			return err
 		}

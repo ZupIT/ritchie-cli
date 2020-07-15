@@ -1,4 +1,4 @@
-package credsingle
+package find
 
 import (
 	"encoding/json"
@@ -28,7 +28,7 @@ func (f Finder) Find(provider string) (credential.Detail, error) {
 		ctx.Current = rcontext.DefaultCtx
 	}
 
-	cb, err := fileutil.ReadFile(File(f.homePath, ctx.Current, provider))
+	cb, err := fileutil.ReadFile(credential.File(f.homePath, ctx.Current, provider))
 	if err != nil {
 		return credential.Detail{}, err
 	}

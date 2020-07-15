@@ -223,6 +223,8 @@ func loadItems(input formula.Input, formulaPath string) ([]string, error) {
 func (d InputManager) resolveIfReserved(input formula.Input) (string, error) {
 	s := strings.Split(input.Type, "_")
 	resolver := d.envResolvers[s[0]]
+	fmt.Println(resolver)
+
 	if resolver != nil {
 		return resolver.Resolve(input.Type)
 	}
