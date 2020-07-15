@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/mattn/go-isatty"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 
@@ -39,7 +41,13 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType, v
 	}
 
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
-	args := []string{dockerRunCmd, "-it", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+
+	var args []string
+	if isatty.IsTerminal(os.Stdout.Fd()) {
+		args = []string{dockerRunCmd, "-it", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+	} else {
+		args = []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+	}
 	cmd := exec.Command(docker, args...) // Run command "docker run -it -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Env = os.Environ()
 
