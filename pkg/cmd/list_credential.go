@@ -29,6 +29,18 @@ func NewListCredentialCmd(
 	return cmd
 }
 
+func hideCredential(credential string) string {
+	noHiddenChars := len(credential) / 3
+	var hiddenCredential []rune
+	for i, r := range credential {
+		if i < len(credential)-noHiddenChars {
+			r ='*'
+		}
+		hiddenCredential = append(hiddenCredential, r)
+	}
+	return string(hiddenCredential)
+}
+
 func printCredentialsTable(fields credential.Fields) {
 	table := uitable.New()
 	table.AddRow(prompt.Bold("CONTEXT"), prompt.Bold("PROVIDER"), prompt.Bold("NAME"), prompt.Bold("CREDENTIAL"))
