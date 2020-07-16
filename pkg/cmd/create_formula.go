@@ -34,7 +34,7 @@ type createFormulaCmd struct {
 	inList          prompt.InputList
 }
 
-// CreateFormulaCmd creates a new cmd instance
+// NewCreateFormulaCmd creates a new cmd instance
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,

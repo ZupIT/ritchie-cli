@@ -35,7 +35,7 @@ func NewDeleteRepoCmd(dl formula.RepoDelLister, il prompt.InputList, ib prompt.I
 
 	cmd := &cobra.Command{
 		Use:     "repo [NAME_REPOSITORY]",
-		Short:   "Delete a repository.",
+		Short:   "Delete a repository",
 		Example: "rit delete repo [NAME_REPOSITORY]",
 		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
 	}

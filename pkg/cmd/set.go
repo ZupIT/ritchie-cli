@@ -8,7 +8,7 @@ import (
 func NewSetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "set SUBCOMMAND",
-		Short: "Set objects",
+		Short: "Set objects (context, credential)",
 		Long:  `Set objects like credentials, etc.`,
 	}
 }

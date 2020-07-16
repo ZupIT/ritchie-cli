@@ -11,6 +11,7 @@ type logoutCmd struct {
 	security.LogoutManager
 }
 
+// NewLogoutCmd creates new cmd instance of logout command
 func NewLogoutCmd(lm security.LogoutManager) *cobra.Command {
 	l := logoutCmd{lm}
 	return &cobra.Command{
