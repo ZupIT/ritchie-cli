@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"os"
 	"testing"
 )
 
@@ -34,5 +35,14 @@ func TestReadJson(t *testing.T) {
 	// Assert the decoder result is the initial message
 	if msg != tr.Test {
 		t.Errorf("Expected : %v but got %v", msg, tr.Test)
+	}
+}
+
+func TestWriteToStdin(t *testing.T) {
+	tmpfile, oldStdin, err := WriteToStdin(`{"confirm": true}`)
+	defer os.Remove(tmpfile.Name())
+	defer func() { os.Stdin = oldStdin }()
+	if err != nil {
+		t.Errorf("TestNewCleanFormulasCmdStdin got error %v", err)
 	}
 }
