@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 
@@ -15,8 +14,8 @@ import (
 )
 
 var (
-	ErrFormulaBinNotFound        = prompt.NewError("formula bin not found")
-	ErrConfigFileNotFound        = prompt.NewError("config file not found")
+	ErrFormulaBinNotFound = prompt.NewError("formula bin not found")
+	ErrConfigFileNotFound = prompt.NewError("config file not found")
 )
 
 const (
@@ -27,13 +26,11 @@ const (
 
 type DefaultSetup struct {
 	ritchieHome string
-	client      *http.Client
 }
 
-func NewDefaultSetup(ritchieHome string, c *http.Client) DefaultSetup {
+func NewDefaultSetup(ritchieHome string) DefaultSetup {
 	return DefaultSetup{
 		ritchieHome: ritchieHome,
-		client:      c,
 	}
 }
 
