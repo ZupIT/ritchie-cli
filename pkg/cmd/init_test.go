@@ -26,6 +26,58 @@ func TestNewSingleInitCmd(t *testing.T) {
 	}
 }
 
+func Test_initTeamCmd_runStdin(t *testing.T) {
+	type fields struct {
+		InputText     prompt.InputText
+		InputPassword prompt.InputPassword
+		InputURL      prompt.InputURL
+		InputBool     prompt.InputBool
+		FindSetter    server.FindSetter
+		LoginManager  security.LoginManager
+		Loader        formula.RepoLoader
+		Resolver      otp.Resolver
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "Run With Success with empty config",
+			fields: fields{
+				InputText:     inputTextMock{},
+				InputPassword: inputPasswordMock{},
+				InputURL:      inputURLMock{},
+				InputBool:     inputFalseMock{},
+				FindSetter:    findSetterServerMock{},
+				LoginManager:  loginManagerMock{},
+				Loader:        repoLoaderMock{},
+				Resolver:      otpResolverMock{},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := NewTeamInitCmd(
+				tt.fields.InputText,
+				tt.fields.InputPassword,
+				tt.fields.InputURL,
+				tt.fields.InputBool,
+				tt.fields.FindSetter,
+				tt.fields.LoginManager,
+				tt.fields.Loader,
+				tt.fields.Resolver,
+			)
+			o.PersistentFlags().Bool("stdin", true, "input by stdin")
+
+			if err := o.Execute(); (err == nil) != tt.wantErr {
+				t.Errorf("initTeamCmd_runStdin() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func Test_initTeamCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		InputText     prompt.InputText

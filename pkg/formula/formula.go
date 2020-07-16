@@ -2,6 +2,7 @@ package formula
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -12,23 +13,24 @@ import (
 )
 
 const (
-	PathPattern          = "%s/formulas/%s"
-	TmpDirPattern        = "%s/tmp/%s"
-	TmpBinDirPattern     = "%s/tmp/%s/%s"
+	PathSeparator	     = string(os.PathSeparator)
+	PathPattern          = "%s" + PathSeparator + "formulas" + PathSeparator + "%s"
+	TmpDirPattern        = "%s" + PathSeparator + "%s"
+	TmpBinDirPattern     = "%s" + PathSeparator + "tmp" + "%s" + PathSeparator + "%s"
 	DefaultConfig        = "config.json"
-	ConfigPattern        = "%s/%s"
+	ConfigPattern        = "%s" + PathSeparator + "%s"
 	CommandEnv           = "COMMAND"
 	PwdEnv               = "PWD"
 	CPwdEnv              = "CURRENT_PWD"
 	VerboseEnv           = "VERBOSE_MODE"
 	BinPattern           = "%s%s"
-	BinPathPattern       = "%s/bin"
+	BinPathPattern       = "%s" + PathSeparator +"bin"
 	EnvPattern           = "%s=%s"
-	CachePattern         = "%s/.%s.cache"
+	CachePattern         = "%s" + PathSeparator +  ".%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
-	TreePath             = "/tree/tree.json"
-	MakefilePath         = "/Makefile"
+	TreePath             = PathSeparator + "tree" + PathSeparator + "tree.json"
+	MakefilePath         = PathSeparator + "Makefile"
 )
 
 type (

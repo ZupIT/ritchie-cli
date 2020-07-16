@@ -12,7 +12,7 @@ import (
 
 func TestDefaultSetup_Setup(t *testing.T) {
 	def := formula.Definition{
-		Path:    "mock/test",
+		Path:    "mock" + string(os.PathSeparator) +  "test",
 		Bin:     "test-${so}",
 		LBin:    "test-${so}",
 		MBin:    "test-${so}",
