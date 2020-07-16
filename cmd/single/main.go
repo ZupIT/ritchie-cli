@@ -131,7 +131,8 @@ func buildCommands() *cobra.Command {
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword)
+		inputPassword,
+		fileManager)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
