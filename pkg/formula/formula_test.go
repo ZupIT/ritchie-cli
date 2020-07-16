@@ -1,7 +1,9 @@
 package formula
 
 import (
+	"fmt"
 	"os"
+	"path"
 	"testing"
 )
 
@@ -11,7 +13,7 @@ var home string
 func TestMain(m *testing.M) {
 	home = os.TempDir()
 	def = Definition{
-		Path:     "scaffold/coffee-java",
+		Path:     path.Join("scaffold", "coffee-java"),
 		Bin:      "coffee-java.sh",
 		LBin:     "coffee-java.sh",
 		MBin:     "coffee-java.sh",
@@ -35,8 +37,10 @@ func TestFormulaPath(t *testing.T) {
 
 func TestTmpWorkDirPath(t *testing.T) {
 	const hash = "e43c2b35-aa28-4833-b6d3-f1e89691fbd6"
-	const wantTmpDir = "/tmp/tmp/e43c2b35-aa28-4833-b6d3-f1e89691fbd6"
-	const wantTmpBinDir = "/tmp/tmp/e43c2b35-aa28-4833-b6d3-f1e89691fbd6/scaffold/coffee-java"
+	wantTmpDir := fmt.Sprintf(TmpDirPattern, os.TempDir(),
+		"e43c2b35-aa28-4833-b6d3-f1e89691fbd6")
+	wantTmpBinDir := fmt.Sprintf(TmpBinDirPattern, os.TempDir(),
+		"e43c2b35-aa28-4833-b6d3-f1e89691fbd6", def.Path)
 
 	gotTmpDir, gotTmpBinDir := def.TmpWorkDirPath(home, hash)
 
