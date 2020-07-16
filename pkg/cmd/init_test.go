@@ -8,20 +8,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/github"
 )
 
-var (
-	defaultRepoAdderMock = repoAdderMock{
-		add: func(d formula.Repo) error {
-			return nil
-		},
-	}
-
-	defaultGitRepositoryMock = GitRepositoryMock{
-		latestTag: func(info github.RepoInfo) (github.Tag, error) {
-			return github.Tag{}, nil
-		},
-	}
-)
-
 func TestNewSingleInitCmd(t *testing.T) {
 	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
@@ -70,7 +56,7 @@ func Test_initCmd_runPrompt(t *testing.T) {
 		{
 			name: "Fail when call repo.Add",
 			fields: fields{
-				repo: repoAdderMock{
+				repo: repoListerAdderCustomMock{
 					add: func(d formula.Repo) error {
 						return errors.New("some error")
 					},

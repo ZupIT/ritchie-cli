@@ -109,16 +109,16 @@ func (inputListErrorMock) List(name string, items []string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 
-type repoAdderMock struct {
+type repoListerAdderCustomMock struct {
 	list func() (formula.Repos, error)
 	add  func(d formula.Repo) error
 }
 
-func (a repoAdderMock) List() (formula.Repos, error) {
+func (a repoListerAdderCustomMock) List() (formula.Repos, error) {
 	return a.list()
 }
 
-func (a repoAdderMock) Add(d formula.Repo) error {
+func (a repoListerAdderCustomMock) Add(d formula.Repo) error {
 	return a.add(d)
 }
 
@@ -371,3 +371,26 @@ func (m GitRepositoryMock) Tags(info github.RepoInfo) (github.Tags, error) {
 func (m GitRepositoryMock) LatestTag(info github.RepoInfo) (github.Tag, error) {
 	return m.latestTag(info)
 }
+
+var (
+	defaultRepoAdderMock = repoListerAdderCustomMock{
+		add: func(d formula.Repo) error {
+			return nil
+		},
+		list: func() (formula.Repos, error) {
+			return formula.Repos{}, nil
+		},
+	}
+
+	defaultGitRepositoryMock = GitRepositoryMock{
+		latestTag: func(info github.RepoInfo) (github.Tag, error) {
+			return github.Tag{}, nil
+		},
+		tags: func(info github.RepoInfo) (github.Tags, error) {
+			return github.Tags{}, nil
+		},
+		zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
+			return nil, nil
+		},
+	}
+)

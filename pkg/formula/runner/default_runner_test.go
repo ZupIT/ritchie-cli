@@ -84,8 +84,6 @@ func TestDefaultRunner_Run(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		// todo fix tests
-		t.Skip()
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 

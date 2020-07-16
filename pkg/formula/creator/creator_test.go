@@ -1,6 +1,6 @@
 package creator
 
-//  Todo fix creator text
+//  Todo wait merge rit create formula new logic
 // import (
 // 	"errors"
 // 	"os"
