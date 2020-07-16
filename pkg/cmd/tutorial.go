@@ -78,7 +78,7 @@ func (o tutorialSingleCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		fmt.Println("TUDO OK! SUA RESPOSTA: ", y)
-		tutorialStatus, _ = currentTutorial(o.homePath)
+		tutorialStatus, _ = currentTutorial(pathTutorial)
 		fmt.Println("STATUS TUTORIAL: ", tutorialStatus)
 		return nil
 	}

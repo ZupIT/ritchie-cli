@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/security/otp"
 	"github.com/ZupIT/ritchie-cli/pkg/validator"
@@ -240,5 +241,12 @@ func (o initTeamCmd) runStdin() CommandRunnerFunc {
 }
 
 func tutorialInit() {
-	prompt.Info("\n[TUTORIAL] The next step is \"rit set context\"")
+	homePath := api.RitchieHomeDir()
+	pathTutorial := fmt.Sprintf(TutorialFilePattern, homePath)
+
+	tutorialStatus, _ := currentTutorial(pathTutorial)
+
+	if tutorialStatus == tutorialStatusOn {
+		prompt.Info("\n[TUTORIAL] The next step is \"rit set context\"")
+	}
 }
