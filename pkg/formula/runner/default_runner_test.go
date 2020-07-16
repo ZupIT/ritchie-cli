@@ -2,25 +2,19 @@ package runner
 
 import (
 	"errors"
-	"os"
+	"runtime"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 )
-
-var RepoUrl = os.Getenv("REPO_URL")
 
 func TestDefaultRunner_Run(t *testing.T) {
 	def := formula.Definition{
 		Path: "mock/test",
 	}
-
-	home := os.TempDir()
-	_ = fileutil.RemoveDir(home + "/formulas")
-	setup := NewDefaultSetup(home)
 
 	type in struct {
 		envMock  envResolverMock
@@ -31,6 +25,29 @@ func TestDefaultRunner_Run(t *testing.T) {
 		postMock *postRunnerMock
 	}
 
+	var binName string
+	switch runtime.GOOS {
+	case osutil.Windows:
+		binName = "../../../testdata/run-mock.bat"
+	default:
+		binName = "../../../testdata/run-mock.sh"
+	}
+	defaultPreMock := &preRunnerMock{
+		setup: formula.Setup{
+			BinName: binName,
+			Config: formula.Config{
+				Inputs: []formula.Input{
+					{
+						Name: "SOME_INPUT",
+						Type: "text",
+					},
+				},
+			},
+		},
+	}
+
+	defaultPostMock := &postRunnerMock{}
+
 	tests := []struct {
 		name string
 		in   in
@@ -39,10 +56,12 @@ func TestDefaultRunner_Run(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				envMock: envResolverMock{in: "ok"},
-				inText:  inputMock{text: ""},
-				inBool:  inputMock{boolean: true},
-				inPass:  inputMock{text: "******"},
+				envMock:  envResolverMock{in: "ok"},
+				inText:   inputMock{text: ""},
+				inBool:   inputMock{boolean: true},
+				inPass:   inputMock{text: "******"},
+				preMock:  defaultPreMock,
+				postMock: defaultPostMock,
 			},
 			want: nil,
 		},
@@ -63,10 +82,12 @@ func TestDefaultRunner_Run(t *testing.T) {
 		{
 			name: "inputs error",
 			in: in{
-				envMock: envResolverMock{in: "ok"},
-				inText:  inputMock{err: errors.New("fail to resolve input")},
-				inBool:  inputMock{boolean: true},
-				inPass:  inputMock{text: "******"},
+				envMock:  envResolverMock{in: "ok"},
+				inText:   inputMock{err: errors.New("fail to resolve input")},
+				inBool:   inputMock{boolean: true},
+				inPass:   inputMock{text: "******"},
+				preMock:  defaultPreMock,
+				postMock: defaultPostMock,
 			},
 			want: errors.New("fail to resolve input"),
 		},
@@ -77,6 +98,7 @@ func TestDefaultRunner_Run(t *testing.T) {
 				inText:   inputMock{text: "ok"},
 				inBool:   inputMock{boolean: true},
 				inPass:   inputMock{text: "******"},
+				preMock:  defaultPreMock,
 				postMock: &postRunnerMock{error: errors.New("error in remove dir")},
 			},
 			want: errors.New("error in remove dir"),
@@ -87,27 +109,13 @@ func TestDefaultRunner_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			var preRunner formula.PreRunner
-			if in.preMock != nil {
-				preRunner = in.preMock
-			} else {
-				preRunner = NewDefaultPreRunner(setup)
-			}
-
-			var postRunner formula.PostRunner
-			if in.postMock != nil {
-				postRunner = in.postMock
-			} else {
-				postRunner = NewPostRunner()
-			}
-
 			resolvers := env.Resolvers{"test": in.envMock}
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPass)
-			defaultRunner := NewDefaultRunner(preRunner, postRunner, inputManager)
+			defaultRunner := NewDefaultRunner(in.preMock, in.postMock, inputManager)
 
 			got := defaultRunner.Run(def, api.Prompt)
 
-			if got != nil && got.Error() != tt.want.Error() {
+			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
 			}
 

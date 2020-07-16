@@ -1,6 +1,5 @@
 package runner
 
-// Todo fix setup test
 // import (
 // 	"net/http"
 // 	"os"
