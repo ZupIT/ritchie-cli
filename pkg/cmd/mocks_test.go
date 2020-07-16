@@ -49,13 +49,13 @@ func (inputURLMock) URL(name, defaultValue string) (string, error) {
 
 type inputIntMock struct{}
 
-func (inputIntMock) Int(name string) (int64, error) {
+func (inputIntMock) Int(name string, helper ...string) (int64, error) {
 	return 0, nil
 }
 
 type inputIntErrorMock struct{}
 
-func (inputIntErrorMock) Int(name string) (int64, error) {
+func (inputIntErrorMock) Int(name string, helper ...string) (int64, error) {
 	return 0, errors.New("some error")
 }
 
@@ -206,16 +206,16 @@ func (repoListerErrorMock) List() (formula.Repos, error) {
 
 type repoPrioritySetterMock struct{}
 
-func (repoPrioritySetterMock) SetPriority(repo string, priority int) error {
+func (repoPrioritySetterMock) SetPriority(name formula.RepoName, priority int) error {
 	return nil
 }
 
 type repoPrioritySetterCustomMock struct {
-	setPriority func(repo string, priority int) error
+	setPriority func(name formula.RepoName, priority int) error
 }
 
-func (m repoPrioritySetterCustomMock) SetPriority(repo string, priority int) error {
-	return m.setPriority(repo, priority)
+func (m repoPrioritySetterCustomMock) SetPriority(name formula.RepoName, priority int) error {
+	return m.setPriority(name, priority)
 }
 
 type repoLoaderMock struct{}
