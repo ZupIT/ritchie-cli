@@ -189,7 +189,11 @@ func Test_setCredentialCmd_singlePrompt(t *testing.T) {
 					},
 				},
 				InputText: inputTextMock{},
-				InputBool: inputBoolErrorMock{},
+				InputBool: inputBoolCustomMock{
+					bool: func(name string, items []string) (bool, error) {
+						return false, errors.New("some error")
+					},
+				},
 			},
 			want:    credential.Detail{},
 			wantErr: true,

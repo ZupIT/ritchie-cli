@@ -63,12 +63,6 @@ func (inputTrueMock) Bool(name string, items []string) (bool, error) {
 	return true, nil
 }
 
-type inputBoolErrorMock struct{}
-
-func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
-	return false, errors.New("some error")
-}
-
 type inputFalseMock struct{}
 
 func (inputFalseMock) Bool(name string, items []string) (bool, error) {

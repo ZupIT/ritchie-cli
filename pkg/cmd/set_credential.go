@@ -203,7 +203,7 @@ func (s setCredentialCmd) singlePrompt() (credential.Detail, error) {
 					return credDetail, err
 				}
 			} else {
-				value, err = s.Text(i.Name, true)
+				value, err = s.Text(i.Name + ":", true)
 				if err != nil {
 					return credDetail, err
 				}
