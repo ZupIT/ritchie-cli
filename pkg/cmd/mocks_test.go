@@ -245,7 +245,7 @@ func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
 }
 
 func (s singleCredSettingsMock) ReadCredentials(path string) (credential.Fields, error) {
-	return nil, nil
+	return credential.Fields{}, nil
 }
 
 func (s singleCredSettingsMock) WriteCredentials(fields credential.Fields, path string) error {

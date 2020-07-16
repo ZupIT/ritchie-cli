@@ -2,30 +2,77 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-func TestNewSingleSetCredentialCmd(t *testing.T) {
-	cmd := NewSetCredentialCmd(credSetterMock{}, singleCredSettingsMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{})
-
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	if cmd == nil {
-		t.Errorf("NewSetCredentialCmd got %v", cmd)
+func Test_setCredentialCmd_runPrompt(t *testing.T) {
+	type fields struct {
+		Setter         credential.Setter
+		SingleSettings credential.SingleSettings
+		InputText      prompt.InputText
+		InputBool      prompt.InputBool
+		InputList      prompt.InputList
+		InputPassword  prompt.InputPassword
 	}
-
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "Run with success",
+			fields: fields{
+				Setter:         credSetterMock{},
+				SingleSettings: singleCredSettingsMock{},
+				InputText:      inputSecretMock{},
+				InputBool:      inputFalseMock{},
+				InputList:      inputListCredMock{},
+				InputPassword:  inputPasswordMock{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success AddNew",
+			fields: fields{
+				Setter:         credSetterMock{},
+				SingleSettings: singleCredSettingsMock{},
+				InputText:      inputSecretMock{},
+				InputBool:      inputFalseMock{},
+				InputList:      inputListCustomMock{credsingle.AddNew},
+				InputPassword:  inputPasswordMock{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Fail when list return err",
+			fields: fields{
+				Setter:         credSetterMock{},
+				SingleSettings: singleCredSettingsMock{},
+				InputText:      inputSecretMock{},
+				InputBool:      inputFalseMock{},
+				InputList:      inputListErrorMock{},
+				InputPassword:  inputPasswordMock{},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := NewSetCredentialCmd(
+				tt.fields.Setter,
+				tt.fields.SingleSettings,
+				tt.fields.InputText,
+				tt.fields.InputBool,
+				tt.fields.InputList,
+				tt.fields.InputPassword,
+			)
+			o.PersistentFlags().Bool("stdin", false, "input by stdin")
+			if err := o.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
-
-// Todo fix TestNewTeamSetCredentialCmd
-// func TestNewTeamSetCredentialCmd(t *testing.T) {
-// 	cmd := NewTeamSetCredentialCmd(credSetterMock{}, credSettingsMock{}, inputSecretMock{}, inputFalseMock{}, inputListCredMock{}, inputPasswordMock{}, InputMultilineMock{})
-// 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-// 	if cmd == nil {
-// 		t.Errorf("NewTeamSetCredentialCmd got %v", cmd)
-// 	}
-//
-// 	if err := cmd.Execute(); err != nil {
-// 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-// 	}
-// }
