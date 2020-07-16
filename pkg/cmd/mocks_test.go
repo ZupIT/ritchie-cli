@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"io"
 
 	"github.com/docker/docker/api/server"
 	"github.com/spf13/cobra"
@@ -10,6 +11,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
@@ -107,14 +109,17 @@ func (inputListErrorMock) List(name string, items []string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 
-type repoAdder struct{}
-
-func (a repoAdder) List() (formula.Repos, error) {
-	return formula.Repos{}, nil
+type repoAdderMock struct {
+	list func() (formula.Repos, error)
+	add  func(d formula.Repo) error
 }
 
-func (repoAdder) Add(d formula.Repo) error {
-	return nil
+func (a repoAdderMock) List() (formula.Repos, error) {
+	return a.list()
+}
+
+func (a repoAdderMock) Add(d formula.Repo) error {
+	return a.add(d)
 }
 
 type formCreator struct{}
@@ -347,4 +352,22 @@ type InputMultilineMock struct{}
 
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
+}
+
+type GitRepositoryMock struct {
+	zipball   func(info github.RepoInfo, version string) (io.ReadCloser, error)
+	tags      func(info github.RepoInfo) (github.Tags, error)
+	latestTag func(info github.RepoInfo) (github.Tag, error)
+}
+
+func (m GitRepositoryMock) Zipball(info github.RepoInfo, version string) (io.ReadCloser, error) {
+	return m.zipball(info, version)
+}
+
+func (m GitRepositoryMock) Tags(info github.RepoInfo) (github.Tags, error) {
+	return m.tags(info)
+}
+
+func (m GitRepositoryMock) LatestTag(info github.RepoInfo) (github.Tag, error) {
+	return m.latestTag(info)
 }
