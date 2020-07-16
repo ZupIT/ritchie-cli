@@ -20,8 +20,17 @@ func TestNewCleanFormulasCmd(t *testing.T) {
 }
 
 func TestNewCleanFormulasCmdStdin(t *testing.T) {
+	t.Run("confirm", func(t *testing.T) {
+		runStdinCommand(t, `{"confirm": true}`)
+	})
 
-	tmpfile, oldStdin, err := stdin.WriteToStdin(`{"confirm": true}`)
+	t.Run("not confirm", func(t *testing.T) {
+		runStdinCommand(t, `{"confirm": false}`)
+	})
+}
+
+func runStdinCommand(t *testing.T, content string) {
+	tmpfile, oldStdin, err := stdin.WriteToStdin(content)
 	defer os.Remove(tmpfile.Name())
 	defer func() { os.Stdin = oldStdin }()
 	if err != nil {
