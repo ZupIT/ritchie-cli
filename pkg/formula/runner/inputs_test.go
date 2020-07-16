@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"strings"
@@ -8,24 +9,51 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 func TestInputManager_Inputs(t *testing.T) {
-	//Todo fix
-	t.Skip()
-	def := formula.Definition{
-		Path: "mock/test",
-	}
 
-	home := os.TempDir()
-	_ = fileutil.RemoveDir(home + "/formulas")
-	defaultSetup := NewDefaultSetup(home)
-	preRunner := NewDefaultPreRunner(defaultSetup)
-	setup, err := preRunner.PreRun(def)
-	if err != nil {
-		t.Fatal(err)
+	inputJson := `
+[
+  {
+	"name" : "sample_text",
+	"type" : "text",
+	"label" : "Type : ",
+	"cache" : {
+	  "active": true,
+	  "qtd" : 6,
+	  "newLabel" : "Type new value. "
+	}
+  },
+  {
+	"name" : "sample_list",
+	"type" : "text",
+	"default" : "in1",
+	"items" : ["in_list1", "in_list2", "in_list3", "in_listN"],
+	"label" : "Pick your : "
+  },
+  {
+	"name" : "sample_bool",
+	"type" : "bool",
+	"default" : "false",
+	"items" : ["false", "true"],
+	"label" : "Pick: "
+  },
+  {
+	"name" : "test_resolver",
+	"type" : "CREDENTIAL_TEST"
+  }
+]
+`
+	var inputs []formula.Input
+	_ = json.Unmarshal([]byte(inputJson), &inputs)
+
+	setup := formula.Setup{
+		Config: formula.Config{
+			Inputs: inputs,
+		},
+		FormulaPath: os.TempDir(),
 	}
 
 	type in struct {
@@ -95,7 +123,7 @@ func TestInputManager_Inputs(t *testing.T) {
 
 			got := inputManager.Inputs(cmd, setup, tt.in.inType)
 
-			if got != nil && got.Error() != tt.want.Error() {
+			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
 			}
 		})
