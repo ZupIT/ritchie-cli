@@ -14,8 +14,6 @@ import (
 
 func TestWorkspaceManager_Add(t *testing.T) {
 	cleanForm()
-	makefileDir := createDirWithMakefile()
-	treeDir := createDirWithTree()
 	fullDir := createFullDir()
 
 	tmpDir := os.TempDir()
@@ -67,28 +65,6 @@ func TestWorkspaceManager_Add(t *testing.T) {
 				fileManager: fileManager,
 			},
 			out: ErrInvalidWorkspace,
-		},
-		{
-			name: "not found tree.json",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  makefileDir,
-				},
-				fileManager: fileManager,
-			},
-			out: ErrTreeJsonNotFound,
-		},
-		{
-			name: "not found MakefilePath",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  treeDir,
-				},
-				fileManager: fileManager,
-			},
-			out: ErrMakefileNotFound,
 		},
 		{
 			name: "read not found",
@@ -230,8 +206,6 @@ func TestManager_List(t *testing.T) {
 
 func TestValidate(t *testing.T) {
 	cleanForm()
-	makefileDir := createDirWithMakefile()
-	treeDir := createDirWithTree()
 	fullDir := createFullDir()
 
 	tmpDir := os.TempDir()
@@ -273,28 +247,6 @@ func TestValidate(t *testing.T) {
 			},
 			out: ErrInvalidWorkspace,
 		},
-		{
-			name: "invalid Makefile not found",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  treeDir,
-				},
-				fileManager: fileManager,
-			},
-			out: ErrMakefileNotFound,
-		},
-		{
-			name: "invalid tree.json not found",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  makefileDir,
-				},
-				fileManager: fileManager,
-			},
-			out: ErrTreeJsonNotFound,
-		},
 	}
 
 	for _, tt := range tests {
@@ -316,24 +268,6 @@ func cleanForm() {
 	_ = fileutil.RemoveDir(os.TempDir() + "/customRepo")
 	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoMakefile")
 	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoTreejson")
-}
-
-func createDirWithMakefile() string {
-	dir := os.TempDir() + "/my-custom-repo-with-makefile"
-	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
-	makefilePath := path.Join(dir, formula.MakefilePath)
-	_ = fileutil.CreateFileIfNotExist(makefilePath, []byte(""))
-	return dir
-}
-
-func createDirWithTree() string {
-	dir := os.TempDir() + "/my-custom-repo-with-tree"
-	treeJsonFile := path.Join(dir, formula.TreePath)
-	treeJsonDir := path.Dir(treeJsonFile)
-	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
-	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
-	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte(""))
-	return dir
 }
 
 func createFullDir() string {
