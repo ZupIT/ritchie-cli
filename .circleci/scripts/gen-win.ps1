@@ -56,6 +56,7 @@ Write-Output 'GENERATING WIX MSI TEMPLATES'
 Write-Output 'GENERATING MSI TEAM INSTALLER'
 
 ls
+ls ..
 & 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecliteam.msi --version $release_version --path wix-team.json --src template-$release_version
 
 Write-Output 'GENERATING CHOCO TEAM INSTALLER'
