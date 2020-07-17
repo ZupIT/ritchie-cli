@@ -40,25 +40,16 @@
       <Directory Id="TARGETDIR" Name="SourceDir">
          <Directory Id="USERPROFILEFOLDER">
             <Directory Id="INSTALLDIR" Name="{{.Product}}">
-               {{if gt (.Files.Items | len) 0}}
                <Component Id="ApplicationFiles" Guid="{{.Files.GUID}}">
-                  {{range $i, $e := .Files.Items}}
-                  <File Id="ApplicationFile{{$i}}" Source="{{$e}}"/>
+                  <File Id="ApplicationFile0" Source="C:\workspace\dist\windows\team\rit.exe"/>
                      <RegistryValue Root="HKCU"
                         Key="Software\{{$.Company}}\{{$.Product}}"
-                        Name="InstallFolder-{{$i}}"
+                        Name="InstallFolder-0"
                         Value="[INSTALLFOLDER]"
                         Type="string"
                         KeyPath="yes"/>
-                  {{end}}
                   <RemoveFolder Id="USERPROFILEFOLDER" On="uninstall"/>
                </Component>
-               {{end}}
-               {{if gt (.Directories | len) 0}}
-               {{range $i, $e := .Directories}}
-               <Directory Id="APPDIR{{$i}}" Name="{{$e}}" />
-               {{end}}
-               {{end}}
             </Directory>
          </Directory>
 
