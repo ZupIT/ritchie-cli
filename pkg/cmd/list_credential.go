@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 type listCredentialCmd struct {
@@ -44,17 +43,10 @@ func printCredentialsTable(fields credential.ListCredDatas) {
 	table := uitable.New()
 	table.MaxColWidth = 100
 	table.Wrap = true
-	table.AddRow(prompt.Bold("NAME"), prompt.Bold("PROVIDER"), prompt.Bold("CONTEXT"), prompt.Bold("VALUE"))
-	switchColor := true
-	for _, c := range fields {
-		if switchColor {
-			table.AddRow(c.Name, c.Provider, c.Context, hideCredential(c.Value))
-			switchColor = false
-		} else {
-			table.AddRow(prompt.Cyan(c.Name), prompt.Cyan(c.Provider), prompt.Cyan(c.Context), prompt.Cyan(hideCredential(c.Value)))
-			switchColor = true
-		}
+	table.AddRow("Name", "Value", "Provider", "Context")
 
+	for _, c := range fields {
+		table.AddRow(c.Name, hideCredential(c.Value), c.Provider, c.Context, )
 	}
 	fmt.Println(table)
 }

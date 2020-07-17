@@ -45,7 +45,6 @@ func (s Settings) ReadCredentialsValue(path string) []ListCredData {
 		for _, p := range providers {
 			cBytes, _ := s.file.Read(CredentialsPath() + c + "/" + p)
 			json.Unmarshal(cBytes, &detail)
-
 			for k, v := range detail.Credential {
 				cred.Provider = detail.Service
 				cred.Context = c
@@ -54,7 +53,6 @@ func (s Settings) ReadCredentialsValue(path string) []ListCredData {
 				creds = append(creds, cred)
 			}
 		}
-
 	}
 	return creds
 }
