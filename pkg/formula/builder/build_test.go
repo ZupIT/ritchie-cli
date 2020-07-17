@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -20,6 +21,8 @@ func TestBuild(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	defaultTreeManagerMock := tree.NewGenerator(dirManager, fileManager)
+
+	time.Sleep(time.Second * 3)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
