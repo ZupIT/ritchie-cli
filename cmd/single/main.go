@@ -94,7 +94,7 @@ func buildCommands() *cobra.Command {
 	postRunner := runner.NewPostRunner()
 
 	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
-	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
+	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager, ctxFinder)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
