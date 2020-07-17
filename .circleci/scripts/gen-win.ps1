@@ -47,6 +47,9 @@ copy LICENSE packaging/windows
 
 cd packaging\windows
 
+Write-Output $(Get-Location)
+
+
 Write-Output 'GENERATING WIX MSI TEMPLATES'
 
 & 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix-team.json --version $release_version --src ritchie-wix-templates --out template-$release_version
@@ -55,18 +58,10 @@ Write-Output 'GENERATING WIX MSI TEMPLATES'
 
 Write-Output 'GENERATING MSI TEAM INSTALLER'
 
-pwd
-ls
-ls ..
-ls ..\..\..\workspace\dist\windows\team
-ls ..\..\..
-
-
 & 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecliteam.msi --version $release_version --path wix-team.json --src template-$release_version
 
 Write-Output 'GENERATING CHOCO TEAM INSTALLER'
 
-dir
 & 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-team" --input ritchiecliteam.msi --path wix-team.json --out template-$release_version
 
 Write-Output 'GENERATING MSI SINGLE INSTALLER'
