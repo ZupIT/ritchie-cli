@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -27,8 +26,6 @@ func TestBuild(t *testing.T) {
 	_ = dirManager.Create(ritHome)
 	_ = dirManager.Create(workspacePath)
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
-
-	time.Sleep(time.Second * 3)
 
 	type in struct {
 		fileManager stream.FileCopyExistListerWriter
