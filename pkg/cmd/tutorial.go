@@ -41,7 +41,7 @@ func (o tutorialSingleCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
 		obj := struct {
-			Passphrase string `json:"passphrase"`
+			Tutorial string `json:"tutorial"`
 		}{}
 
 		err := stdin.ReadJson(os.Stdin, &obj)
