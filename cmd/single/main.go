@@ -94,7 +94,7 @@ func buildCommands() *cobra.Command {
 	postRunner := runner.NewPostRunner()
 
 	defaultRunner := runner.NewDefaultRunner(defaultPreRunner, postRunner, inputManager)
-	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager)
+	dockerRunner := runner.NewDockerRunner(dockerPreRunner, postRunner, inputManager, ctxFinder)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -132,7 +132,8 @@ func buildCommands() *cobra.Command {
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword)
+		inputPassword,
+		fileManager)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
