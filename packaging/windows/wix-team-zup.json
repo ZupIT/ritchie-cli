@@ -30,14 +30,14 @@
                 "description": "Ritchie CLI",
                 "target": "[INSTALLDIR]\\rit.exe",
                 "wdir": "INSTALLDIR",
-                "arguments": "",
-                "icon": "ico.ico"
+                "arguments": ""
             }
         ]
     },
     "hooks": [
         {"when":"install", "command":"cmd.exe /c mkdir %systemdrive%%homepath%\\.rit"},
         {"when":"install", "command":"cmd.exe /c echo {\"organization\":\"zup\",\"url\":\"https://ritchie-server.zup.io\"} > %systemdrive%%homepath%\\.rit\\server.json"},
+        {"when":"install", "command":"cmd.exe /c setx /M PATH \"%PATH%;[INSTALLLOCATION]\""},
         {"when":"uninstall", "command":"cmd.exe /c del /s /q %systemdrive%%homepath%\\.rit"}
     ],
     "choco": {

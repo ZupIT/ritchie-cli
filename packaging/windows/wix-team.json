@@ -30,8 +30,7 @@
         "description": "Ritchie CLI",
         "target": "[INSTALLDIR]\\rit.exe",
         "wdir": "INSTALLDIR",
-        "arguments": "",
-        "icon": "ico.ico"
+        "arguments": ""
       }
     ]
   },
