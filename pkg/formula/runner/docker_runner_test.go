@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -86,6 +87,7 @@ func TestDockerRunner_Run(t *testing.T) {
 		},
 	}
 
+	ctxFinder := rcontext.NewFinder(api.RitchieHomeDir())
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
@@ -106,7 +108,7 @@ func TestDockerRunner_Run(t *testing.T) {
 
 			resolvers := env.Resolvers{"test": in.envMock}
 			inputManager := NewInputManager(resolvers, in.inText, in.inText, in.inBool, in.inPassword)
-			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager)
+			dockerRunner := NewDockerRunner(preRunner, postRunner, inputManager, ctxFinder)
 
 			got := dockerRunner.Run(def, api.Prompt, verboseFlag)
 
