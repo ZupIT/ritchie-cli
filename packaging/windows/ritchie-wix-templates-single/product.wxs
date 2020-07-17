@@ -41,7 +41,7 @@
          <Directory Id="USERPROFILEFOLDER">
             <Directory Id="INSTALLDIR" Name="{{.Product}}">
                <Component Id="ApplicationFiles" Guid="{{.Files.GUID}}">
-                  <File Id="ApplicationFile0" Source="C:\workspace\dist\windows\single\rit.exe"/>
+                  <File Id="ApplicationFile0" Source="C:\workspace\workspace\dist\windows\single\rit.exe"/>
                      <RegistryValue Root="HKCU"
                         Key="Software\{{$.Company}}\{{$.Product}}"
                         Name="InstallFolder-0"
