@@ -60,7 +60,7 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 }
 
 func (m Manager) buildFormulaBin(workspacePath, formulaPath, dest string) (error, bool) {
-	formulaSrc := path.Join(strings.ReplaceAll(formulaPath, workspacePath, dest), "/src")
+	formulaSrc := strings.ReplaceAll(formulaPath, workspacePath, dest)
 	if err := os.Chdir(formulaSrc); err != nil {
 		return err, true
 	}

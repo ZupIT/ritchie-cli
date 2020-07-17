@@ -125,7 +125,7 @@ func TestBuild(t *testing.T) {
 
 				formulaFiles := fmt.Sprintf("%s/repos/local/testing/formula/bin", ritHome)
 				files, err := fileManager.List(formulaFiles)
-				if err == nil && len(files) != 2 {
+				if err == nil && len(files) != 4 {
 					t.Errorf("Build(%s) did not generate bin files", tt.name)
 				}
 
