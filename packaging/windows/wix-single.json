@@ -1,12 +1,12 @@
 {
   "product": "rit",
   "company": "ZupIT",
-  "license": "LICENSE",
+  "license": "C:\\workspace\\packaging\\windows\\LICENSE",
   "upgrade-code": "978a8f0d-0720-4c7a-a40c-71edf98ba660",
   "files": {
     "guid": "ebdf3311-3856-4b44-99d4-d77bc264e208",
     "items": [
-      "..\\..\\workspace\\dist\\windows\\single\\rit.exe"
+      "C:\\workspace\\dist\\windows\\single\\rit.exe"
     ]
   },
   "env": {
