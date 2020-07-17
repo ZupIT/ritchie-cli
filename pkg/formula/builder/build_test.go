@@ -23,6 +23,7 @@ func TestBuild(t *testing.T) {
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
+	_ = dirManager.Create(ritHome)
 	_ = dirManager.Create(workspacePath)
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
