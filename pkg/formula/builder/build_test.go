@@ -22,13 +22,13 @@ func TestBuild(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	defaultTreeManagerMock := tree.NewGenerator(dirManager, fileManager)
 
-	time.Sleep(time.Second * 3)
-
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
 	_ = dirManager.Create(ritHome)
 	_ = dirManager.Create(workspacePath)
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
+
+	time.Sleep(time.Second * 3)
 
 	type in struct {
 		fileManager stream.FileCopyExistListerWriter
