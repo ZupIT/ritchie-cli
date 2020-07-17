@@ -58,8 +58,9 @@ Write-Output 'GENERATING MSI TEAM INSTALLER'
 pwd
 ls
 ls ..
-ls ..\..
+ls ..\..\dist\windows\team
 ls ..\..\..
+
 
 & 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecliteam.msi --version $release_version --path wix-team.json --src template-$release_version
 
