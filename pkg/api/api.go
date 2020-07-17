@@ -23,6 +23,8 @@ var (
 		{Parent: "root", Usage: "completion"},
 		{Parent: "root_completion", Usage: "bash"},
 		{Parent: "root_completion", Usage: "zsh"},
+		{Parent: "root_completion", Usage: "fish"},
+		{Parent: "root_completion", Usage: "powershell"},
 		{Parent: "root", Usage: "delete"},
 		{Parent: "root_delete", Usage: "context"},
 		{Parent: "root_delete", Usage: "repo"},
@@ -59,11 +61,11 @@ var (
 
 // Command type
 type Command struct {
-	Parent  string  `json:"parent"`
-	Usage   string  `json:"usage"`
-	Help    string  `json:"help"`
+	Parent  string   `json:"parent"`
+	Usage   string   `json:"usage"`
+	Help    string   `json:"help"`
 	Formula *Formula `json:"formula,omitempty"`
-	Repo    string  `json:"Repo,omitempty"`
+	Repo    string   `json:"Repo,omitempty"`
 }
 
 type Commands []Command
