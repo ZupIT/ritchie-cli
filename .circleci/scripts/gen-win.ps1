@@ -58,7 +58,7 @@ Write-Output 'GENERATING MSI TEAM INSTALLER'
 pwd
 ls
 ls ..
-ls ..\..\dist\windows\team
+ls ..\..\..\workspace\dist\windows\team
 ls ..\..\..
 
 
