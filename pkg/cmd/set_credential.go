@@ -95,7 +95,6 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 		if err != nil {
 			return credDetail, err
 		}
-		providerArr = append(providerArr, newProvider)
 
 		var newFields []credential.Field
 		var newField credential.Field
