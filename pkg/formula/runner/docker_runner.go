@@ -5,7 +5,10 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/mattn/go-isatty"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -24,10 +27,11 @@ type DockerRunner struct {
 	formula.PreRunner
 	formula.PostRunner
 	formula.InputRunner
+	ctxFinder rcontext.Finder
 }
 
-func NewDockerRunner(preRunner formula.PreRunner, postRunner formula.PostRunner, inputRunner formula.InputRunner) DockerRunner {
-	return DockerRunner{preRunner, postRunner, inputRunner}
+func NewDockerRunner(preRunner formula.PreRunner, postRunner formula.PostRunner, inputRunner formula.InputRunner, ctxFinder rcontext.Finder) DockerRunner {
+	return DockerRunner{preRunner, postRunner, inputRunner, ctxFinder}
 }
 
 func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType, verboseFlag string) error {
@@ -37,7 +41,14 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType, v
 	}
 
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
-	args := []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+
+	var args []string
+	if isatty.IsTerminal(os.Stdout.Fd()) {
+		args = []string{dockerRunCmd, "-it", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+	} else {
+		args = []string{dockerRunCmd, "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+	}
+
 	cmd := exec.Command(docker, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Env = os.Environ()
 
@@ -62,6 +73,15 @@ func (d DockerRunner) Run(def formula.Definition, inputType api.TermInputType, v
 		if err := fileutil.AppendFileData(envFile, []byte(e+"\n")); err != nil {
 			return err
 		}
+	}
+
+	ctx, err := d.ctxFinder.Find()
+	if err != nil {
+		return err
+	}
+
+	if err := fileutil.AppendFileData(envFile, []byte("CONTEXT="+ctx.Current+"\n")); err != nil {
+		return err
 	}
 
 	if err := cmd.Start(); err != nil {
