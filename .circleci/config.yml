@@ -349,7 +349,6 @@ jobs:
           at: /workspace/dist
       - run:
           command: |
-            dir
             .circleci/scripts/gen-win.ps1
           shell: powershell.exe
       - persist_to_workspace:
