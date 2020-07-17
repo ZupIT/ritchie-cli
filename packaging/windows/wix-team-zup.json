@@ -1,7 +1,7 @@
 {
     "product": "rit",
     "company": "ZupIT",
-    "license": "C:\\workspace\\packaging\\windows\\LICENSE",
+    "license": "C:\\workspace\\packaging\\windows\\LICENSE.rtf",
     "upgrade-code": "978a8f0d-0720-4c7a-a40c-71edf98ba660",
     "files": {
         "guid": "ebdf3311-3856-4b44-99d4-d77bc264e208",
@@ -37,8 +37,7 @@
     "hooks": [
         {"when":"install", "command":"cmd.exe /c mkdir %systemdrive%%homepath%\\.rit"},
         {"when":"install", "command":"cmd.exe /c echo {\"organization\":\"zup\",\"url\":\"https://ritchie-server.zup.io\"} > %systemdrive%%homepath%\\.rit\\server.json"},
-        {"when":"install", "command":"cmd.exe /c setx /M PATH \"%PATH%;[INSTALLLOCATION]\""},
-        {"when":"uninstall", "command":"cmd.exe /c del /s /q %systemdrive%%homepath%\\.rit"}
+        {"when":"uninstall", "command":"cmd.exe /c rmdir /s /q %systemdrive%%homepath%\\.rit"}
     ],
     "choco": {
         "description": "ritchie cli",

@@ -43,18 +43,15 @@ $release_version=$(Get-Content .\workspace\dist\release_version.txt)
 
 mkdir dist\installer
 
-copy LICENSE packaging/windows
+copy LICENSE.rtf packaging/windows
 
 cd packaging\windows
-
-Write-Output $(Get-Location)
-
 
 Write-Output 'GENERATING WIX MSI TEMPLATES'
 
 & 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix-team.json --version $release_version --src ritchie-wix-templates-team --out template-$release_version
-& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix-single.json --version $release_version"-single"  --src ritchie-wix-templates-single --out $release_version"-single"
-& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix-team-zup.json --version $release_version"-teamzup"  --src ritchie-wix-templates-team --out $release_version"-teamzup"
+& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix-single.json --version $release_version"-single" --src ritchie-wix-templates-single --out $release_version"-single"
+& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix-team-zup.json --version $release_version"-teamzup" --src ritchie-wix-templates-team --out $release_version"-teamzup"
 
 Write-Output 'GENERATING MSI TEAM INSTALLER'
 
