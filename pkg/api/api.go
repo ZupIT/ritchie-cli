@@ -23,6 +23,8 @@ var (
 		{Parent: "root", Usage: "completion"},
 		{Parent: "root_completion", Usage: "bash"},
 		{Parent: "root_completion", Usage: "zsh"},
+		{Parent: "root_completion", Usage: "fish"},
+		{Parent: "root_completion", Usage: "powershell"},
 		{Parent: "root", Usage: "delete"},
 		{Parent: "root_delete", Usage: "context"},
 		{Parent: "root_delete", Usage: "repo"},
