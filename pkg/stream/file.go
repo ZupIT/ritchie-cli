@@ -84,7 +84,6 @@ func (f FileManager) Read(path string) ([]byte, error) {
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
-
 	return b, err
 }
 

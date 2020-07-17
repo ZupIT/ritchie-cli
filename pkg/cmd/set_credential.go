@@ -18,7 +18,7 @@ var inputTypes = []string{"plain text", "secret"}
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	set.Setter
-	set.SingleSettings
+	credential.Settings
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
@@ -28,19 +28,19 @@ type setCredentialCmd struct {
 // NewSetCredentialCmd creates a new cmd instance
 func NewSetCredentialCmd(
 	credSetter set.Setter,
-	credSetting set.SingleSettings,
+	credSetting credential.Settings,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
 	inPass prompt.InputPassword,
 ) *cobra.Command {
 	s := &setCredentialCmd{
-		Setter:         credSetter,
-		SingleSettings: credSetting,
-		InputText:      inText,
-		InputBool:      inBool,
-		InputList:      inList,
-		InputPassword:  inPass,
+		Setter:        credSetter,
+		Settings:      credSetting,
+		InputText:     inText,
+		InputBool:     inBool,
+		InputList:     inList,
+		InputPassword: inPass,
 	}
 
 	cmd := &cobra.Command{
@@ -72,25 +72,25 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 
 func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
-	if err := s.WriteDefaultCredentials(set.ProviderPath()); err != nil {
+	if err := s.WriteDefaultCredentialsFields(credential.ProviderPath()); err != nil {
 		return credential.Detail{}, err
 	}
 
 	var credDetail credential.Detail
 	cred := credential.Credential{}
 
-	credentials, err := s.ReadCredentials(set.ProviderPath())
+	credentials, err := s.ReadCredentialsFields(credential.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
 	}
 
-	providerArr := set.NewProviderArr(credentials)
+	providerArr := credential.NewProviderArr(credentials)
 	providerChoose, err := s.List("Select your provider", providerArr)
 	if err != nil {
 		return credDetail, err
 	}
 
-	if providerChoose == set.AddNew {
+	if providerChoose == credential.AddNew {
 		newProvider, err := s.Text("Define your provider name:", true)
 		if err != nil {
 			return credDetail, err
@@ -118,7 +118,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 			}
 		}
 		credentials[newProvider] = newFields
-		if err = s.WriteCredentials(credentials, set.ProviderPath()); err != nil {
+		if err = s.WriteCredentialsFields(credentials, credential.ProviderPath()); err != nil {
 			return credDetail, err
 		}
 
