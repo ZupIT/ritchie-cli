@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 type listCredentialCmd struct {
@@ -28,10 +29,10 @@ func NewListCredentialCmd(
 }
 
 func hideCredential(credential string) string {
-	noHiddenChars := len(credential) / 3
+	mustHideIndex := len(credential) / 3
 	var hiddenCredential []rune
 	for i, r := range credential {
-		if i < len(credential)-noHiddenChars {
+		if i > mustHideIndex {
 			r = '*'
 		}
 		hiddenCredential = append(hiddenCredential, r)
@@ -41,22 +42,24 @@ func hideCredential(credential string) string {
 
 func printCredentialsTable(fields credential.ListCredDatas) {
 	table := uitable.New()
-	table.MaxColWidth = 100
+	table.MaxColWidth = 50
 	table.Wrap = true
-	table.AddRow("Name", "Value", "Provider", "Context")
+
+	table.AddRow(
+		prompt.Bold("NAME"),
+		prompt.Bold("VALUE"),
+		prompt.Bold("PROVIDER"),
+		prompt.Bold("CONTEXT"),
+	)
 
 	for _, c := range fields {
-		table.AddRow(c.Name, hideCredential(c.Value), c.Provider, c.Context, )
+		table.AddRow(c.Name, hideCredential(c.Value), c.Provider, c.Context)
 	}
 	fmt.Println(table)
 }
 
 func (l listCredentialCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
-		// TODO ler as pastas dentro de credentials para pegar os contextos
-
-		// TODO separar os valores das credentials
 		data := l.Settings.ReadCredentialsValue(credential.CredentialsPath())
 		printCredentialsTable(data)
 		return nil

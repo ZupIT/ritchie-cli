@@ -2,7 +2,6 @@ package find
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -33,13 +32,11 @@ func (f Finder) Find(provider string) (credential.Detail, error) {
 	if err != nil {
 		return credential.Detail{}, err
 	}
-	fmt.Println(string(cb))
+
 	cred := &credential.Detail{}
 	if err := json.Unmarshal(cb, cred); err != nil {
 		return credential.Detail{}, err
 	}
-	fmt.Println("on finder.go")
-	fmt.Println(cred.Credential["aws"])
-	fmt.Println("nothing")
+
 	return *cred, nil
 }
