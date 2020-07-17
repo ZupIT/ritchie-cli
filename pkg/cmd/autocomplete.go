@@ -42,7 +42,7 @@ func NewAutocompleteZsh(g autocomplete.Generator) *cobra.Command {
 		Use:     zsh.String(),
 		Short:   "Add zsh autocomplete for terminal, --help to know how to use",
 		Long:    `
-Add bash autocomplete for terminal
+Add zsh autocomplete for terminal
 Only works if zsh auto completion is installed.
 
 To test run: 
@@ -50,6 +50,7 @@ To test run:
 
 To install run: 
  $ echo "[[ -r "/usr/local/bin/rit" ]] && rit completion zsh > ~/.rit_completion" >> ~/.zshrc
+ $ echo "source ~/.rit_completion" >> ~/.zshrc
 
 `,
 		Example: "rit completion zsh | source",
@@ -73,6 +74,7 @@ To test run:
 
 To install run: 
  $ echo "[[ -r "/usr/local/bin/rit" ]] && rit completion bash > ~/.rit_completion" >> ~/.bashrc
+ $ echo "source ~/.rit_completion" >> ~/.bashrc
 
 `,
 		Example: "rit completion bash | source",
