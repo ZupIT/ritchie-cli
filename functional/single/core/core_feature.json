@@ -180,7 +180,7 @@
                 "action":"main"
             }
         ],
-        "result":"Add autocomplete for terminal, Available for (bash, zsh)."
+        "result":"Add autocomplete for terminal, Available for (zsh, bash, fish, powershell)."
     },
     {
         "entry":"Completion bash",
@@ -224,7 +224,7 @@
                 "action":"main"
             }
         ],
-        "result":"Delete objects like users, etc."
+        "result":"Delete objects like contexts and repo"
     },
     {
         "entry":"Show",
@@ -235,7 +235,7 @@
                 "action":"main"
             }
         ],
-        "result":"Show objects like context, organization etc."
+        "result":"Show contexts"
     },
     {
         "entry":"Help",

@@ -60,27 +60,27 @@ func (s SingleSettings) WriteDefaultCredentials(path string) error {
 func NewDefaultCredentials() credential.Fields {
 	var username = credential.Field{
 		Name: "username",
-		Type: "text",
+		Type: "plain text",
 	}
 
 	var token = credential.Field{
 		Name: "token",
-		Type: "password",
+		Type: "secret",
 	}
 
 	var accessKeyId = credential.Field{
 		Name: "accessKeyId",
-		Type: "text",
+		Type: "plain text",
 	}
 
 	var secretAccessKey = credential.Field{
 		Name: "secretAccessKey",
-		Type: "password",
+		Type: "secret",
 	}
 
 	var base64config = credential.Field{
 		Name: "base64config",
-		Type: "text",
+		Type: "plain text",
 	}
 
 	var dc = credential.Fields{
