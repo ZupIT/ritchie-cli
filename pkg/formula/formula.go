@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	PathSeparator	     = string(os.PathSeparator)
+	PathSeparator        = string(os.PathSeparator)
 	PathPattern          = "%s" + PathSeparator + "formulas" + PathSeparator + "%s"
 	TmpDirPattern        = "%s" + PathSeparator + "%s"
-	TmpBinDirPattern     = "%s" + PathSeparator + "tmp" + "%s" + PathSeparator + "%s"
+	TmpBinDirPattern     = "%s" + PathSeparator + "tmp" + PathSeparator + "%s" + PathSeparator + "%s"
 	DefaultConfig        = "config.json"
 	ConfigPattern        = "%s" + PathSeparator + "%s"
 	CommandEnv           = "COMMAND"
@@ -24,9 +24,9 @@ const (
 	CPwdEnv              = "CURRENT_PWD"
 	VerboseEnv           = "VERBOSE_MODE"
 	BinPattern           = "%s%s"
-	BinPathPattern       = "%s" + PathSeparator +"bin"
+	BinPathPattern       = "%s" + PathSeparator + "bin"
 	EnvPattern           = "%s=%s"
-	CachePattern         = "%s" + PathSeparator +  ".%s.cache"
+	CachePattern         = "%s" + PathSeparator + ".%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 	TreePath             = PathSeparator + "tree" + PathSeparator + "tree.json"
