@@ -8,6 +8,8 @@ import (
 
 	"k8s.io/kubectl/pkg/util/templates"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
@@ -73,6 +75,7 @@ func buildCommands() *cobra.Command {
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, fileManager, dirManager)
 	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
 
+	tplManager := template.NewManager(api.RitchieHomeDir())
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
@@ -92,13 +95,12 @@ func buildCommands() *cobra.Command {
 	formBuildDocker := builder.NewBuildDocker()
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
-
 	postRunner := runner.NewPostRunner()
 	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewDefaultSetup(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
 	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup)
 
-	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager)
+	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
 
 	watchManager := watcher.New(formulaLocalBuilder, dirManager)
@@ -147,9 +149,9 @@ func buildCommands() *cobra.Command {
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaLocalBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
-
+	
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)

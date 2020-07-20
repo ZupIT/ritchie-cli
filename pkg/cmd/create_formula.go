@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -22,7 +23,7 @@ var (
 	ErrTooShortCommand     = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 )
 
-const notAllowedChars = `\/><,@-`
+const notAllowedChars = `\/><,@`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -32,24 +33,27 @@ type createFormulaCmd struct {
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
+	tplM            template.Manager
 }
 
 // CreateFormulaCmd creates a new cmd instance
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
+	tplM template.Manager,
 	workspace formula.WorkspaceAddListValidator,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 ) *cobra.Command {
 	c := createFormulaCmd{
-		homeDir,
-		formula,
-		workspace,
-		inText,
-		inTextValidator,
-		inList,
+		homeDir:         homeDir,
+		formula:         formula,
+		workspace:       workspace,
+		inText:          inText,
+		inTextValidator: inTextValidator,
+		inList:          inList,
+		tplM:            tplM,
 	}
 
 	cmd := &cobra.Command{
@@ -79,7 +83,12 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		lang, err := c.inList.List("Choose the language: ", formula.Languages)
+		languages, err := c.tplM.Languages()
+		if err != nil {
+			return err
+		}
+
+		lang, err := c.inList.List("Choose the language: ", languages)
 		if err != nil {
 			return err
 		}
@@ -132,12 +141,8 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		if err := c.formula.Create(cf); err != nil {
-			return err
-		}
+		c.create(cf, cf.WorkspacePath, cf.FormulaPath)
 
-		prompt.Success(fmt.Sprintf("%s formula successfully created!\n", cf.Lang))
-		prompt.Info(fmt.Sprintf("Formula path is %s \n", cf.WorkspacePath))
 		return nil
 	}
 }

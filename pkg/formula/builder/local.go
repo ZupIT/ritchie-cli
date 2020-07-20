@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"runtime"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
@@ -62,8 +63,10 @@ func (m LocalManager) Build(workspacePath, formulaPath string) error {
 	return nil
 }
 
+
 func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) (error, bool) {
-	if err := os.Chdir(formulaPath); err != nil {
+	formulaSrc := strings.ReplaceAll(formulaPath, workspacePath, dest)
+	if err := os.Chdir(formulaSrc); err != nil {
 		return err, true
 	}
 
