@@ -116,6 +116,7 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
+	cleanCmd := cmd.NewCleanCmd()
 	initCmd := cmd.NewSingleInitCmd(inputPassword, passphraseManager, repoLoader)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
@@ -147,11 +148,13 @@ func buildCommands() *cobra.Command {
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
+	cleanFormulasCmd := cmd.NewCleanFormulasCmd()
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteRepoCmd, deleteCtxCmd)
+	cleanCmd.AddCommand(cleanFormulasCmd)
 	listCmd.AddCommand(listRepoCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd)
 	showCmd.AddCommand(showCtxCmd)
@@ -171,6 +174,7 @@ func buildCommands() *cobra.Command {
 				autocompleteCmd,
 				createCmd,
 				deleteCmd,
+				cleanCmd,
 				initCmd,
 				listCmd,
 				setCmd,
