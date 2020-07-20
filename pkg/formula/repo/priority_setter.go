@@ -40,10 +40,10 @@ func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int
 	}
 
 	if err := json.Unmarshal(read, &repos); err != nil {
-			return err
-		}
+		return err
+	}
 
-	for i, _ := range repos {
+	for i := range repos {
 		if repoName == repos[i].Name {
 			repos[i].Priority = priority
 		} else if repos[i].Priority >= priority {
