@@ -121,9 +121,6 @@ func TestListManager_List(t *testing.T) {
 
 type fileReadExisterMockWithErrorOnRead struct{}
 
-// Read(path string) ([]byte, error)
-// Exists(path string) bool
-
 func (m fileReadExisterMockWithErrorOnRead) Read(path string) ([]byte, error) {
 	return nil, errors.New("some error")
 }
