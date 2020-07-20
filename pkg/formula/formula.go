@@ -15,7 +15,7 @@ import (
 const (
 	PathSeparator        = string(os.PathSeparator)
 	PathPattern          = "%s" + PathSeparator + "formulas" + PathSeparator + "%s"
-	TmpDirPattern        = "%s" + PathSeparator + "%s"
+	TmpDirPattern        = "%s" + PathSeparator + "tmp" + PathSeparator + "%s"
 	TmpBinDirPattern     = "%s" + PathSeparator + "tmp" + PathSeparator + "%s" + PathSeparator + "%s"
 	DefaultConfig        = "config.json"
 	ConfigPattern        = "%s" + PathSeparator + "%s"
