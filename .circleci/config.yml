@@ -23,7 +23,7 @@ references:
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
     BUILD_IMAGE: *GOLANG_IMAGE
-    VERSION_PLACEHOLDER: 1.0.0-betaPLACEHOLDER
+    VERSION_PLACEHOLDER: 2.0.0-betaPLACEHOLDER
 
   filters: &FILTERS_DELIVERY
     branches:
