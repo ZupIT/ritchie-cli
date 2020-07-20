@@ -2,6 +2,7 @@
 
 <img class="special-img-class" src="/docs/img/ritchie-banner.png" />
 
+
 ## Ritchie
 
 Transform your daily task into simple commands by using Ritchie-CLI. 
