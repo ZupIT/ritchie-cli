@@ -14,7 +14,7 @@ require (
 	github.com/gorilla/mux v1.7.4 // indirect
 	github.com/gosuri/uitable v0.0.4
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
-	github.com/kaduartur/go-cli-spinner v1.0.0
+	github.com/kaduartur/go-cli-spinner v1.0.1
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-shellwords v1.0.10 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect

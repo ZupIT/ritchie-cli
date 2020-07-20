@@ -78,7 +78,7 @@ type PreRunner interface {
 }
 
 type Runner interface {
-	Run(def Definition, inputType api.TermInputType) error
+	Run(def Definition, inputType api.TermInputType, local bool) error
 }
 
 type PostRunner interface {
@@ -90,14 +90,26 @@ type InputRunner interface {
 }
 
 type Setuper interface {
-	Setup(def Definition) (Setup, error)
+	Setup(def Definition, local bool) (Setup, error)
 }
 
 type Creator interface {
 	Create(cf Create) error
 }
 
-type Builder interface {
+type MakeBuilder interface {
+	Build(formulaPath string) error
+}
+
+type BatBuilder interface {
+	Build(formulaPath string) error
+}
+
+type DockerBuilder interface {
+	Build(formulaPath, dockerImg string) error
+}
+
+type LocalBuilder interface {
 	Build(workspacePath, formulaPath string) error
 }
 
@@ -107,7 +119,7 @@ type Watcher interface {
 
 type CreateBuilder interface {
 	Creator
-	Builder
+	LocalBuilder
 }
 
 // FormulaPath builds the formula path from ritchie home

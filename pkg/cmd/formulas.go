@@ -16,27 +16,24 @@ import (
 const (
 	subCommand  = " SUBCOMMAND"
 	Group       = "group"
-	dockerFlag  = "docker"
+	localFlag   = "local"
 	rootCmdName = "root"
 )
 
 type FormulaCommand struct {
-	coreCmds      api.Commands
-	treeManager   formula.TreeManager
-	defaultRunner formula.Runner
-	dockerRunner  formula.Runner
+	coreCmds    api.Commands
+	treeManager formula.TreeManager
+	formula     formula.Runner
 }
 
 func NewFormulaCommand(
 	coreCmds api.Commands,
 	treeManager formula.TreeManager,
-	defaultRunner formula.Runner,
-	dockerRunner formula.Runner) *FormulaCommand {
+	formula formula.Runner) *FormulaCommand {
 	return &FormulaCommand{
-		coreCmds:      coreCmds,
-		treeManager:   treeManager,
-		defaultRunner: defaultRunner,
-		dockerRunner:  dockerRunner,
+		coreCmds:    coreCmds,
+		treeManager: treeManager,
+		formula:     formula,
 	}
 }
 
@@ -46,7 +43,7 @@ func (f FormulaCommand) Add(root *cobra.Command) error {
 	commands[rootCmdName] = root
 
 	for _, cmd := range treeRep.Commands {
-		cmdPath := api.Command{Parent: cmd.Parent, Usage: cmd.Usage}
+		cmdPath := api.Command{Id: cmd.Id, Parent: cmd.Parent, Usage: cmd.Usage}
 		if !sliceutil.ContainsCmd(f.coreCmds, cmdPath) {
 			var newCmd *cobra.Command
 			if cmd.Formula {
@@ -57,8 +54,7 @@ func (f FormulaCommand) Add(root *cobra.Command) error {
 
 			parentCmd := commands[cmd.Parent]
 			parentCmd.AddCommand(newCmd)
-			cmdKey := fmt.Sprintf("%s_%s", cmdPath.Parent, cmdPath.Usage)
-			commands[cmdKey] = newCmd
+			commands[cmdPath.Id] = newCmd
 		}
 	}
 
@@ -112,20 +108,20 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			inputType = api.Stdin
 		}
 
-		docker, err := cmd.Flags().GetBool(dockerFlag)
+		local, err := cmd.Flags().GetBool(localFlag)
 		if err != nil {
 			return err
 		}
 
-		if docker {
-			return f.dockerRunner.Run(d, inputType)
+		if err := f.formula.Run(d, inputType, local); err != nil {
+			return err
 		}
 
-		return f.defaultRunner.Run(d, inputType)
+		return nil
 	}
 }
 
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
-	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside a docker container")
+	formulaFlags.BoolP(localFlag, "l", false, "Use to run formulas locally")
 }

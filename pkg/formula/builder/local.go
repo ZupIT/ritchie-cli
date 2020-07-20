@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path"
 	"runtime"
-	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
@@ -24,18 +23,22 @@ var (
 	ErrBuildOnWindows = errors.New(msgBuildOnWindows)
 )
 
-type Manager struct {
+type LocalManager struct {
 	ritHome string
 	dir     stream.DirCreateListCopier
 	file    stream.FileCopyExistListerWriter
 	tree    formula.TreeGenerator
 }
 
-func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExistListerWriter, tree formula.TreeGenerator) Manager {
-	return Manager{ritHome: ritHome, dir: dir, file: file, tree: tree}
+func NewBuildLocal(
+	ritHome string,
+	dir stream.DirCreateListCopier, file stream.FileCopyExistListerWriter,
+	tree formula.TreeGenerator,
+) formula.LocalBuilder {
+	return LocalManager{ritHome: ritHome, dir: dir, file: file, tree: tree}
 }
 
-func (m Manager) Build(workspacePath, formulaPath string) error {
+func (m LocalManager) Build(workspacePath, formulaPath string) error {
 
 	dest := path.Join(m.ritHome, localRepoDir)
 
@@ -59,9 +62,8 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 	return nil
 }
 
-func (m Manager) buildFormulaBin(workspacePath, formulaPath, dest string) (error, bool) {
-	formulaSrc := path.Join(strings.ReplaceAll(formulaPath, workspacePath, dest), "/src")
-	if err := os.Chdir(formulaSrc); err != nil {
+func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) (error, bool) {
+	if err := os.Chdir(formulaPath); err != nil {
 		return err, true
 	}
 
@@ -69,7 +71,7 @@ func (m Manager) buildFormulaBin(workspacePath, formulaPath, dest string) (error
 	var cmd *exec.Cmd
 	switch so {
 	case osutil.Windows:
-		winBuild := path.Join(formulaSrc, "build.bat")
+		winBuild := path.Join(formulaPath, "build.bat")
 		if !m.file.Exists(winBuild) {
 			return ErrBuildOnWindows, true
 		}
@@ -92,7 +94,7 @@ func (m Manager) buildFormulaBin(workspacePath, formulaPath, dest string) (error
 	return nil, false
 }
 
-func (m Manager) generateTree(dest string) error {
+func (m LocalManager) generateTree(dest string) error {
 	tree, err := m.tree.Generate(dest)
 	if err != nil {
 		return err
@@ -110,6 +112,6 @@ func (m Manager) generateTree(dest string) error {
 	return nil
 }
 
-func (m Manager) copyWorkSpace(workspacePath string, dest string) error {
+func (m LocalManager) copyWorkSpace(workspacePath string, dest string) error {
 	return m.dir.Copy(workspacePath, dest)
 }

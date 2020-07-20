@@ -47,8 +47,8 @@ func removeWorkDir(tmpDir string) {
 }
 
 func removeContainer(imgName string) error {
-	args := []string{dockerRemoveCmd, imgName}
-	cmd := exec.Command(docker, args...)
+	args := []string{"rm", imgName}
+	cmd := exec.Command(dockerCmd, args...)
 
 	if err := cmd.Run(); err != nil {
 		return err
