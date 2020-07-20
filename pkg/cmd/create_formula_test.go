@@ -9,11 +9,11 @@ import (
 
 func TestNewCreateFormulaCmd(t *testing.T) {
 
-	tlpM := template.NewManager("../../testdata")
+	tplM := template.NewManager("../../testdata")
 	cmd := NewCreateFormulaCmd(
 		os.TempDir(),
 		formCreator{},
-		tlpM, workspaceForm{},
+		tplM, workspaceForm{},
 		inputTextMock{},
 		inputTextValidatorMock{},
 		inputListMock{},
