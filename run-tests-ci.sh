@@ -1,9 +1,5 @@
 #!/bin/sh
 
-./wait-for-it.sh "localhost:8882" && echo "stubby4j is up"
-
-export REPO_URL=http://localhost:8882/formulas
-
 PACKAGE_NAMES=$(go list ./pkg/... | grep -v vendor/)
 
 go mod download

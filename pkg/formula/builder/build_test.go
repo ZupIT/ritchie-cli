@@ -23,6 +23,7 @@ func TestBuild(t *testing.T) {
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
+	_ = dirManager.Create(ritHome)
 	_ = dirManager.Create(workspacePath)
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
@@ -107,7 +108,7 @@ func TestBuild(t *testing.T) {
 			builderManager := New(ritHome, tt.in.dirManager, tt.in.fileManager, tt.in.tree)
 			got := builderManager.Build(workspacePath, formulaPath)
 
-			if got != nil && got.Error() != tt.want.Error() {
+			if (tt.want == nil && got != nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Build(%s) got %v, want %v", tt.name, got, tt.want)
 			}
 
@@ -125,7 +126,7 @@ func TestBuild(t *testing.T) {
 
 				formulaFiles := fmt.Sprintf("%s/repos/local/testing/formula/bin", ritHome)
 				files, err := fileManager.List(formulaFiles)
-				if err == nil && len(files) != 2 {
+				if err == nil && len(files) != 3 {
 					t.Errorf("Build(%s) did not generate bin files", tt.name)
 				}
 

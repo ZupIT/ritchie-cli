@@ -11,7 +11,7 @@ type UrlFinder interface {
 	Url(resolver version.Resolver) string
 }
 
-type DefaultUrlFinder struct {}
+type DefaultUrlFinder struct{}
 
 func (duf DefaultUrlFinder) Url(resolver version.Resolver) string {
 	stableVersion, err := resolver.StableVersion()

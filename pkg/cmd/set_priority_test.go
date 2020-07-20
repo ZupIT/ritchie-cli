@@ -41,11 +41,21 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "return nil when repoLister was empty",
+			fields: fields{
+				InputList:          inputListMock{},
+				InputInt:           inputIntMock{},
+				RepoLister:         repoListerMock{},
+				RepoPrioritySetter: repoPrioritySetterMock{},
+			},
+			wantErr: false,
+		},
+		{
 			name: "error on inputList",
 			fields: fields{
 				InputList:          inputListErrorMock{},
 				InputInt:           inputIntMock{},
-				RepoLister:         repoListerMock{},
+				RepoLister:         repoListerNonEmptyMock{},
 				RepoPrioritySetter: repoPrioritySetterMock{},
 			},
 			wantErr: true,
@@ -55,7 +65,7 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 			fields: fields{
 				InputList:          inputListMock{},
 				InputInt:           inputIntErrorMock{},
-				RepoLister:         repoListerMock{},
+				RepoLister:         repoListerNonEmptyMock{},
 				RepoPrioritySetter: repoPrioritySetterMock{},
 			},
 			wantErr: true,
@@ -75,9 +85,9 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 			fields: fields{
 				InputList:  inputListMock{},
 				InputInt:   inputIntMock{},
-				RepoLister: repoListerMock{},
+				RepoLister: repoListerNonEmptyMock{},
 				RepoPrioritySetter: repoPrioritySetterCustomMock{
-					setPriority: func(repo string, priority int) error {
+					setPriority: func(name formula.RepoName, priority int) error {
 						return errors.New("some error")
 					},
 				},
@@ -89,7 +99,6 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewSetPriorityCmd(tt.fields.InputList, tt.fields.InputInt, tt.fields.RepoLister, tt.fields.RepoPrioritySetter)
 			if err := s.Execute(); (err != nil) != tt.wantErr {
-				t.Skip("Todo fix later")
 				t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

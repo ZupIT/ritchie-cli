@@ -23,7 +23,7 @@ references:
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
     BUILD_IMAGE: *GOLANG_IMAGE
-    VERSION_PLACEHOLDER: 1.0.0-betaPLACEHOLDER
+    VERSION_PLACEHOLDER: 2.0.0-betaPLACEHOLDER
 
   filters: &FILTERS_DELIVERY
     branches:
@@ -137,10 +137,6 @@ jobs:
           name: Install gotestsum
           command: |
             curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v0.4.2/gotestsum_0.4.2_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
-      - run:
-          name: Run docker-compose
-          command: |
-            docker-compose up -d
       - run:
           name: Running Unit tests
           command: |
