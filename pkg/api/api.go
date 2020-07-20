@@ -44,6 +44,8 @@ var (
 		{Parent: "root", Usage: "build"},
 		{Parent: "root_build", Usage: "formula"},
 		{Parent: "root", Usage: "upgrade"},
+		{Parent: "root", Usage: "clean"},
+		{Parent: "root_clean", Usage: "formulas"},
 	}
 
 	SingleCoreCmds = CoreCmds
