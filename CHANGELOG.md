@@ -2,18 +2,48 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.20...HEAD)
-
-**Implemented enhancements:**
-
-- \[Feature\] Adding ruby language support [\#252](https://github.com/ZupIT/ritchie-cli/pull/252) ([henriquemoraes8](https://github.com/henriquemoraes8))
-- Feature/verbose flag [\#250](https://github.com/ZupIT/ritchie-cli/pull/250) ([antonioolf](https://github.com/antonioolf))
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.21...HEAD)
 
 **Merged pull requests:**
 
+- \[Suggest\] Pull review guidelines according to last meeting [\#292](https://github.com/ZupIT/ritchie-cli/pull/292) ([henriquemoraes8](https://github.com/henriquemoraes8))
+
+## [1.0.0-beta.21](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.21) (2020-07-20)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.20...1.0.0-beta.21)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Resize website layout [\#140](https://github.com/ZupIT/ritchie-cli/issues/140)
+- \[FEATURE\] Adding a new input type : SELECTOR [\#50](https://github.com/ZupIT/ritchie-cli/issues/50)
+- Add files entry to `set credential` command [\#287](https://github.com/ZupIT/ritchie-cli/pull/287) ([marcoscostazup](https://github.com/marcoscostazup))
+- \[Feature\] Adding ruby language support [\#252](https://github.com/ZupIT/ritchie-cli/pull/252) ([henriquemoraes8](https://github.com/henriquemoraes8))
+- Feature/verbose flag [\#250](https://github.com/ZupIT/ritchie-cli/pull/250) ([antonioolf](https://github.com/antonioolf))
+
+**Fixed bugs:**
+
+- \[BUG\] make test-local doesn't work with space in PATH obtained with PWD command [\#183](https://github.com/ZupIT/ritchie-cli/issues/183)
+- \[BUG\] Error when adding kubeconfig too big [\#173](https://github.com/ZupIT/ritchie-cli/issues/173)
+- \[BUG\]Local Formula [\#148](https://github.com/ZupIT/ritchie-cli/issues/148)
+- adding powershell and fish and modifying helpers [\#294](https://github.com/ZupIT/ritchie-cli/pull/294) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Fix formula path separator based on os [\#240](https://github.com/ZupIT/ritchie-cli/pull/240) ([felipemdrs](https://github.com/felipemdrs))
+
+**Merged pull requests:**
+
+- change path to stable version [\#297](https://github.com/ZupIT/ritchie-cli/pull/297) ([marcosgmgm](https://github.com/marcosgmgm))
+- \[FIX\] Windows Installer no longer requires admin privilege [\#291](https://github.com/ZupIT/ritchie-cli/pull/291) ([douglasvinter](https://github.com/douglasvinter))
+- Add context and -it arg to docker [\#290](https://github.com/ZupIT/ritchie-cli/pull/290) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+- \[FIX\] Update vendor and remove glide [\#285](https://github.com/ZupIT/ritchie-cli/pull/285) ([ernelio](https://github.com/ernelio))
+- \[FIX\]Change legacy-version [\#281](https://github.com/ZupIT/ritchie-cli/pull/281) ([ernelio](https://github.com/ernelio))
+- \[FIX\] Node Dockerfile template [\#280](https://github.com/ZupIT/ritchie-cli/pull/280) ([henriquemoraes8](https://github.com/henriquemoraes8))
+- \[DEPRECATION\] Removed `rit clean repo` command [\#278](https://github.com/ZupIT/ritchie-cli/pull/278) ([marcoscostazup](https://github.com/marcoscostazup))
+- adding legatsy pipeline to allow running old code [\#275](https://github.com/ZupIT/ritchie-cli/pull/275) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Release 1.0.0-beta.20 merge [\#274](https://github.com/ZupIT/ritchie-cli/pull/274) ([zup-ci](https://github.com/zup-ci))
+- Improvement/rit completion [\#273](https://github.com/ZupIT/ritchie-cli/pull/273) ([viniciussousazup](https://github.com/viniciussousazup))
+- \[fix\] del in uninstaller hook win [\#267](https://github.com/ZupIT/ritchie-cli/pull/267) ([ernelio](https://github.com/ernelio))
 - Add signature in single [\#265](https://github.com/ZupIT/ritchie-cli/pull/265) ([ernelio](https://github.com/ernelio))
 - Release 1.0.0-beta.19 merge [\#259](https://github.com/ZupIT/ritchie-cli/pull/259) ([zup-ci](https://github.com/zup-ci))
+- FEATURE - Improving information about help [\#256](https://github.com/ZupIT/ritchie-cli/pull/256) ([brunats](https://github.com/brunats))
 
 ## [1.0.0-beta.20](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.20) (2020-07-13)
 
@@ -22,7 +52,6 @@
 **Implemented enhancements:**
 
 - \[FEATURE\] Adding hello world template in RUBY \(rit create formula\) [\#186](https://github.com/ZupIT/ritchie-cli/issues/186)
-
 - \[FEATURE\] Enhancement of the rit set credential command on single version [\#177](https://github.com/ZupIT/ritchie-cli/issues/177)
 
 ## [1.0.0-beta.19](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.19) (2020-07-08)
@@ -40,7 +69,6 @@
 **Fixed bugs:**
 
 - \[FIX\] run go mod vendor [\#247](https://github.com/ZupIT/ritchie-cli/pull/247) ([kaduartur](https://github.com/kaduartur))
-
 
 **Merged pull requests:**
 
@@ -94,6 +122,7 @@
 - Release 1.0.0-beta.16 merge [\#208](https://github.com/ZupIT/ritchie-cli/pull/208) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.15 merge [\#207](https://github.com/ZupIT/ritchie-cli/pull/207) ([zup-ci](https://github.com/zup-ci))
 - Release 1.0.0-beta.14 merge [\#206](https://github.com/ZupIT/ritchie-cli/pull/206) ([zup-ci](https://github.com/zup-ci))
+- \[FEATURE\] Change login and init to get totp [\#190](https://github.com/ZupIT/ritchie-cli/pull/190) ([viniciussousazup](https://github.com/viniciussousazup))
 
 ## [1.0.0-beta.15](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.15) (2020-06-24)
 
@@ -143,7 +172,6 @@
 - Fix/version msi release [\#193](https://github.com/ZupIT/ritchie-cli/pull/193) ([ernelio](https://github.com/ernelio))
 - fix msi release [\#192](https://github.com/ZupIT/ritchie-cli/pull/192) ([ernelio](https://github.com/ernelio))
 - \[FEATURE\] Pinning ssl [\#191](https://github.com/ZupIT/ritchie-cli/pull/191) ([marcosgmgm](https://github.com/marcosgmgm))
-- \[FEATURE\] Change login and init to get totp [\#190](https://github.com/ZupIT/ritchie-cli/pull/190) ([viniciussousazup](https://github.com/viniciussousazup))
 - \[FIX\] Packaging changelog [\#184](https://github.com/ZupIT/ritchie-cli/pull/184) ([ernelio](https://github.com/ernelio))
 - \[Feature\] Improvements circleci [\#182](https://github.com/ZupIT/ritchie-cli/pull/182) ([ernelio](https://github.com/ernelio))
 - Feature/unix tests for init [\#174](https://github.com/ZupIT/ritchie-cli/pull/174) ([dmbarra](https://github.com/dmbarra))
@@ -340,7 +368,6 @@
 - \[FIX \] use $\(HOME\) instead of ~ in Makefile \(main\) [\#35](https://github.com/ZupIT/ritchie-cli/pull/35) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - \[FEATURE\] Creation set server cmd \(TEAM\) [\#34](https://github.com/ZupIT/ritchie-cli/pull/34) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - Circleci project setup [\#29](https://github.com/ZupIT/ritchie-cli/pull/29) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
-- Feature/improve\_session\_validator [\#21](https://github.com/ZupIT/ritchie-cli/pull/21) ([kaduartur](https://github.com/kaduartur))
 - \[FEATURE\] updating issues contribution templates [\#20](https://github.com/ZupIT/ritchie-cli/pull/20) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - \[Enhancement\] Contributing file [\#17](https://github.com/ZupIT/ritchie-cli/pull/17) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
@@ -374,6 +401,7 @@
 
 **Implemented enhancements:**
 
+- Feature/improve\_session\_validator [\#21](https://github.com/ZupIT/ritchie-cli/pull/21) ([kaduartur](https://github.com/kaduartur))
 - feature/prompt\_interface [\#14](https://github.com/ZupIT/ritchie-cli/pull/14) ([sandokandias](https://github.com/sandokandias))
 - \[Enhancement\] Contributing file [\#11](https://github.com/ZupIT/ritchie-cli/pull/11) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
