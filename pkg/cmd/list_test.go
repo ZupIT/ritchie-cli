@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-func TestNewDeleteCmd(t *testing.T) {
-	cmd := NewDeleteCmd()
+func TestNewListCmd(t *testing.T) {
+	cmd := NewListCmd()
 	if cmd == nil {
-		t.Errorf("NewDeleteCmd got %v", cmd)
+		t.Errorf("NewListCmd got %v", cmd)
 
 	}
 
