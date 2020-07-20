@@ -13,6 +13,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+const (
+	defaultRepoUrl = "https://github.com/kaduartur/ritchie-formulas"
+)
+
 var (
 	ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 	ErrCommonsRepoName  = errors.New("the name \"commons\" is not valid for the repository name, try to enter another name")
@@ -97,7 +101,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		url, err := ad.URL("Repository URL: ", "https://github.com/kaduartur/ritchie-formulas")
+		url, err := ad.URL("Repository URL: ", defaultRepoUrl)
 		if err != nil {
 			return err
 		}
