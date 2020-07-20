@@ -119,6 +119,10 @@ ifneq "$(IS_QA)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 endif
+ifneq "$(IS_LEGACY)" ""
+	echo -n "$(RELEASE_VERSION)" > stable-legacy.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable-legacy.txt"
+endif
 else
 	echo "NOT GONNA PUBLISH"
 endif
