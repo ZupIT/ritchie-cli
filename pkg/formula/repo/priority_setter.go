@@ -17,14 +17,12 @@ const (
 type SetPriorityManager struct {
 	ritHome string
 	file    stream.FileWriteReadExister
-	dir     stream.DirCreater
 }
 
-func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister, dir stream.DirCreater) SetPriorityManager {
+func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister) SetPriorityManager {
 	return SetPriorityManager{
 		ritHome: ritHome,
 		file:    file,
-		dir:     dir,
 	}
 }
 
@@ -55,11 +53,6 @@ func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int
 
 	bytes, err := json.MarshalIndent(repos, "", "\t")
 	if err != nil {
-		return err
-	}
-
-	dirPath := path.Dir(repoPath)
-	if err := sm.dir.Create(dirPath); err != nil {
 		return err
 	}
 

@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,7 +18,6 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 	type fields struct {
 		ritHome string
 		file    stream.FileWriteReadExister
-		dir     stream.DirCreater
 	}
 	type args struct {
 		repoName formula.RepoName
@@ -28,14 +28,15 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    formula.Repos
 		wantErr bool
+		Err     error
 	}{
 		{
 			name: "Setting priority test success",
 			fields: fields{
 				ritHome: func() string {
-					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo")
+					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo-sucess")
+					_ = dirManager.Remove(ritHomePath)
 					_ = dirManager.Create(ritHomePath)
 					_ = dirManager.Create(filepath.Join(ritHomePath, "repos"))
 
@@ -55,26 +56,122 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 					return ritHomePath
 				}(),
 				file: fileManager,
-				dir:  dirManager,
 			},
 			args: args{
 				repoName: "commons",
-				priority: 0,
+				priority: 1,
 			},
-			want:    nil,
 			wantErr: false,
 		},
+		{
+			name: "Return error when file not exist",
+			fields: fields{
+				ritHome: os.TempDir(),
+				file:    fileManager,
+			},
+			wantErr: true,
+			Err:     errors.New(repositoryDoNotExistError),
+		},
+		{
+			name: "Return error when try to read file",
+			fields: fields{
+				ritHome: os.TempDir(),
+				file:    fileWriteReadExisterMockErrorOnReadAndWrite{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return error when try unmarshal the file to json",
+			fields: fields{
+				ritHome: func() string {
+					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo-fail")
+					_ = dirManager.Remove(ritHomePath)
+					_ = dirManager.Create(ritHomePath)
+					_ = dirManager.Create(filepath.Join(ritHomePath, "repos"))
+
+					repositoryFile := filepath.Join(ritHomePath, "repos", "repositories.json")
+
+					data := `
+						[
+							{
+								"name: "commons",
+								"version": "v2.0.0",
+								"url": "https://github.com/kaduartur/ritchie-formulas",
+								"priority": 0
+							}
+						]`
+
+					_ = fileManager.Write(repositoryFile, []byte(data))
+					return ritHomePath
+				}(),
+				file: fileManager,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return error when try write the changes on file",
+			fields: fields{
+				ritHome: os.TempDir(),
+				file:    fileWriteReadExisterMockOnSucessRead{},
+			},
+			wantErr: true,
+		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
 			sm := SetPriorityManager{
 				ritHome: tt.fields.ritHome,
 				file:    tt.fields.file,
-				dir:     tt.fields.dir,
 			}
-			if err := sm.SetPriority(tt.args.repoName, tt.args.priority); (err != nil) != tt.wantErr {
+
+			err := sm.SetPriority(tt.args.repoName, tt.args.priority)
+
+			if (tt.Err != nil) && err.Error() != tt.Err.Error() {
+				t.Errorf("This error didnt expect this error menssage")
+			}
+
+			if (err != nil) != tt.wantErr {
 				t.Errorf("SetPriorityManager.SetPriority() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
+}
+
+type fileWriteReadExisterMockOnSucessRead struct{}
+
+func (m fileWriteReadExisterMockOnSucessRead) Read(path string) ([]byte, error) {
+	data := `
+	[
+		{
+			"name": "commons",
+			"version": "v2.0.0",
+			"url": "https://github.com/kaduartur/ritchie-formulas",
+			"priority": 0
+		}
+	]`
+	return []byte(data), nil
+}
+
+func (m fileWriteReadExisterMockOnSucessRead) Write(path string, content []byte) error {
+	return errors.New("Error on write the data on file")
+}
+
+func (m fileWriteReadExisterMockOnSucessRead) Exists(path string) bool {
+	return true
+}
+
+type fileWriteReadExisterMockErrorOnReadAndWrite struct{}
+
+func (m fileWriteReadExisterMockErrorOnReadAndWrite) Read(path string) ([]byte, error) {
+	return nil, errors.New("Error on read the file")
+}
+
+func (m fileWriteReadExisterMockErrorOnReadAndWrite) Exists(path string) bool {
+	return true
+}
+
+func (m fileWriteReadExisterMockErrorOnReadAndWrite) Write(path string, content []byte) error {
+	return errors.New("Error on write the data on file")
 }
