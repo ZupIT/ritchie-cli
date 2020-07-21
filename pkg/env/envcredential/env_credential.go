@@ -2,17 +2,16 @@ package envcredential
 
 import (
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"strings"
-
-	"github.com/ZupIT/ritchie-cli/pkg/credential/find"
 )
 
 type CredentialResolver struct {
-	find.Finder
+	credential.Finder
 }
 
 // NewResolver creates a credential resolver instance of Resolver interface
-func NewResolver(cf find.Finder) CredentialResolver {
+func NewResolver(cf credential.Finder) CredentialResolver {
 	return CredentialResolver{cf}
 }
 

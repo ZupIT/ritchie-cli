@@ -1,9 +1,8 @@
-package set
+package credential
 
 import (
 	"encoding/json"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
@@ -20,7 +19,7 @@ func NewSetter(homePath string, cf rcontext.Finder) Setter {
 	}
 }
 
-func (s Setter) Set(cred credential.Detail) error {
+func (s Setter) Set(cred Detail) error {
 	ctx, err := s.ctxFinder.Find()
 	if err != nil {
 		return err
@@ -33,12 +32,12 @@ func (s Setter) Set(cred credential.Detail) error {
 		return err
 	}
 
-	dir := credential.Dir(s.homePath, ctx.Current)
+	dir := Dir(s.homePath, ctx.Current)
 	if err := fileutil.CreateDirIfNotExists(dir, 0700); err != nil {
 		return err
 	}
 
-	credFile := credential.File(s.homePath, ctx.Current, cred.Service)
+	credFile := File(s.homePath, ctx.Current, cred.Service)
 	if err := fileutil.WriteFilePerm(credFile, cb, 0600); err != nil {
 		return err
 	}

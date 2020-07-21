@@ -1,4 +1,4 @@
-package set
+package credential
 
 import (
 	"fmt"
@@ -6,12 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 var fileManager = stream.NewFileManager()
-var credSettings = credential.NewSettings(fileManager)
+var credSettings = NewSettings(fileManager)
 
 func providersPath() string {
 	tempDir := os.TempDir()
@@ -32,7 +31,7 @@ func TestSingleSettings_ReadCredentials(t *testing.T) {
 }
 
 func TestSingleSettings_WriteCredentials(t *testing.T) {
-	err := credSettings.WriteCredentialsFields(credential.NewDefaultCredentials(), providersPath())
+	err := credSettings.WriteCredentialsFields(NewDefaultCredentials(), providersPath())
 	defer os.Remove(providersPath())
 	if err != nil {
 		t.Errorf("Error while write credentials: %s", err)
@@ -48,7 +47,7 @@ func TestSingleSettings_WriteDefaultCredentials(t *testing.T) {
 }
 
 func TestNewDefaultCredentials(t *testing.T) {
-	defaultCredentials := credential.NewDefaultCredentials()
+	defaultCredentials := NewDefaultCredentials()
 
 	if defaultCredentials == nil {
 		t.Errorf("Default credentials cannot be nill")
@@ -60,7 +59,7 @@ func TestNewDefaultCredentials(t *testing.T) {
 }
 
 func TestProviderPath(t *testing.T) {
-	provider := credential.ProviderPath()
+	provider := ProviderPath()
 	slicedPath := strings.Split(provider, "/")
 	providersJson := slicedPath[len(slicedPath)-1]
 
@@ -70,11 +69,11 @@ func TestProviderPath(t *testing.T) {
 }
 
 func TestProvidersArr(t *testing.T) {
-	credentials := credential.NewDefaultCredentials()
-	providersArray := credential.NewProviderArr(credentials)
+	credentials := NewDefaultCredentials()
+	providersArray := NewProviderArr(credentials)
 
-	if providersArray[len(providersArray)-1] != credential.AddNew {
-		t.Errorf("%q option must be the last one", credential.AddNew)
+	if providersArray[len(providersArray)-1] != AddNew {
+		t.Errorf("%q option must be the last one", AddNew)
 	}
 
 	if providersArray == nil {

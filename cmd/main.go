@@ -9,8 +9,6 @@ import (
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/find"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/set"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
@@ -80,8 +78,8 @@ func buildCommands() *cobra.Command {
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	credSetter := set.NewSetter(ritchieHomeDir, ctxFinder)
-	credFinder := find.NewFinder(ritchieHomeDir, ctxFinder)
+	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
+	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds)
 	credSettings := credential.NewSettings(fileManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)

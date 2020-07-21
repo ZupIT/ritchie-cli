@@ -1,24 +1,25 @@
-package set
+package credential
 
 import (
 	"os"
 	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 )
 
 func TestSet(t *testing.T) {
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, credential.ctxFinder, sessManager)
+
+	setter := NewSetter(tmp, ctxFinder, sessManager)
+
+
 
 	tests := []struct {
 		name string
-		in   credential.Detail
+		in   Detail
 		out  error
 	}{
 		{
 			name: "github credential",
-			in:   credential.githubCred,
+			in:   githubCred,
 			out:  nil,
 		},
 	}

@@ -1,27 +1,24 @@
-package find
+package credential
 
 import (
 	"fmt"
 	"os"
 	"reflect"
 	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/set"
 )
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
-	setter := set.NewSetter(tmp, credential.ctxFinder, sessManager)
-	err := setter.Set(credential.githubCred)
+	setter := NewSetter(tmp, )
+	err := setter.Set(githubCred)
 	if err != nil {
 		fmt.Sprintln("Error in Set")
 		return
 	}
-	finder := NewFinder(tmp, credential.ctxFinder, sessManager)
+	finder := NewFinder(tmp, ctxFinder, sessManager)
 
 	type out struct {
-		cred credential.Detail
+		cred Detail
 		err  error
 	}
 
@@ -34,7 +31,7 @@ func TestFind(t *testing.T) {
 			name: "github",
 			in:   "github",
 			out: out{
-				cred: credential.githubCred,
+				cred: githubCred,
 				err:  nil,
 			},
 		},

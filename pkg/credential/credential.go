@@ -35,11 +35,11 @@ type ListCredData struct {
 // Fields are used to represents providers.json
 type Fields map[string][]Field
 
-type Setter interface {
+type CredSetter interface {
 	Set(d Detail) error
 }
 
-type Finder interface {
+type CredFinder interface {
 	Find(service string) (Detail, error)
 }
 

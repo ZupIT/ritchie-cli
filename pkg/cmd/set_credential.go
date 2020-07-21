@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/set"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -17,7 +16,7 @@ var inputTypes = []string{"plain text", "secret"}
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
-	set.Setter
+	credential.Setter
 	credential.Settings
 	prompt.InputText
 	prompt.InputBool
@@ -27,7 +26,7 @@ type setCredentialCmd struct {
 
 // NewSetCredentialCmd creates a new cmd instance
 func NewSetCredentialCmd(
-	credSetter set.Setter,
+	credSetter credential.Setter,
 	credSetting credential.Settings,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
