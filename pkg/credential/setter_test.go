@@ -7,10 +7,7 @@ import (
 
 func TestSet(t *testing.T) {
 	tmp := os.TempDir()
-
-	setter := NewSetter(tmp, ctxFinder, sessManager)
-
-
+	setter := NewSetter(tmp, ctxFinder)
 
 	tests := []struct {
 		name string

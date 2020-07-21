@@ -23,7 +23,8 @@ func (s Setter) Set(cred Detail) error {
 	ctx, err := s.ctxFinder.Find()
 	if err != nil {
 		return err
-	} else if ctx.Current == "" {
+	}
+	if ctx.Current == "" {
 		ctx.Current = rcontext.DefaultCtx
 	}
 
