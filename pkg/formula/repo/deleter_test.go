@@ -11,7 +11,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestDeleteManager_DeleteWithSuccess(t *testing.T) {
+func TestDeleteWithSuccess(t *testing.T) {
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
@@ -66,7 +66,7 @@ func TestDeleteManager_DeleteWithSuccess(t *testing.T) {
 
 }
 
-func TestDeleteManager_DeleteWhenErr(t *testing.T) {
+func TestDeleteWhenErr(t *testing.T) {
 	type fields struct {
 		ritHome string
 		file    stream.FileWriteReadExister

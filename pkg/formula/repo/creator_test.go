@@ -14,7 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestCreateManager_Create(t *testing.T) {
+func TestCreate(t *testing.T) {
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
