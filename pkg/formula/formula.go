@@ -22,9 +22,6 @@ const (
 	BinWindows           = "run.bat"
 	BinDir               = "bin"
 	EnvPattern           = "%s=%s"
-	CachePattern         = "%s/.%s.cache"
-	DefaultCacheNewLabel = "Type new value?"
-	DefaultCacheQty      = 5
 	TreePath             = "/tree/tree.json"
 	MakefilePath         = "/Makefile"
 )

@@ -96,7 +96,7 @@ func buildCommands() *cobra.Command {
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
 	postRunner := runner.NewPostRunner()
-	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
+	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewDefaultSetup(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
 	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup)
 
@@ -151,7 +151,7 @@ func buildCommands() *cobra.Command {
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaLocalBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
-	
+
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
