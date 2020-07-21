@@ -12,8 +12,8 @@ import (
 
 type repoListerMock struct{}
 
-func (repoListerMock) List() ([]formula.Repository, error) {
-	return []formula.Repository{}, nil
+func (repoListerMock) List() (formula.Repos, error) {
+	return formula.Repos{}, nil
 }
 
 func TestGenerate(t *testing.T) {
@@ -25,7 +25,7 @@ func TestGenerate(t *testing.T) {
 		err error
 	}
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.SingleCoreCmds)
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.Commands{})
 	autocomplete := NewGenerator(treeMan)
 
 	tests := []struct {

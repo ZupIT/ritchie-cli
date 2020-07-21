@@ -54,7 +54,7 @@ func TestWatch(t *testing.T) {
 
 	formulaFiles := fmt.Sprintf("%s/repos/local/testing/formula/bin", ritHome)
 	files, err := fileManager.List(formulaFiles)
-	if err == nil && len(files) != 2 {
+	if err == nil && len(files) != 3 {
 		t.Error("Watch build did not generate formulas files")
 	}
 

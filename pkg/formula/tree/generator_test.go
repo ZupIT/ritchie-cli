@@ -3,13 +3,11 @@ package tree
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 func TestGenerate(t *testing.T) {
@@ -17,25 +15,24 @@ func TestGenerate(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	generator := NewGenerator(dirManager, fileManager)
 
-	adder := repo.NewAdder(os.TempDir(), http.DefaultClient, generator, dirManager, fileManager)
-	_ = adder.Add(formula.Repo{
-		Name:     "commons",
-		ZipUrl:   "http://localhost:8882/repos/ZupIT/ritchie-formulas/zipball/v2.0.0",
-		Version:  "v2.0.0",
-		Priority: 0,
-	})
+	tmpDir := os.TempDir()
+	workspacePath := fmt.Sprintf("%s/ritchie-formulas-test", tmpDir)
+	ritHome := fmt.Sprintf("%s/.my-rit", os.TempDir())
 
-	resultDir := os.TempDir() + "/commons"
-	_ = dirManager.Create(resultDir)
-	defer func() {
-		_ = dirManager.Remove(resultDir)
-	}()
-	tree, err := generator.Generate(resultDir)
+	_ = dirManager.Remove(ritHome)
+	_ = dirManager.Remove(workspacePath)
+	_ = dirManager.Create(workspacePath)
+	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
+
+	tree, err := generator.Generate(workspacePath)
 	if err != nil {
 		t.Error(err)
 	}
 
-	bytes, _ := json.MarshalIndent(tree, "", "\t")
+	bytes, err := json.MarshalIndent(tree, "", "\t")
+	if err != nil {
+		t.Error(err)
+	}
 
 	fmt.Println(string(bytes))
 }
