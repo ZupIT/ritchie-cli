@@ -31,6 +31,7 @@ func TestListManager_List(t *testing.T) {
 			fields: fields{
 				ritHome: func() string {
 					ritHomePath := filepath.Join(os.TempDir(), "test-list-repo")
+					_ = dirManager.Remove(ritHomePath)
 					_ = dirManager.Create(ritHomePath)
 					_ = dirManager.Create(filepath.Join(ritHomePath, "repos"))
 
