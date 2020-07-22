@@ -2,6 +2,7 @@ package rtutorial
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -80,7 +81,8 @@ func TestFind(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmp := os.TempDir()
-			defer os.RemoveAll(tmp)
+			tmpTutorial := fmt.Sprintf(TutorialPath, tmp)
+			defer os.RemoveAll(tmpTutorial)
 
 			finder := NewFinder(tmp, tt.FileReadExister)
 
