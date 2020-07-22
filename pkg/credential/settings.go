@@ -34,7 +34,7 @@ func (s Settings) ReadCredentialsFields(path string) (Fields, error) {
 	return fields, nil
 }
 
-func (s Settings) ReadCredentialsValue(path string) []ListCredData {
+func (s Settings) ReadCredentialsValue() []ListCredData {
 	var creds []ListCredData
 	var cred ListCredData
 	var detail Detail
@@ -44,7 +44,7 @@ func (s Settings) ReadCredentialsValue(path string) []ListCredData {
 		providers := providerByCtx(c)
 		for _, p := range providers {
 			cBytes, _ := s.file.Read(CredentialsPath() + c + "/" + p)
-			json.Unmarshal(cBytes, &detail)
+			_ = json.Unmarshal(cBytes, &detail)
 			for k, v := range detail.Credential {
 				cred.Provider = detail.Service
 				cred.Context = c

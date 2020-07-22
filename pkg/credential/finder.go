@@ -28,7 +28,7 @@ func (f Finder) Find(provider string) (Detail, error) {
 	if ctx.Current == "" {
 		ctx.Current = rcontext.DefaultCtx
 	}
-	
+
 	cb, err := fileutil.ReadFile(File(f.homePath, ctx.Current, provider))
 	if err != nil {
 		return Detail{}, err
