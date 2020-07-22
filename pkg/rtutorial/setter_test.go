@@ -52,8 +52,7 @@ func TestSet(t *testing.T) {
 			tmp := os.TempDir()
 			defer os.RemoveAll(tmp)
 
-			finder := NewFinder(tmp)
-			setter := NewSetter(tmp, finder)
+			setter := NewSetter(tmp)
 
 			in := tt.in
 			out := tt.out

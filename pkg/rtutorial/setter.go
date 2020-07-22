@@ -9,27 +9,33 @@ import (
 
 type SetterManager struct {
 	tutorialFile string
-	finder       Finder
 }
 
-func NewSetter(homePath string, f Finder) Setter {
-	return SetterManager{tutorialFile: fmt.Sprintf(TutorialPath, homePath), finder: f}
+func NewSetter(homePath string) Setter {
+	return SetterManager{tutorialFile: fmt.Sprintf(TutorialPath, homePath)}
 }
 
 func (s SetterManager) Set(tutorial string) (TutorialHolder, error) {
-	tutorialHolder, err := s.finder.Find()
-	if err != nil {
-		return TutorialHolder{Current: DefaultTutorial}, err
-	}
+	tutorialHolder := TutorialHolder{Current: DefaultTutorial}
+	tutorialHolderDefault := TutorialHolder{Current: DefaultTutorial}
 
 	tutorialHolder.Current = tutorial
 
 	b, err := json.Marshal(&tutorialHolder)
 	if err != nil {
-		return TutorialHolder{}, err
+		return tutorialHolderDefault, err
 	}
-	if err := fileutil.WriteFilePerm(s.tutorialFile, b, 0600); err != nil {
-		return TutorialHolder{}, err
+
+	exists := fileutil.Exists(s.tutorialFile)
+	if exists {
+		if err := fileutil.WriteFilePerm(s.tutorialFile, b, 0600); err != nil {
+			return tutorialHolderDefault, err
+		}
+	} else {
+		err = fileutil.CreateFileIfNotExist(s.tutorialFile, b)
+		if err != nil {
+			return tutorialHolderDefault, err
+		}
 	}
 
 	return tutorialHolder, nil

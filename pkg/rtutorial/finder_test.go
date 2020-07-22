@@ -50,7 +50,7 @@ func TestFind(t *testing.T) {
 			defer os.RemoveAll(tmp)
 
 			finder := NewFinder(tmp)
-			setter := NewSetter(tmp, finder)
+			setter := NewSetter(tmp)
 
 			in := tt.in
 			if in != nil {
