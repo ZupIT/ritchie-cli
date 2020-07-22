@@ -4,25 +4,27 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type FindManager struct {
 	tutorialFile string
 	homePath     string
+	fr           stream.FileReadExister
 }
 
-func NewFinder(homePath string) FindManager {
+func NewFinder(homePath string, fr stream.FileReadExister) FindManager {
 	return FindManager{
 		tutorialFile: fmt.Sprintf(TutorialPath, homePath),
 		homePath:     homePath,
+		fr:           fr,
 	}
 }
 
 func (f FindManager) Find() (TutorialHolder, error) {
 	tutorialHolder := TutorialHolder{Current: DefaultTutorial}
 
-	if !fileutil.Exists(f.tutorialFile) {
+	if !f.fr.Exists(f.tutorialFile) {
 		setter := NewSetter(f.homePath)
 
 		tutorialHolder, err := setter.Set(DefaultTutorial)
@@ -33,7 +35,7 @@ func (f FindManager) Find() (TutorialHolder, error) {
 		return tutorialHolder, nil
 	}
 
-	file, err := fileutil.ReadFile(f.tutorialFile)
+	file, err := f.fr.Read(f.tutorialFile)
 	if err != nil {
 		return tutorialHolder, err
 	}

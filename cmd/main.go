@@ -90,7 +90,7 @@ func buildCommands() *cobra.Command {
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
-	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
 

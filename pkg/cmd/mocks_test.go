@@ -277,10 +277,6 @@ func (m GitRepositoryMock) LatestTag(info github.RepoInfo) (github.Tag, error) {
 	return m.latestTag(info)
 }
 
-func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
-	return "username=ritchie", nil
-}
-
 type TutorialSetterMock struct{}
 
 func (TutorialSetterMock) Set(tutorial string) (rtutorial.TutorialHolder, error) {
