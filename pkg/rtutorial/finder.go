@@ -25,13 +25,6 @@ func (f FindManager) Find() (TutorialHolder, error) {
 	tutorialHolder := TutorialHolder{Current: DefaultTutorial}
 
 	if !f.fr.Exists(f.tutorialFile) {
-		setter := NewSetter(f.homePath)
-
-		tutorialHolder, err := setter.Set(DefaultTutorial)
-		if err != nil {
-			return tutorialHolder, err
-		}
-
 		return tutorialHolder, nil
 	}
 

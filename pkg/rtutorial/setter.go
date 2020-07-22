@@ -4,15 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type SetterManager struct {
 	tutorialFile string
+	fw           stream.FileWriter
 }
 
-func NewSetter(homePath string) Setter {
-	return SetterManager{tutorialFile: fmt.Sprintf(TutorialPath, homePath)}
+func NewSetter(homePath string, fw stream.FileWriter) Setter {
+	return SetterManager{
+		tutorialFile: fmt.Sprintf(TutorialPath, homePath),
+		fw:           fw,
+	}
 }
 
 func (s SetterManager) Set(tutorial string) (TutorialHolder, error) {
@@ -26,16 +30,8 @@ func (s SetterManager) Set(tutorial string) (TutorialHolder, error) {
 		return tutorialHolderDefault, err
 	}
 
-	exists := fileutil.Exists(s.tutorialFile)
-	if exists {
-		if err := fileutil.WriteFilePerm(s.tutorialFile, b, 0600); err != nil {
-			return tutorialHolderDefault, err
-		}
-	} else {
-		err = fileutil.CreateFileIfNotExist(s.tutorialFile, b)
-		if err != nil {
-			return tutorialHolderDefault, err
-		}
+	if err := s.fw.Write(s.tutorialFile, b); err != nil {
+		return tutorialHolderDefault, err
 	}
 
 	return tutorialHolder, nil

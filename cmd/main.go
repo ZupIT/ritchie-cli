@@ -91,7 +91,7 @@ func buildCommands() *cobra.Command {
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
-	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir)
+	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
 
 	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)

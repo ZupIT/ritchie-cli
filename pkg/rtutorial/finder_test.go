@@ -2,7 +2,6 @@ package rtutorial
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -33,7 +32,6 @@ func TestFind(t *testing.T) {
 	}{
 		{
 			name: "With no tutorial file",
-			in:   nil,
 			out: &out{
 				want:      TutorialHolder{Current: "on"},
 				err:       nil,
@@ -47,9 +45,6 @@ func TestFind(t *testing.T) {
 		},
 		{
 			name: "With existing tutorial file",
-			in: &in{
-				tutorial: "on",
-			},
 			out: &out{
 				want:      TutorialHolder{Current: "off"},
 				err:       nil,
@@ -66,9 +61,6 @@ func TestFind(t *testing.T) {
 		},
 		{
 			name: "Error reading the tutorial file",
-			in: &in{
-				tutorial: "on",
-			},
 			out: &out{
 				want:      TutorialHolder{Current: "on"},
 				err:       err,
@@ -91,16 +83,6 @@ func TestFind(t *testing.T) {
 			defer os.RemoveAll(tmp)
 
 			finder := NewFinder(tmp, tt.FileReadExister)
-			setter := NewSetter(tmp)
-
-			in := tt.in
-			if in != nil {
-				_, err := setter.Set(in.tutorial)
-				if err != nil {
-					fmt.Sprintln("Error in Set")
-					return
-				}
-			}
 
 			out := tt.out
 			got, err := finder.Find()
