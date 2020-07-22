@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -20,7 +19,6 @@ var (
 )
 
 type addRepoCmd struct {
-	client *http.Client
 	repo   formula.RepositoryAddLister
 	github github.Repositories
 	prompt.InputTextValidator

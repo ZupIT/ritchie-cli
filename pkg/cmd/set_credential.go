@@ -95,7 +95,6 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 		if err != nil {
 			return credDetail, err
 		}
-		providerArr = append(providerArr, newProvider)
 
 		var newFields []credential.Field
 		var newField credential.Field
@@ -173,31 +172,4 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 		return credDetail, err
 	}
 	return credDetail, nil
-}
-
-func (s setCredentialCmd) profile(credDetail *credential.Detail) error {
-	profiles := map[string]credential.Type{
-		"ME (for you)":               credential.Me,
-		"OTHER (for another user)":   credential.Other,
-		"ORG (for the organization)": credential.Org,
-	}
-	var types []string
-	for k := range profiles {
-		types = append(types, k)
-	}
-
-	typ, err := s.List("Profile to add credential: ", types)
-	if err != nil {
-		return err
-	}
-
-	if profiles[typ] == credential.Other {
-		credDetail.Username, err = s.Text("Username: ", true)
-		if err != nil {
-			return err
-		}
-	}
-
-	credDetail.Type = profiles[typ]
-	return nil
 }

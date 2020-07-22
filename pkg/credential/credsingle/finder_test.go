@@ -11,13 +11,13 @@ import (
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, ctxFinder, sessManager)
+	setter := NewSetter(tmp, ctxFinder)
 	err := setter.Set(githubCred)
 	if err != nil {
 		fmt.Sprintln("Error in Set")
 		return
 	}
-	finder := NewFinder(tmp, ctxFinder, sessManager)
+	finder := NewFinder(tmp, ctxFinder)
 
 	type out struct {
 		cred credential.Detail

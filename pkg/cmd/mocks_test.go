@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"errors"
+	"io"
 
-	"github.com/docker/docker/api/server"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
@@ -48,13 +49,13 @@ func (inputURLMock) URL(name, defaultValue string) (string, error) {
 
 type inputIntMock struct{}
 
-func (inputIntMock) Int(name string) (int64, error) {
+func (inputIntMock) Int(name string, helper ...string) (int64, error) {
 	return 0, nil
 }
 
 type inputIntErrorMock struct{}
 
-func (inputIntErrorMock) Int(name string) (int64, error) {
+func (inputIntErrorMock) Int(name string, helper ...string) (int64, error) {
 	return 0, errors.New("some error")
 }
 
@@ -108,14 +109,17 @@ func (inputListErrorMock) List(name string, items []string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 
-type repoAdder struct{}
-
-func (a repoAdder) List() (formula.Repos, error) {
-	return formula.Repos{}, nil
+type repoListerAdderCustomMock struct {
+	list func() (formula.Repos, error)
+	add  func(d formula.Repo) error
 }
 
-func (repoAdder) Add(d formula.Repo) error {
-	return nil
+func (a repoListerAdderCustomMock) List() (formula.Repos, error) {
+	return a.list()
+}
+
+func (a repoListerAdderCustomMock) Add(d formula.Repo) error {
+	return a.add(d)
 }
 
 type formCreator struct{}
@@ -202,28 +206,16 @@ func (repoListerErrorMock) List() (formula.Repos, error) {
 
 type repoPrioritySetterMock struct{}
 
-func (repoPrioritySetterMock) SetPriority(repo string, priority int) error {
+func (repoPrioritySetterMock) SetPriority(name formula.RepoName, priority int) error {
 	return nil
 }
 
 type repoPrioritySetterCustomMock struct {
-	setPriority func(repo string, priority int) error
+	setPriority func(name formula.RepoName, priority int) error
 }
 
-func (m repoPrioritySetterCustomMock) SetPriority(repo string, priority int) error {
-	return m.setPriority(repo, priority)
-}
-
-type repoLoaderMock struct{}
-
-func (repoLoaderMock) Load() error {
-	return nil
-}
-
-type repoUpdaterMock struct{}
-
-func (repoUpdaterMock) Update() error {
-	return nil
+func (m repoPrioritySetterCustomMock) SetPriority(name formula.RepoName, priority int) error {
+	return m.setPriority(name, priority)
 }
 
 type credSetterMock struct{}
@@ -232,8 +224,6 @@ func (credSetterMock) Set(d credential.Detail) error {
 	return nil
 }
 
-type credSettingsMock struct{}
-
 type singleCredSettingsMock struct{}
 
 func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
@@ -241,26 +231,11 @@ func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
 }
 
 func (s singleCredSettingsMock) ReadCredentials(path string) (credential.Fields, error) {
-	return nil, nil
+	return credential.Fields{}, nil
 }
 
 func (s singleCredSettingsMock) WriteCredentials(fields credential.Fields, path string) error {
 	return nil
-}
-
-func (credSettingsMock) Fields() (credential.Fields, error) {
-	return credential.Fields{
-		"github": []credential.Field{
-			{
-				Name: "username",
-				Type: "text",
-			},
-			{
-				Name: "token",
-				Type: "password",
-			},
-		},
-	}, nil
 }
 
 type runnerMock struct {
@@ -284,67 +259,23 @@ func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
 }
 
-type findSetterServerMock struct{}
-
-func (findSetterServerMock) Set(*server.Config) error {
-	return nil
+type GitRepositoryMock struct {
+	zipball   func(info github.RepoInfo, version string) (io.ReadCloser, error)
+	tags      func(info github.RepoInfo) (github.Tags, error)
+	latestTag func(info github.RepoInfo) (github.Tag, error)
 }
 
-func (findSetterServerMock) Find() (server.Config, error) {
-	return server.Config{}, nil
+func (m GitRepositoryMock) Zipball(info github.RepoInfo, version string) (io.ReadCloser, error) {
+	return m.zipball(info, version)
 }
 
-type findSetterServerCustomMock struct {
-	set  func(*server.Config) error
-	find func() (server.Config, error)
+func (m GitRepositoryMock) Tags(info github.RepoInfo) (github.Tags, error) {
+	return m.tags(info)
 }
 
-func (m findSetterServerCustomMock) Set(ctx *server.Config) error {
-	return m.set(ctx)
+func (m GitRepositoryMock) LatestTag(info github.RepoInfo) (github.Tag, error) {
+	return m.latestTag(info)
 }
-
-func (m findSetterServerCustomMock) Find() (server.Config, error) {
-	return m.find()
-}
-
-type inputBoolCustomMock struct {
-	bool func(name string, items []string) (bool, error)
-}
-
-func (m inputBoolCustomMock) Bool(name string, items []string) (bool, error) {
-	return m.bool(name, items)
-}
-
-type inputTextCustomMock struct {
-	text             func(name string, required bool) (string, error)
-	textWithValidate func(name string, validate func(interface{}) error) (string, error)
-}
-
-func (m inputTextCustomMock) Text(name string, required bool, helper ...string) (string, error) {
-	return m.text(name, required)
-}
-
-func (m inputTextCustomMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return m.textWithValidate(name, validate)
-}
-
-type inputURLCustomMock struct {
-	url func(name, defaultValue string) (string, error)
-}
-
-func (m inputURLCustomMock) URL(name, defaultValue string) (string, error) {
-	return m.url(name, defaultValue)
-}
-
-type inputPasswordCustomMock struct {
-	password func(label string) (string, error)
-}
-
-func (m inputPasswordCustomMock) Password(label string) (string, error) {
-	return m.password(label)
-}
-
-type InputMultilineMock struct{}
 
 func (InputMultilineMock) MultiLineText(name string, required bool) (string, error) {
 	return "username=ritchie", nil
@@ -373,3 +304,26 @@ func (TutorialFindSetterMock) Set(tutorial string) (rtutorial.TutorialHolder, er
 	s := TutorialSetterMock{}
 	return s.Set(tutorial)
 }
+
+var (
+	defaultRepoAdderMock = repoListerAdderCustomMock{
+		add: func(d formula.Repo) error {
+			return nil
+		},
+		list: func() (formula.Repos, error) {
+			return formula.Repos{}, nil
+		},
+	}
+
+	defaultGitRepositoryMock = GitRepositoryMock{
+		latestTag: func(info github.RepoInfo) (github.Tag, error) {
+			return github.Tag{}, nil
+		},
+		tags: func(info github.RepoInfo) (github.Tags, error) {
+			return github.Tags{}, nil
+		},
+		zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
+			return nil, nil
+		},
+	}
+)
