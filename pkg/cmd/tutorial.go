@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/spf13/cobra"
 )
 
 type tutorialSingleCmd struct {
 	homePath string
-	prompt.InputBool
+	prompt.InputList
+	rtutorial.FindSetter
 }
 
 const (
@@ -22,8 +23,8 @@ const (
 )
 
 // NewTutorialCmd creates tutorial command
-func NewTutorialCmd(homePath string, ib prompt.InputBool) *cobra.Command {
-	o := tutorialSingleCmd{homePath, ib}
+func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSetter) *cobra.Command {
+	o := tutorialSingleCmd{homePath, il, fs}
 
 	cmd := &cobra.Command{
 		Use:   "tutorial",
@@ -58,69 +59,25 @@ func (o tutorialSingleCmd) runStdin() CommandRunnerFunc {
 
 func (o tutorialSingleCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		pathTutorial := fmt.Sprintf(TutorialFilePattern, o.homePath)
-		msg := "Enable tutorial?"
-		tutorialStatus, _ := currentTutorial(pathTutorial)
-		tutorialEnabled := tutorialStatus == tutorialStatusOn
-		fmt.Println("STATUS TUTORIAL: ", tutorialStatus)
+		msg := "Status tutorial?"
+		var statusTypes = []string{tutorialStatusOn, tutorialStatusOff}
 
-		if tutorialEnabled {
-			msg = "Disable tutorial?"
-		}
-
-		y, err := o.Bool(msg, []string{"yes", "no"})
+		tutorialHolder, err := o.Find()
 		if err != nil {
 			return err
 		}
 
-		if y {
-			invertsTutorialStatus(pathTutorial, tutorialStatus)
+		tutorialStatusCurrent := tutorialHolder.Current
+		fmt.Println("Current tutorial status: ", tutorialStatusCurrent)
+
+		response, err := o.List(msg, statusTypes)
+		if err != nil {
+			return err
 		}
 
-		fmt.Println("TUDO OK! SUA RESPOSTA: ", y)
-		tutorialStatus, _ = currentTutorial(pathTutorial)
-		fmt.Println("STATUS TUTORIAL: ", tutorialStatus)
+		o.Set(response)
+
+		prompt.Success("Set tutorial successful!")
 		return nil
 	}
-}
-
-func currentTutorial(path string) (string, error) {
-	currentStatus := tutorialStatusOn
-
-	if fileutil.Exists(path) {
-		status, err := fileutil.ReadFile(path)
-		if err != nil {
-			return tutorialStatusOn, err
-		}
-		currentStatus = string(status)
-	} else {
-		err := createTutorial(path)
-		if err != nil {
-			return tutorialStatusOn, err
-		}
-	}
-
-	return string(currentStatus), nil
-}
-
-func createTutorial(path string) error {
-	if err := fileutil.WriteFile(path, []byte(tutorialStatusOn)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func invertsTutorialStatus(path string, currentStatus string) error {
-	nextStatus := tutorialStatusOn
-
-	if currentStatus == tutorialStatusOn {
-		nextStatus = tutorialStatusOff
-	}
-
-	if err := fileutil.WriteFile(path, []byte(nextStatus)); err != nil {
-		return err
-	}
-
-	return nil
 }
