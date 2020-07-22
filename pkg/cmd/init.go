@@ -10,6 +10,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
 const UsageMsg = ` How to contribute new formulas to the Ritchie community?
@@ -27,10 +28,11 @@ var CommonsRepoURL = "https://github.com/kaduartur/ritchie-formulas"
 type initCmd struct {
 	repo formula.RepositoryAdder
 	git  github.Repositories
+	find rtutorial.Finder
 }
 
-func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories) *cobra.Command {
-	o := initCmd{repo: repo, git: git}
+func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories, find rtutorial.Finder) *cobra.Command {
+	o := initCmd{repo: repo, git: git, find: find}
 
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -69,6 +71,18 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 		s.Success(prompt.Green("Okay, now you can use rit.\n"))
 		prompt.Info(UsageMsg)
 
+		tutorialHolder, err := in.find.Find()
+		if err != nil {
+			return err
+		}
+
+		tutorialInit(tutorialHolder.Current)
 		return nil
+	}
+}
+
+func tutorialInit(tutorialStatus string) {
+	if tutorialStatus == tutorialStatusOn {
+		prompt.Info("\n[TUTORIAL] The next step is \"rit set context\"")
 	}
 }

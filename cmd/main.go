@@ -9,6 +9,7 @@ import (
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
@@ -89,6 +90,9 @@ func buildCommands() *cobra.Command {
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
+	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir)
+	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
 
 	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewDefaultSetup(ritchieHomeDir)
@@ -121,7 +125,7 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, gitRepo)
+	initCmd := cmd.NewInitCmd(repoAdder, gitRepo, tutorialFinder)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -129,7 +133,7 @@ func buildCommands() *cobra.Command {
 	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
 
-	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputBool)
+	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2
 	setCredentialCmd := cmd.NewSetCredentialCmd(
