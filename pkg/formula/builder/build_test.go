@@ -25,7 +25,7 @@ func TestBuild(t *testing.T) {
 
 	type in struct {
 		fileManager stream.FileCopyExistLister
-		dirManager  stream.DirCreateListCopier
+		dirManager  stream.DirCreateListCopyRemover
 	}
 
 	testes := []struct {
@@ -133,6 +133,7 @@ type dirManagerMock struct {
 	createErr error
 	listErr   error
 	copyErr   error
+	remErr    error
 }
 
 func (d dirManagerMock) Create(string) error {
@@ -145,6 +146,10 @@ func (d dirManagerMock) List(string, bool) ([]string, error) {
 
 func (d dirManagerMock) Copy(string, string) error {
 	return d.copyErr
+}
+
+func (d dirManagerMock) Remove(string) error {
+	return d.remErr
 }
 
 type fileManagerMock struct {
