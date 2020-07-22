@@ -22,7 +22,6 @@ func NewSettings(file stream.FileWriteReadExister) Settings {
 
 func (s Settings) ReadCredentialsFields(path string) (Fields, error) {
 	fields := Fields{}
-
 	if s.file.Exists(path) {
 		cBytes, _ := s.file.Read(path)
 		err := json.Unmarshal(cBytes, &fields)
@@ -34,7 +33,7 @@ func (s Settings) ReadCredentialsFields(path string) (Fields, error) {
 	return fields, nil
 }
 
-func (s Settings) ReadCredentialsValue() []ListCredData {
+func (s Settings) ReadCredentialsValue() ([]ListCredData, error) {
 	var creds []ListCredData
 	var cred ListCredData
 	var detail Detail
@@ -44,7 +43,9 @@ func (s Settings) ReadCredentialsValue() []ListCredData {
 		providers := providerByCtx(c)
 		for _, p := range providers {
 			cBytes, _ := s.file.Read(CredentialsPath() + c + "/" + p)
-			_ = json.Unmarshal(cBytes, &detail)
+			if err := json.Unmarshal(cBytes, &detail); err != nil {
+				return creds, err
+			}
 			for k, v := range detail.Credential {
 				cred.Provider = detail.Service
 				cred.Context = c
@@ -54,7 +55,7 @@ func (s Settings) ReadCredentialsValue() []ListCredData {
 			}
 		}
 	}
-	return creds
+	return creds, nil
 }
 
 func providerByCtx(ctx string) []string {

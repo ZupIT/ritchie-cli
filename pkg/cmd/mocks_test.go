@@ -231,8 +231,8 @@ func (s credSettingsMock) ReadCredentialsFields(path string) (credential.Fields,
 	return credential.Fields{}, nil
 }
 
-func (s credSettingsMock) ReadCredentialsValue() []credential.ListCredData {
-	return []credential.ListCredData{}
+func (s credSettingsMock) ReadCredentialsValue() ([]credential.ListCredData, error) {
+	return []credential.ListCredData{}, nil
 }
 
 func (s credSettingsMock) WriteDefaultCredentialsFields(path string) error {

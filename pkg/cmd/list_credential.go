@@ -60,7 +60,7 @@ func printCredentialsTable(fields credential.ListCredDatas) {
 
 func (l listCredentialCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data := l.Settings.ReadCredentialsValue()
+		data, _ := l.Settings.ReadCredentialsValue()
 		printCredentialsTable(data)
 		return nil
 	}
