@@ -8,7 +8,7 @@ import (
 
 const (
 	ritchieHomePattern = "%s/.rit"
-	CoreCmdsDesc = "core commands:"
+	CoreCmdsDesc       = "core commands:"
 )
 
 var (
@@ -38,6 +38,7 @@ var (
 		{Parent: "root", Usage: "build"},
 		{Parent: "root_build", Usage: "formula"},
 		{Parent: "root", Usage: "upgrade"},
+		{Parent: "root", Usage: "tutorial"},
 	}
 )
 
