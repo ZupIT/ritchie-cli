@@ -95,7 +95,6 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 
 		err = stdin.ReadJson(os.Stdin, &dc)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 

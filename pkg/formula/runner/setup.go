@@ -16,11 +16,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-var (
-	ErrFormulaBinNotFound = prompt.NewError("formula bin not found")
-	ErrConfigFileNotFound = prompt.NewError("config file not found")
-)
-
 const loadConfigErrMsg = `Failed to load formula config file
 Try running rit update repo
 Config file path not found: %s`
@@ -34,13 +29,14 @@ type SetupManager struct {
 	file        stream.FileExister
 }
 
-func NewDefaultSetup(
+func NewSetup(
 	ritchieHome string,
 	make formula.MakeBuilder,
 	docker formula.DockerBuilder,
 	bat formula.BatBuilder,
 	dir stream.DirCreateListCopier,
-	file stream.FileExister) SetupManager {
+	file stream.FileExister,
+) SetupManager {
 	return SetupManager{
 		ritchieHome: ritchieHome,
 		make:        make,
