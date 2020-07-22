@@ -26,14 +26,15 @@ var (
 
 type LocalManager struct {
 	ritHome string
-	dir     stream.DirCreateListCopier
+	dir     stream.DirCreateListCopyRemover
 	file    stream.FileCopyExistListerWriter
 	tree    formula.TreeGenerator
 }
 
 func NewBuildLocal(
 	ritHome string,
-	dir stream.DirCreateListCopier, file stream.FileCopyExistListerWriter,
+	dir stream.DirCreateListCopyRemover,
+	file stream.FileCopyExistListerWriter,
 	tree formula.TreeGenerator,
 ) formula.LocalBuilder {
 	return LocalManager{ritHome: ritHome, dir: dir, file: file, tree: tree}
@@ -55,19 +56,23 @@ func (m LocalManager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
-	err, done := m.buildFormulaBin(workspacePath, formulaPath, dest)
-	if done {
+	if err:= m.buildFormulaBin(workspacePath, formulaPath, dest); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-
-func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) (error, bool) {
+func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) error {
 	formulaSrc := strings.ReplaceAll(formulaPath, workspacePath, dest)
+	formulaBin := path.Join(formulaSrc, "bin")
+
+	if err := m.dir.Remove(formulaBin); err != nil {
+		return err
+	}
+
 	if err := os.Chdir(formulaSrc); err != nil {
-		return err, true
+		return err
 	}
 
 	so := runtime.GOOS
@@ -76,7 +81,7 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) (
 	case osutil.Windows:
 		winBuild := path.Join(formulaPath, "build.bat")
 		if !m.file.Exists(winBuild) {
-			return ErrBuildOnWindows, true
+			return ErrBuildOnWindows
 		}
 		cmd = exec.Command(winBuild)
 	default:
@@ -89,12 +94,18 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) (
 	if err := cmd.Run(); err != nil {
 		if stderr.Bytes() != nil {
 			errMsg := fmt.Sprintf("Build error: \n%s \n%s", stderr.String(), err)
-			return errors.New(errMsg), true
+			return errors.New(errMsg)
 		}
 
-		return err, true
+		return err
 	}
-	return nil, false
+
+	if stderr.String() != "" {
+		errMsg := fmt.Sprintf("Build error: \n%s", stderr.String())
+		return errors.New(errMsg)
+	}
+
+	return nil
 }
 
 func (m LocalManager) generateTree(dest string) error {
