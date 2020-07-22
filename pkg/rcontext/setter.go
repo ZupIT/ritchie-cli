@@ -11,10 +11,10 @@ import (
 
 type SetterManager struct {
 	ctxFile string
-	finder  Finder
+	finder  CtxFinder
 }
 
-func NewSetter(homePath string, f Finder) Setter {
+func NewSetter(homePath string, f CtxFinder) Setter {
 	return SetterManager{ctxFile: fmt.Sprintf(ContextPath, homePath), finder: f}
 }
 

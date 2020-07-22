@@ -1,30 +1,16 @@
 package credential
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"reflect"
 	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
-
-var (
-	githubCred Detail
-	ctxFinder  rcontext.Finder
-)
-
-
-
-var errTest = errors.New("Ai pai")
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
 	setter := NewSetter(tmp, ctxFinder)
 	err := setter.Set(githubCred)
 	if err != nil {
-		fmt.Sprintln("Error in Set")
 		return
 	}
 	finder := NewFinder(tmp, ctxFinder)
@@ -44,7 +30,7 @@ func TestFind(t *testing.T) {
 			in:   "github",
 			out: out{
 				cred: githubCred,
-				err:errTest  ,
+				err:nil  ,
 			},
 		},
 	}
@@ -53,7 +39,6 @@ func TestFind(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			out := tt.out
 			got, err := finder.Find(tt.in)
-
 			if err != nil && err.Error() != out.err.Error() {
 				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)
 			}
@@ -62,6 +47,5 @@ func TestFind(t *testing.T) {
 				t.Errorf("Find(%s) got %v, want %v", tt.name, got, out.cred)
 			}
 		})
-		fmt.Println(tt)
 	}
 }

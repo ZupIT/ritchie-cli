@@ -2,24 +2,25 @@ package credential
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
-type Setter struct {
+type SetManager struct {
 	homePath  string
-	ctxFinder rcontext.Finder
+	ctxFinder rcontext.CtxFinder
 }
 
-func NewSetter(homePath string, cf rcontext.Finder) Setter {
-	return Setter{
+func NewSetter(homePath string, cf rcontext.CtxFinder) SetManager {
+	return SetManager{
 		homePath:  homePath,
 		ctxFinder: cf,
 	}
 }
 
-func (s Setter) Set(cred Detail) error {
+func (s SetManager) Set(cred Detail) error {
 	ctx, err := s.ctxFinder.Find()
 	if err != nil {
 		return err
@@ -40,6 +41,7 @@ func (s Setter) Set(cred Detail) error {
 
 	credFile := File(s.homePath, ctx.Current, cred.Service)
 	if err := fileutil.WriteFilePerm(credFile, cb, 0600); err != nil {
+		fmt.Println(err)
 		return err
 	}
 

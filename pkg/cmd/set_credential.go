@@ -17,7 +17,7 @@ var inputTypes = []string{"plain text", "secret"}
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
-	credential.Settings
+	credential.Operations
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
@@ -27,15 +27,15 @@ type setCredentialCmd struct {
 // NewSetCredentialCmd creates a new cmd instance
 func NewSetCredentialCmd(
 	credSetter credential.Setter,
-	credSetting credential.Settings,
+	credSetting credential.Operations,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
 	inPass prompt.InputPassword,
 ) *cobra.Command {
 	s := &setCredentialCmd{
-		Setter:        credSetter,
-		Settings:      credSetting,
+		Setter:    credSetter,
+		Operations:      credSetting,
 		InputText:     inText,
 		InputBool:     inBool,
 		InputList:     inList,

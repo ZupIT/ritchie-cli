@@ -6,4 +6,4 @@ for i in $(go list ./pkg/... | grep -v vendor/); do
   go tool cover -func=bin/cov.out
 done
 
-echo "\033[0;32m All tests run with success :D"
+echo "\033[0;32m All tests run with success"

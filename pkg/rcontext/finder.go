@@ -8,21 +8,21 @@ import (
 )
 
 type FindManager struct {
-	ctxFile string
+	CtxFile string
 }
 
 func NewFinder(homePath string) FindManager {
-	return FindManager{ctxFile: fmt.Sprintf(ContextPath, homePath)}
+	return FindManager{CtxFile: fmt.Sprintf(ContextPath, homePath)}
 }
 
 func (f FindManager) Find() (ContextHolder, error) {
 	ctxHolder := ContextHolder{}
 
-	if !fileutil.Exists(f.ctxFile) {
+	if !fileutil.Exists(f.CtxFile) {
 		return ctxHolder, nil
 	}
 
-	file, err := fileutil.ReadFile(f.ctxFile)
+	file, err := fileutil.ReadFile(f.CtxFile)
 	if err != nil {
 		return ctxHolder, err
 	}

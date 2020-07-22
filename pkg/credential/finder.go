@@ -9,10 +9,10 @@ import (
 
 type Finder struct {
 	homePath  string
-	ctxFinder rcontext.Finder
+	ctxFinder rcontext.CtxFinder
 }
 
-func NewFinder(homePath string, cf rcontext.Finder) Finder {
+func NewFinder(homePath string, cf rcontext.CtxFinder) Finder {
 	return Finder{
 		homePath:  homePath,
 		ctxFinder: cf,
@@ -21,12 +21,14 @@ func NewFinder(homePath string, cf rcontext.Finder) Finder {
 
 func (f Finder) Find(provider string) (Detail, error) {
 	ctx, err := f.ctxFinder.Find()
+
 	if err != nil {
 		return Detail{}, err
-	} else if ctx.Current == "" {
+	}
+	if ctx.Current == "" {
 		ctx.Current = rcontext.DefaultCtx
 	}
-
+	
 	cb, err := fileutil.ReadFile(File(f.homePath, ctx.Current, provider))
 	if err != nil {
 		return Detail{}, err
@@ -36,6 +38,6 @@ func (f Finder) Find(provider string) (Detail, error) {
 	if err := json.Unmarshal(cb, cred); err != nil {
 		return Detail{}, err
 	}
-
 	return *cred, nil
+
 }

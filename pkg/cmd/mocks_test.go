@@ -194,7 +194,7 @@ func (repoListerNonEmptyMock) List() (formula.Repos, error) {
 			Name:     "repoName",
 			Priority: 0,
 		},
-	}, nil
+	},nil
 }
 
 type repoListerErrorMock struct{}
@@ -223,17 +223,23 @@ func (credSetterMock) Set(d credential.Detail) error {
 	return nil
 }
 
-type singleCredSettingsMock struct{}
-
-func (s singleCredSettingsMock) WriteDefaultCredentialsFields(path string) error {
-	return nil
+type credSettingsMock struct{
+	error
 }
 
-func (s singleCredSettingsMock) ReadCredentialsFields(path string) (credential.Fields, error) {
+func (s credSettingsMock) ReadCredentialsFields(path string) (credential.Fields, error) {
 	return credential.Fields{}, nil
 }
 
-func (s singleCredSettingsMock) WriteCredentialsFields(fields credential.Fields, path string) error {
+func (s credSettingsMock) ReadCredentialsValue(path string) string {
+	return ""
+}
+
+func (s credSettingsMock) WriteDefaultCredentialsFields(path string) error {
+	return nil
+}
+
+func (s credSettingsMock) WriteCredentialsFields(fields credential.Fields, path string) error {
 	return nil
 }
 

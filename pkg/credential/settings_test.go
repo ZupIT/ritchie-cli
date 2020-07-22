@@ -18,17 +18,17 @@ func providersPath() string {
 	return path
 }
 
-func TestSingleSettings_ReadCredentials(t *testing.T) {
-
-	credentials, err := credSettings.ReadCredentialsFields("../../../testdata/credentials.json")
-	if err != nil {
-		t.Errorf("Error on on read credentials function")
-	}
-
-	if credentials == nil || len(credentials) <= 0 {
-		t.Errorf("Error on on read credentials function, cannot be empty or null")
-	}
-}
+// func TestSingleSettings_ReadCredentials(t *testing.T) {
+//
+// 	credentials, err := credSettings.ReadCredentialsFields("../../../testdata/credentials.json")
+// 	if err != nil {
+// 		t.Errorf("Error on on read credentials function")
+// 	}
+//
+// 	if credentials == nil || len(credentials) <= 0 {
+// 		t.Errorf("Error on on read credentials function, cannot be empty or null")
+// 	}
+// }
 
 func TestSingleSettings_WriteCredentials(t *testing.T) {
 	err := credSettings.WriteCredentialsFields(NewDefaultCredentials(), providersPath())
