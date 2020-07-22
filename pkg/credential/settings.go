@@ -72,10 +72,7 @@ func providerByCtx(ctx string) []string {
 
 func ctxArr() []string {
 	var ctx []string
-	files, err := ioutil.ReadDir(CredentialsPath())
-	if err != nil {
-		log.Fatal(err)
-	}
+	files, _ := ioutil.ReadDir(CredentialsPath())
 	for _, f := range files {
 		if f.IsDir() {
 			ctx = append(ctx, f.Name())

@@ -137,8 +137,6 @@ func (d InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 // add the variable inName=inValue to cmd.Env
 func addEnv(cmd *exec.Cmd, inName, inValue string) {
 	e := fmt.Sprintf(formula.EnvPattern, strings.ToUpper(inName), inValue)
-	fmt.Println("ADDENV on inputs.go")
-	fmt.Println(e)
 	cmd.Env = append(cmd.Env, e)
 }
 
