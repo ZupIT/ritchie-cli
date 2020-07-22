@@ -64,6 +64,34 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Return error when try to unmarshal the file to json",
+			fields: fields{
+				ritHome: func() string {
+					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo-fail")
+					_ = dirManager.Remove(ritHomePath)
+					_ = dirManager.Create(ritHomePath)
+					_ = dirManager.Create(filepath.Join(ritHomePath, "repos"))
+
+					repositoryFile := filepath.Join(ritHomePath, "repos", "repositories.json")
+
+					data := `
+						[
+							{
+								"errorHere: "commons",
+								"version": "v2.0.0",
+								"url": "https://github.com/kaduartur/ritchie-formulas",
+								"priority": 0
+							}
+						]`
+
+					_ = fileManager.Write(repositoryFile, []byte(data))
+					return ritHomePath
+				}(),
+				file: fileManager,
+			},
+			wantErr: true,
+		},
+		{
 			name: "Return error when file not exist",
 			fields: fields{
 				ritHome: os.TempDir(),
@@ -81,38 +109,10 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Return error when try unmarshal the file to json",
-			fields: fields{
-				ritHome: func() string {
-					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo-fail")
-					_ = dirManager.Remove(ritHomePath)
-					_ = dirManager.Create(ritHomePath)
-					_ = dirManager.Create(filepath.Join(ritHomePath, "repos"))
-
-					repositoryFile := filepath.Join(ritHomePath, "repos", "repositories.json")
-
-					data := `
-						[
-							{
-								"name: "commons",
-								"version": "v2.0.0",
-								"url": "https://github.com/kaduartur/ritchie-formulas",
-								"priority": 0
-							}
-						]`
-
-					_ = fileManager.Write(repositoryFile, []byte(data))
-					return ritHomePath
-				}(),
-				file: fileManager,
-			},
-			wantErr: true,
-		},
-		{
-			name: "Return error when try write the changes on file",
+			name: "Return error when try to write the changes on file",
 			fields: fields{
 				ritHome: os.TempDir(),
-				file:    fileWriteReadExisterMockOnSucessRead{},
+				file:    fileWriteReadExisterMockOnSucessReadData{},
 			},
 			wantErr: true,
 		},
@@ -129,7 +129,7 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 			err := sm.SetPriority(tt.args.repoName, tt.args.priority)
 
 			if (tt.Err != nil) && err.Error() != tt.Err.Error() {
-				t.Errorf("This error didnt expect this error menssage")
+				t.Errorf("This error didnt expect this menssage")
 			}
 
 			if (err != nil) != tt.wantErr {
@@ -139,10 +139,10 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 	}
 }
 
-type fileWriteReadExisterMockOnSucessRead struct{}
+type fileWriteReadExisterMockOnSucessReadData struct{}
 
-func (m fileWriteReadExisterMockOnSucessRead) Read(path string) ([]byte, error) {
-	data := `
+func (m fileWriteReadExisterMockOnSucessReadData) Read(path string) ([]byte, error) {
+	dataWithoutErrors := `
 	[
 		{
 			"name": "commons",
@@ -151,14 +151,14 @@ func (m fileWriteReadExisterMockOnSucessRead) Read(path string) ([]byte, error) 
 			"priority": 0
 		}
 	]`
-	return []byte(data), nil
+	return []byte(dataWithoutErrors), nil
 }
 
-func (m fileWriteReadExisterMockOnSucessRead) Write(path string, content []byte) error {
+func (m fileWriteReadExisterMockOnSucessReadData) Write(path string, content []byte) error {
 	return errors.New("Error on write the data on file")
 }
 
-func (m fileWriteReadExisterMockOnSucessRead) Exists(path string) bool {
+func (m fileWriteReadExisterMockOnSucessReadData) Exists(path string) bool {
 	return true
 }
 
