@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewShowContextCmd(t *testing.T) {
-	cmd := NewShowContextCmd(ctxFinderMock{}, TutorialFinderMock{})
+	cmd := NewShowContextCmd(ctxFinderMock{})
 	if cmd == nil {
 		t.Errorf("NewShowContextCmd got %v", cmd)
 

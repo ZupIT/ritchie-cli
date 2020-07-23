@@ -10,7 +10,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
@@ -24,7 +23,6 @@ type setCredentialCmd struct {
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
-	rtutorial.Finder
 }
 
 // NewSetCredentialCmd creates a new cmd instance
@@ -35,7 +33,6 @@ func NewSetCredentialCmd(
 	inBool prompt.InputBool,
 	inList prompt.InputList,
 	inPass prompt.InputPassword,
-	find rtutorial.Finder,
 ) *cobra.Command {
 	s := &setCredentialCmd{
 		Setter:         credSetter,
@@ -44,7 +41,6 @@ func NewSetCredentialCmd(
 		InputBool:      inBool,
 		InputList:      inList,
 		InputPassword:  inPass,
-		Finder:         find,
 	}
 
 	cmd := &cobra.Command{
@@ -70,13 +66,6 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
-
-		tutorialHolder, err := s.Finder.Find()
-		if err != nil {
-			return err
-		}
-
-		tutorialSetCred(tutorialHolder.Current)
 		return nil
 	}
 }
@@ -171,13 +160,6 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 		}
 
 		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
-
-		tutorialHolder, err := s.Finder.Find()
-		if err != nil {
-			return err
-		}
-
-		tutorialSetCred(tutorialHolder.Current)
 		return nil
 	}
 }
@@ -190,10 +172,4 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 		return credDetail, err
 	}
 	return credDetail, nil
-}
-
-func tutorialSetCred(tutorialStatus string) {
-	if tutorialStatus == tutorialStatusOn {
-		prompt.Info("\n[TUTORIAL] The next step is \"rit add repo\"")
-	}
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewSetContextCmd(t *testing.T) {
-	cmd := NewSetContextCmd(ctxFindSetterMock{}, inputTextMock{}, inputListMock{}, TutorialFinderMock{})
+	cmd := NewSetContextCmd(ctxFindSetterMock{}, inputTextMock{}, inputListMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewSetContextCmd got %v", cmd)

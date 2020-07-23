@@ -69,7 +69,6 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				tt.fields.InputList,
 				tt.fields.InputBool,
 				tt.fields.InputInt,
-				TutorialFinderMock{},
 			)
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {

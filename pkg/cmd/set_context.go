@@ -7,7 +7,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
@@ -18,7 +17,6 @@ type setContextCmd struct {
 	rcontext.FindSetter
 	prompt.InputText
 	prompt.InputList
-	rt rtutorial.Finder
 }
 
 // setContext type for stdin json decoder
@@ -29,9 +27,8 @@ type setContext struct {
 func NewSetContextCmd(
 	fs rcontext.FindSetter,
 	it prompt.InputText,
-	il prompt.InputList,
-	f rtutorial.Finder) *cobra.Command {
-	s := setContextCmd{fs, it, il, f}
+	il prompt.InputList) *cobra.Command {
+	s := setContextCmd{fs, it, il}
 
 	cmd := &cobra.Command{
 		Use:     "context",
@@ -71,13 +68,6 @@ func (s setContextCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		prompt.Success("Set context successful!")
-
-		tutorialHolder, err := s.rt.Find()
-		if err != nil {
-			return err
-		}
-
-		tutorialSetCtx(tutorialHolder.Current)
 		return nil
 	}
 
@@ -99,19 +89,6 @@ func (s setContextCmd) runStdin() CommandRunnerFunc {
 		}
 
 		prompt.Success("Set context successful!")
-
-		tutorialHolder, err := s.rt.Find()
-		if err != nil {
-			return err
-		}
-
-		tutorialSetCtx(tutorialHolder.Current)
 		return nil
-	}
-}
-
-func tutorialSetCtx(tutorialStatus string) {
-	if tutorialStatus == tutorialStatusOn {
-		prompt.Info("\n[TUTORIAL] The next step is \"rit show context\" or \"rit set credential\"")
 	}
 }
