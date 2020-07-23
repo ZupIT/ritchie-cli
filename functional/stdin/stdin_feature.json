@@ -38,7 +38,7 @@
         "steps":[
             {
                 "key":"",
-                "value":"{\"treePath\":\"https://commons-repo.ritchiecli.io/tree/tree.json\",\"name\":\"Leonidas\",\"priority\":999}",
+                "value":"{\"name\":\"Leonidas\", \"url\":\"https://github.com/viniciussousazup/ritchie-formulas\", \"version\":\"0.0.3\",\"priority\":999}",
                 "action":"echo"
             },
             {
@@ -63,7 +63,7 @@
                 "action":"main"
             }
         ],
-        "result":"\"Leonidas\" has been removed from your repositories"
+        "result":"\"Leonidas\" was deleted with success"
     },
     {
         "entry":"Set credentials STDIN",
