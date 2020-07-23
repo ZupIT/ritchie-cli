@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"path"
 	"runtime"
 	"strings"
@@ -30,10 +30,10 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	Version = "dev"
-	BuildDate = "unknown"
+	Version          = "dev"
+	BuildDate        = "unknown"
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
-	ErrRitInit = errors.New("To start using rit, you need to initialize rit first.\nCommand: rit init")
+	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 
 	whitelist = []string{
 		fmt.Sprint(cmdUse),
@@ -87,7 +87,8 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 
 		commonsRepoPath := path.Join(ro.ritchieHome, "repos", "commons")
 		if !ro.dir.Exists(commonsRepoPath) {
-			return ErrRitInit
+			fmt.Println(MsgInit)
+			os.Exit(0)
 		}
 
 		return nil
