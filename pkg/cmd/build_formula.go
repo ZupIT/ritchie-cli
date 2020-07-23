@@ -11,6 +11,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -30,6 +31,7 @@ type buildFormulaCmd struct {
 	directory   stream.DirListChecker
 	prompt.InputText
 	prompt.InputList
+	rt rtutorial.Finder
 }
 
 func NewBuildFormulaCmd(
@@ -40,6 +42,7 @@ func NewBuildFormulaCmd(
 	directory stream.DirListChecker,
 	inText prompt.InputText,
 	inList prompt.InputList,
+	rtf rtutorial.Finder,
 ) *cobra.Command {
 	s := buildFormulaCmd{
 		userHomeDir: userHomeDir,
@@ -49,6 +52,7 @@ func NewBuildFormulaCmd(
 		directory:   directory,
 		InputText:   inText,
 		InputList:   inList,
+		rt:          rtf,
 	}
 
 	cmd := &cobra.Command{
@@ -107,6 +111,12 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 
 		b.build(wspace.Dir, formulaPath)
 
+		tutorialHolder, err := b.rt.Find()
+		if err != nil {
+			return err
+		}
+		tutorialBuildFormula(tutorialHolder.Current)
+
 		return nil
 	}
 }
@@ -160,4 +170,16 @@ func isFormula(dirs []string) bool {
 	}
 
 	return false
+}
+
+func tutorialBuildFormula(tutorialStatus string) {
+	const tagTutorial = "\n[TUTORIAL]"
+	const MessageTitle = "To add a new formula repository to Ritchie:"
+	const MessageBody = ` ∙ Run "rit add repo"`
+
+	if tutorialStatus == tutorialStatusOn {
+		prompt.Info(tagTutorial)
+		prompt.Info(MessageTitle)
+		fmt.Println(MessageBody)
+	}
 }
