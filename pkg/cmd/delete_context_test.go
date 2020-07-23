@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewDeleteContextCmd(t *testing.T) {
-	cmd := NewDeleteContextCmd(ctxFindRemoverMock{}, inputTrueMock{}, inputListMock{})
+	cmd := NewDeleteContextCmd(ctxFindRemoverMock{}, inputTrueMock{}, inputListMock{}, TutorialFinderMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewDeleteContextCmd got %v", cmd)

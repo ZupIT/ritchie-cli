@@ -8,6 +8,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
@@ -16,6 +17,7 @@ type deleteContextCmd struct {
 	rcontext.FindRemover
 	prompt.InputBool
 	prompt.InputList
+	rt rtutorial.Finder
 }
 
 // deleteContext type for stdin json decoder
@@ -26,14 +28,15 @@ type deleteContext struct {
 func NewDeleteContextCmd(
 	fr rcontext.FindRemover,
 	ib prompt.InputBool,
-	il prompt.InputList) *cobra.Command {
-	d := deleteContextCmd{fr, ib, il}
+	il prompt.InputList,
+	f rtutorial.Finder) *cobra.Command {
+	d := deleteContextCmd{fr, ib, il, f}
 
 	cmd := &cobra.Command{
 		Use:     "context",
 		Short:   "Delete context for Ritchie-cli",
 		Example: "rit delete context",
-		RunE: RunFuncE(d.runStdin(), d.runPrompt()),
+		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
 	}
 
 	cmd.LocalFlags()
@@ -75,6 +78,13 @@ func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		prompt.Success("Delete context successful!")
+
+		tutorialHolder, err := d.rt.Find()
+		if err != nil {
+			return err
+		}
+
+		tutorialDeleteCtx(tutorialHolder.Current)
 		return nil
 	}
 }
@@ -104,6 +114,19 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 		}
 
 		prompt.Success("Delete context successful!")
+
+		tutorialHolder, err := d.rt.Find()
+		if err != nil {
+			return err
+		}
+
+		tutorialDeleteCtx(tutorialHolder.Current)
 		return nil
+	}
+}
+
+func tutorialDeleteCtx(tutorialStatus string) {
+	if tutorialStatus == tutorialStatusOn {
+		prompt.Info("\n[TUTORIAL] The next step is \"rit set credential\"")
 	}
 }
