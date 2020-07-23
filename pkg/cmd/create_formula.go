@@ -14,6 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
@@ -34,6 +35,7 @@ type createFormulaCmd struct {
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
 	tplM            template.Manager
+	rt              rtutorial.Finder
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -45,6 +47,7 @@ func NewCreateFormulaCmd(
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
+	rtf rtutorial.Finder,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,
@@ -54,6 +57,7 @@ func NewCreateFormulaCmd(
 		inTextValidator: inTextValidator,
 		inList:          inList,
 		tplM:            tplM,
+		rt:              rtf,
 	}
 
 	cmd := &cobra.Command{
@@ -122,7 +126,6 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		c.create(cf, wspace.Dir, formulaPath)
-
 		return nil
 	}
 }
@@ -142,7 +145,6 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 		}
 
 		c.create(cf, cf.WorkspacePath, cf.FormulaPath)
-
 		return nil
 	}
 }
@@ -166,7 +168,12 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	buildSuccess(formulaPath, cf.FormulaCmd)
+	tutorialHolder, err := c.rt.Find()
+	if err != nil {
+		s.Error(err)
+		return
+	}
+	buildSuccess(formulaPath, cf.FormulaCmd, tutorialHolder.Current)
 }
 
 func createSuccess(s *spinner.Spinner, lang string) {
@@ -175,9 +182,14 @@ func createSuccess(s *spinner.Spinner, lang string) {
 	s.Success(success)
 }
 
-func buildSuccess(formulaPath, formulaCmd string) {
+func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 	prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
-	prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
+
+	if tutorialStatus == tutorialStatusOn {
+		tutorialCreateFormula(tutorialStatus, formulaCmd)
+	} else {
+		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
+	}
 }
 
 func formulaPath(workspacePath, cmd string) string {
@@ -247,4 +259,16 @@ func FormulaWorkspaceInput(
 		}
 	}
 	return wspace, nil
+}
+
+func tutorialCreateFormula(tutorialStatus string, formulaCmd string) {
+	const tagTutorial = "\n[TUTORIAL]"
+	const messageTitle = "In order to test your new formula:"
+	const messageBody = ` ∙ Run %q to run
+ ∙ Run "rit build formula" to update
+ ∙ Run "rit build formula --watch" to have automatic updates when editing` + "\n"
+
+	prompt.Info(tagTutorial)
+	prompt.Info(messageTitle)
+	fmt.Println(fmt.Sprintf(messageBody, formulaCmd))
 }
