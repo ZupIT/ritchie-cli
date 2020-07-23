@@ -118,7 +118,7 @@ func buildCommands() *cobra.Command {
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
 	defaultUrlFinder := upgrade.DefaultUrlFinder{}
-	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager)
+	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
