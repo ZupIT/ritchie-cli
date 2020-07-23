@@ -89,6 +89,10 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 				}(),
 				file: fileManager,
 			},
+			args: args{
+				repoName: "commons",
+				priority: 1,
+			},
 			wantErr: true,
 		},
 		{
@@ -96,6 +100,10 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 			fields: fields{
 				ritHome: os.TempDir(),
 				file:    fileManager,
+			},
+			args: args{
+				repoName: "commons",
+				priority: 1,
 			},
 			wantErr: true,
 			Err:     errors.New(repositoryDoNotExistError),
@@ -106,6 +114,10 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 				ritHome: os.TempDir(),
 				file:    fileWriteReadExisterMockErrorOnReadAndWrite{},
 			},
+			args: args{
+				repoName: "commons",
+				priority: 1,
+			},
 			wantErr: true,
 		},
 		{
@@ -113,6 +125,10 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 			fields: fields{
 				ritHome: os.TempDir(),
 				file:    fileWriteReadExisterMockOnSucessReadData{},
+			},
+			args: args{
+				repoName: "commons",
+				priority: 1,
 			},
 			wantErr: true,
 		},
