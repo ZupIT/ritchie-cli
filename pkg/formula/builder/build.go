@@ -25,16 +25,22 @@ var (
 
 type Manager struct {
 	ritHome string
-	dir     stream.DirCreateListCopier
+	dir     stream.DirCreateListCopyRemover
 	file    stream.FileCopyExistLister
 }
 
-func New(ritHome string, dir stream.DirCreateListCopier, file stream.FileCopyExistLister) Manager {
+func New(ritHome string, dir stream.DirCreateListCopyRemover, file stream.FileCopyExistLister) Manager {
 	return Manager{ritHome: ritHome, dir: dir, file: file}
 }
 
 func (m Manager) Build(workspacePath, formulaPath string) error {
 	formulaSrc := path.Join(formulaPath, "/src")
+	formulaDist := path.Join(formulaPath, "/dist")
+
+	if err := m.dir.Remove(formulaDist); err != nil {
+		return err
+	}
+
 	if err := os.Chdir(formulaSrc); err != nil {
 		return err
 	}
@@ -62,6 +68,11 @@ func (m Manager) Build(workspacePath, formulaPath string) error {
 		}
 
 		return err
+	}
+
+	if stderr.String() != "" {
+		errMsg := fmt.Sprintf("Build error: \n%s", stderr.String())
+		return errors.New(errMsg)
 	}
 
 	formulaDestPath := m.formulaDestPath(formulaPath, workspacePath)

@@ -24,8 +24,10 @@ func TestBuild(t *testing.T) {
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
 	type in struct {
-		fileManager stream.FileCopyExistLister
-		dirManager  stream.DirCreateListCopier
+		workspacePath string
+		formulaPath   string
+		fileManager   stream.FileCopyExistLister
+		dirManager    stream.DirCreateListCopyRemover
 	}
 
 	testes := []struct {
@@ -36,56 +38,88 @@ func TestBuild(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				fileManager: fileManager,
-				dirManager:  dirManager,
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManager,
+				dirManager:    dirManager,
 			},
 			want: nil,
 		},
 		{
+			name: "error invalid formula path",
+			in: in{
+				formulaPath: "invalid",
+				fileManager: fileManager,
+				dirManager:  dirManager,
+			},
+			want: errors.New("chdir invalid/src: no such file or directory"),
+		},
+		{
 			name: "list dir error",
 			in: in{
-				fileManager: fileManager,
-				dirManager:  dirManagerMock{listErr: errors.New("error to list dir")},
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManager,
+				dirManager:    dirManagerMock{listErr: errors.New("error to list dir")},
 			},
 			want: errors.New("error to list dir"),
 		},
 		{
 			name: "create dir error",
 			in: in{
-				fileManager: fileManager,
-				dirManager:  dirManagerMock{createErr: errors.New("error to create dir")},
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManager,
+				dirManager:    dirManagerMock{createErr: errors.New("error to create dir")},
 			},
 			want: errors.New("error to create dir"),
+		}, {
+			name: "remove dir error",
+			in: in{
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManager,
+				dirManager:    dirManagerMock{remErr: errors.New("error to remove dir")},
+			},
+			want: errors.New("error to remove dir"),
 		},
 		{
 			name: "copy so dir error",
 			in: in{
-				fileManager: fileManager,
-				dirManager:  dirManagerMock{data: []string{"linux"}, copyErr: errors.New("error to copy dir")},
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManager,
+				dirManager:    dirManagerMock{data: []string{"linux"}, copyErr: errors.New("error to copy dir")},
 			},
 			want: errors.New("error to copy dir"),
 		},
 		{
 			name: "copy commons dir error",
 			in: in{
-				fileManager: fileManager,
-				dirManager:  dirManagerMock{data: []string{"commons"}, copyErr: errors.New("error to copy dir")},
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManager,
+				dirManager:    dirManagerMock{data: []string{"commons"}, copyErr: errors.New("error to copy dir")},
 			},
 			want: errors.New("error to copy dir"),
 		},
 		{
 			name: "list files error",
 			in: in{
-				fileManager: fileManagerMock{listErr: errors.New("error to list files")},
-				dirManager:  dirManager,
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManagerMock{listErr: errors.New("error to list files")},
+				dirManager:    dirManager,
 			},
 			want: errors.New("error to list files"),
 		},
 		{
 			name: "copy files error",
 			in: in{
-				fileManager: fileManagerMock{copyErr: errors.New("error to copy files")},
-				dirManager:  dirManager,
+				workspacePath: workspacePath,
+				formulaPath:   formulaPath,
+				fileManager:   fileManagerMock{copyErr: errors.New("error to copy files")},
+				dirManager:    dirManager,
 			},
 			want: errors.New("error to copy files"),
 		},
@@ -94,7 +128,7 @@ func TestBuild(t *testing.T) {
 	for _, tt := range testes {
 		t.Run(tt.name, func(t *testing.T) {
 			builderManager := New(ritHome, tt.in.dirManager, tt.in.fileManager)
-			got := builderManager.Build(workspacePath, formulaPath)
+			got := builderManager.Build(tt.in.workspacePath, tt.in.formulaPath)
 
 			if got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Build(%s) got %v, want %v", tt.name, got, tt.want)
@@ -133,6 +167,7 @@ type dirManagerMock struct {
 	createErr error
 	listErr   error
 	copyErr   error
+	remErr    error
 }
 
 func (d dirManagerMock) Create(string) error {
@@ -145,6 +180,10 @@ func (d dirManagerMock) List(string, bool) ([]string, error) {
 
 func (d dirManagerMock) Copy(string, string) error {
 	return d.copyErr
+}
+
+func (d dirManagerMock) Remove(string) error {
+	return d.remErr
 }
 
 type fileManagerMock struct {

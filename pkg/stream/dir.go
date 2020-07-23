@@ -29,10 +29,11 @@ type DirCopier interface {
 	Copy(src, dst string) error
 }
 
-type DirCreateListCopier interface {
+type DirCreateListCopyRemover interface {
 	DirCreater
 	DirLister
 	DirCopier
+	DirRemover
 }
 
 type DirListChecker interface {
