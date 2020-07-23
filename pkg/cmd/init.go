@@ -59,27 +59,25 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
+		s.Success(prompt.Green("Initialization successful!"))
+
 		tutorialHolder, err := in.rt.Find()
 		if err != nil {
 			return err
 		}
-
-		s.Success(prompt.Green("Initialization successful!"))
-
 		tutorialInit(tutorialHolder.Current)
 		return nil
 	}
 }
 
 func tutorialInit(tutorialStatus string) {
-	const tagTutorial = "[TUTORIAL]"
-	const MessageTitle = ` How to create new formulas with Ritchie?`
+	const tagTutorial = "\n[TUTORIAL]"
+	const MessageTitle = "How to create new formulas with Ritchie?"
 	const MessageBody = ` ∙ Run "rit create formula"
- ∙ Open the project with your favorite text editor.\n
- `
+ ∙ Open the project with your favorite text editor.` + "\n"
 
 	if tutorialStatus == tutorialStatusOn {
-		prompt.Info("\n[TUTORIAL]")
+		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
 		fmt.Println(MessageBody)
 	}
