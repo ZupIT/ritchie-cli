@@ -45,7 +45,7 @@ type CredFinder interface {
 
 type Operations interface {
 	ReadCredentialsFields(path string) (Fields, error)
-	ReadCredentialsValue() ([]ListCredData, error)
+	ReadCredentialsValue(path string) ([]ListCredData, error)
 	WriteCredentialsFields(fields Fields, path string) error
 	WriteDefaultCredentialsFields(path string) error
 }

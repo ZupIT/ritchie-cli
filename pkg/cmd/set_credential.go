@@ -158,6 +158,7 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 		}
 
 		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
+		prompt.Info("Check your credentials using rit list credential")
 		return nil
 	}
 }

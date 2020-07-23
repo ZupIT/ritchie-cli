@@ -18,15 +18,26 @@ func providersPath() string {
 	return path
 }
 
-func TestSettings_ReadCredentials(t *testing.T) {
+func TestSettings_ReadCredentialsFields(t *testing.T) {
 
 	credentials, err := credSettings.ReadCredentialsFields("../../testdata/credentials.json")
 	if err != nil {
-		t.Errorf("Error on on read credentials function")
+		t.Errorf("Error reading credentials fields")
 	}
 
 	if credentials == nil || len(credentials) <= 0 {
-		t.Errorf("Error on on read credentials function, cannot be empty or null")
+		t.Errorf("Error reading credentials fields, cannot be empty or null")
+	}
+}
+
+func TestSettings_ReadCredentialsValue(t *testing.T) {
+	credentials, err := credSettings.ReadCredentialsValue("../../testdata/.rit/credentials/")
+	if err != nil {
+		t.Errorf("Error reading credentials: %s", err)
+	}
+
+	if credentials == nil || len(credentials) <= 0 {
+		t.Errorf("Error reading credentials, cannot be empty or null")
 	}
 }
 
@@ -34,7 +45,7 @@ func TestSettings_WriteCredentials(t *testing.T) {
 	err := credSettings.WriteCredentialsFields(NewDefaultCredentials(), providersPath())
 	defer os.Remove(providersPath())
 	if err != nil {
-		t.Errorf("Error while write credentials: %s", err)
+		t.Errorf("Error writing credentials: %s", err)
 	}
 }
 
@@ -42,7 +53,7 @@ func TestSettings_WriteDefaultCredentials(t *testing.T) {
 	err := credSettings.WriteDefaultCredentialsFields(providersPath())
 	defer os.Remove(providersPath())
 	if err != nil {
-		t.Errorf("Error while write credentials: %s", err)
+		t.Errorf("Error writing credentials: %s", err)
 	}
 }
 

@@ -18,7 +18,6 @@ func NewResolver(cf credential.Finder) CredentialResolver {
 func (c CredentialResolver) Resolve(name string) (string, error) {
 	s := strings.Split(name, "_")
 	service := strings.ToLower(s[1])
-
 	cred, err := c.Find(service)
 	if err != nil {
 		return "", err

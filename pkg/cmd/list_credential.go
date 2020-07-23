@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/gosuri/uitable"
@@ -14,9 +13,6 @@ import (
 type listCredentialCmd struct {
 	credential.Settings
 }
-
-var setCredCmd = prompt.Bold("rit set credential")
-var ErrCannotReadCredentials = errors.New("Cannot read any credentials. Use: " + setCredCmd)
 
 func NewListCredentialCmd(
 	ss credential.Settings) *cobra.Command {
@@ -59,14 +55,19 @@ func printCredentialsTable(fields credential.ListCredDatas) {
 	for _, c := range fields {
 		table.AddRow(c.Name, hideCredential(c.Value), c.Provider, c.Context)
 	}
-	fmt.Println(table)
+	if len(table.Rows) < 2 {
+		setCmd := prompt.Cyan("rit set credential")
+		fmt.Printf("You dont have any credential, use %s\n", setCmd)
+	} else {
+		fmt.Println(table)
+	}
 }
 
 func (l listCredentialCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		data, err := l.Settings.ReadCredentialsValue()
+		data, err := l.Settings.ReadCredentialsValue(credential.CredentialsPath())
 		if err != nil {
-			return ErrCannotReadCredentials
+			return err
 		}
 		printCredentialsTable(data)
 		return nil
