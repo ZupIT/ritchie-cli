@@ -32,24 +32,7 @@ func TestUpgradeUrl(t *testing.T) {
 		want string
 	}{
 		{
-			name: "Get url for single edition",
-			args: args{
-				resolver: stubResolver{
-					stableVersion: func() (string, error) {
-						return "1.0.0", nil
-					},
-				},
-			},
-			want: func() string {
-				expected := fmt.Sprintf(upgradeUrlFormat, "1.0.0", runtime.GOOS)
-				if runtime.GOOS == "windows" {
-					expected += ".exe"
-				}
-				return expected
-			}(),
-		},
-		{
-			name: "Get url for team edition",
+			name: "Get url with success",
 			args: args{
 				resolver: stubResolver{
 					stableVersion: func() (string, error) {
