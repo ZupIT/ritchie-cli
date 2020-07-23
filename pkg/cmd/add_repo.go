@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	defaultRepoUrl = "https://github.com/kaduartur/ritchie-formulas"
+	defaultRepoUrl = "https://github.com/zupIt/ritchie-formulas"
 )
 
 var (
