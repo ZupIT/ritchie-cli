@@ -95,47 +95,8 @@
                 "key":"",
                 "value":"init",
                 "action":"main"
-            },
-            {
-                "key":"Define a passphrase for your machine:",
-                "value":"12345",
-                "action":"sendkey"
             }
         ],
         "result":""
-    },
-    {
-        "entry":"Set Login STDIN",
-        "steps":[
-            {
-                "key":"",
-                "value":"{\"passphrase\":\"12345\"}",
-                "action":"echo"
-            },
-            {
-                "key":"",
-                "value":"init --stdin",
-                "action":"main"
-            }
-
-        ],
-        "result":""
-    },
-    {
-        "entry":"Set Login STDIN without passphrase",
-        "steps":[
-            {
-                "key":"",
-                "value":"{\"name\":\"12345\"}",
-                "action":"echo"
-            },
-            {
-                "key":"",
-                "value":"init --stdin",
-                "action":"main"
-            }
-
-        ],
-        "result":"passphrase is required"
     }
 ]
