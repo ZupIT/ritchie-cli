@@ -286,7 +286,7 @@ func (TutorialSetterMock) Set(tutorial string) (rtutorial.TutorialHolder, error)
 type TutorialFinderMock struct{}
 
 func (TutorialFinderMock) Find() (rtutorial.TutorialHolder, error) {
-	return rtutorial.TutorialHolder{}, nil
+	return rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial}, nil
 }
 
 type TutorialFindSetterMock struct{}

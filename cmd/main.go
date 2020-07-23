@@ -144,8 +144,8 @@ func buildCommands() *cobra.Command {
 		inputList,
 		inputPassword)
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
-	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
-	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
+	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList, tutorialFinder)
+	showCtxCmd := cmd.NewShowContextCmd(ctxFinder, tutorialFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister)
