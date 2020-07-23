@@ -8,19 +8,21 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
 const (
-	totalReposMsg = "There are %v repos"
+	totalReposMsg   = "There are %v repos"
 	totalOneRepoMsg = "There is 1 repo"
 )
 
 type listRepoCmd struct {
 	formula.RepositoryLister
+	rt rtutorial.Finder
 }
 
-func NewListRepoCmd(rl formula.RepositoryLister) *cobra.Command {
-	lr := listRepoCmd{rl}
+func NewListRepoCmd(rl formula.RepositoryLister, rtf rtutorial.Finder) *cobra.Command {
+	lr := listRepoCmd{rl, rtf}
 	cmd := &cobra.Command{
 		Use:     "repo",
 		Short:   "Show a list with all your available repositories",
@@ -45,6 +47,11 @@ func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 			prompt.Info(totalOneRepoMsg)
 		}
 
+		tutorialHolder, err := lr.rt.Find()
+		if err != nil {
+			return err
+		}
+		tutorialListRepo(tutorialHolder.Current)
 		return nil
 	}
 }
@@ -59,4 +66,17 @@ func printRepos(repos formula.Repos) {
 	raw = append(raw, []byte("\n")...)
 	fmt.Println(string(raw))
 
+}
+
+func tutorialListRepo(tutorialStatus string) {
+	const tagTutorial = "\n[TUTORIAL]"
+	const MessageTitle = "To update all repositories or delete an repository:"
+	const MessageBody = ` ∙ Run "rit update repo" to update your repositories
+ ∙ Run "rit delete repo" to remove a repository` + "\n"
+
+	if tutorialStatus == tutorialStatusOn {
+		prompt.Info(tagTutorial)
+		prompt.Info(MessageTitle)
+		fmt.Println(MessageBody)
+	}
 }
