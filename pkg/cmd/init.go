@@ -23,7 +23,7 @@ const UsageMsg = ` How to contribute new formulas to the Ritchie community?
   ∙ In order to test your new formula, you can run the command "rit build formula" or
     "rit build formula --watch" to have automatic updates when editing your formula.`
 
-var CommonsRepoURL = "https://github.com/kaduartur/ritchie-formulas"
+var CommonsRepoURL = "https://github.com/zupIt/ritchie-formulas"
 
 type initCmd struct {
 	repo formula.RepositoryAdder

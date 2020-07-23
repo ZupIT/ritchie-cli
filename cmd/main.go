@@ -74,7 +74,7 @@ func buildCommands() *cobra.Command {
 	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
 	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, fileManager, dirManager)
-	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
+	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager)
 
 	tplManager := template.NewManager(api.RitchieHomeDir())
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
