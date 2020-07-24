@@ -9,7 +9,8 @@ import (
 
 func Test_ListCredentialCmd(t *testing.T) {
 	fileManager := stream.NewFileManager()
-	credSettings := credential.NewSettings(fileManager)
+	dirManager := stream.NewDirManager(fileManager)
+	credSettings := credential.NewSettings(fileManager, dirManager)
 
 	t.Run("Success case", func(t *testing.T) {
 		o := NewListCredentialCmd(credSettings)

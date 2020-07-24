@@ -2,7 +2,6 @@ package credential
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -12,11 +11,15 @@ import (
 const AddNew = "Add a new"
 
 type Settings struct {
-	file stream.FileWriteReadExister
+	file stream.FileWriteReadExisterLister
+	dir stream.DirLister
 }
 
-func NewSettings(file stream.FileWriteReadExister) Settings {
-	return Settings{file: file}
+func NewSettings(file stream.FileWriteReadExisterLister, dir stream.DirLister) Settings {
+	return Settings{
+		file: file,
+		dir: dir,
+	}
 }
 
 func (s Settings) ReadCredentialsFields(path string) (Fields, error) {
@@ -34,10 +37,9 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 	var creds []ListCredData
 	var cred ListCredData
 	var detail Detail
-	ctx := ctxArr(path)
-
+	ctx, _ := s.dir.List(path, true)
 	for _, c := range ctx {
-		providers, _ := providerByCtx(c, path)
+		providers, _ := s.file.List(filepath.Join(path, c))
 		for _, p := range providers {
 			cBytes, _ := s.file.Read(filepath.Join(path, c, p))
 			if err := json.Unmarshal(cBytes, &detail); err != nil {
@@ -53,30 +55,6 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 		}
 	}
 	return creds, nil
-}
-
-func providerByCtx(ctx, path string) ([]string, error) {
-	var providers []string
-	files, err := ioutil.ReadDir(filepath.Join(path, ctx))
-	if err != nil {
-		return providers, err
-	}
-
-	for _, f := range files {
-		providers = append(providers, f.Name())
-	}
-	return providers, nil
-}
-
-func ctxArr(path string) []string {
-	var ctx []string
-	files, _ := ioutil.ReadDir(path)
-	for _, f := range files {
-		if f.IsDir() {
-			ctx = append(ctx, f.Name())
-		}
-	}
-	return ctx
 }
 
 func (s Settings) WriteCredentialsFields(fields Fields, path string) error {

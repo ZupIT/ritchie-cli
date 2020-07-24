@@ -10,7 +10,8 @@ import (
 )
 
 var fileManager = stream.NewFileManager()
-var credSettings = NewSettings(fileManager)
+var dirManager = stream.NewDirManager(fileManager)
+var credSettings = NewSettings(fileManager, dirManager)
 
 func providersPath() string {
 	tempDir := os.TempDir()
@@ -107,7 +108,8 @@ func TestProviderPath(t *testing.T) {
 func TestCredentialsPath(t *testing.T){
 	credentials := CredentialsPath()
 	slicedPath := strings.Split(credentials, "/")
-	providersDir := slicedPath[len(slicedPath)-2]
+	fmt.Println(slicedPath)
+	providersDir := slicedPath[len(slicedPath)-1]
 
 	if providersDir != "credentials"{
 		t.Errorf("Providers path must end on credentials dir")

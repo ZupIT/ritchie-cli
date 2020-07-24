@@ -52,6 +52,13 @@ type FileWriteReadExister interface {
 	FileExister
 }
 
+type FileWriteReadExisterLister interface {
+	FileWriter
+	FileReader
+	FileExister
+	FileLister
+}
+
 type FileWriteReadExistRemover interface {
 	FileWriter
 	FileReader
