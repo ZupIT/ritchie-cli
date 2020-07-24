@@ -11,8 +11,9 @@ It can be used to list formulas, repositories and other objects.
 // NewListCmd create a new list instance
 func NewListCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "list SUBCOMMAND",
-		Short: "List repositories",
-		Long:  descListLong,
+		Use:     "list SUBCOMMAND",
+		Short:   "List repositories",
+		Long:    "List all formula repositories.",
+		Example: "rit list repo",
 	}
 }
