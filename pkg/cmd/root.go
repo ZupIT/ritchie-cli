@@ -150,7 +150,7 @@ func runHelp(cmd *cobra.Command, _ []string) error {
 
 func tutorialRit(tutorialStatus string) {
 	const tagTutorial = "\n[TUTORIAL]"
-	const MessageTitle = "To initialize the ritchie ROOT:"
+	const MessageTitle = "To initialize the ritchie:"
 	const MessageBody = ` ∙ Run "rit init"` + "\n"
 
 	if tutorialStatus == tutorialStatusOn {
