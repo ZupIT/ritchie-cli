@@ -25,7 +25,7 @@ func TestNewModifiers(t *testing.T) {
 					FormulaCmd: "rit testing formula",
 				},
 			},
-			in:   `tags: #rit-replace{formulaTags} cmd: #rit-replace{formulaCmd}`,
+			in:   `tags: "#rit-replace{formulaTags}" cmd: #rit-replace{formulaCmd}`,
 			want: `tags: "testing", "formula" cmd: rit testing formula`,
 		},
 		{
