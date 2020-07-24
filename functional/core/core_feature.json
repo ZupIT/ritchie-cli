@@ -63,7 +63,7 @@
                 "action":"main"
             }
         ],
-        "result":"It can be used to add formulas, repositories and other objects.."
+        "result":"Add a new formula repository to ritchie-cli."
     },
     {
         "entry":"Add new repo",
@@ -158,7 +158,7 @@
                 "action":"main"
             }
         ],
-        "result":"Set objects like credentials, etc."
+        "result":"Set contexts, credentials and priorities for formula repositories."
     },
     {
         "entry":"Update repo",
@@ -180,7 +180,7 @@
                 "action":"main"
             }
         ],
-        "result":"Add autocomplete for terminal, Available for (bash, zsh)."
+        "result":"Add autocomplete for terminal, available for (zsh, bash, fish, powershell)."
     },
     {
         "entry":"Completion bash",
@@ -224,7 +224,7 @@
                 "action":"main"
             }
         ],
-        "result":"Delete objects like users, etc."
+        "result":"Delete a object like context and repository."
     },
     {
         "entry":"Show",
@@ -235,7 +235,7 @@
                 "action":"main"
             }
         ],
-        "result":"Show objects like context, organization etc."
+        "result":"Show current context."
     },
     {
         "entry":"Help",
