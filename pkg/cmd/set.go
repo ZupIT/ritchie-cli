@@ -7,8 +7,9 @@ import (
 // NewSetCmd creates new cmd instance
 func NewSetCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "set SUBCOMMAND",
-		Short: "Set objects (context, credential)",
-		Long:  `Set objects like credentials, etc.`,
+		Use:     "set SUBCOMMAND",
+		Short:   "Set objects (context, credential, repo-priority)",
+		Long:    "Set contexts, credentials and priorities for formula repositories.",
+		Example: "rit set context",
 	}
 }
