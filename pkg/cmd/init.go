@@ -34,7 +34,7 @@ func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories) *cobra.Co
 
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Init rit",
+		Short: "Initialize rit configuration",
 		Long:  "Initialize rit configuration",
 		RunE:  o.runPrompt(),
 	}
