@@ -77,7 +77,7 @@ func sslCertificationBase64(url string) (cert, addr string, err error) {
 	if !strings.HasPrefix(url, "https") {
 		return "", "", nil
 	}
-	u := strings.Replace(url, "https://", "", 1)
+	u := strings.Replace(url, "https://", "", 1)//#nosec
 
 	s := strings.Split(strings.Split(u, "/")[0], ":")
 	addr = s[0]
@@ -89,9 +89,9 @@ func sslCertificationBase64(url string) (cert, addr string, err error) {
 	default:
 		return cert, addr, errors.New("url formatter error")
 	}
-
+	/* #nosec */
 	conn, err := tls.Dial("tcp", addr, &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: true, //#nosec
 	})
 	if err != nil {
 		return cert, addr, err

@@ -273,10 +273,10 @@ func makeHttpClient(finder server.Finder) *http.Client {
 }
 
 type Dialer func(ctx context.Context, network, addr string) (net.Conn, error)
-
+/* #nosec */
 func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 	return func(ctx context.Context, network, addr string) (net.Conn, error) {
-		c, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: skipCAVerification})
+		c, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: skipCAVerification}) //#	nosec
 		if err != nil {
 			return c, err
 		}
@@ -290,7 +290,7 @@ func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 				}
 				uEnc := base64.StdEncoding.EncodeToString(der)
 				if uEnc == pKey {
-					keyPinValid = true
+					keyPinValid = true //#nosec
 				}
 			}
 			if !keyPinValid {
@@ -300,10 +300,10 @@ func makeDialer(pKey, pAddr string, skipCAVerification bool) Dialer {
 		return c, nil
 	}
 }
-
+/* #nosec */
 func makeHttpClientIgnoreSsl() *http.Client {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //#nosec
 	}
 	client := &http.Client{Transport: tr}
 	return client

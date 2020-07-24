@@ -128,7 +128,7 @@ jobs:
             -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS \
             -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK horuszup/horus-client:latest
 
-  unit_test:
+  unit_test: 
     executor: ritchie-tests-executor
     environment:
       <<: *ENVIRONMENT
@@ -480,8 +480,13 @@ workflows:
   build-for-requests:
     jobs:
       - lint:
+          filters: 
+            <<: *FILTERS_CHECK_CODE
+      - horus:
           filters:
             <<: *FILTERS_CHECK_CODE
+          requires:
+            - lint
       - unit_test:
          name: unit-test
          filters:
