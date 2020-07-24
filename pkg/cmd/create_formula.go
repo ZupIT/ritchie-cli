@@ -264,9 +264,9 @@ func FormulaWorkspaceInput(
 func tutorialCreateFormula(tutorialStatus string, formulaCmd string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const messageTitle = "In order to test your new formula:"
-	const messageBody = ` ∙ Run %q to run
- ∙ Run "rit build formula" to update
- ∙ Run "rit build formula --watch" to have automatic updates when editing` + "\n"
+	const messageBody = ` ∙ Run %q
+ ∙ Run "rit build formula" to update your changes
+ ∙ Run "rit build formula --watch" to have automatic updates` + "\n"
 
 	prompt.Info(tagTutorial)
 	prompt.Info(messageTitle)

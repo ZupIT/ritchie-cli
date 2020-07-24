@@ -134,7 +134,6 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 
 	success := prompt.Green("✔ Build completed!")
 	s.Success(success)
-	prompt.Info("Now you can run your formula with Ritchie!")
 }
 
 func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
@@ -174,12 +173,19 @@ func isFormula(dirs []string) bool {
 
 func tutorialBuildFormula(tutorialStatus string) {
 	const tagTutorial = "\n[TUTORIAL]"
-	const MessageTitle = "To add a new formula repository to Ritchie:"
-	const MessageBody = ` ∙ Run "rit add repo"`
+	const titleNewRepositories = "To add a new repository of formulas:"
+	const bodyNewRepositories = ` ∙ Run "rit add repo"`
+
+	const titlePublishFormula = "To publish your formula:"
+	const bodyPublishFormula = ` ∙ Create a git repo
+ ∙ Commit and push your formula in repo created
+ ∙ Run "rit add repo"`
 
 	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
-		prompt.Info(MessageTitle)
-		fmt.Println(MessageBody)
+		prompt.Info(titleNewRepositories)
+		fmt.Println(bodyNewRepositories)
+		prompt.Info(titlePublishFormula)
+		fmt.Println(bodyPublishFormula)
 	}
 }

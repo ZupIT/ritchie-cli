@@ -71,8 +71,8 @@ func printRepos(repos formula.Repos) {
 func tutorialListRepo(tutorialStatus string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const MessageTitle = "To update all repositories or delete an repository:"
-	const MessageBody = ` ∙ Run "rit update repo" to update your repositories
- ∙ Run "rit delete repo" to remove a repository` + "\n"
+	const MessageBody = ` ∙ Run "rit update repo"
+ ∙ Run "rit delete repo"` + "\n"
 
 	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)

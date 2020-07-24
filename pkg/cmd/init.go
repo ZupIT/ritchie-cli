@@ -72,7 +72,7 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 
 func tutorialInit(tutorialStatus string) {
 	const tagTutorial = "\n[TUTORIAL]"
-	const MessageTitle = "How to create new formulas with Ritchie?"
+	const MessageTitle = "How to create new formulas:"
 	const MessageBody = ` ∙ Run "rit create formula"
  ∙ Open the project with your favorite text editor.` + "\n"
 
