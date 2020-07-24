@@ -31,10 +31,10 @@ func TestSet(t *testing.T) {
 		FileWriter stream.FileWriter
 	}{
 		{
-			name: "Set on tutorial",
-			in:   "on",
+			name: "Set enabled tutorial",
+			in:   "enabled",
 			out: &out{
-				want:      TutorialHolder{Current: "on"},
+				want:      TutorialHolder{Current: "enabled"},
 				err:       nil,
 				waitError: false,
 			},
@@ -45,10 +45,10 @@ func TestSet(t *testing.T) {
 			},
 		},
 		{
-			name: "Set off tutorial",
-			in:   "off",
+			name: "Set disabled tutorial",
+			in:   "disabled",
 			out: &out{
-				want:      TutorialHolder{Current: "off"},
+				want:      TutorialHolder{Current: "disabled"},
 				err:       nil,
 				waitError: false,
 			},

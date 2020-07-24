@@ -2,7 +2,7 @@ package rtutorial
 
 const TutorialPath = "%s/Tutorial"
 
-const DefaultTutorial = "on"
+const DefaultTutorial = "enabled"
 
 type TutorialHolder struct {
 	Current string `json:"tutorial"`

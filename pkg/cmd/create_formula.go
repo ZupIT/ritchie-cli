@@ -185,7 +185,7 @@ func createSuccess(s *spinner.Spinner, lang string) {
 func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 	prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
 
-	if tutorialStatus == tutorialStatusOn {
+	if tutorialStatus == tutorialStatusEnabled {
 		tutorialCreateFormula(tutorialStatus, formulaCmd)
 	} else {
 		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))

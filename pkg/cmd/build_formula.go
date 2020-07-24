@@ -177,7 +177,7 @@ func tutorialBuildFormula(tutorialStatus string) {
 	const MessageTitle = "To add a new formula repository to Ritchie:"
 	const MessageBody = ` ∙ Run "rit add repo"`
 
-	if tutorialStatus == tutorialStatusOn {
+	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
 		fmt.Println(MessageBody)

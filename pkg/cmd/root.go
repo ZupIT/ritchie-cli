@@ -153,7 +153,7 @@ func tutorialRit(tutorialStatus string) {
 	const MessageTitle = "To initialize the ritchie:"
 	const MessageBody = ` ∙ Run "rit init"` + "\n"
 
-	if tutorialStatus == tutorialStatusOn {
+	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
 		fmt.Println(MessageBody)

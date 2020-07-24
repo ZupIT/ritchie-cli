@@ -17,9 +17,9 @@ type tutorialSingleCmd struct {
 }
 
 const (
-	tutorialStatusOn    = "on"
-	tutorialStatusOff   = "off"
-	TutorialFilePattern = "%s/tutorial"
+	tutorialStatusEnabled  = "enabled"
+	tutorialStatusDisabled = "disabled"
+	TutorialFilePattern    = "%s/tutorial"
 )
 
 // NewTutorialCmd creates tutorial command
@@ -28,8 +28,8 @@ func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSette
 
 	cmd := &cobra.Command{
 		Use:   "tutorial",
-		Short: "Turns the tutorial on or off",
-		Long:  "Turns the tutorial on or off",
+		Short: "Enable or disable the tutorial",
+		Long:  "Enable or disable the tutorial",
 		RunE:  RunFuncE(o.runStdin(), o.runPrompt()),
 	}
 
@@ -60,7 +60,7 @@ func (o tutorialSingleCmd) runStdin() CommandRunnerFunc {
 func (o tutorialSingleCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		msg := "Status tutorial?"
-		var statusTypes = []string{tutorialStatusOn, tutorialStatusOff}
+		var statusTypes = []string{tutorialStatusEnabled, tutorialStatusDisabled}
 
 		tutorialHolder, err := o.Find()
 		if err != nil {

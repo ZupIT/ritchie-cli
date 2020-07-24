@@ -74,7 +74,7 @@ func tutorialListRepo(tutorialStatus string) {
 	const MessageBody = ` ∙ Run "rit update repo" to update your repositories
  ∙ Run "rit delete repo" to remove a repository` + "\n"
 
-	if tutorialStatus == tutorialStatusOn {
+	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
 		fmt.Println(MessageBody)

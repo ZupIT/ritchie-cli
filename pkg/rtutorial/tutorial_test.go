@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	on  = "off"
-	off = "on"
+	enabled  = "enabled"
+	disabled = "disabled"
 )
 
 func TestMain(m *testing.M) {

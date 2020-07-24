@@ -34,7 +34,7 @@ func TestFind(t *testing.T) {
 		{
 			name: "With no tutorial file",
 			out: &out{
-				want:      TutorialHolder{Current: "on"},
+				want:      TutorialHolder{Current: "enabled"},
 				err:       nil,
 				waitError: false,
 			},
@@ -47,13 +47,13 @@ func TestFind(t *testing.T) {
 		{
 			name: "With existing tutorial file",
 			out: &out{
-				want:      TutorialHolder{Current: "off"},
+				want:      TutorialHolder{Current: "disabled"},
 				err:       nil,
 				waitError: false,
 			},
 			FileReadExister: sMocks.FileReadExisterCustomMock{
 				ReadMock: func(path string) ([]byte, error) {
-					return []byte("{\"tutorial\":\"off\"}"), nil
+					return []byte("{\"tutorial\":\"disabled\"}"), nil
 				},
 				ExistsMock: func(path string) bool {
 					return true
@@ -63,7 +63,7 @@ func TestFind(t *testing.T) {
 		{
 			name: "Error reading the tutorial file",
 			out: &out{
-				want:      TutorialHolder{Current: "on"},
+				want:      TutorialHolder{Current: "enabled"},
 				err:       err,
 				waitError: true,
 			},

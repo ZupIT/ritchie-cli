@@ -196,7 +196,7 @@ func tutorialAddRepo(tutorialStatus string) {
 	const MessageTitle = "To view your formula repositories:"
 	const MessageBody = ` ∙ Run "rit list repo"` + "\n"
 
-	if tutorialStatus == tutorialStatusOn {
+	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
 		fmt.Println(MessageBody)
