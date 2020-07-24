@@ -14,8 +14,7 @@ type listCredentialCmd struct {
 	credential.Settings
 }
 
-func NewListCredentialCmd(
-	ss credential.Settings) *cobra.Command {
+func NewListCredentialCmd(ss credential.Settings) *cobra.Command {
 	l := &listCredentialCmd{ss}
 
 	cmd := &cobra.Command{

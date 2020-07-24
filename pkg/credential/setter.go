@@ -2,7 +2,6 @@ package credential
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
@@ -41,7 +40,6 @@ func (s SetManager) Set(cred Detail) error {
 
 	credFile := File(s.homePath, ctx.Current, cred.Service)
 	if err := fileutil.WriteFilePerm(credFile, cb, 0600); err != nil {
-		fmt.Println(err)
 		return err
 	}
 

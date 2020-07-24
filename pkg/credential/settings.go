@@ -23,12 +23,10 @@ func (s Settings) ReadCredentialsFields(path string) (Fields, error) {
 	fields := Fields{}
 	if s.file.Exists(path) {
 		cBytes, _ := s.file.Read(path)
-		err := json.Unmarshal(cBytes, &fields)
-		if err != nil {
+		if err := json.Unmarshal(cBytes, &fields); err != nil {
 			return fields, err
 		}
 	}
-
 	return fields, nil
 }
 

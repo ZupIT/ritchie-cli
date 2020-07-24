@@ -1,7 +1,6 @@
 package credential
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -33,7 +32,6 @@ func TestSet(t *testing.T) {
 			got := setter.Set(tt.in)
 			if got != tt.out {
 				t.Errorf("Set(%s) got %v, want %v", tt.name, got, tt.out)
-				fmt.Println("ok")
 			}
 		})
 	}
