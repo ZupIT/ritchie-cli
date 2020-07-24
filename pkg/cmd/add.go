@@ -4,17 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var descAddLong = `
-This command consists of multiple subcommands to interact with ritchie.
-
-It can be used to add formulas, repositories and other objects..
-`
-
 // NewAddCmd create a new add instance
 func NewAddCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "add SUBCOMMAND",
-		Short: "Add repositories",
-		Long:  descAddLong,
+		Use:     "add SUBCOMMAND",
+		Short:   "Add repositories ",
+		Long:    "Add a new formula repository to ritchie-cli.",
+		Example: "rit add repo",
 	}
 }
