@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type tutorialSingleCmd struct {
+type tutorialCmd struct {
 	homePath string
 	prompt.InputList
 	rtutorial.FindSetter
@@ -24,7 +24,7 @@ const (
 
 // NewTutorialCmd creates tutorial command
 func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSetter) *cobra.Command {
-	o := tutorialSingleCmd{homePath, il, fs}
+	o := tutorialCmd{homePath, il, fs}
 
 	cmd := &cobra.Command{
 		Use:   "tutorial",
@@ -38,7 +38,7 @@ func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSette
 	return cmd
 }
 
-func (o tutorialSingleCmd) runStdin() CommandRunnerFunc {
+func (o tutorialCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
 		obj := struct {
@@ -57,7 +57,7 @@ func (o tutorialSingleCmd) runStdin() CommandRunnerFunc {
 	}
 }
 
-func (o tutorialSingleCmd) runPrompt() CommandRunnerFunc {
+func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		msg := "Status tutorial?"
 		var statusTypes = []string{tutorialStatusEnabled, tutorialStatusDisabled}
