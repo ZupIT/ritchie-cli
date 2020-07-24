@@ -30,7 +30,7 @@ func NewAutocompleteCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "completion SUBCOMMAND",
 		Short:   "Add autocomplete for terminal (" + shells + ")",
-		Long:    `Add autocomplete for terminal, available for (` + shells + `).`,
+		Long:    "Add autocomplete for terminal, available for (" + shells + ").",
 		Example: "rit completion zsh",
 	}
 }
