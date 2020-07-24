@@ -17,11 +17,6 @@ func TestSet(t *testing.T) {
 		err       error
 		waitError bool
 	}
-	type fieldsMock struct {
-		read   func(path string) ([]byte, error)
-		exists func(path string) bool
-	}
-
 	err := errors.New("some error")
 
 	tests := []struct {

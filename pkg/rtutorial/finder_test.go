@@ -12,11 +12,6 @@ import (
 )
 
 func TestFind(t *testing.T) {
-	type in struct {
-		tutorial string
-		holder   TutorialHolder
-	}
-
 	type out struct {
 		err       error
 		want      TutorialHolder
@@ -27,7 +22,6 @@ func TestFind(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		in              *in
 		out             *out
 		FileReadExister stream.FileReadExister
 	}{
