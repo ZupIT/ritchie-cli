@@ -62,7 +62,7 @@ func (cr CreateManager) Create(repo formula.Repo) error {
 		return err
 	}
 
-	dirs, err := cr.dir.List(repoPath, false) // Get the directories after unzip the new repo
+	dirs, err := cr.dir.List(repoPath, true) // Get the directories after unzip the new repo
 	if err != nil {
 		return err
 	}

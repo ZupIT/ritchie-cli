@@ -21,7 +21,7 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewCreateFormulaCmd got %v", cmd)
-
+		return
 	}
 
 	if err := cmd.Execute(); err != nil {
