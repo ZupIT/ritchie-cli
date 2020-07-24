@@ -2,9 +2,9 @@ package credential
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -39,7 +39,7 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 	for _, c := range ctx {
 		providers, _ := providerByCtx(c, path)
 		for _, p := range providers {
-			cBytes, _ := s.file.Read(path + c + "/" + p)
+			cBytes, _ := s.file.Read(filepath.Join(path, c, p))
 			if err := json.Unmarshal(cBytes, &detail); err != nil {
 				return creds, err
 			}
@@ -55,12 +55,13 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 	return creds, nil
 }
 
-func providerByCtx(ctx , path string) ([]string, error) {
+func providerByCtx(ctx, path string) ([]string, error) {
 	var providers []string
-	files, err := ioutil.ReadDir(path + "/" + ctx)
+	files, err := ioutil.ReadDir(filepath.Join(path, ctx))
 	if err != nil {
-		return  providers, err
+		return providers, err
 	}
+
 	for _, f := range files {
 		providers = append(providers, f.Name())
 	}
@@ -140,14 +141,12 @@ func NewDefaultCredentials() Fields {
 
 func ProviderPath() string {
 	homeDir, _ := os.UserHomeDir()
-	providerDir := fmt.Sprintf("%s/.rit/providers.json", homeDir)
-	return providerDir
+	return filepath.Join(homeDir, ".rit/providers.json")
 }
 
 func CredentialsPath() string {
 	homeDir, _ := os.UserHomeDir()
-	credentialPath := fmt.Sprintf("%s/.rit/credentials/", homeDir)
-	return credentialPath
+	return filepath.Join(homeDir, ".rit/credentials/")
 }
 
 func NewProviderArr(fields Fields) []string {
