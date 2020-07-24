@@ -422,7 +422,7 @@ workflows:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
-            - lint
+            - lint 
       - unit_test:
           name: unit-test
           filters:
