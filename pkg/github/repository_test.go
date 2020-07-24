@@ -173,25 +173,20 @@ func TestTags(t *testing.T) {
 		writer.WriteHeader(http.StatusBadRequest)
 	}))
 
-	type fields struct {
+	type in struct {
 		client *http.Client
-	}
-	type args struct {
-		info RepoInfo
+		info   RepoInfo
 	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		in      in
 		want    Tags
 		wantErr bool
 	}{
 		{
 			name: "Run with success",
-			fields: fields{
+			in: in{
 				client: mockServer.Client(),
-			},
-			args: args{
 				info: RepoInfoCustomMock{
 					tagsUrl: mockServer.URL,
 					token:   "some_token",
@@ -206,10 +201,8 @@ func TestTags(t *testing.T) {
 		},
 		{
 			name: "Return err when request fail",
-			fields: fields{
+			in: in{
 				client: mockServerThatFail.Client(),
-			},
-			args: args{
 				info: RepoInfoCustomMock{
 					tagsUrl: mockServerThatFail.URL,
 				},
@@ -220,9 +213,9 @@ func TestTags(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			re := NewRepoManager(tt.fields.client)
+			re := NewRepoManager(tt.in.client)
 
-			got, err := re.Tags(tt.args.info)
+			got, err := re.Tags(tt.in.info)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Tags() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -244,25 +237,20 @@ func TestLatestTag(t *testing.T) {
 		writer.WriteHeader(http.StatusBadRequest)
 	}))
 
-	type fields struct {
+	type in struct {
 		client *http.Client
-	}
-	type args struct {
-		info RepoInfo
+		info   RepoInfo
 	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		in      in
 		want    Tag
 		wantErr bool
 	}{
 		{
 			name: "Run with success",
-			fields: fields{
+			in: in{
 				client: mockServer.Client(),
-			},
-			args: args{
 				info: RepoInfoCustomMock{
 					latestTagUrl: mockServer.URL,
 					token:        "some_token",
@@ -273,10 +261,8 @@ func TestLatestTag(t *testing.T) {
 		},
 		{
 			name: "Return err when request fail",
-			fields: fields{
+			in: in{
 				client: mockServerThatFail.Client(),
-			},
-			args: args{
 				info: RepoInfoCustomMock{
 					latestTagUrl: mockServerThatFail.URL,
 				},
@@ -287,9 +273,9 @@ func TestLatestTag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			re := NewRepoManager(tt.fields.client)
+			re := NewRepoManager(tt.in.client)
 
-			got, err := re.LatestTag(tt.args.info)
+			got, err := re.LatestTag(tt.in.info)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LatestTag() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -308,26 +294,21 @@ func TestZipball(t *testing.T) {
 		_, _ = writer.Write([]byte(data))
 	}))
 
-	type fields struct {
-		client *http.Client
-	}
-	type args struct {
+	type in struct {
+		client  *http.Client
 		info    RepoInfo
 		version string
 	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		in      in
 		want    string
 		wantErr bool
 	}{
 		{
 			name: "Run with success",
-			fields: fields{
+			in: in{
 				client: mockServer.Client(),
-			},
-			args: args{
 				info: RepoInfoCustomMock{
 					zipUrl: func(version string) string {
 						return mockServer.URL
@@ -343,9 +324,9 @@ func TestZipball(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			re := RepoManager{
-				client: tt.fields.client,
+				client: tt.in.client,
 			}
-			got, err := re.Zipball(tt.args.info, tt.args.version)
+			got, err := re.Zipball(tt.in.info, tt.in.version)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Zipball() error = %v, wantErr %v", err, tt.wantErr)
 				return

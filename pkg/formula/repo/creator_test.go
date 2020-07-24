@@ -19,24 +19,21 @@ func TestCreate(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	type fields struct {
+	type in struct {
 		ritHome string
 		github  github.Repositories
 		dir     stream.DirCreateListCopyRemover
 		file    stream.FileWriteCreatorReadExistRemover
-	}
-	type args struct {
-		repo formula.Repo
+		repo    formula.Repo
 	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		in      in
 		wantErr bool
 	}{
 		{
 			name: "Run with success",
-			fields: fields{
+			in: in{
 				ritHome: func() string {
 					ritHomePath := filepath.Join(os.TempDir(), "TestCreateManager_Create_with_success")
 					_ = dirManager.Remove(ritHomePath)
@@ -53,8 +50,6 @@ func TestCreate(t *testing.T) {
 				},
 				dir:  dirManager,
 				file: fileManager,
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "testing_repo",
 					Version:  "0.0.3",
@@ -67,7 +62,7 @@ func TestCreate(t *testing.T) {
 		},
 		{
 			name: "Return err when zipball fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				github: GitRepositoryMock{
 					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
@@ -76,8 +71,6 @@ func TestCreate(t *testing.T) {
 				},
 				dir:  dirManager,
 				file: fileManager,
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "testing_repo",
 					Version:  "0.0.3",
@@ -90,7 +83,7 @@ func TestCreate(t *testing.T) {
 		},
 		{
 			name: "Return err when dir remove fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				github: GitRepositoryMock{
 					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
@@ -104,8 +97,6 @@ func TestCreate(t *testing.T) {
 					},
 				},
 				file: fileManager,
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "testing_repo",
 					Version:  "0.0.3",
@@ -118,7 +109,7 @@ func TestCreate(t *testing.T) {
 		},
 		{
 			name: "Return err when dir create fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				github: GitRepositoryMock{
 					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
@@ -135,8 +126,6 @@ func TestCreate(t *testing.T) {
 					},
 				},
 				file: fileManager,
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "testing_repo",
 					Version:  "0.0.3",
@@ -149,7 +138,7 @@ func TestCreate(t *testing.T) {
 		},
 		{
 			name: "Return err when file create fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				github: GitRepositoryMock{
 					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
@@ -170,8 +159,6 @@ func TestCreate(t *testing.T) {
 						return errors.New("some error")
 					},
 				},
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "testing_repo",
 					Version:  "0.0.3",
@@ -184,7 +171,7 @@ func TestCreate(t *testing.T) {
 		},
 		{
 			name: "Return err when file remove fail",
-			fields: fields{
+			in: in{
 				ritHome: func() string {
 					ritHomePath := filepath.Join(os.TempDir(), "TestCreateManager_Create_fail_remove_File")
 					_ = dirManager.Remove(ritHomePath)
@@ -206,8 +193,6 @@ func TestCreate(t *testing.T) {
 						return errors.New("some error")
 					},
 				},
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "testing_repo",
 					Version:  "0.0.3",
@@ -222,16 +207,16 @@ func TestCreate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cr := NewCreator(
-				tt.fields.ritHome,
-				tt.fields.github,
-				tt.fields.dir,
-				tt.fields.file,
+				tt.in.ritHome,
+				tt.in.github,
+				tt.in.dir,
+				tt.in.file,
 			)
-			if err := cr.Create(tt.args.repo); (err != nil) != tt.wantErr {
+			if err := cr.Create(tt.in.repo); (err != nil) != tt.wantErr {
 				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if tt.wantErr == false {
-				newRepoPath := filepath.Join(tt.fields.ritHome, "repos", tt.args.repo.Name.String())
+				newRepoPath := filepath.Join(tt.in.ritHome, "repos", tt.in.repo.Name.String())
 				readMePath := filepath.Join(newRepoPath, "README.md")
 				if !fileManager.Exists(readMePath) {
 					t.Errorf("ReadMe not exist on path %s ", readMePath)

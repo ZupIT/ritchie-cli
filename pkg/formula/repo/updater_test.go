@@ -11,35 +11,30 @@ import (
 
 func TestUpdateManager_Update(t *testing.T) {
 
-	type fields struct {
+	type in struct {
 		ritHome string
 		repo    formula.RepositoryListCreator
 		tree    formula.TreeGenerator
 		file    stream.FileWriter
-	}
-	type args struct {
 		name    formula.RepoName
 		version formula.RepoVersion
 	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		in      in
 		wantErr bool
 	}{
 		{
 			name: "Return err when listRepos fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				repo: repositoryListCreatorCustomMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{}, errors.New("some error")
 					},
 				},
-				tree: treeGeneratorCustomMock{},
-				file: FileWriteCreatorReadExistRemover{},
-			},
-			args: args{
+				tree:    treeGeneratorCustomMock{},
+				file:    FileWriteCreatorReadExistRemover{},
 				name:    "any_name",
 				version: "any_version",
 			},
@@ -47,7 +42,7 @@ func TestUpdateManager_Update(t *testing.T) {
 		},
 		{
 			name: "Return err when listRepos is empty",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				repo: repositoryListCreatorCustomMock{
 					list: func() (formula.Repos, error) {
@@ -58,10 +53,8 @@ func TestUpdateManager_Update(t *testing.T) {
 						}, nil
 					},
 				},
-				tree: treeGeneratorCustomMock{},
-				file: FileWriteCreatorReadExistRemover{},
-			},
-			args: args{
+				tree:    treeGeneratorCustomMock{},
+				file:    FileWriteCreatorReadExistRemover{},
 				name:    "not_a_repo_added_name",
 				version: "any_version",
 			},
@@ -69,7 +62,7 @@ func TestUpdateManager_Update(t *testing.T) {
 		},
 		{
 			name: "Return err when Create fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				repo: repositoryListCreatorCustomMock{
 					list: func() (formula.Repos, error) {
@@ -83,10 +76,8 @@ func TestUpdateManager_Update(t *testing.T) {
 						return errors.New("some error")
 					},
 				},
-				tree: treeGeneratorCustomMock{},
-				file: FileWriteCreatorReadExistRemover{},
-			},
-			args: args{
+				tree:    treeGeneratorCustomMock{},
+				file:    FileWriteCreatorReadExistRemover{},
 				name:    "any_repo",
 				version: "any_version",
 			},
@@ -94,7 +85,7 @@ func TestUpdateManager_Update(t *testing.T) {
 		},
 		{
 			name: "Return err when write fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				repo: repositoryListCreatorCustomMock{
 					list: func() (formula.Repos, error) {
@@ -114,8 +105,6 @@ func TestUpdateManager_Update(t *testing.T) {
 						return errors.New("some error")
 					},
 				},
-			},
-			args: args{
 				name:    "any_repo",
 				version: "any_version",
 			},
@@ -123,7 +112,7 @@ func TestUpdateManager_Update(t *testing.T) {
 		},
 		{
 			name: "Return err when generate fail",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				repo: repositoryListCreatorCustomMock{
 					list: func() (formula.Repos, error) {
@@ -147,8 +136,6 @@ func TestUpdateManager_Update(t *testing.T) {
 						return nil
 					},
 				},
-			},
-			args: args{
 				name:    "any_repo",
 				version: "any_version",
 			},
@@ -156,7 +143,7 @@ func TestUpdateManager_Update(t *testing.T) {
 		},
 		{
 			name: "Return err when fail to write tree",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				repo: repositoryListCreatorCustomMock{
 					list: func() (formula.Repos, error) {
@@ -183,8 +170,6 @@ func TestUpdateManager_Update(t *testing.T) {
 						return nil
 					},
 				},
-			},
-			args: args{
 				name:    "any_repo",
 				version: "any_version",
 			},
@@ -192,7 +177,7 @@ func TestUpdateManager_Update(t *testing.T) {
 		},
 		{
 			name: "Run with success",
-			fields: fields{
+			in: in{
 				ritHome: "",
 				repo: repositoryListCreatorCustomMock{
 					list: func() (formula.Repos, error) {
@@ -216,8 +201,6 @@ func TestUpdateManager_Update(t *testing.T) {
 						return nil
 					},
 				},
-			},
-			args: args{
 				name:    "any_repo",
 				version: "any_version",
 			},
@@ -227,12 +210,12 @@ func TestUpdateManager_Update(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			up := NewUpdater(
-				tt.fields.ritHome,
-				tt.fields.repo,
-				tt.fields.tree,
-				tt.fields.file,
+				tt.in.ritHome,
+				tt.in.repo,
+				tt.in.tree,
+				tt.in.file,
 			)
-			if err := up.Update(tt.args.name, tt.args.version); (err != nil) != tt.wantErr {
+			if err := up.Update(tt.in.name, tt.in.version); (err != nil) != tt.wantErr {
 				t.Errorf("Update() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -16,19 +16,19 @@ func TestListManager_List(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	type fields struct {
+	type in struct {
 		ritHome string
 		file    stream.FileReadExister
 	}
 	tests := []struct {
 		name    string
-		fields  fields
+		in      in
 		want    formula.Repos
 		wantErr bool
 	}{
 		{
 			name: "List with success",
-			fields: fields{
+			in: in{
 				ritHome: func() string {
 					ritHomePath := filepath.Join(os.TempDir(), "test-list-repo")
 					_ = dirManager.Remove(ritHomePath)
@@ -65,7 +65,7 @@ func TestListManager_List(t *testing.T) {
 		},
 		{
 			name: "Fail to read reposFilePath",
-			fields: fields{
+			in: in{
 				ritHome: func() string {
 					ritHomePath := filepath.Join(os.TempDir(), "test-list-repo-fail-json")
 					_ = dirManager.Create(ritHomePath)
@@ -85,7 +85,7 @@ func TestListManager_List(t *testing.T) {
 		},
 		{
 			name: "Return empty when file not exist",
-			fields: fields{
+			in: in{
 				ritHome: os.TempDir(),
 				file:    fileManager,
 			},
@@ -94,7 +94,7 @@ func TestListManager_List(t *testing.T) {
 		},
 		{
 			name: "Return fail when fail to read file",
-			fields: fields{
+			in: in{
 				ritHome: os.TempDir(),
 				file:    fileReadExisterMockWithErrorOnRead{},
 			},
@@ -105,8 +105,8 @@ func TestListManager_List(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			li := NewLister(
-				tt.fields.ritHome,
-				tt.fields.file,
+				tt.in.ritHome,
+				tt.in.file,
 			)
 			got, err := li.List()
 			if (err != nil) != tt.wantErr {

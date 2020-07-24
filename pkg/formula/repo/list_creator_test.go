@@ -20,18 +20,18 @@ func TestNewListCreator(t *testing.T) {
 	repoList := NewLister(ritHome, fileManager)
 	repoCreator := NewCreator(ritHome, github.NewRepoManager(http.DefaultClient), dirManager, fileManager)
 
-	type args struct {
+	type in struct {
 		repoList   formula.RepositoryLister
 		repoCreate formula.RepositoryCreator
 	}
 	tests := []struct {
 		name string
-		args args
+		in   in
 		want formula.RepositoryListCreator
 	}{
 		{
 			name: "Build with success",
-			args: args{
+			in: in{
 				repoList:   repoList,
 				repoCreate: repoCreator,
 			},
@@ -43,7 +43,7 @@ func TestNewListCreator(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewListCreator(tt.args.repoList, tt.args.repoCreate); !reflect.DeepEqual(got, tt.want) {
+			if got := NewListCreator(tt.in.repoList, tt.in.repoCreate); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewListCreator() = %v, want %v", got, tt.want)
 			}
 		})

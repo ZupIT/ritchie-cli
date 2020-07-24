@@ -23,18 +23,18 @@ func TestNewListAdder(t *testing.T) {
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
 	repoAdd := NewAdder(ritHome, repoCreator, treeGenerator, dirManager, fileManager)
 
-	type args struct {
+	type in struct {
 		repoList formula.RepositoryLister
 		repoAdd  formula.RepositoryAdder
 	}
 	tests := []struct {
 		name string
-		args args
+		in   in
 		want formula.RepositoryAddLister
 	}{
 		{
 			name: "Build with success",
-			args: args{
+			in: in{
 				repoList: repoList,
 				repoAdd:  repoAdd,
 			},
@@ -46,7 +46,7 @@ func TestNewListAdder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewListAdder(tt.args.repoList, tt.args.repoAdd); !reflect.DeepEqual(got, tt.want) {
+			if got := NewListAdder(tt.in.repoList, tt.in.repoAdd); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewListAdder() = %v, want %v", got, tt.want)
 			}
 		})

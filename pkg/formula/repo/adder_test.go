@@ -16,25 +16,22 @@ func TestAdd(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	type fields struct {
+	type in struct {
 		ritHome string
-		repo    formula.RepositoryCreator
+		creator formula.RepositoryCreator
 		tree    formula.TreeGenerator
 		dir     stream.DirCreateListCopyRemover
 		file    stream.FileWriteCreatorReadExistRemover
-	}
-	type args struct {
-		repo formula.Repo
+		repo    formula.Repo
 	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		in      in
 		wantErr bool
 	}{
 		{
 			name: "Run with success, when repository json not exist",
-			fields: fields{
+			in: in{
 				ritHome: func() string {
 					ritHomePath := filepath.Join(os.TempDir(), "test-adder-test-success")
 					_ = dirManager.Remove(ritHomePath)
@@ -43,7 +40,7 @@ func TestAdd(t *testing.T) {
 					_ = dirManager.Create(filepath.Join(ritHomePath, "repos", "some_repo_name"))
 					return ritHomePath
 				}(),
-				repo: repositoryCreatorCustomMock{
+				creator: repositoryCreatorCustomMock{
 					create: func(repo formula.Repo) error {
 						return nil
 					},
@@ -55,20 +52,19 @@ func TestAdd(t *testing.T) {
 				},
 				file: fileManager,
 				dir:  dirManager,
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "some_repo_name",
 					Priority: 10,
 					Token:    "",
 					Url:      "https://github.com/someUser/ritchie-formulas",
 					Version:  "2.0",
-				}},
+				},
+			},
 			wantErr: false,
 		},
 		{
 			name: "Run with success, when repository json exist",
-			fields: fields{
+			in: in{
 				ritHome: func() string {
 					ritHomePath := filepath.Join(os.TempDir(), "test-adder-test-success")
 					_ = dirManager.Remove(ritHomePath)
@@ -88,7 +84,7 @@ func TestAdd(t *testing.T) {
 					_ = fileManager.Write(filepath.Join(ritHomePath, "repos", reposFileName), []byte(repoFileData))
 					return ritHomePath
 				}(),
-				repo: repositoryCreatorCustomMock{
+				creator: repositoryCreatorCustomMock{
 					create: func(repo formula.Repo) error {
 						return nil
 					},
@@ -100,21 +96,21 @@ func TestAdd(t *testing.T) {
 				},
 				file: fileManager,
 				dir:  dirManager,
-			},
-			args: args{
 				repo: formula.Repo{
 					Name:     "some_repo_name",
 					Priority: 10,
 					Token:    "",
 					Url:      "https://github.com/someUser/ritchie-formulas",
 					Version:  "2.0",
-				}},
+				},
+			},
+
 			wantErr: false,
 		},
 		{
 			name: "Return err when RepositoryCreator fail",
-			fields: fields{
-				repo: repositoryCreatorCustomMock{
+			in: in{
+				creator: repositoryCreatorCustomMock{
 					create: func(repo formula.Repo) error {
 						return errors.New("some error")
 					},
@@ -124,8 +120,8 @@ func TestAdd(t *testing.T) {
 		},
 		{
 			name: "Return err when file read fail",
-			fields: fields{
-				repo: repositoryCreatorCustomMock{
+			in: in{
+				creator: repositoryCreatorCustomMock{
 					create: func(repo formula.Repo) error {
 						return nil
 					},
@@ -143,8 +139,8 @@ func TestAdd(t *testing.T) {
 		},
 		{
 			name: "Return err when fail to parse json",
-			fields: fields{
-				repo: repositoryCreatorCustomMock{
+			in: in{
+				creator: repositoryCreatorCustomMock{
 					create: func(repo formula.Repo) error {
 						return nil
 					},
@@ -162,8 +158,8 @@ func TestAdd(t *testing.T) {
 		},
 		{
 			name: "Return err when saveRepo fail",
-			fields: fields{
-				repo: repositoryCreatorCustomMock{
+			in: in{
+				creator: repositoryCreatorCustomMock{
 					create: func(repo formula.Repo) error {
 						return nil
 					},
@@ -186,8 +182,8 @@ func TestAdd(t *testing.T) {
 		},
 		{
 			name: "Return err when tree Generate fail",
-			fields: fields{
-				repo: repositoryCreatorCustomMock{
+			in: in{
+				creator: repositoryCreatorCustomMock{
 					create: func(repo formula.Repo) error {
 						return nil
 					},
@@ -217,21 +213,21 @@ func TestAdd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ad := NewAdder(
-				tt.fields.ritHome,
-				tt.fields.repo,
-				tt.fields.tree,
-				tt.fields.dir,
-				tt.fields.file,
+				tt.in.ritHome,
+				tt.in.creator,
+				tt.in.tree,
+				tt.in.dir,
+				tt.in.file,
 			)
-			if err := ad.Add(tt.args.repo); (err != nil) != tt.wantErr {
+			if err := ad.Add(tt.in.repo); (err != nil) != tt.wantErr {
 				t.Errorf("Add() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if tt.wantErr == false {
-				treePath := filepath.Join(tt.fields.ritHome, "repos", tt.args.repo.Name.String(), "tree.json")
+				treePath := filepath.Join(tt.in.ritHome, "repos", tt.in.repo.Name.String(), "tree.json")
 				if !fileManager.Exists(treePath) {
 					t.Errorf("Tree with path %s not exist.", treePath)
 				}
-				repoJsonPath := filepath.Join(tt.fields.ritHome, "repos", reposFileName)
+				repoJsonPath := filepath.Join(tt.in.ritHome, "repos", reposFileName)
 				if !fileManager.Exists(repoJsonPath) {
 					t.Errorf("RepoJsonPath with path %s not exist.", repoJsonPath)
 				}

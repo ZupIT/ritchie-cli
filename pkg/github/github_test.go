@@ -6,18 +6,18 @@ import (
 )
 
 func TestLatestTagUrl(t *testing.T) {
-	type fields struct {
+	type in struct {
 		Url   string
 		Token string
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		want   string
+		name string
+		in   in
+		want string
 	}{
 		{
 			name: "Generate LatestTagUrlWithSuccess",
-			fields: fields{
+			in: in{
 				Url: "http://github.com/zupIt/ritchie-cli",
 			},
 			want: "https://api.github.com/repos/zupIt/ritchie-cli/releases/latest",
@@ -25,7 +25,7 @@ func TestLatestTagUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.fields.Url, tt.fields.Token)
+			in := NewRepoInfo(tt.in.Url, tt.in.Token)
 
 			if got := in.LatestTagUrl(); got != tt.want {
 				t.Errorf("LatestTagUrl() = %v, want %v", got, tt.want)
@@ -35,18 +35,18 @@ func TestLatestTagUrl(t *testing.T) {
 }
 
 func TestTagsUrl(t *testing.T) {
-	type fields struct {
+	type in struct {
 		Url   string
 		Token string
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		want   string
+		name string
+		in   in
+		want string
 	}{
 		{
 			name: "Generate LatestTagUrlWithSuccess",
-			fields: fields{
+			in: in{
 				Url: "http://github.com/zupIt/ritchie-cli",
 			},
 			want: "https://api.github.com/repos/zupIt/ritchie-cli/releases",
@@ -54,7 +54,7 @@ func TestTagsUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.fields.Url, tt.fields.Token)
+			in := NewRepoInfo(tt.in.Url, tt.in.Token)
 
 			if got := in.TagsUrl(); got != tt.want {
 				t.Errorf("TagsUrl() = %v, want %v", got, tt.want)
@@ -64,18 +64,18 @@ func TestTagsUrl(t *testing.T) {
 }
 
 func TestRepoInfo_TokenHeader(t *testing.T) {
-	type fields struct {
+	type in struct {
 		Url   string
 		Token string
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		want   string
+		name string
+		in   in
+		want string
 	}{
 		{
 			name: "Generate LatestTagUrlWithSuccess",
-			fields: fields{
+			in: in{
 				Url:   "http://github.com/zupIt/ritchie-cli",
 				Token: "any_token",
 			},
@@ -84,7 +84,7 @@ func TestRepoInfo_TokenHeader(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.fields.Url, tt.fields.Token)
+			in := NewRepoInfo(tt.in.Url, tt.in.Token)
 
 			if got := in.TokenHeader(); got != tt.want {
 				t.Errorf("TokenHeader() = %v, want %v", got, tt.want)
@@ -94,27 +94,21 @@ func TestRepoInfo_TokenHeader(t *testing.T) {
 }
 
 func TestZipUrl(t *testing.T) {
-	type fields struct {
-		Url   string
-		Token string
-	}
-
-	type args struct {
+	type in struct {
+		Url     string
+		Token   string
 		version string
 	}
 
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   string
+		name string
+		in   in
+		want string
 	}{
 		{
 			name: "Generate LatestTagUrlWithSuccess",
-			fields: fields{
-				Url: "http://github.com/zupIt/ritchie-cli",
-			},
-			args: args{
+			in: in{
+				Url:     "http://github.com/zupIt/ritchie-cli",
 				version: "0.0.3",
 			},
 			want: "https://api.github.com/repos/zupIt/ritchie-cli/zipball/0.0.3",
@@ -122,8 +116,8 @@ func TestZipUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.fields.Url, tt.fields.Token)
-			if got := in.ZipUrl(tt.args.version); got != tt.want {
+			in := NewRepoInfo(tt.in.Url, tt.in.Token)
+			if got := in.ZipUrl(tt.in.version); got != tt.want {
 				t.Errorf("ZipUrl() = %v, want %v", got, tt.want)
 			}
 		})

@@ -67,23 +67,20 @@ func TestDeleteWithSuccess(t *testing.T) {
 }
 
 func TestDeleteWhenErr(t *testing.T) {
-	type fields struct {
-		ritHome string
-		file    stream.FileWriteReadExister
-		dir     stream.DirRemover
-	}
-	type args struct {
+	type in struct {
+		ritHome  string
+		file     stream.FileWriteReadExister
+		dir      stream.DirRemover
 		repoName formula.RepoName
 	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		in      in
 		wantErr bool
 	}{
 		{
 			name: "Return err when remove fail",
-			fields: fields{
+			in: in{
 				dir: DirCreateListCopyRemoverCustomMock{
 					remove: func(dir string) error {
 						return errors.New("some error")
@@ -94,7 +91,7 @@ func TestDeleteWhenErr(t *testing.T) {
 		},
 		{
 			name: "Return err when read fail",
-			fields: fields{
+			in: in{
 				dir: DirCreateListCopyRemoverCustomMock{
 					remove: func(dir string) error {
 						return nil
@@ -110,7 +107,7 @@ func TestDeleteWhenErr(t *testing.T) {
 		},
 		{
 			name: "Return err when fail to parse json",
-			fields: fields{
+			in: in{
 				dir: DirCreateListCopyRemoverCustomMock{
 					remove: func(dir string) error {
 						return nil
@@ -126,7 +123,7 @@ func TestDeleteWhenErr(t *testing.T) {
 		},
 		{
 			name: "Return err when fail to write",
-			fields: fields{
+			in: in{
 				dir: DirCreateListCopyRemoverCustomMock{
 					remove: func(dir string) error {
 						return nil
@@ -157,11 +154,11 @@ func TestDeleteWhenErr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dm := DeleteManager{
-				ritHome: tt.fields.ritHome,
-				file:    tt.fields.file,
-				dir:     tt.fields.dir,
+				ritHome: tt.in.ritHome,
+				file:    tt.in.file,
+				dir:     tt.in.dir,
 			}
-			if err := dm.Delete(tt.args.repoName); (err != nil) != tt.wantErr {
+			if err := dm.Delete(tt.in.repoName); (err != nil) != tt.wantErr {
 				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
