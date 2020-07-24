@@ -100,7 +100,7 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		verifyNewVersion(cmd)
 
-		if !ro.ritchieIsInitialized() {
+		if !ro.ritchieIsInitialized() && cmd.Use == cmdUse {
 			tutorialHolder, err := ro.rt.Find()
 			if err != nil {
 				return err
@@ -150,7 +150,7 @@ func runHelp(cmd *cobra.Command, _ []string) error {
 
 func tutorialRit(tutorialStatus string) {
 	const tagTutorial = "\n[TUTORIAL]"
-	const MessageTitle = "To initialize the ritchie:"
+	const MessageTitle = "To initialize the ritchie ROOT:"
 	const MessageBody = ` ∙ Run "rit init"` + "\n"
 
 	if tutorialStatus == tutorialStatusOn {
