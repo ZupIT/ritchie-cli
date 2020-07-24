@@ -26,15 +26,14 @@ type deleteContext struct {
 func NewDeleteContextCmd(
 	fr rcontext.FindRemover,
 	ib prompt.InputBool,
-	il prompt.InputList,
-) *cobra.Command {
+	il prompt.InputList) *cobra.Command {
 	d := deleteContextCmd{fr, ib, il}
 
 	cmd := &cobra.Command{
 		Use:     "context",
 		Short:   "Delete context for Ritchie-cli",
 		Example: "rit delete context",
-		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
+		RunE: RunFuncE(d.runStdin(), d.runPrompt()),
 	}
 
 	cmd.LocalFlags()

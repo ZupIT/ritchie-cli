@@ -34,7 +34,7 @@ func NewSetContextCmd(
 		Use:     "context",
 		Short:   "Set context",
 		Example: "rit set context",
-		RunE:    RunFuncE(s.runStdin(), s.runPrompt()),
+		RunE: RunFuncE(s.runStdin(), s.runPrompt()),
 	}
 
 	cmd.LocalFlags()
