@@ -57,6 +57,18 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Fail when text return err",
+			fields: fields{
+				Setter:        credSetterMock{},
+				Operations:    credSettingsMock{},
+				InputText:     inputTextErrorMock{},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{credential.AddNew},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

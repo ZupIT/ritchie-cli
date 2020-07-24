@@ -42,10 +42,35 @@ func TestSettings_ReadCredentialsValue(t *testing.T) {
 }
 
 func TestSettings_WriteCredentials(t *testing.T) {
-	err := credSettings.WriteCredentialsFields(NewDefaultCredentials(), providersPath())
 	defer os.Remove(providersPath())
-	if err != nil {
-		t.Errorf("Error writing credentials: %s", err)
+	var tests = []struct {
+		name    string
+		path    string
+		fields  Fields
+		wantErr bool
+	}{
+		{
+			name:    "Run with success",
+			path:    providersPath(),
+			fields:  NewDefaultCredentials(),
+			wantErr: false,
+		},
+		{
+			name:    "Error with invalid path",
+			path:    "",
+			fields:  NewDefaultCredentials(),
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := credSettings.WriteCredentialsFields(tt.fields, tt.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Write credentials fields error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+		})
 	}
 }
 
@@ -78,6 +103,17 @@ func TestProviderPath(t *testing.T) {
 		t.Errorf("Providers path must end on providers.json")
 	}
 }
+
+func TestCredentialsPath(t *testing.T){
+	credentials := CredentialsPath()
+	slicedPath := strings.Split(credentials, "/")
+	providersDir := slicedPath[len(slicedPath)-2]
+
+	if providersDir != "credentials"{
+		t.Errorf("Providers path must end on credentials dir")
+	}
+}
+
 
 func TestProvidersArr(t *testing.T) {
 	credentials := NewDefaultCredentials()

@@ -30,6 +30,12 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 	return "mocked text", nil
 }
 
+type inputTextErrorMock struct{}
+
+func (inputTextErrorMock) Text(name string, required bool, helper ...string) (string, error) {
+	return "", errors.New("error on input text")
+}
+
 type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool, helper ...string) (string, error) {
@@ -194,7 +200,7 @@ func (repoListerNonEmptyMock) List() (formula.Repos, error) {
 			Name:     "repoName",
 			Priority: 0,
 		},
-	},nil
+	}, nil
 }
 
 type repoListerErrorMock struct{}
@@ -223,7 +229,7 @@ func (credSetterMock) Set(d credential.Detail) error {
 	return nil
 }
 
-type credSettingsMock struct{
+type credSettingsMock struct {
 	error
 }
 
