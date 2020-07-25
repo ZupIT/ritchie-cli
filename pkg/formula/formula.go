@@ -71,7 +71,7 @@ type (
 )
 
 type PreRunner interface {
-	PreRun(def Definition) (Setup, error)
+	PreRun(def Definition, local bool) (Setup, error)
 }
 
 type Runner interface {
@@ -84,10 +84,6 @@ type PostRunner interface {
 
 type InputRunner interface {
 	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
-}
-
-type Setuper interface {
-	Setup(def Definition, local bool) (Setup, error)
 }
 
 type Creator interface {

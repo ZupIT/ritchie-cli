@@ -5,15 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"os/user"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-const (
-	volumePattern              = "%s:/app"
-	msgDockerBuildErrorPattern = `failed building formula with Docker, try run your formula with the flag "--local"
-More about the error: %s`
-)
+const volumePattern = "%s:/app"
+
+var ErrDockerBuild = errors.New("failed building formula with Docker, we will try to build your formula locally")
 
 type DockerManager struct{}
 
@@ -23,16 +22,24 @@ func NewBuildDocker() formula.DockerBuilder {
 
 func (do DockerManager) Build(formulaPath, dockerImg string) error {
 	volume := fmt.Sprintf(volumePattern, formulaPath)
-	args := []string{"run", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", "cd /app && /usr/bin/make build"}
-	cmd := exec.Command("docker", args...)
+	currentUser, err := user.Current()
+	if err != nil {
+		return err
+	}
 
-	var stderr bytes.Buffer
+	containerCmd := fmt.Sprintf("cd /app && /usr/bin/make build && chown -R %s bin", currentUser.Uid)
+	args := []string{"run", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd}
+
+	var stderr, stdout bytes.Buffer
+	cmd := exec.Command("docker", args...)
+	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		if stderr.Bytes() != nil {
-			errMsg := fmt.Sprintf(msgDockerBuildErrorPattern, stderr.String())
-			return errors.New(errMsg)
-		}
+		return ErrDockerBuild
+	}
+
+	if stderr.String() != "" {
+		return ErrDockerBuild
 	}
 
 	return nil

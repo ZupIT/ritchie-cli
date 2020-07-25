@@ -97,7 +97,7 @@ func buildCommands() *cobra.Command {
 
 	postRunner := runner.NewPostRunner()
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
-	formulaSetup := runner.NewSetup(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
+	formulaSetup := runner.NewPreRun(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
 	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
