@@ -29,7 +29,7 @@ func TestBuild(t *testing.T) {
 
 	type in struct {
 		fileManager stream.FileCopyExistListerWriter
-		dirManager  stream.DirCreateListCopier
+		dirManager  stream.DirCreateListCopyRemover
 		tree        formula.TreeGenerator
 	}
 
@@ -105,7 +105,7 @@ func TestBuild(t *testing.T) {
 
 	for _, tt := range testes {
 		t.Run(tt.name, func(t *testing.T) {
-			builderManager := New(ritHome, tt.in.dirManager, tt.in.fileManager, tt.in.tree)
+			builderManager := NewBuildLocal(ritHome, tt.in.dirManager, tt.in.fileManager, tt.in.tree)
 			got := builderManager.Build(workspacePath, formulaPath)
 
 			if (tt.want == nil && got != nil) || got != nil && got.Error() != tt.want.Error() {
@@ -145,6 +145,7 @@ type dirManagerMock struct {
 	createErr error
 	listErr   error
 	copyErr   error
+	removeErr error
 }
 
 func (d dirManagerMock) Create(string) error {
@@ -157,6 +158,10 @@ func (d dirManagerMock) List(string, bool) ([]string, error) {
 
 func (d dirManagerMock) Copy(string, string) error {
 	return d.copyErr
+}
+
+func (d dirManagerMock) Remove(string) error {
+	return d.removeErr
 }
 
 type fileManagerMock struct {

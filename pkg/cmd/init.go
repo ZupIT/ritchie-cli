@@ -14,7 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-var CommonsRepoURL = "https://github.com/zupIt/ritchie-formulas"
+var CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 
 type initCmd struct {
 	repo formula.RepositoryAdder
@@ -27,7 +27,7 @@ func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories, rtf rtuto
 
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Init rit",
+		Short: "Initialize rit configuration",
 		Long:  "Initialize rit configuration",
 		RunE:  o.runPrompt(),
 	}

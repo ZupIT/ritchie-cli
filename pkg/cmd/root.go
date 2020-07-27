@@ -36,7 +36,7 @@ var (
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
 	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 
-	whitelist = []string{
+	allowList = []string{
 		fmt.Sprint(cmdUse),
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
@@ -47,7 +47,7 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 	}
 
-	upgradeWhitelist = []string{
+	upgradeList = []string{
 		fmt.Sprint(cmdUse),
 	}
 )
@@ -83,7 +83,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if isWhitelist(whitelist, cmd) || isCompleteCmd(cmd) {
+		if isAllowList(allowList, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
 
@@ -112,7 +112,7 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 }
 
 func verifyNewVersion(cmd *cobra.Command) {
-	if isWhitelist(upgradeWhitelist, cmd) {
+	if isAllowList(upgradeList, cmd) {
 		resolver := version.DefaultVersionResolver{
 			StableVersionUrl: StableVersionUrl,
 			FileUtilService:  fileutil.DefaultService{},
@@ -122,8 +122,8 @@ func verifyNewVersion(cmd *cobra.Command) {
 	}
 }
 
-func isWhitelist(whitelist []string, cmd *cobra.Command) bool {
-	return sliceutil.Contains(whitelist, cmd.CommandPath())
+func isAllowList(allowList []string, cmd *cobra.Command) bool {
+	return sliceutil.Contains(allowList, cmd.CommandPath())
 }
 
 func isCompleteCmd(cmd *cobra.Command) bool {

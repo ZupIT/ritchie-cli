@@ -46,7 +46,6 @@ func (o tutorialCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &obj)
 		if err != nil {
-			fmt.Println(stdin.MsgInvalidInput)
 			return err
 		}
 

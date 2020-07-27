@@ -28,7 +28,7 @@ func TestWatch(t *testing.T) {
 	_ = dirManager.Create(workspacePath)
 	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
 
-	builderManager := builder.New(ritHome, dirManager, fileManager, treeGenerator)
+	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, treeGenerator)
 
 	watchManager := New(builderManager, dirManager)
 

@@ -254,7 +254,7 @@ type runnerMock struct {
 	error error
 }
 
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType) error {
+func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool) error {
 	return r.error
 }
 

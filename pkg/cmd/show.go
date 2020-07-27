@@ -4,8 +4,9 @@ import "github.com/spf13/cobra"
 
 func NewShowCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "show SUB_COMMAND",
-		Short: "Show objects",
-		Long:  `Show objects like context, organization etc.`,
+		Use:     "show SUB_COMMAND",
+		Short:   "Show context",
+		Long:    "Show current context.",
+		Example: "rit show context",
 	}
 }

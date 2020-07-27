@@ -17,11 +17,11 @@ import (
 
 type WatchManager struct {
 	watcher *watcher.Watcher
-	formula formula.Builder
+	formula formula.LocalBuilder
 	dir     stream.DirListChecker
 }
 
-func New(formula formula.Builder, dir stream.DirListChecker) *WatchManager {
+func New(formula formula.LocalBuilder, dir stream.DirListChecker) *WatchManager {
 	w := watcher.New()
 
 	return &WatchManager{watcher: w, formula: formula, dir: dir}

@@ -98,7 +98,7 @@ github.com/inconshreveable/go-update/internal/osext
 github.com/inconshreveable/mousetrap
 # github.com/json-iterator/go v1.1.8
 github.com/json-iterator/go
-# github.com/kaduartur/go-cli-spinner v1.0.0
+# github.com/kaduartur/go-cli-spinner v1.0.1
 ## explicit
 github.com/kaduartur/go-cli-spinner/pkg/spinner
 github.com/kaduartur/go-cli-spinner/pkg/template
