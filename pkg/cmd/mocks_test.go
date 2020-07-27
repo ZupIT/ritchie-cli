@@ -250,6 +250,14 @@ func (s credSettingsMock) WriteCredentialsFields(fields credential.Fields, path 
 	return nil
 }
 
+func (s credSettingsMock) ProviderPath() string {
+	return ""
+}
+
+func (s credSettingsMock) CredentialsPath () string {
+	return ""
+}
+
 type runnerMock struct {
 	error error
 }

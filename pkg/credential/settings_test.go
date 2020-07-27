@@ -43,7 +43,7 @@ func TestSettings_ReadCredentialsValue(t *testing.T) {
 	}
 }
 
-func TestSettings_WriteCredentials(t *testing.T) {
+func TestSettings_WriteCredentialsFields(t *testing.T) {
 	defer os.Remove(providersPath())
 	var tests = []struct {
 		name    string
@@ -76,7 +76,7 @@ func TestSettings_WriteCredentials(t *testing.T) {
 	}
 }
 
-func TestSettings_WriteDefaultCredentials(t *testing.T) {
+func TestSettings_WriteDefaultCredentialsFields(t *testing.T) {
 	err := credSettings.WriteDefaultCredentialsFields(providersPath())
 	defer os.Remove(providersPath())
 	if err != nil {
@@ -97,7 +97,7 @@ func TestNewDefaultCredentials(t *testing.T) {
 }
 
 func TestProviderPath(t *testing.T) {
-	provider := ProviderPath()
+	provider := credSettings.ProviderPath()
 	slicedPath := strings.Split(provider, "/")
 	providersJson := slicedPath[len(slicedPath)-1]
 
@@ -107,7 +107,7 @@ func TestProviderPath(t *testing.T) {
 }
 
 func TestCredentialsPath(t *testing.T){
-	credentials := CredentialsPath()
+	credentials := credSettings.CredentialsPath()
 	slicedPath := strings.Split(credentials, "/")
 	fmt.Println(slicedPath)
 	providersDir := slicedPath[len(slicedPath)-1]

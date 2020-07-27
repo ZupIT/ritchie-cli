@@ -2,7 +2,6 @@ package credential
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -11,16 +10,16 @@ import (
 const AddNew = "Add a new"
 
 type Settings struct {
-	file stream.FileWriteReadExisterLister
-	dir  stream.DirLister
-	homeDir string
+	file    stream.FileWriteReadExisterLister
+	dir     stream.DirLister
+	HomeDir string
 }
 
 func NewSettings(file stream.FileWriteReadExisterLister, dir stream.DirLister, homeDir string) Settings {
 	return Settings{
-		file: file,
-		dir:  dir,
-		homeDir : homeDir,
+		file:    file,
+		dir:     dir,
+		HomeDir: homeDir,
 	}
 }
 
@@ -120,14 +119,12 @@ func NewDefaultCredentials() Fields {
 	return dc
 }
 
-func ProviderPath() string {
-	homeDir, _ := os.UserHomeDir()
-	return filepath.Join(homeDir, ".rit/providers.json")
+func (s Settings) ProviderPath() string {
+	return filepath.Join(s.HomeDir, ".rit/providers.json")
 }
 
-func CredentialsPath() string {
-	homeDir, _ := os.UserHomeDir()
-	return filepath.Join(homeDir, ".rit/credentials/")
+func (s Settings) CredentialsPath() string {
+	return filepath.Join(s.HomeDir, ".rit/credentials/")
 }
 
 func NewProviderArr(fields Fields) []string {

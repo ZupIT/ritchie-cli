@@ -27,9 +27,9 @@ type ListCredDatas []ListCredData
 
 type ListCredData struct {
 	Provider string
-	Name string
-	Value string
-	Context string
+	Name     string
+	Value    string
+	Context  string
 }
 
 // Fields are used to represents providers.json
@@ -53,8 +53,13 @@ type Writer interface {
 	WriteDefaultCredentialsFields(path string) error
 }
 
-type ReaderWriter interface {
-	Reader
-	Writer
+type Pather interface {
+	ProviderPath() string
+	CredentialsPath() string
 }
 
+type ReaderWriterPather interface {
+	Reader
+	Writer
+	Pather
+}

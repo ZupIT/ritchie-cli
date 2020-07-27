@@ -17,7 +17,7 @@ var inputTypes = []string{"plain text", "secret"}
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
-	credential.ReaderWriter
+	credential.ReaderWriterPather
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
@@ -27,19 +27,19 @@ type setCredentialCmd struct {
 // NewSetCredentialCmd creates a new cmd instance
 func NewSetCredentialCmd(
 	credSetter credential.Setter,
-	file credential.ReaderWriter,
+	file credential.ReaderWriterPather,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
 	inPass prompt.InputPassword,
 ) *cobra.Command {
 	s := &setCredentialCmd{
-		Setter:        credSetter,
-		ReaderWriter:  file,
-		InputText:     inText,
-		InputBool:     inBool,
-		InputList:     inList,
-		InputPassword: inPass,
+		Setter:             credSetter,
+		ReaderWriterPather: file,
+		InputText:          inText,
+		InputBool:          inBool,
+		InputList:          inList,
+		InputPassword:      inPass,
 	}
 
 	cmd := &cobra.Command{
@@ -71,14 +71,14 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 
 func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
-	if err := s.WriteDefaultCredentialsFields(credential.ProviderPath()); err != nil {
+	if err := s.WriteDefaultCredentialsFields(s.ProviderPath()); err != nil {
 		return credential.Detail{}, err
 	}
 
 	var credDetail credential.Detail
 	cred := credential.Credential{}
 
-	credentials, err := s.ReadCredentialsFields(credential.ProviderPath())
+	credentials, err := s.ReadCredentialsFields(s.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
 	}
@@ -116,7 +116,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 			}
 		}
 		credentials[newProvider] = newFields
-		if err = s.WriteCredentialsFields(credentials, credential.ProviderPath()); err != nil {
+		if err = s.WriteCredentialsFields(credentials, s.ProviderPath()); err != nil {
 			return credDetail, err
 		}
 

@@ -10,7 +10,7 @@ import (
 func Test_setCredentialCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		Setter        credential.Setter
-		file          credential.ReaderWriter
+		file          credential.ReaderWriterPather
 		InputText     prompt.InputText
 		InputBool     prompt.InputBool
 		InputList     prompt.InputList
