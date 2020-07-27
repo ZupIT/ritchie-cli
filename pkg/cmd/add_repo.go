@@ -162,7 +162,6 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &r)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 

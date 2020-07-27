@@ -70,7 +70,6 @@ func (dr deleteRepoCmd) runStdin() CommandRunnerFunc {
 
 		err := stdin.ReadJson(os.Stdin, &repo)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 

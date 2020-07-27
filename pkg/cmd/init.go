@@ -14,7 +14,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-var CommonsRepoURL = "https://github.com/zupIt/ritchie-formulas"
+var CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 
 type initCmd struct {
 	repo formula.RepositoryAdder

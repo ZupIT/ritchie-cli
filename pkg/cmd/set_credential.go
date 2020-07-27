@@ -168,7 +168,6 @@ func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
 	var credDetail credential.Detail
 
 	if err := stdin.ReadJson(os.Stdin, &credDetail); err != nil {
-		prompt.Error(stdin.MsgInvalidInput)
 		return credDetail, err
 	}
 	return credDetail, nil

@@ -13,20 +13,17 @@ import (
 )
 
 const (
-	ReposDir             = "repos"
-	TmpDir               = "tmp"
-	DefaultConfig        = "config.json"
-	PwdEnv               = "PWD"
-	CPwdEnv              = "CURRENT_PWD"
-	BinUnix              = "run.sh"
-	BinWindows           = "run.bat"
-	BinDir               = "bin"
-	EnvPattern           = "%s=%s"
-	CachePattern         = "%s/.%s.cache"
-	DefaultCacheNewLabel = "Type new value?"
-	DefaultCacheQty      = 5
-	TreePath             = "/tree/tree.json"
-	MakefilePath         = "/Makefile"
+	ReposDir      = "repos"
+	TmpDir        = "tmp"
+	DefaultConfig = "config.json"
+	PwdEnv        = "PWD"
+	CPwdEnv       = "CURRENT_PWD"
+	BinUnix       = "run.sh"
+	BinWindows    = "run.bat"
+	BinDir        = "bin"
+	EnvPattern    = "%s=%s"
+	TreePath      = "/tree/tree.json"
+	MakefilePath  = "/Makefile"
 )
 
 type (
@@ -78,11 +75,11 @@ type (
 )
 
 type PreRunner interface {
-	PreRun(def Definition) (Setup, error)
+	PreRun(def Definition, local bool) (Setup, error)
 }
 
 type Runner interface {
-	Run(def Definition, inputType api.TermInputType) error
+	Run(def Definition, inputType api.TermInputType, local bool) error
 }
 
 type PostRunner interface {
@@ -93,15 +90,23 @@ type InputRunner interface {
 	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
 }
 
-type Setuper interface {
-	Setup(def Definition) (Setup, error)
-}
-
 type Creator interface {
 	Create(cf Create) error
 }
 
-type Builder interface {
+type MakeBuilder interface {
+	Build(formulaPath string) error
+}
+
+type BatBuilder interface {
+	Build(formulaPath string) error
+}
+
+type DockerBuilder interface {
+	Build(formulaPath, dockerImg string) error
+}
+
+type LocalBuilder interface {
 	Build(workspacePath, formulaPath string) error
 }
 
@@ -111,7 +116,7 @@ type Watcher interface {
 
 type CreateBuilder interface {
 	Creator
-	Builder
+	LocalBuilder
 }
 
 // FormulaPath builds the formula path from ritchie home
