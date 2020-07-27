@@ -31,7 +31,7 @@ func NewDeleteContextCmd(
 
 	cmd := &cobra.Command{
 		Use:     "context",
-		Short:   "Delete context for ritchie-cli",
+		Short:   "Delete context for credentials",
 		Example: "rit delete context",
 		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
 	}

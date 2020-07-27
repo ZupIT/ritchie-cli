@@ -63,7 +63,7 @@
                 "action":"main"
             }
         ],
-        "result":"Add a new formula repository to ritchie-cli."
+        "result":"Add a new repository of formulas"
     },
     {
         "entry":"Add new repo",
@@ -224,7 +224,7 @@
                 "action":"main"
             }
         ],
-        "result":"Delete a object like context and repository."
+        "result":"Delete contexts and repositories."
     },
     {
         "entry":"Show",
