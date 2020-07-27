@@ -5,11 +5,14 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestRemove(t *testing.T) {
 	tmp := os.TempDir()
-	finder := NewFinder(tmp)
+	file := stream.NewFileManager()
+	finder := NewFinder(tmp, file)
 	setter := NewSetter(tmp, finder)
 	remover := NewRemover(tmp, finder)
 

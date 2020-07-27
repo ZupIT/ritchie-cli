@@ -1,19 +1,23 @@
-package credsingle
+package credential
 
 import (
 	"os"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+)
+
+var (
+	githubCred = Detail{Service: "github"}
+	ctxFinder =   rcontext.FindManager{CtxFile: ""}
 )
 
 func TestSet(t *testing.T) {
 	tmp := os.TempDir()
 	setter := NewSetter(tmp, ctxFinder)
-
 	tests := []struct {
 		name string
-		in   credential.Detail
+		in   Detail
 		out  error
 	}{
 		{
@@ -32,3 +36,4 @@ func TestSet(t *testing.T) {
 		})
 	}
 }
+

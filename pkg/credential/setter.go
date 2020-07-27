@@ -1,30 +1,30 @@
-package credsingle
+package credential
 
 import (
 	"encoding/json"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
-type Setter struct {
+type SetManager struct {
 	homePath  string
-	ctxFinder rcontext.Finder
+	ctxFinder rcontext.CtxFinder
 }
 
-func NewSetter(homePath string, cf rcontext.Finder) Setter {
-	return Setter{
+func NewSetter(homePath string, cf rcontext.CtxFinder) SetManager {
+	return SetManager{
 		homePath:  homePath,
 		ctxFinder: cf,
 	}
 }
 
-func (s Setter) Set(cred credential.Detail) error {
+func (s SetManager) Set(cred Detail) error {
 	ctx, err := s.ctxFinder.Find()
 	if err != nil {
 		return err
-	} else if ctx.Current == "" {
+	}
+	if ctx.Current == "" {
 		ctx.Current = rcontext.DefaultCtx
 	}
 

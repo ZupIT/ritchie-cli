@@ -9,10 +9,10 @@ import (
 
 type RemoveManager struct {
 	ctxFile string
-	finder  Finder
+	finder  CtxFinder
 }
 
-func NewRemover(homePath string, f Finder) RemoveManager {
+func NewRemover(homePath string, f CtxFinder) RemoveManager {
 	return RemoveManager{ctxFile: fmt.Sprintf(ContextPath, homePath), finder: f}
 }
 

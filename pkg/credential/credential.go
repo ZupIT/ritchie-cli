@@ -1,14 +1,5 @@
 package credential
 
-const (
-	// Other credential path /admin
-	Other Type = "admin"
-	// Me credential path /me
-	Me Type = "me"
-	// Org credential path /org
-	Org Type = "org"
-)
-
 // Info represents a credential information of the user.
 type Detail struct {
 	Username   string     `json:"username"`
@@ -32,24 +23,30 @@ type Field struct {
 	Type string `json:"type"`
 }
 
-// Fields represents a collection of credential fields returned by the Server (Team).
-// Fields are used on single to represents providers.json
+type ListCredDatas []ListCredData
+
+type ListCredData struct {
+	Provider string
+	Name string
+	Value string
+	Context string
+}
+
+// Fields are used to represents providers.json
 type Fields map[string][]Field
 
 type Setter interface {
 	Set(d Detail) error
 }
 
-type Finder interface {
+type CredFinder interface {
 	Find(service string) (Detail, error)
 }
 
-type Settings interface {
-	Fields() (Fields, error)
+type Operations interface {
+	ReadCredentialsFields(path string) (Fields, error)
+	ReadCredentialsValue(path string) ([]ListCredData, error)
+	WriteCredentialsFields(fields Fields, path string) error
+	WriteDefaultCredentialsFields(path string) error
 }
 
-type SingleSettings interface {
-	ReadCredentials(path string) (Fields, error)
-	WriteCredentials(fields Fields, path string) error
-	WriteDefaultCredentials(path string) error
-}

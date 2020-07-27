@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
@@ -18,7 +17,7 @@ var inputTypes = []string{"plain text", "secret"}
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
-	credential.SingleSettings
+	credential.Operations
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
@@ -28,19 +27,19 @@ type setCredentialCmd struct {
 // NewSetCredentialCmd creates a new cmd instance
 func NewSetCredentialCmd(
 	credSetter credential.Setter,
-	credSetting credential.SingleSettings,
+	credSetting credential.Operations,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
 	inPass prompt.InputPassword,
 ) *cobra.Command {
 	s := &setCredentialCmd{
-		Setter:         credSetter,
-		SingleSettings: credSetting,
-		InputText:      inText,
-		InputBool:      inBool,
-		InputList:      inList,
-		InputPassword:  inPass,
+		Setter:    credSetter,
+		Operations:      credSetting,
+		InputText:     inText,
+		InputBool:     inBool,
+		InputList:     inList,
+		InputPassword: inPass,
 	}
 
 	cmd := &cobra.Command{
@@ -71,26 +70,26 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 }
 
 func (s setCredentialCmd) prompt() (credential.Detail, error) {
-	err := s.WriteDefaultCredentials(credsingle.ProviderPath())
-	if err != nil {
+
+	if err := s.WriteDefaultCredentialsFields(credential.ProviderPath()); err != nil {
 		return credential.Detail{}, err
 	}
 
 	var credDetail credential.Detail
 	cred := credential.Credential{}
 
-	credentials, err := s.ReadCredentials(credsingle.ProviderPath())
+	credentials, err := s.ReadCredentialsFields(credential.ProviderPath())
 	if err != nil {
 		return credential.Detail{}, err
 	}
 
-	providerArr := credsingle.NewProviderArr(credentials)
+	providerArr := credential.NewProviderArr(credentials)
 	providerChoose, err := s.List("Select your provider", providerArr)
 	if err != nil {
 		return credDetail, err
 	}
 
-	if providerChoose == credsingle.AddNew {
+	if providerChoose == credential.AddNew {
 		newProvider, err := s.Text("Define your provider name:", true)
 		if err != nil {
 			return credDetail, err
@@ -117,8 +116,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 			}
 		}
 		credentials[newProvider] = newFields
-		err = s.WriteCredentials(credentials, credsingle.ProviderPath())
-		if err != nil {
+		if err = s.WriteCredentialsFields(credentials, credential.ProviderPath()); err != nil {
 			return credDetail, err
 		}
 
@@ -135,7 +133,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 				return credDetail, err
 			}
 		} else {
-			value, err = s.Text(i.Name, true)
+			value, err = s.Text(i.Name+":", true)
 			if err != nil {
 				return credDetail, err
 			}
@@ -160,6 +158,7 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 		}
 
 		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
+		prompt.Info("Check your credentials using rit list credential")
 		return nil
 	}
 }

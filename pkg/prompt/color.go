@@ -42,3 +42,7 @@ func Yellow(text string) string {
 func Warning(text string) {
 	color.Warn.Println(text)
 }
+
+func Cyan(text string) string {
+	return color.Cyan.Render(text)
+}

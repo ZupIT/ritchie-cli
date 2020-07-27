@@ -52,6 +52,13 @@ type FileWriteReadExister interface {
 	FileExister
 }
 
+type FileWriteReadExisterLister interface {
+	FileWriter
+	FileReader
+	FileExister
+	FileLister
+}
+
 type FileWriteReadExistRemover interface {
 	FileWriter
 	FileReader
@@ -84,7 +91,6 @@ func (f FileManager) Read(path string) ([]byte, error) {
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
-
 	return b, err
 }
 
