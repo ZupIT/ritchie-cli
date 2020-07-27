@@ -10,6 +10,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
@@ -31,6 +32,7 @@ type addRepoCmd struct {
 	prompt.InputList
 	prompt.InputBool
 	prompt.InputInt
+	rt rtutorial.Finder
 }
 
 func NewAddRepoCmd(
@@ -42,6 +44,7 @@ func NewAddRepoCmd(
 	inList prompt.InputList,
 	inBool prompt.InputBool,
 	inInt prompt.InputInt,
+	rtf rtutorial.Finder,
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
@@ -52,6 +55,7 @@ func NewAddRepoCmd(
 		InputBool:          inBool,
 		InputInt:           inInt,
 		InputPassword:      inPass,
+		rt:                 rtf,
 	}
 	cmd := &cobra.Command{
 		Use:     "repo",
@@ -141,6 +145,12 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 
 		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", repository.Name)
 		prompt.Success(successMsg)
+
+		tutorialHolder, err := ad.rt.Find()
+		if err != nil {
+			return err
+		}
+		tutorialAddRepo(tutorialHolder.Current)
 		return nil
 	}
 }
@@ -162,6 +172,12 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 
 		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", r.Name)
 		prompt.Success(successMsg)
+
+		tutorialHolder, err := ad.rt.Find()
+		if err != nil {
+			return err
+		}
+		tutorialAddRepo(tutorialHolder.Current)
 		return nil
 	}
 }
@@ -177,4 +193,16 @@ func (ad addRepoCmd) repoNameValidator(text interface{}) error {
 	}
 
 	return nil
+}
+
+func tutorialAddRepo(tutorialStatus string) {
+	const tagTutorial = "\n[TUTORIAL]"
+	const MessageTitle = "To view your formula repositories:"
+	const MessageBody = ` ∙ Run "rit list repo"` + "\n"
+
+	if tutorialStatus == tutorialStatusEnabled {
+		prompt.Info(tagTutorial)
+		prompt.Info(MessageTitle)
+		fmt.Println(MessageBody)
+	}
 }
