@@ -11,6 +11,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -30,6 +31,7 @@ type buildFormulaCmd struct {
 	directory   stream.DirListChecker
 	prompt.InputText
 	prompt.InputList
+	rt rtutorial.Finder
 }
 
 func NewBuildFormulaCmd(
@@ -40,6 +42,7 @@ func NewBuildFormulaCmd(
 	directory stream.DirListChecker,
 	inText prompt.InputText,
 	inList prompt.InputList,
+	rtf rtutorial.Finder,
 ) *cobra.Command {
 	s := buildFormulaCmd{
 		userHomeDir: userHomeDir,
@@ -49,6 +52,7 @@ func NewBuildFormulaCmd(
 		directory:   directory,
 		InputText:   inText,
 		InputList:   inList,
+		rt:          rtf,
 	}
 
 	cmd := &cobra.Command{
@@ -107,6 +111,12 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 
 		b.build(wspace.Dir, formulaPath)
 
+		tutorialHolder, err := b.rt.Find()
+		if err != nil {
+			return err
+		}
+		tutorialBuildFormula(tutorialHolder.Current)
+
 		return nil
 	}
 }
@@ -124,7 +134,6 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 
 	success := prompt.Green("✔ Build completed!")
 	s.Success(success)
-	prompt.Info("Now you can run your formula with Ritchie!")
 }
 
 func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
@@ -160,4 +169,23 @@ func isFormula(dirs []string) bool {
 	}
 
 	return false
+}
+
+func tutorialBuildFormula(tutorialStatus string) {
+	const tagTutorial = "\n[TUTORIAL]"
+	const titleNewRepositories = "To add a new repository of formulas:"
+	const bodyNewRepositories = ` ∙ Run "rit add repo"`
+
+	const titlePublishFormula = "To publish your formula:"
+	const bodyPublishFormula = ` ∙ Create a git repo
+ ∙ Commit and push your formula in repo created
+ ∙ Run "rit add repo"`
+
+	if tutorialStatus == tutorialStatusEnabled {
+		prompt.Info(tagTutorial)
+		prompt.Info(titleNewRepositories)
+		fmt.Println(bodyNewRepositories)
+		prompt.Info(titlePublishFormula)
+		fmt.Println(bodyPublishFormula)
+	}
 }

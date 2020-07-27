@@ -25,7 +25,7 @@ func (re RepoManager) Zipball(info RepoInfo, version string) (io.ReadCloser, err
 		return nil, err
 	}
 
-	if info.Token != "" {
+	if info.Token() != "" {
 		authToken := info.TokenHeader()
 		req.Header.Add(headers.Authorization, authToken)
 	}
@@ -46,7 +46,7 @@ func (re RepoManager) Tags(info RepoInfo) (Tags, error) {
 		return Tags{}, err
 	}
 
-	if info.Token != "" {
+	if info.Token() != "" {
 		authToken := info.TokenHeader()
 		req.Header.Add(headers.Authorization, authToken)
 	}
@@ -82,7 +82,7 @@ func (re RepoManager) LatestTag(info RepoInfo) (Tag, error) {
 		return Tag{}, err
 	}
 
-	if info.Token != "" {
+	if info.Token() != "" {
 		authToken := info.TokenHeader()
 		req.Header.Add(headers.Authorization, authToken)
 	}

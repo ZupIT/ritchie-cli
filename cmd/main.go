@@ -9,6 +9,7 @@ import (
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
@@ -72,7 +73,7 @@ func buildCommands() *cobra.Command {
 	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
 	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, fileManager, dirManager)
-	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager, dirManager)
+	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager)
 
 	tplManager := template.NewManager(api.RitchieHomeDir())
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
@@ -88,6 +89,9 @@ func buildCommands() *cobra.Command {
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
+	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
+	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
 
 	inputManager := runner.NewInputManager(envResolvers, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewDefaultSetup(ritchieHomeDir)
@@ -113,20 +117,22 @@ func buildCommands() *cobra.Command {
 		HttpClient:       &http.Client{Timeout: 1 * time.Second},
 	}
 	defaultUrlFinder := upgrade.DefaultUrlFinder{}
-	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager)
+	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, gitRepo)
+	initCmd := cmd.NewInitCmd(repoAdder, gitRepo, tutorialFinder)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
+
+	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2
 	setCredentialCmd := cmd.NewSetCredentialCmd(
@@ -137,12 +143,13 @@ func buildCommands() *cobra.Command {
 		inputList,
 		inputPassword)
 	listCredentialCmd := cmd.NewListCredentialCmd(credSettings)
+
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	listRepoCmd := cmd.NewListRepoCmd(repoLister)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
@@ -150,8 +157,8 @@ func buildCommands() *cobra.Command {
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
@@ -184,6 +191,7 @@ func buildCommands() *cobra.Command {
 				updateCmd,
 				buildCmd,
 				upgradeCmd,
+				tutorialCmd,
 			},
 		},
 	}
