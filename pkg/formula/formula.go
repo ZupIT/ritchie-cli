@@ -13,17 +13,17 @@ import (
 )
 
 const (
-	ReposDir             = "repos"
-	TmpDir               = "tmp"
-	DefaultConfig        = "config.json"
-	PwdEnv               = "PWD"
-	CPwdEnv              = "CURRENT_PWD"
-	BinUnix              = "run.sh"
-	BinWindows           = "run.bat"
-	BinDir               = "bin"
-	EnvPattern           = "%s=%s"
-	TreePath             = "/tree/tree.json"
-	MakefilePath         = "/Makefile"
+	ReposDir      = "repos"
+	TmpDir        = "tmp"
+	DefaultConfig = "config.json"
+	PwdEnv        = "PWD"
+	CPwdEnv       = "CURRENT_PWD"
+	BinUnix       = "run.sh"
+	BinWindows    = "run.bat"
+	BinDir        = "bin"
+	EnvPattern    = "%s=%s"
+	TreePath      = "/tree/tree.json"
+	MakefilePath  = "/Makefile"
 )
 
 type (

@@ -15,7 +15,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
-func TestSetup(t *testing.T) {
+func TestPreRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
@@ -248,6 +248,8 @@ func TestSetup(t *testing.T) {
 			if !reflect.DeepEqual(tt.out.want.Config, got.Config) {
 				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got, tt.out.want.Config)
 			}
+
+			_ = os.Chdir(got.Pwd) // Return to test folder
 		})
 	}
 }

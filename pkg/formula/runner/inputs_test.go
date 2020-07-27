@@ -302,9 +302,10 @@ func (e envResolverMock) Resolve(string) (string, error) {
 }
 
 type fileManagerMock struct {
-	wErr   error
 	rBytes []byte
 	rErr   error
+	wErr   error
+	aErr   error
 	exist  bool
 }
 
@@ -318,4 +319,8 @@ func (fi fileManagerMock) Read(string) ([]byte, error) {
 
 func (fi fileManagerMock) Exists(string) bool {
 	return fi.exist
+}
+
+func (fi fileManagerMock) Append(path string, content []byte) error {
+	return fi.aErr
 }

@@ -9,8 +9,8 @@ import (
 	"github.com/mattn/go-isatty"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -22,13 +22,20 @@ type RunManager struct {
 	formula.PostRunner
 	formula.InputRunner
 	formula.PreRunner
+	file stream.FileWriteExistAppender
 }
 
-func NewFormulaRunner(postRun formula.PostRunner, input formula.InputRunner, preRun formula.PreRunner) formula.Runner {
+func NewFormulaRunner(
+	postRun formula.PostRunner,
+	input formula.InputRunner,
+	preRun formula.PreRunner,
+	file stream.FileWriteExistAppender,
+) formula.Runner {
 	return RunManager{
 		PostRunner:  postRun,
 		InputRunner: input,
 		PreRunner:   preRun,
+		file:        file,
 	}
 }
 
@@ -85,13 +92,13 @@ func (ru RunManager) RunDocker(setup formula.Setup, inputType api.TermInputType)
 	}
 
 	for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
-		if !fileutil.Exists(envFile) {
-			if err := fileutil.WriteFile(envFile, []byte(e+"\n")); err != nil {
+		if !ru.file.Exists(envFile) {
+			if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
 				return nil, err
 			}
 			continue
 		}
-		if err := fileutil.AppendFileData(envFile, []byte(e+"\n")); err != nil {
+		if err := ru.file.Append(envFile, []byte(e+"\n")); err != nil {
 			return nil, err
 		}
 	}

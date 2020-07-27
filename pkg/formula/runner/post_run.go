@@ -6,18 +6,21 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type PostRunnerManager struct {
+	file stream.FileMoveRemover
+	dir  stream.DirRemover
 }
 
-func NewPostRunner() PostRunnerManager {
-	return PostRunnerManager{}
+func NewPostRunner(file stream.FileMoveRemover, dir stream.DirRemover) PostRunnerManager {
+	return PostRunnerManager{file: file, dir: dir}
 }
 
-func (PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
+func (po PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 	if docker {
-		if err := fileutil.RemoveFile(envFile); err != nil {
+		if err := po.file.Remove(envFile); err != nil {
 			return err
 		}
 
@@ -26,22 +29,22 @@ func (PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 		}
 	}
 
-	defer removeWorkDir(p.TmpDir)
+	defer po.removeWorkDir(p.TmpDir)
 
 	df, err := fileutil.ListNewFiles(p.BinPath, p.TmpDir)
 	if err != nil {
 		return err
 	}
 
-	if err = fileutil.MoveFiles(p.TmpDir, p.Pwd, df); err != nil {
+	if err = po.file.Move(p.TmpDir, p.Pwd, df); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func removeWorkDir(tmpDir string) {
-	if err := fileutil.RemoveDir(tmpDir); err != nil {
+func (po PostRunnerManager) removeWorkDir(tmpDir string) {
+	if err := po.dir.Remove(tmpDir); err != nil {
 		fmt.Sprintln("Error in remove dir")
 	}
 }
