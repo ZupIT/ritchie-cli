@@ -8,6 +8,7 @@ import (
 	"os/user"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const volumePattern = "%s:/app"
@@ -39,7 +40,8 @@ func (do DockerManager) Build(formulaPath, dockerImg string) error {
 	}
 
 	if stderr.String() != "" {
-		return ErrDockerBuild
+		prompt.Error("\n" + stderr.String())
+		// return ErrDockerBuild
 	}
 
 	return nil

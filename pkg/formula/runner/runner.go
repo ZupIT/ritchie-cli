@@ -82,10 +82,13 @@ func (ru RunManager) RunDocker(setup formula.Setup, inputType api.TermInputType)
 	}
 
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
-	cmd.Env = os.Environ()
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, "/app")
+	cPwdEnv := fmt.Sprintf(formula.EnvPattern, formula.CPwdEnv, "/app")
+	cmd.Env = append(cmd.Env, pwdEnv)
+	cmd.Env = append(cmd.Env, cPwdEnv)
 
 	if err := ru.Inputs(cmd, setup, inputType); err != nil {
 		return nil, err
@@ -103,6 +106,7 @@ func (ru RunManager) RunDocker(setup formula.Setup, inputType api.TermInputType)
 		}
 	}
 
+	cmd.Env = os.Environ()
 	return cmd, nil
 }
 
