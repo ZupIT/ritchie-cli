@@ -19,7 +19,6 @@ type tutorialCmd struct {
 const (
 	tutorialStatusEnabled  = "enabled"
 	tutorialStatusDisabled = "disabled"
-	TutorialFilePattern    = "%s/tutorial"
 )
 
 // NewTutorialCmd creates tutorial command

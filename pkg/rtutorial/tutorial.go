@@ -1,6 +1,6 @@
 package rtutorial
 
-const TutorialPath = "%s/Tutorial"
+const TutorialPath = "%s/tutorial.json"
 
 const DefaultTutorial = "enabled"
 
