@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -10,27 +11,19 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
-
-const UsageMsg = ` How to contribute new formulas to the Ritchie community?
- You must fork the Github repository "https://github.com/ZupIT/ritchie-formulas" 
- and then follow the step by step below:
-  ∙ git clone https://github.com/{{your_github_user}}/ritchie-formulas
-  ∙ Run the command "rit create formula" and add the location where you cloned your 
-    repository. Rit will create a formula template that you can already test.
-  ∙ Open the project with your favorite text editor.
-  ∙ In order to test your new formula, you can run the command "rit build formula" or
-    "rit build formula --watch" to have automatic updates when editing your formula.`
 
 var CommonsRepoURL = "https://github.com/zupIt/ritchie-formulas"
 
 type initCmd struct {
 	repo formula.RepositoryAdder
 	git  github.Repositories
+	rt   rtutorial.Finder
 }
 
-func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories) *cobra.Command {
-	o := initCmd{repo: repo, git: git}
+func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories, rtf rtutorial.Finder) *cobra.Command {
+	o := initCmd{repo: repo, git: git, rt: rtf}
 
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -66,9 +59,26 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		s.Success(prompt.Green("Okay, now you can use rit.\n"))
-		prompt.Info(UsageMsg)
+		s.Success(prompt.Green("Initialization successful!"))
 
+		tutorialHolder, err := in.rt.Find()
+		if err != nil {
+			return err
+		}
+		tutorialInit(tutorialHolder.Current)
 		return nil
+	}
+}
+
+func tutorialInit(tutorialStatus string) {
+	const tagTutorial = "\n[TUTORIAL]"
+	const MessageTitle = "How to create new formulas:"
+	const MessageBody = ` ∙ Run "rit create formula"
+ ∙ Open the project with your favorite text editor.` + "\n"
+
+	if tutorialStatus == tutorialStatusEnabled {
+		prompt.Info(tagTutorial)
+		prompt.Info(MessageTitle)
+		fmt.Println(MessageBody)
 	}
 }

@@ -28,3 +28,5 @@ type FileWriterMock struct{}
 func (FileWriterMock) Write(path string, content []byte) error {
 	return nil
 }
+
+

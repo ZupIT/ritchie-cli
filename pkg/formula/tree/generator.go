@@ -1,19 +1,19 @@
 package tree
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
 	root        = "root"
 	rootPattern = "root_%s"
-	helpFile    = "help.txt"
 	configFile  = "config.json"
 )
 
@@ -35,7 +35,7 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 	commands := api.Commands{}
 	for _, dir := range dirs { // Generate root commands
 		formulaPath := path.Join(repoPath, dir)
-		helpFilePath := path.Join(formulaPath, helpFile)
+		helpFilePath := path.Join(formulaPath, template.HelpFileName)
 		if !ge.file.Exists(helpFilePath) { // Ignore folders without help.txt
 			continue
 		}
@@ -44,12 +44,18 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 		if err != nil {
 			return formula.Tree{}, err
 		}
+		help := formula.Help{}
+		err = json.Unmarshal(helpFile, &help)
+		if err != nil {
+			return formula.Tree{}, err
+		}
 
 		cmd := api.Command{
-			Id:     fmt.Sprintf(rootPattern, dir),
-			Parent: root,
-			Usage:  dir,
-			Help:   strings.TrimSuffix(string(helpFile), "\n"),
+			Id:       fmt.Sprintf(rootPattern, dir),
+			Parent:   root,
+			Usage:    dir,
+			Help:     help.Short,
+			LongHelp: help.Long,
 		}
 
 		commands = append(commands, cmd)
@@ -82,20 +88,26 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 		}
 
 		formulaPath := path.Join(dirPath, dir)
-		helpFilePath := path.Join(formulaPath, helpFile)
-		var helpFile []byte
+		helpFilePath := path.Join(formulaPath, template.HelpFileName)
+		help := formula.Help{}
 		if ge.file.Exists(helpFilePath) { // Check if help.txt exist
-			helpFile, err = ge.file.Read(helpFilePath)
+			helpFile, err := ge.file.Read(helpFilePath)
 			if err != nil {
 				return nil, err
 			}
+			err = json.Unmarshal(helpFile, &help)
+			if err != nil {
+				return nil, err
+			}
+
 		}
 
 		cmd := api.Command{
-			Id:     fmt.Sprintf("%s_%s", cmd.Id, dir),
-			Parent: cmd.Id,
-			Usage:  dir,
-			Help:  strings.TrimSuffix(string(helpFile), "\n"),
+			Id:       fmt.Sprintf("%s_%s", cmd.Id, dir),
+			Parent:   cmd.Id,
+			Usage:    dir,
+			Help:     help.Short,
+			LongHelp: help.Long,
 		}
 
 		configFilePath := path.Join(formulaPath, configFile)

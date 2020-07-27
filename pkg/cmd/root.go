@@ -13,6 +13,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
@@ -54,10 +55,11 @@ var (
 type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
+	rt          rtutorial.Finder
 }
 
-func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker) *cobra.Command {
-	o := &rootCmd{ritchieHome: ritchieHome, dir: dir}
+func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker, rtf rtutorial.Finder) *cobra.Command {
+	o := &rootCmd{ritchieHome: ritchieHome, dir: dir, rt: rtf}
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
@@ -85,8 +87,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		commonsRepoPath := path.Join(ro.ritchieHome, "repos", "commons")
-		if !ro.dir.Exists(commonsRepoPath) {
+		if !ro.ritchieIsInitialized() {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
@@ -98,6 +99,14 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		verifyNewVersion(cmd)
+
+		if !ro.ritchieIsInitialized() && cmd.Use == cmdUse {
+			tutorialHolder, err := ro.rt.Find()
+			if err != nil {
+				return err
+			}
+			tutorialRit(tutorialHolder.Current)
+		}
 		return nil
 	}
 }
@@ -137,4 +146,22 @@ func versionFlag() string {
 
 func runHelp(cmd *cobra.Command, _ []string) error {
 	return cmd.Help()
+}
+
+func tutorialRit(tutorialStatus string) {
+	const tagTutorial = "\n[TUTORIAL]"
+	const MessageTitle = "To initialize the ritchie:"
+	const MessageBody = ` ∙ Run "rit init"` + "\n"
+
+	if tutorialStatus == tutorialStatusEnabled {
+		prompt.Info(tagTutorial)
+		prompt.Info(MessageTitle)
+		fmt.Println(MessageBody)
+	}
+}
+
+func (ro *rootCmd) ritchieIsInitialized() bool {
+	commonsRepoPath := path.Join(ro.ritchieHome, "repos", "commons")
+
+	return ro.dir.Exists(commonsRepoPath)
 }

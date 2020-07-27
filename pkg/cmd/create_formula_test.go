@@ -17,6 +17,7 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 		inputTextMock{},
 		inputTextValidatorMock{},
 		inputListMock{},
+		TutorialFinderMock{},
 	)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {

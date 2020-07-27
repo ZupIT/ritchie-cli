@@ -1,11 +1,13 @@
 package creator
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/modifier"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -44,7 +46,8 @@ func (c CreateManager) Create(cf formula.Create) error {
 
 	fCmdName := cf.FormulaCmdName()
 
-	if err := c.generateFormulaFiles(cf.FormulaPath, cf.Lang, fCmdName, cf.WorkspacePath); err != nil {
+	modifiers := modifier.NewModifiers(cf)
+	if err := c.generateFormulaFiles(cf.FormulaPath, cf.Lang, fCmdName, cf.WorkspacePath, modifiers); err != nil {
 		return err
 	}
 
@@ -60,7 +63,7 @@ func (c CreateManager) isValidCmd(fPath string) error {
 	return nil
 }
 
-func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath string) error {
+func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath string, modifiers []modifier.Modifier) error {
 
 	if err := c.dir.Create(fPath); err != nil {
 		return err
@@ -70,14 +73,14 @@ func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath s
 		return err
 	}
 
-	if err := c.applyLangTemplate(lang, fPath, workSpcPath); err != nil {
+	if err := c.applyLangTemplate(lang, fPath, workSpcPath, modifiers); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string) error {
+func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string, modifiers []modifier.Modifier) error {
 
 	tFiles, err := c.tplM.LangTemplateFiles(lang)
 	if err != nil {
@@ -111,6 +114,7 @@ func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string
 			if err != nil {
 				return err
 			}
+			tpl = modifier.Modify(tpl, modifiers)
 			err = c.file.Write(newPath, tpl)
 			if err != nil {
 				return err
@@ -126,11 +130,22 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 	for i := 0; i < len(dirs); i++ {
 		d := dirs[0 : i+1]
 		tPath := path.Join(workSpacePath, path.Join(d...))
-		helpPath := fmt.Sprintf("%s/help.txt", tPath)
+		helpPath := fmt.Sprintf("%s/%s", tPath, template.HelpFileName)
 		if !c.file.Exists(helpPath) {
 			folderName := path.Base(tPath)
-			tpl := strings.ReplaceAll(template.Help, "{{folderName}}", folderName)
-			err := c.file.Write(helpPath, []byte(tpl))
+			tpl := strings.ReplaceAll(template.HelpJson, "{{folderName}}", folderName)
+			help := formula.Help{}
+
+			err := json.Unmarshal([]byte(tpl), &help)
+			if err != nil {
+				return err
+			}
+
+			b, err := json.MarshalIndent(help, "", "\t")
+			if err != nil {
+				return err
+			}
+			err = c.file.Write(helpPath, b)
 			if err != nil {
 				return err
 			}
