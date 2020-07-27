@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
@@ -10,7 +11,8 @@ import (
 func Test_ListCredentialCmd(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	credSettings := credential.NewSettings(fileManager, dirManager)
+	homeDir, _ := os.UserHomeDir()
+	credSettings := credential.NewSettings(fileManager, dirManager, homeDir)
 
 	t.Run("Success case", func(t *testing.T) {
 		o := NewListCredentialCmd(credSettings)

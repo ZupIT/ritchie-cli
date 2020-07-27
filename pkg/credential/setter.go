@@ -8,19 +8,19 @@ import (
 )
 
 type SetManager struct {
-	homePath  string
-	ctxFinder rcontext.CtxFinder
+	homePath string
+	ctx      rcontext.Finder
 }
 
-func NewSetter(homePath string, cf rcontext.CtxFinder) SetManager {
+func NewSetter(homePath string, cf rcontext.Finder) SetManager {
 	return SetManager{
-		homePath:  homePath,
-		ctxFinder: cf,
+		homePath: homePath,
+		ctx:      cf,
 	}
 }
 
 func (s SetManager) Set(cred Detail) error {
-	ctx, err := s.ctxFinder.Find()
+	ctx, err := s.ctx.Find()
 	if err != nil {
 		return err
 	}

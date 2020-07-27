@@ -10,10 +10,10 @@ import (
 )
 
 type showContextCmd struct {
-	rcontext.CtxFinder
+	rcontext.Finder
 }
 
-func NewShowContextCmd(f rcontext.CtxFinder) *cobra.Command {
+func NewShowContextCmd(f rcontext.Finder) *cobra.Command {
 	s := showContextCmd{f}
 
 	return &cobra.Command{

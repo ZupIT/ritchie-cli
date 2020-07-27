@@ -4,10 +4,10 @@ import "fmt"
 
 type FindSetterManager struct {
 	ctxFile string
-	CtxFinder
+	Finder
 	Setter
 }
 
-func NewFindSetter(homePath string, f CtxFinder, s Setter) FindSetterManager {
+func NewFindSetter(homePath string, f Finder, s Setter) FindSetterManager {
 	return FindSetterManager{fmt.Sprintf(ContextPath, homePath), f, s}
 }

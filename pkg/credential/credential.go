@@ -43,10 +43,18 @@ type CredFinder interface {
 	Find(service string) (Detail, error)
 }
 
-type Operations interface {
+type Reader interface {
 	ReadCredentialsFields(path string) (Fields, error)
 	ReadCredentialsValue(path string) ([]ListCredData, error)
+}
+
+type Writer interface {
 	WriteCredentialsFields(fields Fields, path string) error
 	WriteDefaultCredentialsFields(path string) error
+}
+
+type ReaderWriter interface {
+	Reader
+	Writer
 }
 

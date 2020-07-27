@@ -10,7 +10,7 @@ import (
 func Test_setCredentialCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		Setter        credential.Setter
-		Operations    credential.Operations
+		file          credential.ReaderWriter
 		InputText     prompt.InputText
 		InputBool     prompt.InputBool
 		InputList     prompt.InputList
@@ -25,7 +25,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			name: "Run with success",
 			fields: fields{
 				Setter:        credSetterMock{},
-				Operations:    credSettingsMock{},
+				file:          credSettingsMock{},
 				InputText:     inputSecretMock{},
 				InputBool:     inputFalseMock{},
 				InputList:     inputListCredMock{},
@@ -37,7 +37,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			name: "Run with success AddNew",
 			fields: fields{
 				Setter:        credSetterMock{},
-				Operations:    credSettingsMock{},
+				file:          credSettingsMock{},
 				InputText:     inputSecretMock{},
 				InputBool:     inputFalseMock{},
 				InputList:     inputListCustomMock{credential.AddNew},
@@ -49,7 +49,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			name: "Fail when list return err",
 			fields: fields{
 				Setter:        credSetterMock{},
-				Operations:    credSettingsMock{},
+				file:          credSettingsMock{},
 				InputText:     inputSecretMock{},
 				InputBool:     inputFalseMock{},
 				InputList:     inputListErrorMock{},
@@ -61,7 +61,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			name: "Fail when text return err",
 			fields: fields{
 				Setter:        credSetterMock{},
-				Operations:    credSettingsMock{},
+				file:          credSettingsMock{},
 				InputText:     inputTextErrorMock{},
 				InputBool:     inputFalseMock{},
 				InputList:     inputListCustomMock{credential.AddNew},
@@ -74,7 +74,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			o := NewSetCredentialCmd(
 				tt.fields.Setter,
-				tt.fields.Operations,
+				tt.fields.file,
 				tt.fields.InputText,
 				tt.fields.InputBool,
 				tt.fields.InputList,

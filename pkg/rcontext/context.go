@@ -15,7 +15,7 @@ type Setter interface {
 	Set(ctx string) (ContextHolder, error)
 }
 
-type CtxFinder interface {
+type Finder interface {
 	Find() (ContextHolder, error)
 }
 
@@ -24,11 +24,11 @@ type Remover interface {
 }
 
 type FindRemover interface {
-	CtxFinder
+	Finder
 	Remover
 }
 
 type FindSetter interface {
-	CtxFinder
+	Finder
 	Setter
 }

@@ -9,10 +9,10 @@ import (
 
 type Finder struct {
 	homePath  string
-	ctxFinder rcontext.CtxFinder
+	ctxFinder rcontext.Finder
 }
 
-func NewFinder(homePath string, cf rcontext.CtxFinder) Finder {
+func NewFinder(homePath string, cf rcontext.Finder) Finder {
 	return Finder{
 		homePath:  homePath,
 		ctxFinder: cf,

@@ -5,14 +5,24 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	stream "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 var (
 	githubCred = Detail{Service: "github"}
-	ctxFinder =   rcontext.FindManager{CtxFile: ""}
+	streamMock = stream.FileReadExisterCustomMock{
+		ReadMock: func(path string) ([]byte, error) {
+			return []byte("{\"current_context\":\"default\"}"), nil
+		},
+		ExistsMock: func(path string) bool {
+			return true
+		},
+	}
+	ctxFinder = rcontext.FindManager{CtxFile: "", File: streamMock}
 )
 
 func TestSet(t *testing.T) {
+
 	tmp := os.TempDir()
 	setter := NewSetter(tmp, ctxFinder)
 	tests := []struct {
@@ -36,4 +46,3 @@ func TestSet(t *testing.T) {
 		})
 	}
 }
-

@@ -11,7 +11,8 @@ import (
 
 var fileManager = stream.NewFileManager()
 var dirManager = stream.NewDirManager(fileManager)
-var credSettings = NewSettings(fileManager, dirManager)
+var homeDir, _ = os.UserHomeDir()
+var credSettings = NewSettings(fileManager, dirManager, homeDir)
 
 func providersPath() string {
 	tempDir := os.TempDir()

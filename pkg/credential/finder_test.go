@@ -30,7 +30,7 @@ func TestFind(t *testing.T) {
 			in:   "github",
 			out: out{
 				cred: githubCred,
-				err:nil  ,
+				err:  nil,
 			},
 		},
 	}
