@@ -53,6 +53,7 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 				cred.Value = v
 				cred.Name = k
 				creds = append(creds, cred)
+				detail = Detail{}
 			}
 		}
 	}
