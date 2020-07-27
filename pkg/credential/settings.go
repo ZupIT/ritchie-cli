@@ -12,13 +12,13 @@ const AddNew = "Add a new"
 
 type Settings struct {
 	file stream.FileWriteReadExisterLister
-	dir stream.DirLister
+	dir  stream.DirLister
 }
 
 func NewSettings(file stream.FileWriteReadExisterLister, dir stream.DirLister) Settings {
 	return Settings{
 		file: file,
-		dir: dir,
+		dir:  dir,
 	}
 }
 

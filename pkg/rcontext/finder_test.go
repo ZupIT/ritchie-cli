@@ -5,11 +5,14 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
-	finder := NewFinder(tmp)
+	file := stream.NewFileManager()
+	finder := NewFinder(tmp, file)
 	setter := NewSetter(tmp, finder)
 
 	type in struct {
@@ -29,9 +32,12 @@ func TestFind(t *testing.T) {
 	}{
 		{
 			name: "empty context",
-			in:   nil,
+			in:   &in{
+				ctx: "",
+				holder: ContextHolder{Current: ""},
+			},
 			out: &out{
-				want: ContextHolder{},
+				want: ContextHolder{Current: ""},
 				err:  nil,
 			},
 		},
