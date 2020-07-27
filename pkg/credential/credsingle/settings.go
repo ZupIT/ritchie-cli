@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -35,7 +36,39 @@ func (s SingleSettings) ReadCredentials(path string) (credential.Fields, error) 
 }
 
 func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) error {
-	fieldsData, err := json.Marshal(fields)
+	var fieldsToWrite = fields
+	if s.file.Exists(path) {
+		configFile, err := fileutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		// Check for incoming new keys
+		credentialFields := &credential.Fields{}
+		json.Unmarshal(configFile, credentialFields)
+		currentKeys := make(map[string]struct{})
+		var diff []string
+		for k := range *credentialFields {
+			currentKeys[k] = struct{}{}
+		}
+		for k := range fieldsToWrite {
+			if _, found := currentKeys[k]; !found {
+				diff = append(diff, k)
+			}
+		}
+
+		// Avoid I/O consumption if there is nothing to change
+		if len(diff) == 0 {
+			return nil
+		}
+
+		for _, key := range diff {
+			(*credentialFields)[key] = fieldsToWrite[key]
+		}
+		fieldsToWrite = *credentialFields
+	}
+
+	fieldsData, err := json.Marshal(fieldsToWrite)
 	if err != nil {
 		return err
 	}
@@ -50,11 +83,8 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) 
 // WriteDefault is a non override version of WriteCredentials
 // used to create providers.json if user dont have it
 func (s SingleSettings) WriteDefaultCredentials(path string) error {
-	if !s.file.Exists(path) {
-		err := s.WriteCredentials(NewDefaultCredentials(), path)
-		return err
-	}
-	return nil
+	err := s.WriteCredentials(NewDefaultCredentials(), path)
+	return err
 }
 
 func NewDefaultCredentials() credential.Fields {
@@ -83,6 +113,11 @@ func NewDefaultCredentials() credential.Fields {
 		Type: "plain text",
 	}
 
+	var password = credential.Field{
+		Name: "password",
+		Type: "secret",
+	}
+
 	var dc = credential.Fields{
 		"Add a new":  []credential.Field{},
 		"github":     []credential.Field{username, token},
@@ -90,6 +125,7 @@ func NewDefaultCredentials() credential.Fields {
 		"aws":        []credential.Field{accessKeyId, secretAccessKey},
 		"jenkins":    []credential.Field{username, token},
 		"kubeconfig": []credential.Field{base64config},
+		"ansible":    []credential.Field{username, password},
 	}
 
 	return dc
