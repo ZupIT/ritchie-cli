@@ -59,8 +59,8 @@ func NewAddRepoCmd(
 	}
 	cmd := &cobra.Command{
 		Use:     "repo",
-		Short:   "Add a repository.",
-		Example: "rit add repo ",
+		Short:   "Add a repository",
+		Example: "rit add repo",
 		RunE:    RunFuncE(addRepo.runStdin(), addRepo.runPrompt()),
 	}
 	cmd.LocalFlags()
