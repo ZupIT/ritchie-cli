@@ -8,6 +8,7 @@ import (
 	"os/user"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const volumePattern = "%s:/app"
@@ -30,15 +31,13 @@ func (do DockerManager) Build(formulaPath, dockerImg string) error {
 	containerCmd := fmt.Sprintf("cd /app && /usr/bin/make build && chown -R %s bin", currentUser.Uid)
 	args := []string{"run", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd}
 
-	var stderr, stdout bytes.Buffer
+	var stderr bytes.Buffer
 	cmd := exec.Command("docker", args...)
-	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return ErrDockerBuild
-	}
-
-	if stderr.String() != "" {
+		if stderr.Bytes() != nil {
+			prompt.Error(stderr.String())
+		}
 		return ErrDockerBuild
 	}
 
