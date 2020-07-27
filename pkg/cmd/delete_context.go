@@ -31,9 +31,9 @@ func NewDeleteContextCmd(
 
 	cmd := &cobra.Command{
 		Use:     "context",
-		Short:   "Delete context for Ritchie-cli",
+		Short:   "Delete context for credentials",
 		Example: "rit delete context",
-		RunE: RunFuncE(d.runStdin(), d.runPrompt()),
+		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
 	}
 
 	cmd.LocalFlags()
@@ -95,7 +95,6 @@ func (d deleteContextCmd) runStdin() CommandRunnerFunc {
 
 		err = stdin.ReadJson(os.Stdin, &dc)
 		if err != nil {
-			prompt.Error(stdin.MsgInvalidInput)
 			return err
 		}
 

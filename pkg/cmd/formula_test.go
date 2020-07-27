@@ -14,11 +14,13 @@ func TestFormulaCommand_Add(t *testing.T) {
 		tree: formula.Tree{
 			Commands: api.Commands{
 				{
+					Id:     "root_mock",
 					Parent: "root",
 					Usage:  "mock",
 					Help:   "mock for add",
 				},
 				{
+					Id:      "root_mock_test",
 					Parent:  "root_mock",
 					Usage:   "test",
 					Help:    "test for add",
@@ -27,7 +29,7 @@ func TestFormulaCommand_Add(t *testing.T) {
 			},
 		},
 	}
-	formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, runnerMock{}, runnerMock{})
+	formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, runnerMock{})
 	rootCmd := &cobra.Command{
 		Use: "rit",
 	}
@@ -47,7 +49,7 @@ func TestFormulaCommand_Add(t *testing.T) {
 		},
 		{
 			name: "success docker",
-			args: []string{"mock", "test", "--docker"},
+			args: []string{"mock", "test", "--local"},
 		},
 		{
 			name: "success stdin",

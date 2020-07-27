@@ -9,7 +9,10 @@ import (
 
 // Unzip wrapper for archive.zip
 func Unzip(src string, dest string) error {
-	reader, _ := zip.OpenReader(src)
+	reader, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
 	for _, file := range reader.Reader.File {
 
 		zippedFile, err := file.Open()

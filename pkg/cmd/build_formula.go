@@ -26,7 +26,7 @@ const (
 type buildFormulaCmd struct {
 	userHomeDir string
 	workspace   formula.WorkspaceAddListValidator
-	formula     formula.Builder
+	formula     formula.LocalBuilder
 	watcher     formula.Watcher
 	directory   stream.DirListChecker
 	prompt.InputText
@@ -36,7 +36,7 @@ type buildFormulaCmd struct {
 
 func NewBuildFormulaCmd(
 	userHomeDir string,
-	formula formula.Builder,
+	formula formula.LocalBuilder,
 	workManager formula.WorkspaceAddListValidator,
 	watcher formula.Watcher,
 	directory stream.DirListChecker,

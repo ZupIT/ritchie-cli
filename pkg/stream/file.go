@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type FileExister interface {
@@ -34,9 +35,22 @@ type FileCopier interface {
 	Copy(src, dst string) error
 }
 
+type FileAppender interface {
+	Append(path string, content []byte) error
+}
+
+type FileMover interface {
+	Move(oldPath, newPath string, files []string) error
+}
+
 type FileReadExister interface {
 	FileReader
 	FileExister
+}
+
+type FileMoveRemover interface {
+	FileMover
+	FileRemover
 }
 
 type FileCopyExistListerWriter interface {
@@ -57,6 +71,12 @@ type FileWriteReadExisterLister interface {
 	FileReader
 	FileExister
 	FileLister
+}
+
+type FileWriteExistAppender interface {
+	FileWriter
+	FileExister
+	FileAppender
 }
 
 type FileWriteReadExistRemover interface {
@@ -159,5 +179,29 @@ func (f FileManager) Copy(src, dest string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (f FileManager) Append(path string, content []byte) error {
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	if _, err := file.Write(content); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f FileManager) Move(oldPath, newPath string, files []string) error {
+	for _, f := range files {
+		pwdOF := filepath.Join(oldPath, f)
+		pwdNF := filepath.Join(newPath, f)
+		if err := os.Rename(pwdOF, pwdNF); err != nil {
+			return err
+		}
+	}
 	return nil
 }
