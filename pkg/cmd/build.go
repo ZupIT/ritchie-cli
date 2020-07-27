@@ -6,7 +6,7 @@ func NewBuildCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "build SUB_COMMAND",
 		Short:   "Build formulas",
-		Long:    "This is a root command, to use it, add a sub command.",
+		Long:    "Build formula with latest changes.",
 		Example: "rit build formula",
 	}
 }
