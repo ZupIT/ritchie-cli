@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
@@ -25,7 +27,7 @@ func NewDeleteRepoCmd(rl formula.RepositoryLister, il prompt.InputList, rd formu
 		Use:     "repo",
 		Short:   "Delete a repository",
 		Example: "rit delete repo",
-		RunE:    dr.runFunc(),
+		RunE:    RunFuncE(dr.runStdin(), dr.runFunc()),
 	}
 	return cmd
 }
@@ -57,6 +59,25 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 		}
 
 		prompt.Success(fmt.Sprintf(deleteSuccessMsg, repo))
+		return nil
+	}
+}
+
+func (dr deleteRepoCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		repo := formula.Repo{}
+
+		err := stdin.ReadJson(os.Stdin, &repo)
+		if err != nil {
+			return err
+		}
+
+		if err := dr.Delete(repo.Name); err != nil {
+			return err
+		}
+
+		prompt.Success(fmt.Sprintf(deleteSuccessMsg, repo.Name))
 		return nil
 	}
 }

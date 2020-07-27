@@ -27,10 +27,18 @@ func (t Tags) Names() []string {
 	return tags
 }
 
-type RepoInfo struct {
-	Owner string
-	Repo  string
-	Token string
+type RepoInfo interface {
+	ZipUrl(version string) string
+	TagsUrl() string
+	LatestTagUrl() string
+	TokenHeader() string
+	Token() string
+}
+
+type DefaultRepoInfo struct {
+	owner string
+	repo  string
+	token string
 }
 
 type Repositories interface {
@@ -46,33 +54,37 @@ func NewRepoInfo(url string, token string) RepoInfo {
 	repo := split[len(split)-1]
 	owner := split[len(split)-2]
 
-	return RepoInfo{
-		Owner: owner,
-		Repo:  repo,
-		Token: token,
+	return DefaultRepoInfo{
+		owner: owner,
+		repo:  repo,
+		token: token,
 	}
 }
 
 // ZipUrl returns the GitHub API URL for download zipball repository
 // e.g. https://api.github.com/repos/{{owner}}/{{repo}}/zipball/{{tag-version}}
-func (in RepoInfo) ZipUrl(version string) string {
-	return fmt.Sprintf(ZipUrlPattern, in.Owner, in.Repo, version)
+func (in DefaultRepoInfo) ZipUrl(version string) string {
+	return fmt.Sprintf(ZipUrlPattern, in.owner, in.repo, version)
 }
 
 // TagsUrl returns the GitHub API URL for get all tags
 // e.g. https://api.github.com/repos/{{owner}}/{{repo}}/tags
-func (in RepoInfo) TagsUrl() string {
-	return fmt.Sprintf(TagsUrlPattern, in.Owner, in.Repo)
+func (in DefaultRepoInfo) TagsUrl() string {
+	return fmt.Sprintf(TagsUrlPattern, in.owner, in.repo)
 }
 
 // LatestTagUrl returns the GitHub API URL for get latest tag release
 // https://api.github.com/repos/:owner/:repo/releases/latest
-func (in RepoInfo) LatestTagUrl() string {
-	return fmt.Sprintf(LatestTagUrlPattern, in.Owner, in.Repo)
+func (in DefaultRepoInfo) LatestTagUrl() string {
+	return fmt.Sprintf(LatestTagUrlPattern, in.owner, in.repo)
 }
 
 // TokenHeader returns the Authorization value formatted for Github API integration
 // e.g. "token f39c5aca-858f-4a04-9ca3-5104d02b9c56"
-func (in RepoInfo) TokenHeader() string {
-	return fmt.Sprintf("token %s", in.Token)
+func (in DefaultRepoInfo) TokenHeader() string {
+	return fmt.Sprintf("token %s", in.token)
+}
+
+func (in DefaultRepoInfo) Token() string {
+	return in.token
 }

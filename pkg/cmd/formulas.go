@@ -70,7 +70,7 @@ func newSubCmd(cmd api.Command) *cobra.Command {
 	c := &cobra.Command{
 		Use:         cmd.Usage + subCommand,
 		Short:       cmd.Help,
-		Long:        cmd.Help,
+		Long:        cmd.LongHelp,
 		Annotations: map[string]string{Group: group},
 	}
 	c.LocalFlags()
@@ -81,7 +81,7 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	formulaCmd := &cobra.Command{
 		Use:   cmd.Usage,
 		Short: cmd.Help,
-		Long:  cmd.Help,
+		Long:  cmd.LongHelp,
 	}
 
 	addFlags(formulaCmd)

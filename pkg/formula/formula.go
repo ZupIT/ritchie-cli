@@ -68,6 +68,10 @@ type (
 		Config      Config
 		ContainerId string
 	}
+	Help struct {
+		Short string `json:"short"`
+		Long  string `json:"long"`
+	}
 )
 
 type PreRunner interface {
