@@ -36,7 +36,22 @@ func (s SingleSettings) ReadCredentials(path string) (credential.Fields, error) 
 }
 
 func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) error {
-	var fieldsToWrite = fields
+	fieldsData, err := json.Marshal(fields)
+	if err != nil {
+		return err
+	}
+	err = s.file.Write(path, fieldsData)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// WriteDefault is a non override version of WriteCredentials
+// used to create providers.json if user dont have it
+func (s SingleSettings) WriteDefaultCredentials(path string) error {
+	fieldsToWrite := NewDefaultCredentials()
 	if s.file.Exists(path) {
 		configFile, err := fileutil.ReadFile(path)
 		if err != nil {
@@ -67,23 +82,7 @@ func (s SingleSettings) WriteCredentials(fields credential.Fields, path string) 
 		}
 		fieldsToWrite = *credentialFields
 	}
-
-	fieldsData, err := json.Marshal(fieldsToWrite)
-	if err != nil {
-		return err
-	}
-	err = s.file.Write(path, fieldsData)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// WriteDefault is a non override version of WriteCredentials
-// used to create providers.json if user dont have it
-func (s SingleSettings) WriteDefaultCredentials(path string) error {
-	err := s.WriteCredentials(NewDefaultCredentials(), path)
+	err := s.WriteCredentials(fieldsToWrite, path)
 	return err
 }
 

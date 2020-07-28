@@ -1,11 +1,14 @@
 package credsingle
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -39,6 +42,43 @@ func TestSingleSettings_WriteCredentials(t *testing.T) {
 }
 
 func TestSingleSettings_WriteDefaultCredentials(t *testing.T) {
+	credentials := credential.Fields{
+		"customField":     []credential.Field{},
+	}
+	fieldsData, err := json.Marshal(credentials)
+	if err != nil {
+		t.Errorf("Error while writing existing credentials: %s", err)
+	}
+
+	// Write an initial credential file
+	err = ioutil.WriteFile(providersPath(), fieldsData, os.ModePerm)
+	defer os.Remove(providersPath())
+	if err != nil {
+		t.Errorf("Error while writing existing credentials: %s", err)
+	}
+
+	// Call the method
+	err = credSettings.WriteDefaultCredentials(providersPath())
+	if err != nil {
+		t.Errorf("Error while writing existing credentials: %s", err)
+	}
+
+	// Reopen file and check if previous config was not lost
+	file, _ := ioutil.ReadFile(providersPath())
+	var fields credential.Fields
+	err = json.Unmarshal(file, &fields)
+	if err != nil {
+		t.Errorf("Error while writing existing credentials: %s", err)
+	}
+	if len(fields) != len(NewDefaultCredentials()) + 1 {
+		t.Errorf("Writing existing credentials did not succeed in adding a field")
+	}
+	if fields["customField"] == nil {
+		t.Errorf("Writing existing credentials did not save custom field")
+	}
+}
+
+func TestSingleSettings_WriteDefaultCredentialsOnExistingFile(t *testing.T) {
 	err := credSettings.WriteDefaultCredentials(providersPath())
 	defer os.Remove(providersPath())
 	if err != nil {
