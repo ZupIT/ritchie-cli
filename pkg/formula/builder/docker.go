@@ -28,7 +28,12 @@ func NewBuildDocker() formula.DockerBuilder {
 
 func (do DockerManager) Build(formulaPath, dockerImg string) error {
 	volume := fmt.Sprintf(volumePattern, formulaPath)
-	args := []string{"run", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd()}
+	containerCmd, err := containerCmd()
+	if err != nil {
+		return err
+	}
+
+	args := []string{"run", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd}
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", args...)
@@ -43,13 +48,16 @@ func (do DockerManager) Build(formulaPath, dockerImg string) error {
 	return nil
 }
 
-func containerCmd() string {
+func containerCmd() (string, error) {
 	os := runtime.GOOS
 	switch os {
 	case osutil.Windows:
-		return defaultContainerCmd
+		return defaultContainerCmd, nil
 	default:
-		currentUser, _ := user.Current()
-		return fmt.Sprintf("%s && chown -R %s bin", defaultContainerCmd, currentUser.Uid)
+		currentUser, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%s && chown -R %s bin", defaultContainerCmd, currentUser.Uid), nil
 	}
 }

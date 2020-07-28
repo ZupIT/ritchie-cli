@@ -53,12 +53,11 @@ func TestBinPath(t *testing.T) {
 
 func TestBinFilePath(t *testing.T) {
 	os := runtime.GOOS
-	var want string
+	run := "run.sh"
 	if os == osutil.Windows {
-		want = filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin", "run.bat")
-	} else {
-		want = filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin", "run.sh")
+		run =  "run.bat"
 	}
+	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin", run)
 
 	formulaPath := def.FormulaPath(home)
 	got := def.BinFilePath(formulaPath)
