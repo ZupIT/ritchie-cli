@@ -58,34 +58,44 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 }
 
 func formatCredential(credential string) string {
-	arr := strings.Split(credential, "credential")
-	arr2 := strings.Split(arr[1], "service")
-	res := strings.TrimPrefix(arr2[0], "\":")
-	res = strings.TrimSuffix(res, ",\"")
+	credArr := strings.Split(credential, "credential")
+	credArr = strings.Split(credArr[1], "service")
 
-	splitedCredential := strings.Split(res, "\"")
+	credValue := strings.TrimPrefix(credArr[0], "\":")
+	credValue = strings.TrimSuffix(credValue, ",\"")
+
+	splitedCredential := strings.Split(credValue, "\"")
 	for i, c := range splitedCredential {
 		if c == ":" {
-			splitedCredential[i+1] = hide(splitedCredential[i+1])
+			splitedCredential[i+1] = formatCredValue(splitedCredential[i+1])
 		}
 	}
 
 	return strings.Join(splitedCredential, "\"")
 }
 
-func hide(credential string) string {
-	mustHideIndex := len(credential) / 3
-	var hiddenCredential []rune
-	for i, r := range credential {
-		if i > mustHideIndex {
-			r = '*'
+func formatCredValue(credential string) string {
+	if credLen := len(credential); credLen > 20 {
+		var resumedCredential []rune
+		for i, r := range credential {
+			resumedCredential = append(resumedCredential, r)
+			if i > 10 {
+				break
+			}
 		}
-		hiddenCredential = append(hiddenCredential, r)
+		return string(resumedCredential) + "..."
+	} else {
+		var hiddenCredential []rune
+		mustHideIndex := credLen / 3
+		for i, r := range credential {
+			if i > mustHideIndex {
+				r = '*'
+			}
+			hiddenCredential = append(hiddenCredential, r)
+		}
+		return string(hiddenCredential)
 	}
-
-	return string(hiddenCredential)
 }
-
 
 func (s Settings) WriteCredentialsFields(fields Fields, path string) error {
 	fieldsData, err := json.Marshal(fields)
