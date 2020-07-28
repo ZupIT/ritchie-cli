@@ -11,8 +11,6 @@ This repository contains the CLI core, which can execute formulas stored inside 
 
 ## How to install
 
-Download the installer from (https://commons-repo.ritchiecli.io/install.msi)
-
 - Linux|MacOS
 
 ```bash
