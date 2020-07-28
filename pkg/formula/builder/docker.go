@@ -6,12 +6,17 @@ import (
 	"fmt"
 	"os/exec"
 	"os/user"
+	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-const volumePattern = "%s:/app"
+const (
+	defaultContainerCmd = "cd /app && /usr/bin/make build"
+	volumePattern       = "%s:/app"
+)
 
 var ErrDockerBuild = errors.New("failed building formula with Docker, we will try to build your formula locally")
 
@@ -23,13 +28,7 @@ func NewBuildDocker() formula.DockerBuilder {
 
 func (do DockerManager) Build(formulaPath, dockerImg string) error {
 	volume := fmt.Sprintf(volumePattern, formulaPath)
-	currentUser, err := user.Current()
-	if err != nil {
-		return err
-	}
-
-	containerCmd := fmt.Sprintf("cd /app && /usr/bin/make build && chown -R %s bin", currentUser.Uid)
-	args := []string{"run", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd}
+	args := []string{"run", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd()}
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", args...)
@@ -42,4 +41,15 @@ func (do DockerManager) Build(formulaPath, dockerImg string) error {
 	}
 
 	return nil
+}
+
+func containerCmd() string {
+	os := runtime.GOOS
+	switch os {
+	case osutil.Windows:
+		return defaultContainerCmd
+	default:
+		currentUser, _ := user.Current()
+		return fmt.Sprintf("%s && chown -R %s bin", defaultContainerCmd, currentUser.Uid)
+	}
 }

@@ -2,9 +2,12 @@ package formula
 
 import (
 	"os"
-	"path"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 )
 
 var def Definition
@@ -21,7 +24,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestFormulaPath(t *testing.T) {
-	const want = "/tmp/repos/commons/scaffold/coffee-java"
+	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java")
 	got := def.FormulaPath(home)
 
 	if want != got {
@@ -30,8 +33,7 @@ func TestFormulaPath(t *testing.T) {
 }
 
 func TestTmpWorkDirPath(t *testing.T) {
-
-	want := path.Join(home, TmpDir)
+	want := filepath.Join(home, TmpDir)
 	gotTmpDir := def.TmpWorkDirPath(home)
 
 	if !strings.Contains(gotTmpDir, want) {
@@ -40,7 +42,7 @@ func TestTmpWorkDirPath(t *testing.T) {
 }
 
 func TestBinPath(t *testing.T) {
-	const want = "/tmp/repos/commons/scaffold/coffee-java/bin"
+	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin")
 	formulaPath := def.FormulaPath(home)
 	got := def.BinPath(formulaPath)
 
@@ -50,7 +52,14 @@ func TestBinPath(t *testing.T) {
 }
 
 func TestBinFilePath(t *testing.T) {
-	const want = "/tmp/repos/commons/scaffold/coffee-java/bin/run.sh"
+	os := runtime.GOOS
+	var want string
+	if os == osutil.Windows {
+		want = filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin", "run.bat")
+	} else {
+		want = filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin", "run.sh")
+	}
+
 	formulaPath := def.FormulaPath(home)
 	got := def.BinFilePath(formulaPath)
 
@@ -86,8 +95,7 @@ func TestPkgName(t *testing.T) {
 }
 
 func TestConfigPath(t *testing.T) {
-
-	const want = "/tmp/repos/commons/scaffold/coffee-java/config.json"
+	 want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "config.json")
 
 	got := def.ConfigPath(def.FormulaPath(home))
 

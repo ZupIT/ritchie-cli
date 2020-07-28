@@ -2,8 +2,8 @@ package watcher
 
 import (
 	"errors"
-	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/radovskyb/watcher"
@@ -16,9 +16,9 @@ import (
 
 func TestWatch(t *testing.T) {
 	tmpDir := os.TempDir()
-	workspacePath := fmt.Sprintf("%s/ritchie-formulas-test-watcher", tmpDir)
-	formulaPath := fmt.Sprintf("%s/ritchie-formulas-test-watcher/testing/formula", tmpDir)
-	ritHome := fmt.Sprintf("%s/.my-rit-watcher", os.TempDir())
+	workspacePath := filepath.Join(tmpDir, "ritchie-formulas-test-watcher")
+	formulaPath := filepath.Join(tmpDir, "ritchie-formulas-test-watcher", "testing", "formula")
+	ritHome := filepath.Join(os.TempDir(), ".my-rit-watcher")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
@@ -26,7 +26,8 @@ func TestWatch(t *testing.T) {
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
 	_ = dirManager.Create(workspacePath)
-	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
+	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	_ = streams.Unzip(zipFile, workspacePath)
 
 	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, treeGenerator)
 
@@ -46,19 +47,19 @@ func TestWatch(t *testing.T) {
 		t.Error("Watch build did not create the Ritchie home directory")
 	}
 
-	treeLocalFile := fmt.Sprintf("%s/repos/local/tree.json", ritHome)
+	treeLocalFile := filepath.Join(ritHome, "repos", "local", "tree.json")
 	hasTreeLocalFile := fileManager.Exists(treeLocalFile)
 	if !hasTreeLocalFile {
 		t.Error("Watch build did not copy the tree local file")
 	}
 
-	formulaFiles := fmt.Sprintf("%s/repos/local/testing/formula/bin", ritHome)
+	formulaFiles := filepath.Join(ritHome, "repos", "local", "testing", "formula", "bin")
 	files, err := fileManager.List(formulaFiles)
-	if err == nil && len(files) != 3 {
+	if err == nil && len(files) != 4 {
 		t.Error("Watch build did not generate formulas files")
 	}
 
-	configFile := fmt.Sprintf("%s/repos/local/testing/formula/config.json", ritHome)
+	configFile := filepath.Join(ritHome, "repos", "local", "testing", "formula", "config.json")
 	hasConfigFile := fileManager.Exists(configFile)
 	if !hasConfigFile {
 		t.Error("Watch build did not copy formula config")
