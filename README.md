@@ -2,7 +2,7 @@
 
 <img class="special-img-class" src="/docs/img/ritchie-banner.png" />
 
-## Ritchie- One CLI to rule them all
+## Ritchie - One CLI to rule them all
 
 Ritchie is an open source framework that creates and tweaks a CLI for your team. It allows you to easily create, build and share formulas.
 
