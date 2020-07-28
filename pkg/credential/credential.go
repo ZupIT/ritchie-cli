@@ -27,8 +27,7 @@ type ListCredDatas []ListCredData
 
 type ListCredData struct {
 	Provider string
-	Name     string
-	Value    string
+	Credential string
 	Context  string
 }
 

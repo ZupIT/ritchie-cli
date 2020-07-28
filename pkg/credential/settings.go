@@ -3,6 +3,7 @@ package credential
 import (
 	"encoding/json"
 	"path/filepath"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -10,12 +11,12 @@ import (
 const AddNew = "Add a new"
 
 type Settings struct {
-	file    stream.FileWriteReadExisterLister
+	file    stream.FileWriteReadExistLister
 	dir     stream.DirLister
 	HomeDir string
 }
 
-func NewSettings(file stream.FileWriteReadExisterLister, dir stream.DirLister, homeDir string) Settings {
+func NewSettings(file stream.FileWriteReadExistLister, dir stream.DirLister, homeDir string) Settings {
 	return Settings{
 		file:    file,
 		dir:     dir,
@@ -46,18 +47,45 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 			if err := json.Unmarshal(cBytes, &detail); err != nil {
 				return creds, err
 			}
-			for k, v := range detail.Credential {
-				cred.Provider = detail.Service
-				cred.Context = c
-				cred.Value = v
-				cred.Name = k
-				creds = append(creds, cred)
-				detail = Detail{}
-			}
+			cred.Credential = formatCredential(string(cBytes))
+			cred.Provider = detail.Service
+			cred.Context = c
+			creds = append(creds, cred)
+			detail = Detail{}
 		}
 	}
 	return creds, nil
 }
+
+func formatCredential(credential string) string {
+	arr := strings.Split(credential, "credential")
+	arr2 := strings.Split(arr[1], "service")
+	res := strings.TrimPrefix(arr2[0], "\":")
+	res = strings.TrimSuffix(res, ",\"")
+
+	splitedCredential := strings.Split(res, "\"")
+	for i, c := range splitedCredential {
+		if c == ":" {
+			splitedCredential[i+1] = hide(splitedCredential[i+1])
+		}
+	}
+
+	return strings.Join(splitedCredential, "\"")
+}
+
+func hide(credential string) string {
+	mustHideIndex := len(credential) / 3
+	var hiddenCredential []rune
+	for i, r := range credential {
+		if i > mustHideIndex {
+			r = '*'
+		}
+		hiddenCredential = append(hiddenCredential, r)
+	}
+
+	return string(hiddenCredential)
+}
+
 
 func (s Settings) WriteCredentialsFields(fields Fields, path string) error {
 	fieldsData, err := json.Marshal(fields)

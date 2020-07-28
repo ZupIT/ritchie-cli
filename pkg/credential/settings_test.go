@@ -21,7 +21,6 @@ func providersPath() string {
 }
 
 func TestSettings_ReadCredentialsFields(t *testing.T) {
-
 	credentials, err := credSettings.ReadCredentialsFields("../../testdata/credentials.json")
 	if err != nil {
 		t.Errorf("Error reading credentials fields")

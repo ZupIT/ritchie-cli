@@ -27,32 +27,17 @@ func NewListCredentialCmd(ss credential.Settings) *cobra.Command {
 	return cmd
 }
 
-func hideCredential(credential string) string {
-	mustHideIndex := len(credential) / 3
-	var hiddenCredential []rune
-	for i, r := range credential {
-		if i > mustHideIndex {
-			r = '*'
-		}
-		hiddenCredential = append(hiddenCredential, r)
-	}
-	return string(hiddenCredential)
-}
-
 func printCredentialsTable(fields credential.ListCredDatas) {
 	table := uitable.New()
-	table.MaxColWidth = 50
 	table.Wrap = true
-
 	table.AddRow(
-		prompt.Bold("NAME"),
-		prompt.Bold("VALUE"),
+		prompt.Bold("CREDENTIAL"),
 		prompt.Bold("PROVIDER"),
 		prompt.Bold("CONTEXT"),
 	)
 
 	for _, c := range fields {
-		table.AddRow(c.Name, hideCredential(c.Value), c.Provider, c.Context)
+		table.AddRow(c.Credential, c.Provider, c.Context)
 	}
 	if len(table.Rows) < 2 {
 		setCmd := prompt.Cyan("rit set credential")

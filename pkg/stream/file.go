@@ -66,7 +66,7 @@ type FileWriteReadExister interface {
 	FileExister
 }
 
-type FileWriteReadExisterLister interface {
+type FileWriteReadExistLister interface {
 	FileWriter
 	FileReader
 	FileExister
@@ -119,7 +119,6 @@ func (f FileManager) Exists(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
 	}
-
 	return true
 }
 
