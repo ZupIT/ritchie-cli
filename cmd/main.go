@@ -8,11 +8,11 @@ import (
 
 	"k8s.io/kubectl/pkg/util/templates"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -26,7 +26,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
-	"github.com/ZupIT/ritchie-cli/pkg/credential/credsingle"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -77,15 +76,15 @@ func buildCommands() *cobra.Command {
 	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager)
 
 	tplManager := template.NewManager(api.RitchieHomeDir())
-	ctxFinder := rcontext.NewFinder(ritchieHomeDir)
+	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
 	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	credSetter := credsingle.NewSetter(ritchieHomeDir, ctxFinder)
-	credFinder := credsingle.NewFinder(ritchieHomeDir, ctxFinder)
+	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
+	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds)
-	credSettings := credsingle.NewSingleSettings(fileManager)
+	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder)
 	envResolvers := make(env.Resolvers)
@@ -141,8 +140,9 @@ func buildCommands() *cobra.Command {
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword,
-	)
+		inputPassword)
+	listCredentialCmd := cmd.NewListCredentialCmd(credSettings)
+
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
@@ -165,6 +165,7 @@ func buildCommands() *cobra.Command {
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd)
 	listCmd.AddCommand(listRepoCmd)
+	listCmd.AddCommand(listCredentialCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
 	showCmd.AddCommand(showCtxCmd)
 	buildCmd.AddCommand(buildFormulaCmd)

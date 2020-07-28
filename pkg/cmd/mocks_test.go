@@ -31,6 +31,12 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 	return "mocked text", nil
 }
 
+type inputTextErrorMock struct{}
+
+func (inputTextErrorMock) Text(name string, required bool, helper ...string) (string, error) {
+	return "", errors.New("error on input text")
+}
+
 type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool, helper ...string) (string, error) {
@@ -224,18 +230,32 @@ func (credSetterMock) Set(d credential.Detail) error {
 	return nil
 }
 
-type singleCredSettingsMock struct{}
-
-func (s singleCredSettingsMock) WriteDefaultCredentials(path string) error {
-	return nil
+type credSettingsMock struct {
+	error
 }
 
-func (s singleCredSettingsMock) ReadCredentials(path string) (credential.Fields, error) {
+func (s credSettingsMock) ReadCredentialsFields(path string) (credential.Fields, error) {
 	return credential.Fields{}, nil
 }
 
-func (s singleCredSettingsMock) WriteCredentials(fields credential.Fields, path string) error {
+func (s credSettingsMock) ReadCredentialsValue(path string) ([]credential.ListCredData, error) {
+	return []credential.ListCredData{}, nil
+}
+
+func (s credSettingsMock) WriteDefaultCredentialsFields(path string) error {
 	return nil
+}
+
+func (s credSettingsMock) WriteCredentialsFields(fields credential.Fields, path string) error {
+	return nil
+}
+
+func (s credSettingsMock) ProviderPath() string {
+	return ""
+}
+
+func (s credSettingsMock) CredentialsPath () string {
+	return ""
 }
 
 type runnerMock struct {

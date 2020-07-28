@@ -1,9 +1,8 @@
-package credsingle
+package credential
 
 import (
 	"encoding/json"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
@@ -20,23 +19,25 @@ func NewFinder(homePath string, cf rcontext.Finder) Finder {
 	}
 }
 
-func (f Finder) Find(provider string) (credential.Detail, error) {
+func (f Finder) Find(provider string) (Detail, error) {
 	ctx, err := f.ctxFinder.Find()
+
 	if err != nil {
-		return credential.Detail{}, err
-	} else if ctx.Current == "" {
+		return Detail{}, err
+	}
+	if ctx.Current == "" {
 		ctx.Current = rcontext.DefaultCtx
 	}
 
 	cb, err := fileutil.ReadFile(File(f.homePath, ctx.Current, provider))
 	if err != nil {
-		return credential.Detail{}, err
+		return Detail{}, err
 	}
 
-	cred := &credential.Detail{}
+	cred := &Detail{}
 	if err := json.Unmarshal(cb, cred); err != nil {
-		return credential.Detail{}, err
+		return Detail{}, err
 	}
-
 	return *cred, nil
+
 }

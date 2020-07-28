@@ -1,4 +1,4 @@
-package credsingle
+package credential
 
 import (
 	"fmt"

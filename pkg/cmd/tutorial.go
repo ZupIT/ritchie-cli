@@ -73,8 +73,10 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		o.Set(response)
-
+		_, err = o.Set(response)
+		if err != nil {
+			return err
+		}
 		prompt.Success("Set tutorial successful!")
 		return nil
 	}

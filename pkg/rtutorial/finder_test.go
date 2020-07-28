@@ -11,41 +11,36 @@ import (
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
+var errReadingFile = errors.New("Error reading file")
+
 func TestFind(t *testing.T) {
 	type out struct {
 		err       error
 		want      TutorialHolder
-		waitError bool
+		wantError bool
 	}
 
-	err := errors.New("some error")
-
 	tests := []struct {
-		name            string
-		out             *out
-		FileReadExister stream.FileReadExister
+		name string
+		in   stream.FileReadExister
+		out  *out
 	}{
 		{
 			name: "With no tutorial file",
-			out: &out{
-				want:      TutorialHolder{Current: "enabled"},
-				err:       nil,
-				waitError: false,
-			},
-			FileReadExister: sMocks.FileReadExisterCustomMock{
+			in: sMocks.FileReadExisterCustomMock{
 				ExistsMock: func(path string) bool {
 					return false
 				},
 			},
+			out: &out{
+				want:      TutorialHolder{Current: "enabled"},
+				err:       nil,
+				wantError: false,
+			},
 		},
 		{
 			name: "With existing tutorial file",
-			out: &out{
-				want:      TutorialHolder{Current: "disabled"},
-				err:       nil,
-				waitError: false,
-			},
-			FileReadExister: sMocks.FileReadExisterCustomMock{
+			in: sMocks.FileReadExisterCustomMock{
 				ReadMock: func(path string) ([]byte, error) {
 					return []byte("{\"tutorial\":\"disabled\"}"), nil
 				},
@@ -53,21 +48,26 @@ func TestFind(t *testing.T) {
 					return true
 				},
 			},
+			out: &out{
+				want:      TutorialHolder{Current: "disabled"},
+				err:       nil,
+				wantError: false,
+			},
 		},
 		{
 			name: "Error reading the tutorial file",
-			out: &out{
-				want:      TutorialHolder{Current: "enabled"},
-				err:       err,
-				waitError: true,
-			},
-			FileReadExister: sMocks.FileReadExisterCustomMock{
+			in: sMocks.FileReadExisterCustomMock{
 				ReadMock: func(path string) ([]byte, error) {
-					return []byte(""), err
+					return []byte(""), errReadingFile
 				},
 				ExistsMock: func(path string) bool {
 					return true
 				},
+			},
+			out: &out{
+				want:      TutorialHolder{Current: "enabled"},
+				err:       errReadingFile,
+				wantError: true,
 			},
 		},
 	}
@@ -78,15 +78,15 @@ func TestFind(t *testing.T) {
 			tmpTutorial := fmt.Sprintf(TutorialPath, tmp)
 			defer os.RemoveAll(tmpTutorial)
 
-			finder := NewFinder(tmp, tt.FileReadExister)
+			finder := NewFinder(tmp, tt.in)
 
 			out := tt.out
 			got, err := finder.Find()
-			if err != nil && !tt.out.waitError {
-				t.Errorf("Set(%s) - Execution error - got %v, want %v", tt.name, err, out.err)
+			if err != nil && !tt.out.wantError {
+				t.Errorf("%s - Execution error - got %v, want %v", tt.name, err, out.err)
 			}
 			if !reflect.DeepEqual(out.want, got) {
-				t.Errorf("Set(%s) - Error in the expected response -  got %v, want %v", tt.name, got, out.want)
+				t.Errorf("%s - Error in the expected response -  got %v, want %v", tt.name, got, out.want)
 			}
 		})
 	}

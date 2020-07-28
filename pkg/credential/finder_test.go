@@ -1,12 +1,9 @@
-package credsingle
+package credential
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 )
 
 func TestFind(t *testing.T) {
@@ -14,13 +11,12 @@ func TestFind(t *testing.T) {
 	setter := NewSetter(tmp, ctxFinder)
 	err := setter.Set(githubCred)
 	if err != nil {
-		fmt.Sprintln("Error in Set")
 		return
 	}
 	finder := NewFinder(tmp, ctxFinder)
 
 	type out struct {
-		cred credential.Detail
+		cred Detail
 		err  error
 	}
 
@@ -43,7 +39,6 @@ func TestFind(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			out := tt.out
 			got, err := finder.Find(tt.in)
-
 			if err != nil && err.Error() != out.err.Error() {
 				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)
 			}
