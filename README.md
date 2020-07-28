@@ -2,39 +2,36 @@
 
 <img class="special-img-class" src="/docs/img/ritchie-banner.png" />
 
-## Ritchie
+## Ritchie- One CLI to rule them all
 
-Transform your daily task into simple commands by using Ritchie-CLI. 
-This tool uses tree decisions, so that you can create your own commands and execute when you want, just by using formulas or creating new ones. 
+Ritchie is an open source framework that creates and tweaks a CLI for your team. It allows you to easily create, build and share formulas.
 
 This repository contains the CLI core, which can execute formulas stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas).
 
-[Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
+
+## How to install
+
+Download the installer from (https://commons-repo.ritchiecli.io/install.msi)
+
+- Linux|MacOS
+
+```bash
+curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+```
+
+- Windows
+
+Download the installer from (https://commons-repo.ritchiecli.io/install.msi)
 
 
 ## Documentation
 
 - [Gitbook](https://docs.ritchiecli.io)
 
-- [Zup Products](https://www.zup.com.br/en/about) 
+- [Zup Products](https://www.zup.com.br/en/about)
 
 
-## How to install Ritchie
+## Contributing
 
-- [Windows](https://docs.ritchiecli.io/getting-started/installation/windows)
+[Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
 
-- [Linux](https://docs.ritchiecli.io/getting-started/installation/linux)
-
-- [MacOS](https://docs.ritchiecli.io/getting-started/installation/macos)
-
-
-## Contributors
-
-* [@sandokandias](https://github.com/sandokandias) 
-* [@marcosgmgm](https://github.com/marcosgmgm) 
-* [@viniciusramosdefaria](https://github.com/viniciusramosdefaria) 
-* [@kaduartur](https://github.com/kaduartur) 
-* [@ernelio](https://github.com/ernelio)
-* [@guillaumefalourd](https://github.com/guillaumefalourd)
-* [@rodrigomedeirosf](https://github.com/rodrigomedeirosf)
-* [@victor-schumacher](https://github.com/victor-schumacher)
