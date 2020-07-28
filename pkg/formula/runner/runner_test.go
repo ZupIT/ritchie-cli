@@ -2,9 +2,9 @@ package runner
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -19,21 +19,19 @@ func TestRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
-	ritHome := fmt.Sprintf("%s/.rit-runner", tmpDir)
-	repoPath := fmt.Sprintf("%s/repos/commons", ritHome)
+	ritHome := filepath.Join(tmpDir, ".rit-runner")
+	repoPath := filepath.Join(ritHome, "repos", "commons")
 
 	makeBuilder := builder.NewBuildMake()
+	batBuilder := builder.NewBuildBat()
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
 	_ = dirManager.Create(repoPath)
-	getwd, _ := os.Getwd()
-	fmt.Println(getwd)
-	if err := streams.Unzip("../../../testdata/ritchie-formulas-test.zip", repoPath); err != nil {
-		t.Error(err)
-	}
+	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	_ = streams.Unzip(zipFile, repoPath)
 
-	preRunner := NewPreRun(ritHome, makeBuilder, dockerBuildMock{}, nil, dirManager, fileManager)
+	preRunner := NewPreRun(ritHome, makeBuilder, dockerBuildMock{}, batBuilder, dirManager, fileManager)
 	postRunner := NewPostRunner(fileManager, dirManager)
 	inputRunner := NewInput(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputMock{}, inputMock{})
 
@@ -56,7 +54,7 @@ func TestRun(t *testing.T) {
 		out  out
 	}{
 		{
-			name: "Run local success",
+			name: "run local success",
 			in: in{
 				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:      preRunner,

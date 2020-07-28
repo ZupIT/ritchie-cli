@@ -19,15 +19,17 @@ func TestPreRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
-	ritHome := fmt.Sprintf("%s/.rit-setup", tmpDir)
-	repoPath := fmt.Sprintf("%s/repos/commons", ritHome)
+	ritHome := filepath.Join(tmpDir, ".rit-setup")
+	repoPath := filepath.Join(ritHome, "repos", "commons")
 
 	makeBuilder := builder.NewBuildMake()
+	batBuilder := builder.NewBuildBat()
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
 	_ = dirManager.Create(repoPath)
-	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", repoPath)
+	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	_ = streams.Unzip(zipFile, repoPath)
 
 	var config formula.Config
 	_ = json.Unmarshal([]byte(configJson), &config)
@@ -86,6 +88,9 @@ func TestPreRun(t *testing.T) {
 				makeBuild: makeBuildMock{
 					build: makeBuilder.Build,
 				},
+				batBuild: batBuildMock{
+					build: batBuilder.Build,
+				},
 				file:      fileManager,
 				dir:       dirManager,
 				localFlag: false,
@@ -103,6 +108,11 @@ func TestPreRun(t *testing.T) {
 			in: in{
 				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				makeBuild: makeBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				batBuild: batBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
@@ -128,6 +138,11 @@ func TestPreRun(t *testing.T) {
 						return builder.ErrBuildFormulaMakefile
 					},
 				},
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return builder.ErrBuildFormulaMakefile
+					},
+				},
 				file:      fileManager,
 				dir:       dirManager,
 				localFlag: true,
@@ -146,7 +161,7 @@ func TestPreRun(t *testing.T) {
 			},
 			out: out{
 				wantErr: true,
-				err:     fmt.Errorf(loadConfigErrMsg, "/tmp/.rit-setup/repos/commons/testing/formula/config.json"),
+				err:     fmt.Errorf(loadConfigErrMsg, filepath.Join(os.TempDir(), ".rit-setup", "repos", "commons", "testing", "formula", "config.json")),
 			},
 		},
 		{
@@ -182,6 +197,11 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
+				batBuild:  batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
 				file:      fileManager,
 				dir:       dirManagerMock{createErr: errors.New("error to create dir")},
 				localFlag: true,
@@ -200,6 +220,11 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
+				batBuild:  batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
 				file:      fileManager,
 				dir:       dirManagerMock{copyErr: errors.New("error to copy dir")},
 				localFlag: true,
@@ -214,6 +239,11 @@ func TestPreRun(t *testing.T) {
 			in: in{
 				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				makeBuild: makeBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				batBuild:  batBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
@@ -246,7 +276,7 @@ func TestPreRun(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(tt.out.want.Config, got.Config) {
-				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got, tt.out.want.Config)
+				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got.Config, tt.out.want.Config)
 			}
 
 			_ = os.Chdir(got.Pwd) // Return to test folder
@@ -270,6 +300,14 @@ func (do dockerBuildMock) Build(formulaPath, dockerImg string) error {
 	return do.build(formulaPath, dockerImg)
 }
 
+type batBuildMock struct {
+	build func(formulaPath string) error
+}
+
+func (ba batBuildMock) Build(formulaPath string) error {
+	return ba.build(formulaPath)
+}
+
 type dirManagerMock struct {
 	copyErr   error
 	createErr error
@@ -288,7 +326,7 @@ func (di dirManagerMock) List(dir string, hiddenDir bool) ([]string, error) {
 }
 
 const configJson = `{
-    "dockerImageBuilder": "cimg/base:stable-20.04",
+    "dockerImageBuilder": "cimg/go:1.14",
     "inputs": [
       {
         "name": "sample_text",
