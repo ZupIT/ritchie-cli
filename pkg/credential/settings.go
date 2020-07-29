@@ -127,7 +127,7 @@ func NewDefaultCredentials() Fields {
 
 	token := Field{
 		Name: "token",
-		Type: "password",
+		Type: "secret",
 	}
 
 	accessKey := Field{
@@ -137,7 +137,7 @@ func NewDefaultCredentials() Fields {
 
 	secretAccessKey := Field{
 		Name: "secretAccessKey",
-		Type: "password",
+		Type: "secret",
 	}
 
 	base64config := Field{
