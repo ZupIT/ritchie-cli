@@ -40,10 +40,21 @@ func NewAutocompleteZsh(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 
 	return &cobra.Command{
-		Use:     zsh.String(),
-		Short:   "Add zsh autocomplete for terminal",
-		Long:    "Add zsh autocomplete for terminal",
-		Example: "rit completion zsh",
+		Use:   zsh.String(),
+		Short: "Add zsh autocomplete for terminal, --help to know how to use",
+		Long: `
+Add zsh autocomplete for terminal
+Only works if zsh auto completion is installed.
+
+To test run: 
+ $ rit completion zsh | source
+
+To install run: 
+ $ echo "[[ -r "/usr/local/bin/rit" ]] && rit completion zsh > ~/.rit_completion" >> ~/.zshrc
+ $ echo "source ~/.rit_completion" >> ~/.zshrc
+
+`,
+		Example: "rit completion zsh | source",
 		RunE:    a.runFunc(),
 	}
 }
@@ -53,10 +64,21 @@ func NewAutocompleteBash(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 
 	return &cobra.Command{
-		Use:     bash.String(),
-		Short:   "Add bash autocomplete for terminal",
-		Long:    "Add bash autocomplete for terminal",
-		Example: "rit completion bash",
+		Use:   bash.String(),
+		Short: "Add bash autocomplete for terminal, --help to know how to use",
+		Long: `
+Add bash autocomplete for terminal
+Only works if bash auto completion is installed.
+
+To test run: 
+ $ rit completion bash | source
+
+To install run: 
+ $ echo "[[ -r "/usr/local/bin/rit" ]] && rit completion bash > ~/.rit_completion" >> ~/.bashrc
+ $ echo "source ~/.rit_completion" >> ~/.bashrc
+
+`,
+		Example: "rit completion bash | source",
 		RunE:    a.runFunc(),
 	}
 }
@@ -67,7 +89,7 @@ func NewAutocompleteFish(g autocomplete.Generator) *cobra.Command {
 
 	return &cobra.Command{
 		Use:   fish.String(),
-		Short: "Add fish autocomplete for terminal --help to know how to use",
+		Short: "Add fish autocomplete for terminal, --help to know how to use",
 		Long: `
 Add fish autocomplete for terminal
 Only fish >= version 3.X is supported (fish 2.X is not supported)
@@ -90,7 +112,7 @@ func NewAutocompletePowerShell(g autocomplete.Generator) *cobra.Command {
 
 	return &cobra.Command{
 		Use:   powerShell.String(),
-		Short: "Add powerShell autocomplete for terminal --help to know how to use",
+		Short: "Add powerShell autocomplete for terminal, --help to know how to use",
 		Long: `
 Add powerShell autocomplete for terminal
 Only powerShell >= version 5.X is supported
