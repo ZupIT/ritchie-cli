@@ -69,12 +69,12 @@ func NewDefaultCredentials() credential.Fields {
 	}
 
 	var accessKeyId = credential.Field{
-		Name: "accessKeyId",
+		Name: "accesskeyid",
 		Type: "text",
 	}
 
 	var secretAccessKey = credential.Field{
-		Name: "secretAccessKey",
+		Name: "secretaccesskey",
 		Type: "password",
 	}
 
