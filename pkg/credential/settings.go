@@ -131,12 +131,12 @@ func NewDefaultCredentials() Fields {
 	}
 
 	accessKey := Field{
-		Name: "accessKey",
+		Name: "accesskeyid",
 		Type: "text",
 	}
 
 	secretAccessKey := Field{
-		Name: "secretAccessKey",
+		Name: "secretaccesskey",
 		Type: "secret",
 	}
 

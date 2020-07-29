@@ -50,7 +50,7 @@ func TestFind(t *testing.T) {
 			},
 		},
 		{
-			name: "Return err when fail when file not exist",
+			name: "Return err when file not exist",
 			in: in{
 				homePath:  tmp,
 				ctxFinder: ctxFinder,
