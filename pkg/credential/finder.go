@@ -11,7 +11,7 @@ import (
 )
 
 const errNotFoundTemplate = `
-Fail to resolve credencial for provider %s.
+Fail to resolve credential for provider %s.
 Try again after use:
 	∙ rit set credential
 `
