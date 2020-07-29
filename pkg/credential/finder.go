@@ -13,7 +13,7 @@ import (
 const errNotFoundTemplate = `
 Fail to resolve credencial for provider %s.
 Try again after use:
-	∙ "rit update repo"
+	∙ rit set credential
 `
 
 type Finder struct {
