@@ -31,7 +31,7 @@ rit init
 
 Once you made it,  Ritchie will add all community formulas' repository and create all the necessary configuration's files.
 
-### Run formula "hello-world"
+### Run your fist formula
 
 After you finished the previous steps - installation and initialization -, you can run a "hello-world" formula to test Ritchie. 
 As most of developers like coffee, we created an initial formula that "delivers coffee" to you. 
