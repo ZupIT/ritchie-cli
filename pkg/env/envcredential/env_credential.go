@@ -13,7 +13,7 @@ type CredentialResolver struct {
 	credential.Finder
 }
 
-const errKeyNotFoundTemplate = `Provider %s has not credential:%s to fix this verify, config.json of formula`
+const errKeyNotFoundTemplate = `Provider %s has not credential:%s to fix this, verify config.json of formula`
 
 // NewResolver creates a credential resolver instance of Resolver interface
 func NewResolver(cf credential.Finder) CredentialResolver {
