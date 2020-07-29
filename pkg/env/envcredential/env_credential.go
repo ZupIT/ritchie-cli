@@ -13,7 +13,7 @@ type CredentialResolver struct {
 	credential.Finder
 }
 
-const errKeyNotFoundTemplate = `Provider %s has not credencial %s, to fix this verify config.json of formula`
+const errKeyNotFoundTemplate = `Provider %s has not credencial:%s to fix this verify, config.json of formula`
 
 // NewResolver creates a credential resolver instance of Resolver interface
 func NewResolver(cf credential.Finder) CredentialResolver {
@@ -31,7 +31,7 @@ func (c CredentialResolver) Resolve(name string) (string, error) {
 	k := strings.ToLower(s[2])
 	credValue, exist := cred.Credential[k]
 	if !exist {
-		errMsg := fmt.Sprintf(errKeyNotFoundTemplate, service, k)
+		errMsg := fmt.Sprintf(errKeyNotFoundTemplate, service, strings.ToUpper(name))
 		return "", errors.New(prompt.Red(errMsg))
 	}
 	return credValue, nil
