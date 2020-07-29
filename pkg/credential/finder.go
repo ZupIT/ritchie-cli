@@ -11,9 +11,9 @@ import (
 )
 
 const errNotFoundTemplate = `
-fail to resolve credencial for provider %s.
-try again after use:
-	rit set credential
+Fail to resolve credencial for provider %s.
+Try again after use:
+	∙ "rit update repo"
 `
 
 type Finder struct {
