@@ -187,7 +187,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager)
-			got := runner.Run(in.def, api.Prompt, in.local)
+			got := runner.Run(in.def, api.Prompt, in.local, false)
 
 			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.out.err)

@@ -33,6 +33,7 @@ const (
 	subCommand  = " SUBCOMMAND"
 	Group       = "group"
 	localFlag   = "local"
+	verboseFlag = "verbose"
 	rootCmdName = "root"
 )
 
@@ -129,7 +130,13 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			return err
 		}
 
-		if err := f.formula.Run(d, inputType, local); err != nil {
+		verbose, err := cmd.Flags().GetBool(verboseFlag)
+
+		if err != nil {
+			return err
+		}
+
+		if err := f.formula.Run(d, inputType, local, verbose); err != nil {
 			return err
 		}
 
