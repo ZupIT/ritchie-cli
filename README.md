@@ -53,5 +53,5 @@ rit scaffold generate coffee-go
 
 ## Zup Products
 
-- [Zup Products](https://www.zup.com.br/en/about)
+- [Zup open source](https://opensource.zup.com.br)
 
