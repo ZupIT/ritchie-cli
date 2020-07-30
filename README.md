@@ -25,7 +25,7 @@ Download the installer from (https://commons-repo.ritchiecli.io/install.msi)
 
 ### Initialize rit
 
-Once you made it,  Ritchie will add all community formulas' repository and create all the necessary configuration's files.
+Once you made it,  Ritchie will add all community formulas repository and create all the necessary configuration's files.
 
 ```bash
 rit init
