@@ -84,7 +84,6 @@ func formatCredValue(credential string) string {
 				break
 			}
 			resumedCredential = append(resumedCredential, r)
-
 		}
 		return string(resumedCredential) + "..."
 	} else {
