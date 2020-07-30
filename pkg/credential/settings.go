@@ -73,15 +73,18 @@ func formatCredential(credential string) string {
 
 	return strings.Join(splitedCredential, "\"")
 }
-
 func formatCredValue(credential string) string {
 	if credLen := len(credential); credLen > 20 {
 		var resumedCredential []rune
 		for i, r := range credential {
-			resumedCredential = append(resumedCredential, r)
+			if i > 4 {
+				r = '*'
+			}
 			if i > 10 {
 				break
 			}
+			resumedCredential = append(resumedCredential, r)
+
 		}
 		return string(resumedCredential) + "..."
 	} else {
