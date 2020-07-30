@@ -113,14 +113,14 @@ func (pr PreRunManager) buildFormula(formulaPath, dockerIB string, dockerFlag bo
 		}
 	}
 
-	if runtime.GOOS == osutil.Windows { // Build formula docker with build.bat
+	if runtime.GOOS == osutil.Windows { // Build formula local with build.bat
 		if err := pr.bat.Build(formulaPath); err != nil {
 			return err
 		}
 		return nil
 	}
 
-	if err := pr.make.Build(formulaPath); err != nil { // Build formula docker with Makefile
+	if err := pr.make.Build(formulaPath); err != nil { // Build formula local with Makefile
 		return err
 	}
 
