@@ -170,10 +170,10 @@ func buildRunImg(def formula.Definition) (string, error) {
 
 func generateContainerId(def formula.Definition) string {
 	baseName := "rit-"
-	formulaName := def.RepoName + "-" + strings.ReplaceAll(def.Path, "/", "-")
+	formulaName := def.RepoName + strings.ReplaceAll(def.Path, "/", "-")
 	containerId := baseName + strings.ToLower(formulaName)
 	if len(containerId) > 127 {
-		containerId = baseName + formulaName[:127-len(baseName)]
+		return containerId[:127]
 	}
 	return containerId
 }
