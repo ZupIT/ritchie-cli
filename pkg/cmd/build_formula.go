@@ -3,7 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -19,7 +19,7 @@ import (
 const (
 	newWorkspace = "Type new formula workspace?"
 	dirPattern   = "%s/%s"
-	treeDir      = "tree"
+	docsDir      = "docs"
 	srcDir       = "src"
 )
 
@@ -74,7 +74,7 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := path.Join(b.userHomeDir, formula.DefaultWorkspaceDir)
+		defaultWorkspace := filepath.Join(b.userHomeDir, formula.DefaultWorkspaceDir)
 		if b.directory.Exists(defaultWorkspace) {
 			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
 		}
@@ -142,7 +142,7 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 		return "", err
 	}
 
-	dirs = sliceutil.Remove(dirs, treeDir)
+	dirs = sliceutil.Remove(dirs, docsDir)
 
 	if isFormula(dirs) {
 		return dir, nil

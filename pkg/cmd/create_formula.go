@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -102,7 +103,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := path.Join(c.homeDir, formula.DefaultWorkspaceDir)
+		defaultWorkspace := filepath.Join(c.homeDir, formula.DefaultWorkspaceDir)
 		workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
 
 		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText)

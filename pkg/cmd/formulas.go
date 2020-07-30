@@ -16,7 +16,7 @@ import (
 const (
 	subCommand  = " SUBCOMMAND"
 	Group       = "group"
-	localFlag   = "local"
+	dockerFlag  = "docker"
 	rootCmdName = "root"
 )
 
@@ -108,12 +108,12 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			inputType = api.Stdin
 		}
 
-		local, err := cmd.Flags().GetBool(localFlag)
+		docker, err := cmd.Flags().GetBool(dockerFlag)
 		if err != nil {
 			return err
 		}
 
-		if err := f.formula.Run(d, inputType, local); err != nil {
+		if err := f.formula.Run(d, inputType, docker); err != nil {
 			return err
 		}
 
@@ -123,5 +123,5 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
-	formulaFlags.BoolP(localFlag, "l", false, "Use to run formulas locally")
+	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside docker")
 }

@@ -49,7 +49,7 @@ func TestFormulaCommand_Add(t *testing.T) {
 		},
 		{
 			name: "success docker",
-			args: []string{"mock", "test", "--local"},
+			args: []string{"mock", "test", "--docker"},
 		},
 		{
 			name: "success stdin",

@@ -33,7 +33,7 @@ func (do DockerManager) Build(formulaPath, dockerImg string) error {
 		return err
 	}
 
-	args := []string{"run", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd}
+	args := []string{"run", "--rm", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd}
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", args...)
