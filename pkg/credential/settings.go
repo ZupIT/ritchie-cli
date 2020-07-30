@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -130,11 +131,39 @@ func (s Settings) WriteCredentialsFields(fields Fields, path string) error {
 // WriteDefault is a non override version of WriteCredentialsFields
 // used to create providers.json if user dont have it
 func (s Settings) WriteDefaultCredentialsFields(path string) error {
-	if !s.file.Exists(path) {
-		err := s.WriteCredentialsFields(NewDefaultCredentials(), path)
-		return err
+	fieldsToWrite := NewDefaultCredentials()
+	if s.file.Exists(path) {
+		configFile, err := fileutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		// Check for incoming new keys
+		credentialFields := &Fields{}
+		json.Unmarshal(configFile, credentialFields)
+		currentKeys := make(map[string]struct{})
+		var diff []string
+		for k := range *credentialFields {
+			currentKeys[k] = struct{}{}
+		}
+		for k := range fieldsToWrite {
+			if _, found := currentKeys[k]; !found {
+				diff = append(diff, k)
+			}
+		}
+
+		// Avoid I/O consumption if there is nothing to change
+		if len(diff) == 0 {
+			return nil
+		}
+
+		for _, key := range diff {
+			(*credentialFields)[key] = fieldsToWrite[key]
+		}
+		fieldsToWrite = *credentialFields
 	}
-	return nil
+	err := s.WriteCredentialsFields(fieldsToWrite, path)
+	return err
 }
 
 func NewDefaultCredentials() Fields {
@@ -163,6 +192,11 @@ func NewDefaultCredentials() Fields {
 		Type: "text",
 	}
 
+	password := Field{
+		Name: "password",
+		Type: "secret",
+	}
+
 	dc := Fields{
 		AddNew:       []Field{},
 		"github":     []Field{username, token},
@@ -170,6 +204,7 @@ func NewDefaultCredentials() Fields {
 		"aws":        []Field{accessKey, secretAccessKey},
 		"jenkins":    []Field{username, token},
 		"kubeconfig": []Field{base64config},
+		"ansible":    []Field{username, password},
 	}
 
 	return dc
