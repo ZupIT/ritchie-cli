@@ -131,8 +131,9 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 	for _, i := range inputs {
 		var value string
 		if inputWayChoose == inputWay[1] {
-			path, _ := s.Text("Enter the file path:", true)
-			byteValue, _ :=  s.FileReadExister.Read(path)
+			path, _ := s.Text("Enter the file path for "+i.Name+":", true)
+			byteValue, _ := s.FileReadExister.Read(path)
+			value = string(byteValue)
 		} else {
 
 			if i.Type == inputTypes[1] {
