@@ -147,4 +147,5 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
 	formulaFlags.BoolP(localFlag, "l", false, "Use to run formulas locally")
+	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
 }
