@@ -10,14 +10,17 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 var inputTypes = []string{"plain text", "secret"}
+var inputWay = []string{"file", "type"}
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
 	credential.Setter
 	credential.ReaderWriterPather
+	stream.FileReadExister
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
@@ -27,7 +30,8 @@ type setCredentialCmd struct {
 // NewSetCredentialCmd creates a new cmd instance
 func NewSetCredentialCmd(
 	credSetter credential.Setter,
-	file credential.ReaderWriterPather,
+	credFile credential.ReaderWriterPather,
+	file stream.FileReadExister,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
@@ -35,7 +39,8 @@ func NewSetCredentialCmd(
 ) *cobra.Command {
 	s := &setCredentialCmd{
 		Setter:             credSetter,
-		ReaderWriterPather: file,
+		ReaderWriterPather: credFile,
+		FileReadExister:    file,
 		InputText:          inText,
 		InputBool:          inBool,
 		InputList:          inList,
@@ -49,7 +54,6 @@ func NewSetCredentialCmd(
 		RunE:  RunFuncE(s.runStdin(), s.runPrompt()),
 	}
 	cmd.LocalFlags()
-
 	return cmd
 }
 
@@ -63,14 +67,12 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 		if err := s.Set(cred); err != nil {
 			return err
 		}
-
 		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
 		return nil
 	}
 }
 
 func (s setCredentialCmd) prompt() (credential.Detail, error) {
-
 	if err := s.WriteDefaultCredentialsFields(s.ProviderPath()); err != nil {
 		return credential.Detail{}, err
 	}
@@ -110,7 +112,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 			}
 
 			newFields = append(newFields, newField)
-			addMoreCredentials, err = s.Bool("Add more credentials to this provider?", []string{"no", "yes"})
+			addMoreCredentials, err = s.Bool("Add more credentials fields to this provider?", []string{"no", "yes"})
 			if err != nil {
 				return credDetail, err
 			}
@@ -125,20 +127,27 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
+	inputWayChoose, _ := s.List("Want to enter your credential through a file or by typing it?", inputWay)
 	for _, i := range inputs {
 		var value string
-		if i.Type == inputTypes[1] {
-			value, err = s.Password(i.Name + ":")
-			if err != nil {
-				return credDetail, err
-			}
+		if inputWayChoose == inputWay[1] {
+			path, _ := s.Text("Enter the file path:", true)
+			byteValue, _ :=  s.FileReadExister.Read(path)
 		} else {
-			value, err = s.Text(i.Name+":", true)
-			if err != nil {
-				return credDetail, err
+
+			if i.Type == inputTypes[1] {
+				value, err = s.Password(i.Name + ":")
+				if err != nil {
+					return credDetail, err
+				}
+			} else {
+				value, err = s.Text(i.Name+":", true)
+				if err != nil {
+					return credDetail, err
+				}
 			}
+			cred[i.Name] = value
 		}
-		cred[i.Name] = value
 	}
 	credDetail.Service = providerChoose
 	credDetail.Credential = cred

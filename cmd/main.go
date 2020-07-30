@@ -137,6 +137,7 @@ func buildCommands() *cobra.Command {
 	setCredentialCmd := cmd.NewSetCredentialCmd(
 		credSetter,
 		credSettings,
+		fileManager,
 		inputText,
 		inputBool,
 		inputList,
