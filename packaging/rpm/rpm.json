@@ -6,9 +6,9 @@
     "url": "https://github.com/ZupIT/ritchie-cli",
     "files": [
         {
-            "from": "dist/linux/single/rit",
+            "from": "dist/linux/rit",
             "to": "/usr/local/bin",
-            "base": "dist/linux/single",
+            "base": "dist/linux",
             "type": ""
         }
     ],
