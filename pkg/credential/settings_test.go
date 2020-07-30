@@ -24,7 +24,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -115,8 +114,8 @@ func TestNewDefaultCredentials(t *testing.T) {
 }
 
 func TestSingleSettings_WriteDefaultCredentialsOnExistingFile(t *testing.T) {
-	credentials := credential.Fields{
-		"customField":     []credential.Field{},
+	credentials := Fields{
+		"customField":     []Field{},
 	}
 	fieldsData, err := json.Marshal(credentials)
 	if err != nil {
@@ -138,7 +137,7 @@ func TestSingleSettings_WriteDefaultCredentialsOnExistingFile(t *testing.T) {
 
 	// Reopen file and check if previous config was not lost
 	file, _ := ioutil.ReadFile(providersPath())
-	var fields credential.Fields
+	var fields Fields
 	err = json.Unmarshal(file, &fields)
 	if err != nil {
 		t.Errorf("Error while writing existing credentials: %s", err)
