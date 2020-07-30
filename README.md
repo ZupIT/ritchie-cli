@@ -41,14 +41,17 @@ rit scaffold generate coffee-go
 ```
 
 
-## Documentation
+## Full Documentation
 
 - [Gitbook](https://docs.ritchiecli.io)
-
-- [Zup Products](https://www.zup.com.br/en/about)
 
 
 ## Contributing
 
 [Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
+
+
+## Zup Products
+
+- [Zup Products](https://www.zup.com.br/en/about)
 
