@@ -172,8 +172,8 @@ func generateContainerId(def formula.Definition) string {
 	baseName := "rit-"
 	formulaName := def.RepoName + strings.ReplaceAll(def.Path, "/", "-")
 	containerId := baseName + strings.ToLower(formulaName)
-	if len(containerId) > 127 {
-		return containerId[:127]
+	if len(containerId) > 200 {
+		return containerId[:200]
 	}
 	return containerId
 }
