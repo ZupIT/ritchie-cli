@@ -213,7 +213,7 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				batBuild:  batBuildMock{
+				batBuild: batBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
@@ -236,7 +236,7 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				batBuild:  batBuildMock{
+				batBuild: batBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
@@ -259,7 +259,7 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				batBuild:  batBuildMock{
+				batBuild: batBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},

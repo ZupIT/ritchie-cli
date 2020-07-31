@@ -270,7 +270,7 @@ func (s credSettingsMock) ProviderPath() string {
 	return ""
 }
 
-func (s credSettingsMock) CredentialsPath () string {
+func (s credSettingsMock) CredentialsPath() string {
 	return ""
 }
 
@@ -278,7 +278,7 @@ type runnerMock struct {
 	error error
 }
 
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool) error {
+func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool, verbose bool) error {
 	return r.error
 }
 

@@ -34,6 +34,7 @@ const (
 	DefaultConfig = "config.json"
 	PwdEnv        = "PWD"
 	CPwdEnv       = "CURRENT_PWD"
+	VerboseEnv    = "VERBOSE_MODE"
 	BinUnix       = "run.sh"
 	BinWindows    = "run.bat"
 	BinDir        = "bin"
@@ -95,7 +96,7 @@ type PreRunner interface {
 }
 
 type Runner interface {
-	Run(def Definition, inputType api.TermInputType, docker bool) error
+	Run(def Definition, inputType api.TermInputType, docker bool, verbose bool) error
 }
 
 type PostRunner interface {

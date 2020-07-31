@@ -121,17 +121,16 @@ func TestProviderPath(t *testing.T) {
 	}
 }
 
-func TestCredentialsPath(t *testing.T){
+func TestCredentialsPath(t *testing.T) {
 	credentials := credSettings.CredentialsPath()
 	slicedPath := strings.Split(credentials, string(os.PathSeparator))
 	fmt.Println(slicedPath)
 	providersDir := slicedPath[len(slicedPath)-1]
 
-	if providersDir != "credentials"{
+	if providersDir != "credentials" {
 		t.Errorf("Providers path must end on credentials dir")
 	}
 }
-
 
 func TestProvidersArr(t *testing.T) {
 	credentials := NewDefaultCredentials()
