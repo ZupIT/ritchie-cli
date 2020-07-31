@@ -18,7 +18,6 @@ package runner
 
 import (
 	"fmt"
-	"os/exec"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -37,10 +36,6 @@ func NewPostRunner(file stream.FileMoveRemover, dir stream.DirRemover) PostRunne
 func (po PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 	if docker {
 		if err := po.file.Remove(envFile); err != nil {
-			return err
-		}
-
-		if err := removeContainer(p.ContainerId); err != nil {
 			return err
 		}
 	}
@@ -63,15 +58,4 @@ func (po PostRunnerManager) removeWorkDir(tmpDir string) {
 	if err := po.dir.Remove(tmpDir); err != nil {
 		fmt.Sprintln("Error in remove dir")
 	}
-}
-
-func removeContainer(imgName string) error {
-	args := []string{"rm", imgName}
-	cmd := exec.Command(dockerCmd, args...)
-
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	return nil
 }
