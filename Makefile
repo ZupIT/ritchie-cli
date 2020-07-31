@@ -93,9 +93,10 @@ ifneq "$(IS_RELEASE)" ""
 endif
 ifneq "$(IS_QA)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
-	cp dist/installer/ritchiecli.msi .
+	mkdir latest
+	cp dist/installer/ritchiecli.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
-	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "ritchiecli.msi"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
 endif
 else
 	echo "NOT GONNA PUBLISH"
