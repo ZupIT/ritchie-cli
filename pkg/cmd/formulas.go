@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package cmd
 
 import (
@@ -17,6 +33,7 @@ const (
 	subCommand  = " SUBCOMMAND"
 	Group       = "group"
 	dockerFlag  = "docker"
+	verboseFlag = "verbose"
 	rootCmdName = "root"
 )
 
@@ -113,7 +130,13 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			return err
 		}
 
-		if err := f.formula.Run(d, inputType, docker); err != nil {
+		verbose, err := cmd.Flags().GetBool(verboseFlag)
+
+		if err != nil {
+			return err
+		}
+
+		if err := f.formula.Run(d, inputType, docker, verbose); err != nil {
 			return err
 		}
 
@@ -124,4 +147,5 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
 	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside docker")
+	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
 }

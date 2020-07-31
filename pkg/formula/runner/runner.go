@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package runner
 
 import (
@@ -5,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 
 	"github.com/mattn/go-isatty"
 
@@ -43,7 +60,7 @@ func NewFormulaRunner(
 	}
 }
 
-func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool) error {
+func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool, verbose bool) error {
 	setup, err := ru.PreRun(def, docker)
 	if err != nil {
 		return err
@@ -51,12 +68,12 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 
 	var cmd *exec.Cmd
 	if !docker || setup.ContainerId == "" {
-		cmd, err = ru.runLocal(setup, inputType)
+		cmd, err = ru.runLocal(setup, inputType, verbose)
 		if err != nil {
 			return err
 		}
 	} else {
-		cmd, err = ru.runDocker(setup, inputType)
+		cmd, err = ru.runDocker(setup, inputType, verbose)
 		if err != nil {
 			return err
 		}
@@ -73,7 +90,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 	return nil
 }
 
-func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType) (*exec.Cmd, error) {
+func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
 	var args []string
 	if isatty.IsTerminal(os.Stdout.Fd()) {
@@ -91,14 +108,14 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType)
 		return nil, err
 	}
 
-	if err := ru.setEnvs(cmd, "/app", true); err != nil {
+	if err := ru.setEnvs(cmd, "/app", true, verbose); err != nil {
 		return nil, err
 	}
 
 	return cmd, nil
 }
 
-func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType) (*exec.Cmd, error) {
+func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
 	formulaRun := path.Join(setup.TmpDir, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
@@ -106,7 +123,7 @@ func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType) 
 	cmd.Stderr = os.Stderr
 
 	cmd.Env = os.Environ()
-	if err := ru.setEnvs(cmd, setup.Pwd, false); err != nil {
+	if err := ru.setEnvs(cmd, setup.Pwd, false, verbose); err != nil {
 		return nil, err
 	}
 
@@ -117,7 +134,7 @@ func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType) 
 	return cmd, nil
 }
 
-func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, docker bool) error {
+func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, docker, verbose bool) error {
 	ctx, err := ru.ctx.Find()
 	if err != nil {
 		return err
@@ -125,7 +142,8 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, docker bool) error {
 
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, pwd)
 	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, ctx.Current)
-	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv)
+	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
+	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv)
 
 	if docker {
 		for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
