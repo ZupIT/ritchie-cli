@@ -265,7 +265,7 @@ func FormulaWorkspaceInput(
 			Dir:  workspacePath,
 		}
 	} else {
-		split := strings.Split(selected, " ")
+		split := strings.Split(selected, " (")
 		workspaceName = split[0]
 		workspacePath = workspaces[workspaceName]
 		wspace = formula.Workspace{

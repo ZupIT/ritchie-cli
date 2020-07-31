@@ -47,7 +47,7 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	Version          = "dev"
+	Version          = ""
 	BuildDate        = "unknown"
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
 	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
