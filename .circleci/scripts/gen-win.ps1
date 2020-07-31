@@ -1,5 +1,3 @@
-dir
-
 Write-Output 'DOWLOADING GO-MSI INSTALLER'
 
 $url = "https://github.com/mh-cbon/go-msi/releases/download/1.0.2/go-msi-amd64.msi"
