@@ -43,6 +43,10 @@ func (po PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 		if err := removeContainer(p.ContainerId); err != nil {
 			return err
 		}
+
+		if err := removeImage(p.ContainerId); err != nil {
+			return err
+		}
 	}
 
 	defer po.removeWorkDir(p.TmpDir)
@@ -67,6 +71,17 @@ func (po PostRunnerManager) removeWorkDir(tmpDir string) {
 
 func removeContainer(imgName string) error {
 	args := []string{"rm", imgName}
+	cmd := exec.Command(dockerCmd, args...)
+
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func removeImage(imgName string) error {
+	args := []string{"rmi", imgName}
 	cmd := exec.Command(dockerCmd, args...)
 
 	if err := cmd.Run(); err != nil {
