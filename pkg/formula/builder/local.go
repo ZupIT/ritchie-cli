@@ -97,12 +97,6 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 		return err
 	}
 
-	if so == osutil.Windows {
-		if stderr.String() != "" {
-			return fmt.Errorf("%s \nMore about error: %s", ErrBuildFormulaBuildBat, stderr.String())
-		}
-	}
-
 	return nil
 }
 
