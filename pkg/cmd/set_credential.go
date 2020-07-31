@@ -130,10 +130,19 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 	inputWayChoose, _ := s.List("Want to enter your credential through a file or by typing it?", inputWay)
 	for _, i := range inputs {
 		var value string
-		if inputWayChoose == inputWay[1] {
+		if inputWayChoose == inputWay[0] {
 			path, _ := s.Text("Enter the file path for "+i.Name+":", true)
+			if !s.FileReadExister.Exists(path) {
+				return credDetail, prompt.NewError("Cannot find any file at " + path)
+			}
+
 			byteValue, _ := s.FileReadExister.Read(path)
-			value = string(byteValue)
+			if len(byteValue) ==0 {
+				return credential.Detail{}, prompt.NewError("")
+			}
+
+				cred[i.Name] = string(byteValue)
+
 		} else {
 
 			if i.Type == inputTypes[1] {
