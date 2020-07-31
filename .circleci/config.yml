@@ -252,6 +252,7 @@ jobs:
             . ./.circleci/scripts/version.sh
             . ./.circleci/scripts/bucket.sh
             . ./.circleci/scripts/credentials.sh
+            ls -R
             make delivery
 
   deb-package:
