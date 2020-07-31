@@ -57,11 +57,7 @@ func (ba BatManager) Build(formulaPath string) error {
 	cmd := exec.Command(buildFile)
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return ErrBuildFormulaBuildBat
-	}
-
-	if stderr.String() != "" {
-		return fmt.Errorf(errMsgFmt, msgBuildErr, stderr.String())
+		return fmt.Errorf(errMsgFmt, ErrBuildFormulaBuildBat, stderr.String())
 	}
 
 	return nil
