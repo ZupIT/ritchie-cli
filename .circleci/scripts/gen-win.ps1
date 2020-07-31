@@ -47,13 +47,17 @@ copy LICENSE packaging/windows
 
 cd packaging\windows
 
+Write-Output 'GENERATING WIX MSI TEMPLATE'
+
+& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix.json --version $release_version --src ritchie-wix-templates --out $release_version
+
 Write-Output 'GENERATING MSI INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version --path wix.json
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version --path wix.json --src $release_version
 
 Write-Output 'GENERATING CHOCO INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-ritchie" --input ritchiecli.msi --path wix.json
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-ritchie" --input ritchiecli.msi --path wix.json --src $release_version
 
 
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
