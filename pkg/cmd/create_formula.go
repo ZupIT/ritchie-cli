@@ -160,8 +160,6 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	createSuccess(s, cf.Lang)
-
 	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
 		err := prompt.NewError(err.Error())
 		s.Error(err)
@@ -173,6 +171,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		s.Error(err)
 		return
 	}
+	createSuccess(s, cf.Lang)
 	buildSuccess(formulaPath, cf.FormulaCmd, tutorialHolder.Current)
 }
 
