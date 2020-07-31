@@ -11,6 +11,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -31,6 +32,7 @@ func TestRun(t *testing.T) {
 	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 
+	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, makeBuilder, dockerBuildMock{}, batBuilder, dirManager, fileManager)
 	postRunner := NewPostRunner(fileManager, dirManager)
 	inputRunner := NewInput(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputMock{}, inputMock{})
@@ -170,7 +172,7 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager)
+			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager, ctxFinder)
 			got := runner.Run(in.def, api.Prompt, in.docker)
 
 			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {

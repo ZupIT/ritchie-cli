@@ -9,7 +9,6 @@ import (
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
@@ -17,6 +16,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/github"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
@@ -101,7 +101,7 @@ func buildCommands() *cobra.Command {
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewPreRun(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
-	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup, fileManager)
+	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup, fileManager, ctxFinder)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)

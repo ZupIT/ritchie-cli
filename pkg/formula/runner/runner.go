@@ -10,6 +10,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -23,6 +24,7 @@ type RunManager struct {
 	formula.InputRunner
 	formula.PreRunner
 	file stream.FileWriteExistAppender
+	ctx  rcontext.Finder
 }
 
 func NewFormulaRunner(
@@ -30,12 +32,14 @@ func NewFormulaRunner(
 	input formula.InputRunner,
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
+	ctx rcontext.Finder,
 ) formula.Runner {
 	return RunManager{
 		PostRunner:  postRun,
 		InputRunner: input,
 		PreRunner:   preRun,
 		file:        file,
+		ctx:         ctx,
 	}
 }
 
@@ -87,7 +91,7 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType)
 		return nil, err
 	}
 
-	if err := ru.setDockerEnvs(cmd); err != nil {
+	if err := ru.setEnvs(cmd, "/app", true); err != nil {
 		return nil, err
 	}
 
@@ -102,10 +106,9 @@ func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType) 
 	cmd.Stderr = os.Stderr
 
 	cmd.Env = os.Environ()
-	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, setup.Pwd)
-	cPwdEnv := fmt.Sprintf(formula.EnvPattern, formula.CPwdEnv, setup.Pwd)
-	cmd.Env = append(cmd.Env, pwdEnv)
-	cmd.Env = append(cmd.Env, cPwdEnv)
+	if err := ru.setEnvs(cmd, setup.Pwd, false); err != nil {
+		return nil, err
+	}
 
 	if err := ru.Inputs(cmd, setup, inputType); err != nil {
 		return nil, err
@@ -114,21 +117,27 @@ func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType) 
 	return cmd, nil
 }
 
-func (ru RunManager) setDockerEnvs(cmd *exec.Cmd) error {
-	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, "/app")
-	cPwdEnv := fmt.Sprintf(formula.EnvPattern, formula.CPwdEnv, "/app")
-	cmd.Env = append(cmd.Env, pwdEnv)
-	cmd.Env = append(cmd.Env, cPwdEnv)
+func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, docker bool) error {
+	ctx, err := ru.ctx.Find()
+	if err != nil {
+		return err
+	}
 
-	for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
-		if !ru.file.Exists(envFile) {
-			if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
+	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, pwd)
+	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, ctx.Current)
+	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv)
+
+	if docker {
+		for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
+			if !ru.file.Exists(envFile) {
+				if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
+					return err
+				}
+				continue
+			}
+			if err := ru.file.Append(envFile, []byte(e+"\n")); err != nil {
 				return err
 			}
-			continue
-		}
-		if err := ru.file.Append(envFile, []byte(e+"\n")); err != nil {
-			return err
 		}
 	}
 
