@@ -1,3 +1,4 @@
+dir
 
 Write-Output 'DOWLOADING GO-MSI INSTALLER'
 
