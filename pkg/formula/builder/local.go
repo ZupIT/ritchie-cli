@@ -104,7 +104,6 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
-
 	if err := cmd.Run(); err != nil {
 		if stderr.Bytes() != nil {
 			errMsg := fmt.Sprintf("Build error: \n%s \n%s", stderr.String(), err)
@@ -112,6 +111,12 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 		}
 
 		return err
+	}
+
+	if so == osutil.Windows {
+		if stderr.String() != "" {
+			return fmt.Errorf("%s \nMore about error: %s", ErrBuildFormulaBuildBat, stderr.String())
+		}
 	}
 
 	return nil

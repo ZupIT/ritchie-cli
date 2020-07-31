@@ -23,9 +23,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -43,7 +43,7 @@ type PreRunManager struct {
 	make        formula.MakeBuilder
 	docker      formula.DockerBuilder
 	bat         formula.BatBuilder
-	dir         stream.DirCreateListCopier
+	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
 }
 
@@ -52,7 +52,7 @@ func NewPreRun(
 	make formula.MakeBuilder,
 	docker formula.DockerBuilder,
 	bat formula.BatBuilder,
-	dir stream.DirCreateListCopier,
+	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
 ) PreRunManager {
 	return PreRunManager{
@@ -65,7 +65,7 @@ func NewPreRun(
 	}
 }
 
-func (pr PreRunManager) PreRun(def formula.Definition, local bool) (formula.Setup, error) {
+func (pr PreRunManager) PreRun(def formula.Definition, docker bool) (formula.Setup, error) {
 	pwd, _ := os.Getwd()
 	formulaPath := def.FormulaPath(pr.ritchieHome)
 
@@ -78,8 +78,14 @@ func (pr PreRunManager) PreRun(def formula.Definition, local bool) (formula.Setu
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
 		time.Sleep(2 * time.Second)
-		if err := pr.buildFormula(formulaPath, config.DockerIB, local); err != nil {
+		if err := pr.buildFormula(formulaPath, config.DockerIB, docker); err != nil {
 			s.Stop()
+
+			// Remove /bin dir to force formula rebuild in next execution
+			if err := pr.dir.Remove(def.BinPath(formulaPath)); err != nil {
+				return formula.Setup{}, err
+			}
+
 			return formula.Setup{}, err
 		}
 		s.Success(prompt.Green("Formula was successfully built!"))
@@ -104,8 +110,8 @@ func (pr PreRunManager) PreRun(def formula.Definition, local bool) (formula.Setu
 	}
 
 	dockerFile := filepath.Join(tmpDir, "Dockerfile")
-	if !local && validateDocker() && pr.file.Exists(dockerFile) {
-		s.ContainerId, err = buildRunImg()
+	if docker && validateDocker() && pr.file.Exists(dockerFile) {
+		s.ContainerId, err = buildRunImg(def)
 		if err != nil {
 			return formula.Setup{}, err
 		}
@@ -114,8 +120,8 @@ func (pr PreRunManager) PreRun(def formula.Definition, local bool) (formula.Setu
 	return s, nil
 }
 
-func (pr PreRunManager) buildFormula(formulaPath, dockerIB string, localFlag bool) error {
-	if !localFlag && dockerIB != "" && validateDocker() { // Build formula inside docker
+func (pr PreRunManager) buildFormula(formulaPath, dockerIB string, dockerFlag bool) error {
+	if dockerFlag && dockerIB != "" && validateDocker() { // Build formula inside docker
 		if err := pr.docker.Build(formulaPath, dockerIB); err != nil {
 			fmt.Println("\n" + err.Error())
 		} else {
@@ -168,13 +174,15 @@ func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Defi
 	return tDir, nil
 }
 
-func buildRunImg() (string, error) {
+func buildRunImg(def formula.Definition) (string, error) {
 	s := spinner.StartNew("Building docker image to run formula...")
-	containerId, err := uuid.NewRandom()
-	if err != nil {
-		return "", err
+	formName := strings.ReplaceAll(def.Path, string(os.PathSeparator), "-")
+	containerId := fmt.Sprintf("rit-repo-%s-formula%s", def.RepoName, formName)
+	if len(containerId) > 200 {
+		containerId = containerId[:200]
 	}
-	args := []string{"build", "-t", containerId.String(), "."}
+
+	args := []string{"build", "-t", containerId, "."}
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
 
@@ -184,7 +192,7 @@ func buildRunImg() (string, error) {
 	}
 
 	s.Success(prompt.Green("Docker image successfully built!"))
-	return containerId.String(), err
+	return containerId, nil
 }
 
 // validate checks if able to run inside docker

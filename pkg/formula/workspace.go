@@ -18,8 +18,8 @@ package formula
 
 const (
 	DefaultWorkspaceName = "Default"
-	DefaultWorkspaceDir  = "/ritchie-formulas-local"
-	WorkspacesFile       = "/formula_workspaces.json"
+	DefaultWorkspaceDir  = "ritchie-formulas-local"
+	WorkspacesFile       = "formula_workspaces.json"
 )
 
 type (

@@ -55,15 +55,14 @@ func NewFormulaRunner(
 	}
 }
 
-func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, local bool) error {
-	setup, err := ru.PreRun(def, local)
+func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool) error {
+	setup, err := ru.PreRun(def, docker)
 	if err != nil {
 		return err
 	}
 
-	var isDocker bool
 	var cmd *exec.Cmd
-	if local || setup.ContainerId == "" {
+	if !docker || setup.ContainerId == "" {
 		cmd, err = ru.runLocal(setup, inputType)
 		if err != nil {
 			return err
@@ -73,15 +72,13 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, lo
 		if err != nil {
 			return err
 		}
-
-		isDocker = true
 	}
 
 	if err := cmd.Run(); err != nil {
 		return err
 	}
 
-	if err := ru.PostRun(setup, isDocker); err != nil {
+	if err := ru.PostRun(setup, docker); err != nil {
 		return err
 	}
 
@@ -92,9 +89,9 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType)
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
 	var args []string
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		args = []string{"run", "-it", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
 	} else {
-		args = []string{"run", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
 	}
 
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"

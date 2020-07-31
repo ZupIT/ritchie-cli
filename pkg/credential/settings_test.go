@@ -113,7 +113,7 @@ func TestNewDefaultCredentials(t *testing.T) {
 
 func TestProviderPath(t *testing.T) {
 	provider := credSettings.ProviderPath()
-	slicedPath := strings.Split(provider, "/")
+	slicedPath := strings.Split(provider, string(os.PathSeparator))
 	providersJson := slicedPath[len(slicedPath)-1]
 
 	if providersJson != "providers.json" {
@@ -123,7 +123,7 @@ func TestProviderPath(t *testing.T) {
 
 func TestCredentialsPath(t *testing.T){
 	credentials := credSettings.CredentialsPath()
-	slicedPath := strings.Split(credentials, "/")
+	slicedPath := strings.Split(credentials, string(os.PathSeparator))
 	fmt.Println(slicedPath)
 	providersDir := slicedPath[len(slicedPath)-1]
 
