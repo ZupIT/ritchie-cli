@@ -31,6 +31,29 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <!-- Build an executable (uber)JAR with all dependencies inside-->
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<!-- <addClasspath>true</addClasspath> -->
+							<mainClass>com.ritchie.Main</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
         </plugins>
     </build>
 

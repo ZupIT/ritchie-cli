@@ -4,7 +4,7 @@ SH=$(BIN_FOLDER)/run.sh
 BAT=$(BIN_FOLDER)/run.bat
 BUILD=mvn clean install
 CLEAN=mvn clean
-JAR_FILE=Main.jar
+JAR_FILE=Main-jar-with-dependencies.jar
 TARGET=target
 
 build: java-build sh-unix bat-windows
