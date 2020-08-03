@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.0-beta.24](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.24) (2020-08-03)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.23...1.0.0-beta.24)
+
+**Implemented enhancements:**
+
+- Create journey tips [\#289](https://github.com/ZupIT/ritchie-cli/issues/289)
+- Create journey tips [\#304](https://github.com/ZupIT/ritchie-cli/pull/304) ([brunats](https://github.com/brunats))
+
+**Fixed bugs:**
+
+- \[FIX\] Fix build formula on Windows [\#307](https://github.com/ZupIT/ritchie-cli/pull/307) ([kaduartur](https://github.com/kaduartur))
+- Vulnerability SSL pipeline blocking ignored [\#239](https://github.com/ZupIT/ritchie-cli/pull/239) ([Leonardo-Beda-ZUP](https://github.com/Leonardo-Beda-ZUP))
+
+## [1.0.0-beta.23](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.23) (2020-07-27)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.22...1.0.0-beta.23)
+
+**Merged pull requests:**
+
+- Release 1.0.0-beta.22 merge [\#303](https://github.com/ZupIT/ritchie-cli/pull/303) ([zup-ci](https://github.com/zup-ci))
+
 ## [1.0.0-beta.22](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.22) (2020-07-20)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.21...1.0.0-beta.22)
@@ -54,7 +76,6 @@
 - Add signature in single [\#265](https://github.com/ZupIT/ritchie-cli/pull/265) ([ernelio](https://github.com/ernelio))
 - Release 1.0.0-beta.19 merge [\#259](https://github.com/ZupIT/ritchie-cli/pull/259) ([zup-ci](https://github.com/zup-ci))
 - FEATURE - Improving information about help [\#256](https://github.com/ZupIT/ritchie-cli/pull/256) ([brunats](https://github.com/brunats))
-- Feature/repo [\#254](https://github.com/ZupIT/ritchie-cli/pull/254) ([kaduartur](https://github.com/kaduartur))
 
 ## [1.0.0-beta.20](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.20) (2020-07-13)
 
