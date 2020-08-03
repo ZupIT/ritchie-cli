@@ -18,7 +18,7 @@ package repo
 
 import (
 	"encoding/json"
-	"path"
+	"path/filepath"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -60,7 +60,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	}
 
 	repos := formula.Repos{}
-	repoPath := path.Join(ad.ritHome, reposDirName, reposFileName)
+	repoPath := filepath.Join(ad.ritHome, reposDirName, reposFileName)
 	if ad.file.Exists(repoPath) {
 		read, err := ad.file.Read(repoPath)
 		if err != nil {
@@ -78,14 +78,14 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		return err
 	}
 
-	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name.String())
+	newRepoPath := filepath.Join(ad.ritHome, reposDirName, repo.Name.String())
 
 	tree, err := ad.tree.Generate(newRepoPath)
 	if err != nil {
 		return err
 	}
 
-	treeFilePath := path.Join(newRepoPath, "tree.json")
+	treeFilePath := filepath.Join(newRepoPath, "tree.json")
 	bytes, err := json.MarshalIndent(tree, "", "\t")
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
 		return err
 	}
 
-	dirPath := path.Dir(repoPath)
+	dirPath := filepath.Dir(repoPath)
 	if err := ad.dir.Create(dirPath); err != nil {
 		return err
 	}

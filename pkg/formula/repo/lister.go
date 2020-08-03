@@ -18,7 +18,7 @@ package repo
 
 import (
 	"encoding/json"
-	"path"
+	"path/filepath"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -37,7 +37,7 @@ func NewLister(ritHome string, file stream.FileReadExister) ListManager {
 // List method returns an empty []formula.Repo if there is no repositories.json
 func (li ListManager) List() (formula.Repos, error) {
 	repos := formula.Repos{}
-	reposFilePath := path.Join(li.ritHome, reposDirName, reposFileName)
+	reposFilePath := filepath.Join(li.ritHome, reposDirName, reposFileName)
 	if !li.file.Exists(reposFilePath) {
 		return repos, nil
 	}

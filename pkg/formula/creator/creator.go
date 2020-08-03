@@ -18,8 +18,7 @@ package creator
 
 import (
 	"encoding/json"
-	"fmt"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -125,7 +124,7 @@ func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string
 			if err != nil {
 				return err
 			}
-			newDir, _ := path.Split(newPath)
+			newDir, _ := filepath.Split(newPath)
 			err = c.dir.Create(newDir)
 			if err != nil {
 				return err
@@ -145,10 +144,10 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 	dirs := strings.Split(formulaCmdName, " ")
 	for i := 0; i < len(dirs); i++ {
 		d := dirs[0 : i+1]
-		tPath := path.Join(workSpacePath, path.Join(d...))
-		helpPath := fmt.Sprintf("%s/%s", tPath, template.HelpFileName)
+		tPath := filepath.Join(workSpacePath, filepath.Join(d...))
+		helpPath := filepath.Join(tPath, template.HelpFileName)
 		if !c.file.Exists(helpPath) {
-			folderName := path.Base(tPath)
+			folderName := filepath.Base(tPath)
 			tpl := strings.ReplaceAll(template.HelpJson, "{{folderName}}", folderName)
 			help := formula.Help{}
 

@@ -19,7 +19,7 @@ package repo
 import (
 	"encoding/json"
 	"errors"
-	"path"
+	"path/filepath"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -44,7 +44,7 @@ func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister) SetPrio
 
 func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int) error {
 	var repos formula.Repos
-	repoPath := path.Join(sm.ritHome, reposDirName, reposFileName)
+	repoPath := filepath.Join(sm.ritHome, reposDirName, reposFileName)
 	if !sm.file.Exists(repoPath) {
 		return errors.New(repositoryDoNotExistError)
 	}

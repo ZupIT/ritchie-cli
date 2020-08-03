@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -177,7 +177,7 @@ func tutorialRit(tutorialStatus string) {
 }
 
 func (ro *rootCmd) ritchieIsInitialized() bool {
-	commonsRepoPath := path.Join(ro.ritchieHome, "repos", "commons")
+	commonsRepoPath := filepath.Join(ro.ritchieHome, "repos", "commons")
 
 	return ro.dir.Exists(commonsRepoPath)
 }
