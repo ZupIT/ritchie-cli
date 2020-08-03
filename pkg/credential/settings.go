@@ -75,7 +75,7 @@ func formatCredential(credential string) string {
 }
 
 func formatCredValue(credential string) string {
-	if credLen := len(credential); credLen > 12 {
+	if credLen := len(credential); credLen > 20 {
 		var resumedCredential []rune
 		for i, r := range credential {
 			if i >= 4 {
