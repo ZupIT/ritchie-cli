@@ -34,7 +34,6 @@ import (
 
 const (
 	newWorkspace = "Type new formula workspace?"
-	dirPattern   = "%s/%s"
 	docsDir      = "docs"
 	srcDir       = "src"
 )
@@ -169,7 +168,7 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 		return "", err
 	}
 
-	dir, err = b.readFormulas(fmt.Sprintf(dirPattern, dir, selected))
+	dir, err = b.readFormulas(filepath.Join(dir, selected))
 	if err != nil {
 		return "", err
 	}

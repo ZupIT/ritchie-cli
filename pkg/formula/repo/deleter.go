@@ -18,7 +18,7 @@ package repo
 
 import (
 	"encoding/json"
-	"path"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -49,7 +49,7 @@ func (dm DeleteManager) Delete(repoName formula.RepoName) error {
 }
 
 func (dm DeleteManager) deleteRepoDir(repoName formula.RepoName) error {
-	repoPath := path.Join(dm.ritHome, reposDirName, repoName.String())
+	repoPath := filepath.Join(dm.ritHome, reposDirName, repoName.String())
 	if err := dm.dir.Remove(repoPath); err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (dm DeleteManager) deleteRepoDir(repoName formula.RepoName) error {
 func (dm DeleteManager) deleteFromReposFile(repoName formula.RepoName) error {
 	repos := formula.Repos{}
 
-	repoFilePath := path.Join(dm.ritHome, reposDirName, reposFileName)
+	repoFilePath := filepath.Join(dm.ritHome, reposDirName, reposFileName)
 	file, err := dm.file.Read(repoFilePath)
 	if err != nil {
 		return err

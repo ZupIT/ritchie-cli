@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -209,8 +208,8 @@ func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 
 func formulaPath(workspacePath, cmd string) string {
 	cc := strings.Split(cmd, " ")
-	formulaPath := strings.Join(cc[1:], "/")
-	return path.Join(workspacePath, formulaPath)
+	formulaPath := strings.Join(cc[1:], string(os.PathSeparator))
+	return filepath.Join(workspacePath, formulaPath)
 }
 
 func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {

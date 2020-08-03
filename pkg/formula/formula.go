@@ -39,8 +39,6 @@ const (
 	BinWindows    = "run.bat"
 	BinDir        = "bin"
 	EnvPattern    = "%s=%s"
-	TreePath      = "/tree/tree.json"
-	MakefilePath  = "/Makefile"
 )
 
 type (

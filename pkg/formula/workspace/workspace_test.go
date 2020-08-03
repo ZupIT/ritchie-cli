@@ -21,6 +21,7 @@ import (
 	"errors"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
@@ -281,21 +282,12 @@ func TestValidate(t *testing.T) {
 }
 
 func cleanForm() {
-	_ = fileutil.RemoveDir(os.TempDir() + "/customRepo")
-	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoMakefile")
-	_ = fileutil.RemoveDir(os.TempDir() + "/customRepoTreejson")
+	_ = fileutil.RemoveDir(filepath.Join(os.TempDir(), "my-custom-repo"))
 }
 
 func createFullDir() string {
-	dir := os.TempDir() + "/my-custom-repo"
-	treeJsonFile := path.Join(dir, formula.TreePath)
-	treeJsonDir := path.Dir(treeJsonFile)
-	makefilePath := path.Join(dir, formula.MakefilePath)
+	dir := filepath.Join(os.TempDir(), "my-custom-repo")
 	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
-	_ = fileutil.CreateDirIfNotExists(treeJsonDir, os.ModePerm)
-	makefile, _ := fileutil.ReadFile("../../testdata/MakefilePath")
-	_ = fileutil.CreateFileIfNotExist(makefilePath, makefile)
-	_ = fileutil.CreateFileIfNotExist(treeJsonFile, []byte("{}"))
 
 	return dir
 }

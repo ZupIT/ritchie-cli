@@ -19,7 +19,7 @@ package tree
 import (
 	"encoding/json"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -50,8 +50,8 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 
 	commands := api.Commands{}
 	for _, dir := range dirs { // Generate root commands
-		formulaPath := path.Join(repoPath, dir)
-		helpFilePath := path.Join(formulaPath, template.HelpFileName)
+		formulaPath := filepath.Join(repoPath, dir)
+		helpFilePath := filepath.Join(formulaPath, template.HelpFileName)
 		if !ge.file.Exists(helpFilePath) { // Ignore folders without help.txt
 			continue
 		}
@@ -103,8 +103,8 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			continue
 		}
 
-		formulaPath := path.Join(dirPath, dir)
-		helpFilePath := path.Join(formulaPath, template.HelpFileName)
+		formulaPath := filepath.Join(dirPath, dir)
+		helpFilePath := filepath.Join(formulaPath, template.HelpFileName)
 		help := formula.Help{}
 		if ge.file.Exists(helpFilePath) { // Check if help.txt exist
 			helpFile, err := ge.file.Read(helpFilePath)
@@ -126,7 +126,7 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			LongHelp: help.Long,
 		}
 
-		configFilePath := path.Join(formulaPath, configFile)
+		configFilePath := filepath.Join(formulaPath, configFile)
 		if ge.file.Exists(configFilePath) { // Case config.json exists, set cmd.Formula as true
 			cmd.Formula = true
 		}

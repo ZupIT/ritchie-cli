@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strconv"
 
 	"github.com/mattn/go-isatty"
@@ -116,7 +116,7 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 }
 
 func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
-	formulaRun := path.Join(setup.TmpDir, setup.BinName)
+	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
