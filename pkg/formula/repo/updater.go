@@ -1,9 +1,25 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package repo
 
 import (
 	"encoding/json"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -53,18 +69,18 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 		return err
 	}
 
-	repoFilePath := path.Join(up.ritHome, reposDirName, reposFileName)
+	repoFilePath := filepath.Join(up.ritHome, reposDirName, reposFileName)
 	if err := up.saveRepo(repoFilePath, repos); err != nil {
 		return err
 	}
 
-	repoPath := path.Join(up.ritHome, reposDirName, name.String())
+	repoPath := filepath.Join(up.ritHome, reposDirName, name.String())
 	tree, err := up.tree.Generate(repoPath)
 	if err != nil {
 		return err
 	}
 
-	treeFilePath := path.Join(repoPath, "tree.json")
+	treeFilePath := filepath.Join(repoPath, "tree.json")
 	bytes, err := json.MarshalIndent(tree, "", "\t")
 	if err != nil {
 		return err

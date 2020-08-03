@@ -1,0 +1,16 @@
+{
+    "name": "ritchiecli",
+    "summary": "RitchieCLI installer",
+    "description": "Install ritchie CLI",
+    "license": "LICENSE",
+    "url": "https://github.com/ZupIT/ritchie-cli",
+    "files": [
+        {
+            "from": "dist/linux/rit",
+            "to": "/usr/local/bin",
+            "base": "dist/linux",
+            "type": ""
+        }
+    ],
+    "preinst": "packaging/scripts/preinst.sh"
+}

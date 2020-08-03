@@ -1,8 +1,24 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package repo
 
 import (
 	"encoding/json"
-	"path"
+	"path/filepath"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -44,7 +60,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	}
 
 	repos := formula.Repos{}
-	repoPath := path.Join(ad.ritHome, reposDirName, reposFileName)
+	repoPath := filepath.Join(ad.ritHome, reposDirName, reposFileName)
 	if ad.file.Exists(repoPath) {
 		read, err := ad.file.Read(repoPath)
 		if err != nil {
@@ -62,14 +78,14 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		return err
 	}
 
-	newRepoPath := path.Join(ad.ritHome, reposDirName, repo.Name.String())
+	newRepoPath := filepath.Join(ad.ritHome, reposDirName, repo.Name.String())
 
 	tree, err := ad.tree.Generate(newRepoPath)
 	if err != nil {
 		return err
 	}
 
-	treeFilePath := path.Join(newRepoPath, "tree.json")
+	treeFilePath := filepath.Join(newRepoPath, "tree.json")
 	bytes, err := json.MarshalIndent(tree, "", "\t")
 	if err != nil {
 		return err
@@ -88,7 +104,7 @@ func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
 		return err
 	}
 
-	dirPath := path.Dir(repoPath)
+	dirPath := filepath.Dir(repoPath)
 	if err := ad.dir.Create(dirPath); err != nil {
 		return err
 	}

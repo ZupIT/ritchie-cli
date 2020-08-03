@@ -1,9 +1,25 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package cmd
 
 import (
 	"errors"
 	"fmt"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -18,8 +34,7 @@ import (
 
 const (
 	newWorkspace = "Type new formula workspace?"
-	dirPattern   = "%s/%s"
-	treeDir      = "tree"
+	docsDir      = "docs"
 	srcDir       = "src"
 )
 
@@ -74,7 +89,7 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := path.Join(b.userHomeDir, formula.DefaultWorkspaceDir)
+		defaultWorkspace := filepath.Join(b.userHomeDir, formula.DefaultWorkspaceDir)
 		if b.directory.Exists(defaultWorkspace) {
 			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
 		}
@@ -142,7 +157,7 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 		return "", err
 	}
 
-	dirs = sliceutil.Remove(dirs, treeDir)
+	dirs = sliceutil.Remove(dirs, docsDir)
 
 	if isFormula(dirs) {
 		return dir, nil
@@ -153,7 +168,7 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 		return "", err
 	}
 
-	dir, err = b.readFormulas(fmt.Sprintf(dirPattern, dir, selected))
+	dir, err = b.readFormulas(filepath.Join(dir, selected))
 	if err != nil {
 		return "", err
 	}

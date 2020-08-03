@@ -1,8 +1,24 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package repo
 
 import (
 	"encoding/json"
-	"path"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -33,7 +49,7 @@ func (dm DeleteManager) Delete(repoName formula.RepoName) error {
 }
 
 func (dm DeleteManager) deleteRepoDir(repoName formula.RepoName) error {
-	repoPath := path.Join(dm.ritHome, reposDirName, repoName.String())
+	repoPath := filepath.Join(dm.ritHome, reposDirName, repoName.String())
 	if err := dm.dir.Remove(repoPath); err != nil {
 		return err
 	}
@@ -43,7 +59,7 @@ func (dm DeleteManager) deleteRepoDir(repoName formula.RepoName) error {
 func (dm DeleteManager) deleteFromReposFile(repoName formula.RepoName) error {
 	repos := formula.Repos{}
 
-	repoFilePath := path.Join(dm.ritHome, reposDirName, reposFileName)
+	repoFilePath := filepath.Join(dm.ritHome, reposDirName, reposFileName)
 	file, err := dm.file.Read(repoFilePath)
 	if err != nil {
 		return err

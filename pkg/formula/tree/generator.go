@@ -1,9 +1,25 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package tree
 
 import (
 	"encoding/json"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -34,8 +50,8 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 
 	commands := api.Commands{}
 	for _, dir := range dirs { // Generate root commands
-		formulaPath := path.Join(repoPath, dir)
-		helpFilePath := path.Join(formulaPath, template.HelpFileName)
+		formulaPath := filepath.Join(repoPath, dir)
+		helpFilePath := filepath.Join(formulaPath, template.HelpFileName)
 		if !ge.file.Exists(helpFilePath) { // Ignore folders without help.txt
 			continue
 		}
@@ -87,8 +103,8 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			continue
 		}
 
-		formulaPath := path.Join(dirPath, dir)
-		helpFilePath := path.Join(formulaPath, template.HelpFileName)
+		formulaPath := filepath.Join(dirPath, dir)
+		helpFilePath := filepath.Join(formulaPath, template.HelpFileName)
 		help := formula.Help{}
 		if ge.file.Exists(helpFilePath) { // Check if help.txt exist
 			helpFile, err := ge.file.Read(helpFilePath)
@@ -110,7 +126,7 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			LongHelp: help.Long,
 		}
 
-		configFilePath := path.Join(formulaPath, configFile)
+		configFilePath := filepath.Join(formulaPath, configFile)
 		if ge.file.Exists(configFilePath) { // Case config.json exists, set cmd.Formula as true
 			cmd.Formula = true
 		}

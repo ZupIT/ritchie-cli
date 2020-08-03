@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package runner
 
 import (
@@ -19,15 +35,17 @@ func TestPreRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
-	ritHome := fmt.Sprintf("%s/.rit-setup", tmpDir)
-	repoPath := fmt.Sprintf("%s/repos/commons", ritHome)
+	ritHome := filepath.Join(tmpDir, ".rit-setup")
+	repoPath := filepath.Join(ritHome, "repos", "commons")
 
 	makeBuilder := builder.NewBuildMake()
+	batBuilder := builder.NewBuildBat(fileManager)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
 	_ = dirManager.Create(repoPath)
-	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", repoPath)
+	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	_ = streams.Unzip(zipFile, repoPath)
 
 	var config formula.Config
 	_ = json.Unmarshal([]byte(configJson), &config)
@@ -38,8 +56,8 @@ func TestPreRun(t *testing.T) {
 		batBuild    formula.BatBuilder
 		dockerBuild formula.DockerBuilder
 		file        stream.FileReadExister
-		dir         stream.DirCreateListCopier
-		localFlag   bool
+		dir         stream.DirCreateListCopyRemover
+		dockerFlag  bool
 	}
 
 	type out struct {
@@ -62,9 +80,9 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				file:      fileManager,
-				dir:       dirManager,
-				localFlag: false,
+				file:       fileManager,
+				dir:        dirManager,
+				dockerFlag: true,
 			},
 			out: out{
 				want: formula.Setup{
@@ -75,7 +93,7 @@ func TestPreRun(t *testing.T) {
 			},
 		},
 		{
-			name: "docker build fallback local",
+			name: "docker build fallback docker",
 			in: in{
 				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				dockerBuild: dockerBuildMock{
@@ -86,9 +104,12 @@ func TestPreRun(t *testing.T) {
 				makeBuild: makeBuildMock{
 					build: makeBuilder.Build,
 				},
-				file:      fileManager,
-				dir:       dirManager,
-				localFlag: false,
+				batBuild: batBuildMock{
+					build: batBuilder.Build,
+				},
+				file:       fileManager,
+				dir:        dirManager,
+				dockerFlag: true,
 			},
 			out: out{
 				want: formula.Setup{
@@ -99,7 +120,7 @@ func TestPreRun(t *testing.T) {
 			},
 		},
 		{
-			name: "local build success",
+			name: "docker build success",
 			in: in{
 				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				makeBuild: makeBuildMock{
@@ -107,9 +128,14 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				file:      fileManager,
-				dir:       dirManager,
-				localFlag: true,
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				file:       fileManager,
+				dir:        dirManager,
+				dockerFlag: false,
 			},
 			out: out{
 				want: formula.Setup{
@@ -120,7 +146,7 @@ func TestPreRun(t *testing.T) {
 			},
 		},
 		{
-			name: "local build error",
+			name: "docker build error",
 			in: in{
 				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				makeBuild: makeBuildMock{
@@ -128,9 +154,14 @@ func TestPreRun(t *testing.T) {
 						return builder.ErrBuildFormulaMakefile
 					},
 				},
-				file:      fileManager,
-				dir:       dirManager,
-				localFlag: true,
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return builder.ErrBuildFormulaMakefile
+					},
+				},
+				file:       fileManager,
+				dir:        dirManager,
+				dockerFlag: false,
 			},
 			out: out{
 				wantErr: true,
@@ -140,21 +171,21 @@ func TestPreRun(t *testing.T) {
 		{
 			name: "not found config error",
 			in: in{
-				def:       formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				file:      fileManagerMock{exist: false},
-				localFlag: true,
+				def:        formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				file:       fileManagerMock{exist: false},
+				dockerFlag: false,
 			},
 			out: out{
 				wantErr: true,
-				err:     fmt.Errorf(loadConfigErrMsg, "/tmp/.rit-setup/repos/commons/testing/formula/config.json"),
+				err:     fmt.Errorf(loadConfigErrMsg, filepath.Join(os.TempDir(), ".rit-setup", "repos", "commons", "testing", "formula", "config.json")),
 			},
 		},
 		{
 			name: "read config error",
 			in: in{
-				def:       formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				file:      fileManagerMock{exist: true, rErr: errors.New("error to read config")},
-				localFlag: true,
+				def:        formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				file:       fileManagerMock{exist: true, rErr: errors.New("error to read config")},
+				dockerFlag: false,
 			},
 			out: out{
 				wantErr: true,
@@ -164,9 +195,9 @@ func TestPreRun(t *testing.T) {
 		{
 			name: "unmarshal config error",
 			in: in{
-				def:       formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				file:      fileManagerMock{exist: true, rBytes: []byte("error")},
-				localFlag: true,
+				def:        formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				file:       fileManagerMock{exist: true, rBytes: []byte("error")},
+				dockerFlag: false,
 			},
 			out: out{
 				wantErr: true,
@@ -182,9 +213,14 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				file:      fileManager,
-				dir:       dirManagerMock{createErr: errors.New("error to create dir")},
-				localFlag: true,
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				file:       fileManager,
+				dir:        dirManagerMock{createErr: errors.New("error to create dir")},
+				dockerFlag: false,
 			},
 			out: out{
 				wantErr: true,
@@ -200,9 +236,14 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				file:      fileManager,
-				dir:       dirManagerMock{copyErr: errors.New("error to copy dir")},
-				localFlag: true,
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				file:       fileManager,
+				dir:        dirManagerMock{copyErr: errors.New("error to copy dir")},
+				dockerFlag: false,
 			},
 			out: out{
 				wantErr: true,
@@ -218,9 +259,14 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
-				file:      fileManager,
-				dir:       dirManagerMock{},
-				localFlag: true,
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				file:       fileManager,
+				dir:        dirManagerMock{},
+				dockerFlag: false,
 			},
 			out: out{
 				wantErr: true,
@@ -233,7 +279,7 @@ func TestPreRun(t *testing.T) {
 			in := tt.in
 			_ = dirManager.Remove(filepath.Join(in.def.FormulaPath(ritHome), "bin"))
 			preRun := NewPreRun(ritHome, in.makeBuild, in.dockerBuild, in.batBuild, in.dir, in.file)
-			got, err := preRun.PreRun(in.def, in.localFlag)
+			got, err := preRun.PreRun(in.def, in.dockerFlag)
 
 			if tt.out.wantErr {
 				if tt.out.err == nil && err == nil {
@@ -246,7 +292,7 @@ func TestPreRun(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(tt.out.want.Config, got.Config) {
-				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got, tt.out.want.Config)
+				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got.Config, tt.out.want.Config)
 			}
 
 			_ = os.Chdir(got.Pwd) // Return to test folder
@@ -270,6 +316,14 @@ func (do dockerBuildMock) Build(formulaPath, dockerImg string) error {
 	return do.build(formulaPath, dockerImg)
 }
 
+type batBuildMock struct {
+	build func(formulaPath string) error
+}
+
+func (ba batBuildMock) Build(formulaPath string) error {
+	return ba.build(formulaPath)
+}
+
 type dirManagerMock struct {
 	copyErr   error
 	createErr error
@@ -287,8 +341,12 @@ func (di dirManagerMock) List(dir string, hiddenDir bool) ([]string, error) {
 	return nil, nil
 }
 
+func (di dirManagerMock) Remove(dir string) error {
+	return nil
+}
+
 const configJson = `{
-    "dockerImageBuilder": "cimg/base:stable-20.04",
+    "dockerImageBuilder": "cimg/go:1.14",
     "inputs": [
       {
         "name": "sample_text",

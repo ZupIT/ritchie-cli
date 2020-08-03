@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package builder
 
 import (
@@ -7,7 +23,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -17,8 +33,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const localRepoDir = "/repos/local"
-
 var (
 	msgBuildOnWindows = prompt.Yellow("This formula cannot be built on Windows.")
 	ErrBuildOnWindows = errors.New(msgBuildOnWindows)
@@ -27,14 +41,14 @@ var (
 type LocalManager struct {
 	ritHome string
 	dir     stream.DirCreateListCopyRemover
-	file    stream.FileCopyExistListerWriter
+	file    stream.FileWriteReadExister
 	tree    formula.TreeGenerator
 }
 
 func NewBuildLocal(
 	ritHome string,
 	dir stream.DirCreateListCopyRemover,
-	file stream.FileCopyExistListerWriter,
+	file stream.FileWriteReadExister,
 	tree formula.TreeGenerator,
 ) formula.LocalBuilder {
 	return LocalManager{ritHome: ritHome, dir: dir, file: file, tree: tree}
@@ -42,7 +56,7 @@ func NewBuildLocal(
 
 func (m LocalManager) Build(workspacePath, formulaPath string) error {
 
-	dest := path.Join(m.ritHome, localRepoDir)
+	dest := filepath.Join(m.ritHome, "repos", "local")
 
 	if err := m.dir.Create(dest); err != nil {
 		return err
@@ -56,7 +70,7 @@ func (m LocalManager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
-	if err:= m.buildFormulaBin(workspacePath, formulaPath, dest); err != nil {
+	if err := m.buildFormulaBin(workspacePath, formulaPath, dest); err != nil {
 		return err
 	}
 
@@ -65,7 +79,7 @@ func (m LocalManager) Build(workspacePath, formulaPath string) error {
 
 func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) error {
 	formulaSrc := strings.ReplaceAll(formulaPath, workspacePath, dest)
-	formulaBin := path.Join(formulaSrc, "bin")
+	formulaBin := filepath.Join(formulaSrc, "bin")
 
 	if err := m.dir.Remove(formulaBin); err != nil {
 		return err
@@ -79,7 +93,7 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 	var cmd *exec.Cmd
 	switch so {
 	case osutil.Windows:
-		winBuild := path.Join(formulaPath, "build.bat")
+		winBuild := filepath.Join(formulaPath, "build.bat")
 		if !m.file.Exists(winBuild) {
 			return ErrBuildOnWindows
 		}
@@ -90,7 +104,6 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
-
 	if err := cmd.Run(); err != nil {
 		if stderr.Bytes() != nil {
 			errMsg := fmt.Sprintf("Build error: \n%s \n%s", stderr.String(), err)
@@ -98,11 +111,6 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 		}
 
 		return err
-	}
-
-	if stderr.String() != "" {
-		errMsg := fmt.Sprintf("Build error: \n%s", stderr.String())
-		return errors.New(errMsg)
 	}
 
 	return nil
@@ -114,7 +122,7 @@ func (m LocalManager) generateTree(dest string) error {
 		return err
 	}
 
-	treeFilePath := path.Join(dest, "tree.json")
+	treeFilePath := filepath.Join(dest, "tree.json")
 	treeIndented, err := json.MarshalIndent(tree, "", "\t")
 	if err != nil {
 		return err

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package formula
 
 import (
@@ -16,14 +32,13 @@ const (
 	ReposDir      = "repos"
 	TmpDir        = "tmp"
 	DefaultConfig = "config.json"
-	PwdEnv        = "PWD"
-	CPwdEnv       = "CURRENT_PWD"
+	PwdEnv        = "CURRENT_PWD"
+	CtxEnv        = "CONTEXT"
+	VerboseEnv    = "VERBOSE_MODE"
 	BinUnix       = "run.sh"
 	BinWindows    = "run.bat"
 	BinDir        = "bin"
 	EnvPattern    = "%s=%s"
-	TreePath      = "/tree/tree.json"
-	MakefilePath  = "/Makefile"
 )
 
 type (
@@ -75,11 +90,11 @@ type (
 )
 
 type PreRunner interface {
-	PreRun(def Definition, local bool) (Setup, error)
+	PreRun(def Definition, docker bool) (Setup, error)
 }
 
 type Runner interface {
-	Run(def Definition, inputType api.TermInputType, local bool) error
+	Run(def Definition, inputType api.TermInputType, docker bool, verbose bool) error
 }
 
 type PostRunner interface {

@@ -1,9 +1,25 @@
+/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package builder
 
 import (
 	"errors"
-	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -14,21 +30,23 @@ import (
 
 func TestBuild(t *testing.T) {
 	tmpDir := os.TempDir()
-	workspacePath := fmt.Sprintf("%s/ritchie-formulas-test", tmpDir)
-	formulaPath := fmt.Sprintf("%s/ritchie-formulas-test/testing/formula", tmpDir)
-	ritHome := fmt.Sprintf("%s/.my-rit", os.TempDir())
+	workspacePath := filepath.Join(tmpDir, "ritchie-formulas-test")
+	formulaPath := filepath.Join(tmpDir, "ritchie-formulas-test", "testing", "formula")
+	ritHome := filepath.Join(tmpDir, ".my-rit")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	defaultTreeManagerMock := tree.NewGenerator(dirManager, fileManager)
+	defaultTreeManager := tree.NewGenerator(dirManager, fileManager)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
 	_ = dirManager.Create(ritHome)
 	_ = dirManager.Create(workspacePath)
-	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
+
+	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	_ = streams.Unzip(zipFile, workspacePath)
 
 	type in struct {
-		fileManager stream.FileCopyExistListerWriter
+		fileManager stream.FileWriteReadExister
 		dirManager  stream.DirCreateListCopyRemover
 		tree        formula.TreeGenerator
 	}
@@ -43,25 +61,16 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManager,
-				tree:        defaultTreeManagerMock,
+				tree:        defaultTreeManager,
 			},
 			want: nil,
-		},
-		{
-			name: "list dir error",
-			in: in{
-				fileManager: fileManager,
-				dirManager:  dirManagerMock{listErr: errors.New("error to list dir")},
-				tree:        defaultTreeManagerMock,
-			},
-			want: errors.New("error to list dir"),
 		},
 		{
 			name: "create dir error",
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{createErr: errors.New("error to create dir")},
-				tree:        defaultTreeManagerMock,
+				tree:        defaultTreeManager,
 			},
 			want: errors.New("error to create dir"),
 		},
@@ -70,7 +79,7 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{data: []string{"linux"}, copyErr: errors.New("error to copy dir")},
-				tree:        defaultTreeManagerMock,
+				tree:        defaultTreeManager,
 			},
 			want: errors.New("error to copy dir"),
 		},
@@ -79,27 +88,36 @@ func TestBuild(t *testing.T) {
 			in: in{
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{data: []string{"commons"}, copyErr: errors.New("error to copy dir")},
-				tree:        defaultTreeManagerMock,
+				tree:        defaultTreeManager,
 			},
 			want: errors.New("error to copy dir"),
 		},
 		{
-			name: "list files error",
+			name: "dir remove error",
 			in: in{
-				fileManager: fileManagerMock{listErr: errors.New("error to list files")},
-				dirManager:  dirManager,
-				tree:        defaultTreeManagerMock,
+				fileManager: fileManager,
+				dirManager:  dirManagerMock{data: []string{"commons"}, removeErr: errors.New("error to remove dir")},
+				tree:        defaultTreeManager,
 			},
-			want: errors.New("error to list files"),
+			want: errors.New("error to remove dir"),
 		},
 		{
-			name: "copy files error",
+			name: "tree generate error",
 			in: in{
-				fileManager: fileManagerMock{copyErr: errors.New("error to copy files")},
+				fileManager: fileManager,
 				dirManager:  dirManager,
-				tree:        defaultTreeManagerMock,
+				tree:        treeGenerateMock{err: errors.New("error to generate tree")},
 			},
-			want: errors.New("error to copy files"),
+			want: errors.New("error to generate tree"),
+		},
+		{
+			name: "write tree error",
+			in: in{
+				fileManager: fileManagerMock{writeErr: errors.New("error to write tree")},
+				dirManager:  dirManager,
+				tree:        defaultTreeManager,
+			},
+			want: errors.New("error to write tree"),
 		},
 	}
 
@@ -118,19 +136,19 @@ func TestBuild(t *testing.T) {
 					t.Errorf("Build(%s) did not create the Ritchie home directory", tt.name)
 				}
 
-				treeLocalFile := fmt.Sprintf("%s/repos/local/tree.json", ritHome)
+				treeLocalFile := filepath.Join(ritHome, "repos", "local", "tree.json")
 				hasTreeLocalFile := fileManager.Exists(treeLocalFile)
 				if !hasTreeLocalFile {
 					t.Errorf("Build(%s) did not copy the tree local file", tt.name)
 				}
 
-				formulaFiles := fmt.Sprintf("%s/repos/local/testing/formula/bin", ritHome)
+				formulaFiles := filepath.Join(ritHome, "repos", "local", "testing", "formula", "bin")
 				files, err := fileManager.List(formulaFiles)
-				if err == nil && len(files) != 3 {
+				if err == nil && len(files) != 4 {
 					t.Errorf("Build(%s) did not generate bin files", tt.name)
 				}
 
-				configFile := fmt.Sprintf("%s/repos/local/testing/formula/config.json", ritHome)
+				configFile := filepath.Join(ritHome, "repos", "local", "testing", "formula", "config.json")
 				hasConfigFile := fileManager.Exists(configFile)
 				if !hasConfigFile {
 					t.Errorf("Build(%s) did not copy formula config", tt.name)
@@ -165,25 +183,29 @@ func (d dirManagerMock) Remove(string) error {
 }
 
 type fileManagerMock struct {
-	data     []string
-	listErr  error
-	copyErr  error
+	data     []byte
+	readErr  error
 	exist    bool
 	writeErr error
 }
 
-func (f fileManagerMock) List(string) ([]string, error) {
-	return f.data, f.listErr
-}
-
-func (f fileManagerMock) Copy(string, string) error {
-	return f.copyErr
+func (f fileManagerMock) Read(string) ([]byte, error) {
+	return f.data, f.readErr
 }
 
 func (f fileManagerMock) Exists(string) bool {
 	return f.exist
 }
 
-func (f fileManagerMock) Write(path string, content []byte) error {
+func (f fileManagerMock) Write(string, []byte) error {
 	return f.writeErr
+}
+
+type treeGenerateMock struct {
+	tree formula.Tree
+	err  error
+}
+
+func (t treeGenerateMock) Generate(repoPath string) (formula.Tree, error) {
+	return t.tree, t.err
 }
