@@ -14,7 +14,7 @@ import (
 )
 
 var inputTypes = []string{"plain text", "secret"}
-var inputWay = []string{"file", "type"}
+var inputWay = []string{"credFile", "type"}
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
@@ -68,6 +68,8 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
+		prompt.Info("Check your credentials using rit list credential")
+
 		return nil
 	}
 }
@@ -127,24 +129,26 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
-	inputWayChoose, _ := s.List("Want to enter your credential through a file or by typing it?", inputWay)
+	inputWayChoose, _ := s.List("Want to enter your credential through a credFile or by typing it?", inputWay)
 	for _, i := range inputs {
 		var value string
 		if inputWayChoose == inputWay[0] {
-			path, _ := s.Text("Enter the file path for "+i.Name+":", true)
+			path, _ := s.Text("Enter the credFile path for "+i.Name+":", true)
 			if !s.FileReadExister.Exists(path) {
-				return credDetail, prompt.NewError("Cannot find any file at " + path)
+				return credDetail, prompt.NewError("Cannot find any credFile at " + path)
 			}
 
-			byteValue, _ := s.FileReadExister.Read(path)
-			if len(byteValue) ==0 {
-				return credential.Detail{}, prompt.NewError("")
+			byteValue, err := s.FileReadExister.Read(path)
+			if err != nil {
+				return credential.Detail{}, err
+			}
+			if len(byteValue) == 0 {
+				return credential.Detail{}, prompt.NewError("Empty credFile!")
 			}
 
-				cred[i.Name] = string(byteValue)
+			cred[i.Name] = string(byteValue)
 
 		} else {
-
 			if i.Type == inputTypes[1] {
 				value, err = s.Password(i.Name + ":")
 				if err != nil {

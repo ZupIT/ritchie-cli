@@ -11,7 +11,7 @@ import (
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
-var errReadingFile = errors.New("Error reading file")
+var errReadingFile = errors.New("error reading file")
 
 func TestFind(t *testing.T) {
 	type out struct {
