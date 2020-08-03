@@ -29,12 +29,12 @@ import (
 
 const (
 	buildFile   = "build.bat"
-	msgBuildErr = "failed building formula with build.bat, verify your repository"
+	msgBatBuildErr = "failed building formula with build.bat, verify your repository"
 	errMsgFmt   = `%s
 More about error: %s`
 )
 
-var ErrBuildFormulaBuildBat = errors.New(msgBuildErr)
+var ErrBuildFormulaBuildBat = errors.New(msgBatBuildErr)
 
 type BatManager struct {
 	file stream.FileExister
