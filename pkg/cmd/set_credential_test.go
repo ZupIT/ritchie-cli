@@ -95,7 +95,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			)
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("set credential command error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
