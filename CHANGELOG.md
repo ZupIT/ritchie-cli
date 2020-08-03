@@ -2,10 +2,37 @@
 
 ## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.21...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.23...HEAD)
+
+**Fixed bugs:**
+
+- \[FIX\] Fix build formula on Windows [\#307](https://github.com/ZupIT/ritchie-cli/pull/307) ([kaduartur](https://github.com/kaduartur))
+- Vulnerability SSL pipeline blocking ignored [\#239](https://github.com/ZupIT/ritchie-cli/pull/239) ([Leonardo-Beda-ZUP](https://github.com/Leonardo-Beda-ZUP))
+
+## [1.0.0-beta.23](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.23) (2020-07-27)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.22...1.0.0-beta.23)
 
 **Merged pull requests:**
 
+- Release 1.0.0-beta.22 merge [\#303](https://github.com/ZupIT/ritchie-cli/pull/303) ([zup-ci](https://github.com/zup-ci))
+
+## [1.0.0-beta.22](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.22) (2020-07-20)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.21...1.0.0-beta.22)
+
+**Implemented enhancements:**
+
+- Clean formulas command [\#288](https://github.com/ZupIT/ritchie-cli/pull/288) ([henriquemoraes8](https://github.com/henriquemoraes8))
+
+**Fixed bugs:**
+
+- added clean autocompletion [\#301](https://github.com/ZupIT/ritchie-cli/pull/301) ([marcosgmgm](https://github.com/marcosgmgm))
+- Fix tmp bin dir pattern [\#298](https://github.com/ZupIT/ritchie-cli/pull/298) ([viniciussousazup](https://github.com/viniciussousazup))
+
+**Merged pull requests:**
+
+- Release 1.0.0-beta.21 merge [\#299](https://github.com/ZupIT/ritchie-cli/pull/299) ([zup-ci](https://github.com/zup-ci))
 - \[Suggest\] Pull review guidelines according to last meeting [\#292](https://github.com/ZupIT/ritchie-cli/pull/292) ([henriquemoraes8](https://github.com/henriquemoraes8))
 
 ## [1.0.0-beta.21](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.21) (2020-07-20)
@@ -368,6 +395,7 @@
 - \[FIX \] use $\(HOME\) instead of ~ in Makefile \(main\) [\#35](https://github.com/ZupIT/ritchie-cli/pull/35) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - \[FEATURE\] Creation set server cmd \(TEAM\) [\#34](https://github.com/ZupIT/ritchie-cli/pull/34) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - Circleci project setup [\#29](https://github.com/ZupIT/ritchie-cli/pull/29) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Feature/improve\_session\_validator [\#21](https://github.com/ZupIT/ritchie-cli/pull/21) ([kaduartur](https://github.com/kaduartur))
 - \[FEATURE\] updating issues contribution templates [\#20](https://github.com/ZupIT/ritchie-cli/pull/20) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - \[Enhancement\] Contributing file [\#17](https://github.com/ZupIT/ritchie-cli/pull/17) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
@@ -401,7 +429,6 @@
 
 **Implemented enhancements:**
 
-- Feature/improve\_session\_validator [\#21](https://github.com/ZupIT/ritchie-cli/pull/21) ([kaduartur](https://github.com/kaduartur))
 - feature/prompt\_interface [\#14](https://github.com/ZupIT/ritchie-cli/pull/14) ([sandokandias](https://github.com/sandokandias))
 - \[Enhancement\] Contributing file [\#11](https://github.com/ZupIT/ritchie-cli/pull/11) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
