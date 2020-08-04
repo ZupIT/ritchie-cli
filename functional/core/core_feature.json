@@ -69,22 +69,37 @@
         "entry":"Add new repo",
         "steps":[
             {
+                "key":"Select your provider:",
+                "value":"Github",
+                "action":"select"
+            },
+            {
                 "key":"",
                 "value":"add repo",
                 "action":"main"
             },
             {
-                "key":"Name of the repository:",
+                "key":"Repository name:",
                 "value":"Leonidas",
                 "action":"sendkey"
             },
             {
-                "key":"URL of the tree",
-                "value":"https://commons-repo.ritchiecli.io/tree/tree.json",
+                "key":"Repository URL:",
+                "value":"https://github.com/zupIt/ritchie-formulas",
                 "action":"sendkey"
             },
             {
-                "key":"Priority",
+                "key":"Is a private repository?",
+                "value":"no",
+                "action":"select"
+            },
+            {
+                "key":"Select a tag version:",
+                "value":"1.0.0",
+                "action":"select"
+            },
+            {
+                "key":"Set the priority:",
                 "value":"999",
                 "action":"sendkey"
             }
