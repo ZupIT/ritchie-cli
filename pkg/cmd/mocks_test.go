@@ -138,12 +138,6 @@ func (m inputListCustomMock) List(name string, items []string) (string, error) {
 	return m.name, nil
 }
 
-type inputListCredMock struct{}
-
-func (inputListCredMock) List(name string, items []string) (string, error) {
-	return "me", nil
-}
-
 type inputListErrorMock struct{}
 
 func (inputListErrorMock) List(name string, items []string) (string, error) {
