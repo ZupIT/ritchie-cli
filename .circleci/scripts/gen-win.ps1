@@ -42,8 +42,6 @@ $release_version=$(Get-Content .\workspace\dist\release_version.txt)
 
 mkdir dist\installer
 
-copy LICENSE.rtf packaging/windows
-
 cd packaging\windows
 
 Write-Output 'GENERATING WIX MSI TEMPLATE'
