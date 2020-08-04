@@ -105,7 +105,7 @@ jobs:
       - run:
           name: lint
           command: |
-            /go/bin/golangci-lint run --no-config --issues-exit-code=0 --deadline=10m -v
+            /go/bin/golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
   horus:
     executor: horus-executor
     environment:
