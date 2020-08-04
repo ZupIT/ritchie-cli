@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -133,34 +132,28 @@ func (s Settings) WriteCredentialsFields(fields Fields, path string) error {
 func (s Settings) WriteDefaultCredentialsFields(path string) error {
 	fieldsToWrite := NewDefaultCredentials()
 	if s.file.Exists(path) {
-		configFile, err := fileutil.ReadFile(path)
+		configFile, err := s.file.Read(path)
 		if err != nil {
 			return err
 		}
 
-		// Check for incoming new keys
-		credentialFields := &Fields{}
-		json.Unmarshal(configFile, credentialFields)
-		currentKeys := make(map[string]struct{})
-		var diff []string
-		for k := range *credentialFields {
-			currentKeys[k] = struct{}{}
+		// Join saved fields and default fields
+		credentialFields := Fields{}
+		if err = json.Unmarshal(configFile, &credentialFields); err != nil {
+			return err
 		}
-		for k := range fieldsToWrite {
-			if _, found := currentKeys[k]; !found {
-				diff = append(diff, k)
-			}
+
+		originalLength := len(credentialFields)
+		for k, v := range fieldsToWrite {
+			credentialFields[k] = v
 		}
 
 		// Avoid I/O consumption if there is nothing to change
-		if len(diff) == 0 {
+		if originalLength == len(credentialFields) {
 			return nil
 		}
 
-		for _, key := range diff {
-			(*credentialFields)[key] = fieldsToWrite[key]
-		}
-		fieldsToWrite = *credentialFields
+		fieldsToWrite = credentialFields
 	}
 	err := s.WriteCredentialsFields(fieldsToWrite, path)
 	return err
