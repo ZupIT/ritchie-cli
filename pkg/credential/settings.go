@@ -130,11 +130,33 @@ func (s Settings) WriteCredentialsFields(fields Fields, path string) error {
 // WriteDefault is a non override version of WriteCredentialsFields
 // used to create providers.json if user dont have it
 func (s Settings) WriteDefaultCredentialsFields(path string) error {
-	if !s.file.Exists(path) {
-		err := s.WriteCredentialsFields(NewDefaultCredentials(), path)
-		return err
+	fieldsToWrite := NewDefaultCredentials()
+	if s.file.Exists(path) {
+		configFile, err := s.file.Read(path)
+		if err != nil {
+			return err
+		}
+
+		// Join saved fields and default fields
+		credentialFields := Fields{}
+		if err = json.Unmarshal(configFile, &credentialFields); err != nil {
+			return err
+		}
+
+		originalLength := len(credentialFields)
+		for k, v := range fieldsToWrite {
+			credentialFields[k] = v
+		}
+
+		// Avoid I/O consumption if there is nothing to change
+		if originalLength == len(credentialFields) {
+			return nil
+		}
+
+		fieldsToWrite = credentialFields
 	}
-	return nil
+	err := s.WriteCredentialsFields(fieldsToWrite, path)
+	return err
 }
 
 func NewDefaultCredentials() Fields {
@@ -163,6 +185,11 @@ func NewDefaultCredentials() Fields {
 		Type: "text",
 	}
 
+	password := Field{
+		Name: "password",
+		Type: "secret",
+	}
+
 	dc := Fields{
 		AddNew:       []Field{},
 		"github":     []Field{username, token},
@@ -170,6 +197,7 @@ func NewDefaultCredentials() Fields {
 		"aws":        []Field{accessKey, secretAccessKey},
 		"jenkins":    []Field{username, token},
 		"kubeconfig": []Field{base64config},
+		"ansible":    []Field{username, password},
 	}
 
 	return dc
