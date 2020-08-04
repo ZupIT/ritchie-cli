@@ -22,9 +22,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -35,7 +36,15 @@ func TestNewListAdder(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 
 	repoList := NewLister(ritHome, fileManager)
-	repoCreator := NewCreator(ritHome, github.NewRepoManager(http.DefaultClient), dirManager, fileManager)
+
+	repoProviders := formula.RepoProviders{
+		"Github": formula.Git{
+			Repos:       github.NewRepoManager(http.DefaultClient),
+			NewRepoInfo: github.NewRepoInfo,
+		},
+	}
+
+	repoCreator := NewCreator(ritHome, repoProviders, dirManager, fileManager)
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
 	repoAdd := NewAdder(ritHome, repoCreator, treeGenerator, dirManager, fileManager)
 

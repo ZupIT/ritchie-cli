@@ -18,8 +18,9 @@ package github
 
 import (
 	"fmt"
-	"io"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
 const (
@@ -28,44 +29,15 @@ const (
 	LatestTagUrlPattern = "https://api.github.com/repos/%s/%s/releases/latest"
 )
 
-type Tag struct {
-	Name string `json:"tag_name"`
-}
-
-type Tags []Tag
-
-func (t Tags) Names() []string {
-	var tags []string
-	for i := range t {
-		tags = append(tags, t[i].Name)
-	}
-
-	return tags
-}
-
-type RepoInfo interface {
-	ZipUrl(version string) string
-	TagsUrl() string
-	LatestTagUrl() string
-	TokenHeader() string
-	Token() string
-}
-
 type DefaultRepoInfo struct {
 	owner string
 	repo  string
 	token string
 }
 
-type Repositories interface {
-	Zipball(info RepoInfo, version string) (io.ReadCloser, error)
-	Tags(info RepoInfo) (Tags, error)
-	LatestTag(info RepoInfo) (Tag, error)
-}
-
 // NewRepoInfo returns the RepoInfo built by repository url
 // Repository url e.g. https://github.com/{{owner}}/{{repo}}
-func NewRepoInfo(url string, token string) RepoInfo {
+func NewRepoInfo(url string, token string) git.RepoInfo {
 	split := strings.Split(url, "/")
 	repo := split[len(split)-1]
 	owner := split[len(split)-2]

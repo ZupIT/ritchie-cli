@@ -24,7 +24,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -40,8 +39,8 @@ var (
 )
 
 type addRepoCmd struct {
-	repo   formula.RepositoryAddLister
-	github github.Repositories
+	repo          formula.RepositoryAddLister
+	repoProviders formula.RepoProviders
 	prompt.InputTextValidator
 	prompt.InputPassword
 	prompt.InputURL
@@ -53,7 +52,7 @@ type addRepoCmd struct {
 
 func NewAddRepoCmd(
 	repo formula.RepositoryAddLister,
-	github github.Repositories,
+	repoProviders formula.RepoProviders,
 	inText prompt.InputTextValidator,
 	inPass prompt.InputPassword,
 	inUrl prompt.InputURL,
@@ -64,7 +63,7 @@ func NewAddRepoCmd(
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
-		github:             github,
+		repoProviders:      repoProviders,
 		InputTextValidator: inText,
 		InputURL:           inUrl,
 		InputList:          inList,
@@ -86,6 +85,16 @@ func NewAddRepoCmd(
 
 func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
+		var providers []string
+		for provider, _ := range ad.repoProviders {
+			providers = append(providers, provider.String())
+		}
+
+		provider, err := ad.List("Select your provider:", providers)
+		if err != nil {
+			return err
+		}
+
 		name, err := ad.Text("Repository name: ", ad.repoNameValidator)
 		if err != nil {
 			return err
@@ -126,8 +135,10 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		gitRepoInfo := github.NewRepoInfo(url, token)
-		tags, err := ad.github.Tags(gitRepoInfo)
+		git := ad.repoProviders[formula.RepoProvider(provider)]
+
+		gitRepoInfo := git.NewRepoInfo(url, token)
+		tags, err := git.Repos.Tags(gitRepoInfo)
 		if err != nil {
 			return err
 		}
@@ -148,6 +159,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		repository := formula.Repo{
+			Provider: formula.RepoProvider(provider),
 			Name:     formula.RepoName(name),
 			Version:  formula.RepoVersion(version),
 			Token:    token,

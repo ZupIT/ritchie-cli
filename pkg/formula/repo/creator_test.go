@@ -25,8 +25,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -36,11 +38,11 @@ func TestCreate(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 
 	type in struct {
-		ritHome string
-		github  github.Repositories
-		dir     stream.DirCreateListCopyRemover
-		file    stream.FileWriteCreatorReadExistRemover
-		repo    formula.Repo
+		ritHome       string
+		repoProviders formula.RepoProviders
+		dir           stream.DirCreateListCopyRemover
+		file          stream.FileWriteCreatorReadExistRemover
+		repo          formula.Repo
 	}
 	tests := []struct {
 		name    string
@@ -58,15 +60,21 @@ func TestCreate(t *testing.T) {
 					_ = dirManager.Create(filepath.Join(ritHomePath, "repos", "some_repo_name"))
 					return ritHomePath
 				}(),
-				github: GitRepositoryMock{
-					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
-						data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
-						return ioutil.NopCloser(bytes.NewReader(data)), nil
+				repoProviders: formula.RepoProviders{
+					"Github": formula.Git{
+						Repos: GitRepositoryMock{
+							zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+								data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
+								return ioutil.NopCloser(bytes.NewReader(data)), nil
+							},
+						},
+						NewRepoInfo: github.NewRepoInfo,
 					},
 				},
 				dir:  dirManager,
 				file: fileManager,
 				repo: formula.Repo{
+					Provider: "Github",
 					Name:     "testing_repo",
 					Version:  "0.0.3",
 					Url:      "https://github.com/viniciussousazup/ritchie-formulas/releases",
@@ -80,14 +88,20 @@ func TestCreate(t *testing.T) {
 			name: "Return err when zipball fail",
 			in: in{
 				ritHome: "",
-				github: GitRepositoryMock{
-					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
-						return nil, errors.New("some error")
+				repoProviders: formula.RepoProviders{
+					"Github": formula.Git{
+						Repos: GitRepositoryMock{
+							zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+								return nil, errors.New("some error")
+							},
+						},
+						NewRepoInfo: github.NewRepoInfo,
 					},
 				},
 				dir:  dirManager,
 				file: fileManager,
 				repo: formula.Repo{
+					Provider: "Github",
 					Name:     "testing_repo",
 					Version:  "0.0.3",
 					Url:      "https://github.com/viniciussousazup/ritchie-formulas/releases",
@@ -101,10 +115,15 @@ func TestCreate(t *testing.T) {
 			name: "Return err when dir remove fail",
 			in: in{
 				ritHome: "",
-				github: GitRepositoryMock{
-					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
-						data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
-						return ioutil.NopCloser(bytes.NewReader(data)), nil
+				repoProviders: formula.RepoProviders{
+					"Github": formula.Git{
+						Repos: GitRepositoryMock{
+							zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+								data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
+								return ioutil.NopCloser(bytes.NewReader(data)), nil
+							},
+						},
+						NewRepoInfo: github.NewRepoInfo,
 					},
 				},
 				dir: DirCreateListCopyRemoverCustomMock{
@@ -114,6 +133,7 @@ func TestCreate(t *testing.T) {
 				},
 				file: fileManager,
 				repo: formula.Repo{
+					Provider: "Github",
 					Name:     "testing_repo",
 					Version:  "0.0.3",
 					Url:      "https://github.com/viniciussousazup/ritchie-formulas/releases",
@@ -127,10 +147,15 @@ func TestCreate(t *testing.T) {
 			name: "Return err when dir create fail",
 			in: in{
 				ritHome: "",
-				github: GitRepositoryMock{
-					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
-						data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
-						return ioutil.NopCloser(bytes.NewReader(data)), nil
+				repoProviders: formula.RepoProviders{
+					"Github": formula.Git{
+						Repos: GitRepositoryMock{
+							zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+								data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
+								return ioutil.NopCloser(bytes.NewReader(data)), nil
+							},
+						},
+						NewRepoInfo: github.NewRepoInfo,
 					},
 				},
 				dir: DirCreateListCopyRemoverCustomMock{
@@ -143,6 +168,7 @@ func TestCreate(t *testing.T) {
 				},
 				file: fileManager,
 				repo: formula.Repo{
+					Provider: "Github",
 					Name:     "testing_repo",
 					Version:  "0.0.3",
 					Url:      "https://github.com/viniciussousazup/ritchie-formulas/releases",
@@ -156,10 +182,15 @@ func TestCreate(t *testing.T) {
 			name: "Return err when file create fail",
 			in: in{
 				ritHome: "",
-				github: GitRepositoryMock{
-					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
-						data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
-						return ioutil.NopCloser(bytes.NewReader(data)), nil
+				repoProviders: formula.RepoProviders{
+					"Github": formula.Git{
+						Repos: GitRepositoryMock{
+							zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+								data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
+								return ioutil.NopCloser(bytes.NewReader(data)), nil
+							},
+						},
+						NewRepoInfo: github.NewRepoInfo,
 					},
 				},
 				dir: DirCreateListCopyRemoverCustomMock{
@@ -176,6 +207,7 @@ func TestCreate(t *testing.T) {
 					},
 				},
 				repo: formula.Repo{
+					Provider: "Github",
 					Name:     "testing_repo",
 					Version:  "0.0.3",
 					Url:      "https://github.com/viniciussousazup/ritchie-formulas/releases",
@@ -196,10 +228,15 @@ func TestCreate(t *testing.T) {
 					_ = dirManager.Create(filepath.Join(ritHomePath, "repos", "some_repo_name"))
 					return ritHomePath
 				}(),
-				github: GitRepositoryMock{
-					zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
-						data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
-						return ioutil.NopCloser(bytes.NewReader(data)), nil
+				repoProviders: formula.RepoProviders{
+					"Github": formula.Git{
+						Repos: GitRepositoryMock{
+							zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+								data, _ := fileManager.Read("../../../testdata/ritchie-formulas.zip")
+								return ioutil.NopCloser(bytes.NewReader(data)), nil
+							},
+						},
+						NewRepoInfo: github.NewRepoInfo,
 					},
 				},
 				dir: dirManager,
@@ -210,6 +247,7 @@ func TestCreate(t *testing.T) {
 					},
 				},
 				repo: formula.Repo{
+					Provider: "Github",
 					Name:     "testing_repo",
 					Version:  "0.0.3",
 					Url:      "https://github.com/viniciussousazup/ritchie-formulas/releases",
@@ -224,7 +262,7 @@ func TestCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cr := NewCreator(
 				tt.in.ritHome,
-				tt.in.github,
+				tt.in.repoProviders,
 				tt.in.dir,
 				tt.in.file,
 			)
@@ -244,19 +282,19 @@ func TestCreate(t *testing.T) {
 }
 
 type GitRepositoryMock struct {
-	zipball   func(info github.RepoInfo, version string) (io.ReadCloser, error)
-	tags      func(info github.RepoInfo) (github.Tags, error)
-	latestTag func(info github.RepoInfo) (github.Tag, error)
+	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
+	tags      func(info git.RepoInfo) (git.Tags, error)
+	latestTag func(info git.RepoInfo) (git.Tag, error)
 }
 
-func (m GitRepositoryMock) Zipball(info github.RepoInfo, version string) (io.ReadCloser, error) {
+func (m GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	return m.zipball(info, version)
 }
 
-func (m GitRepositoryMock) Tags(info github.RepoInfo) (github.Tags, error) {
+func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
 	return m.tags(info)
 }
 
-func (m GitRepositoryMock) LatestTag(info github.RepoInfo) (github.Tag, error) {
+func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	return m.latestTag(info)
 }

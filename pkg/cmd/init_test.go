@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
 func TestNewSingleInitCmd(t *testing.T) {
@@ -41,7 +41,7 @@ func TestNewSingleInitCmd(t *testing.T) {
 func Test_initCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		repo formula.RepositoryAdder
-		git  github.Repositories
+		git  git.Repositories
 	}
 
 	tests := []struct {
@@ -62,8 +62,8 @@ func Test_initCmd_runPrompt(t *testing.T) {
 			fields: fields{
 				repo: defaultRepoAdderMock,
 				git: GitRepositoryMock{
-					latestTag: func(info github.RepoInfo) (github.Tag, error) {
-						return github.Tag{}, errors.New("some error")
+					latestTag: func(info git.RepoInfo) (git.Tag, error) {
+						return git.Tag{}, errors.New("some error")
 					},
 				},
 			},

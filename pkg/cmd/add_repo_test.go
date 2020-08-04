@@ -21,14 +21,21 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 func Test_addRepoCmd_runPrompt(t *testing.T) {
+	repoProviders := formula.RepoProviders{
+		"Github": formula.Git{
+			Repos:       defaultGitRepositoryMock,
+			NewRepoInfo: github.NewRepoInfo,
+		},
+	}
+
 	type fields struct {
 		repo               formula.RepositoryAddLister
-		github             github.Repositories
+		repoProviders      formula.RepoProviders
 		InputTextValidator prompt.InputTextValidator
 		InputPassword      prompt.InputPassword
 		InputURL           prompt.InputURL
@@ -45,13 +52,13 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 			name: "Run with success",
 			fields: fields{
 				repo:               defaultRepoAdderMock,
-				github:             defaultGitRepositoryMock,
+				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
-				InputList:          inputListMock{},
+				InputList:          inputListCustomMock{name: "Github"},
 			},
 			wantErr: false,
 		},
@@ -63,13 +70,13 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 						return nil, errors.New("some error")
 					},
 				},
-				github:             defaultGitRepositoryMock,
+				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
-				InputList:          inputListMock{},
+				InputList:          inputListCustomMock{name: "Github"},
 			},
 			wantErr: true,
 		},
@@ -78,7 +85,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			o := NewAddRepoCmd(
 				tt.fields.repo,
-				tt.fields.github,
+				tt.fields.repoProviders,
 				tt.fields.InputTextValidator,
 				tt.fields.InputPassword,
 				tt.fields.InputURL,

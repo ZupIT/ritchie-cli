@@ -22,6 +22,8 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
 const (
@@ -191,12 +193,12 @@ func TestTags(t *testing.T) {
 
 	type in struct {
 		client *http.Client
-		info   RepoInfo
+		info   git.RepoInfo
 	}
 	tests := []struct {
 		name    string
 		in      in
-		want    Tags
+		want    git.Tags
 		wantErr bool
 	}{
 		{
@@ -208,7 +210,7 @@ func TestTags(t *testing.T) {
 					token:   "some_token",
 				},
 			},
-			want: Tags{
+			want: git.Tags{
 				{
 					Name: "v1.0.0",
 				},
@@ -223,7 +225,7 @@ func TestTags(t *testing.T) {
 					tagsUrl: mockServerThatFail.URL,
 				},
 			},
-			want:    Tags{},
+			want:    git.Tags{},
 			wantErr: true,
 		},
 	}
@@ -255,12 +257,12 @@ func TestLatestTag(t *testing.T) {
 
 	type in struct {
 		client *http.Client
-		info   RepoInfo
+		info   git.RepoInfo
 	}
 	tests := []struct {
 		name    string
 		in      in
-		want    Tag
+		want    git.Tag
 		wantErr bool
 	}{
 		{
@@ -272,7 +274,7 @@ func TestLatestTag(t *testing.T) {
 					token:        "some_token",
 				},
 			},
-			want:    Tag{Name: "v1.0.0"},
+			want:    git.Tag{Name: "v1.0.0"},
 			wantErr: false,
 		},
 		{
@@ -283,7 +285,7 @@ func TestLatestTag(t *testing.T) {
 					latestTagUrl: mockServerThatFail.URL,
 				},
 			},
-			want:    Tag{},
+			want:    git.Tag{},
 			wantErr: true,
 		},
 	}
@@ -312,7 +314,7 @@ func TestZipball(t *testing.T) {
 
 	type in struct {
 		client  *http.Client
-		info    RepoInfo
+		info    git.RepoInfo
 		version string
 	}
 	tests := []struct {

@@ -22,6 +22,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
+
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
@@ -31,7 +34,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
@@ -78,10 +80,17 @@ func buildCommands() *cobra.Command {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	gitRepo := github.NewRepoManager(http.DefaultClient)
+	githubRepo := github.NewRepoManager(http.DefaultClient)
+	gitlabRepo := gitlab.NewRepoManager(http.DefaultClient)
+
+	repoProviders := formula.RepoProviders{
+		"Github": formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo},
+		"Gitlab": formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo},
+	}
+
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
-	repoCreator := repo.NewCreator(ritchieHomeDir, gitRepo, dirManager, fileManager)
+	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
 	repoAdder := repo.NewAdder(ritchieHomeDir, repoCreator, treeGen, dirManager, fileManager)
 	repoListCreator := repo.NewListCreator(repoLister, repoCreator)
@@ -139,7 +148,7 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, gitRepo, tutorialFinder)
+	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -162,8 +171,8 @@ func buildCommands() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, gitRepo, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder)
-	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, gitRepo, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder)
+	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)

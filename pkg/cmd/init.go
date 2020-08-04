@@ -20,12 +20,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
@@ -34,11 +36,11 @@ var CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 
 type initCmd struct {
 	repo formula.RepositoryAdder
-	git  github.Repositories
+	git  git.Repositories
 	rt   rtutorial.Finder
 }
 
-func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories, rtf rtutorial.Finder) *cobra.Command {
+func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder) *cobra.Command {
 	o := initCmd{repo: repo, git: git, rt: rtf}
 
 	cmd := &cobra.Command{
@@ -54,6 +56,7 @@ func NewInitCmd(repo formula.RepositoryAdder, git github.Repositories, rtf rtuto
 func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repo := formula.Repo{
+			Provider: "Github",
 			Name:     "commons",
 			Url:      CommonsRepoURL,
 			Priority: 0,
