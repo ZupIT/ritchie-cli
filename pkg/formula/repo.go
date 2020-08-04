@@ -66,6 +66,27 @@ type Git struct {
 
 type RepoProviders map[RepoProvider]Git
 
+func NewRepoProviders() RepoProviders {
+	return RepoProviders{}
+}
+
+func (re RepoProviders) Add(provider RepoProvider, git Git) {
+	re[provider] = git
+}
+
+func (re RepoProviders) Resolve(provider RepoProvider) Git {
+	return re[provider]
+}
+
+func (re RepoProviders) List() []string {
+	var providers []string
+	for provider, _ := range re {
+		providers = append(providers, provider.String())
+	}
+
+	return providers
+}
+
 type RepositoryAdder interface {
 	Add(repo Repo) error
 }

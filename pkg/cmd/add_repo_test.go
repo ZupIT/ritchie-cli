@@ -26,12 +26,8 @@ import (
 )
 
 func Test_addRepoCmd_runPrompt(t *testing.T) {
-	repoProviders := formula.RepoProviders{
-		"Github": formula.Git{
-			Repos:       defaultGitRepositoryMock,
-			NewRepoInfo: github.NewRepoInfo,
-		},
-	}
+	repoProviders := formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
 	type fields struct {
 		repo               formula.RepositoryAddLister

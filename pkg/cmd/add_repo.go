@@ -85,12 +85,7 @@ func NewAddRepoCmd(
 
 func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		var providers []string
-		for provider, _ := range ad.repoProviders {
-			providers = append(providers, provider.String())
-		}
-
-		provider, err := ad.List("Select your provider:", providers)
+		provider, err := ad.List("Select your provider:", ad.repoProviders.List())
 		if err != nil {
 			return err
 		}
@@ -135,7 +130,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		git := ad.repoProviders[formula.RepoProvider(provider)]
+		git := ad.repoProviders.Resolve(formula.RepoProvider(provider))
 
 		gitRepoInfo := git.NewRepoInfo(url, token)
 		tags, err := git.Repos.Tags(gitRepoInfo)

@@ -99,7 +99,7 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		git := up.repoProviders[repo.Provider]
+		git := up.repoProviders.Resolve(repo.Provider)
 
 		repoInfo := git.NewRepoInfo(repo.Url, repo.Token)
 		tags, err := git.Repos.Tags(repoInfo)

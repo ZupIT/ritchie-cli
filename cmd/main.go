@@ -83,10 +83,9 @@ func buildCommands() *cobra.Command {
 	githubRepo := github.NewRepoManager(http.DefaultClient)
 	gitlabRepo := gitlab.NewRepoManager(http.DefaultClient)
 
-	repoProviders := formula.RepoProviders{
-		"Github": formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo},
-		"Gitlab": formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo},
-	}
+	repoProviders := formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
