@@ -19,7 +19,7 @@
             <Control Id="LicenseText" Type="ScrollableText" X="20" Y="60" Width="330" Height="140" Sunken="yes" TabSkip="no">
 
             {{if gt (.License | len) 0}}
-            <Text SourceFile="{{.License}}" />
+            <Text SourceFile="C:\workspace\LICENSE.rtf" />
             {{end}}
 
             </Control>
