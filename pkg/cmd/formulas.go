@@ -32,7 +32,8 @@ import (
 const (
 	subCommand  = " SUBCOMMAND"
 	Group       = "group"
-	localFlag   = "local"
+	dockerFlag  = "docker"
+	verboseFlag = "verbose"
 	rootCmdName = "root"
 )
 
@@ -124,12 +125,18 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			inputType = api.Stdin
 		}
 
-		local, err := cmd.Flags().GetBool(localFlag)
+		docker, err := cmd.Flags().GetBool(dockerFlag)
 		if err != nil {
 			return err
 		}
 
-		if err := f.formula.Run(d, inputType, local); err != nil {
+		verbose, err := cmd.Flags().GetBool(verboseFlag)
+
+		if err != nil {
+			return err
+		}
+
+		if err := f.formula.Run(d, inputType, docker, verbose); err != nil {
 			return err
 		}
 
@@ -139,5 +146,6 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
-	formulaFlags.BoolP(localFlag, "l", false, "Use to run formulas locally")
+	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside docker")
+	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
 }

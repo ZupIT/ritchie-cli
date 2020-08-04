@@ -121,7 +121,7 @@ func VerifyNewVersion(resolve Resolver, currentVersion string) string {
 	if err != nil {
 		return ""
 	}
-	if currentVersion != stableVersion {
+	if currentVersion != stableVersion && currentVersion != "" {
 		return MsgRitUpgrade
 	}
 	return ""

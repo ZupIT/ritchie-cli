@@ -19,7 +19,7 @@ package repo
 import (
 	"encoding/json"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -69,18 +69,18 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 		return err
 	}
 
-	repoFilePath := path.Join(up.ritHome, reposDirName, reposFileName)
+	repoFilePath := filepath.Join(up.ritHome, reposDirName, reposFileName)
 	if err := up.saveRepo(repoFilePath, repos); err != nil {
 		return err
 	}
 
-	repoPath := path.Join(up.ritHome, reposDirName, name.String())
+	repoPath := filepath.Join(up.ritHome, reposDirName, name.String())
 	tree, err := up.tree.Generate(repoPath)
 	if err != nil {
 		return err
 	}
 
-	treeFilePath := path.Join(repoPath, "tree.json")
+	treeFilePath := filepath.Join(repoPath, "tree.json")
 	bytes, err := json.MarshalIndent(tree, "", "\t")
 	if err != nil {
 		return err

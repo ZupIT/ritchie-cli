@@ -3,6 +3,7 @@ package spinner
 import (
 	"fmt"
 	"io"
+	"runtime"
 	"sync"
 	"syscall"
 	"time"
@@ -56,7 +57,14 @@ func StartNew(title string) *Spinner {
 
 // Start starts the spinner execution
 func (s *Spinner) Start() *Spinner {
+	goos := runtime.GOOS
+	if goos == "windows" { // Show title without animation on Windows
+		fmt.Println(s.Title)
+		return s
+	}
+
 	go s.writer()
+
 	return s
 }
 

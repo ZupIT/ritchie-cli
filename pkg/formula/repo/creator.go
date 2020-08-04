@@ -18,7 +18,7 @@ package repo
 
 import (
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/github"
@@ -56,7 +56,7 @@ func (cr CreateManager) Create(repo formula.Repo) error {
 
 	defer zipball.Close()
 
-	repoPath := path.Join(cr.ritHome, reposDirName, repo.Name.String())
+	repoPath := filepath.Join(cr.ritHome, reposDirName, repo.Name.String())
 	if err := cr.dir.Remove(repoPath); err != nil { // Remove old repo directory
 		return err
 	}
@@ -65,7 +65,7 @@ func (cr CreateManager) Create(repo formula.Repo) error {
 		return err
 	}
 
-	zipFile := path.Join(repoPath, fmt.Sprintf("%s.zip", repo.Name))
+	zipFile := filepath.Join(repoPath, fmt.Sprintf("%s.zip", repo.Name))
 	if err := cr.file.Create(zipFile, zipball); err != nil { // Create .zip file inside repo directory
 		return err
 	}
@@ -83,7 +83,7 @@ func (cr CreateManager) Create(repo formula.Repo) error {
 		return err
 	}
 
-	src := path.Join(repoPath, dirs[0])                // Get the first directory created by unzip
+	src := filepath.Join(repoPath, dirs[0])            // Get the first directory created by unzip
 	if err := cr.dir.Copy(src, repoPath); err != nil { // Copy all formulas inside directory created by unzip to repo path
 		return err
 	}

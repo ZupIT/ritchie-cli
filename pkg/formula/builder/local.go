@@ -104,7 +104,6 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
-
 	if err := cmd.Run(); err != nil {
 		if stderr.Bytes() != nil {
 			errMsg := fmt.Sprintf("Build error: \n%s \n%s", stderr.String(), err)

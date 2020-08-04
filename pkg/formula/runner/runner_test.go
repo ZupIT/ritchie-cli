@@ -27,6 +27,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -39,7 +40,7 @@ func TestRun(t *testing.T) {
 	repoPath := filepath.Join(ritHome, "repos", "commons")
 
 	makeBuilder := builder.NewBuildMake()
-	batBuilder := builder.NewBuildBat()
+	batBuilder := builder.NewBuildBat(fileManager)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
@@ -47,6 +48,7 @@ func TestRun(t *testing.T) {
 	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 
+	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, makeBuilder, dockerBuildMock{}, batBuilder, dirManager, fileManager)
 	postRunner := NewPostRunner(fileManager, dirManager)
 	inputRunner := NewInput(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputMock{}, inputMock{})
@@ -57,7 +59,7 @@ func TestRun(t *testing.T) {
 		postRun     formula.PostRunner
 		inputRun    formula.InputRunner
 		fileManager stream.FileWriteExistAppender
-		local       bool
+		docker      bool
 	}
 
 	type out struct {
@@ -77,7 +79,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunner,
 				fileManager: fileManager,
-				local:       true,
+				docker:      false,
 			},
 			out: out{
 				err: nil,
@@ -91,7 +93,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunnerMock{err: ErrInputNotRecognized},
 				fileManager: fileManager,
-				local:       true,
+				docker:      false,
 			},
 			out: out{
 				err: ErrInputNotRecognized,
@@ -105,7 +107,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunner,
 				fileManager: fileManager,
-				local:       true,
+				docker:      false,
 			},
 			out: out{
 				err: errors.New("pre runner error"),
@@ -119,7 +121,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunnerMock{err: errors.New("post runner error")},
 				inputRun:    inputRunner,
 				fileManager: fileManager,
-				local:       true,
+				docker:      false,
 			},
 			out: out{
 				err: errors.New("post runner error"),
@@ -133,7 +135,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunner,
 				fileManager: fileManager,
-				local:       false,
+				docker:      true,
 			},
 			out: out{
 				err: nil,
@@ -147,7 +149,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunnerMock{err: ErrInputNotRecognized},
 				fileManager: fileManager,
-				local:       false,
+				docker:      true,
 			},
 			out: out{
 				err: ErrInputNotRecognized,
@@ -161,7 +163,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunner,
 				fileManager: fileManagerMock{wErr: errors.New("error to write env file")},
-				local:       false,
+				docker:      true,
 			},
 			out: out{
 				err: errors.New("error to write env file"),
@@ -175,7 +177,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunner,
 				fileManager: fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				local:       false,
+				docker:      true,
 			},
 			out: out{
 				err: errors.New("error to append env file"),
@@ -186,8 +188,8 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager)
-			got := runner.Run(in.def, api.Prompt, in.local)
+			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager, ctxFinder)
+			got := runner.Run(in.def, api.Prompt, in.docker, false)
 
 			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.out.err)

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -47,7 +47,7 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	Version          = "dev"
+	Version          = ""
 	BuildDate        = "unknown"
 	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
 	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
@@ -177,7 +177,7 @@ func tutorialRit(tutorialStatus string) {
 }
 
 func (ro *rootCmd) ritchieIsInitialized() bool {
-	commonsRepoPath := path.Join(ro.ritchieHome, "repos", "commons")
+	commonsRepoPath := filepath.Join(ro.ritchieHome, "repos", "commons")
 
 	return ro.dir.Exists(commonsRepoPath)
 }

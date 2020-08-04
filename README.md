@@ -21,7 +21,7 @@ curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
 
 - Windows
 
-Download the installer from (https://commons-repo.ritchiecli.io/install.msi)
+Download the installer from (https://commons-repo.ritchiecli.io/latest/ritchiecli.msi)
 
 ### Initialize rit
 

@@ -19,7 +19,7 @@ package template
 import (
 	"fmt"
 	"io/ioutil"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -52,11 +52,11 @@ type DefaultManager struct {
 }
 
 func (tm DefaultManager) templateDir() string {
-	return path.Join(tm.ritchieHome, path.Join(templatePath...))
+	return filepath.Join(tm.ritchieHome, filepath.Join(templatePath...))
 }
 
 func (tm DefaultManager) Languages() ([]string, error) {
-	tplD := path.Join(tm.templateDir(), languageDir)
+	tplD := filepath.Join(tm.templateDir(), languageDir)
 
 	dirs, err := ioutil.ReadDir(tplD)
 	if err != nil {
@@ -76,14 +76,14 @@ func (tm DefaultManager) Languages() ([]string, error) {
 func (tm DefaultManager) LangTemplateFiles(lang string) ([]File, error) {
 	tplD := tm.templateDir()
 
-	langDir := path.Join(tplD, languageDir, lang)
+	langDir := filepath.Join(tplD, languageDir, lang)
 
 	languageTpl, err := readDirRecursive(langDir)
 	if err != nil {
 		return nil, err
 	}
 
-	rootTplDir := path.Join(tplD, rootDir)
+	rootTplDir := filepath.Join(tplD, rootDir)
 	rootTpl, err := readDirRecursive(rootTplDir)
 	if err != nil {
 		return nil, err
@@ -100,14 +100,14 @@ func readDirRecursive(dir string) ([]File, error) {
 	var fileNames []File
 	for _, f := range files {
 		if f.IsDir() {
-			dirFiles, err := readDirRecursive(path.Join(dir, f.Name()))
+			dirFiles, err := readDirRecursive(filepath.Join(dir, f.Name()))
 			if err != nil {
 				return nil, err
 			}
 			fileNames = append(fileNames, dirFiles...)
 		}
 		fileNames = append(fileNames, File{
-			Path:  path.Join(dir, f.Name()),
+			Path:  filepath.Join(dir, f.Name()),
 			IsDir: f.IsDir(),
 		})
 
@@ -117,8 +117,8 @@ func readDirRecursive(dir string) ([]File, error) {
 
 func (tm DefaultManager) ResolverNewPath(oldPath, formulaPath, lang, workspacePath string) (string, error) {
 	tplD := tm.templateDir()
-	langTplPath := path.Join(tplD, languageDir, lang)
-	rootTplPath := path.Join(tplD, rootDir)
+	langTplPath := filepath.Join(tplD, languageDir, lang)
+	rootTplPath := filepath.Join(tplD, rootDir)
 
 	if strings.Contains(oldPath, rootTplPath) {
 		return strings.Replace(oldPath, rootTplPath, workspacePath, 1), nil
