@@ -68,41 +68,6 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						}
 						credArr := []credential.Field{}
 						credArr = append(credArr, cred)
-						creds["credFile"] = credArr
-						return creds, nil
-					},
-				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("some data"), nil
-					},
-				},
-				InputText:     inputTextCustomMock{
-					text: func(name string, required bool) (string, error) {
-						return "./path/to/my/credentialFile", nil
-					},
-				},
-				InputBool:     inputFalseMock{},
-				InputList:     inputListCustomMock{"file"},
-				InputPassword: inputPasswordMock{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "success run with full data data",
-			in: in{
-				Setter: credSetterMock{},
-				credFile: credSettingsCustomMock{
-					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
-						cred := credential.Field{
-							Name: "accesskeyid",
-							Type: "plain text",
-						}
-						credArr := []credential.Field{}
-						credArr = append(credArr, cred)
 						creds["file"] = credArr
 						return creds, nil
 					},
@@ -189,7 +154,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "fail to empty credential file file",
+			name: "fail empty credential file",
 			in: in{
 				Setter: credSetterMock{},
 				credFile: credSettingsCustomMock{
@@ -283,7 +248,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Fail when password return err",
+			name: "fail when password return err",
 			in: in{
 				Setter: credSetterMock{},
 				credFile: credSettingsCustomMock{
@@ -311,7 +276,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Fail when list return err",
+			name: "fail when list return err",
 			in: in{
 				Setter:        credSetterMock{},
 				credFile:      credSettingsMock{},
@@ -323,7 +288,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Fail when text return err",
+			name: "fail when text return err",
 			in: in{
 				Setter:   credSetterMock{},
 				credFile: credSettingsMock{},
