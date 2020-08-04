@@ -30,7 +30,7 @@ import (
 )
 
 var inputTypes = []string{"plain text", "secret"}
-var inputWay = []string{"credFile", "type"}
+var inputWay = []string{"file", "type"}
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
@@ -145,13 +145,17 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
-	inputWayChoose, _ := s.List("Want to enter your credential through a credFile or by typing it?", inputWay)
+	inputWayChoose, _ := s.List("Want to enter your credential through a file or by typing it?", inputWay)
 	for _, i := range inputs {
 		var value string
 		if inputWayChoose == inputWay[0] {
-			path, _ := s.Text("Enter the credFile path for "+i.Name+":", true)
+			path, err := s.Text("Enter the credential file path for "+prompt.Cyan(i.Name)+":", true)
+			if err != nil {
+				return credential.Detail{}, err
+			}
+
 			if !s.FileReadExister.Exists(path) {
-				return credDetail, prompt.NewError("Cannot find any credFile at " + path)
+				return credDetail, prompt.NewError("Cannot find any credential file at " + path)
 			}
 
 			byteValue, err := s.FileReadExister.Read(path)
@@ -159,7 +163,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 				return credential.Detail{}, err
 			}
 			if len(byteValue) == 0 {
-				return credential.Detail{}, prompt.NewError("Empty credFile!")
+				return credential.Detail{}, prompt.NewError("Empty credential file!")
 			}
 
 			cred[i.Name] = string(byteValue)
