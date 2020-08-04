@@ -82,16 +82,6 @@ func RitSingleInit() {
 	fmt.Println("Setup Done..")
 }
 
-func RitTeamInit() {
-	os := runtime.GOOS
-	if  os == "windows" {
-		// TODO setup Windows for TEAM
-	} else {
-		setUpRitTeamUnix()
-	}
-	fmt.Println("Setup Done..")
-}
-
 func RitClearConfigs() {
 	os := runtime.GOOS
 	if  os == "windows" {
