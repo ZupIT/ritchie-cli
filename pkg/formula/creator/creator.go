@@ -55,6 +55,10 @@ func (c CreateManager) Create(cf formula.Create) error {
 		return err
 	}
 
+	if err := c.tplM.Validate(); err != nil {
+		return err
+	}
+
 	if err := c.dir.Create(cf.WorkspacePath); err != nil {
 		return err
 	}
@@ -70,7 +74,6 @@ func (c CreateManager) Create(cf formula.Create) error {
 }
 
 func (c CreateManager) isValidCmd(fPath string) error {
-
 	if c.dir.Exists(fPath) {
 		return ErrRepeatedCommand
 	}

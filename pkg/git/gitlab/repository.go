@@ -99,6 +99,40 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 }
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
-	panic("Method not implemented")
-	return git.Tag{}, nil
+	apiUrl := info.LatestTagUrl()
+	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	if err != nil {
+		return git.Tag{}, err
+	}
+
+	if info.Token() != "" {
+		authToken := info.TokenHeader()
+		req.Header.Add(headers.Authorization, authToken)
+	}
+
+	res, err := re.client.Do(req)
+	if err != nil {
+		return git.Tag{}, err
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return git.Tag{}, err
+		}
+		return git.Tag{}, errors.New(string(b))
+	}
+
+	var tags git.Tags
+	if err := json.NewDecoder(res.Body).Decode(&tags); err != nil {
+		return git.Tag{}, err
+	}
+
+	if len(tags) <= 0 {
+		return git.Tag{}, errors.New("release not found")
+	}
+
+	return tags[0], nil
 }

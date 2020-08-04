@@ -21,11 +21,13 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestNewCreateFormulaCmd(t *testing.T) {
-
-	tplM := template.NewManager("../../testdata")
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	tplM := template.NewManager("../../testdata", dirManager)
 	cmd := NewCreateFormulaCmd(
 		os.TempDir(),
 		formCreator{},

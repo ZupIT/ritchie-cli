@@ -103,6 +103,10 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
+		if err := c.tplM.Validate(); err != nil {
+			return err
+		}
+
 		languages, err := c.tplM.Languages()
 		if err != nil {
 			return err

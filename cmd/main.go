@@ -99,7 +99,7 @@ func buildCommands() *cobra.Command {
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, fileManager, dirManager)
 	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager)
 
-	tplManager := template.NewManager(api.RitchieHomeDir())
+	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
 	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
@@ -147,7 +147,7 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder)
+	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, inputBool)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()

@@ -112,6 +112,11 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
+		url, err := ad.URL("Repository URL: ", defaultRepoUrl)
+		if err != nil {
+			return err
+		}
+
 		isPrivate, err := ad.Bool("Is a private repository? ", []string{"no", "yes"})
 		if err != nil {
 			return err
@@ -125,17 +130,16 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		url, err := ad.URL("Repository URL: ", defaultRepoUrl)
-		if err != nil {
-			return err
-		}
-
 		git := ad.repoProviders.Resolve(formula.RepoProvider(provider))
 
 		gitRepoInfo := git.NewRepoInfo(url, token)
 		tags, err := git.Repos.Tags(gitRepoInfo)
 		if err != nil {
 			return err
+		}
+
+		if len(tags) <= 0 {
+			return fmt.Errorf("please, generate a release to add your repository")
 		}
 
 		var tagNames []string

@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -32,16 +33,28 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-var CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
+const (
+	addRepoInfo = `To create new formulas you must add a repository with the name "commons" and 
+that contains the templates for creation following the structure of the repository. 
+See example [https://github.com/ZupIT/ritchie-formulas/tree/ritchie-2.0.0/templates/create_formula]`
+	addRepoMsg = "Run \"rit add repo\" to add a new repository manually."
+)
+
+var (
+	errMsg             = prompt.Yellow("It was not possible to add the commons repository at this time, please try again later.")
+	ErrInitCommonsRepo = errors.New(errMsg)
+	CommonsRepoURL     = "https://github.com/ZupIT/ritchie-formulas"
+)
 
 type initCmd struct {
 	repo formula.RepositoryAdder
 	git  git.Repositories
 	rt   rtutorial.Finder
+	prompt.InputBool
 }
 
-func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder) *cobra.Command {
-	o := initCmd{repo: repo, git: git, rt: rtf}
+func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder, inBool prompt.InputBool) *cobra.Command {
+	o := initCmd{repo: repo, git: git, rt: rtf, InputBool: inBool}
 
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -55,6 +68,20 @@ func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutoria
 
 func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
+		label := "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]"
+		choose, err := in.Bool(label, []string{"yes", "no"})
+		if err != nil {
+			return err
+		}
+
+		if !choose {
+			fmt.Println()
+			prompt.Info(addRepoInfo)
+			fmt.Println()
+			fmt.Println(addRepoMsg)
+			return nil
+		}
+
 		repo := formula.Repo{
 			Provider: "Github",
 			Name:     "commons",
@@ -69,13 +96,17 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 
 		tag, err := in.git.LatestTag(repoInfo)
 		if err != nil {
-			return err
+			s.Error(ErrInitCommonsRepo)
+			fmt.Println(addRepoMsg)
+			return nil
 		}
 
 		repo.Version = formula.RepoVersion(tag.Name)
 
 		if err := in.repo.Add(repo); err != nil {
-			return err
+			s.Error(ErrInitCommonsRepo)
+			fmt.Println(addRepoMsg)
+			return nil
 		}
 
 		s.Success(prompt.Green("Initialization successful!"))

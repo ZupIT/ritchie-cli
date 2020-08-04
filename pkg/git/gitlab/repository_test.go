@@ -146,6 +146,66 @@ func TestZipball(t *testing.T) {
 	}
 }
 
+func TestLatestTag(t *testing.T) {
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		_, _ = writer.Write([]byte(PayloadListLastTags))
+	}))
+
+	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.WriteHeader(http.StatusBadRequest)
+	}))
+
+	type in struct {
+		client *http.Client
+		info   git.RepoInfo
+	}
+	tests := []struct {
+		name    string
+		in      in
+		want    git.Tag
+		wantErr bool
+	}{
+		{
+			name: "Run with success",
+			in: in{
+				client: mockServer.Client(),
+				info: RepoInfoCustomMock{
+					latestTagUrl: mockServer.URL,
+					token:        "some_token",
+				},
+			},
+			want:    git.Tag{Name: "1.0.1"},
+			wantErr: false,
+		},
+		{
+			name: "Return err when request fail",
+			in: in{
+				client: mockServerThatFail.Client(),
+				info: RepoInfoCustomMock{
+					latestTagUrl: mockServerThatFail.URL,
+				},
+			},
+			want:    git.Tag{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			re := NewRepoManager(tt.in.client)
+
+			got, err := re.LatestTag(tt.in.info)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("LatestTag() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("LatestTag() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 const (
 	PayloadListAllTags = `[
     {
@@ -207,6 +267,78 @@ const (
         "_links": {
             "self": "https://gitlab.com/username/ritchie-formulas/-/releases/1.0.0",
             "edit_url": "https://gitlab.com/username/ritchie-formulas/-/releases/1.0.0/edit"
+        }
+    }
+]`
+
+	PayloadListLastTags = `[
+    {
+        "name": "1.0.1",
+        "tag_name": "1.0.1",
+        "description": "New golang formula",
+        "description_html": "<p data-sourcepos=\"1:1-1:18\" dir=\"auto\">New golang formula</p>",
+        "created_at": "2020-08-04T15:49:24.101Z",
+        "released_at": "2020-08-04T15:49:24.101Z",
+        "author": {
+            "id": 2418203,
+            "name": "User Name",
+            "username": "username",
+            "state": "active",
+            "avatar_url": "https://secure.gravatar.com/avatar/0ff2eaae88cd45073b3cf17b13151f15?s=80&d=identicon",
+            "web_url": "https://gitlab.com/username"
+        },
+        "commit": {
+            "id": "03f883dfa3821672ef74f3bcc12ae2c83b068dd8",
+            "short_id": "03f883df",
+            "created_at": "2020-08-04T12:48:09.000-03:00",
+            "parent_ids": [
+                "8d5ec4f376066836f21110766314210b5e21bbd2"
+            ],
+            "title": "Create formula go",
+            "message": "Create formula go\n",
+            "author_name": "User Name",
+            "author_email": "user@user.com",
+            "authored_date": "2020-08-04T12:48:09.000-03:00",
+            "committer_name": "User Name",
+            "committer_email": "user@user.com",
+            "committed_date": "2020-08-04T12:48:09.000-03:00",
+            "web_url": "https://gitlab.com/username/ritchie-formulas/-/commit/03f883dfa3821672ef74f3bcc12ae2c83b068dd8"
+        },
+        "upcoming_release": false,
+        "commit_path": "/username/ritchie-formulas/-/commit/03f883dfa3821672ef74f3bcc12ae2c83b068dd8",
+        "tag_path": "/username/ritchie-formulas/-/tags/1.0.1",
+        "assets": {
+            "count": 4,
+            "sources": [
+                {
+                    "format": "zip",
+                    "url": "https://gitlab.com/username/ritchie-formulas/-/archive/1.0.1/ritchie-formulas-1.0.1.zip"
+                },
+                {
+                    "format": "tar.gz",
+                    "url": "https://gitlab.com/username/ritchie-formulas/-/archive/1.0.1/ritchie-formulas-1.0.1.tar.gz"
+                },
+                {
+                    "format": "tar.bz2",
+                    "url": "https://gitlab.com/username/ritchie-formulas/-/archive/1.0.1/ritchie-formulas-1.0.1.tar.bz2"
+                },
+                {
+                    "format": "tar",
+                    "url": "https://gitlab.com/username/ritchie-formulas/-/archive/1.0.1/ritchie-formulas-1.0.1.tar"
+                }
+            ],
+            "links": []
+        },
+        "evidences": [
+            {
+                "sha": "1ee3430fc63f6fb9e2a3e6ffe62fcbf90e3d273372ad",
+                "filepath": "https://gitlab.com/username/ritchie-formulas/-/releases/1.0.1/evidences/285309.json",
+                "collected_at": "2020-08-04T15:49:24.158Z"
+            }
+        ],
+        "_links": {
+            "self": "https://gitlab.com/username/ritchie-formulas/-/releases/1.0.1",
+            "edit_url": "https://gitlab.com/username/ritchie-formulas/-/releases/1.0.1/edit"
         }
     }
 ]`

@@ -54,7 +54,7 @@ func TestCreator(t *testing.T) {
 
 	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds)
 
-	tplM := template.NewManager("../../../testdata")
+	tplM := template.NewManager("../../../testdata", dirManager)
 
 	type in struct {
 		formCreate formula.Create

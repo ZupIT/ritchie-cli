@@ -353,7 +353,7 @@ var (
 			return git.Tag{}, nil
 		},
 		tags: func(info git.RepoInfo) (git.Tags, error) {
-			return git.Tags{}, nil
+			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
 		},
 		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
 			return nil, nil

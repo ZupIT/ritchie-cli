@@ -25,7 +25,7 @@ import (
 )
 
 func TestNewSingleInitCmd(t *testing.T) {
-	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{})
+	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{}, inputTrueMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 	if cmd == nil {
@@ -58,7 +58,7 @@ func Test_initCmd_runPrompt(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Fail when call git.LatestTag",
+			name: "Warning when call git.LatestTag",
 			fields: fields{
 				repo: defaultRepoAdderMock,
 				git: GitRepositoryMock{
@@ -67,10 +67,10 @@ func Test_initCmd_runPrompt(t *testing.T) {
 					},
 				},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
-			name: "Fail when call repo.Add",
+			name: "Warning when call repo.Add",
 			fields: fields{
 				repo: repoListerAdderCustomMock{
 					add: func(d formula.Repo) error {
@@ -79,12 +79,12 @@ func Test_initCmd_runPrompt(t *testing.T) {
 				},
 				git: defaultGitRepositoryMock,
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewInitCmd(tt.fields.repo, tt.fields.git, TutorialFinderMock{})
+			o := NewInitCmd(tt.fields.repo, tt.fields.git, TutorialFinderMock{}, inputTrueMock{})
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)

@@ -25,9 +25,9 @@ import (
 )
 
 const (
-	// https://gitlab.com/api/v4/projects/kaduartur%2Fritchie-formulas-kadu/repository/archive.zip?sha=1.0.1
-	ZipUrlPattern  = "https://%s/api/v4/projects/%s/repository/archive.zip?sha=%s"
-	TagsUrlPattern = "https://%s/api/v4/projects/%s/releases"
+	ZipUrlPattern       = "https://%s/api/v4/projects/%s/repository/archive.zip?sha=%s"
+	TagsUrlPattern      = "https://%s/api/v4/projects/%s/releases"
+	LatestTagUrlPattern = "https://%s/api/v4/projects/%s/releases?per_page=1&page=1"
 )
 
 type DefaultRepoInfo struct {
@@ -67,9 +67,11 @@ func (in DefaultRepoInfo) TagsUrl() string {
 	return fmt.Sprintf(TagsUrlPattern, in.host, id)
 }
 
-// Deprecated: Gitlab API does not implement the latest tag URL
+// LatestTagUrl returns the Gitlab API URL for get latest tag release
+// e.g. https://yourhost/api/v4/projects/{{owner}}%2F{{repo}}/releases?page=1&size=1
 func (in DefaultRepoInfo) LatestTagUrl() string {
-	return ""
+	id := url.QueryEscape(path.Join(in.owner, in.repo))
+	return fmt.Sprintf(LatestTagUrlPattern, in.host, id)
 }
 
 // TokenHeader returns the Authorization value formatted for Gitlab API integration
@@ -78,7 +80,6 @@ func (in DefaultRepoInfo) TokenHeader() string {
 	return in.token
 }
 
-// Deprecated: Uses TokenHeader() function
 func (in DefaultRepoInfo) Token() string {
 	return in.token
 }
