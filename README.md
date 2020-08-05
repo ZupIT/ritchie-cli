@@ -47,7 +47,7 @@ rit scaffold generate coffee-go
 
 ## Ritchie Legacy-1.0.0
 
-With the release of version 2.0.0 of Ritchie, the previous version (Ritchie 1.0.0) has been deprecated. Therefore, only bugs will be implemented in this version.
+With the release of version 2.0.0 of Ritchie, the previous version (Ritchie 1.0.0) has been deprecated. Therefore, only bugs fixes will be implemented in this version.
 
 The legacy code is available at [Ritchie Legacy-1.0.0](https://github.com/ZupIT/ritchie-cli/tree/legacy-1.0.0).
 
