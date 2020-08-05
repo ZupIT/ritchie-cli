@@ -37,7 +37,7 @@ var (
  └── languages
  └── root
 
-See example: [https://github.com/ZupIT/ritchie-formulas/tree/ritchie-2.0.0/templates/create_formula]`
+See example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`
 )
 
 type Manager interface {

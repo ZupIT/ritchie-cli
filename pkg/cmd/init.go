@@ -34,13 +34,13 @@ import (
 )
 
 const (
-	addRepoInfo = `To create new formulas you must add a repository with the name "commons" and 
-that contains the templates for creation following the structure of the repository. 
-See example [https://github.com/ZupIT/ritchie-formulas/tree/ritchie-2.0.0/templates/create_formula]`
 	addRepoMsg = "Run \"rit add repo\" to add a new repository manually."
 )
 
 var (
+	addRepoInfo = prompt.Yellow(`To create new formulas you must add a repository with the name "commons" and 
+that contains the templates for creation following the structure of the repository. 
+See example [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`)
 	errMsg             = prompt.Yellow("It was not possible to add the commons repository at this time, please try again later.")
 	ErrInitCommonsRepo = errors.New(errMsg)
 	CommonsRepoURL     = "https://github.com/ZupIT/ritchie-formulas"
