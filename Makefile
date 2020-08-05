@@ -18,7 +18,7 @@ MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
 RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
-IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+")
+IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]$")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
@@ -89,7 +89,6 @@ ifneq "$(IS_BETA)" ""
 endif
 ifneq "$(IS_RELEASE)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
-	ls -R
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
