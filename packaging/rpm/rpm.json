@@ -12,5 +12,6 @@
             "type": ""
         }
     ],
-    "preinst": "packaging/scripts/preinst.sh"
+    "preinst": "packaging/scripts/preinst.sh",
+    "postinst": "packaging/scripts/postinst.sh"
 }
