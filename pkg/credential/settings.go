@@ -93,9 +93,10 @@ func formatCredValue(credential string) string {
 	if credLen := len(credential); credLen > 20 {
 		var resumedCredential []rune
 		for i, r := range credential {
-			if i > 4 {
+			if i >= 4 {
 				r = '*'
 			}
+			resumedCredential = append(resumedCredential, r)
 			if i > 10 {
 				break
 			}
@@ -162,7 +163,7 @@ func (s Settings) WriteDefaultCredentialsFields(path string) error {
 func NewDefaultCredentials() Fields {
 	username := Field{
 		Name: "username",
-		Type: "text",
+		Type: "plain text",
 	}
 
 	token := Field{
@@ -172,7 +173,7 @@ func NewDefaultCredentials() Fields {
 
 	accessKey := Field{
 		Name: "accesskeyid",
-		Type: "text",
+		Type: "plain text",
 	}
 
 	secretAccessKey := Field{
@@ -182,7 +183,7 @@ func NewDefaultCredentials() Fields {
 
 	base64config := Field{
 		Name: "base64config",
-		Type: "text",
+		Type: "plain text",
 	}
 
 	password := Field{

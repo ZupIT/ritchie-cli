@@ -53,6 +53,19 @@ func (inputTextErrorMock) Text(name string, required bool, helper ...string) (st
 	return "", errors.New("error on input text")
 }
 
+type inputTextCustomMock struct {
+	text             func(name string, required bool) (string, error)
+	textWithValidate func(name string, validate func(interface{}) error) (string, error)
+}
+
+func (m inputTextCustomMock) Text(name string, required bool, helper ...string) (string, error) {
+	return m.text(name, required)
+}
+
+func (m inputTextCustomMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return m.textWithValidate(name, validate)
+}
+
 type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool, helper ...string) (string, error) {
@@ -87,6 +100,12 @@ func (inputPasswordMock) Password(label string) (string, error) {
 	return "s3cr3t", nil
 }
 
+type inputPasswordErrorMock struct {}
+
+func (inputPasswordErrorMock) Password(label string) (string, error){
+	return "", errors.New("password error")
+}
+
 type autocompleteGenMock struct{}
 
 func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command) (string, error) {
@@ -117,12 +136,6 @@ type inputListCustomMock struct {
 
 func (m inputListCustomMock) List(name string, items []string) (string, error) {
 	return m.name, nil
-}
-
-type inputListCredMock struct{}
-
-func (inputListCredMock) List(name string, items []string) (string, error) {
-	return "me", nil
 }
 
 type inputListErrorMock struct{}
@@ -273,6 +286,41 @@ func (s credSettingsMock) ProviderPath() string {
 func (s credSettingsMock) CredentialsPath() string {
 	return ""
 }
+
+type credSettingsCustomMock struct {
+	ReadCredentialsValueMock func(path string)([]credential.ListCredData, error)
+	ReadCredentialsFieldsMock func(path string) (credential.Fields, error)
+	WriteDefaultCredentialsFieldsMock func(path string) error
+	WriteCredentialsFieldsMock func (fields credential.Fields, path string) error
+	ProviderPathMock func () string
+	CredentialsPathMock func () string
+}
+
+func (cscm credSettingsCustomMock) ReadCredentialsFields(path string) (credential.Fields, error) {
+	return cscm.ReadCredentialsFieldsMock(path)
+}
+
+func (cscm credSettingsCustomMock) ReadCredentialsValue (path string)([]credential.ListCredData, error) {
+	return cscm.ReadCredentialsValueMock(path)
+}
+
+func (cscm credSettingsCustomMock) WriteDefaultCredentialsFields(path string) error {
+	return nil
+}
+
+func (cscm credSettingsCustomMock) WriteCredentialsFields(fields credential.Fields, path string) error {
+	return nil
+}
+
+func (cscm credSettingsCustomMock) ProviderPath() string {
+	return ""
+}
+
+func (cscm credSettingsCustomMock) CredentialsPath() string {
+	return ""
+}
+
+
 
 type runnerMock struct {
 	error error

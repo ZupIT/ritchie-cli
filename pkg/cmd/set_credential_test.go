@@ -17,16 +17,22 @@
 package cmd
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
+var creds = make(map[string][]credential.Field)
+
 func Test_setCredentialCmd_runPrompt(t *testing.T) {
-	type fields struct {
+	type in struct {
 		Setter        credential.Setter
-		file          credential.ReaderWriterPather
+		credFile      credential.ReaderWriterPather
+		file          stream.FileReadExister
 		InputText     prompt.InputText
 		InputBool     prompt.InputBool
 		InputList     prompt.InputList
@@ -34,26 +40,15 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 	}
 	var tests = []struct {
 		name    string
-		fields  fields
+		in      in
 		wantErr bool
+		want    string
 	}{
 		{
-			name: "Run with success",
-			fields: fields{
+			name: "success run with no data",
+			in: in{
 				Setter:        credSetterMock{},
-				file:          credSettingsMock{},
-				InputText:     inputSecretMock{},
-				InputBool:     inputFalseMock{},
-				InputList:     inputListCredMock{},
-				InputPassword: inputPasswordMock{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "Run with success AddNew",
-			fields: fields{
-				Setter:        credSetterMock{},
-				file:          credSettingsMock{},
+				credFile:      credSettingsMock{},
 				InputText:     inputSecretMock{},
 				InputBool:     inputFalseMock{},
 				InputList:     inputListCustomMock{credential.AddNew},
@@ -62,43 +57,265 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Fail when list return err",
-			fields: fields{
+			name: "success run with full data data",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						cred := credential.Field{
+							Name: "accesskeyid",
+							Type: "plain text",
+						}
+						credArr := []credential.Field{}
+						credArr = append(credArr, cred)
+						creds["file"] = credArr
+						return creds, nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte("some data"), nil
+					},
+				},
+				InputText:     inputTextMock{},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{"file"},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "fail text with full data and file input",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						cred := credential.Field{
+							Name: "accesskeyid",
+							Type: "plain text",
+						}
+						credArr := []credential.Field{}
+						credArr = append(credArr, cred)
+						creds["file"] = credArr
+						return creds, nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte("some data"), nil
+					},
+				},
+				InputText:     inputTextCustomMock{
+					text: func(name string, required bool) (string, error) {
+						return "", errors.New("text error")
+					},
+				},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{"file"},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail to read file",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						cred := credential.Field{
+							Name: "accesskeyid",
+							Type: "plain text",
+						}
+						credArr := []credential.Field{}
+						credArr = append(credArr, cred)
+						creds["type"] = credArr
+						return creds, nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return nil, errors.New("error reading file")
+					},
+				},
+				InputText:     inputTextMock{},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{"file"},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail empty credential file",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						cred := credential.Field{
+							Name: "accesskeyid",
+							Type: "plain text",
+						}
+						credArr := []credential.Field{}
+						credArr = append(credArr, cred)
+						creds["type"] = credArr
+						return creds, nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte(""), nil
+					},
+				},
+				InputText:     inputTextMock{},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{"file"},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail no file to read",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						cred := credential.Field{
+							Name: "accesskeyid",
+							Type: "plain text",
+						}
+						credArr := []credential.Field{}
+						credArr = append(credArr, cred)
+						creds["type"] = credArr
+						return creds, nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+				},
+				InputText:     inputTextMock{},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{"file"},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail cannot find any credential in path ",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						cred := credential.Field{
+							Name: "accesskeyid",
+							Type: "plain text",
+						}
+						credArr := []credential.Field{}
+						credArr = append(credArr, cred)
+						creds["type"] = credArr
+						return creds, nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte("some data"), nil
+					},
+				},
+				InputText:     inputTextCustomMock{
+					text: func(name string, required bool) (string, error) {
+						return "", errors.New("text error")
+					},
+				},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{"type"},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail when password return err",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						cred := credential.Field{
+							Name: "accesskeyid",
+							Type: "secret",
+						}
+						credArr := []credential.Field{}
+						credArr = append(credArr, cred)
+						creds["type"] = credArr
+						return creds, nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{},
+				InputText:     inputTextCustomMock{
+					text: func(name string, required bool) (string, error) {
+						return "./path/to/my/credentialFile", nil
+					},
+				},
+				InputBool:     inputFalseMock{},
+				InputList:     inputListCustomMock{"type"},
+				InputPassword: inputPasswordErrorMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail when list return err",
+			in: in{
 				Setter:        credSetterMock{},
-				file:          credSettingsMock{},
+				credFile:      credSettingsMock{},
 				InputText:     inputSecretMock{},
 				InputBool:     inputFalseMock{},
 				InputList:     inputListErrorMock{},
-				InputPassword: inputPasswordMock{},
+				InputPassword: inputPasswordErrorMock{},
 			},
 			wantErr: true,
 		},
 		{
-			name: "Fail when text return err",
-			fields: fields{
-				Setter:        credSetterMock{},
-				file:          credSettingsMock{},
-				InputText:     inputTextErrorMock{},
+			name: "fail when text return err",
+			in: in{
+				Setter:   credSetterMock{},
+				credFile: credSettingsMock{},
+				InputText:     inputTextErrorMock{} ,
 				InputBool:     inputFalseMock{},
 				InputList:     inputListCustomMock{credential.AddNew},
 				InputPassword: inputPasswordMock{},
 			},
 			wantErr: true,
 		},
+
+
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := NewSetCredentialCmd(
-				tt.fields.Setter,
-				tt.fields.file,
-				tt.fields.InputText,
-				tt.fields.InputBool,
-				tt.fields.InputList,
-				tt.fields.InputPassword,
+				tt.in.Setter,
+				tt.in.credFile,
+				tt.in.file,
+				tt.in.InputText,
+				tt.in.InputBool,
+				tt.in.InputList,
+				tt.in.InputPassword,
 			)
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("set credential command error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

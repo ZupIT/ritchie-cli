@@ -35,7 +35,7 @@ func NewListCredentialCmd(ss credential.Settings) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "credential",
-		Short:   "List all credential names and fields.",
+		Short:   "List credentials fields and part of values",
 		Example: "rit list credential",
 		RunE:    l.run(),
 	}
