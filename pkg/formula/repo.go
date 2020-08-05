@@ -18,6 +18,8 @@ package formula
 
 import "github.com/ZupIT/ritchie-cli/pkg/git"
 
+const RepoCommonsName = RepoName("commons")
+
 type Repo struct {
 	Provider RepoProvider `json:"provider"`
 	Name     RepoName     `json:"name"`
