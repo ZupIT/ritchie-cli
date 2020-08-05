@@ -21,6 +21,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -30,12 +32,19 @@ const (
 
 var (
 	templatePath = []string{"repos", "commons", "templates", "create_formula"}
+	errMsg       = `To create a new formula, the commons repository must contain the following structure: 
+%s
+ └── languages
+ └── root
+
+See example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`
 )
 
 type Manager interface {
 	Languages() ([]string, error)
 	LangTemplateFiles(lang string) ([]File, error)
 	ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error)
+	Validate() error
 }
 
 type File struct {
@@ -43,12 +52,13 @@ type File struct {
 	IsDir bool
 }
 
-func NewManager(ritchieHome string) Manager {
-	return DefaultManager{ritchieHome}
+func NewManager(ritchieHome string, dir stream.DirChecker) Manager {
+	return DefaultManager{ritchieHome, dir}
 }
 
 type DefaultManager struct {
 	ritchieHome string
+	dir         stream.DirChecker
 }
 
 func (tm DefaultManager) templateDir() string {
@@ -129,5 +139,15 @@ func (tm DefaultManager) ResolverNewPath(oldPath, formulaPath, lang, workspacePa
 	}
 
 	return "", fmt.Errorf("fail to resolve new Path %s", oldPath)
+}
 
+func (tm DefaultManager) Validate() error {
+	tplDirPath := tm.templateDir()
+	tplLangPath := filepath.Join(tplDirPath, languageDir)
+	tplRootPath := filepath.Join(tplDirPath, rootDir)
+	invalidErr := fmt.Errorf(errMsg, tplDirPath)
+	if !tm.dir.Exists(tplDirPath) || !tm.dir.Exists(tplLangPath) || !tm.dir.Exists(tplRootPath) {
+		return invalidErr
+	}
+	return nil
 }

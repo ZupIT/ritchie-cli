@@ -24,15 +24,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 type updateRepoCmd struct {
-	client *http.Client
-	repo   formula.RepositoryListUpdater
-	github github.Repositories
+	client        *http.Client
+	repo          formula.RepositoryListUpdater
+	repoProviders formula.RepoProviders
 	prompt.InputText
 	prompt.InputPassword
 	prompt.InputURL
@@ -44,7 +43,7 @@ type updateRepoCmd struct {
 func NewUpdateRepoCmd(
 	client *http.Client,
 	repo formula.RepositoryListUpdater,
-	github github.Repositories,
+	repoProviders formula.RepoProviders,
 	inText prompt.InputText,
 	inPass prompt.InputPassword,
 	inUrl prompt.InputURL,
@@ -55,7 +54,7 @@ func NewUpdateRepoCmd(
 	updateRepo := updateRepoCmd{
 		client:        client,
 		repo:          repo,
-		github:        github,
+		repoProviders: repoProviders,
 		InputText:     inText,
 		InputURL:      inUrl,
 		InputList:     inList,
@@ -100,8 +99,10 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
-		tags, err := up.github.Tags(repoInfo)
+		git := up.repoProviders.Resolve(repo.Provider)
+
+		repoInfo := git.NewRepoInfo(repo.Url, repo.Token)
+		tags, err := git.Repos.Tags(repoInfo)
 		if err != nil {
 			return err
 		}

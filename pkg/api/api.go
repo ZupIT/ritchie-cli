@@ -43,6 +43,7 @@ var (
 		{Parent: "root", Usage: "init"},
 		{Parent: "root", Usage: "list"},
 		{Parent: "root_list", Usage: "repo"},
+		{Parent: "root_list", Usage: "credential"},
 		{Parent: "root", Usage: "set"},
 		{Parent: "root_set", Usage: "context"},
 		{Parent: "root_set", Usage: "credential"},

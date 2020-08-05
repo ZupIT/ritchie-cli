@@ -38,7 +38,7 @@
         "steps":[
             {
                 "key":"",
-                "value":"{\"name\":\"Leonidas\", \"url\":\"https://github.com/viniciussousazup/ritchie-formulas\", \"version\":\"0.0.3\",\"priority\":999}",
+                "value":"{\"provider\":\"Github\", \"name\":\"Leonidas\", \"url\":\"https://github.com/viniciussousazup/ritchie-formulas\", \"version\":\"0.0.3\",\"priority\":999}",
                 "action":"echo"
             },
             {

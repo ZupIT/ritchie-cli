@@ -21,11 +21,11 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
 func TestNewSingleInitCmd(t *testing.T) {
-	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{})
+	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{}, inputTrueMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 	if cmd == nil {
@@ -41,7 +41,7 @@ func TestNewSingleInitCmd(t *testing.T) {
 func Test_initCmd_runPrompt(t *testing.T) {
 	type fields struct {
 		repo formula.RepositoryAdder
-		git  github.Repositories
+		git  git.Repositories
 	}
 
 	tests := []struct {
@@ -58,19 +58,19 @@ func Test_initCmd_runPrompt(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Fail when call git.LatestTag",
+			name: "Warning when call git.LatestTag",
 			fields: fields{
 				repo: defaultRepoAdderMock,
 				git: GitRepositoryMock{
-					latestTag: func(info github.RepoInfo) (github.Tag, error) {
-						return github.Tag{}, errors.New("some error")
+					latestTag: func(info git.RepoInfo) (git.Tag, error) {
+						return git.Tag{}, errors.New("some error")
 					},
 				},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
-			name: "Fail when call repo.Add",
+			name: "Warning when call repo.Add",
 			fields: fields{
 				repo: repoListerAdderCustomMock{
 					add: func(d formula.Repo) error {
@@ -79,12 +79,12 @@ func Test_initCmd_runPrompt(t *testing.T) {
 				},
 				git: defaultGitRepositoryMock,
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewInitCmd(tt.fields.repo, tt.fields.git, TutorialFinderMock{})
+			o := NewInitCmd(tt.fields.repo, tt.fields.git, TutorialFinderMock{}, inputTrueMock{})
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)

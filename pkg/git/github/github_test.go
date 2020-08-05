@@ -19,6 +19,8 @@ package github
 import (
 	"reflect"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
 func TestLatestTagUrl(t *testing.T) {
@@ -143,12 +145,12 @@ func TestZipUrl(t *testing.T) {
 func TestTags_Names(t *testing.T) {
 	tests := []struct {
 		name string
-		t    Tags
+		t    git.Tags
 		want []string
 	}{
 		{
 			name: "Return tags name",
-			t: Tags{
+			t: git.Tags{
 				{
 					Name: "tag1",
 				},

@@ -21,35 +21,35 @@ import (
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 type CreateManager struct {
-	ritHome string
-	github  github.Repositories
-	dir     stream.DirCreateListCopyRemover
-	file    stream.FileWriteCreatorReadExistRemover
+	ritHome       string
+	repoProviders formula.RepoProviders
+	dir           stream.DirCreateListCopyRemover
+	file          stream.FileWriteCreatorReadExistRemover
 }
 
 func NewCreator(
 	ritHome string,
-	github github.Repositories,
+	repoProviders formula.RepoProviders,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileWriteCreatorReadExistRemover,
 ) CreateManager {
 	return CreateManager{
-		ritHome: ritHome,
-		github:  github,
-		dir:     dir,
-		file:    file,
+		ritHome:       ritHome,
+		repoProviders: repoProviders,
+		dir:           dir,
+		file:          file,
 	}
 }
 
 func (cr CreateManager) Create(repo formula.Repo) error {
-	repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
-	zipball, err := cr.github.Zipball(repoInfo, repo.Version.String()) // Download zip repository from github
+	git := cr.repoProviders.Resolve(repo.Provider)
+	repoInfo := git.NewRepoInfo(repo.Url, repo.Token)
+	zipball, err := git.Repos.Zipball(repoInfo, repo.Version.String()) // Download zip repository from github
 	if err != nil {
 		return err
 	}

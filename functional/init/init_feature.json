@@ -34,17 +34,6 @@
         "result":"To start using rit, you need to initialize rit first."
     },
     {
-        "entry":"Add new repo",
-        "steps":[
-            {
-                "key":"",
-                "value":"add repo",
-                "action":"main"
-            }
-        ],
-        "result":"To start using rit, you need to initialize rit first."
-    },
-    {
         "entry":"List repo",
         "steps":[
             {
@@ -95,6 +84,11 @@
                 "key":"",
                 "value":"init",
                 "action":"main"
+            },
+            {
+                "key":"Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]",
+                "value":"yes",
+                "action":"select"
             }
         ],
         "result":""

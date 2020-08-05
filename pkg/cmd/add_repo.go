@@ -24,24 +24,20 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
-	defaultRepoUrl = "https://github.com/zupIt/ritchie-formulas"
+	defaultRepoUrl = "https://github.com/ZupIT/ritchie-formulas"
 )
 
-var (
-	ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
-	ErrCommonsRepoName  = errors.New("the name \"commons\" is not valid for the repository name, try to enter another name")
-)
+var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 
 type addRepoCmd struct {
-	repo   formula.RepositoryAddLister
-	github github.Repositories
+	repo          formula.RepositoryAddLister
+	repoProviders formula.RepoProviders
 	prompt.InputTextValidator
 	prompt.InputPassword
 	prompt.InputURL
@@ -53,7 +49,7 @@ type addRepoCmd struct {
 
 func NewAddRepoCmd(
 	repo formula.RepositoryAddLister,
-	github github.Repositories,
+	repoProviders formula.RepoProviders,
 	inText prompt.InputTextValidator,
 	inPass prompt.InputPassword,
 	inUrl prompt.InputURL,
@@ -64,7 +60,7 @@ func NewAddRepoCmd(
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
-		github:             github,
+		repoProviders:      repoProviders,
 		InputTextValidator: inText,
 		InputURL:           inUrl,
 		InputList:          inList,
@@ -86,7 +82,12 @@ func NewAddRepoCmd(
 
 func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		name, err := ad.Text("Repository name: ", ad.repoNameValidator)
+		provider, err := ad.List("Select your provider:", ad.repoProviders.List())
+		if err != nil {
+			return err
+		}
+
+		name, err := ad.Text("Repository name:", ad.repoNameValidator)
 		if err != nil {
 			return err
 		}
@@ -98,9 +99,18 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 
 		for i := range repos {
 			repo := repos[i]
+			if repo.Name == "commons" {
+				prompt.Warning("You are trying to replace the \"common\" repository!")
+				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"})
+				if !choice {
+					prompt.Info("Operation cancelled")
+					return nil
+				}
+			}
+
 			if repo.Name == formula.RepoName(name) {
 				prompt.Warning(fmt.Sprintf("Your repository %q is gonna be overwritten.", repo.Name))
-				choice, _ := ad.Bool("Want to proceed?", []string{"yes", "no"})
+				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"})
 				if !choice {
 					prompt.Info("Operation cancelled")
 					return nil
@@ -108,28 +118,34 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		isPrivate, err := ad.Bool("Is a private repository? ", []string{"no", "yes"})
+		url, err := ad.URL("Repository URL:", defaultRepoUrl)
+		if err != nil {
+			return err
+		}
+
+		isPrivate, err := ad.Bool("Is a private repository?", []string{"no", "yes"})
 		if err != nil {
 			return err
 		}
 
 		var token string
 		if isPrivate {
-			token, err = ad.Password("Personal access tokens: ")
+			token, err = ad.Password("Personal access tokens:")
 			if err != nil {
 				return err
 			}
 		}
 
-		url, err := ad.URL("Repository URL: ", defaultRepoUrl)
+		git := ad.repoProviders.Resolve(formula.RepoProvider(provider))
+
+		gitRepoInfo := git.NewRepoInfo(url, token)
+		tags, err := git.Repos.Tags(gitRepoInfo)
 		if err != nil {
 			return err
 		}
 
-		gitRepoInfo := github.NewRepoInfo(url, token)
-		tags, err := ad.github.Tags(gitRepoInfo)
-		if err != nil {
-			return err
+		if len(tags) <= 0 {
+			return fmt.Errorf("please, generate a release to add your repository")
 		}
 
 		var tagNames []string
@@ -148,6 +164,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		repository := formula.Repo{
+			Provider: formula.RepoProvider(provider),
 			Name:     formula.RepoName(name),
 			Version:  formula.RepoVersion(version),
 			Token:    token,
@@ -201,10 +218,6 @@ func (ad addRepoCmd) repoNameValidator(text interface{}) error {
 	in := text.(string)
 	if in == "" {
 		return ErrRepoNameNotEmpty
-	}
-
-	if in == "commons" {
-		return ErrCommonsRepoName
 	}
 
 	return nil

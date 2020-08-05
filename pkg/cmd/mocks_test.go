@@ -20,13 +20,14 @@ import (
 	"errors"
 	"io"
 
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
@@ -344,20 +345,20 @@ func (t treeMock) MergedTree(bool) formula.Tree {
 }
 
 type GitRepositoryMock struct {
-	zipball   func(info github.RepoInfo, version string) (io.ReadCloser, error)
-	tags      func(info github.RepoInfo) (github.Tags, error)
-	latestTag func(info github.RepoInfo) (github.Tag, error)
+	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
+	tags      func(info git.RepoInfo) (git.Tags, error)
+	latestTag func(info git.RepoInfo) (git.Tag, error)
 }
 
-func (m GitRepositoryMock) Zipball(info github.RepoInfo, version string) (io.ReadCloser, error) {
+func (m GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	return m.zipball(info, version)
 }
 
-func (m GitRepositoryMock) Tags(info github.RepoInfo) (github.Tags, error) {
+func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
 	return m.tags(info)
 }
 
-func (m GitRepositoryMock) LatestTag(info github.RepoInfo) (github.Tag, error) {
+func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	return m.latestTag(info)
 }
 
@@ -396,13 +397,13 @@ var (
 	}
 
 	defaultGitRepositoryMock = GitRepositoryMock{
-		latestTag: func(info github.RepoInfo) (github.Tag, error) {
-			return github.Tag{}, nil
+		latestTag: func(info git.RepoInfo) (git.Tag, error) {
+			return git.Tag{}, nil
 		},
-		tags: func(info github.RepoInfo) (github.Tags, error) {
-			return github.Tags{}, nil
+		tags: func(info git.RepoInfo) (git.Tags, error) {
+			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
 		},
-		zipball: func(info github.RepoInfo, version string) (io.ReadCloser, error) {
+		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
 			return nil, nil
 		},
 	}

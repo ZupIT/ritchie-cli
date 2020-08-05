@@ -61,6 +61,7 @@ var (
 		fmt.Sprintf("%s completion powershell", cmdUse),
 		fmt.Sprintf("%s init", cmdUse),
 		fmt.Sprintf("%s upgrade", cmdUse),
+		fmt.Sprintf("%s add repo", cmdUse),
 	}
 
 	upgradeList = []string{

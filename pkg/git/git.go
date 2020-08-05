@@ -13,11 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package git
 
-package headers
+import "io"
 
-const (
-	Authorization = "Authorization"
-	Accept        = "Accept"
-	GitlabToken   = "PRIVATE-TOKEN"
-)
+type Tag struct {
+	Name string `json:"tag_name"`
+}
+
+type Tags []Tag
+
+func (t Tags) Names() []string {
+	var tags []string
+	for i := range t {
+		tags = append(tags, t[i].Name)
+	}
+
+	return tags
+}
+
+type RepoInfo interface {
+	ZipUrl(version string) string
+	TagsUrl() string
+	LatestTagUrl() string
+	TokenHeader() string
+	Token() string
+}
+
+type Repositories interface {
+	Zipball(info RepoInfo, version string) (io.ReadCloser, error)
+	Tags(info RepoInfo) (Tags, error)
+	LatestTag(info RepoInfo) (Tag, error)
+}

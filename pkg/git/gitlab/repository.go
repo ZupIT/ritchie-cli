@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package github
+package gitlab
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 )
 
@@ -34,7 +35,7 @@ func NewRepoManager(client *http.Client) RepoManager {
 	return RepoManager{client: client}
 }
 
-func (re RepoManager) Zipball(info RepoInfo, version string) (io.ReadCloser, error) {
+func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	zipUrl := info.ZipUrl(version)
 	req, err := http.NewRequest(http.MethodGet, zipUrl, nil)
 	if err != nil {
@@ -43,34 +44,40 @@ func (re RepoManager) Zipball(info RepoInfo, version string) (io.ReadCloser, err
 
 	if info.Token() != "" {
 		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, authToken)
+		req.Header.Add(headers.GitlabToken, authToken)
 	}
 
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
 	resp, err := re.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
+	if resp.StatusCode != 200 {
+		defer resp.Body.Close()
+
+		all, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(all)
+		return nil, errors.New(resp.Status)
+	}
+
 	return resp.Body, nil
 }
 
-func (re RepoManager) Tags(info RepoInfo) (Tags, error) {
+func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiUrl := info.TagsUrl()
 	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
 	if err != nil {
-		return Tags{}, err
+		return git.Tags{}, err
 	}
 
 	if info.Token() != "" {
 		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, authToken)
+		req.Header.Add(headers.GitlabToken, authToken)
 	}
 
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
 	res, err := re.client.Do(req)
 	if err != nil {
-		return Tags{}, err
+		return git.Tags{}, err
 	}
 
 	defer res.Body.Close()
@@ -78,24 +85,24 @@ func (re RepoManager) Tags(info RepoInfo) (Tags, error) {
 	if res.StatusCode != http.StatusOK {
 		b, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return Tags{}, err
+			return git.Tags{}, err
 		}
-		return Tags{}, errors.New(string(b))
+		return git.Tags{}, errors.New(string(b))
 	}
 
-	var tags Tags
+	var tags git.Tags
 	if err := json.NewDecoder(res.Body).Decode(&tags); err != nil {
-		return Tags{}, err
+		return git.Tags{}, err
 	}
 
 	return tags, nil
 }
 
-func (re RepoManager) LatestTag(info RepoInfo) (Tag, error) {
+func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	apiUrl := info.LatestTagUrl()
 	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
 	if err != nil {
-		return Tag{}, err
+		return git.Tag{}, err
 	}
 
 	if info.Token() != "" {
@@ -103,10 +110,9 @@ func (re RepoManager) LatestTag(info RepoInfo) (Tag, error) {
 		req.Header.Add(headers.Authorization, authToken)
 	}
 
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
 	res, err := re.client.Do(req)
 	if err != nil {
-		return Tag{}, err
+		return git.Tag{}, err
 	}
 
 	defer res.Body.Close()
@@ -114,15 +120,19 @@ func (re RepoManager) LatestTag(info RepoInfo) (Tag, error) {
 	if res.StatusCode != http.StatusOK {
 		b, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return Tag{}, err
+			return git.Tag{}, err
 		}
-		return Tag{}, errors.New(string(b))
+		return git.Tag{}, errors.New(string(b))
 	}
 
-	var tag Tag
-	if err := json.NewDecoder(res.Body).Decode(&tag); err != nil {
-		return Tag{}, err
+	var tags git.Tags
+	if err := json.NewDecoder(res.Body).Decode(&tags); err != nil {
+		return git.Tag{}, err
 	}
 
-	return tag, nil
+	if len(tags) <= 0 {
+		return git.Tag{}, errors.New("release not found")
+	}
+
+	return tags[0], nil
 }

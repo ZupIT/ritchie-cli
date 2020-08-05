@@ -16,12 +16,15 @@
 
 package formula
 
+import "github.com/ZupIT/ritchie-cli/pkg/git"
+
 type Repo struct {
-	Name     RepoName    `json:"name"`
-	Version  RepoVersion `json:"version"`
-	Url      string      `json:"url"`
-	Token    string      `json:"token,omitempty"`
-	Priority int         `json:"priority"`
+	Provider RepoProvider `json:"provider"`
+	Name     RepoName     `json:"name"`
+	Version  RepoVersion  `json:"version"`
+	Url      string       `json:"url"`
+	Token    string       `json:"token,omitempty"`
+	Priority int          `json:"priority"`
 }
 
 type Repos []Repo
@@ -48,6 +51,40 @@ type RepoVersion string
 
 func (r RepoVersion) String() string {
 	return string(r)
+}
+
+type RepoProvider string
+
+func (r RepoProvider) String() string {
+	return string(r)
+}
+
+type Git struct {
+	Repos       git.Repositories
+	NewRepoInfo func(url string, token string) git.RepoInfo
+}
+
+type RepoProviders map[RepoProvider]Git
+
+func NewRepoProviders() RepoProviders {
+	return RepoProviders{}
+}
+
+func (re RepoProviders) Add(provider RepoProvider, git Git) {
+	re[provider] = git
+}
+
+func (re RepoProviders) Resolve(provider RepoProvider) Git {
+	return re[provider]
+}
+
+func (re RepoProviders) List() []string {
+	var providers []string
+	for provider, _ := range re {
+		providers = append(providers, provider.String())
+	}
+
+	return providers
 }
 
 type RepositoryAdder interface {
