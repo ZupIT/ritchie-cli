@@ -30,7 +30,7 @@ import (
 )
 
 var inputTypes = []string{"plain text", "secret"}
-var inputWay = []string{"file", "type"}
+var inputWay = []string{"type", "file"}
 
 // setCredentialCmd type for set credential command
 type setCredentialCmd struct {
@@ -145,10 +145,10 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
-	inputWayChoose, _ := s.List("Want to enter your credential through a file or by typing it?", inputWay)
+	inputWayChoose, _ := s.List("Want to enter your credential typing or through a file?", inputWay)
 	for _, i := range inputs {
 		var value string
-		if inputWayChoose == inputWay[0] {
+		if inputWayChoose == inputWay[1] {
 			path, err := s.Text("Enter the credential file path for "+prompt.Cyan(i.Name)+":", true)
 			if err != nil {
 				return credential.Detail{}, err
