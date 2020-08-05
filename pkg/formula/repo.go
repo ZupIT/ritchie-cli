@@ -80,7 +80,7 @@ func (re RepoProviders) Resolve(provider RepoProvider) Git {
 
 func (re RepoProviders) List() []string {
 	var providers []string
-	for provider, _ := range re {
+	for provider := range re {
 		providers = append(providers, provider.String())
 	}
 
