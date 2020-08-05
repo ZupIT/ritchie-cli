@@ -38,9 +38,11 @@ const (
 )
 
 var (
-	addRepoInfo = prompt.Yellow(`To create new formulas you must add a repository with the name "commons" and 
-that contains the templates for creation following the structure of the repository. 
-See example [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`)
+	addRepoInfo = `You can keep the configuration without adding the community repository,
+but you will need to provide a git repo with the formulas templates and add them with 
+rit add repo command, naming this repository obligatorily as "commons".
+
+See how to do this on the example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`
 	errMsg             = prompt.Yellow("It was not possible to add the commons repository at this time, please try again later.")
 	ErrInitCommonsRepo = errors.New(errMsg)
 	CommonsRepoURL     = "https://github.com/ZupIT/ritchie-formulas"
@@ -76,7 +78,7 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 
 		if !choose {
 			fmt.Println()
-			prompt.Info(addRepoInfo)
+			prompt.Warning(addRepoInfo)
 			fmt.Println()
 			fmt.Println(addRepoMsg)
 			return nil
