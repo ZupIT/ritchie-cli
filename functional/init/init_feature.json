@@ -1,0 +1,96 @@
+[
+    {
+        "entry":"Show context",
+        "steps":[
+            {
+                "key":"",
+                "value":"show context",
+                "action":"main"
+            }
+        ],
+        "result":"To start using rit, you need to initialize rit first."
+    },
+    {
+        "entry":"Set context",
+        "steps":[
+            {
+                "key":"",
+                "value":"set context",
+                "action":"main"
+            }
+        ],
+        "result":"To start using rit, you need to initialize rit first."
+    },
+    {
+        "entry":"Delete context",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete context",
+                "action":"main"
+            }
+
+        ],
+        "result":"To start using rit, you need to initialize rit first."
+    },
+    {
+        "entry":"List repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"list repo",
+                "action":"main"
+            }
+        ],
+        "result":"To start using rit, you need to initialize rit first."
+    },
+    {
+        "entry":"Delete repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete repo",
+                "action":"main"
+            }
+        ],
+        "result":"To start using rit, you need to initialize rit first."
+    },
+    {
+        "entry":"Set credentials",
+        "steps":[
+            {
+                "key":"",
+                "value":"set credential",
+                "action":"main"
+            }
+        ],
+        "result":"To start using rit, you need to initialize rit first."
+    },
+    {
+        "entry":"Update repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"update repo",
+                "action":"main"
+            }
+        ],
+        "result":"To start using rit, you need to initialize rit first."
+    },
+    {
+        "entry":"Do INIT",
+        "steps":[
+            {
+                "key":"",
+                "value":"init",
+                "action":"main"
+            },
+            {
+                "key":"Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]",
+                "value":"yes",
+                "action":"select"
+            }
+        ],
+        "result":""
+    }
+]

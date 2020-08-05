@@ -1,0 +1,523 @@
+version: 2.1
+
+orbs:
+  windows: circleci/windows@2.4.0
+
+references:
+  images:
+    go: &GOLANG_IMAGE cimg/go:1.14
+    python: &PYTHON_IMAGE circleci/python:2.7-stretch
+    ruby: &RUBY_IMAGE cimg/ruby:2.6.5
+    ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
+    horus: &HORUS_IMAGE library/docker:dind
+    ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
+    centos: &CENTOS_IMAGE viniciusramosdefaria/centos-circleci:7.0
+    windows: &WINDOWS_IMAGE windows-server-2019
+
+  paths:
+    test-results: &TEST_RESULTS_DIR bin
+
+  environment: &ENVIRONMENT
+    TEST_RESULTS_DIR: *TEST_RESULTS_DIR
+    GIT_EMAIL : "zup-ci@zup.com.br"
+    GIT_USERNAME: "zup-ci"
+    GIT_NAME: "Zup CI"
+    BUILD_IMAGE: *GOLANG_IMAGE
+    VERSION_PLACEHOLDER: 2.0.0-betaPLACEHOLDER
+
+  filters: &FILTERS_DELIVERY
+    branches:
+      only:
+        - qa
+        - nightly
+        - beta
+
+  filters-release: &FILTERS_RELEASE
+    branches:
+      only:
+        - /^release-.*/
+
+  filters-checks-pr: &FILTERS_CHECK_CODE
+    branches:
+      only:
+        - /^pull\/.*$/
+        - /^feature.*/
+        - master
+
+executors:
+  ritchie-tests-executor:
+    machine:
+      image: *CI_MACHINE_IMAGE
+    working_directory: ~/workspace
+
+  ritchie-executor:
+    docker:
+      - image: *GOLANG_IMAGE
+        user: root
+    working_directory: /workspace
+
+  horus-executor:
+    docker:
+      - image: *HORUS_IMAGE
+        user: root
+
+  delivery-executor:
+    docker:
+      - image: *PYTHON_IMAGE
+        user: root
+    working_directory: /workspace
+
+  release-executor:
+    docker:
+      - image: *RUBY_IMAGE
+        user: root
+    working_directory: /workspace
+
+  windows-executor:
+    working_directory: /workspace
+    resource_class: windows.medium
+    shell: powershell.exe -ExecutionPolicy Unrestricted
+    machine:
+      image: *WINDOWS_IMAGE
+
+  ubuntu-executor:
+    docker:
+      - image: *UBUNTU_IMAGE
+        user: root
+    working_directory: /workspace
+
+  centos-executor:
+    docker:
+      - image: *CENTOS_IMAGE
+        user: root
+    working_directory: /workspace
+
+jobs:
+  lint:
+    executor: ritchie-tests-executor
+    steps:
+      - checkout
+      - run:
+          name: Install golangci-lint
+          command: |
+            download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
+            wget -O- -q $download |sudo sh -s -- -b /go/bin/ v1.24.0
+      - run:
+          name: lint
+          command: |
+            /go/bin/golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
+  horus:
+    executor: horus-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Horus Security Analysis
+          command: |
+            echo "Starting scan Horus..."
+            docker run --rm -e HORUS_CLIENT_REPO_URL=$HORUS_CLIENT_REPO_URL \
+            -e HORUS_CLIENT_REPO_BRANCH=$HORUS_CLIENT_REPO_BRANCH \
+            -e HORUS_CLIENT_API_ADDR=$HORUS_CLIENT_API_ADDR \
+            -e HORUS_CLIENT_TOKEN=$HORUS_CLIENT_TOKEN \
+            -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS \
+            -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK horuszup/horus-client:latest
+
+  unit_test:
+    executor: ritchie-tests-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - run:
+          name: Check go version
+          command: |
+            . ./go-version.sh
+      - run:
+          name: Install gotestsum
+          command: |
+            curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v0.4.2/gotestsum_0.4.2_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
+      - run:
+          name: Running Unit tests
+          command: |
+            mkdir -p $TEST_RESULTS_DIR
+            . ./run-tests-ci.sh
+      - store_test_results:
+          path: *TEST_RESULTS_DIR
+      - store_artifacts:
+          path: *TEST_RESULTS_DIR
+      - run:
+          name: codecov upload
+          when: always
+          command: bash <(curl -s https://codecov.io/bash)
+  unix_functional_test:
+    executor: ritchie-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+            at: /workspace/dist
+      - run:
+          name: Setup Bash for CLI
+          command: |
+            echo "export PATH=/workspace/dist/linux:$PATH" >> $BASH_ENV
+            source /home/circleci/.bashrc
+      - run:
+          name: Running Functional tests for CLI
+          command: |
+            make functional-test
+
+  windows_functional_test:
+    executor: windows-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Install GO
+          command: |
+            choco install -y golang
+      - run:
+          name: Set Enviroment PATH
+          command: |
+            [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\workspace\workspace\dist\windows", "Machine")
+      - run:
+          name: Running Functional tests for CLI
+          command: |
+            go test -v -count=1 -p 1 (go list ./functional/... | grep -v vendor/)
+
+  build:
+    executor: ritchie-executor
+    environment:
+      <<: *ENVIRONMENT
+    branches:
+    steps:
+      - checkout
+      - run:
+          name: Running build
+          command: |
+            . ./.circleci/scripts/version.sh
+            make build-circle
+      - run:
+          name: Persist version file
+          command: |
+            . ./.circleci/scripts/version.sh
+            echo $RELEASE_VERSION > dist/release_version.txt
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - linux
+            - darwin
+            - windows
+            - release_version.txt
+      - store_test_results:
+          path: *TEST_RESULTS_DIR
+      - store_artifacts:
+          path: *TEST_RESULTS_DIR
+
+  sign-bin:
+    executor: ubuntu-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Install osslsigncode
+          command: |
+            sudo apt-get update -y
+            sudo apt-get install -y osslsigncode
+            osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecli.msi -out dist/installer/ritchiecli.msi
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  delivery:
+    executor: delivery-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Delivering cli binary
+          command: |
+            pip install awscli
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/bucket.sh
+            . ./.circleci/scripts/credentials.sh
+            make delivery
+
+  deb-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: ubuntu-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Generating package for debian
+          command: |
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/gen-deb.sh
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  rpm-package:
+    environment:
+      <<: *ENVIRONMENT
+    executor: centos-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          name: Generating package for rpm
+          command: |
+            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/gen-rpm.sh
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  win-package:
+    executor:
+      name: windows-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /workspace/dist
+      - run:
+          command: |
+            .circleci/scripts/gen-win.ps1
+          shell: powershell.exe
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - installer
+
+  release:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Releasing
+          command: |
+            . ./.circleci/scripts/version.sh
+            make release
+
+  release_creator:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Checking if we need to release any new features
+          command: |
+            make release-creator
+
+  rebase_nightly:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Rebase Nightly
+          command: |
+            make rebase-nightly
+
+  rebase_beta:
+    environment:
+      <<: *ENVIRONMENT
+    executor: release-executor
+    steps:
+      - checkout
+      - run:
+          name: Rebase Beta
+          command: |
+            make rebase-beta
+
+  unix_smoke_test:
+    executor: ritchie-tests-executor
+    environment:
+      <<: *ENVIRONMENT
+    steps:
+      - checkout
+      - run:
+          name: Load Versions
+          command: |
+            . ./.circleci/scripts/version.sh
+            echo $RELEASE_VERSION
+      - run:
+          name: install Rit
+          command: |
+            curl -fsSL https://commons-repo.ritchiecli.io/install_cli.sh | bash
+      - run:
+          name: Verify Command
+          command: |
+            rit --version
+            rit --version | grep "$RELEASE_VERSION"
+
+workflows:
+  release_trigger:
+    triggers:
+      - schedule:
+          cron: "0 13 * * 1"
+          filters:
+            branches:
+              only:
+                - beta
+    jobs:
+      - release_creator
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 22 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - rebase_nightly
+  beta:
+    triggers:
+      - schedule:
+          cron: "0 11 * * 2,4"
+          filters:
+            branches:
+              only:
+                - nightly
+    jobs:
+      - build:
+          name: build-code
+      - windows_functional_test:
+          name: windows-functional-test-code
+          requires:
+            - build-code
+      - rebase_beta:
+          name: release-beta
+          requires:
+            - windows-functional-test-code
+
+  build-for-requests:
+    jobs:
+      - lint:
+          filters:
+            <<: *FILTERS_CHECK_CODE
+      - horus:
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - lint 
+      - unit_test:
+          name: unit-test
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - lint
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - unit-test
+      - unix_functional_test:
+          name: unix-functional-test-code
+          filters:
+            <<: *FILTERS_CHECK_CODE
+          requires:
+            - build-code
+  release:
+    jobs:
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_RELEASE
+      - deb-package:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
+      - rpm-package:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
+      - win-package:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - win-package
+            - deb-package
+            - rpm-package
+      - delivery:
+          name: delivery
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - sign-bin
+      - release:
+          name: release-publish
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - delivery
+      - unix_smoke_test:
+          name: unix-smoke-test
+          filters:
+            <<: *FILTERS_RELEASE
+          requires:
+            - release-publish
+  delivery:
+    jobs:
+      - build:
+          name: build-code
+          filters:
+            <<: *FILTERS_DELIVERY
+      - delivery:
+          name: delivery
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - sign-bin
+      - deb-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code
+      - rpm-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code
+      - win-package:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - build-code
+      - sign-bin:
+          filters:
+            <<: *FILTERS_DELIVERY
+          requires:
+            - win-package
+            - rpm-package
+            - deb-package

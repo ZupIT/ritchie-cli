@@ -1,0 +1,84 @@
+[
+    {
+        "entry":"Set context STDIN",
+        "steps":[
+            {
+                "key":"",
+                "value":"{\"context\":\"Leonidas\"}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"set context --stdin",
+                "action":"main"
+            }
+
+        ],
+        "result":"Set context successful!"
+    },
+    {
+        "entry":"Delete context STDIN",
+        "steps":[
+            {
+                "key":"",
+                "value":"{\"context\":\"Leonidas\"}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"delete context --stdin",
+                "action":"main"
+            }
+
+        ],
+        "result":"Delete context successful!"
+    },
+    {
+        "entry":"Add new repo STDIN",
+        "steps":[
+            {
+                "key":"",
+                "value":"{\"provider\":\"Github\", \"name\":\"Leonidas\", \"url\":\"https://github.com/viniciussousazup/ritchie-formulas\", \"version\":\"0.0.3\",\"priority\":999}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"add repo --stdin",
+                "action":"main"
+            }
+        ],
+        "result":""
+    },
+    {
+        "entry":"Delete repo STDIN",
+        "steps":[
+            {
+                "key":"",
+                "value":"{\"name\":\"Leonidas\"}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"delete repo --stdin",
+                "action":"main"
+            }
+        ],
+        "result":"\"Leonidas\" was deleted with success"
+    },
+    {
+        "entry":"Set credentials STDIN",
+        "steps":[
+            {
+                "key":"",
+                "value":"{\"service\":\"Leonidas\",\"credential\": {\"username\":\"dmbarra\",\"token\": \"credentialToken\"}}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"set credential --stdin",
+                "action":"main"
+            }
+        ],
+        "result":""
+    }
+]
