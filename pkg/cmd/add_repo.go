@@ -29,9 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	defaultRepoUrl = "https://github.com/ZupIT/ritchie-formulas"
-)
+const defaultRepoUrl = "https://github.com/ZupIT/ritchie-formulas"
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 
@@ -99,13 +97,14 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 
 		for i := range repos {
 			repo := repos[i]
-			if repo.Name == "commons" {
-				prompt.Warning("You are trying to replace the \"common\" repository!")
+			if repo.Name == formula.RepoCommonsName && formula.RepoName(name) == formula.RepoCommonsName {
+				prompt.Warning("You are trying to replace the \"commons\" repository!")
 				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"})
 				if !choice {
 					prompt.Info("Operation cancelled")
 					return nil
 				}
+				break
 			}
 
 			if repo.Name == formula.RepoName(name) {
