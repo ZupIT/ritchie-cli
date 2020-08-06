@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.2](https://github.com/zupit/ritchie-cli/tree/2.0.2) (2020-08-06)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.1...2.0.2)
+
+**Merged pull requests:**
+
+- fix wix [\#364](https://github.com/ZupIT/ritchie-cli/pull/364) ([ernelio](https://github.com/ernelio))
+- \[FIX\] Fix Makefile is\_release [\#363](https://github.com/ZupIT/ritchie-cli/pull/363) ([ernelio](https://github.com/ernelio))
+- Release 2.0.1 merge [\#362](https://github.com/ZupIT/ritchie-cli/pull/362) ([zup-ci](https://github.com/zup-ci))
+- fix message about Ritchie Legacy-1.0.0 [\#360](https://github.com/ZupIT/ritchie-cli/pull/360) ([rodrigomedeirosf](https://github.com/rodrigomedeirosf))
+
 ## [2.0.1](https://github.com/zupit/ritchie-cli/tree/2.0.1) (2020-08-06)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.0...2.0.1)
