@@ -43,7 +43,7 @@ var (
 	MsgSession = "To use this command, you need to start a session first.\nCommand: rit login"
 
 	// Url to get Rit Stable Version
-	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable-legacy.txt"
 
 	singleIgnorelist = []string{
 		fmt.Sprint(cmdUse),
