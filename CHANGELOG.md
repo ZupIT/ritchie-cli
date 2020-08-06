@@ -9,6 +9,11 @@
 - Create journey tips [\#289](https://github.com/ZupIT/ritchie-cli/issues/289)
 - Create journey tips [\#304](https://github.com/ZupIT/ritchie-cli/pull/304) ([brunats](https://github.com/brunats))
 
+## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.23...HEAD)
+
+
 **Fixed bugs:**
 
 - \[FIX\] Fix build formula on Windows [\#307](https://github.com/ZupIT/ritchie-cli/pull/307) ([kaduartur](https://github.com/kaduartur))

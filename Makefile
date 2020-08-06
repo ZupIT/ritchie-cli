@@ -31,7 +31,7 @@ IS_RELEASE=$(shell echo $(VERSION) | egrep "^[0-9.]+-beta.[0-9]+")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
-IS_LEGACY=$(shell echo $(VERSION) | egrep "*.legacy.*")
+IS_LEGACY=$(shell echo $(VERSION) | egrep "*-legacy")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
 STABLE_VERSION_URL=https://commons-repo.ritchiecli.io/stable-legacy.txt
@@ -118,6 +118,10 @@ endif
 ifneq "$(IS_QA)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+endif
+ifneq "$(IS_LEGACY)" ""
+	echo -n "$(RELEASE_VERSION)" > stable-legacy.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable-legacy.txt"
 endif
 else
 	echo "NOT GONNA PUBLISH"

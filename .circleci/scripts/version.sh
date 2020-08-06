@@ -11,7 +11,7 @@ elif expr "$CIRCLE_BRANCH" : '^beta' >/dev/null; then
   BETA_VERSION=$(expr $(curl -s https://commons-repo.ritchiecli.io/stable.txt| rev | cut -d . -f -1|rev) + 1)
   export RELEASE_VERSION=$(echo "$VERSION_PLACEHOLDER" | sed "s/PLACEHOLDER/.pre.${BETA_VERSION}/")
 elif expr "$CIRCLE_BRANCH" : '^legacy-.*' >/dev/null; then
-  export RELEASE_VERSION=$(echo "${CIRCLE_BRANCH}.legacy" | cut -d '-' -f 2-)
+  export RELEASE_VERSION=$(echo "${CIRCLE_BRANCH}-legacy" | cut -d '-' -f 2-)
 else
   export RELEASE_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
 fi
