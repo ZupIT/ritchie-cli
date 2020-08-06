@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.1](https://github.com/zupit/ritchie-cli/tree/2.0.1) (2020-08-06)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.0...2.0.1)
+
+**Fixed bugs:**
+
+- \[FIX\] Add repo with the commons name [\#361](https://github.com/ZupIT/ritchie-cli/pull/361) ([kaduartur](https://github.com/kaduartur))
+
+**Merged pull requests:**
+
+- \[Feature\] Add hooks in packagings [\#359](https://github.com/ZupIT/ritchie-cli/pull/359) ([ernelio](https://github.com/ernelio))
+- Release 2.0.0 merge [\#358](https://github.com/ZupIT/ritchie-cli/pull/358) ([zup-ci](https://github.com/zup-ci))
+
 ## [2.0.0](https://github.com/zupit/ritchie-cli/tree/2.0.0) (2020-08-05)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0-beta.24...2.0.0)
