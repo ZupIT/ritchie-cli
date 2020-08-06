@@ -34,7 +34,7 @@
     ]
   },
   "hooks": [
-    {"when":"install", "command":"cmd.exe /c rmdir /s /q %systemdrive%%homepath%\\.rit"}
+    {"when":"uninstall", "command":"cmd.exe /c rmdir /s /q %systemdrive%%homepath%\\.rit"}
   ],
   "choco": {
       "description": "ritchie cli",
