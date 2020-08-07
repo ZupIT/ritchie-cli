@@ -35,7 +35,8 @@
   },
   "hooks": [
     {"when":"install", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"},
-    {"when":"uninstall", "command":"cmd.exe /c rmdir /s /q %systemdrive%%homepath%\\.rit"}
+    {"when":"install", "command":"cmd.exe /c setx /M PATH \"%PATH%;%systemdrive%%homepath%\\rit\""},
+    {"when":"uninstall", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"}
   ],
   "choco": {
       "description": "ritchie cli",
