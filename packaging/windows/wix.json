@@ -13,10 +13,10 @@
     "guid": "f29951f5-7869-4bd5-9e40-de2edd9291e8",
     "vars": [
       {
-          "name": "some",
-          "value": "value",
-          "permanent": "no",
-          "system": "no",
+          "name": "PATH",
+          "value": "[INSTALLDIR]",
+          "permanent": "yes",
+          "system": "yes",
           "action": "set",
           "part": "last"
       }
@@ -35,7 +35,6 @@
   },
   "hooks": [
     {"when":"install", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"},
-    {"when":"install", "command":"cmd.exe /c setx /M PATH \"%PATH%;%systemdrive%%homepath%\\rit\""},
     {"when":"uninstall", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"}
   ],
   "choco": {
