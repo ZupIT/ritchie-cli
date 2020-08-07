@@ -40,7 +40,10 @@ func (us UserIdManager) Generate() (UserId, error) {
 	}
 
 	us.hash.Reset()
-	us.hash.Write([]byte(id))
+	if _, err := us.hash.Write([]byte(id)); err != nil {
+		return "", err
+	}
+	
 	userId := hex.EncodeToString(us.hash.Sum(nil))
 
 	return UserId(userId), nil
