@@ -22,17 +22,6 @@
       }
     ]
   },
-  "shortcuts": {
-    "guid": "503ab4a8-dc62-4130-903b-12f3ab7c2618",
-    "items": [
-        {
-            "name": "ritchiecli",
-            "description": "Ritchie CLI",
-            "target": "[INSTALLDIR]\\rit.exe",
-            "wdir": "INSTALLDIR"
-        }
-    ]
-  },
   "hooks": [
     {"when":"install", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"},
     {"when":"uninstall", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"}
