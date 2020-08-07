@@ -43,7 +43,7 @@ func (us UserIdManager) Generate() (UserId, error) {
 	if _, err := us.hash.Write([]byte(id)); err != nil {
 		return "", err
 	}
-	
+
 	userId := hex.EncodeToString(us.hash.Sum(nil))
 
 	return UserId(userId), nil
