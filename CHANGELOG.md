@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.0.3](https://github.com/zupit/ritchie-cli/tree/2.0.3) (2020-08-07)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0...2.0.3)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Send formula commands metrics [\#369](https://github.com/ZupIT/ritchie-cli/issues/369)
+- \[FEATURE\] Add set path .msi [\#372](https://github.com/ZupIT/ritchie-cli/pull/372) ([ernelio](https://github.com/ernelio))
+
+**Fixed bugs:**
+
+- \[BUG\] Create formula with specific words [\#249](https://github.com/ZupIT/ritchie-cli/issues/249)
+- \[BUG\] Using rit build formula appends to application.bat instead of replacing [\#238](https://github.com/ZupIT/ritchie-cli/issues/238)
+
+**Merged pull requests:**
+
+- Release 2.0.2 merge [\#365](https://github.com/ZupIT/ritchie-cli/pull/365) ([zup-ci](https://github.com/zup-ci))
+
+## [1.0.0](https://github.com/zupit/ritchie-cli/tree/1.0.0) (2020-08-06)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.2...1.0.0)
+
+**Fixed bugs:**
+
+- \[Fix\] Credential AWS Provider Default [\#313](https://github.com/ZupIT/ritchie-cli/pull/313) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+- \[FIX\] stable version URL [\#371](https://github.com/ZupIT/ritchie-cli/pull/371) ([kaduartur](https://github.com/kaduartur))
+
+**Merged pull requests:**
+
+- Release 1.0.0 beta.23 [\#339](https://github.com/ZupIT/ritchie-cli/pull/339) ([sandokandias](https://github.com/sandokandias))
+
 ## [2.0.2](https://github.com/zupit/ritchie-cli/tree/2.0.2) (2020-08-06)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.1...2.0.2)
