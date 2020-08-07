@@ -194,6 +194,7 @@ func tutorialBuildFormula(tutorialStatus string) {
 	const titlePublishFormula = "To publish your formula:"
 	const bodyPublishFormula = ` ∙ Create a git repo
  ∙ Commit and push your formula in repo created
+ ∙ Create a release
  ∙ Run "rit add repo"`
 
 	if tutorialStatus == tutorialStatusEnabled {
