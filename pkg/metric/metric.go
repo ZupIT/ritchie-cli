@@ -33,5 +33,5 @@ type Sender interface {
 }
 
 type UserIdGenerator interface {
-	Generate() UserId
+	Generate() (UserId, error)
 }
