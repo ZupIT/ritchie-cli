@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
+	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gookit/color v1.2.5
@@ -17,5 +18,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/radovskyb/watcher v1.0.7
 	github.com/spf13/cobra v1.0.0
+	golang.org/x/sys v0.0.0-20200806125547-5acd03effb82 // indirect
 	k8s.io/kubectl v0.18.4
 )
