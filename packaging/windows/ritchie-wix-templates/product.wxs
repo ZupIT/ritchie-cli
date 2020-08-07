@@ -34,7 +34,7 @@
       </Upgrade>
       <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
 
-      <!-- Gets the user profile home path i.e: C:\Users\<userName> -->
+      <!-- Gets the user profile home path i.e: C:\Users\<userName> 
       <SetDirectory Id="USERPROFILEFOLDER" Value="[%USERPROFILE]"/>
 
       <Directory Id="TARGETDIR" Name="SourceDir">
@@ -51,7 +51,7 @@
                   <RemoveFolder Id="USERPROFILEFOLDER" On="uninstall"/>
                </Component>
             </Directory>
-         </Directory>
+         </Directory>-->
 
          {{if gt (.Env.Vars | len) 0}}
          <Component Id="ENVS" Guid="{{.Env.GUID}}">
