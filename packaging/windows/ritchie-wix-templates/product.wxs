@@ -34,8 +34,9 @@
       </Upgrade>
       <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
 
-      <!-- Gets the user profile home path i.e: C:\Users\<userName> 
-      <SetDirectory Id="USERPROFILEFOLDER" Value="[%USERPROFILE]"/>-->
+      <!-- Gets the user profile home path i.e: C:\Users\<userName>
+      <SetDirectory Id="USERPROFILEFOLDER" Value="[%USERPROFILE]"/>--> 
+      <SetDirectory Id="USERPROFILEFOLDER" Value="C:\Program Files\rit"/>
 
       <Directory Id="TARGETDIR" Name="SourceDir">
          <Directory Id="USERPROFILEFOLDER">
