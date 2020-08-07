@@ -6,7 +6,6 @@
 
 **Implemented enhancements:**
 
-- \[FEATURE\] Send formula commands metrics [\#369](https://github.com/ZupIT/ritchie-cli/issues/369)
 - \[FEATURE\] Add set path .msi [\#372](https://github.com/ZupIT/ritchie-cli/pull/372) ([ernelio](https://github.com/ernelio))
 
 **Fixed bugs:**
