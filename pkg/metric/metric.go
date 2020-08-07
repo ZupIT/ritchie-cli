@@ -17,12 +17,12 @@ package metric
 
 import "time"
 
-type ID string
+type Id string
 
 type UserId string
 
 type Dataset struct {
-	Id        ID          `json:"metricId"`
+	Id        Id          `json:"metricId"`
 	UserId    UserId      `json:"userId"`
 	Timestamp time.Time   `json:"timestamp"`
 	Data      interface{} `json:"data"`
