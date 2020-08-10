@@ -115,7 +115,7 @@ func TestNewDefaultCredentials(t *testing.T) {
 
 func TestSingleSettings_WriteDefaultCredentialsOnExistingFile(t *testing.T) {
 	credentials := Fields{
-		"customField":     []Field{},
+		"customField": []Field{},
 	}
 	fieldsData, err := json.Marshal(credentials)
 	if err != nil {
@@ -142,7 +142,7 @@ func TestSingleSettings_WriteDefaultCredentialsOnExistingFile(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error while writing existing credentials: %s", err)
 	}
-	if len(fields) != len(NewDefaultCredentials()) + 1 {
+	if len(fields) != len(NewDefaultCredentials())+1 {
 		t.Errorf("Writing existing credentials did not succeed in adding a field")
 	}
 	if fields["customField"] == nil {
