@@ -15,7 +15,16 @@
  */
 package metric
 
-import "time"
+import (
+	"os"
+	"path/filepath"
+	"time"
+)
+
+func MetricsPath()string {
+	hd, _ := os.UserHomeDir()
+	return filepath.Join(hd, ".rit", "metrics")
+}
 
 type Id string
 
