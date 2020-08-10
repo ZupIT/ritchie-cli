@@ -42,7 +42,6 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 		name    string
 		in      in
 		wantErr bool
-		want    string
 	}{
 		{
 			name: "success run with no data",

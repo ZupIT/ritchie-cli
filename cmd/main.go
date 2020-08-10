@@ -154,7 +154,7 @@ func buildCommands() *cobra.Command {
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
-
+	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2
@@ -216,6 +216,7 @@ func buildCommands() *cobra.Command {
 				buildCmd,
 				upgradeCmd,
 				tutorialCmd,
+				metricsCmd,
 			},
 		},
 	}
