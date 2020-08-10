@@ -56,7 +56,7 @@ func (f FileWriteReadExisterCustomMock) Read(path string) ([]byte, error) {
 	return f.ReadMock(path)
 }
 
-// Exists of FileManagerCustomMock
+
 func (f FileWriteReadExisterCustomMock) Exists(path string) bool {
 	return f.ExistsMock(path)
 }
