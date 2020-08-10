@@ -34,7 +34,7 @@ func (m metricsCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if !m.FileWriteReadExister.Exists(metric.MetricsPath()) {
 			options := []string{"yes", "no"}
-			choose, err := m.InputList.List("You want to to send anonymous data about the product, feature use, statistics and crash reports?", options)
+			choose, err := m.InputList.List("You want to send anonymous data about the product, feature use, statistics and crash reports?", options)
 			if err != nil {
 				return err
 			}
