@@ -111,7 +111,14 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			return nil
 		}
 
-		s.Success(prompt.Green("Initialization successful!"))
+		s.Success(prompt.Green("Commons repository added successfully!"))
+
+		result := metricsAuthorization(in.InputBool)
+		if result != nil {
+			return result
+		}
+
+		prompt.Green("Initialization successful!")
 
 		tutorialHolder, err := in.rt.Find()
 		if err != nil {
@@ -133,4 +140,23 @@ func tutorialInit(tutorialStatus string) {
 		prompt.Info(MessageTitle)
 		fmt.Println(MessageBody)
 	}
+}
+
+func metricsAuthorization(inBool prompt.InputBool) error {
+	const header = "Ritchie is a platform that helps you and your team to save time by giving you the power to create powerful templates to execute important tasks across your team and organization with minimum time and with standards, delivering autonomy to developers with security."
+	const footer = "You can always modify your choice using the \"rit metrics\" command.\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment."
+	const label = "\nTo help us improve and deliver more value to the community, do you agree to let us collect anonymous data about product and feature use statistics and crash reports?"
+
+	prompt.Info("\n\nWelcome to Ritchie!")
+	fmt.Println(header)
+	options := []string{"Yes, I agree to contribute with data anonymously", "No, not for now."}
+
+	choose, err := inBool.Bool(label, options)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(footer)
+	fmt.Println("\n\nsua resposta foi: ", choose)
+	return nil
 }
