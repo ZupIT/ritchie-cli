@@ -75,7 +75,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 			},
 		},
 		{
-			name:    "success when metrics file exist",
+			name: "success when metrics file exist",
 			in: in{
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
@@ -92,7 +92,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "fail on read when metrics file exist",
+			name: "fail on read when metrics file exist",
 			in: in{
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
@@ -109,7 +109,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "fail on write when metrics file exist",
+			name: "fail on write when metrics file exist",
 			in: in{
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
