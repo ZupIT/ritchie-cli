@@ -39,7 +39,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 			},
 		},
 		{
-			name:    "fail on read file when metrics file dont exist",
+			name:    "fail on write file when metrics file dont exist",
 			wantErr: true,
 			in: in{
 				file: sMocks.FileWriteReadExisterCustomMock{
