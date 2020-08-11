@@ -23,6 +23,8 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
@@ -34,7 +36,11 @@ import (
 )
 
 const (
-	addRepoMsg = "Run \"rit add repo\" to add a new repository manually."
+	addRepoMsg         = "Run \"rit add repo\" to add a new repository manually."
+	AddCommonsQuestion = "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]"
+	AddMetricsQuestion = "To help us improve and deliver more value to the community, do you agree to let us collect anonymous data about product and feature use statistics and crash reports?"
+	AcceptMetrics      = "Yes, I agree to contribute with data anonymously"
+	DoNotAcceptMetrics = "No, not for now."
 )
 
 var (
@@ -53,10 +59,11 @@ type initCmd struct {
 	git  git.Repositories
 	rt   rtutorial.Finder
 	prompt.InputList
+	stream.FileWriteReadExister
 }
 
-func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder, inList prompt.InputList) *cobra.Command {
-	o := initCmd{repo: repo, git: git, rt: rtf, InputList: inList}
+func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder, inList prompt.InputList, file stream.FileWriteReadExister) *cobra.Command {
+	o := initCmd{repo: repo, git: git, rt: rtf, InputList: inList, FileWriteReadExister: file}
 
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -70,8 +77,7 @@ func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutoria
 
 func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		label := "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]"
-		choose, err := in.List(label, []string{"yes", "no"})
+		choose, err := in.List(AddCommonsQuestion, []string{"yes", "no"})
 		if err != nil {
 			return err
 		}
@@ -112,12 +118,10 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			s.Success(prompt.Green("Commons repository added successfully!"))
 		}
 
-		result := metricsAuthorization(in.InputList)
-		if result != nil {
-			return result
+		err = metricsAuthorization(in.InputList, in.FileWriteReadExister)
+		if err != nil {
+			return err
 		}
-
-		prompt.Green("Initialization successful!")
 
 		tutorialHolder, err := in.rt.Find()
 		if err != nil {
@@ -141,21 +145,28 @@ func tutorialInit(tutorialStatus string) {
 	}
 }
 
-func metricsAuthorization(inList prompt.InputList) error {
-	const header = "Ritchie is a platform that helps you and your team to save time by giving you the power to create powerful templates to execute important tasks across your team and organization with minimum time and with standards, delivering autonomy to developers with security."
-	const footer = "You can always modify your choice using the \"rit metrics\" command.\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment."
-	const label = "To help us improve and deliver more value to the community, do you agree to let us collect anonymous data about product and feature use statistics and crash reports?"
+func metricsAuthorization(inList prompt.InputList, file stream.FileWriteReadExister) error {
+	const header = "Ritchie is a platform that helps you and your team to save time by giving you the power to create powerful templates to execute important tasks across your team and organization with minimum time and with standards, delivering autonomy to developers with security.\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment."
+	const footer = "You can always modify your choice using the \"rit metrics\" command."
 
 	prompt.Info("\n\nWelcome to Ritchie!")
 	fmt.Println(header)
-	options := []string{"Yes, I agree to contribute with data anonymously", "No, not for now."}
+	options := []string{AcceptMetrics, DoNotAcceptMetrics}
 
-	choose, err := inList.List(label, options)
+	choose, err := inList.List(AddMetricsQuestion, options)
 	if err != nil {
 		return err
 	}
-
 	fmt.Println(footer)
-	fmt.Println("\n\nsua resposta foi: ", choose)
+
+	responseToWrite := "yes"
+	if choose == DoNotAcceptMetrics {
+		responseToWrite = "no"
+	}
+
+	err = file.Write(metric.MetricsPath(), []byte(responseToWrite))
+	if err != nil {
+		return err
+	}
 	return nil
 }
