@@ -147,7 +147,7 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, inputList)
+	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, inputList, fileManager)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
