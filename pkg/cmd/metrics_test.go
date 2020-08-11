@@ -35,7 +35,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return nil
 					},
 				},
-				InputList: inputListCustomMock2{
+				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "yes", nil
 					},
@@ -57,7 +57,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return errors.New("reading file error")
 					},
 				},
-				InputList: inputListCustomMock2{
+				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "yes", nil
 					},

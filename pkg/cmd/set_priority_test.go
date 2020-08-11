@@ -89,7 +89,7 @@ func TestSetRepoCmd_runFunc(t *testing.T) {
 		{
 			name: "success pass on if r.Name == repoName",
 			fields: fields{
-				InputList: inputListCustomMock2{
+				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "repoName", nil
 					},

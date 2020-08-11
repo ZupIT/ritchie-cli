@@ -54,7 +54,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputURL:           inputURLMock{},
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock2{
+				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "Github", nil
 					},
@@ -76,7 +76,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputURL:           inputURLMock{},
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock2{
+				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "Github", nil
 					},
