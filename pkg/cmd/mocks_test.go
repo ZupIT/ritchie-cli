@@ -132,18 +132,10 @@ func (inputListMock) List(name string, items []string) (string, error) {
 }
 
 type inputListCustomMock struct {
-	name string
-}
-
-func (m inputListCustomMock) List(name string, items []string) (string, error) {
-	return m.name, nil
-}
-
-type inputListCustomMock2 struct {
 	list func(name string, items []string) (string, error)
 }
 
-func (m inputListCustomMock2) List(name string, items []string) (string, error) {
+func (m inputListCustomMock) List(name string, items []string) (string, error) {
 	return m.list(name, items)
 }
 
