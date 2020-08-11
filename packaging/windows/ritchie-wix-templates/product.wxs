@@ -34,11 +34,11 @@
       </Upgrade>
       <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
 
-      <!-- Gets the user profile home path i.e: C:\Users\<userName> -->
-      <SetDirectory Id="USERPROFILEFOLDER" Value="[%USERPROFILE]"/>
+      <!-- Gets the user profile home path i.e: C:\Users\<userName>
+      <SetDirectory Id="USERPROFILEFOLDER" Value="[%USERPROFILE]"/>--> 
 
       <Directory Id="TARGETDIR" Name="SourceDir">
-         <Directory Id="USERPROFILEFOLDER">
+         <Directory Id="ProgramFiles64Folder">
             <Directory Id="INSTALLDIR" Name="{{.Product}}">
                <Component Id="ApplicationFiles" Guid="{{.Files.GUID}}">
                   <File Id="ApplicationFile0" Source="C:\workspace\workspace\dist\windows\rit.exe"/>

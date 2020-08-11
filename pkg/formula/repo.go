@@ -18,6 +18,8 @@ package formula
 
 import "github.com/ZupIT/ritchie-cli/pkg/git"
 
+const RepoCommonsName = RepoName("commons")
+
 type Repo struct {
 	Provider RepoProvider `json:"provider"`
 	Name     RepoName     `json:"name"`
@@ -80,7 +82,7 @@ func (re RepoProviders) Resolve(provider RepoProvider) Git {
 
 func (re RepoProviders) List() []string {
 	var providers []string
-	for provider, _ := range re {
+	for provider := range re {
 		providers = append(providers, provider.String())
 	}
 

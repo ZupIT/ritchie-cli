@@ -23,7 +23,7 @@ references:
     GIT_USERNAME: "zup-ci"
     GIT_NAME: "Zup CI"
     BUILD_IMAGE: *GOLANG_IMAGE
-    VERSION_PLACEHOLDER: 2.0.0-betaPLACEHOLDER
+    VERSION_PLACEHOLDER: 2.0.0PLACEHOLDER
 
   filters: &FILTERS_DELIVERY
     branches:
@@ -363,9 +363,9 @@ jobs:
             . ./.circleci/scripts/version.sh
             echo $RELEASE_VERSION
       - run:
-          name: install Rit
+          name: install Ritchie
           command: |
-            curl -fsSL https://commons-repo.ritchiecli.io/install_cli.sh | bash
+            curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
       - run:
           name: Verify Command
           command: |

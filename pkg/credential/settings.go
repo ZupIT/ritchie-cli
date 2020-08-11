@@ -166,6 +166,11 @@ func NewDefaultCredentials() Fields {
 		Type: "plain text",
 	}
 
+	email := Field{
+		Name: "email",
+		Type: "plain text",
+	}
+
 	token := Field{
 		Name: "token",
 		Type: "secret",
@@ -193,7 +198,7 @@ func NewDefaultCredentials() Fields {
 
 	dc := Fields{
 		AddNew:       []Field{},
-		"github":     []Field{username, token},
+		"github":     []Field{username, email, token},
 		"gitlab":     []Field{username, token},
 		"aws":        []Field{accessKey, secretAccessKey},
 		"jenkins":    []Field{username, token},
