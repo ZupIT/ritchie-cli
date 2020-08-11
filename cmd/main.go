@@ -22,10 +22,10 @@ import (
 	"os"
 	"time"
 
+	"k8s.io/kubectl/pkg/util/templates"
+
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
-
-	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
@@ -154,7 +154,7 @@ func buildCommands() *cobra.Command {
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
-	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
+	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList, ritchieHomeDir)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2

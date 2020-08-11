@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -129,11 +130,10 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			metricsCmd := NewMetricsCmd(tt.in.file, tt.in.InputList)
+			metricsCmd := NewMetricsCmd(tt.in.file, tt.in.InputList, api.RitchieHomeDir())
 			if err := metricsCmd.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("metrics command error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("metrics command error = %v | error wanted: %v", err, tt.wantErr)
 			}
 		})
 	}
-
 }

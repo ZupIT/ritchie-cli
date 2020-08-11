@@ -13,18 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package metric
+package metrics
 
 import (
-	"os"
-	"path/filepath"
 	"time"
 )
-
-func MetricsPath()string {
-	hd, _ := os.UserHomeDir()
-	return filepath.Join(hd, ".rit", "metrics")
-}
 
 type Id string
 
@@ -43,4 +36,8 @@ type Sender interface {
 
 type UserIdGenerator interface {
 	Generate() (UserId, error)
+}
+
+type Checker interface {
+	Check() (bool, error)
 }
