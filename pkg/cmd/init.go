@@ -82,8 +82,6 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		time.Sleep(time.Second * 2)
-
 		if choose != "yes" {
 			fmt.Println()
 			prompt.Warning(addRepoInfo)
@@ -146,12 +144,13 @@ func tutorialInit(tutorialStatus string) {
 }
 
 func metricsAuthorization(inList prompt.InputList, file stream.FileWriteReadExister) error {
+	const welcome = "\n\nWelcome to Ritchie!"
 	const header = "Ritchie is a platform that helps you and your team to save time by giving you the power to create powerful templates to execute important tasks across your team and organization with minimum time and with standards, delivering autonomy to developers with security.\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment."
 	const footer = "You can always modify your choice using the \"rit metrics\" command."
-
-	prompt.Info("\n\nWelcome to Ritchie!")
-	fmt.Println(header)
 	options := []string{AcceptMetrics, DoNotAcceptMetrics}
+
+	prompt.Info(welcome)
+	fmt.Println(header)
 
 	choose, err := inList.List(AddMetricsQuestion, options)
 	if err != nil {
