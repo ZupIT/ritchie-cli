@@ -15,25 +15,33 @@
  */
 package metric
 
-import "time"
+import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+)
 
-var URL = ""
+var _ Sender = SendManager{}
 
-type Id string
-
-type UserId string
-
-type Dataset struct {
-	Id        Id          `json:"metricId"`
-	UserId    UserId      `json:"userId"`
-	Timestamp time.Time   `json:"timestamp"`
-	Data      interface{} `json:"data"`
+type SendManager struct {
+	client *http.Client
 }
 
-type Sender interface {
-	Send(dataset Dataset)
+func NewSender(client *http.Client) SendManager {
+	return SendManager{client: client}
 }
 
-type UserIdGenerator interface {
-	Generate() (UserId, error)
+func (sm SendManager) Send(dataset Dataset) {
+	reqBody, err := json.Marshal(&dataset)
+	if err != nil {
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPost, URL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	_, _ = sm.client.Do(req)
 }

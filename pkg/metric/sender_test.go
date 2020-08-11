@@ -15,25 +15,8 @@
  */
 package metric
 
-import "time"
+import "testing"
 
-var URL = ""
+func TestSend(t *testing.T) {
 
-type Id string
-
-type UserId string
-
-type Dataset struct {
-	Id        Id          `json:"metricId"`
-	UserId    UserId      `json:"userId"`
-	Timestamp time.Time   `json:"timestamp"`
-	Data      interface{} `json:"data"`
-}
-
-type Sender interface {
-	Send(dataset Dataset)
-}
-
-type UserIdGenerator interface {
-	Generate() (UserId, error)
 }
