@@ -92,11 +92,12 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 
 func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
+	homeDir, _ := os.UserHomeDir()
 	var args []string
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", os.UserHomeDir()+"/.rit:/root/.rit", "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", homeDir + "/.rit:/root/.rit", "--name", setup.ContainerId, setup.ContainerId}
 	} else {
-		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "-v", os.UserHomeDir()+"/.rit:/root/.rit", "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "-v", homeDir + "/.rit:/root/.rit", "--name", setup.ContainerId, setup.ContainerId}
 	}
 
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
