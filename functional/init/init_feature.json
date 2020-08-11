@@ -89,6 +89,11 @@
                 "key":"Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]",
                 "value":"yes",
                 "action":"select"
+            },
+            {
+                "key":"To help us improve and deliver more value to the community, do you agree to let us collect anonymous data about product and feature use statistics and crash reports?",
+                "value":"Yes, I agree to contribute with data anonymously",
+                "action":"select"
             }
         ],
         "result":""

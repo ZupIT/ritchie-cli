@@ -52,11 +52,11 @@ type initCmd struct {
 	repo formula.RepositoryAdder
 	git  git.Repositories
 	rt   rtutorial.Finder
-	prompt.InputBool
+	prompt.InputList
 }
 
-func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder, inBool prompt.InputBool) *cobra.Command {
-	o := initCmd{repo: repo, git: git, rt: rtf, InputBool: inBool}
+func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder, inList prompt.InputList) *cobra.Command {
+	o := initCmd{repo: repo, git: git, rt: rtf, InputList: inList}
 
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -71,49 +71,48 @@ func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutoria
 func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		label := "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]"
-		choose, err := in.Bool(label, []string{"yes", "no"})
+		choose, err := in.List(label, []string{"yes", "no"})
 		if err != nil {
 			return err
 		}
 
-		if !choose {
+		time.Sleep(time.Second * 2)
+
+		if choose != "yes" {
 			fmt.Println()
 			prompt.Warning(addRepoInfo)
 			fmt.Println()
 			fmt.Println(addRepoMsg)
-			return nil
+		} else {
+			repo := formula.Repo{
+				Provider: "Github",
+				Name:     "commons",
+				Url:      CommonsRepoURL,
+				Priority: 0,
+			}
+
+			s := spinner.StartNew("Adding the commons repository...")
+			time.Sleep(time.Second * 2)
+
+			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+
+			tag, err := in.git.LatestTag(repoInfo)
+			if err != nil {
+				s.Error(ErrInitCommonsRepo)
+				fmt.Println(addRepoMsg)
+			}
+
+			repo.Version = formula.RepoVersion(tag.Name)
+
+			if err := in.repo.Add(repo); err != nil {
+				s.Error(ErrInitCommonsRepo)
+				fmt.Println(addRepoMsg)
+			}
+
+			s.Success(prompt.Green("Commons repository added successfully!"))
 		}
 
-		repo := formula.Repo{
-			Provider: "Github",
-			Name:     "commons",
-			Url:      CommonsRepoURL,
-			Priority: 0,
-		}
-
-		s := spinner.StartNew("Adding the commons repository...")
-		time.Sleep(time.Second * 2)
-
-		repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
-
-		tag, err := in.git.LatestTag(repoInfo)
-		if err != nil {
-			s.Error(ErrInitCommonsRepo)
-			fmt.Println(addRepoMsg)
-			return nil
-		}
-
-		repo.Version = formula.RepoVersion(tag.Name)
-
-		if err := in.repo.Add(repo); err != nil {
-			s.Error(ErrInitCommonsRepo)
-			fmt.Println(addRepoMsg)
-			return nil
-		}
-
-		s.Success(prompt.Green("Commons repository added successfully!"))
-
-		result := metricsAuthorization(in.InputBool)
+		result := metricsAuthorization(in.InputList)
 		if result != nil {
 			return result
 		}
@@ -142,16 +141,16 @@ func tutorialInit(tutorialStatus string) {
 	}
 }
 
-func metricsAuthorization(inBool prompt.InputBool) error {
+func metricsAuthorization(inList prompt.InputList) error {
 	const header = "Ritchie is a platform that helps you and your team to save time by giving you the power to create powerful templates to execute important tasks across your team and organization with minimum time and with standards, delivering autonomy to developers with security."
 	const footer = "You can always modify your choice using the \"rit metrics\" command.\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment."
-	const label = "\nTo help us improve and deliver more value to the community, do you agree to let us collect anonymous data about product and feature use statistics and crash reports?"
+	const label = "To help us improve and deliver more value to the community, do you agree to let us collect anonymous data about product and feature use statistics and crash reports?"
 
 	prompt.Info("\n\nWelcome to Ritchie!")
 	fmt.Println(header)
 	options := []string{"Yes, I agree to contribute with data anonymously", "No, not for now."}
 
-	choose, err := inBool.Bool(label, options)
+	choose, err := inList.List(label, options)
 	if err != nil {
 		return err
 	}
