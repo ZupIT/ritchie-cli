@@ -25,7 +25,16 @@ import (
 )
 
 func TestNewSingleInitCmd(t *testing.T) {
-	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{}, inputListCustomMock{name: "yes"})
+	cmd := NewInitCmd(
+		defaultRepoAdderMock,
+		defaultGitRepositoryMock,
+		TutorialFinderMock{},
+		inputListCustomMock{
+			list: func(name string, items []string) (string, error) {
+				return "yes", nil
+			},
+		},
+	)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 	if cmd == nil {
@@ -84,7 +93,15 @@ func Test_initCmd_runPrompt(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewInitCmd(tt.fields.repo, tt.fields.git, TutorialFinderMock{}, inputListCustomMock{name: "yes"})
+			o := NewInitCmd(
+				tt.fields.repo,
+				tt.fields.git,
+				TutorialFinderMock{},
+				inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "yes", nil
+					},
+				})
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
