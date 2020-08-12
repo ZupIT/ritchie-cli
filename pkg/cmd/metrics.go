@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"path/filepath"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/metrics"
@@ -13,15 +11,14 @@ import (
 type metricsCmd struct {
 	stream.FileWriteReadExister
 	prompt.InputList
-	ritPath string
 	metrics.Checker
 }
 
-func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, ritPath string) *cobra.Command {
+func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, checker metrics.Checker) *cobra.Command {
 	m := &metricsCmd{
 		FileWriteReadExister: file,
 		InputList:            inList,
-		ritPath: ritPath,
+		Checker: checker,
 	}
 
 	cmd := &cobra.Command{
@@ -37,7 +34,7 @@ func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, ri
 
 func (m metricsCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		path := filepath.Join(m.ritPath, "metrics")
+		path := metrics.FilePath
 		if !m.FileWriteReadExister.Exists(path) {
 			options := []string{"yes", "no"}
 			choose, err := m.InputList.List("You want to send anonymous data about the product, feature use, statistics and crash reports?", options)
@@ -52,16 +49,16 @@ func (m metricsCmd) run() CommandRunnerFunc {
 			return nil
 		}
 
-		metricsStatus, err := m.FileWriteReadExister.Read(path)
+		metricsStatus, err := m.Check()
 		if err != nil {
 			return err
 		}
 
-		changeTo := "no"
-		message := "You are no longer sending anonymous metrics."
-		if string(metricsStatus) == changeTo {
-			changeTo = "yes"
-			message = "You are now sending anonymous metrics. Thank you!"
+		changeTo := "yes"
+		message := "You are now sending anonymous metrics. Thank you!"
+		if metricsStatus {
+			changeTo = "no"
+			message = "You are no longer sending anonymous metrics."
 		}
 
 		err = m.FileWriteReadExister.Write(path, []byte(changeTo))

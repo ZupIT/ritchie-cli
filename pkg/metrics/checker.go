@@ -17,9 +17,6 @@
 package metrics
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -32,11 +29,11 @@ func NewChecker(file stream.FileReadExister) CheckManager {
 }
 
 func (c CheckManager) Check() (bool, error) {
-	if !c.file.Exists(path()) {
+	if !c.file.Exists(FilePath) {
 		return false, nil
 	}
 
-	bytes, err := c.file.Read(path())
+	bytes, err := c.file.Read(FilePath)
 	if err != nil {
 		return false, err
 	}
@@ -49,7 +46,3 @@ func (c CheckManager) Check() (bool, error) {
 	return result, nil
 }
 
-func path() string {
-	hd, _ := os.UserHomeDir()
-	return filepath.Join(hd, ".rit", "metrics")
-}

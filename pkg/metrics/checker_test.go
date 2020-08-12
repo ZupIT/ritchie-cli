@@ -47,7 +47,8 @@ func Test_Check(t *testing.T) {
 					ExistsMock: func(path string) bool {
 						return true
 					},
-				}},
+				},
+			},
 		},
 		{
 			name:           "success case expecting false",
@@ -61,7 +62,8 @@ func Test_Check(t *testing.T) {
 					ExistsMock: func(path string) bool {
 						return true
 					},
-				}},
+				},
+			},
 		},
 		{
 			name:           "success case when metrics file doesn't exist",
@@ -72,7 +74,8 @@ func Test_Check(t *testing.T) {
 					ExistsMock: func(path string) bool {
 						return false
 					},
-				}},
+				},
+			},
 		},
 		{
 			name:           "fail case error on reading file",
@@ -86,7 +89,8 @@ func Test_Check(t *testing.T) {
 					ExistsMock: func(path string) bool {
 						return true
 					},
-				}},
+				},
+			},
 		},
 	}
 
@@ -103,3 +107,4 @@ func Test_Check(t *testing.T) {
 		})
 	}
 }
+

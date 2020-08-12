@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -12,8 +11,9 @@ import (
 
 func Test_metricsCmd_runPrompt(t *testing.T) {
 	type in struct {
-		file      stream.FileWriteReadExister
-		InputList prompt.InputList
+		file        stream.FileWriteReadExister
+		InputList   prompt.InputList
+		checkerMock CheckerMock
 	}
 
 	var tests = []struct {
@@ -76,53 +76,53 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 			},
 		},
 		{
-			name:    "success when metrics file exist",
+			name: "success when metrics file exist",
 			in: in{
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
 					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("no"), nil
-					},
 					WriteMock: func(path string, content []byte) error {
 						return nil
 					},
 				},
+				checkerMock: CheckerMock{func() (bool, error) {
+					return true, nil
+				}},
 			},
 			wantErr: false,
 		},
 		{
-			name:    "fail on read when metrics file exist",
+			name: "fail on check when metrics file exist",
 			in: in{
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("no"), errors.New("error reading file")
 					},
 					WriteMock: func(path string, content []byte) error {
 						return nil
 					},
 				},
+				checkerMock: CheckerMock{func() (bool, error) {
+					return false, errors.New("error reading file")
+				}},
 			},
 			wantErr: true,
 		},
 		{
-			name:    "fail on write when metrics file exist",
+			name: "fail on write when metrics file exist",
 			in: in{
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("no"), nil
 					},
 					WriteMock: func(path string, content []byte) error {
 						return errors.New("error writing file")
 					},
 				},
+				checkerMock: CheckerMock{func() (bool, error) {
+					return false, nil
+				}},
 			},
 			wantErr: true,
 		},
@@ -130,10 +130,18 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			metricsCmd := NewMetricsCmd(tt.in.file, tt.in.InputList, api.RitchieHomeDir())
+			metricsCmd := NewMetricsCmd(tt.in.file, tt.in.InputList, tt.in.checkerMock)
 			if err := metricsCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("metrics command error = %v | error wanted: %v", err, tt.wantErr)
 			}
 		})
 	}
+}
+
+type CheckerMock struct {
+	CheckMock func() (bool, error)
+}
+
+func (cm CheckerMock) Check() (bool, error) {
+	return cm.CheckMock()
 }
