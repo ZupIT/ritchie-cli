@@ -1,19 +1,21 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-labels: bug
+name: Support request
+about: Support request or question relating to Ritchie
+labels: support
 assignees: ''
 
 ---
 
-<!-- Please use this template while reporting a bug and provide as much info as possible. 
-Not doing so may result in your bug not being addressed in a timely manner. Thanks!
+<!--
+    Use this template when requesting support or to ask questions.
+
+    Please include useful information for understanding your question.
+
+    Thanks!
 -->
 
 
 **What happened**:
-
-**What you expected to happen**:
 
 **How to reproduce it (as minimally and precisely as possible)**:
 
