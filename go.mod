@@ -18,7 +18,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/radovskyb/watcher v1.0.7
 	github.com/spf13/cobra v1.0.0
-	github.com/stretchr/testify v1.4.0
 	golang.org/x/sys v0.0.0-20200806125547-5acd03effb82 // indirect
 	k8s.io/kubectl v0.18.4
 )
