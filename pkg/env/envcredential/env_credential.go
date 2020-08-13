@@ -17,7 +17,6 @@
 package envcredential
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -27,29 +26,52 @@ import (
 
 type CredentialResolver struct {
 	credential.Finder
+	credential.Setter
 }
-
-const errKeyNotFoundTemplate = `Provider %s has not the credential type %s.
-Please verify formula's config.json`
 
 // NewResolver creates a credential resolver instance of Resolver interface
-func NewResolver(cf credential.Finder) CredentialResolver {
-	return CredentialResolver{cf}
+func NewResolver(cf credential.Finder, cs credential.Setter) CredentialResolver {
+	return CredentialResolver{cf, cs}
 }
 
-func (c CredentialResolver) Resolve(name string) (string, error) {
-	s := strings.Split(name, "_")
-	service := strings.ToLower(s[1])
+func (c CredentialResolver) Resolve(name string, passwordInput prompt.InputPassword) (string, error) {
+	s := strings.Split(strings.ToLower(name), "_")
+	service := s[1]
+	key := s[2]
 	cred, err := c.Find(service)
+	if err != nil {
+		// Provider was never set
+		cred.Service = service
+		return c.PromptCredential(service, key, cred, passwordInput)
+	}
+	credValue, exists := cred.Credential[key]
+	if !exists {
+		// Provider exists but the expected key doesn't
+		return c.PromptCredential(service, key, cred, passwordInput)
+	}
+
+	// Provider and key exist
+	return credValue, nil
+}
+
+func (c CredentialResolver) PromptCredential(
+	provider string,
+	key string,
+	credentialDetail credential.Detail,
+	passwordInput prompt.InputPassword,
+) (string, error) {
+	inputVal, err := passwordInput.Password(
+		fmt.Sprintf("Provider key not found, please provide a value for %s %s: ", provider, key),
+	)
 	if err != nil {
 		return "", err
 	}
 
-	k := strings.ToLower(s[2])
-	credValue, exist := cred.Credential[k]
-	if !exist {
-		errMsg := fmt.Sprintf(errKeyNotFoundTemplate, service, strings.ToUpper(name))
-		return "", errors.New(prompt.Red(errMsg))
+	credentialDetail.Credential[key] = inputVal
+
+	if err := c.Set(credentialDetail); err != nil {
+		return "", err
 	}
-	return credValue, nil
+
+	return inputVal, nil
 }
