@@ -17,46 +17,43 @@
 package metrics
 
 import (
-	"path/filepath"
+	"os"
+	"runtime"
+	"strings"
 	"time"
-
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
-var FilePath = filepath.Join(api.RitchieHomeDir(), "metrics")
-
-type Id string
-
-type Metric struct {
-	Id        Id          `json:"metricId"`
-	Timestamp time.Time   `json:"timestamp"`
-	Data      interface{} `json:"data"`
+type DataCollectorManager struct {
+	userId UserIdGenerator
 }
 
-type UserId string
-
-type OS string
-
-type Command string
-
-type Data struct {
-	Command Command
-	UserId UserId `json:"userId"`
-	OS     OS     `json:"operationalSystem:"`
+func NewDataCollector() DataCollectorManager {
+	return DataCollectorManager{}
 }
 
-type Sender interface {
-	Send(dataset Metric)
+func (d DataCollectorManager) Collect() (Metric, error) {
+
+	userId, err := d.userId.Generate()
+	if err != nil {
+		return Metric{}, err
+	}
+
+	data := Data{
+		Command: Command(joinArgs(" ")),
+		UserId: userId,
+		OS:     OS(runtime.GOOS),
+	}
+
+	metric := Metric{
+		Id:        Id(joinArgs("-")),
+		Timestamp: time.Now(),
+		Data:      data,
+	}
+	return metric, nil
 }
 
-type UserIdGenerator interface {
-	Generate() (UserId, error)
-}
+func joinArgs(sep string) string {
+	args := os.Args
+	return strings.Join(args, sep)
 
-type Checker interface {
-	Check() (bool, error)
-}
-
-type Collector interface {
-	Collect() (Metric, error)
 }
