@@ -52,21 +52,22 @@ var _ = Describe("RitCore", func() {
 		Entry("Add", scenariosCore[3]),
 		// Entry("Add new repo", scenariosCore[4]),
 
-		Entry("List repo", scenariosCore[5]),
-		// Entry("Delete repo", scenariosCore[6]),
+		Entry("List", scenariosCore[5]),
+		Entry("List repo", scenariosCore[6]),
+		// Entry("Delete repo", scenariosCore[7]),
 
-		// Entry("Set Credential", scenariosCore[7]),
-		Entry("Set", scenariosCore[8]),
-		// Entry("Update repo", scenariosCore[9]),
+		// Entry("Set Credential", scenariosCore[8]),
+		Entry("Set", scenariosCore[9]),
+		// Entry("Update repo", scenariosCore[10]),
 
-		Entry("Completion", scenariosCore[10]),
-		Entry("Completion bash", scenariosCore[11]),
-		Entry("Completion zsh", scenariosCore[12]),
+		Entry("Completion", scenariosCore[11]),
+		Entry("Completion bash", scenariosCore[12]),
+		Entry("Completion zsh", scenariosCore[13]),
 
-		Entry("Version", scenariosCore[13]),
-		Entry("Delete", scenariosCore[14]),
-		Entry("Show", scenariosCore[15]),
-		Entry("Help", scenariosCore[16]),
+		Entry("Version", scenariosCore[14]),
+		Entry("Delete", scenariosCore[15]),
+		Entry("Show", scenariosCore[16]),
+		Entry("Help", scenariosCore[17]),
 	)
 
 })
