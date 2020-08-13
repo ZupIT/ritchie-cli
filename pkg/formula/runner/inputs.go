@@ -242,7 +242,7 @@ func (in InputManager) resolveIfReserved(input formula.Input) (string, error) {
 	s := strings.Split(input.Type, "_")
 	resolver := in.envResolvers[s[0]]
 	if resolver != nil {
-		return resolver.Resolve(input.Type, prompt.NewSurveyPassword())
+		return resolver.Resolve(input.Type)
 	}
 	return "", nil
 }

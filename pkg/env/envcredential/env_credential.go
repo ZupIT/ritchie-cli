@@ -27,14 +27,15 @@ import (
 type CredentialResolver struct {
 	credential.Finder
 	credential.Setter
+	prompt.InputPassword
 }
 
 // NewResolver creates a credential resolver instance of Resolver interface
-func NewResolver(cf credential.Finder, cs credential.Setter) CredentialResolver {
-	return CredentialResolver{cf, cs}
+func NewResolver(cf credential.Finder, cs credential.Setter, passwordInput prompt.InputPassword) CredentialResolver {
+	return CredentialResolver{cf, cs, passwordInput}
 }
 
-func (c CredentialResolver) Resolve(name string, passwordInput prompt.InputPassword) (string, error) {
+func (c CredentialResolver) Resolve(name string) (string, error) {
 	s := strings.Split(strings.ToLower(name), "_")
 	service := s[1]
 	key := s[2]
@@ -42,12 +43,12 @@ func (c CredentialResolver) Resolve(name string, passwordInput prompt.InputPassw
 	if err != nil {
 		// Provider was never set
 		cred.Service = service
-		return c.PromptCredential(service, key, cred, passwordInput)
+		return c.PromptCredential(service, key, cred)
 	}
 	credValue, exists := cred.Credential[key]
 	if !exists {
 		// Provider exists but the expected key doesn't
-		return c.PromptCredential(service, key, cred, passwordInput)
+		return c.PromptCredential(service, key, cred)
 	}
 
 	// Provider and key exist
@@ -58,9 +59,8 @@ func (c CredentialResolver) PromptCredential(
 	provider string,
 	key string,
 	credentialDetail credential.Detail,
-	passwordInput prompt.InputPassword,
 ) (string, error) {
-	inputVal, err := passwordInput.Password(
+	inputVal, err := c.Password(
 		fmt.Sprintf("Provider key not found, please provide a value for %s %s: ", provider, key),
 	)
 	if err != nil {

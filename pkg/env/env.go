@@ -16,8 +16,6 @@
 
 package env
 
-import "github.com/ZupIT/ritchie-cli/pkg/prompt"
-
 const (
 	// Credential resolver
 	Credential = "CREDENTIAL"
@@ -27,5 +25,5 @@ type Resolvers map[string]Resolver
 
 // Resolver is an interface that we can use to resolve reserved envs
 type Resolver interface {
-	Resolve(name string, password prompt.InputPassword) (string, error)
+	Resolve(name string) (string, error)
 }

@@ -55,12 +55,11 @@ func TestCredentialResolver(t *testing.T) {
 	contextFinder := rcontext.NewFinder(tempDirectory, fileManager)
 	credentialSetter := credential.NewSetter(tempDirectory, contextFinder)
 	credentialFinder := credential.NewFinder(tempDirectory, contextFinder, fileManager)
-	credentialResolver := NewResolver(credentialFinder, credentialSetter)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			password := passwordMock{tt.output}
-			credentialValue, err := credentialResolver.Resolve(tt.credentialField, password)
+			credentialResolver := NewResolver(credentialFinder, credentialSetter, passwordMock{tt.output})
+			credentialValue, err := credentialResolver.Resolve(tt.credentialField)
 			if err != nil {
 				t.Errorf("Resolve credentials error = %v", err)
 			}
