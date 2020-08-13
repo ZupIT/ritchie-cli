@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/metric"
+	"github.com/ZupIT/ritchie-cli/pkg/metrics"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -11,12 +11,14 @@ import (
 type metricsCmd struct {
 	stream.FileWriteReadExister
 	prompt.InputList
+	metrics.Checker
 }
 
-func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList) *cobra.Command {
+func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, checker metrics.Checker) *cobra.Command {
 	m := &metricsCmd{
 		FileWriteReadExister: file,
 		InputList:            inList,
+		Checker: checker,
 	}
 
 	cmd := &cobra.Command{
@@ -32,33 +34,34 @@ func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList) *c
 
 func (m metricsCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if !m.FileWriteReadExister.Exists(metric.MetricsPath()) {
+		path := metrics.FilePath
+		if !m.FileWriteReadExister.Exists(path) {
 			options := []string{"yes", "no"}
 			choose, err := m.InputList.List("You want to send anonymous data about the product, feature use, statistics and crash reports?", options)
 			if err != nil {
 				return err
 			}
 
-			err = m.FileWriteReadExister.Write(metric.MetricsPath(), []byte(choose))
+			err = m.FileWriteReadExister.Write(path, []byte(choose))
 			if err != nil {
 				return err
 			}
 			return nil
 		}
 
-		metricsStatus, err := m.FileWriteReadExister.Read(metric.MetricsPath())
+		metricsStatus, err := m.Check()
 		if err != nil {
 			return err
 		}
 
-		changeTo := "no"
-		message := "You are no longer sending anonymous metrics."
-		if string(metricsStatus) == changeTo {
-			changeTo = "yes"
-			message = "You are now sending anonymous metrics. Thank you!"
+		changeTo := "yes"
+		message := "You are now sending anonymous metrics. Thank you!"
+		if metricsStatus {
+			changeTo = "no"
+			message = "You are no longer sending anonymous metrics."
 		}
 
-		err = m.FileWriteReadExister.Write(metric.MetricsPath(), []byte(changeTo))
+		err = m.FileWriteReadExister.Write(path, []byte(changeTo))
 		if err != nil {
 			return err
 		}

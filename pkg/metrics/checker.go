@@ -13,34 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package metric
+
+package metrics
 
 import (
-	"os"
-	"path/filepath"
-	"time"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func MetricsPath()string {
-	hd, _ := os.UserHomeDir()
-	return filepath.Join(hd, ".rit", "metrics")
+type CheckManager struct {
+	file stream.FileReadExister
 }
 
-type Id string
-
-type UserId string
-
-type Dataset struct {
-	Id        Id          `json:"metricId"`
-	UserId    UserId      `json:"userId"`
-	Timestamp time.Time   `json:"timestamp"`
-	Data      interface{} `json:"data"`
+func NewChecker(file stream.FileReadExister) CheckManager {
+	return CheckManager{file: file}
 }
 
-type Sender interface {
-	Send(dataset Dataset)
+func (c CheckManager) Check() (bool, error) {
+	if !c.file.Exists(FilePath) {
+		return false, nil
+	}
+
+	bytes, err := c.file.Read(FilePath)
+	if err != nil {
+		return false, err
+	}
+
+	result := true
+	if string(bytes) == "no" {
+		result = false
+	}
+
+	return result, nil
 }
 
-type UserIdGenerator interface {
-	Generate() (UserId, error)
-}

@@ -22,9 +22,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
-
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
@@ -34,6 +31,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
+	"github.com/ZupIT/ritchie-cli/pkg/metrics"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
@@ -116,7 +116,7 @@ func buildCommands() *cobra.Command {
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
-
+	metricsChecker := metrics.NewChecker(fileManager)
 	formBuildMake := builder.NewBuildMake()
 	formBuildBat := builder.NewBuildBat(fileManager)
 	formBuildDocker := builder.NewBuildDocker()
@@ -154,7 +154,7 @@ func buildCommands() *cobra.Command {
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
-	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
+	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList, metricsChecker)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2
