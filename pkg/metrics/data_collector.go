@@ -43,8 +43,8 @@ func (d DataCollectorManager) Collect(commandError ...string) (Metric, error) {
 	data := Data{
 		UserId:  userId,
 		OS:      OS(runtime.GOOS),
-		Command: joinArgs(" "),
-		CommandError: strings.Join(commandError, " "),
+		Command: Command(joinArgs(" ")),
+		CommandError: CommandError(strings.Join(commandError, " ")),
 	}
 
 	metric := Metric{
