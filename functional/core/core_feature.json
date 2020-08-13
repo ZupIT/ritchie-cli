@@ -107,6 +107,17 @@
         "result":""
     },
     {
+        "entry":"List",
+        "steps":[
+            {
+                "key":"",
+                "value":"list repo",
+                "action":"main"
+            }
+        ],
+        "result":"commons"
+    },
+    {
         "entry":"List repo",
         "steps":[
             {
