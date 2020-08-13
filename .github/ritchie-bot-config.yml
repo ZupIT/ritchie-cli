@@ -1,7 +1,19 @@
 merge_branch:
   enable: true # Enable merge branch with comment
   branches: ['qa'] # Branches enabled to merge with comment
-  users: ['sandokandias', 'marcosgmgm', 'kaduartur', 'ernelio', 'viniciusramosdefaria', 'guillaumefalourd', 'rodrigomedeirosf', 'victor-schumacher', 'viniciussousazup'] # Users enabled to merge with comment
+  users: [
+    'sandokandias',
+    'marcosgmgm',
+    'kaduartur',
+    'ernelio',
+    'viniciusramosdefaria',
+    'guillaumefalourd',
+    'rodrigomedeirosf',
+    'victor-schumacher',
+    'viniciussousazup',
+    'brunasilvazup',
+    'lucasdittrichzup'
+  ] # Users enabled to merge with comment
 
 issue_project:
   enable: true # Enable issue to project when opening a new issue

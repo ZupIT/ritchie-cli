@@ -21,7 +21,6 @@ type FileReadExisterCustomMock struct {
 	ExistsMock func(path string) bool
 }
 
-
 // Read of FileManagerCustomMock
 func (fmc FileReadExisterCustomMock) Read(path string) ([]byte, error) {
 	return fmc.ReadMock(path)
