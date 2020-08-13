@@ -15,3 +15,60 @@
  */
 
 package metrics
+
+import (
+	"errors"
+	"testing"
+)
+
+func Test_Collector(t *testing.T) {
+	type in struct {
+		userIdGen UserIdGenerator
+	}
+
+	var tests = []struct {
+		name    string
+		wantErr bool
+		in
+	}{
+		{
+			name:    "success case",
+			wantErr: false,
+			in: in{
+				userIdGen: UserIdGeneratorMock{
+					GenerateMock: func() (UserId, error) {
+						return "", nil
+					}},
+			},
+		},
+		{
+			name:    "fails when generator returns an error",
+			wantErr: true,
+			in: in{
+				userIdGen: UserIdGeneratorMock{
+					GenerateMock: func() (UserId, error) {
+						return "", errors.New("error generating id")
+					}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			collector := NewDataCollector(tt.in.userIdGen)
+			_, err := collector.Collect()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("execution test failed: %s\nwant error: %t | got: %s", tt.name, tt.wantErr, err)
+			}
+		})
+	}
+
+}
+
+type UserIdGeneratorMock struct {
+	GenerateMock func() (UserId, error)
+}
+
+func (us UserIdGeneratorMock) Generate() (UserId, error) {
+	return us.GenerateMock()
+}

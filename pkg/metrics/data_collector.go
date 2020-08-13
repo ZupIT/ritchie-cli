@@ -21,17 +21,19 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type DataCollectorManager struct {
 	userId UserIdGenerator
 }
 
-func NewDataCollector() DataCollectorManager {
-	return DataCollectorManager{}
+func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
+	return DataCollectorManager{userId: userId}
 }
 
-func (d DataCollectorManager) Collect() (Metric, error) {
+func (d DataCollectorManager) Collect(commandError ...string) (Metric, error) {
 
 	userId, err := d.userId.Generate()
 	if err != nil {
@@ -39,21 +41,22 @@ func (d DataCollectorManager) Collect() (Metric, error) {
 	}
 
 	data := Data{
-		Command: Command(joinArgs(" ")),
-		UserId: userId,
-		OS:     OS(runtime.GOOS),
+		UserId:  userId,
+		OS:      OS(runtime.GOOS),
+		Command: joinArgs(" "),
+		CommandError: strings.Join(commandError, " "),
 	}
 
 	metric := Metric{
-		Id:        Id(joinArgs("-")),
+		Id:        Id(uuid.New().String()),
 		Timestamp: time.Now(),
 		Data:      data,
 	}
+
 	return metric, nil
 }
 
 func joinArgs(sep string) string {
 	args := os.Args
 	return strings.Join(args, sep)
-
 }

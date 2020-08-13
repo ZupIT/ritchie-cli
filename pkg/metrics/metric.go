@@ -40,9 +40,10 @@ type OS string
 type Command string
 
 type Data struct {
-	Command Command
-	UserId UserId `json:"userId"`
-	OS     OS     `json:"operationalSystem:"`
+	UserId       UserId `json:"userId"`
+	OS           OS     `json:"operationalSystem:"`
+	Command      string
+	CommandError string
 }
 
 type Sender interface {
