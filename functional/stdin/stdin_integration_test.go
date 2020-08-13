@@ -50,7 +50,6 @@ var _ = Describe("RitStdin", func() {
 		Entry("Add new repo STDIN", scenariosStdin[2]),
 		Entry("Delete repo STDIN", scenariosStdin[3]),
 		Entry("Set credentials STDIN", scenariosStdin[4]),
-
 	)
 
 })
