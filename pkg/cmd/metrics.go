@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/metrics"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -11,10 +11,10 @@ import (
 type metricsCmd struct {
 	stream.FileWriteReadExister
 	prompt.InputList
-	metrics.Checker
+	metric.Checker
 }
 
-func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, checker metrics.Checker) *cobra.Command {
+func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, checker metric.Checker) *cobra.Command {
 	m := &metricsCmd{
 		FileWriteReadExister: file,
 		InputList:            inList,
@@ -34,7 +34,7 @@ func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, ch
 
 func (m metricsCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		path := metrics.FilePath
+		path := metric.FilePath
 		if !m.FileWriteReadExister.Exists(path) {
 			options := []string{"yes", "no"}
 			choose, err := m.InputList.List("You want to send anonymous data about the product, feature use, statistics and crash reports?", options)
