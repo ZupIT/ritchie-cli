@@ -112,7 +112,7 @@ jobs:
           name: Horus Security Analysis
           command: |
             curl -fsSL https://horus-assets.s3.amazonaws.com/install.sh | bash
-            horus start -p ./ -i testdata
+            horus start -p ./ -i testdata,vendor
 
   unit_test:
     executor: ritchie-tests-executor
