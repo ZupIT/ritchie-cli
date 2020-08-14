@@ -30,7 +30,8 @@ import (
 )
 
 const (
-	rit = "rit"
+	rit     = "rit"
+	windows = "windows"
 	// initCmd = "init"
 )
 
@@ -50,7 +51,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 	fmt.Println("Running: " + scenario.Entry)
 
 	os := runtime.GOOS
-	if os == "windows" && len(scenario.Steps) >= 2 {
+	if os == windows && len(scenario.Steps) >= 2 {
 		ginkgo.Skip("Scenarios with multi steps for windows doesnt work")
 		return "", nil
 	} else {
@@ -62,7 +63,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 func (scenario *Scenario) RunStdin() (string, error) {
 	fmt.Println("Running STDIN: " + scenario.Entry)
 	os := runtime.GOOS
-	if os == "windows" {
+	if os == windows {
 		b2, err := scenario.runStdinForWindows()
 		return b2.String(), err
 	} else {
@@ -74,7 +75,7 @@ func (scenario *Scenario) RunStdin() (string, error) {
 
 func RitSingleInit() {
 	os := runtime.GOOS
-	if os == "windows" {
+	if os == windows {
 		setUpRitSingleWin()
 	} else {
 		setUpRitSingleUnix()
@@ -84,7 +85,7 @@ func RitSingleInit() {
 
 func RitClearConfigs() {
 	os := runtime.GOOS
-	if os == "windows" {
+	if os == windows {
 		setUpClearSetupWindows()
 	} else {
 		setUpClearSetupUnix()
