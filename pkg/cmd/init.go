@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
@@ -133,7 +132,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		init := initStdin{}
 
-		err := stdin.ReadJson(os.Stdin, &init)
+		err := stdin.ReadJson(cmd.InOrStdin(), &init)
 		if err != nil {
 			return err
 		}
