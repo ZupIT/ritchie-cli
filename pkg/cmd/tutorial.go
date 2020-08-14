@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
@@ -55,17 +54,20 @@ func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSette
 
 func (o tutorialCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
 		obj := struct {
 			Tutorial string `json:"tutorial"`
 		}{}
 
-		err := stdin.ReadJson(os.Stdin, &obj)
+		err := stdin.ReadJson(cmd.InOrStdin(), &obj)
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(obj)
+		_, err = o.Set(obj.Tutorial)
+		if err != nil {
+			return err
+		}
+		prompt.Success("Set tutorial successful!")
 
 		return nil
 	}

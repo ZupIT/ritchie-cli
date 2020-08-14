@@ -18,12 +18,30 @@ package cmd
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
 func TestNewTutorialCmd(t *testing.T) {
 	cmd := NewTutorialCmd(os.TempDir(), inputListMock{}, TutorialFindSetterMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+	if cmd == nil {
+		t.Errorf("NewTutorialCmd got %v", cmd)
+	}
+
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+}
+
+func TestNewTutorialStdin(t *testing.T) {
+	cmd := NewTutorialCmd(os.TempDir(), inputListMock{}, TutorialFindSetterMock{})
+	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
+
+	input := "{\"tutorial\": \"enabled\"}\n"
+	newReader := strings.NewReader(input)
+	cmd.SetIn(newReader)
 
 	if cmd == nil {
 		t.Errorf("NewTutorialCmd got %v", cmd)
