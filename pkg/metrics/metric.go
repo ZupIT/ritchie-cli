@@ -49,7 +49,7 @@ type Data struct {
 }
 
 type Sender interface {
-	Send(dataset Metric)
+	Send(metric Metric)
 }
 
 type UserIdGenerator interface {
