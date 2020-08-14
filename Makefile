@@ -24,7 +24,7 @@ IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
-METRIC_URL=https://d13c37b1-d742-4319-b911-f19d011bb458.mock.pstmn.io/metrics
+METRIC_URL=http://localhost:8080/metrics
 
 build-linux:
 	mkdir -p $(DIST_LINUX)

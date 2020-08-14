@@ -21,13 +21,23 @@ var URL = ""
 
 type Id string
 
+func (i Id) String() string {
+	return string(i)
+}
+
 type UserId string
 
+func (u UserId) String() string {
+	return string(u)
+}
+
 type Dataset struct {
-	Id        Id          `json:"metricId"`
-	UserId    UserId      `json:"userId"`
-	Timestamp time.Time   `json:"timestamp"`
-	Data      interface{} `json:"data"`
+	Id         Id          `json:"metricId"`
+	UserId     UserId      `json:"userId"`
+	Timestamp  time.Time   `json:"timestamp"`
+	So         string      `json:"so"`
+	RitVersion string      `json:"ritVersion"`
+	Data       interface{} `json:"data"`
 }
 
 type Sender interface {
