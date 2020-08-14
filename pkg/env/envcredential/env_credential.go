@@ -55,11 +55,7 @@ func (c CredentialResolver) Resolve(name string) (string, error) {
 	return credValue, nil
 }
 
-func (c CredentialResolver) PromptCredential(
-	provider string,
-	key string,
-	credentialDetail credential.Detail,
-) (string, error) {
+func (c CredentialResolver) PromptCredential(provider, key string, credentialDetail credential.Detail) (string, error) {
 	inputVal, err := c.Password(
 		fmt.Sprintf("Provider key not found, please provide a value for %s %s: ", provider, key),
 	)
