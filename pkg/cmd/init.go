@@ -49,7 +49,6 @@ See how to do this on the example: [https://github.com/ZupIT/ritchie-formulas/bl
 	CommonsRepoURL     = "https://github.com/ZupIT/ritchie-formulas"
 )
 
-// setContext type for stdin json decoder
 type initStdin struct {
 	AddRepo string `json:"addRepo"`
 }
