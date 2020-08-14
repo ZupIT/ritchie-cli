@@ -17,7 +17,10 @@ package metric
 
 import "time"
 
-var URL = ""
+var (
+	ServerRestURL = ""
+	ServerGrpcURL = ""
+)
 
 type Id string
 

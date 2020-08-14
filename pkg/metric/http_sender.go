@@ -18,17 +18,22 @@ package metric
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 var _ Sender = SendManagerHttp{}
 
 type SendManagerHttp struct {
+	URL    string
 	client *http.Client
 }
 
-func NewHttpSender(client *http.Client) SendManagerHttp {
-	return SendManagerHttp{client: client}
+func NewHttpSender(url string, client *http.Client) SendManagerHttp {
+	return SendManagerHttp{
+		URL:    url,
+		client: client,
+	}
 }
 
 func (sm SendManagerHttp) Send(dataset Dataset) {
@@ -37,11 +42,13 @@ func (sm SendManagerHttp) Send(dataset Dataset) {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, URL, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest(http.MethodPost, sm.URL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	_, _ = sm.client.Do(req)
+	res, _ := sm.client.Do(req)
+
+	fmt.Println(res.StatusCode)
 }

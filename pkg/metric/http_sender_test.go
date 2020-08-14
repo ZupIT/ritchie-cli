@@ -16,24 +16,17 @@
 package metric
 
 import (
-	"context"
-	"errors"
+	"net/http"
+	"net/http/httptest"
 	"runtime"
 	"testing"
 	"time"
-
-	"github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/grpc"
-
-	pb "github.com/ZupIT/ritchie-cli/internal/proto"
 )
 
-func TestSend(t *testing.T) {
+func TestSendManagerHttp_Send(t *testing.T) {
 	type in struct {
-		client  pb.ProcessorClient
 		dataset Dataset
 	}
-
 	tests := []struct {
 		name string
 		in   in
@@ -41,21 +34,6 @@ func TestSend(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				client: grpcProcessMock{},
-				dataset: Dataset{
-					Id:         "metric-id",
-					UserId:     "user-id",
-					Timestamp:  time.Now(),
-					So:         runtime.GOOS,
-					RitVersion: "2.0.0",
-					Data:       nil,
-				},
-			},
-		},
-		{
-			name: "ignore error",
-			in: in{
-				client: grpcProcessMock{err: errors.New("error to send metric")},
 				dataset: Dataset{
 					Id:         "metric-id",
 					UserId:     "user-id",
@@ -67,20 +45,19 @@ func TestSend(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rpcSender := NewRpcSender(tt.in.client)
-			rpcSender.Send(tt.in.dataset)
+			server := server()
+			defer server.Close()
+
+			httpSender := NewHttpSender(server.URL, server.Client())
+			httpSender.Send(tt.in.dataset)
 		})
 	}
-
 }
 
-type grpcProcessMock struct {
-	err error
-}
-
-func (g grpcProcessMock) Process(ctx context.Context, in *pb.DatasetRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return &empty.Empty{}, g.err
+func server() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 }

@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	"google.golang.org/grpc"
 
 	pb "github.com/ZupIT/ritchie-cli/internal/proto"
 )
@@ -29,26 +28,28 @@ import (
 var _ Sender = SendManagerRpc{}
 
 type SendManagerRpc struct {
-	rpcClient *grpc.ClientConn
+	processClient pb.ProcessorClient
 }
 
-//  Example of how to create a grpc client:
+//  Example of how to create a grpc client and processor client:
 //  ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 //	defer cancel()
-//	conn, _ := grpc.DialContext(ctx, address, grpc.WithInsecure(), grpc.WithBlock())
-func NewRpcSender(rpcClient *grpc.ClientConn) SendManagerRpc {
-	return SendManagerRpc{rpcClient: rpcClient}
+//	conn, _ := grpc.DialContext(ctx, "localhost:50080", grpc.WithInsecure(), grpc.WithBlock())
+//
+//	if conn != nil {
+//		defer conn.Close()
+//	}
+//
+//	processorClient := pb.NewProcessorClient(conn)
+func NewRpcSender(processClient pb.ProcessorClient) SendManagerRpc {
+	return SendManagerRpc{processClient: processClient}
 }
 
 func (sm SendManagerRpc) Send(dataset Dataset) {
-	defer sm.rpcClient.Close()
-
-	c := pb.NewProcessorClient(sm.rpcClient)
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, _ = c.Process(ctx, convert(dataset))
+	_, _ = sm.processClient.Process(ctx, convert(dataset))
 }
 
 func convert(dataset Dataset) *pb.DatasetRequest {
