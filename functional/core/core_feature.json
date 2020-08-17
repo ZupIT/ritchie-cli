@@ -137,7 +137,7 @@
                 "action":"main"
             }
         ],
-        "result":"CONTEXT"
+        "result":"You dont have any credential, use"
     },
     {
         "entry":"Delete repo",
