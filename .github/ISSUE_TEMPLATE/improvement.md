@@ -1,12 +1,12 @@
 ---
 name: Improvement
-about: Suggest a improvement for this project
+about: Suggest an improvement for this project
 labels: improvement
 assignees: ''
 
 ---
 
-<!-- Please only use this template for submitting new feature or enhancement requests -->
+<!-- Please only use this template for submitting improvement suggestion-->
 
 **What would you like to be added**:
 

@@ -31,13 +31,13 @@ Once you made it,  Ritchie will add all community formulas repository and create
 rit init
 ```
 
-### Run your fist formula
+### Run your first formula
 
-After you finished the previous steps - installation and initialization -, you can run a "hello-world" formula to test Ritchie. 
-As most of developers like coffee, we created an initial formula that "delivers coffee" to you. 
+After you finished the previous steps - installation and initialization -, you can run a ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas/tree/master/demo/hello-world)) to test Ritchie. 
+
 
 ```bash
-rit scaffold generate coffee-go
+rit demo hello-world
 ```
 
 
