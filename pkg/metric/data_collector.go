@@ -25,7 +25,6 @@ import (
 
 type DataCollectorManager struct {
 	userId UserIdGenerator
-	ritVersion string
 }
 
 func NewDataCollector(userId UserIdGenerator, ritVersion string) DataCollectorManager {
