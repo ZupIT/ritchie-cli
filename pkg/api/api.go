@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"os/user"
 	"strings"
-
-	"github.com/ZupIT/ritchie-cli/pkg/cmd"
 )
 
 const (
@@ -106,6 +104,5 @@ func UserHomeDir() string {
 
 // RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
-	cmd.Version
 	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
 }

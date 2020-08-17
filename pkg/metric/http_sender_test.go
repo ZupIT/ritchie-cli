@@ -26,7 +26,7 @@ import (
 
 func TestSendManagerHttp_Send(t *testing.T) {
 	type in struct {
-		dataset Dataset
+		APIData APIData
 	}
 	tests := []struct {
 		name string
@@ -35,11 +35,11 @@ func TestSendManagerHttp_Send(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				dataset: Dataset{
+				APIData: APIData{
 					Id:         "metric-id",
 					UserId:     "user-id",
 					Timestamp:  time.Now(),
-					So:         runtime.GOOS,
+					Os:         runtime.GOOS,
 					RitVersion: "2.0.0",
 					Data:       nil,
 				},
@@ -52,7 +52,7 @@ func TestSendManagerHttp_Send(t *testing.T) {
 			defer server.Close()
 
 			httpSender := NewHttpSender(server.URL, server.Client())
-			httpSender.Send(tt.in.dataset)
+			httpSender.Send(tt.in.APIData)
 		})
 	}
 }

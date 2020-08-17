@@ -21,22 +21,20 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type DataCollectorManager struct {
 	userId UserIdGenerator
-	file   stream.FileReadExister
+	ritVersion string
 }
 
-func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
+func NewDataCollector(userId UserIdGenerator, ritVersion string) DataCollectorManager {
 	return DataCollectorManager{
 		userId: userId,
 	}
 }
 
-func (d DataCollectorManager) Collect(commandError ...string) (APIData, error) {
+func (d DataCollectorManager) Collect(ritVersion string, commandError ...string) (APIData, error) {
 
 	userId, err := d.userId.Generate()
 	if err != nil {
@@ -48,11 +46,12 @@ func (d DataCollectorManager) Collect(commandError ...string) (APIData, error) {
 	}
 
 	metric := APIData{
-		Id:        Id(metricID()),
-		UserId:    userId,
-		Os:        runtime.GOOS,
-		Timestamp: time.Now(),
-		Data:      data,
+		Id:         Id(metricID()),
+		UserId:     userId,
+		Os:         runtime.GOOS,
+		RitVersion: ritVersion,
+		Timestamp:  time.Now(),
+		Data:       data,
 	}
 
 	return metric, nil
