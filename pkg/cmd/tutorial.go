@@ -58,12 +58,11 @@ func (o tutorialCmd) runStdin() CommandRunnerFunc {
 			Tutorial string `json:"tutorial"`
 		}{}
 
-		err := stdin.ReadJson(cmd.InOrStdin(), &obj)
-		if err != nil {
+		if err := stdin.ReadJson(cmd.InOrStdin(), &obj); err != nil {
 			return err
 		}
 
-		_, err = o.Set(obj.Tutorial)
+		_, err := o.Set(obj.Tutorial)
 		if err != nil {
 			return err
 		}
