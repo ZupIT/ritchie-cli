@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package metric
 
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -48,7 +48,5 @@ func (sm SendManagerHttp) Send(dataset Dataset) {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	res, _ := sm.client.Do(req)
-
-	fmt.Println(res.StatusCode)
+	_, _ = sm.client.Do(req)
 }
