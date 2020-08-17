@@ -25,10 +25,12 @@ import (
 
 var FilePath = filepath.Join(api.RitchieHomeDir(), "metrics")
 
-type Id string
+type ID string
 
-type Metric struct {
-	Id        Id          `json:"metricId"`
+type APIData struct {
+	ID ID
+	UserId    UserId      `json:"userId"`
+	OS        OS          `json:"operationalSystem:"`
 	Timestamp time.Time   `json:"timestamp"`
 	Data      interface{} `json:"data"`
 }
@@ -37,19 +39,18 @@ type UserId string
 
 type OS string
 
-type Command string
+type Version string
 
 type CommandError string
 
 type Data struct {
-	UserId       UserId `json:"userId"`
-	OS           OS     `json:"operationalSystem:"`
-	Command      Command `json:"command"`
+	Version      Version      `json:"version"`
 	CommandError CommandError `json:"commandError"`
+
 }
 
 type Sender interface {
-	Send(metric Metric)
+	Send(metric APIData)
 }
 
 type UserIdGenerator interface {
@@ -61,5 +62,5 @@ type Checker interface {
 }
 
 type Collector interface {
-	Collect() (Metric, error)
+	Collect() (APIData, error)
 }

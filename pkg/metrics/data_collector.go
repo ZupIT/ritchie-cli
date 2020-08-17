@@ -22,41 +22,51 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/ZupIT/ritchie-cli/pkg/cmd"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type DataCollectorManager struct {
 	userId UserIdGenerator
+	file stream.FileReadExister
 }
 
 func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
-	return DataCollectorManager{userId: userId}
+	return DataCollectorManager{
+		userId: userId,
+
+	}
 }
 
-func (d DataCollectorManager) Collect(commandError ...string) (Metric, error) {
+func (d DataCollectorManager) Collect(commandError ...string) (APIData, error) {
 
 	userId, err := d.userId.Generate()
 	if err != nil {
-		return Metric{}, err
+		return APIData{}, err
 	}
 
 	data := Data{
-		UserId:  userId,
-		OS:      OS(runtime.GOOS),
-		Command: Command(joinArgs(" ")),
 		CommandError: CommandError(strings.Join(commandError, " ")),
+		Version: Version(cmd.Version),
+
 	}
 
-	metric := Metric{
-		Id:        Id(uuid.New().String()),
+	metric := APIData{
+		ID: ID(metricID()),
+		UserId:       userId,
+		OS:           OS(runtime.GOOS),
 		Timestamp: time.Now(),
 		Data:      data,
+
 	}
+
+
 
 	return metric, nil
 }
 
-func joinArgs(sep string) string {
+func metricID() string {
 	args := os.Args
-	return strings.Join(args, sep)
+	return strings.Join(args, "_")
+
 }
