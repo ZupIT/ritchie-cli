@@ -23,7 +23,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-	"github.com/ZupIT/ritchie-cli/pkg/metrics"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -163,7 +163,7 @@ func metricsAuthorization(inList prompt.InputList, file stream.FileWriteReadExis
 		responseToWrite = "no"
 	}
 
-	err = file.Write(metrics.FilePath, []byte(responseToWrite))
+	err = file.Write(metric.FilePath, []byte(responseToWrite))
 	if err != nil {
 		return err
 	}
