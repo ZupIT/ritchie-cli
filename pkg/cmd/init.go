@@ -137,9 +137,8 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if init.AddRepo == "no" {
-			fmt.Println()
-			prompt.Warning(addRepoInfo)
-			fmt.Println()
+			fmt.Printf("\n%s\n", prompt.Yellow(addRepoInfo))
+
 			fmt.Println(addRepoMsg)
 		} else {
 			s := spinner.StartNew("Adding the commons repository...")
