@@ -26,8 +26,13 @@ import (
 )
 
 func TestCredentialResolver(t *testing.T) {
+	fileManager := stream.NewFileManager()
 	tempDirectory := os.TempDir()
-	defer os.Remove(tempDirectory)
+	contextFinder := rcontext.NewFinder(tempDirectory, fileManager)
+	credentialSetter := credential.NewSetter(tempDirectory, contextFinder)
+	credentialFinder := credential.NewFinder(tempDirectory, contextFinder, fileManager)
+
+	defer os.RemoveAll(credential.File(tempDirectory, "", ""))
 
 	var tests = []struct {
 		name            string
@@ -51,11 +56,6 @@ func TestCredentialResolver(t *testing.T) {
 		},
 	}
 
-	fileManager := stream.NewFileManager()
-	contextFinder := rcontext.NewFinder(tempDirectory, fileManager)
-	credentialSetter := credential.NewSetter(tempDirectory, contextFinder)
-	credentialFinder := credential.NewFinder(tempDirectory, contextFinder, fileManager)
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			credentialResolver := NewResolver(credentialFinder, credentialSetter, passwordMock{tt.output})
@@ -66,7 +66,6 @@ func TestCredentialResolver(t *testing.T) {
 			if credentialValue != tt.output {
 				t.Errorf("Resolve credentials failed to retrieve. Expected %v, got %v", tt.output, credentialValue)
 			}
-
 		})
 	}
 }
