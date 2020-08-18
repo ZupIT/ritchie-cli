@@ -68,6 +68,7 @@ var _ = Describe("RitCore", func() {
 		Entry(scenariosCore[15].Entry, scenariosCore[15]),
 		Entry(scenariosCore[16].Entry, scenariosCore[16]),
 		Entry(scenariosCore[17].Entry, scenariosCore[17]),
-		Entry(scenariosCore[18].Entry, scenariosCore[18]),
+		Entry(scenariosCore[17].Entry, scenariosCore[18]),
+		Entry(scenariosCore[18].Entry, scenariosCore[19]),
 	)
 })
