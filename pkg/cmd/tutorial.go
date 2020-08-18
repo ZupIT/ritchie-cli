@@ -28,7 +28,7 @@ import (
 type tutorialCmd struct {
 	homePath string
 	prompt.InputList
-	rtutorial.FindSetter
+	tutorial rtutorial.FindSetter
 }
 
 const (
@@ -62,10 +62,10 @@ func (o tutorialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		_, err := o.Set(obj.Tutorial)
-		if err != nil {
+		if _, err := o.tutorial.Set(obj.Tutorial); err != nil {
 			return err
 		}
+
 		prompt.Success("Set tutorial successful!")
 
 		return nil
@@ -77,7 +77,7 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 		msg := "Status tutorial?"
 		var statusTypes = []string{tutorialStatusEnabled, tutorialStatusDisabled}
 
-		tutorialHolder, err := o.Find()
+		tutorialHolder, err := o.tutorial.Find()
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		_, err = o.Set(response)
+		_, err = o.tutorial.Set(response)
 		if err != nil {
 			return err
 		}
