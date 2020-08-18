@@ -107,6 +107,17 @@
         "result":""
     },
     {
+        "entry":"List",
+        "steps":[
+            {
+                "key":"",
+                "value":"list",
+                "action":"main"
+            }
+        ],
+        "result":"This command consists of multiple subcommands to interact with ritchie."
+    },
+    {
         "entry":"List repo",
         "steps":[
             {
@@ -116,6 +127,17 @@
             }
         ],
         "result":"commons"
+    },
+    {
+        "entry":"List credential",
+        "steps":[
+            {
+                "key":"",
+                "value":"list credential",
+                "action":"main"
+            }
+        ],
+        "result":"You dont have any credential"
     },
     {
         "entry":"Delete repo",
