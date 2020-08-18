@@ -25,6 +25,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
@@ -54,6 +55,10 @@ var (
 	CommonsRepoURL     = "https://github.com/ZupIT/ritchie-formulas"
 )
 
+type initStdin struct {
+	AddRepo string `json:"addRepo"`
+}
+
 type initCmd struct {
 	repo formula.RepositoryAdder
 	git  git.Repositories
@@ -69,7 +74,7 @@ func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutoria
 		Use:   "init",
 		Short: "Initialize rit configuration",
 		Long:  "Initialize rit configuration",
-		RunE:  o.runPrompt(),
+		RunE:  RunFuncE(o.runStdin(), o.runPrompt()),
 	}
 
 	return cmd
@@ -119,6 +124,59 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 		err = metricsAuthorization(in.InputList, in.FileWriteReadExister)
 		if err != nil {
 			return err
+		}
+
+		tutorialHolder, err := in.rt.Find()
+		if err != nil {
+			return err
+		}
+		tutorialInit(tutorialHolder.Current)
+		return nil
+	}
+}
+
+func (in initCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		init := initStdin{}
+
+		err := stdin.ReadJson(cmd.InOrStdin(), &init)
+		if err != nil {
+			return err
+		}
+
+		if init.AddRepo == "no" {
+			fmt.Printf("\n%s\n", prompt.Yellow(addRepoInfo))
+
+			fmt.Println(addRepoMsg)
+		} else {
+			s := spinner.StartNew("Adding the commons repository...")
+			time.Sleep(time.Second * 2)
+
+			repo := formula.Repo{
+				Provider: "Github",
+				Name:     "commons",
+				Url:      CommonsRepoURL,
+				Priority: 0,
+			}
+
+			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+
+			tag, err := in.git.LatestTag(repoInfo)
+			if err != nil {
+				s.Error(ErrInitCommonsRepo)
+				fmt.Println(addRepoMsg)
+				return nil
+			}
+
+			repo.Version = formula.RepoVersion(tag.Name)
+
+			if err := in.repo.Add(repo); err != nil {
+				s.Error(ErrInitCommonsRepo)
+				fmt.Println(addRepoMsg)
+				return nil
+			}
+
+			s.Success(prompt.Green("Initialization successful!"))
 		}
 
 		tutorialHolder, err := in.rt.Find()
