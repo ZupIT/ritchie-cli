@@ -55,7 +55,7 @@ func TestNewTutorialStdin(t *testing.T) {
 	}
 }
 
-func Test_tutorialCmd_runAnyEntry(t *testing.T) {
+func TestTutorialRunAnyEntry(t *testing.T) {
 	var tutorialHolderEnabled, tutorialHolderDisabled rtutorial.TutorialHolder
 	type fields struct {
 		prompt.InputList
@@ -107,25 +107,25 @@ func Test_tutorialCmd_runAnyEntry(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		initPrompt := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
-		initStdin := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
+		cmdPrompt := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
+		cmdStdin := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
 
-		initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
-		initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+		cmdPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
+		cmdStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
 
 		newReader := strings.NewReader(tt.inputStdin)
-		initStdin.SetIn(newReader)
+		cmdStdin.SetIn(newReader)
 
-		if err := initPrompt.Execute(); (err != nil) != tt.wantErr {
-			t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+		if err := cmdPrompt.Execute(); (err != nil) != tt.wantErr {
+			t.Errorf("cmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
 		}
-		if err := initStdin.Execute(); (err != nil) != tt.wantErr {
-			t.Errorf("init_runStdin() error = %v, wantErr %v", err, tt.wantErr)
+		if err := cmdStdin.Execute(); (err != nil) != tt.wantErr {
+			t.Errorf("cmd_runStdin() error = %v, wantErr %v", err, tt.wantErr)
 		}
 	}
 }
 
-func Test_initCmd_runOnlyPrompt(t *testing.T) {
+func TestTutorialRunOnlyPrompt(t *testing.T) {
 	type fields struct {
 		prompt.InputList
 		tutorial rtutorial.FindSetter
@@ -160,27 +160,27 @@ func Test_initCmd_runOnlyPrompt(t *testing.T) {
 	for _, tt := range tests {
 		wantErr := true
 
-		initPrompt := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
-		initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
+		cmd := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
+		cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
-		if err := initPrompt.Execute(); (err != nil) != wantErr {
-			t.Errorf("init_runPrompt() error = %v, wantErr %v", err, wantErr)
+		if err := cmd.Execute(); (err != nil) != wantErr {
+			t.Errorf("cmd_runPrompt() error = %v, wantErr %v", err, wantErr)
 		}
 	}
 }
 
-func Test_initCmd_runOnlyStdin(t *testing.T) {
+func TestTutorialRunOnlyStdin(t *testing.T) {
 	t.Run("Error when readJson returns err", func(t *testing.T) {
 		wantErr := true
 
-		initStdin := NewTutorialCmd("path/any", inputListMock{}, TutorialFindSetterMock{})
-		initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+		cmdStdin := NewTutorialCmd("path/any", inputListMock{}, TutorialFindSetterMock{})
+		cmdStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
 
 		newReader := strings.NewReader("{\"tutorial\": 1}\n")
-		initStdin.SetIn(newReader)
+		cmdStdin.SetIn(newReader)
 
-		if err := initStdin.Execute(); (err != nil) != wantErr {
-			t.Errorf("init_runStdin() error = %v, wantErr %v", err, wantErr)
+		if err := cmdStdin.Execute(); (err != nil) != wantErr {
+			t.Errorf("cmd_runStdin() error = %v, wantErr %v", err, wantErr)
 		}
 	})
 }
