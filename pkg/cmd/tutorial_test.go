@@ -126,19 +126,17 @@ func Test_tutorialCmd_runAnyEntry(t *testing.T) {
 }
 
 func Test_initCmd_runOnlyPrompt(t *testing.T) {
-	var tutorialHolderEnabled, tutorialHolderDisabled rtutorial.TutorialHolder
 	type fields struct {
 		prompt.InputList
 		tutorial rtutorial.FindSetter
 	}
 
+	var tutorialHolderEnabled rtutorial.TutorialHolder
 	tutorialHolderEnabled.Current = "enabled"
-	tutorialHolderDisabled.Current = "disabled"
 
 	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
+		name   string
+		fields fields
 	}{
 		{
 			name: "Return error when find return error",
@@ -150,7 +148,6 @@ func Test_initCmd_runOnlyPrompt(t *testing.T) {
 					},
 				},
 			},
-			wantErr: true,
 		},
 		{
 			name: "Return error when list return error",
@@ -158,16 +155,16 @@ func Test_initCmd_runOnlyPrompt(t *testing.T) {
 				InputList: inputListErrorMock{},
 				tutorial:  TutorialFindSetterMock{},
 			},
-			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
-		initPrompt := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
+		wantErr := true
 
+		initPrompt := NewTutorialCmd("path/any", tt.fields.InputList, tt.fields.tutorial)
 		initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 
-		if err := initPrompt.Execute(); (err != nil) != tt.wantErr {
-			t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+		if err := initPrompt.Execute(); (err != nil) != wantErr {
+			t.Errorf("init_runPrompt() error = %v, wantErr %v", err, wantErr)
 		}
 	}
 }
@@ -177,8 +174,8 @@ func Test_initCmd_runOnlyStdin(t *testing.T) {
 		wantErr := true
 
 		initStdin := NewTutorialCmd("path/any", inputListMock{}, TutorialFindSetterMock{})
-
 		initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+
 		newReader := strings.NewReader("{\"tutorial\": 1}\n")
 		initStdin.SetIn(newReader)
 
