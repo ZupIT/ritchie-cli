@@ -1,5 +1,22 @@
 [
     {
+        "entry":"Init STDIN",
+        "steps":[
+            {
+                "key":"",
+                "value":"{\"addRepo\":\"yes\"}",
+                "action":"echo"
+            },
+            {
+                "key":"",
+                "value":"init --stdin",
+                "action":"main"
+            }
+
+        ],
+        "result":"Initialization successful!"
+    },
+    {
         "entry":"Set context STDIN",
         "steps":[
             {
