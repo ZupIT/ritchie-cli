@@ -41,17 +41,21 @@ func (u UserId) String() string {
 	return string(u)
 }
 
-type Dataset struct {
+type APIData struct {
 	Id         Id          `json:"metricId"`
 	UserId     UserId      `json:"userId"`
 	Timestamp  time.Time   `json:"timestamp"`
-	So         string      `json:"so"`
+	Os         string      `json:"os"`
 	RitVersion string      `json:"ritVersion"`
 	Data       interface{} `json:"data"`
 }
 
+type Data struct {
+	CommandError string `json:"commandError"`
+}
+
 type Sender interface {
-	Send(dataset Dataset)
+	Send(metric APIData)
 }
 
 type UserIdGenerator interface {
@@ -60,4 +64,8 @@ type UserIdGenerator interface {
 
 type Checker interface {
 	Check() (bool, error)
+}
+
+type Collector interface {
+	Collect() (APIData, error)
 }

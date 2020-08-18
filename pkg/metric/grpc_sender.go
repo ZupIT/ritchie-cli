@@ -46,23 +46,23 @@ func NewRpcSender(processClient pb.ProcessorClient) SendManagerRpc {
 	return SendManagerRpc{processClient: processClient}
 }
 
-func (sm SendManagerRpc) Send(dataset Dataset) {
+func (sm SendManagerRpc) Send(apiData APIData) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, _ = sm.processClient.Process(ctx, convert(dataset))
+	_, _ = sm.processClient.Process(ctx, convert(apiData))
 }
 
-func convert(dataset Dataset) *pb.DatasetRequest {
-	timestamp, _ := ptypes.TimestampProto(dataset.Timestamp)
-	data, _ := json.Marshal(dataset.Data)
+func convert(apiData APIData) *pb.DatasetRequest {
+	timestamp, _ := ptypes.TimestampProto(apiData.Timestamp)
+	data, _ := json.Marshal(apiData.Data)
 
 	return &pb.DatasetRequest{
-		MetricId:   dataset.Id.String(),
-		UserId:     dataset.UserId.String(),
+		MetricId:   apiData.Id.String(),
+		UserId:     apiData.UserId.String(),
 		Timestamp:  timestamp,
-		So:         dataset.So,
-		RitVersion: dataset.RitVersion,
+		So:         apiData.Os,
+		RitVersion: apiData.RitVersion,
 		Data:       data,
 	}
 }

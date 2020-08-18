@@ -32,7 +32,7 @@ import (
 func TestSend(t *testing.T) {
 	type in struct {
 		client  pb.ProcessorClient
-		dataset Dataset
+		dataset APIData
 	}
 
 	tests := []struct {
@@ -43,11 +43,11 @@ func TestSend(t *testing.T) {
 			name: "success",
 			in: in{
 				client: grpcProcessMock{},
-				dataset: Dataset{
+				dataset: APIData{
 					Id:         "metric-id",
 					UserId:     "user-id",
 					Timestamp:  time.Now(),
-					So:         runtime.GOOS,
+					Os:         runtime.GOOS,
 					RitVersion: "2.0.0",
 					Data:       nil,
 				},
@@ -57,11 +57,11 @@ func TestSend(t *testing.T) {
 			name: "ignore error",
 			in: in{
 				client: grpcProcessMock{err: errors.New("error to send metric")},
-				dataset: Dataset{
+				dataset: APIData{
 					Id:         "metric-id",
 					UserId:     "user-id",
 					Timestamp:  time.Now(),
-					So:         runtime.GOOS,
+					Os:         runtime.GOOS,
 					RitVersion: "2.0.0",
 					Data:       nil,
 				},

@@ -36,8 +36,8 @@ func NewHttpSender(url string, client *http.Client) SendManagerHttp {
 	}
 }
 
-func (sm SendManagerHttp) Send(dataset Dataset) {
-	reqBody, err := json.Marshal(&dataset)
+func (sm SendManagerHttp) Send(APIData APIData) {
+	reqBody, err := json.Marshal(&APIData)
 	if err != nil {
 		return
 	}

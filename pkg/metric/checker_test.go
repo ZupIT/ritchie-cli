@@ -96,8 +96,8 @@ func Test_Check(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			check := NewChecker(tt.in.file)
-			result, err := check.Check()
+			checker := NewChecker(tt.in.file)
+			result, err := checker.Check()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("execution test failed: %s\nwant error: %t | got: %s", tt.name, tt.wantErr, err)
 			}
