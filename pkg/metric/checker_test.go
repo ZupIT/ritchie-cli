@@ -74,7 +74,7 @@ func Test_Check(t *testing.T) {
 			},
 		},
 		{
-			name:           "fail case error on reading file",
+			name:           "success case expecting false when error reading file",
 			expectedResult: false,
 			in: in{
 				file: sMocks.FileReadExisterCustomMock{
