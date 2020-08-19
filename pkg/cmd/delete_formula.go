@@ -28,6 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/spf13/cobra"
 )
@@ -37,16 +38,23 @@ const (
 	localTreeJson = "/repos/local/tree.json"
 )
 
-type DeleteFormulaCmd struct {
-	userHomeDir    string
-	ritchieHomeDir string
-	workspace      formula.WorkspaceAddListValidator
-	directory      stream.DirListChecker
-	inBool         prompt.InputBool
-	inText         prompt.InputText
-	inList         prompt.InputList
-	treeManager    tree.Manager
-}
+type (
+	deleteFormulaStdin struct {
+		Workspace string   `json:"workspace"`
+		Groups    []string `json:"groups"`
+	}
+
+	deleteFormulaCmd struct {
+		userHomeDir    string
+		ritchieHomeDir string
+		workspace      formula.WorkspaceAddListValidator
+		directory      stream.DirListChecker
+		inBool         prompt.InputBool
+		inText         prompt.InputText
+		inList         prompt.InputList
+		treeManager    tree.Manager
+	}
+)
 
 func NewDeleteFormulaCmd(
 	userHomeDir string,
@@ -58,7 +66,7 @@ func NewDeleteFormulaCmd(
 	inList prompt.InputList,
 	treeManager tree.Manager,
 ) *cobra.Command {
-	d := DeleteFormulaCmd{
+	d := deleteFormulaCmd{
 		userHomeDir,
 		ritchieHomeDir,
 		workspace,
@@ -73,13 +81,13 @@ func NewDeleteFormulaCmd(
 		Use:     "formula",
 		Short:   "Delete specific formula",
 		Example: "rit delete formula",
-		RunE:    d.runPrompt(),
+		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
 	}
 
 	return cmd
 }
 
-func (d DeleteFormulaCmd) runPrompt() CommandRunnerFunc {
+func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		workspaces, err := d.workspace.List()
 		if err != nil {
@@ -138,7 +146,33 @@ func (d DeleteFormulaCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (d DeleteFormulaCmd) readFormulas(dir string) ([]string, error) {
+func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		deleteStdin := deleteFormulaStdin{}
+
+		if err := stdin.ReadJson(os.Stdin, &deleteStdin); err != nil {
+			return err
+		}
+
+		if err := d.deleteFormula(deleteStdin.Workspace, deleteStdin.Groups, 0); err != nil {
+			return err
+		}
+
+		ritchieLocalWorkspace := d.ritchieHomeDir + localRepo
+		if err := d.deleteFormula(ritchieLocalWorkspace, deleteStdin.Groups, 0); err != nil {
+			return err
+		}
+
+		if err := d.deleteFormulaTreeJson(deleteStdin.Groups); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func (d deleteFormulaCmd) readFormulas(dir string) ([]string, error) {
 	dirs, err := d.directory.List(dir, false)
 	if err != nil {
 		return nil, err
@@ -167,7 +201,7 @@ func (d DeleteFormulaCmd) readFormulas(dir string) ([]string, error) {
 	return groups, nil
 }
 
-func (d DeleteFormulaCmd) deleteFormula(workspace string, groups []string, index int) error {
+func (d deleteFormulaCmd) deleteFormula(workspace string, groups []string, index int) error {
 	if index == len(groups) {
 		err := os.RemoveAll(workspace)
 		if err != nil {
@@ -212,7 +246,7 @@ func canDelete(workspace string) (bool, error) {
 	return true, nil
 }
 
-func (d DeleteFormulaCmd) deleteFormulaTreeJson(groups []string) error {
+func (d deleteFormulaCmd) deleteFormulaTreeJson(groups []string) error {
 	tree, err := d.treeManager.Tree()
 	if err != nil {
 		return err
