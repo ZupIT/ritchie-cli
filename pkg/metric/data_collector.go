@@ -23,18 +23,19 @@ import (
 	"time"
 )
 
+var _ Collector = DataCollectorManager{}
+
 type DataCollectorManager struct {
 	userId UserIdGenerator
 }
 
-func NewDataCollector(userId UserIdGenerator, ritVersion string) DataCollectorManager {
+func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
 	return DataCollectorManager{
 		userId: userId,
 	}
 }
 
 func (d DataCollectorManager) Collect(ritVersion string, commandError ...string) (APIData, error) {
-
 	userId, err := d.userId.Generate()
 	if err != nil {
 		return APIData{}, err

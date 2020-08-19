@@ -31,13 +31,11 @@ func Test_Check(t *testing.T) {
 
 	var tests = []struct {
 		name           string
-		wantErr        bool
 		expectedResult bool
 		in             in
 	}{
 		{
 			name:           "success case expecting true",
-			wantErr:        false,
 			expectedResult: true,
 			in: in{
 				file: sMocks.FileReadExisterCustomMock{
@@ -52,7 +50,6 @@ func Test_Check(t *testing.T) {
 		},
 		{
 			name:           "success case expecting false",
-			wantErr:        false,
 			expectedResult: false,
 			in: in{
 				file: sMocks.FileReadExisterCustomMock{
@@ -67,7 +64,6 @@ func Test_Check(t *testing.T) {
 		},
 		{
 			name:           "success case when metrics file doesn't exist",
-			wantErr:        false,
 			expectedResult: false,
 			in: in{
 				file: sMocks.FileReadExisterCustomMock{
@@ -78,8 +74,7 @@ func Test_Check(t *testing.T) {
 			},
 		},
 		{
-			name:           "fail case error on reading file",
-			wantErr:        true,
+			name:           "success case expecting false when error reading file",
 			expectedResult: false,
 			in: in{
 				file: sMocks.FileReadExisterCustomMock{
@@ -97,10 +92,8 @@ func Test_Check(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			checker := NewChecker(tt.in.file)
-			result, err := checker.Check()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("execution test failed: %s\nwant error: %t | got: %s", tt.name, tt.wantErr, err)
-			}
+			result := checker.Check()
+
 			if result != tt.expectedResult {
 				t.Errorf("behavior test failed: %s\nwant: %t | got: %t", tt.name, tt.expectedResult, result)
 			}

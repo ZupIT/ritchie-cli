@@ -55,12 +55,29 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+func sendMetric(err ...string) {
+	metricEnable := metric.NewChecker(stream.NewFileManager())
+	if metricEnable.Check() {
+		var collectData metric.APIData
+		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
+		userIdManager := metric.NewUserIdGenerator()
+		data := metric.NewDataCollector(userIdManager)
+
+		collectData, _ = data.Collect(cmd.Version, err...)
+		metricManager.Send(collectData)
+	}
+}
+
 func main() {
 	rootCmd := buildCommands()
-	if err := rootCmd.Execute(); err != nil {
+	err := rootCmd.Execute()
+	if err != nil {
+		sendMetric(err.Error())
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %+v\n", err)
 		os.Exit(1)
 	}
+
+	sendMetric()
 }
 
 func buildCommands() *cobra.Command {

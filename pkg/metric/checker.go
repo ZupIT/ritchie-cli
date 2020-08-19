@@ -28,21 +28,19 @@ func NewChecker(file stream.FileReadExister) CheckManager {
 	return CheckManager{file: file}
 }
 
-func (c CheckManager) Check() (bool, error) {
+func (c CheckManager) Check() bool {
 	if !c.file.Exists(FilePath) {
-		return false, nil
+		return false
 	}
 
 	bytes, err := c.file.Read(FilePath)
 	if err != nil {
-		return false, err
+		return false
 	}
 
-	result := true
 	if string(bytes) == "no" {
-		result = false
+		return false
 	}
 
-	return result, nil
+	return true
 }
-
