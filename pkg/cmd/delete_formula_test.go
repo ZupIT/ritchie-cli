@@ -54,10 +54,11 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		workspaceForm{},
 		dirManager,
 		inputTrueMock{},
-		inputTextMock{},
-		inputListMock{},
+		inputTextCustomWithoutValidateMock{text: os.TempDir() + "/ritchie-formulas-local"},
+		inputListCustomMock{name: os.TempDir() + "/ritchie-formulas-local"},
 		treeMock,
 	)
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
 		t.Errorf("NewDeleteFormulaCmd got %v", cmd)
 	}

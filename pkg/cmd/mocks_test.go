@@ -67,6 +67,14 @@ func (m inputTextCustomMock) TextWithValidate(name string, validate func(interfa
 	return m.textWithValidate(name, validate)
 }
 
+type inputTextCustomWithoutValidateMock struct {
+	text string
+}
+
+func (m inputTextCustomWithoutValidateMock) Text(name string, required bool, options ...string) (string, error) {
+	return m.text, nil
+}
+
 type inputSecretMock struct{}
 
 func (inputSecretMock) Text(name string, required bool, helper ...string) (string, error) {
