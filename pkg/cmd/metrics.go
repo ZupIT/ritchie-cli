@@ -18,7 +18,7 @@ func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList, ch
 	m := &metricsCmd{
 		FileWriteReadExister: file,
 		InputList:            inList,
-		Checker: checker,
+		Checker:              checker,
 	}
 
 	cmd := &cobra.Command{
@@ -49,10 +49,7 @@ func (m metricsCmd) run() CommandRunnerFunc {
 			return nil
 		}
 
-		metricsStatus, err := m.Check()
-		if err != nil {
-			return err
-		}
+		metricsStatus := m.Check()
 
 		changeTo := "yes"
 		message := "You are now sending anonymous metrics. Thank you!"
@@ -61,8 +58,7 @@ func (m metricsCmd) run() CommandRunnerFunc {
 			message = "You are no longer sending anonymous metrics."
 		}
 
-		err = m.FileWriteReadExister.Write(path, []byte(changeTo))
-		if err != nil {
+		if err := m.FileWriteReadExister.Write(path, []byte(changeTo)); err != nil {
 			return err
 		}
 		prompt.Info(message)

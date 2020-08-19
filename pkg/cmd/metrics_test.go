@@ -94,8 +94,8 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return nil
 					},
 				},
-				checkerMock: CheckerMock{func() (bool, error) {
-					return true, nil
+				checkerMock: CheckerMock{func() bool {
+					return true
 				}},
 			},
 			wantErr: false,
@@ -111,11 +111,11 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return nil
 					},
 				},
-				checkerMock: CheckerMock{func() (bool, error) {
-					return false, errors.New("error reading file")
+				checkerMock: CheckerMock{func() bool {
+					return false
 				}},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 		{
 			name: "fail on write when metrics file exist",
@@ -128,8 +128,8 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return errors.New("error writing file")
 					},
 				},
-				checkerMock: CheckerMock{func() (bool, error) {
-					return false, nil
+				checkerMock: CheckerMock{func() bool {
+					return false
 				}},
 			},
 			wantErr: true,
@@ -147,9 +147,9 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 }
 
 type CheckerMock struct {
-	CheckMock func() (bool, error)
+	CheckMock func() bool
 }
 
-func (cm CheckerMock) Check() (bool, error) {
+func (cm CheckerMock) Check() bool {
 	return cm.CheckMock()
 }

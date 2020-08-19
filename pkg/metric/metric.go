@@ -63,9 +63,9 @@ type UserIdGenerator interface {
 }
 
 type Checker interface {
-	Check() (bool, error)
+	Check() bool
 }
 
 type Collector interface {
-	Collect() (APIData, error)
+	Collect(ritVersion string, commandError ...string) (APIData, error)
 }
