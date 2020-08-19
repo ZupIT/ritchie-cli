@@ -59,7 +59,7 @@ func sendMetric(err ...string) {
 	metricEnable := metric.NewChecker(stream.NewFileManager())
 	if metricEnable.Check() {
 		var collectData metric.APIData
-		metricManager := metric.NewHttpSender("http://localhost:8080/metrics", http.DefaultClient)
+		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
 		userIdManager := metric.NewUserIdGenerator()
 		data := metric.NewDataCollector(userIdManager)
 
