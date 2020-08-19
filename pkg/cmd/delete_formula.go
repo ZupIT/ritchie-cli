@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -52,7 +51,7 @@ type (
 		inBool         prompt.InputBool
 		inText         prompt.InputText
 		inList         prompt.InputList
-		treeManager    tree.Manager
+		treeManager    formula.TreeManager
 	}
 )
 
@@ -64,7 +63,7 @@ func NewDeleteFormulaCmd(
 	inBool prompt.InputBool,
 	inText prompt.InputText,
 	inList prompt.InputList,
-	treeManager tree.Manager,
+	treeManager formula.TreeManager,
 ) *cobra.Command {
 	d := deleteFormulaCmd{
 		userHomeDir,
