@@ -51,7 +51,7 @@ executors:
     working_directory: ~/workspace
   
   ritchie-static-analisys-executor:
-   docker:
+    docker:
       - image: *PYTHONWITHGO_IMAGE
         user: root
     working_directory: /workspace
