@@ -115,11 +115,3 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 		})
 	}
 }
-
-type CheckerMock struct {
-	CheckMock func() bool
-}
-
-func (cm CheckerMock) Check() bool {
-	return cm.CheckMock()
-}
