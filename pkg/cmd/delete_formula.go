@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -33,10 +34,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	localRepo     = "/repos/local"
-	localTreeJson = "/repos/local/tree.json"
-)
+const msgFormulaNotFound = "Could not find formula"
+
+var ErrCouldNotFindFormula = errors.New(msgFormulaNotFound)
 
 type (
 	deleteFormulaStdin struct {
@@ -52,7 +52,7 @@ type (
 		inBool         prompt.InputBool
 		inText         prompt.InputText
 		inList         prompt.InputList
-		treeManager    formula.TreeManager
+		treeGen        formula.TreeGenerator
 	}
 )
 
@@ -64,7 +64,7 @@ func NewDeleteFormulaCmd(
 	inBool prompt.InputBool,
 	inText prompt.InputText,
 	inList prompt.InputList,
-	treeManager formula.TreeManager,
+	treeGen formula.TreeGenerator,
 ) *cobra.Command {
 	d := deleteFormulaCmd{
 		userHomeDir,
@@ -74,7 +74,7 @@ func NewDeleteFormulaCmd(
 		inBool,
 		inText,
 		inList,
-		treeManager,
+		treeGen,
 	}
 
 	cmd := &cobra.Command{
@@ -102,16 +102,27 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
+		if wspace.Dir != defaultWorkspace {
+			if err := d.workspace.Validate(wspace); err != nil {
+				return err
+			}
+
+			if err := d.workspace.Add(wspace); err != nil {
+				return err
+			}
+		}
+
 		groups, err := d.readFormulas(wspace.Dir)
 		if err != nil {
 			return err
 		}
 
 		if groups == nil {
-			return errors.New("Could not find formula")
+			return ErrCouldNotFindFormula
 		}
 
-		if ans, err := d.inBool.Bool("Are you sure you want to delete the formula: rit "+strings.Join(groups, " "), []string{"no", "yes"}); err != nil {
+		question := fmt.Sprintf("Are you sure you want to delete the formula: rit %s", strings.Join(groups, " "))
+		if ans, err := d.inBool.Bool(question, []string{"no", "yes"}); err != nil {
 			return err
 		} else if !ans {
 			return nil
@@ -121,12 +132,12 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		ritchieLocalWorkspace := d.ritchieHomeDir + localRepo
+		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
 		if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
 			return err
 		}
 
-		if err := d.deleteFormulaTreeJson(groups); err != nil {
+		if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
 			return err
 		}
 
@@ -141,7 +152,7 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 
 		deleteStdin := deleteFormulaStdin{}
 
-		if err := stdin.ReadJson(os.Stdin, &deleteStdin); err != nil {
+		if err := stdin.ReadJson(cmd.InOrStdin(), &deleteStdin); err != nil {
 			return err
 		}
 
@@ -149,12 +160,12 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		ritchieLocalWorkspace := d.ritchieHomeDir + localRepo
+		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
 		if err := d.deleteFormula(ritchieLocalWorkspace, deleteStdin.Groups, 0); err != nil {
 			return err
 		}
 
-		if err := d.deleteFormulaTreeJson(deleteStdin.Groups); err != nil {
+		if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
 			return err
 		}
 
@@ -201,7 +212,8 @@ func (d deleteFormulaCmd) deleteFormula(workspace string, groups []string, index
 		return nil
 	}
 
-	err := d.deleteFormula(workspace+"/"+groups[index], groups, index+1)
+	newWorkspace := filepath.Join(workspace, groups[index])
+	err := d.deleteFormula(newWorkspace, groups, index+1)
 	if err != nil {
 		return err
 	} else if index == 0 {
@@ -238,70 +250,16 @@ func canDelete(workspace string) (bool, error) {
 	return true, nil
 }
 
-func (d deleteFormulaCmd) deleteFormulaTreeJson(groups []string) error {
-	tree, err := d.treeManager.Tree()
+func (d deleteFormulaCmd) recriateTreeJson(workspace string) error {
+	localTree, err := d.treeGen.Generate(workspace)
 	if err != nil {
 		return err
 	}
 
-	localTree := tree["LOCAL"]
-	rootFormulaName := generateRootFormulaName(groups)
-	index := findCommandIdTreeJson(localTree, rootFormulaName)
-	if index == -1 {
-		return errors.New("Could not find formula in tree.json")
-	}
-
-	localTree = deleteCommandTreeJson(localTree, index)
-
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	if err := ioutil.WriteFile(d.ritchieHomeDir+localTreeJson, jsonString, os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json"), jsonString, os.ModePerm); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func generateRootFormulaName(groups []string) string {
-	var name = "root"
-	for _, group := range groups {
-		name += "_" + group
-	}
-
-	return name
-}
-
-func findCommandIdTreeJson(tree formula.Tree, id string) int {
-	for i, command := range tree.Commands {
-		if command.Id == id {
-			return i
-		}
-	}
-
-	return -1
-}
-
-func canDeleteFromTreeJson(tree formula.Tree, id string) bool {
-	for _, command := range tree.Commands {
-		if command.Parent == id {
-			return false
-		}
-	}
-
-	return true
-}
-
-func deleteCommandTreeJson(tree formula.Tree, index int) formula.Tree {
-	if index == -1 {
-		return tree
-	}
-
-	if canDeleteFromTreeJson(tree, tree.Commands[index].Id) {
-		parent := tree.Commands[index].Parent
-		tree.Commands = append(tree.Commands[:index], tree.Commands[index+1:]...)
-
-		parentIndex := findCommandIdTreeJson(tree, parent)
-		return deleteCommandTreeJson(tree, parentIndex)
-	} else {
-		return tree
-	}
 }

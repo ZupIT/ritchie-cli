@@ -17,67 +17,47 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestNewDeleteFormulaCmdStdin(t *testing.T) {
-	treeMock := treeMock{
-		tree: formula.Tree{
-			Commands: api.Commands{
-				{
-					Id:     "root_mock",
-					Parent: "root",
-					Usage:  "mock",
-					Help:   "mock for add",
-				},
-				{
-					Id:      "root_mock_test",
-					Parent:  "root_mock",
-					Usage:   "test",
-					Help:    "test for add",
-					Formula: true,
-				},
-			},
-		},
-		value: "LOCAL",
-	}
-
-	workspace := os.TempDir() + "/ritchie-formulas-local"
-
-	if err := os.MkdirAll(workspace+"/mock/test/scr", os.ModePerm); err != nil {
+	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmdStdin got error %v", err)
 	}
 
-	if err := os.MkdirAll(os.TempDir()+"/.rit/repos/local/mock/test/scr", os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "mock", "test", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmdStdin got error %v", err)
 	}
 
-	json := `{"workspace": "` + workspace + `", "groups": ["mock", "test"]}`
-	tmpfile, oldStdin, err := stdin.WriteToStdin(json)
-	defer os.Remove(tmpfile.Name())
-	defer func() { os.Stdin = oldStdin }()
-	if err != nil {
-		t.Errorf("TestNewDeleteFormulaCmdStdin got error %v", err)
-	}
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	treeGen := tree.NewGenerator(dirManager, fileManager)
 
 	cmd := NewDeleteFormulaCmd(
 		os.TempDir(),
-		os.TempDir()+"/.rit",
+		filepath.Join(os.TempDir(), ".rit"),
 		workspaceForm{},
 		dirMock{},
 		inputTrueMock{},
-		inputTextCustomMock{text: func(name string, required bool) (string, error) {
-			return workspace, nil
-		}},
-		inputListCustomMock{name: "Default (" + workspace + ")"},
-		treeMock,
+		inputTextMock{},
+		inputListMock{},
+		treeGen,
 	)
 	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
+
+	json := "{\"workspace\": \"" + workspace + "\", \"groups\": [\"mock\", \"test\"]}\n"
+	fmt.Println("JSON: " + json)
+	newReader := strings.NewReader(json)
+	cmd.SetIn(newReader)
+
 	if cmd == nil {
 		t.Errorf("NewDeleteFormulaCmd got %v", cmd)
 	}
