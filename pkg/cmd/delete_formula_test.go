@@ -22,12 +22,55 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-func TestNewDeleteFormulaCmd(t *testing.T) {
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
+// func TestNewDeleteFormulaCmd(t *testing.T) {
+// 	// fileManager := stream.NewFileManager()
+// 	// dirManager := stream.NewDirManager(fileManager)
+// 	treeMock := treeMock{
+// 		tree: formula.Tree{
+// 			Commands: api.Commands{
+// 				{
+// 					Id:     "root_mock",
+// 					Parent: "root",
+// 					Usage:  "mock",
+// 					Help:   "mock for add",
+// 				},
+// 				{
+// 					Id:      "root_mock_test",
+// 					Parent:  "root_mock",
+// 					Usage:   "test",
+// 					Help:    "test for add",
+// 					Formula: true,
+// 				},
+// 			},
+// 		},
+// 	}
+//
+// 	cmd := NewDeleteFormulaCmd(
+// 		os.TempDir(),
+// 		os.TempDir()+".rit",
+// 		workspaceForm{},
+// 		dirMock{},
+// 		inputTrueMock{},
+// 		inputTextCustomMock{text: func(name string, required bool) (string, error) {
+// 			return os.TempDir() + "ritchie-formulas-local", nil
+// 		}},
+// 		inputListCustomMock{name: "Default (" + os.TempDir() + "ritchie-formulas-local)"},
+// 		treeMock,
+// 	)
+// 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+// 	if cmd == nil {
+// 		t.Errorf("NewDeleteFormulaCmd got %v", cmd)
+// 	}
+//
+// 	if err := cmd.Execute(); err != nil {
+// 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+// 	}
+// }
+
+func TestNewCleanFormulasCmdStdin(t *testing.T) {
 	treeMock := treeMock{
 		tree: formula.Tree{
 			Commands: api.Commands{
@@ -48,17 +91,41 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		},
 	}
 
+	workspace := os.TempDir() + "ritchie-formulas-local"
+	os.MkdirAll(workspace + "/mock/test/scr", os.ModePerm)
+	os.MkdirAll(os.TempDir() + ".rit/repos/local/mock/test/scr", os.ModePerm)
+	json := `{"workspace": "` + workspace + `", "groups": ["mock", "test"]}`
+	tmpfile, oldStdin, err := stdin.WriteToStdin(json)
+	defer os.Remove(tmpfile.Name())
+	defer func() { os.Stdin = oldStdin }()
+	if err != nil {
+		t.Errorf("TestNewCleanFormulasCmdStdin got error %v", err)
+	}
+
 	cmd := NewDeleteFormulaCmd(
 		os.TempDir(),
-		os.TempDir()+".rit",
+		os.TempDir() + ".rit",
 		workspaceForm{},
-		dirManager,
+		dirMock{},
 		inputTrueMock{},
-		inputTextMock{},
-		inputListMock{},
+		inputTextCustomMock{text: func(name string, required bool) (string, error) {
+			return workspace, nil
+		}},
+		inputListCustomMock{name: "Default (" + workspace + ")"},
 		treeMock,
 	)
+	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 	if cmd == nil {
-		t.Errorf("NewDeleteFormulaCmd got %v", cmd)
+		t.Errorf("NewCleanFormulasCmd got %v", cmd)
 	}
+
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+}
+
+type dirMock struct {}
+
+func (d dirMock) List(_ string, _ bool) ([]string, error)  {
+	return []string{"ola"}, nil
 }
