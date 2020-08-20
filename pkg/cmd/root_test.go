@@ -20,47 +20,20 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestNewDeleteFormulaCmd(t *testing.T) {
+func TestNewRootCmd(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	treeMock := treeMock{
-		tree: formula.Tree{
-			Commands: api.Commands{
-				{
-					Id:     "root_mock",
-					Parent: "root",
-					Usage:  "mock",
-					Help:   "mock for add",
-				},
-				{
-					Id:      "root_mock_test",
-					Parent:  "root_mock",
-					Usage:   "test",
-					Help:    "test for add",
-					Formula: true,
-				},
-			},
-		},
-	}
-
-	cmd := NewDeleteFormulaCmd(
+	cmd := NewRootCmd(
 		os.TempDir(),
-		os.TempDir()+"/.rit",
-		workspaceForm{},
 		dirManager,
-		inputTrueMock{},
-		inputTextCustomWithoutValidateMock{text: os.TempDir() + "/ritchie-formulas-local"},
-		inputListCustomMock{name: os.TempDir() + "/ritchie-formulas-local"},
-		treeMock,
+		TutorialFinderMock{},
 	)
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
-		t.Errorf("NewDeleteFormulaCmd got %v", cmd)
+		t.Errorf("NewCreateFormulaCmd got %v", cmd)
+		return
 	}
 
 	if err := cmd.Execute(); err != nil {

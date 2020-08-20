@@ -19,7 +19,6 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -101,18 +100,6 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-
-		if wspace.Dir != defaultWorkspace {
-			if err := d.workspace.Validate(wspace); err != nil {
-				return err
-			}
-
-			if err := d.workspace.Add(wspace); err != nil {
-				return err
-			}
-		}
-
-		fmt.Println("WSPACE_DIR: " + wspace.Dir)
 
 		groups, err := d.readFormulas(wspace.Dir)
 		if err != nil {
