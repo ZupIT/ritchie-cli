@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
@@ -29,7 +28,7 @@ import (
 type tutorialCmd struct {
 	homePath string
 	prompt.InputList
-	rtutorial.FindSetter
+	tutorial rtutorial.FindSetter
 }
 
 const (
@@ -55,17 +54,19 @@ func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSette
 
 func (o tutorialCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
 		obj := struct {
 			Tutorial string `json:"tutorial"`
 		}{}
 
-		err := stdin.ReadJson(os.Stdin, &obj)
-		if err != nil {
+		if err := stdin.ReadJson(cmd.InOrStdin(), &obj); err != nil {
 			return err
 		}
 
-		fmt.Println(obj)
+		if _, err := o.tutorial.Set(obj.Tutorial); err != nil {
+			return err
+		}
+
+		prompt.Success("Set tutorial successful!")
 
 		return nil
 	}
@@ -76,7 +77,7 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 		msg := "Status tutorial?"
 		var statusTypes = []string{tutorialStatusEnabled, tutorialStatusDisabled}
 
-		tutorialHolder, err := o.Find()
+		tutorialHolder, err := o.tutorial.Find()
 		if err != nil {
 			return err
 		}
@@ -89,7 +90,7 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		_, err = o.Set(response)
+		_, err = o.tutorial.Set(response)
 		if err != nil {
 			return err
 		}

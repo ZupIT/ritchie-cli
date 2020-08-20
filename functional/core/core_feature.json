@@ -273,6 +273,17 @@
         "result": "Show current context."
     },
     {
+        "entry": "Create",
+        "steps": [
+            {
+                "key": "",
+                "value": "create",
+                "action": "main"
+            }
+        ],
+        "result": "Create a new formula."
+    },
+    {
         "entry": "Help",
         "steps": [
             {

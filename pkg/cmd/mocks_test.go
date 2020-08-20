@@ -394,6 +394,19 @@ func (TutorialFindSetterMock) Set(tutorial string) (rtutorial.TutorialHolder, er
 	return s.Set(tutorial)
 }
 
+type TutorialFindSetterCustomMock struct {
+	find func() (rtutorial.TutorialHolder, error)
+	set  func(tutorial string) (rtutorial.TutorialHolder, error)
+}
+
+func (t TutorialFindSetterCustomMock) Find() (rtutorial.TutorialHolder, error) {
+	return t.find()
+}
+
+func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHolder, error) {
+	return t.set(tutorial)
+}
+
 var (
 	defaultRepoAdderMock = repoListerAdderCustomMock{
 		add: func(d formula.Repo) error {
