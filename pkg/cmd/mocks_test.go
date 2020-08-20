@@ -338,9 +338,13 @@ func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, loc
 type treeMock struct {
 	tree  formula.Tree
 	error error
+	value string
 }
 
 func (t treeMock) Tree() (map[string]formula.Tree, error) {
+	if t.value != "" {
+		return map[string]formula.Tree{t.value: t.tree}, t.error
+	}
 	return map[string]formula.Tree{"test": t.tree}, t.error
 }
 

@@ -19,7 +19,6 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -102,18 +101,6 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-
-		if wspace.Dir != defaultWorkspace {
-			if err := d.workspace.Validate(wspace); err != nil {
-				return err
-			}
-
-			if err := d.workspace.Add(wspace); err != nil {
-				return err
-			}
-		}
-
-		fmt.Println("WSPACE_DIR: " + wspace.Dir)
 
 		groups, err := d.readFormulas(wspace.Dir)
 		if err != nil {
@@ -214,7 +201,7 @@ func (d deleteFormulaCmd) deleteFormula(workspace string, groups []string, index
 		return nil
 	}
 
-	err := d.deleteFormula(workspace + "/" + groups[index], groups, index+1)
+	err := d.deleteFormula(workspace+"/"+groups[index], groups, index+1)
 	if err != nil {
 		return err
 	} else if index == 0 {
@@ -267,7 +254,7 @@ func (d deleteFormulaCmd) deleteFormulaTreeJson(groups []string) error {
 	localTree = deleteCommandTreeJson(localTree, index)
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	if err := ioutil.WriteFile(d.ritchieHomeDir + localTreeJson, jsonString, os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(d.ritchieHomeDir+localTreeJson, jsonString, os.ModePerm); err != nil {
 		return err
 	}
 
