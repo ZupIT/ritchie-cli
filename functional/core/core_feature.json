@@ -198,6 +198,17 @@
         "result":"Set contexts, credentials and priorities for formula repositories."
     },
     {
+        "entry":"Update",
+        "steps":[
+            {
+                "key":"",
+                "value":"update",
+                "action":"main"
+            }
+        ],
+        "result":"Update repositories."
+    },
+    {
         "entry":"Update repo",
         "steps":[
             {
