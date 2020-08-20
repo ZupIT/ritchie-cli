@@ -51,9 +51,10 @@ executors:
     working_directory: ~/workspace
   
   ritchie-static-analisys-executor:
-    machine:
-      image: *PYTHONWITHGO_IMAGE
-    working_directory: ~/workspace
+   docker:
+      - image: *PYTHONWITHGO_IMAGE
+        user: root
+    working_directory: /workspace
 
   ritchie-executor:
     docker:
@@ -105,7 +106,7 @@ jobs:
           name: lint
           command: |
             golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
-            
+
   horus:
     executor: horus-executor
     steps:
