@@ -24,8 +24,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
@@ -39,7 +39,9 @@ import (
 const (
 	addRepoMsg         = "Run \"rit add repo\" to add a new repository manually."
 	AddCommonsQuestion = "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]"
-	AddMetricsQuestion = "To help us improve and deliver more value to the community, do you agree to let us collect anonymous data about product and feature use statistics and crash reports?"
+	AddMetricsQuestion = `To help us improve and deliver more value to the community, 
+do you agree to let us collect anonymous data about product 
+and feature use statistics and crash reports?`
 	AcceptMetrics      = "Yes, I agree to contribute with data anonymously"
 	DoNotAcceptMetrics = "No, not for now."
 )
@@ -82,6 +84,10 @@ func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutoria
 
 func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
+		if err := metricsAuthorization(in.InputList, in.FileWriteReadExister); err != nil {
+			return err
+		}
+
 		choose, err := in.List(AddCommonsQuestion, []string{"yes", "no"})
 		if err != nil {
 			return err
@@ -119,11 +125,6 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			}
 
 			s.Success(prompt.Green("Commons repository added successfully!"))
-		}
-
-		err = metricsAuthorization(in.InputList, in.FileWriteReadExister)
-		if err != nil {
-			return err
 		}
 
 		tutorialHolder, err := in.rt.Find()
@@ -202,9 +203,15 @@ func tutorialInit(tutorialStatus string) {
 }
 
 func metricsAuthorization(inList prompt.InputList, file stream.FileWriteReadExister) error {
-	const welcome = "\n\nWelcome to Ritchie!"
-	const header = "Ritchie is a platform that helps you and your team to save time by giving you the power to create powerful templates to execute important tasks across your team and organization with minimum time and with standards, delivering autonomy to developers with security.\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment."
-	const footer = "You can always modify your choice using the \"rit metrics\" command."
+	const welcome = "Welcome to Ritchie!\n"
+	const header = `Ritchie is a platform that helps you and your team to save time by 
+giving you the power to create powerful templates to execute important 
+tasks across your team and organization with minimum time and with standards, 
+delivering autonomy to developers with security.
+
+You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.
+`
+	const footer = "\nYou can always modify your choice using the \"rit metrics\" command.\n"
 	options := []string{AcceptMetrics, DoNotAcceptMetrics}
 
 	prompt.Info(welcome)
