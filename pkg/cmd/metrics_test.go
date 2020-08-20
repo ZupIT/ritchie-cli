@@ -11,9 +11,8 @@ import (
 
 func Test_metricsCmd_runPrompt(t *testing.T) {
 	type in struct {
-		file        stream.FileWriteReadExister
-		InputList   prompt.InputList
-		checkerMock CheckerMock
+		file  stream.FileWriteReadExister
+		input prompt.InputList
 	}
 
 	var tests = []struct {
@@ -36,9 +35,31 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return nil
 					},
 				},
-				InputList: inputListCustomMock{
+				input: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "yes", nil
+					},
+				},
+			},
+		},
+		{
+			name:    "success when not accept send metrics",
+			wantErr: false,
+			in: in{
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte("some data"), nil
+					},
+					WriteMock: func(path string, content []byte) error {
+						return nil
+					},
+				},
+				input: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "no", nil
 					},
 				},
 			},
@@ -58,7 +79,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return errors.New("reading file error")
 					},
 				},
-				InputList: inputListCustomMock{
+				input: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "yes", nil
 					},
@@ -80,59 +101,17 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 						return nil
 					},
 				},
-				InputList: inputListErrorMock{},
+				input: inputListErrorMock{},
 			},
-		},
-		{
-			name: "success when metrics file exist",
-			in: in{
-				file: sMocks.FileWriteReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					WriteMock: func(path string, content []byte) error {
-						return nil
-					},
-				},
-				checkerMock: CheckerMock{func() bool {
-					return true
-				}},
-			},
-			wantErr: false,
-		},
-		{
-			name: "fail on write when metrics file exist",
-			in: in{
-				file: sMocks.FileWriteReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					WriteMock: func(path string, content []byte) error {
-						return errors.New("error writing file")
-					},
-				},
-				checkerMock: CheckerMock{func() bool {
-					return false
-				}},
-			},
-			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			metricsCmd := NewMetricsCmd(tt.in.file, tt.in.InputList, tt.in.checkerMock)
+			metricsCmd := NewMetricsCmd(tt.in.file, tt.in.input)
 			if err := metricsCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("metrics command error = %v | error wanted: %v", err, tt.wantErr)
 			}
 		})
 	}
-}
-
-type CheckerMock struct {
-	CheckMock func() bool
-}
-
-func (cm CheckerMock) Check() bool {
-	return cm.CheckMock()
 }

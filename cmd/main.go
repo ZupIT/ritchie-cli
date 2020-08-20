@@ -55,19 +55,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func sendMetric(err ...string) {
-	metricEnable := metric.NewChecker(stream.NewFileManager())
-	if metricEnable.Check() {
-		var collectData metric.APIData
-		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
-		userIdManager := metric.NewUserIdGenerator()
-		data := metric.NewDataCollector(userIdManager)
-
-		collectData, _ = data.Collect(cmd.Version, err...)
-		metricManager.Send(collectData)
-	}
-}
-
 func main() {
 	rootCmd := buildCommands()
 	err := rootCmd.Execute()
@@ -133,7 +120,6 @@ func buildCommands() *cobra.Command {
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
-	metricsChecker := metric.NewChecker(fileManager)
 	formBuildMake := builder.NewBuildMake()
 	formBuildBat := builder.NewBuildBat(fileManager)
 	formBuildDocker := builder.NewBuildDocker()
@@ -171,7 +157,7 @@ func buildCommands() *cobra.Command {
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
-	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList, metricsChecker)
+	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2
@@ -263,4 +249,17 @@ func buildCommands() *cobra.Command {
 	templates.ActsAsRootCommand(rootCmd, nil, groups...)
 
 	return rootCmd
+}
+
+func sendMetric(err ...string) {
+	metricEnable := metric.NewChecker(stream.NewFileManager())
+	if metricEnable.Check() {
+		var collectData metric.APIData
+		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
+		userIdManager := metric.NewUserIdGenerator()
+		data := metric.NewDataCollector(userIdManager)
+
+		collectData, _ = data.Collect(cmd.Version, err...)
+		metricManager.Send(collectData)
+	}
 }
