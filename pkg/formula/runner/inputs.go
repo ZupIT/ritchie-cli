@@ -121,6 +121,10 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 		if err != nil {
 			return err
 		}
+		if !in.verifyConditional(cmd, input) {
+			continue
+		}
+
 		switch iType := input.Type; iType {
 		case "text":
 			if items != nil {
@@ -245,4 +249,44 @@ func (in InputManager) resolveIfReserved(input formula.Input) (string, error) {
 		return resolver.Resolve(input.Type)
 	}
 	return "", nil
+}
+
+func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) bool {
+	if input.Condition.Variable == "" {
+		return true
+	}
+
+	var value string
+	variable := input.Condition.Variable
+	for _, envVal := range cmd.Env {
+		components := strings.Split(envVal, "=")
+		if strings.ToLower(components[0]) == variable {
+			value = strings.ToLower(components[1])
+			break
+		}
+	}
+	if value == "" {
+		message := fmt.Sprintf("config.json: Conditional variable %s not found. Showing prompt item anyway.", variable)
+		prompt.Warning(message)
+		return true
+	}
+
+	// Currently using case implementation to avoid adding a dependency module or exposing
+	// the code to the risks of running an eval function on a user-defined variable
+	// optimizations are welcome, being mindful of the points above
+	switch input.Condition.Operator {
+	case "==": return value == input.Condition.Value
+	case "!=": return value != input.Condition.Value
+	case ">":  return value > input.Condition.Value
+	case ">=": return value >= input.Condition.Value
+	case "<":  return value < input.Condition.Value
+	case "<=": return value <= input.Condition.Value
+	default:
+		message := fmt.Sprintf(
+			"config.json: Conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=). Falling back to equality.",
+			input.Condition.Operator,
+		)
+		prompt.Warning(message)
+		return value == input.Condition.Value
+	}
 }

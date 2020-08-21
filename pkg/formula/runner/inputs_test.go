@@ -75,6 +75,11 @@ func TestInputManager_Inputs(t *testing.T) {
             "false",
             "true"
         ],
+		"condition": {
+			"variable": "sample_list",
+			"operator": "==",
+			"value": "in_list1"
+		},
         "label": "Pick: "
     },
     {
@@ -148,6 +153,19 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:       inputMock{text: ""},
 				iList:       inputMock{text: "Type new value?"},
+				iBool:       inputMock{boolean: false},
+				iPass:       inputMock{text: "******"},
+				inType:      api.Prompt,
+				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:        fileManager,
+			},
+			want: nil,
+		},
+		{
+			name: "success conditional prompt",
+			in: in{
+				iText:       inputMock{text: ""},
+				iList:       inputMock{text: "in_list1"},
 				iBool:       inputMock{boolean: false},
 				iPass:       inputMock{text: "******"},
 				inType:      api.Prompt,
