@@ -196,7 +196,7 @@ func buildCommands() *cobra.Command {
 	buildCmd.AddCommand(buildFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaRunner)
-	if err := formulaCmd.Add(rootCmd); err != nil {
+	if err := formulaCmd.Add(rootCmd, userHomeDir); err != nil {
 		panic(err)
 	}
 

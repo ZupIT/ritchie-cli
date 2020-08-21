@@ -36,6 +36,7 @@ func TestRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
+	homeDir, _ := os.UserHomeDir()
 	ritHome := filepath.Join(tmpDir, ".rit-runner")
 	repoPath := filepath.Join(ritHome, "repos", "commons")
 
@@ -189,7 +190,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager, ctxFinder)
-			got := runner.Run(in.def, api.Prompt, in.docker, false)
+			got := runner.Run(in.def, api.Prompt, in.docker, false, homeDir)
 
 			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.out.err)

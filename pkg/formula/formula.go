@@ -94,7 +94,7 @@ type PreRunner interface {
 }
 
 type Runner interface {
-	Run(def Definition, inputType api.TermInputType, docker bool, verbose bool) error
+	Run(def Definition, inputType api.TermInputType, docker bool, verbose bool, homeDir string) error
 }
 
 type PostRunner interface {

@@ -60,7 +60,7 @@ func NewFormulaRunner(
 	}
 }
 
-func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool, verbose bool) error {
+func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool, verbose bool, homeDir string) error {
 	setup, err := ru.PreRun(def, docker)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 			return err
 		}
 	} else {
-		cmd, err = ru.runDocker(setup, inputType, verbose)
+		cmd, err = ru.runDocker(setup, inputType, verbose, homeDir)
 		if err != nil {
 			return err
 		}
@@ -90,14 +90,14 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 	return nil
 }
 
-func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
+func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool, homeDir string) (*exec.Cmd, error) {
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
-	homeDir, _ := os.UserHomeDir()
+	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", homeDir)
 	var args []string
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", homeDir + "/.rit:/root/.rit", "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}
 	} else {
-		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "-v", homeDir + "/.rit:/root/.rit", "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}
 	}
 
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
