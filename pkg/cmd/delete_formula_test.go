@@ -45,7 +45,7 @@ func TestNewDeleteFormulaCmdStdin(t *testing.T) {
 		os.TempDir(),
 		filepath.Join(os.TempDir(), ".rit"),
 		workspaceForm{},
-		dirMock{},
+		dirManager,
 		inputTrueMock{},
 		inputTextMock{},
 		inputListMock{},
@@ -65,10 +65,4 @@ func TestNewDeleteFormulaCmdStdin(t *testing.T) {
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
-}
-
-type dirMock struct{}
-
-func (d dirMock) List(_ string, _ bool) ([]string, error) {
-	return []string{""}, nil
 }

@@ -48,7 +48,7 @@ type (
 		userHomeDir    string
 		ritchieHomeDir string
 		workspace      formula.WorkspaceAddListValidator
-		directory      stream.DirLister
+		directory      stream.DirListChecker
 		inBool         prompt.InputBool
 		inText         prompt.InputText
 		inList         prompt.InputList
@@ -60,7 +60,7 @@ func NewDeleteFormulaCmd(
 	userHomeDir string,
 	ritchieHomeDir string,
 	workspace formula.WorkspaceAddListValidator,
-	directory stream.DirLister,
+	directory stream.DirListChecker,
 	inBool prompt.InputBool,
 	inText prompt.InputText,
 	inList prompt.InputList,
@@ -95,7 +95,9 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		defaultWorkspace := filepath.Join(d.userHomeDir, formula.DefaultWorkspaceDir)
-		workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
+		if d.directory.Exists(defaultWorkspace) {
+			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
+		}
 
 		wspace, err := FormulaWorkspaceInput(workspaces, d.inList, d.inText)
 		if err != nil {
@@ -128,17 +130,20 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 			return nil
 		}
 
+		// Delete formula on user workspace
 		if err := d.deleteFormula(wspace.Dir, groups, 0); err != nil {
 			return err
 		}
 
 		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
-		if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
-			return err
-		}
+		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, groups) {
+			if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
+				return err
+			}
 
-		if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
-			return err
+			if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
+				return err
+			}
 		}
 
 		prompt.Success("✔ Formula successfully deleted!")
@@ -156,17 +161,20 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
+		// Delete formula on user workspace
 		if err := d.deleteFormula(deleteStdin.Workspace, deleteStdin.Groups, 0); err != nil {
 			return err
 		}
 
 		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
-		if err := d.deleteFormula(ritchieLocalWorkspace, deleteStdin.Groups, 0); err != nil {
-			return err
-		}
+		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, deleteStdin.Groups) {
+			if err := d.deleteFormula(ritchieLocalWorkspace, deleteStdin.Groups, 0); err != nil {
+				return err
+			}
 
-		if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
-			return err
+			if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -202,9 +210,9 @@ func (d deleteFormulaCmd) readFormulas(dir string) ([]string, error) {
 	return groups, nil
 }
 
-func (d deleteFormulaCmd) deleteFormula(workspace string, groups []string, index int) error {
+func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int) error {
 	if index == len(groups) {
-		err := os.RemoveAll(workspace)
+		err := os.RemoveAll(path)
 		if err != nil {
 			return err
 		}
@@ -212,42 +220,27 @@ func (d deleteFormulaCmd) deleteFormula(workspace string, groups []string, index
 		return nil
 	}
 
-	newWorkspace := filepath.Join(workspace, groups[index])
-	err := d.deleteFormula(newWorkspace, groups, index+1)
+	newPath := filepath.Join(path, groups[index])
+	err := d.deleteFormula(newPath, groups, index+1)
 	if err != nil {
 		return err
 	} else if index == 0 {
 		return nil
 	}
 
-	ok, err := canDelete(workspace)
+	ok, err := canDelete(path)
 	if err != nil {
 		return err
 	}
 
 	if ok {
-		err := os.RemoveAll(workspace)
+		err := os.RemoveAll(path)
 		if err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-func canDelete(workspace string) (bool, error) {
-	files, err := ioutil.ReadDir(workspace)
-	if err != nil {
-		return false, err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			return false, nil
-		}
-	}
-
-	return true, nil
 }
 
 func (d deleteFormulaCmd) recriateTreeJson(workspace string) error {
@@ -262,4 +255,29 @@ func (d deleteFormulaCmd) recriateTreeJson(workspace string) error {
 	}
 
 	return nil
+}
+
+func (d deleteFormulaCmd) formulaExistsInWorkspace(workspace string, groups []string) bool {
+	var path = workspace
+
+	for _, group := range groups {
+		path = filepath.Join(path, group)
+	}
+
+	return d.directory.Exists(path)
+}
+
+func canDelete(path string) (bool, error) {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return false, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
