@@ -46,7 +46,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/watcher"
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
@@ -133,14 +132,15 @@ func buildCommands() *cobra.Command {
 	watchManager := watcher.New(formulaLocalBuilder, dirManager)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaLocalBuilder)
 
-	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
-	defaultUpgradeResolver := version.DefaultVersionResolver{
-		StableVersionUrl: cmd.StableVersionUrl,
-		FileUtilService:  fileutil.DefaultService{},
-		HttpClient:       &http.Client{Timeout: 1 * time.Second},
-	}
-	defaultUrlFinder := upgrade.DefaultUrlFinder{}
-	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder)
+	versionManager := version.NewManager(
+		cmd.StableVersionUrl,
+		fileManager,
+		&http.Client{Timeout: 100 * time.Second},
+	)
+	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()
+	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)
+	defaultUrlFinder := upgrade.NewDefaultUrlFinder()
+	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder, versionManager)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -153,7 +153,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
+	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder)
 
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 

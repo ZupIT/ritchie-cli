@@ -29,6 +29,10 @@ type UrlFinder interface {
 
 type DefaultUrlFinder struct{}
 
+func NewDefaultUrlFinder() DefaultUrlFinder {
+	return DefaultUrlFinder{}
+}
+
 func (duf DefaultUrlFinder) Url(resolver version.Resolver) string {
 	stableVersion, err := resolver.StableVersion()
 	if err != nil {

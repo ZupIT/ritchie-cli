@@ -18,16 +18,13 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -49,7 +46,7 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 var (
 	Version          = ""
 	BuildDate        = "unknown"
-	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+	StableVersionUrl = "https://estou-com-sede-api.herokuapp.com"
 	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 
 	allowList = []string{
@@ -63,7 +60,7 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 		fmt.Sprintf("%s add repo", cmdUse),
 	}
-
+	// TODO y sprint? y array? - fix this
 	upgradeList = []string{
 		fmt.Sprint(cmdUse),
 	}
@@ -73,16 +70,27 @@ type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
 	rt          rtutorial.Finder
+	vm			version.Manager
 }
 
-func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker, rtf rtutorial.Finder) *cobra.Command {
-	o := &rootCmd{ritchieHome: ritchieHome, dir: dir, rt: rtf}
+func NewRootCmd(
+	ritchieHome string,
+	dir stream.DirCreateChecker,
+	rtf rtutorial.Finder,
+	vm version.Manager,
+	) *cobra.Command {
+	o := &rootCmd{
+		ritchieHome: ritchieHome,
+		dir: dir,
+		rt: rtf,
+		vm: vm,
+	}
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
-		Version:            versionFlag(),
+		Version:            versionFlag(vm),
 		PersistentPreRunE:  o.PreRunFunc(),
 		PersistentPostRunE: o.PostRunFunc(),
 		RunE:               runHelp,
@@ -115,8 +123,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 
 func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		verifyNewVersion(cmd)
-
+		verifyNewVersion(cmd, ro)
 		if !ro.ritchieIsInitialized() && cmd.Use == cmdUse {
 			tutorialHolder, err := ro.rt.Find()
 			if err != nil {
@@ -128,37 +135,40 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	}
 }
 
-func verifyNewVersion(cmd *cobra.Command) {
+func verifyNewVersion(cmd *cobra.Command, ro *rootCmd) {
 	if isAllowList(upgradeList, cmd) {
-		resolver := version.DefaultVersionResolver{
-			StableVersionUrl: StableVersionUrl,
-			FileUtilService:  fileutil.DefaultService{},
-			HttpClient:       &http.Client{Timeout: 1 * time.Second},
-		}
-		prompt.Warning(version.VerifyNewVersion(resolver, Version))
+		prompt.Warning(
+			version.VerifyNewVersion(ro.vm, Version))
 	}
 }
 
-func isAllowList(allowList []string, cmd *cobra.Command) bool {
-	return sliceutil.Contains(allowList, cmd.CommandPath())
+func isAllowList(upgradeList []string, cmd *cobra.Command) bool {
+	return sliceutil.Contains(upgradeList, cmd.CommandPath())
 }
 
 func isCompleteCmd(cmd *cobra.Command) bool {
 	return strings.Contains(cmd.CommandPath(), "__complete")
 }
 
-func versionFlag() string {
-	resolver := version.DefaultVersionResolver{
-		StableVersionUrl: StableVersionUrl,
-		FileUtilService:  fileutil.DefaultService{},
-		HttpClient:       &http.Client{Timeout: 1 * time.Second},
-	}
-	latestVersion, err := resolver.StableVersion()
+func versionFlag(vm version.Manager) string {
+	latestVersion, err := vm.StableVersion()
 	if err == nil && latestVersion != Version {
-		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
-		return fmt.Sprintf(versionMsgWithLatestVersion, Version, formattedLatestVersionMsg, BuildDate, runtime.Version())
+		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(
+			latestVersionMsg,
+			latestVersion))
+
+		return fmt.Sprintf(
+			versionMsgWithLatestVersion,
+			Version,
+			formattedLatestVersionMsg,
+			BuildDate,
+			runtime.Version())
 	}
-	return fmt.Sprintf(versionMsg, Version, BuildDate, runtime.Version())
+	return fmt.Sprintf(
+		versionMsg,
+		Version,
+		BuildDate,
+		runtime.Version())
 }
 
 func runHelp(cmd *cobra.Command, _ []string) error {

@@ -32,6 +32,10 @@ type DefaultManager struct {
 	Updater
 }
 
+func NewDefaultManager(Updater Updater) DefaultManager {
+	return DefaultManager{Updater:Updater}
+}
+
 func (m DefaultManager) Run(upgradeUrl string) error {
 	if upgradeUrl == "" {
 		return errors.New("fail to resolve upgrade url")

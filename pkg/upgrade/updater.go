@@ -32,6 +32,10 @@ type Updater interface {
 
 type DefaultUpdater struct{}
 
+func NewDefaultUpdater() DefaultUpdater {
+	return DefaultUpdater{}
+}
+
 func (u DefaultUpdater) Apply(reader io.Reader, opts update.Options) error {
 	return update.Apply(reader, opts)
 }
