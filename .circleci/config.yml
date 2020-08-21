@@ -7,9 +7,9 @@ references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
+    pythonwithgo : &PYTHONWITHGO_IMAGE ritclizup/pythonwithgo:1.0
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
-    horus: &HORUS_IMAGE library/docker:dind
     ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
     centos: &CENTOS_IMAGE viniciusramosdefaria/centos-circleci:7.0
     windows: &WINDOWS_IMAGE windows-server-2019
@@ -49,6 +49,12 @@ executors:
     machine:
       image: *CI_MACHINE_IMAGE
     working_directory: ~/workspace
+  
+  ritchie-static-analisys-executor:
+    docker:
+      - image: *PYTHONWITHGO_IMAGE
+        user: root
+    working_directory: /workspace
 
   ritchie-executor:
     docker:
@@ -57,9 +63,8 @@ executors:
     working_directory: /workspace
 
   horus-executor:
-    docker:
-      - image: *HORUS_IMAGE
-        user: root
+    machine:
+      image: ubuntu-1604:202004-01
 
   delivery-executor:
     docker:
@@ -94,34 +99,23 @@ executors:
 
 jobs:
   lint:
-    executor: ritchie-tests-executor
+    executor: ritchie-static-analisys-executor
     steps:
       - checkout
       - run:
-          name: Install golangci-lint
-          command: |
-            download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
-            wget -O- -q $download |sudo sh -s -- -b /go/bin/ v1.24.0
-      - run:
           name: lint
           command: |
-            /go/bin/golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
+            golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
+
   horus:
     executor: horus-executor
-    environment:
-      <<: *ENVIRONMENT
     steps:
-      - setup_remote_docker
+      - checkout
       - run:
           name: Horus Security Analysis
           command: |
-            echo "Starting scan Horus..."
-            docker run --rm -e HORUS_CLIENT_REPO_URL=$HORUS_CLIENT_REPO_URL \
-            -e HORUS_CLIENT_REPO_BRANCH=$HORUS_CLIENT_REPO_BRANCH \
-            -e HORUS_CLIENT_API_ADDR=$HORUS_CLIENT_API_ADDR \
-            -e HORUS_CLIENT_TOKEN=$HORUS_CLIENT_TOKEN \
-            -e HORUS_CLIENT_API_USE_HTTPS=$HORUS_CLIENT_API_USE_HTTPS \
-            -e HORUS_VULNERABILITY_CHECK=$HORUS_VULNERABILITY_CHECK horuszup/horus-client:latest
+            curl -fsSL https://horus-assets.s3.amazonaws.com/install.sh | bash
+            horus start -p ./ -i testdata,vendor
 
   unit_test:
     executor: ritchie-tests-executor
