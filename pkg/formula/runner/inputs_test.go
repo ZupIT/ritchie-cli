@@ -19,6 +19,7 @@ package runner
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -75,11 +76,6 @@ func TestInputManager_Inputs(t *testing.T) {
             "false",
             "true"
         ],
-		"condition": {
-			"variable": "sample_list",
-			"operator": "==",
-			"value": "in_list1"
-		},
         "label": "Pick: "
     },
     {
@@ -153,19 +149,6 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:       inputMock{text: ""},
 				iList:       inputMock{text: "Type new value?"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManager,
-			},
-			want: nil,
-		},
-		{
-			name: "success conditional prompt",
-			in: in{
-				iText:       inputMock{text: ""},
-				iList:       inputMock{text: "in_list1"},
 				iBool:       inputMock{boolean: false},
 				iPass:       inputMock{text: "******"},
 				inType:      api.Prompt,
@@ -299,6 +282,138 @@ func TestInputManager_Inputs(t *testing.T) {
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestInputManager_ConditionalInputs(t *testing.T) {
+
+	inputJson := `[
+	{
+        "name": "sample_list",
+        "type": "text",
+        "default": "in1",
+        "items": [
+            "in_list1",
+            "in_list2",
+            "in_list3",
+            "in_listN"
+        ],
+ 		"cache": {
+            "active": true,
+            "qty": 3,
+            "newLabel": "Type new value?"
+        },
+        "label": "Pick your : "
+    },
+ 	{
+        "name": "sample_text",
+        "type": "text",
+        "label": "Type : ",
+		"default": "test",
+		"condition": {
+			"variable": "%s",
+			"operator": "%s",
+			"value":    "in_list1"
+		}
+    }
+]`
+
+	fileManager := stream.NewFileManager()
+
+	type in struct {
+		variable       string
+		operator       string
+	}
+
+	tests := []struct {
+		name string
+		in   in
+	}{
+		{
+			name: "equal conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "==",
+			},
+		},
+		{
+			name: "not equal conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "!=",
+			},
+		},
+		{
+			name: "greater than conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    ">",
+			},
+		},
+		{
+			name: "greater than or equal to conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    ">=",
+			},
+		},
+		{
+			name: "less than conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "<",
+			},
+		},
+		{
+			name: "less than or equal to conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "<=",
+			},
+		},
+		{
+			name: "wrong operator conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "eq",
+			},
+		},
+		{
+			name: "non-existing variable conditional",
+			in: in{
+				variable:    "non_existing",
+				operator:    "==",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(fmt.Sprintf(inputJson, tt.in.variable, tt.in.operator)), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iText := inputMock{text: DefaultCacheNewLabel}
+			iList := inputMock{text: "in_list1"}
+			iBool := inputMock{boolean: false}
+			iPass := inputMock{text: "******"}
+
+			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iBool, iPass)
+
+			cmd := &exec.Cmd{}
+
+			got := inputManager.Inputs(cmd, setup, api.Prompt)
+
+			if got != nil {
+				t.Errorf("Error on conditional Inputs(%s): %v", tt.name, got)
 			}
 		})
 	}
