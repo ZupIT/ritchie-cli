@@ -22,9 +22,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
-
 	"k8s.io/kubectl/pkg/util/templates"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
@@ -34,6 +31,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
@@ -57,10 +57,14 @@ import (
 
 func main() {
 	rootCmd := buildCommands()
-	if err := rootCmd.Execute(); err != nil {
+	err := rootCmd.Execute()
+	if err != nil {
+		sendMetric(err.Error())
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %+v\n", err)
 		os.Exit(1)
 	}
+
+	sendMetric()
 }
 
 func buildCommands() *cobra.Command {
@@ -116,7 +120,6 @@ func buildCommands() *cobra.Command {
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
-
 	formBuildMake := builder.NewBuildMake()
 	formBuildBat := builder.NewBuildBat(fileManager)
 	formBuildDocker := builder.NewBuildDocker()
@@ -147,14 +150,14 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, inputBool)
+	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, inputList, fileManager)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
 	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
-
+	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2
@@ -216,6 +219,7 @@ func buildCommands() *cobra.Command {
 				buildCmd,
 				upgradeCmd,
 				tutorialCmd,
+				metricsCmd,
 			},
 		},
 	}
@@ -245,4 +249,17 @@ func buildCommands() *cobra.Command {
 	templates.ActsAsRootCommand(rootCmd, nil, groups...)
 
 	return rootCmd
+}
+
+func sendMetric(err ...string) {
+	metricEnable := metric.NewChecker(stream.NewFileManager())
+	if metricEnable.Check() {
+		var collectData metric.APIData
+		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
+		userIdManager := metric.NewUserIdGenerator()
+		data := metric.NewDataCollector(userIdManager)
+
+		collectData, _ = data.Collect(cmd.Version, err...)
+		metricManager.Send(collectData)
+	}
 }

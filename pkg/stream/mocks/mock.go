@@ -44,3 +44,23 @@ type FileWriterMock struct{}
 func (FileWriterMock) Write(path string, content []byte) error {
 	return nil
 }
+
+type FileWriteReadExisterCustomMock struct {
+	WriteMock  func(path string, content []byte) error
+	ReadMock   func(path string) ([]byte, error)
+	ExistsMock func(path string) bool
+}
+
+func (f FileWriteReadExisterCustomMock) Read(path string) ([]byte, error) {
+	return f.ReadMock(path)
+}
+
+
+func (f FileWriteReadExisterCustomMock) Exists(path string) bool {
+	return f.ExistsMock(path)
+}
+
+func (f FileWriteReadExisterCustomMock) Write(path string, content []byte) error {
+	return f.WriteMock(path, content)
+}
+

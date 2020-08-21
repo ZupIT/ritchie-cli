@@ -125,12 +125,6 @@ func (inputFalseMock) Bool(name string, items []string) (bool, error) {
 	return false, nil
 }
 
-type inputBoolErrorMock struct{}
-
-func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
-	return true, errors.New("some error")
-}
-
 type inputListMock struct{}
 
 func (inputListMock) List(name string, items []string) (string, error) {
@@ -138,11 +132,11 @@ func (inputListMock) List(name string, items []string) (string, error) {
 }
 
 type inputListCustomMock struct {
-	name string
+	list func(name string, items []string) (string, error)
 }
 
 func (m inputListCustomMock) List(name string, items []string) (string, error) {
-	return m.name, nil
+	return m.list(name, items)
 }
 
 type inputListErrorMock struct{}
