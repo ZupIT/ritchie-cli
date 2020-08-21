@@ -317,5 +317,37 @@
             }
         ],
         "result":"Use \"rit <command> --help\" for more information about a given command."
+    },
+    {
+        "entry":"Tutorial enable",
+        "steps":[
+            {
+                "key":"",
+                "value":"tutorial",
+                "action":"main"
+            },
+            {
+                "key":"Status tutorial?",
+                "value":"enabled",
+                "action":"select"
+            }
+        ],
+        "result":"Set tutorial successful!"
+    },
+    {
+        "entry":"Tutorial disable",
+        "steps":[
+            {
+                "key":"",
+                "value":"tutorial",
+                "action":"main"
+            },
+            {
+                "key":"Status tutorial?",
+                "value":"disabled",
+                "action":"sendkey"
+            }
+        ],
+        "result":"Set tutorial successful!"
     }
 ]
