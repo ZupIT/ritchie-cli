@@ -37,18 +37,18 @@ func NewResolver(cf credential.Finder, cs credential.Setter, passwordInput promp
 
 func (c CredentialResolver) Resolve(name string) (string, error) {
 	s := strings.Split(strings.ToLower(name), "_")
-	service := s[1]
+	provider := s[1]
 	key := s[2]
-	cred, err := c.Find(service)
+	cred, err := c.Find(provider)
 	if err != nil {
 		// Provider was never set
-		cred.Service = service
-		return c.PromptCredential(service, key, cred)
+		cred.Service = provider
+		return c.PromptCredential(provider, key, cred)
 	}
 	credValue, exists := cred.Credential[key]
 	if !exists {
 		// Provider exists but the expected key doesn't
-		return c.PromptCredential(service, key, cred)
+		return c.PromptCredential(provider, key, cred)
 	}
 
 	// Provider and key exist
@@ -56,9 +56,8 @@ func (c CredentialResolver) Resolve(name string) (string, error) {
 }
 
 func (c CredentialResolver) PromptCredential(provider, key string, credentialDetail credential.Detail) (string, error) {
-	inputVal, err := c.Password(
-		fmt.Sprintf("Provider key not found, please provide a value for %s %s: ", provider, key),
-	)
+	message := fmt.Sprintf("Provider key not found, please provide a value for %s %s: ", provider, key)
+	inputVal, err := c.Password(message)
 	if err != nil {
 		return "", err
 	}
