@@ -125,7 +125,7 @@ func buildCommands() *cobra.Command {
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewPreRun(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
-	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup, fileManager, ctxFinder)
+	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup, fileManager, ctxFinder, userHomeDir)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -196,7 +196,7 @@ func buildCommands() *cobra.Command {
 	buildCmd.AddCommand(buildFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaRunner)
-	if err := formulaCmd.Add(rootCmd, userHomeDir); err != nil {
+	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}
 

@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"os"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -27,8 +26,6 @@ import (
 )
 
 func TestFormulaCommand_Add(t *testing.T) {
-	homeDir, _ := os.UserHomeDir()
-
 	treeMock := treeMock{
 		tree: formula.Tree{
 			Commands: api.Commands{
@@ -53,7 +50,7 @@ func TestFormulaCommand_Add(t *testing.T) {
 		Use: "rit",
 	}
 	rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	got := formulaCmd.Add(rootCmd, homeDir)
+	got := formulaCmd.Add(rootCmd)
 	if got != nil {
 		t.Errorf("Add got %v, want nil", got)
 	}

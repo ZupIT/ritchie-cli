@@ -54,7 +54,7 @@ func NewFormulaCommand(
 	}
 }
 
-func (f FormulaCommand) Add(root *cobra.Command, homeDir string) error {
+func (f FormulaCommand) Add(root *cobra.Command) error {
 	treeRep := f.treeManager.MergedTree(false)
 	commands := make(map[string]*cobra.Command)
 	commands[rootCmdName] = root
@@ -64,7 +64,7 @@ func (f FormulaCommand) Add(root *cobra.Command, homeDir string) error {
 		if !sliceutil.ContainsCmd(f.coreCmds, cmdPath) {
 			var newCmd *cobra.Command
 			if cmd.Formula {
-				newCmd = f.newFormulaCmd(cmd, homeDir)
+				newCmd = f.newFormulaCmd(cmd)
 			} else {
 				newCmd = newSubCmd(cmd)
 			}
@@ -94,7 +94,7 @@ func newSubCmd(cmd api.Command) *cobra.Command {
 	return c
 }
 
-func (f FormulaCommand) newFormulaCmd(cmd api.Command, homeDir string) *cobra.Command {
+func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	formulaCmd := &cobra.Command{
 		Use:   cmd.Usage,
 		Short: cmd.Help,
@@ -104,12 +104,12 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command, homeDir string) *cobra.Co
 	addFlags(formulaCmd)
 	path := strings.ReplaceAll(strings.Replace(cmd.Parent, "root", "", 1), "_", string(os.PathSeparator))
 	path = fmt.Sprintf("%s%s%s", path, string(os.PathSeparator), cmd.Usage)
-	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, path, homeDir)
+	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, path)
 
 	return formulaCmd
 }
 
-func (f FormulaCommand) execFormulaFunc(repo, path string, homeDir string) func(cmd *cobra.Command, args []string) error {
+func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		d := formula.Definition{
 			Path:     path,
@@ -136,7 +136,7 @@ func (f FormulaCommand) execFormulaFunc(repo, path string, homeDir string) func(
 			return err
 		}
 
-		if err := f.formula.Run(d, inputType, docker, verbose, homeDir); err != nil {
+		if err := f.formula.Run(d, inputType, docker, verbose); err != nil {
 			return err
 		}
 

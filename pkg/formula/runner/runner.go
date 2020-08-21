@@ -42,6 +42,7 @@ type RunManager struct {
 	formula.PreRunner
 	file stream.FileWriteExistAppender
 	ctx  rcontext.Finder
+	homeDir string
 }
 
 func NewFormulaRunner(
@@ -50,6 +51,7 @@ func NewFormulaRunner(
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
 	ctx rcontext.Finder,
+	homeDir string,
 ) formula.Runner {
 	return RunManager{
 		PostRunner:  postRun,
@@ -57,10 +59,11 @@ func NewFormulaRunner(
 		PreRunner:   preRun,
 		file:        file,
 		ctx:         ctx,
+		homeDir:     homeDir,
 	}
 }
 
-func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool, verbose bool, homeDir string) error {
+func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool, verbose bool) error {
 	setup, err := ru.PreRun(def, docker)
 	if err != nil {
 		return err
@@ -73,7 +76,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 			return err
 		}
 	} else {
-		cmd, err = ru.runDocker(setup, inputType, verbose, homeDir)
+		cmd, err = ru.runDocker(setup, inputType, verbose)
 		if err != nil {
 			return err
 		}
@@ -90,9 +93,9 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 	return nil
 }
 
-func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool, homeDir string) (*exec.Cmd, error) {
+func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
-	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", homeDir)
+	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir)
 	var args []string
 	if isatty.IsTerminal(os.Stdout.Fd()) {
 		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}

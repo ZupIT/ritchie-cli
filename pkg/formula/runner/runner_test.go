@@ -189,8 +189,8 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager, ctxFinder)
-			got := runner.Run(in.def, api.Prompt, in.docker, false, homeDir)
+			runner := NewFormulaRunner(in.postRun, in.inputRun, in.preRun, in.fileManager, ctxFinder, homeDir)
+			got := runner.Run(in.def, api.Prompt, in.docker, false)
 
 			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
 				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.out.err)

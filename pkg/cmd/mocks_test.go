@@ -331,7 +331,7 @@ type runnerMock struct {
 	error error
 }
 
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool, verbose bool, homeDir string) error {
+func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool, verbose bool) error {
 	return r.error
 }
 
