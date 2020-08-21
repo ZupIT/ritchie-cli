@@ -16,7 +16,6 @@ require (
 	github.com/onsi/gomega v1.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/radovskyb/watcher v1.0.7
-	github.com/ramya-rao-a/go-outline v0.0.0-20200117021646-2a048b4510eb // indirect
 	github.com/spf13/cobra v1.0.0
 	k8s.io/kubectl v0.18.4
 )
