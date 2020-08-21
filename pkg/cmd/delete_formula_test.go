@@ -53,7 +53,7 @@ func TestNewDeleteFormulaCmdStdin(t *testing.T) {
 	)
 	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 
-	json := "{\"workspace\": \"" + workspace + "\", \"groups\": [\"mock\", \"test\"]}\n"
+	json := fmt.Sprintf("{\"workspace\": \"%s\", \"groups\": [\"mock\", \"test\"]}\n", workspace)
 	fmt.Println("JSON: " + json)
 	newReader := strings.NewReader(json)
 	cmd.SetIn(newReader)
