@@ -74,8 +74,12 @@ func TestTutorialRunAnyEntry(t *testing.T) {
 		{
 			name: "Run With Success when set tutorial enabled",
 			fields: fields{
-				InputList: inputListCustomMock{name: "enabled"},
-				tutorial:  TutorialFindSetterMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "enabled", nil
+					},
+				},
+				tutorial: TutorialFindSetterMock{},
 			},
 			wantErr:    false,
 			inputStdin: "{\"tutorial\": \"enabled\"}\n",
@@ -83,8 +87,12 @@ func TestTutorialRunAnyEntry(t *testing.T) {
 		{
 			name: "Run With Success when set tutorial disabled",
 			fields: fields{
-				InputList: inputListCustomMock{name: "disabled"},
-				tutorial:  TutorialFindSetterMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "disabled", nil
+					},
+				},
+				tutorial: TutorialFindSetterMock{},
 			},
 			wantErr:    false,
 			inputStdin: "{\"tutorial\": \"disabled\"}\n",
@@ -92,7 +100,11 @@ func TestTutorialRunAnyEntry(t *testing.T) {
 		{
 			name: "Return error when set return error",
 			fields: fields{
-				InputList: inputListCustomMock{name: "enabled"},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "enabled", nil
+					},
+				},
 				tutorial: TutorialFindSetterCustomMock{
 					set: func(tutorial string) (rtutorial.TutorialHolder, error) {
 						return tutorialHolderEnabled, errors.New("some error")
@@ -141,7 +153,11 @@ func TestTutorialRunOnlyPrompt(t *testing.T) {
 		{
 			name: "Return error when find return error",
 			fields: fields{
-				InputList: inputListCustomMock{name: "enabled"},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "enabled", nil
+					},
+				},
 				tutorial: TutorialFindSetterCustomMock{
 					find: func() (rtutorial.TutorialHolder, error) {
 						return tutorialHolderEnabled, errors.New("some error")
