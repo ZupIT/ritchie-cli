@@ -28,7 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-var (
+const (
 	// MsgUpgrade error message to inform user to upgrade rit version
 	MsgRitUpgrade = "\nWarning: Rit has a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
@@ -72,12 +72,14 @@ func (m Manager) UpdateCache() error {
 	return err
 }
 
+
 func (m Manager) StableVersion() (string, error) {
 	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
 	cacheData, err := m.file.Read(cachePath)
 	if err != nil {
 		return "", err
 	}
+
 	cache := &stableVersionCache{}
 
 	if err = json.Unmarshal(cacheData, cache); err != nil {

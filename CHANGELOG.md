@@ -1,5 +1,63 @@
 # Changelog
 
+## [2.0.4](https://github.com/zupit/ritchie-cli/tree/2.0.4) (2020-08-21)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.3...2.0.4)
+
+**Implemented enhancements:**
+
+- \[FEATURE\] Functional tests for update [\#415](https://github.com/ZupIT/ritchie-cli/issues/415)
+- Functional tests for create [\#413](https://github.com/ZupIT/ritchie-cli/issues/413)
+- \[FEATURE\] Functional tests for list credential [\#411](https://github.com/ZupIT/ritchie-cli/issues/411)
+- \[FEATURE\] Functional tests for list [\#410](https://github.com/ZupIT/ritchie-cli/issues/410)
+- \[FEATURE\] Add entry by stdin in the init command [\#396](https://github.com/ZupIT/ritchie-cli/issues/396)
+- \[FEATURE\] Create new command "rit metrics" [\#374](https://github.com/ZupIT/ritchie-cli/issues/374)
+- \[FEATURE\] Process and send metrics to server [\#370](https://github.com/ZupIT/ritchie-cli/issues/370)
+- \[FEATURE\] Send formula commands metrics [\#369](https://github.com/ZupIT/ritchie-cli/issues/369)
+- \[FEATURE\] Collect commands metrics [\#368](https://github.com/ZupIT/ritchie-cli/issues/368)
+- \[FEATURE\] Ask on init if user want to send usage metrics [\#367](https://github.com/ZupIT/ritchie-cli/issues/367)
+- Add entry via stdin to the init command [\#426](https://github.com/ZupIT/ritchie-cli/pull/426) ([brunats](https://github.com/brunats))
+- \[FEATURE\] Add EMAIL to provider variables [\#395](https://github.com/ZupIT/ritchie-cli/pull/395) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+- Formatted metric text in init command [\#451](https://github.com/ZupIT/ritchie-cli/pull/451) ([kaduartur](https://github.com/kaduartur))
+- Add collect metric to the main file [\#450](https://github.com/ZupIT/ritchie-cli/pull/450) ([kaduartur](https://github.com/kaduartur))
+- Collect Product Metrics [\#449](https://github.com/ZupIT/ritchie-cli/pull/449) ([kaduartur](https://github.com/kaduartur))
+- Create HTTP and gRPC client to metrics [\#441](https://github.com/ZupIT/ritchie-cli/pull/441) ([kaduartur](https://github.com/kaduartur))
+- Collector function for metrics [\#429](https://github.com/ZupIT/ritchie-cli/pull/429) ([victor-schumacher](https://github.com/victor-schumacher))
+- Adds question about metrics in init [\#420](https://github.com/ZupIT/ritchie-cli/pull/420) ([brunats](https://github.com/brunats))
+- \[FEATURE\] add metrics command [\#394](https://github.com/ZupIT/ritchie-cli/pull/394) ([victor-schumacher](https://github.com/victor-schumacher))
+- \[FEATURE\] Create implementation to UserIdGenerator [\#379](https://github.com/ZupIT/ritchie-cli/pull/379) ([kaduartur](https://github.com/kaduartur))
+- \[FEATURE\] Create interface for metrics [\#375](https://github.com/ZupIT/ritchie-cli/pull/375) ([kaduartur](https://github.com/kaduartur))
+
+**Fixed bugs:**
+
+- \[BUG\] Creating python formulas with dependencies [\#223](https://github.com/ZupIT/ritchie-cli/issues/223)
+- \[BUG\]Error on login when password contains special character [\#168](https://github.com/ZupIT/ritchie-cli/issues/168)
+- \[BUG\] Conflict between V1 and V2 releases [\#445](https://github.com/ZupIT/ritchie-cli/issues/445)
+- Standardized metrics command [\#452](https://github.com/ZupIT/ritchie-cli/pull/452) ([kaduartur](https://github.com/kaduartur))
+- Fix tutorial test [\#460](https://github.com/ZupIT/ritchie-cli/pull/460) ([kaduartur](https://github.com/kaduartur))
+- \[FIX\] Change pipeline lint [\#453](https://github.com/ZupIT/ritchie-cli/pull/453) ([ernelio](https://github.com/ernelio))
+- Fix version.sh expression [\#446](https://github.com/ZupIT/ritchie-cli/pull/446) ([kaduartur](https://github.com/kaduartur))
+
+**Closed issues:**
+
+- Update and improve issues templates [\#421](https://github.com/ZupIT/ritchie-cli/issues/421)
+
+**Merged pull requests:**
+
+- Add functional test for update [\#457](https://github.com/ZupIT/ritchie-cli/pull/457) ([DittrichLucas](https://github.com/DittrichLucas))
+- Add functional test for create [\#448](https://github.com/ZupIT/ritchie-cli/pull/448) ([DittrichLucas](https://github.com/DittrichLucas))
+- Add functional test for list credential [\#442](https://github.com/ZupIT/ritchie-cli/pull/442) ([DittrichLucas](https://github.com/DittrichLucas))
+- Updating Horus pipeline job [\#434](https://github.com/ZupIT/ritchie-cli/pull/434) ([nathannascimentozup](https://github.com/nathannascimentozup))
+- Add functional test for list [\#430](https://github.com/ZupIT/ritchie-cli/pull/430) ([DittrichLucas](https://github.com/DittrichLucas))
+- \[ENHANCEMENT\] Hello world formula command in README [\#401](https://github.com/ZupIT/ritchie-cli/pull/401) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+- Improves inputListCustomMock to use a custom function [\#400](https://github.com/ZupIT/ritchie-cli/pull/400) ([brunats](https://github.com/brunats))
+- Release 2.0.3 merge [\#377](https://github.com/ZupIT/ritchie-cli/pull/377) ([zup-ci](https://github.com/zup-ci))
+- Update tutorial on stdin and add tests [\#435](https://github.com/ZupIT/ritchie-cli/pull/435) ([brunats](https://github.com/brunats))
+- Update issues templates [\#424](https://github.com/ZupIT/ritchie-cli/pull/424) ([brunats](https://github.com/brunats))
+- Improves issues templates [\#422](https://github.com/ZupIT/ritchie-cli/pull/422) ([brunasilvazup](https://github.com/brunasilvazup))
+- Metrics check [\#405](https://github.com/ZupIT/ritchie-cli/pull/405) ([victor-schumacher](https://github.com/victor-schumacher))
+- \[ENHANCEMENT\] build formula tutorial [\#378](https://github.com/ZupIT/ritchie-cli/pull/378) ([victor-schumacher](https://github.com/victor-schumacher))
+
 ## [2.0.3](https://github.com/zupit/ritchie-cli/tree/2.0.3) (2020-08-07)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/1.0.0...2.0.3)
@@ -146,6 +204,7 @@
 **Merged pull requests:**
 
 - Release 1.0.0-beta.21 merge [\#299](https://github.com/ZupIT/ritchie-cli/pull/299) ([zup-ci](https://github.com/zup-ci))
+- Fix tests and code style for lint [\#296](https://github.com/ZupIT/ritchie-cli/pull/296) ([viniciussousazup](https://github.com/viniciussousazup))
 - \[Suggest\] Pull review guidelines according to last meeting [\#292](https://github.com/ZupIT/ritchie-cli/pull/292) ([henriquemoraes8](https://github.com/henriquemoraes8))
 
 ## [1.0.0-beta.21](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.21) (2020-07-20)

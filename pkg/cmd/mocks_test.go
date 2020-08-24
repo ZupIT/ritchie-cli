@@ -101,9 +101,9 @@ func (inputPasswordMock) Password(label string) (string, error) {
 	return "s3cr3t", nil
 }
 
-type inputPasswordErrorMock struct {}
+type inputPasswordErrorMock struct{}
 
-func (inputPasswordErrorMock) Password(label string) (string, error){
+func (inputPasswordErrorMock) Password(label string) (string, error) {
 	return "", errors.New("password error")
 }
 
@@ -132,11 +132,11 @@ func (inputListMock) List(name string, items []string) (string, error) {
 }
 
 type inputListCustomMock struct {
-	name string
+	list func(name string, items []string) (string, error)
 }
 
 func (m inputListCustomMock) List(name string, items []string) (string, error) {
-	return m.name, nil
+	return m.list(name, items)
 }
 
 type inputListErrorMock struct{}
@@ -289,19 +289,19 @@ func (s credSettingsMock) CredentialsPath() string {
 }
 
 type credSettingsCustomMock struct {
-	ReadCredentialsValueMock func(path string)([]credential.ListCredData, error)
-	ReadCredentialsFieldsMock func(path string) (credential.Fields, error)
+	ReadCredentialsValueMock          func(path string) ([]credential.ListCredData, error)
+	ReadCredentialsFieldsMock         func(path string) (credential.Fields, error)
 	WriteDefaultCredentialsFieldsMock func(path string) error
-	WriteCredentialsFieldsMock func (fields credential.Fields, path string) error
-	ProviderPathMock func () string
-	CredentialsPathMock func () string
+	WriteCredentialsFieldsMock        func(fields credential.Fields, path string) error
+	ProviderPathMock                  func() string
+	CredentialsPathMock               func() string
 }
 
 func (cscm credSettingsCustomMock) ReadCredentialsFields(path string) (credential.Fields, error) {
 	return cscm.ReadCredentialsFieldsMock(path)
 }
 
-func (cscm credSettingsCustomMock) ReadCredentialsValue (path string)([]credential.ListCredData, error) {
+func (cscm credSettingsCustomMock) ReadCredentialsValue(path string) ([]credential.ListCredData, error) {
 	return cscm.ReadCredentialsValueMock(path)
 }
 
@@ -320,8 +320,6 @@ func (cscm credSettingsCustomMock) ProviderPath() string {
 func (cscm credSettingsCustomMock) CredentialsPath() string {
 	return ""
 }
-
-
 
 type runnerMock struct {
 	error error
@@ -384,6 +382,19 @@ func (TutorialFindSetterMock) Find() (rtutorial.TutorialHolder, error) {
 func (TutorialFindSetterMock) Set(tutorial string) (rtutorial.TutorialHolder, error) {
 	s := TutorialSetterMock{}
 	return s.Set(tutorial)
+}
+
+type TutorialFindSetterCustomMock struct {
+	find func() (rtutorial.TutorialHolder, error)
+	set  func(tutorial string) (rtutorial.TutorialHolder, error)
+}
+
+func (t TutorialFindSetterCustomMock) Find() (rtutorial.TutorialHolder, error) {
+	return t.find()
+}
+
+func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHolder, error) {
+	return t.set(tutorial)
 }
 
 var (
