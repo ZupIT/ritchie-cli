@@ -46,7 +46,6 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 var (
 	Version          = ""
 	BuildDate        = "unknown"
-	StableVersionUrl = "https://estou-com-sede-api.herokuapp.com"
 	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 
 	allowList = []string{
@@ -62,7 +61,7 @@ var (
 	}
 	// TODO y sprint? y array? - fix this
 	upgradeList = []string{
-		fmt.Sprint(cmdUse),
+		cmdUse,
 	}
 )
 
@@ -108,7 +107,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if isAllowList(allowList, cmd) || isCompleteCmd(cmd) {
+		if isUpgradeCommand(allowList, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
 
@@ -123,7 +122,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 
 func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		verifyNewVersion(cmd, ro)
+		printNewVersionMessage(cmd, ro)
 		if !ro.ritchieIsInitialized() && cmd.Use == cmdUse {
 			tutorialHolder, err := ro.rt.Find()
 			if err != nil {
@@ -135,14 +134,13 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	}
 }
 
-func verifyNewVersion(cmd *cobra.Command, ro *rootCmd) {
-	if isAllowList(upgradeList, cmd) {
-		prompt.Warning(
-			version.VerifyNewVersion(ro.vm, Version))
+func printNewVersionMessage(cmd *cobra.Command, ro *rootCmd) {
+	if isUpgradeCommand(upgradeList, cmd) {
+		prompt.Warning(version.VerifyNewVersion(ro.vm, Version))
 	}
 }
 
-func isAllowList(upgradeList []string, cmd *cobra.Command) bool {
+func isUpgradeCommand(upgradeList []string, cmd *cobra.Command) bool {
 	return sliceutil.Contains(upgradeList, cmd.CommandPath())
 }
 

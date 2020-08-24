@@ -133,7 +133,7 @@ func buildCommands() *cobra.Command {
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaLocalBuilder)
 
 	versionManager := version.NewManager(
-		cmd.StableVersionUrl,
+		version.StableVersionUrl,
 		fileManager,
 		&http.Client{Timeout: 100 * time.Second},
 	)

@@ -33,12 +33,14 @@ var (
 	MsgRitUpgrade = "\nWarning: Rit has a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
+
+	StableVersionUrl = "https://estou-com-sede-api.herokuapp.com"
 )
 
 type Manager struct {
 	stableUrl string
 	file      stream.FileWriteReadExister
-	http      *http.Client
+	http      http.Client
 }
 
 var _ Manager = Manager{}
@@ -50,7 +52,7 @@ func NewManager(
 	return Manager{
 		stableUrl: stableVersionUrl,
 		file:      file,
-		http:      http,
+		http:      *http,
 	}
 }
 
@@ -108,7 +110,7 @@ func VerifyNewVersion(resolve Resolver, currentVersion string) string {
 }
 
 
-func requestStableVersion(httpClient *http.Client, stableVersionUrl string) (string, error) {
+func requestStableVersion(httpClient http.Client, stableVersionUrl string) (string, error) {
 	request, err := http.NewRequest(http.MethodGet, stableVersionUrl, nil)
 	if err != nil {
 		return "", err
@@ -119,9 +121,9 @@ func requestStableVersion(httpClient *http.Client, stableVersionUrl string) (str
 		return "", err
 	}
 
-	// if response.Status != http.StatusText(200) {
-	// 	return "", nil
-	// }
+	if response.Status != http.StatusText(200) {
+		return "", nil
+	}
 
 	stableVersionBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
