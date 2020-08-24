@@ -297,6 +297,17 @@
         "result":"Create a new formula."
     },
     {
+        "entry":"Build",
+        "steps":[
+            {
+                "key":"",
+                "value":"build",
+                "action":"main"
+            }
+        ],
+        "result":"Build formula with latest changes."
+    },
+    {
         "entry":"Help",
         "steps":[
             {
