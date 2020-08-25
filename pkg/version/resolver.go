@@ -19,4 +19,5 @@ package version
 type Resolver interface {
 	StableVersion() (string, error)
 	UpdateCache() error
+	VerifyNewVersion(resolve Resolver, currentVersion string) string
 }

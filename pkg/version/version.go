@@ -18,6 +18,7 @@ package version
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -100,8 +101,8 @@ func (m Manager) StableVersion() (string, error) {
 	return cache.Stable, nil
 }
 
-func VerifyNewVersion(resolve Resolver, currentVersion string) string {
-	stableVersion, err := resolve.StableVersion()
+func (m Manager) VerifyNewVersion(currentVersion string) string {
+	stableVersion, err := m.StableVersion()
 	if err != nil {
 		return ""
 	}
@@ -113,18 +114,15 @@ func VerifyNewVersion(resolve Resolver, currentVersion string) string {
 
 
 func requestStableVersion(httpClient http.Client, stableVersionUrl string) (string, error) {
-	request, err := http.NewRequest(http.MethodGet, stableVersionUrl, nil)
-	if err != nil {
-		return "", err
-	}
+	request, _ := http.NewRequest(http.MethodGet, stableVersionUrl, nil)
 
 	response, err := httpClient.Do(request)
 	if err != nil {
 		return "", err
 	}
 
-	if response.Status != http.StatusText(200) {
-		return "", nil
+	if response.StatusCode != http.StatusOK {
+		return "", errors.New("response status is not 200")
 	}
 
 	stableVersionBytes, err := ioutil.ReadAll(response.Body)
@@ -143,12 +141,9 @@ func saveCache(stableVersion string, cachePath string, file stream.FileWriteRead
 		ExpiresAt: time.Now().Add(time.Hour * 10).Unix(),
 	}
 
-	newCacheJson, err := json.Marshal(newCache)
-	if err != nil {
-		return err
-	}
+	newCacheJson, _ := json.Marshal(newCache)
 
-	err = file.Write(cachePath, newCacheJson)
+	err := file.Write(cachePath, newCacheJson)
 	return err
 }
 

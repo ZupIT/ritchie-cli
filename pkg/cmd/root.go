@@ -136,7 +136,7 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 
 func printNewVersionMessage(cmd *cobra.Command, ro *rootCmd) {
 	if isUpgradeCommand(upgradeList, cmd) {
-		prompt.Warning(version.VerifyNewVersion(ro.vm, Version))
+		prompt.Warning(ro.vm.VerifyNewVersion(ro.vm, Version))
 	}
 }
 
