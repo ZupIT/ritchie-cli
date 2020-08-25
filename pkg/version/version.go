@@ -35,7 +35,7 @@ const (
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
 
-	StableVersionUrl = "https://estou-com-sede-api.herokuapp.com"
+	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
 )
 
 type Manager struct {
@@ -61,18 +61,6 @@ type stableVersionCache struct {
 	Stable    string `json:"stableVersion"`
 	ExpiresAt int64  `json:"expiresAt"`
 }
-
-func (m Manager) UpdateCache() error {
-	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
-	stableVersion, err := requestStableVersion(m.http, m.stableUrl)
-	if err != nil {
-		return err
-	}
-
-	err = saveCache(stableVersion, cachePath, m.file)
-	return err
-}
-
 
 func (m Manager) StableVersion() (string, error) {
 	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
@@ -101,15 +89,22 @@ func (m Manager) StableVersion() (string, error) {
 	return cache.Stable, nil
 }
 
-func (m Manager) VerifyNewVersion(currentVersion string) string {
-	stableVersion, err := m.StableVersion()
-	if err != nil {
-		return ""
-	}
-	if currentVersion != stableVersion && currentVersion != "" {
+func (m Manager) VerifyNewVersion(current, installed string) string {
+	if current != installed && current != "" {
 		return MsgRitUpgrade
 	}
 	return ""
+}
+
+func (m Manager) UpdateCache() error {
+	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
+	stableVersion, err := requestStableVersion(m.http, m.stableUrl)
+	if err != nil {
+		return err
+	}
+
+	err = saveCache(stableVersion, cachePath, m.file)
+	return err
 }
 
 

@@ -45,6 +45,21 @@ func (FileWriterMock) Write(path string, content []byte) error {
 	return nil
 }
 
+type FileWriteReadExisterMock struct {}
+
+func (FileWriteReadExisterMock) Write(path string, content []byte) error {
+	return nil
+}
+
+func (FileWriteReadExisterMock) Read(path string) ([]byte, error) {
+	return []byte(""), nil
+}
+
+func (FileWriteReadExisterMock) Exists(path string) bool {
+	return true
+}
+
+
 type FileWriteReadExisterCustomMock struct {
 	WriteMock  func(path string, content []byte) error
 	ReadMock   func(path string) ([]byte, error)

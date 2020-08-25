@@ -44,12 +44,12 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	Version          = ""
-	BuildDate        = "unknown"
-	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
+	Version   = ""
+	BuildDate = "unknown"
+	MsgInit   = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 
 	allowList = []string{
-		fmt.Sprint(cmdUse),
+		cmdUse,
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
@@ -59,7 +59,6 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 		fmt.Sprintf("%s add repo", cmdUse),
 	}
-	// TODO y sprint? y array? - fix this
 	upgradeList = []string{
 		cmdUse,
 	}
@@ -69,7 +68,7 @@ type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
 	rt          rtutorial.Finder
-	vm			version.Manager
+	vm          version.Manager
 }
 
 func NewRootCmd(
@@ -77,12 +76,12 @@ func NewRootCmd(
 	dir stream.DirCreateChecker,
 	rtf rtutorial.Finder,
 	vm version.Manager,
-	) *cobra.Command {
+) *cobra.Command {
 	o := &rootCmd{
 		ritchieHome: ritchieHome,
-		dir: dir,
-		rt: rtf,
-		vm: vm,
+		dir:         dir,
+		rt:          rtf,
+		vm:          vm,
 	}
 
 	cmd := &cobra.Command{
@@ -136,7 +135,8 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 
 func printNewVersionMessage(cmd *cobra.Command, ro *rootCmd) {
 	if isUpgradeCommand(upgradeList, cmd) {
-		prompt.Warning(ro.vm.VerifyNewVersion(ro.vm, Version))
+		currentStable, _ := ro.vm.StableVersion()
+		prompt.Warning(ro.vm.VerifyNewVersion(currentStable, Version))
 	}
 }
 
