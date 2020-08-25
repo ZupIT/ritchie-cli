@@ -28,6 +28,7 @@ import (
 type stubResolver struct {
 	stableVersion func() (string, error)
 	updateCache   func() error
+	verifyNewVersion func(current, installed string) string
 }
 
 func (r stubResolver) StableVersion() (string, error) {
@@ -36,6 +37,10 @@ func (r stubResolver) StableVersion() (string, error) {
 
 func (r stubResolver) UpdateCache() error {
 	return r.updateCache()
+}
+
+func (r stubResolver) VerifyNewVersion(current, installed string) string {
+	return r.verifyNewVersion(current, installed)
 }
 
 func TestUpgradeUrl(t *testing.T) {

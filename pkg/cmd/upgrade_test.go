@@ -55,7 +55,7 @@ func (vr stubVersionResolver) UpdateCache() error {
 }
 
 func (vr stubVersionResolver) VerifyNewVersion(current, installed string) string {
-	return vr.VerifyNewVersion(current, installed)
+	return vr.verifyNewVersion(current, installed)
 }
 
 func TestUpgradeCmd_runFunc(t *testing.T) {
