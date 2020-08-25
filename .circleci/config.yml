@@ -7,7 +7,7 @@ references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
-    pythonwithgo : &PYTHONWITHGO_IMAGE ritclizup/pythonwithgo:1.0
+    pythonwithgo : &PYTHONWITHGO_IMAGE cimg/go:1.14
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
     ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
