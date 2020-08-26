@@ -31,7 +31,6 @@ references:
         - qa
         - nightly
         - beta
-        - /^test.*/
 
   filters-release: &FILTERS_RELEASE
     branches:
@@ -44,6 +43,7 @@ references:
         - /^pull\/.*$/
         - /^feature.*/
         - master
+        - /^test.*/
 
 executors:
   ritchie-tests-executor:
