@@ -19,9 +19,9 @@ references:
 
   environment: &ENVIRONMENT
     TEST_RESULTS_DIR: *TEST_RESULTS_DIR
-    GIT_EMAIL : "ld.dittrich@gmail.com"
-    GIT_USERNAME: "DittrichLucas"
-    GIT_NAME: "Lucas Dittrich"
+    GIT_EMAIL : "zup-ci@zup.com.br"
+    GIT_USERNAME: "zup-ci"
+    GIT_NAME: "Zup CI"
     BUILD_IMAGE: *GOLANG_IMAGE
     VERSION_PLACEHOLDER: 2.0.0PLACEHOLDER
 
@@ -43,7 +43,6 @@ references:
         - /^pull\/.*$/
         - /^feature.*/
         - master
-        - /^test.*/
 
 executors:
   ritchie-tests-executor:
