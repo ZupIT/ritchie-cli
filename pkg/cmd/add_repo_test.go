@@ -63,6 +63,24 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Run with success",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "Fail when repo.List return err",
 			fields: fields{
 				repo: repoListerAdderCustomMock{
