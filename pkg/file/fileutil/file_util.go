@@ -18,37 +18,9 @@ package fileutil
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 )
-
-// Copy copies a src file to a dst file where src and dst are regular files.
-// Deprecated: use the stream package to work with files and directories
-func Copy(src, dst string) error {
-	sourceFileStat, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	if !sourceFileStat.Mode().IsRegular() {
-		return fmt.Errorf("%s is not a regular file", src)
-	}
-
-	source, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-
-	destination, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer destination.Close()
-	_, err = io.Copy(destination, source)
-	return err
-}
 
 // Exists check if file exists
 // Deprecated: use the stream package to work with files and directories
@@ -83,16 +55,6 @@ func RemoveDir(dir string) error {
 	return nil
 }
 
-// CopySymLink copies src symLink to dst symLink
-// Deprecated: use the stream package to work with files and directories
-func CopySymLink(source, dest string) error {
-	link, err := os.Readlink(source)
-	if err != nil {
-		return err
-	}
-	return os.Symlink(link, dest)
-}
-
 // ReadFile wrapper for ioutil.ReadFile
 // Deprecated: use the stream package to work with files and directories
 func ReadFile(path string) ([]byte, error) {
@@ -104,11 +66,6 @@ func ReadFile(path string) ([]byte, error) {
 	return f, err
 }
 
-// WriteFile wrapper for ioutil.WriteFile
-// Deprecated: use the stream package to work with files and directories
-func WriteFile(path string, content []byte) error {
-	return ioutil.WriteFile(path, content, 0644)
-}
 
 // WriteFilePerm wrapper for ioutil.WriteFile
 // Deprecated: use the stream package to work with files and directories
