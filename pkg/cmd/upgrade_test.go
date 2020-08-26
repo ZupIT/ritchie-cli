@@ -36,7 +36,7 @@ type stubUrlFinder struct {
 	url func(resolver version.Resolver) string
 }
 
-func (uf stubUrlFinder) Url(resolver version.Resolver) string {
+func (uf stubUrlFinder) Url(resolver version.Resolver, os string) string {
 	return uf.url(resolver)
 }
 

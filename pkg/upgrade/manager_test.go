@@ -113,9 +113,8 @@ func TestDefaultManager_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := DefaultManager{
-				Updater: tt.fields.Updater,
-			}
+
+			m := NewDefaultManager(tt.fields.Updater)
 			if err := m.Run(tt.args.upgradeUrl); (err != nil) != tt.wantErr {
 				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
 			}

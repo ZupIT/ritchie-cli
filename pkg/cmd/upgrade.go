@@ -17,6 +17,8 @@
 package cmd
 
 import (
+	"runtime"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -52,7 +54,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return prompt.NewError(err.Error()+"\n")
 		}
-		upgradeUrl := u.Url(u.resolver)
+		upgradeUrl := u.Url(u.resolver , runtime.GOOS)
 		err = u.Run(upgradeUrl)
 		if err != nil {
 			return prompt.NewError(err.Error()+"\n")

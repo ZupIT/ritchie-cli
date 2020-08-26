@@ -18,13 +18,12 @@ package upgrade
 
 import (
 	"fmt"
-	"runtime"
 
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
 type UrlFinder interface {
-	Url(resolver version.Resolver) string
+	Url(resolver version.Resolver, os string) string
 }
 
 type DefaultUrlFinder struct{}
@@ -33,15 +32,15 @@ func NewDefaultUrlFinder() DefaultUrlFinder {
 	return DefaultUrlFinder{}
 }
 
-func (duf DefaultUrlFinder) Url(resolver version.Resolver) string {
+func (duf DefaultUrlFinder) Url(resolver version.Resolver, os string) string {
 	stableVersion, err := resolver.StableVersion()
 	if err != nil {
 		return ""
 	}
 
-	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, runtime.GOOS)
+	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, os)
 
-	if runtime.GOOS == "windows" {
+	if os == "windows" {
 		upgradeUrl += ".exe"
 	}
 
