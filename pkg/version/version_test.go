@@ -28,24 +28,6 @@ import (
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
-type ManagerStub struct {
-	stableVersion    func() (string, error)
-	verifyNewVersion func(resolve Resolver, currentVersion string) string
-	updateCache      func() error
-}
-
-func (r ManagerStub) StableVersion() (string, error) {
-	return r.stableVersion()
-}
-
-func (r ManagerStub) UpdateCache() error {
-	return r.updateCache()
-}
-
-func (r ManagerStub) VerifyNewVersion(resolve Resolver, currentVersion string) string {
-	return r.verifyNewVersion(resolve, currentVersion)
-}
-
 var defaultVersion = "2.0.4"
 
 func buildStableBody(expiresAt int64) []byte {
