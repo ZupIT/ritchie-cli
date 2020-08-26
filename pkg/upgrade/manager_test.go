@@ -35,87 +35,73 @@ func (u stubUpdater) Apply(reader io.Reader, opts update.Options) error {
 }
 
 func TestDefaultManager_Run(t *testing.T) {
-	type fields struct {
-		Updater Updater
+	type in struct {
+		updater    updater
+		upgradeUrl string
 	}
 	type args struct {
-		upgradeUrl string
 	}
 	tests := []struct {
 		name    string
-		fields  fields
+		in      in
 		args    args
 		wantErr bool
 	}{
 		{
 			name: "Run with success",
-			args: args{
+			in: in{
+				updater:    NewDefaultUpdater(),
 				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
-			},
-			fields: fields{
-				Updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
-					return nil
-				}},
 			},
 			wantErr: false,
 		},
 		{
 			name: "Should return err when url is empty",
-			args: args{
-				upgradeUrl: "",
-			},
-			fields: fields{
-				Updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
+			in: in{
+				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
 					return nil
 				}},
+				upgradeUrl: "",
 			},
 			wantErr: true,
 		},
 		{
 			name: "Should return err when happening err when perform get",
-			args: args{
-				upgradeUrl: "some url",
-			},
-			fields: fields{
-				Updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
+			in: in{
+				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
 					return nil
 				}},
+				upgradeUrl: "some url",
 			},
 			wantErr: true,
 		},
 		{
 			name: "Should return err when get return not 200 code",
-			args: args{
+			in: in{
+				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
+					return nil
+				}},
 				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(404)
 				})).URL,
-			},
-			fields: fields{
-				Updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
-					return nil
-				}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "Should return err when fail to apply",
-			args: args{
-				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
-			},
-			fields: fields{
-				Updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
+			in: in{
+				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
 					return errors.New("some error")
 				}},
+				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
 			},
 			wantErr: true,
 		},
-
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			m := NewDefaultManager(tt.fields.Updater)
-			if err := m.Run(tt.args.upgradeUrl); (err != nil) != tt.wantErr {
+			m := NewDefaultManager(tt.in.updater)
+			if err := m.Run(tt.in.upgradeUrl); (err != nil) != tt.wantErr {
 				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

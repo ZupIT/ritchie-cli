@@ -26,7 +26,7 @@ const (
 	upgradeUrlFormat = "https://commons-repo.ritchiecli.io/%s/%s/rit"
 )
 
-type Updater interface {
+type updater interface {
 	Apply(reader io.Reader, opts update.Options) error
 }
 
