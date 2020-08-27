@@ -109,7 +109,10 @@ func (m Manager) UpdateCache() error {
 
 
 func requestStableVersion(httpClient http.Client, stableVersionUrl string) (string, error) {
-	request, _ := http.NewRequest(http.MethodGet, stableVersionUrl, nil)
+	request, _ := http.NewRequest(
+		http.MethodGet,
+		stableVersionUrl,
+		nil)
 
 	response, err := httpClient.Do(request)
 	if err != nil {
@@ -130,7 +133,11 @@ func requestStableVersion(httpClient http.Client, stableVersionUrl string) (stri
 	return stableVersion, nil
 }
 
-func saveCache(stableVersion string, cachePath string, file stream.FileWriteReadExister) error {
+func saveCache(
+	stableVersion string,
+	cachePath string,
+	file stream.FileWriteReadExister,
+	) error {
 	newCache := stableVersionCache{
 		Stable:    stableVersion,
 		ExpiresAt: time.Now().Add(time.Hour * 10).Unix(),

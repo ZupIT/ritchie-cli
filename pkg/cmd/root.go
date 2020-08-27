@@ -114,7 +114,6 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
-
 		return nil
 	}
 }
@@ -151,10 +150,7 @@ func isCompleteCmd(cmd *cobra.Command) bool {
 func versionFlag(vm version.Manager) string {
 	latestVersion, err := vm.StableVersion()
 	if err == nil && latestVersion != Version {
-		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(
-			latestVersionMsg,
-			latestVersion))
-
+		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
 		return fmt.Sprintf(
 			versionMsgWithLatestVersion,
 			Version,
@@ -187,6 +183,5 @@ func tutorialRit(tutorialStatus string) {
 
 func (ro *rootCmd) ritchieIsInitialized() bool {
 	commonsRepoPath := filepath.Join(ro.ritchieHome, "repos", "commons")
-
 	return ro.dir.Exists(commonsRepoPath)
 }

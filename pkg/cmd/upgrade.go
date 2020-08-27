@@ -54,11 +54,13 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return prompt.NewError(err.Error()+"\n")
 		}
+
 		upgradeUrl := u.Url(u.resolver , runtime.GOOS)
-		err = u.Run(upgradeUrl)
-		if err != nil {
+		if err := u.Run(upgradeUrl); err != nil {
 			return prompt.NewError(err.Error()+"\n")
+
 		}
+
 		prompt.Success("Rit upgraded with success")
 		return nil
 	}
