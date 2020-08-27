@@ -264,6 +264,17 @@
         "result":"# fish completion for rit"
     },
     {
+        "entry":"Completion powershell",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion powershell",
+                "action":"main"
+            }
+        ],
+        "result":"using namespace System.Management.Automation"
+    },
+    {
         "entry":"Version",
         "steps":[
             {
