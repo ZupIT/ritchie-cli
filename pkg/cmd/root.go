@@ -76,8 +76,7 @@ func NewRootCmd(
 	dir stream.DirCreateChecker,
 	rtf rtutorial.Finder,
 	vm version.Manager,
-) *cobra.Command {
-	o := &rootCmd{
+) *cobra.Command { o := &rootCmd{
 		ritchieHome: ritchieHome,
 		dir:         dir,
 		rt:          rtf,
@@ -96,7 +95,6 @@ func NewRootCmd(
 		TraverseChildren:   true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-
 	return cmd
 }
 
@@ -151,15 +149,13 @@ func versionFlag(vm version.Manager) string {
 	latestVersion, err := vm.StableVersion()
 	if err == nil && latestVersion != Version {
 		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
-		return fmt.Sprintf(
-			versionMsgWithLatestVersion,
+		return fmt.Sprintf(versionMsgWithLatestVersion,
 			Version,
 			formattedLatestVersionMsg,
 			BuildDate,
 			runtime.Version())
 	}
-	return fmt.Sprintf(
-		versionMsg,
+	return fmt.Sprintf(versionMsg,
 		Version,
 		BuildDate,
 		runtime.Version())
@@ -177,7 +173,7 @@ func tutorialRit(tutorialStatus string) {
 	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
-		fmt.Println(MessageBody)
+		fmt.Print(MessageBody)
 	}
 }
 

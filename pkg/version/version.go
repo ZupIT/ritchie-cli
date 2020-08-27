@@ -63,7 +63,9 @@ type stableVersionCache struct {
 }
 
 func (m Manager) StableVersion() (string, error) {
-	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
+	cachePath := filepath.Join(
+		api.RitchieHomeDir(),
+		stableVersionFileCache)
 	cacheData, err := m.file.Read(cachePath)
 	if err != nil {
 		return "", err
@@ -97,7 +99,10 @@ func (m Manager) VerifyNewVersion(current, installed string) string {
 }
 
 func (m Manager) UpdateCache() error {
-	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
+	cachePath := filepath.Join(
+		api.RitchieHomeDir(),
+		stableVersionFileCache)
+
 	stableVersion, err := requestStableVersion(m.http, m.stableUrl)
 	if err != nil {
 		return err
