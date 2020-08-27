@@ -33,9 +33,10 @@ import (
 )
 
 const (
-	newWorkspace = "Type new formula workspace?"
-	docsDir      = "docs"
-	srcDir       = "src"
+	newWorkspace               = "Type new formula workspace?"
+	docsDir                    = "docs"
+	srcDir                     = "src"
+	questionSelectFormulaGroup = "Select a formula or group: "
 )
 
 type buildFormulaCmd struct {
@@ -180,7 +181,7 @@ func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string
 		dirs = sliceutil.Remove(dirs, srcDir)
 	}
 
-	selected, err := b.List("Select a formula or group: ", dirs)
+	selected, err := b.List(questionSelectFormulaGroup, dirs)
 	if err != nil {
 		return "", err
 	}
