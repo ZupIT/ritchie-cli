@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -32,21 +33,23 @@ import (
 const (
 	subCommand  = " SUBCOMMAND"
 	Group       = "group"
-	dockerFlag  = "docker"
 	verboseFlag = "verbose"
 	rootCmdName = "root"
 )
 
+var ErrRunFormulaWithTwoFlag = errors.New("you cannot run formula with --docker and --local flags togethers")
+
 type FormulaCommand struct {
 	coreCmds    api.Commands
 	treeManager formula.TreeManager
-	formula     formula.Runner
+	formula     formula.Executor
 }
 
 func NewFormulaCommand(
 	coreCmds api.Commands,
 	treeManager formula.TreeManager,
-	formula formula.Runner) *FormulaCommand {
+	formula formula.Executor,
+) *FormulaCommand {
 	return &FormulaCommand{
 		coreCmds:    coreCmds,
 		treeManager: treeManager,
@@ -111,11 +114,6 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 
 func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		d := formula.Definition{
-			Path:     path,
-			RepoName: repo,
-		}
-
 		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
 		if err != nil {
 			return err
@@ -125,18 +123,45 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			inputType = api.Stdin
 		}
 
-		docker, err := cmd.Flags().GetBool(dockerFlag)
+		docker, err := cmd.Flags().GetBool(formula.Docker.String())
+		if err != nil {
+			return err
+		}
+
+		local, err := cmd.Flags().GetBool(formula.Local.String())
 		if err != nil {
 			return err
 		}
 
 		verbose, err := cmd.Flags().GetBool(verboseFlag)
-
 		if err != nil {
 			return err
 		}
 
-		if err := f.formula.Run(d, inputType, docker, verbose); err != nil {
+		if docker && local {
+			return ErrRunFormulaWithTwoFlag
+		}
+
+		runType := formula.RunnerType(-1)
+		if docker {
+			runType = formula.Docker
+		}
+
+		if local {
+			runType = formula.Local
+		}
+
+		exe := formula.ExecuteData{
+			Def: formula.Definition{
+				Path:     path,
+				RepoName: repo,
+			},
+			InType:  inputType,
+			RunType: runType,
+			Verbose: verbose,
+		}
+
+		if err := f.formula.Execute(exe); err != nil {
 			return err
 		}
 
@@ -146,6 +171,7 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
-	formulaFlags.BoolP(dockerFlag, "d", false, "Use to run formulas inside docker")
+	formulaFlags.BoolP(formula.Docker.String(), "d", false, "Use to run formulas inside docker")
+	formulaFlags.BoolP(formula.Local.String(), "l", false, "Use to run formulas locally")
 	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
 }

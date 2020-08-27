@@ -45,7 +45,7 @@ func TestFormulaCommand_Add(t *testing.T) {
 			},
 		},
 	}
-	formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, runnerMock{})
+	formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, FormulaExecutorMock{})
 	rootCmd := &cobra.Command{
 		Use: "rit",
 	}

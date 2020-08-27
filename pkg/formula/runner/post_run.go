@@ -35,7 +35,7 @@ func NewPostRunner(file stream.FileMoveRemover, dir stream.DirRemover) PostRunne
 
 func (po PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 	if docker {
-		if err := po.file.Remove(envFile); err != nil {
+		if err := po.file.Remove(".env"); err != nil {
 			return err
 		}
 	}

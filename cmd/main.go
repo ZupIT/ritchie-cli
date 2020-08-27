@@ -30,6 +30,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/docker"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/local"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
@@ -60,7 +62,9 @@ func main() {
 	err := rootCmd.Execute()
 	if err != nil {
 		sendMetric(err.Error())
-		_, _ = fmt.Fprintf(os.Stderr, "Error: %+v\n", err)
+		errFmt := fmt.Sprintf("%+v", err)
+		errFmt = prompt.Red(errFmt)
+		_, _ = fmt.Fprintf(os.Stderr, "Error: %s\n", errFmt)
 		os.Exit(1)
 	}
 
@@ -127,8 +131,20 @@ func buildCommands() *cobra.Command {
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
-	formulaSetup := runner.NewPreRun(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
-	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup, fileManager, ctxFinder, userHomeDir)
+
+	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, dirManager, fileManager)
+	formulaLocalRun := local.NewRunner(postRunner, inputManager, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
+
+	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
+	formulaDockerRun := docker.NewRunner(postRunner, inputManager, formulaDockerPreRun, fileManager, ctxFinder, userHomeDir)
+
+	runners := formula.Runners{ // Config runner types
+		formula.Local:  formulaLocalRun,
+		formula.Docker: formulaDockerRun,
+	}
+
+	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
+	formulaExec := runner.NewExecutor(runners, configManager)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
@@ -150,7 +166,7 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, inputList, fileManager)
+	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, configManager, fileManager, inputList, inputBool)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -186,6 +202,8 @@ func buildCommands() *cobra.Command {
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaLocalBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
+	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
+	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd)
@@ -194,11 +212,11 @@ func buildCommands() *cobra.Command {
 	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
-	showCmd.AddCommand(showCtxCmd)
+	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd, setFormulaRunnerCmd)
+	showCmd.AddCommand(showCtxCmd, showFormulaRunnerCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
 
-	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaRunner)
+	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaExec)
 	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}

@@ -125,6 +125,12 @@ func (inputFalseMock) Bool(name string, items []string) (bool, error) {
 	return false, nil
 }
 
+type inputBoolErrMock struct{}
+
+func (inputBoolErrMock) Bool(name string, items []string) (bool, error) {
+	return false, errors.New("input bool error")
+}
+
 type inputListMock struct{}
 
 func (inputListMock) List(name string, items []string) (string, error) {
@@ -419,3 +425,25 @@ var (
 		},
 	}
 )
+
+type FormulaExecutorMock struct {
+	err error
+}
+
+func (f FormulaExecutorMock) Execute(exe formula.ExecuteData) error {
+	return f.err
+}
+
+type ConfigRunnerMock struct {
+	runType   formula.RunnerType
+	createErr error
+	findErr   error
+}
+
+func (c ConfigRunnerMock) Create(runType formula.RunnerType) error {
+	return c.createErr
+}
+
+func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
+	return c.runType, c.findErr
+}

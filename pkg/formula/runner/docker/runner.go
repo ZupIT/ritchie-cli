@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package runner
+package docker
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 
 	"github.com/mattn/go-isatty"
@@ -32,20 +31,22 @@ import (
 )
 
 const (
-	dockerCmd = "docker"
 	envFile   = ".env"
+	dockerPwd = "/app"
 )
+
+var _ formula.Runner = RunManager{}
 
 type RunManager struct {
 	formula.PostRunner
 	formula.InputRunner
 	formula.PreRunner
-	file stream.FileWriteExistAppender
-	ctx  rcontext.Finder
+	file    stream.FileWriteExistAppender
+	ctx     rcontext.Finder
 	homeDir string
 }
 
-func NewFormulaRunner(
+func NewRunner(
 	postRun formula.PostRunner,
 	input formula.InputRunner,
 	preRun formula.PreRunner,
@@ -63,30 +64,22 @@ func NewFormulaRunner(
 	}
 }
 
-func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, docker bool, verbose bool) error {
-	setup, err := ru.PreRun(def, docker)
+func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, verbose bool) error {
+	setup, err := ru.PreRun(def)
 	if err != nil {
 		return err
 	}
 
-	var cmd *exec.Cmd
-	if !docker || setup.ContainerId == "" {
-		cmd, err = ru.runLocal(setup, inputType, verbose)
-		if err != nil {
-			return err
-		}
-	} else {
-		cmd, err = ru.runDocker(setup, inputType, verbose)
-		if err != nil {
-			return err
-		}
+	cmd, err := ru.runDocker(setup, inputType, verbose)
+	if err != nil {
+		return err
 	}
 
 	if err := cmd.Run(); err != nil {
 		return err
 	}
 
-	if err := ru.PostRun(setup, docker); err != nil {
+	if err := ru.PostRun(setup, true); err != nil {
 		return err
 	}
 
@@ -112,33 +105,14 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 		return nil, err
 	}
 
-	if err := ru.setEnvs(cmd, "/app", true, verbose); err != nil {
+	if err := ru.setEnvs(cmd, dockerPwd, verbose); err != nil {
 		return nil, err
 	}
 
 	return cmd, nil
 }
 
-func (ru RunManager) runLocal(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
-	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
-	cmd := exec.Command(formulaRun)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	cmd.Env = os.Environ()
-	if err := ru.setEnvs(cmd, setup.Pwd, false, verbose); err != nil {
-		return nil, err
-	}
-
-	if err := ru.Inputs(cmd, setup, inputType); err != nil {
-		return nil, err
-	}
-
-	return cmd, nil
-}
-
-func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, docker, verbose bool) error {
+func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 	ctx, err := ru.ctx.Find()
 	if err != nil {
 		return err
@@ -149,17 +123,15 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, docker, verbose bool) er
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
 	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv)
 
-	if docker {
-		for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
-			if !ru.file.Exists(envFile) {
-				if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
-					return err
-				}
-				continue
-			}
-			if err := ru.file.Append(envFile, []byte(e+"\n")); err != nil {
+	for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
+		if !ru.file.Exists(envFile) {
+			if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
 				return err
 			}
+			continue
+		}
+		if err := ru.file.Append(envFile, []byte(e+"\n")); err != nil {
+			return err
 		}
 	}
 
