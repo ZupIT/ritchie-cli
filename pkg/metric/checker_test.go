@@ -20,7 +20,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
@@ -28,7 +27,6 @@ import (
 func Test_Check(t *testing.T) {
 	type in struct {
 		file stream.FileWriteReadExister
-		prompt prompt.InputList
 	}
 
 	var tests = []struct {
