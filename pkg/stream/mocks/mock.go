@@ -59,7 +59,6 @@ func (FileWriteReadExisterMock) Exists(path string) bool {
 	return true
 }
 
-
 type FileWriteReadExisterCustomMock struct {
 	WriteMock  func(path string, content []byte) error
 	ReadMock   func(path string) ([]byte, error)
