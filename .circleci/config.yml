@@ -456,19 +456,21 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - build-code
-      - sign-bin:
+      # - sign-bin:
+      #     filters:
+      #       <<: *FILTERS_RELEASE
+      #     requires:
+      #       - win-package
+      #       - deb-package
+      #       - rpm-package
+      - delivery:
+          name: delivery
           filters:
             <<: *FILTERS_RELEASE
           requires:
             - win-package
             - deb-package
             - rpm-package
-      - delivery:
-          name: delivery
-          filters:
-            <<: *FILTERS_RELEASE
-          requires:
-            - sign-bin
       - release:
           name: release-publish
           filters:
