@@ -113,7 +113,7 @@ func buildCommands() *cobra.Command {
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
-	credResolver := envcredential.NewResolver(credFinder)
+	credResolver := envcredential.NewResolver(credFinder, credSetter, inputPassword)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
@@ -127,7 +127,7 @@ func buildCommands() *cobra.Command {
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
 	formulaSetup := runner.NewPreRun(ritchieHomeDir, formBuildMake, formBuildDocker, formBuildBat, dirManager, fileManager)
-	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup, fileManager, ctxFinder)
+	formulaRunner := runner.NewFormulaRunner(postRunner, inputManager, formulaSetup, fileManager, ctxFinder, userHomeDir)
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)

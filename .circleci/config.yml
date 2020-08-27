@@ -49,7 +49,7 @@ executors:
     machine:
       image: *CI_MACHINE_IMAGE
     working_directory: ~/workspace
-  
+
   ritchie-static-analisys-executor:
     docker:
       - image: *PYTHONWITHGO_IMAGE
@@ -416,7 +416,7 @@ workflows:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
-            - lint 
+            - lint
       - unit_test:
           name: unit-test
           filters:
