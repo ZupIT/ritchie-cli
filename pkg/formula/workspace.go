@@ -43,6 +43,15 @@ type WorkspaceValidator interface {
 	Validate(workspace Workspace) error
 }
 
+type WorkspaceDeleter interface {
+	Delete(workspace Workspace) error
+}
+
+type WorkspaceListDeleter interface {
+	WorkspaceDeleter
+	WorkspaceLister
+}
+
 type WorkspaceAddListValidator interface {
 	WorkspaceAdder
 	WorkspaceLister

@@ -183,6 +183,7 @@ func buildCommands() *cobra.Command {
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
+	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, dirManager, inputList, inputText, inputBool)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaLocalBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
@@ -191,7 +192,7 @@ func buildCommands() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd)
+	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteWorkspaceCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd)
