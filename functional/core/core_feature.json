@@ -333,5 +333,16 @@
             }
         ],
         "result":"Set tutorial successful!"
+    },
+    {
+        "entry":"Upgrade",
+        "steps":[
+            {
+                "key":"",
+                "value":"upgrade",
+                "action":"main"
+            }
+        ],
+        "result":"Rit upgraded with success"
     }
 ]
