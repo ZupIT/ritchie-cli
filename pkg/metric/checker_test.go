@@ -96,7 +96,7 @@ func Test_Check(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			checker := NewChecker(tt.in.file, tt.in.prompt)
+			checker := NewChecker(tt.in.file)
 			result := checker.Check()
 
 			if result != tt.expectedResult {
