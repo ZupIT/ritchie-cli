@@ -499,7 +499,9 @@ workflows:
           filters:
             <<: *FILTERS_DELIVERY
           requires:
-            - sign-bin
+            - deb-package
+            - rpm-package
+            - win-package
       - deb-package:
           filters:
             <<: *FILTERS_DELIVERY
@@ -515,10 +517,10 @@ workflows:
             <<: *FILTERS_DELIVERY
           requires:
             - build-code
-      - sign-bin:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - win-package
-            - rpm-package
-            - deb-package
+      # - sign-bin:
+      #     filters:
+      #       <<: *FILTERS_DELIVERY
+      #     requires:
+      #       - win-package
+      #       - rpm-package
+      #       - deb-package
