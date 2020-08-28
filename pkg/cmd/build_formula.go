@@ -33,10 +33,11 @@ import (
 )
 
 const (
-	newWorkspace               = "Type new formula workspace?"
-	docsDir                    = "docs"
-	srcDir                     = "src"
-	questionSelectFormulaGroup = "Select a formula or group: "
+	newWorkspace                = "Type new formula workspace?"
+	docsDir                     = "docs"
+	srcDir                      = "src"
+	questionSelectFormulaGroup  = "Select a formula or group: "
+	questionAboutFoundedFormuça = "We found a formula, which one do you want to run the build: "
 )
 
 type buildFormulaCmd struct {
@@ -171,7 +172,7 @@ func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string
 
 		formulaOptions = append(formulaOptions, currentFormula, otherFormula)
 
-		response, err = b.List("We found a formula, which one do you want to run the build: ", formulaOptions)
+		response, err = b.List(questionAboutFoundedFormuça, formulaOptions)
 		if err != nil {
 			return "", err
 		}

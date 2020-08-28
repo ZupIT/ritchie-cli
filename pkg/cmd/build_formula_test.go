@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -77,6 +78,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 			},
 		},
 	}
+	someError := errors.New("some error")
 
 	tests := []struct {
 		name    string
@@ -92,6 +94,83 @@ func TestBuildFormulaCmd(t *testing.T) {
 				inList:           fieldsDefault.inList,
 			},
 			wantErr: false,
+		},
+		{
+			name: "Run with error when workspace list returns err",
+			fields: fields{
+				localBuilder: fieldsDefault.localBuilder,
+				workspaceManager: WorkspaceAddListValidatorCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return formula.Workspaces{}, someError
+					},
+				},
+				directory: fieldsDefault.directory,
+				inList:    fieldsDefault.inList,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with error when readFormulas returns err",
+			fields: fields{
+				localBuilder:     fieldsDefault.localBuilder,
+				workspaceManager: fieldsDefault.workspaceManager,
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, someError
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+				inList: fieldsDefault.inList,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with error when question about select formula or group returns err",
+			fields: fields{
+				localBuilder:     fieldsDefault.localBuilder,
+				workspaceManager: fieldsDefault.workspaceManager,
+				directory:        fieldsDefault.directory,
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return "any", someError
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with error when readFormula returns error on second call",
+			fields: fields{
+				localBuilder:     fieldsDefault.localBuilder,
+				workspaceManager: fieldsDefault.workspaceManager,
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, nil
+						case defaultWorkspace + "/group":
+							return []string{"verb"}, someError
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+				inList: fieldsDefault.inList,
+			},
+			wantErr: true,
 		},
 	}
 
