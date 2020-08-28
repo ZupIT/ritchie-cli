@@ -57,6 +57,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return prompt.NewError(err.Error()+"\n")
 		}
+
 		prompt.Success("Rit upgraded with success")
 		return nil
 	}
