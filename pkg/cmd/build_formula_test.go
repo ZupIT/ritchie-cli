@@ -28,17 +28,19 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+type fieldsTestBuildFormulaCmd struct {
+	localBuilder     formula.LocalBuilder
+	workspaceManager formula.WorkspaceAddListValidator
+	directory        stream.DirListChecker
+	inList           prompt.InputList
+}
+
 func TestBuildFormulaCmd(t *testing.T) {
 	userHomeDir := os.TempDir()
 	defaultWorkspace := filepath.Join(userHomeDir, formula.DefaultWorkspaceDir)
+	someError := errors.New("some error")
 
-	type fields struct {
-		localBuilder     formula.LocalBuilder
-		workspaceManager formula.WorkspaceAddListValidator
-		directory        stream.DirListChecker
-		inList           prompt.InputList
-	}
-	var fieldsDefault fields = fields{
+	var fieldsDefault fieldsTestBuildFormulaCmd = fieldsTestBuildFormulaCmd{
 		localBuilder: LocalBuilderMock{
 			build: func(workspacePath, formulaPath string) error {
 				return nil
@@ -78,42 +80,31 @@ func TestBuildFormulaCmd(t *testing.T) {
 			},
 		},
 	}
-	someError := errors.New("some error")
 
 	tests := []struct {
 		name    string
-		fields  fields
+		fields  fieldsTestBuildFormulaCmd
 		wantErr bool
 	}{
 		{
-			name: "Run with success",
-			fields: fields{
-				localBuilder:     fieldsDefault.localBuilder,
-				workspaceManager: fieldsDefault.workspaceManager,
-				directory:        fieldsDefault.directory,
-				inList:           fieldsDefault.inList,
-			},
+			name:    "Run with success",
+			fields:  fieldsTestBuildFormulaCmd{},
 			wantErr: false,
 		},
 		{
 			name: "Run with error when workspace list returns err",
-			fields: fields{
-				localBuilder: fieldsDefault.localBuilder,
+			fields: fieldsTestBuildFormulaCmd{
 				workspaceManager: WorkspaceAddListValidatorCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{}, someError
 					},
 				},
-				directory: fieldsDefault.directory,
-				inList:    fieldsDefault.inList,
 			},
 			wantErr: true,
 		},
 		{
 			name: "Run with error when readFormulas returns err",
-			fields: fields{
-				localBuilder:     fieldsDefault.localBuilder,
-				workspaceManager: fieldsDefault.workspaceManager,
+			fields: fieldsTestBuildFormulaCmd{
 				directory: DirManagerCustomMock{
 					exists: func(dir string) bool {
 						return true
@@ -127,16 +118,12 @@ func TestBuildFormulaCmd(t *testing.T) {
 						}
 					},
 				},
-				inList: fieldsDefault.inList,
 			},
 			wantErr: true,
 		},
 		{
 			name: "Run with error when question about select formula or group returns err",
-			fields: fields{
-				localBuilder:     fieldsDefault.localBuilder,
-				workspaceManager: fieldsDefault.workspaceManager,
-				directory:        fieldsDefault.directory,
+			fields: fieldsTestBuildFormulaCmd{
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
@@ -150,9 +137,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 		},
 		{
 			name: "Run with error when readFormula returns error on second call",
-			fields: fields{
-				localBuilder:     fieldsDefault.localBuilder,
-				workspaceManager: fieldsDefault.workspaceManager,
+			fields: fieldsTestBuildFormulaCmd{
 				directory: DirManagerCustomMock{
 					exists: func(dir string) bool {
 						return true
@@ -168,7 +153,6 @@ func TestBuildFormulaCmd(t *testing.T) {
 						}
 					},
 				},
-				inList: fieldsDefault.inList,
 			},
 			wantErr: true,
 		},
@@ -176,15 +160,17 @@ func TestBuildFormulaCmd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			fields := getFields(fieldsDefault, tt.fields)
+
 			commandBuildFormula := NewBuildFormulaCmd(
 				userHomeDir,
-				tt.fields.localBuilder,
-				tt.fields.workspaceManager,
+				fields.localBuilder,
+				fields.workspaceManager,
 				WatcherMock{},
-				tt.fields.directory,
+				fields.directory,
 				inputTextMock{},
-				tt.fields.inList,
-				TutorialFindWithReturnDisabled(),
+				fields.inList,
+				tutorialFindWithReturnDisabled(),
 			)
 			commandBuildFormula.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -200,10 +186,29 @@ func TestBuildFormulaCmd(t *testing.T) {
 	}
 }
 
-func TutorialFindWithReturnDisabled() rtutorial.Finder {
+func tutorialFindWithReturnDisabled() rtutorial.Finder {
 	return TutorialFindSetterCustomMock{
 		find: func() (rtutorial.TutorialHolder, error) {
 			return rtutorial.TutorialHolder{Current: "disabled"}, nil
 		},
 	}
+}
+
+func getFields(fieldsDefault fieldsTestBuildFormulaCmd, fieldsTest fieldsTestBuildFormulaCmd) fieldsTestBuildFormulaCmd {
+	var fields fieldsTestBuildFormulaCmd = fieldsDefault
+
+	if fieldsTest.directory != nil {
+		fields.directory = fieldsTest.directory
+	}
+	if fieldsTest.inList != nil {
+		fields.inList = fieldsTest.inList
+	}
+	if fieldsTest.localBuilder != nil {
+		fields.localBuilder = fieldsTest.localBuilder
+	}
+	if fieldsTest.workspaceManager != nil {
+		fields.workspaceManager = fieldsTest.workspaceManager
+	}
+
+	return fields
 }
