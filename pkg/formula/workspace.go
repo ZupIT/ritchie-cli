@@ -43,8 +43,7 @@ type WorkspaceValidator interface {
 	Validate(workspace Workspace) error
 }
 
-type WorkspaceAddListValidator interface {
+type WorkspaceAddLister interface {
 	WorkspaceAdder
 	WorkspaceLister
-	WorkspaceValidator
 }

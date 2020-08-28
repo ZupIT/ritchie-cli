@@ -30,16 +30,25 @@ var (
 )
 
 type Manager struct {
-	workspaceFile string
-	file          stream.FileWriteReadExister
+	workspaceFile 		string
+	defaultWorkspaceDir string
+	file           		stream.FileWriteReadExister
 }
 
-func New(ritchieHome string, fileManager stream.FileWriteReadExister) Manager {
+func New(ritchieHome string, userHome string, fileManager stream.FileWriteReadExister) Manager {
 	workspaceFile := filepath.Join(ritchieHome, formula.WorkspacesFile)
-	return Manager{workspaceFile: workspaceFile, file: fileManager}
+	workspaceHome := filepath.Join(userHome, formula.DefaultWorkspaceDir)
+	return Manager{workspaceFile: workspaceFile, defaultWorkspaceDir: workspaceHome, file: fileManager}
 }
 
 func (m Manager) Add(workspace formula.Workspace) error {
+	if workspace.Dir == m.defaultWorkspaceDir {
+		return nil
+	}
+	if !m.file.Exists(workspace.Dir) {
+		return ErrInvalidWorkspace
+	}
+
 	workspaces := formula.Workspaces{}
 	if m.file.Exists(m.workspaceFile) {
 		file, err := m.file.Read(m.workspaceFile)
@@ -80,14 +89,7 @@ func (m Manager) List() (formula.Workspaces, error) {
 		return nil, err
 	}
 
+	workspaces[formula.DefaultWorkspaceName] = m.defaultWorkspaceDir
+
 	return workspaces, nil
-}
-
-func (m Manager) Validate(workspace formula.Workspace) error {
-	dir := workspace.Dir
-	if !m.file.Exists(dir) {
-		return ErrInvalidWorkspace
-	}
-
-	return nil
 }

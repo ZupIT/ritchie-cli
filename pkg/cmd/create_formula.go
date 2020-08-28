@@ -46,7 +46,7 @@ const notAllowedChars = `\/><,@`
 type createFormulaCmd struct {
 	homeDir         string
 	formula         formula.CreateBuilder
-	workspace       formula.WorkspaceAddListValidator
+	workspace       formula.WorkspaceAddLister
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
@@ -59,7 +59,7 @@ func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
 	tplM template.Manager,
-	workspace formula.WorkspaceAddListValidator,
+	workspace formula.WorkspaceAddLister,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
@@ -122,18 +122,13 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := filepath.Join(c.homeDir, formula.DefaultWorkspaceDir)
-		workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
-
 		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText)
 		if err != nil {
 			return err
 		}
 
-		if wspace.Dir != defaultWorkspace {
-			if err := c.workspace.Add(wspace); err != nil {
-				return err
-			}
+		if err := c.workspace.Add(wspace); err != nil {
+			return err
 		}
 
 		formulaPath := formulaPath(wspace.Dir, formulaCmd)

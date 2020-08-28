@@ -40,7 +40,7 @@ const (
 
 type buildFormulaCmd struct {
 	userHomeDir string
-	workspace   formula.WorkspaceAddListValidator
+	workspace   formula.WorkspaceAddLister
 	formula     formula.LocalBuilder
 	watcher     formula.Watcher
 	directory   stream.DirListChecker
@@ -52,7 +52,7 @@ type buildFormulaCmd struct {
 func NewBuildFormulaCmd(
 	userHomeDir string,
 	formula formula.LocalBuilder,
-	workManager formula.WorkspaceAddListValidator,
+	workManager formula.WorkspaceAddLister,
 	watcher formula.Watcher,
 	directory stream.DirListChecker,
 	inText prompt.InputText,
@@ -89,24 +89,13 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := filepath.Join(b.userHomeDir, formula.DefaultWorkspaceDir)
-		if b.directory.Exists(defaultWorkspace) {
-			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
-		}
-
 		wspace, err := FormulaWorkspaceInput(workspaces, b.InputList, b.InputText)
 		if err != nil {
 			return err
 		}
 
-		if wspace.Dir != defaultWorkspace {
-			if err := b.workspace.Validate(wspace); err != nil {
-				return err
-			}
-
-			if err := b.workspace.Add(wspace); err != nil {
-				return err
-			}
+		if err := b.workspace.Add(wspace); err != nil {
+			return err
 		}
 
 		formulaPath, err := b.readFormulas(wspace.Dir)
