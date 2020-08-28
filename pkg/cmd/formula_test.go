@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -45,40 +46,77 @@ func TestFormulaCommand_Add(t *testing.T) {
 			},
 		},
 	}
-	formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, FormulaExecutorMock{})
-	rootCmd := &cobra.Command{
-		Use: "rit",
-	}
-	rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	got := formulaCmd.Add(rootCmd)
-	if got != nil {
-		t.Errorf("Add got %v, want nil", got)
+
+	type in struct {
+		execMock FormulaExecutorMock
+		args     []string
 	}
 
 	tests := []struct {
-		name string
-		args []string
+		name    string
+		in      in
+		wantErr bool
 	}{
 		{
 			name: "success default",
-			args: []string{"mock", "test"},
+			in: in{
+				execMock: FormulaExecutorMock{},
+				args:     []string{"mock", "test"},
+			},
 		},
 		{
 			name: "success docker",
-			args: []string{"mock", "test", "--docker"},
+			in: in{
+				execMock: FormulaExecutorMock{},
+				args:     []string{"mock", "test", "--docker"},
+			},
+		},
+		{
+			name: "success local",
+			in: in{
+				execMock: FormulaExecutorMock{},
+				args:     []string{"mock", "test", "--local"},
+			},
 		},
 		{
 			name: "success stdin",
-			args: []string{"mock", "test", "--stdin"},
+			in: in{
+				execMock: FormulaExecutorMock{},
+				args:     []string{"mock", "test", "--stdin"},
+			},
+		},
+		{
+			name: "invalid flags",
+			in: in{
+				execMock: FormulaExecutorMock{},
+				args:     []string{"mock", "test", "--local", "--docker"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "formula exec error",
+			in: in{
+				execMock: FormulaExecutorMock{err: errors.New("error to execute formula")},
+				args:     []string{"mock", "test"},
+			},
+			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rootCmd.SetArgs(tt.args)
+			formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, tt.in.execMock)
+			rootCmd := &cobra.Command{Use: "rit"}
+			rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+			got := formulaCmd.Add(rootCmd)
+			if got != nil {
+				t.Errorf("Add got %v, want nil", got)
+			}
 
-			if err := rootCmd.Execute(); err != nil {
-				t.Errorf("%s = %v, want %v", rootCmd.Use, err, nil)
+			rootCmd.SetArgs(tt.in.args)
+
+			if err := rootCmd.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("furmula_exec() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
