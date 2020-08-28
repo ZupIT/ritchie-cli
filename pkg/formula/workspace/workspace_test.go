@@ -207,7 +207,7 @@ func TestManager_List(t *testing.T) {
 				_ = fileManager.Write(workspaceFile, content)
 			}
 
-			workspace := New(tmpDir, in.fileManager)
+			workspace := New(tmpDir, tmpDir, in.fileManager)
 			got, err := workspace.List()
 
 			if err != nil && err.Error() != out.error.Error() {
