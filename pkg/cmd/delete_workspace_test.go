@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,7 +28,8 @@ import (
 type listMock struct{}
 
 func (listMock) List(name string, items []string) (string, error) {
-	return "Default (" + os.TempDir() + "/ritchie-formulas-local)", nil
+	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	return fmt.Sprintf("Default (%s)", workspace), nil
 }
 
 func TestDeleteWorkspaceCmd(t *testing.T) {
