@@ -18,7 +18,6 @@ package runner
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os/exec"
 	"strconv"
@@ -271,7 +270,7 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 		}
 	}
 	if value == "" {
-		return false, errors.New(fmt.Sprintf("config.json: conditional variable %s not found", variable))
+		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
 	}
 
 	// Currently using case implementation to avoid adding a dependency module or exposing
@@ -285,9 +284,9 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 	case "<":  return value < input.Condition.Value, nil
 	case "<=": return value <= input.Condition.Value, nil
 	default:
-		return false, errors.New(fmt.Sprintf(
+		return false, fmt.Errorf(
 			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=)",
 			input.Condition.Operator,
-		))
+		)
 	}
 }
