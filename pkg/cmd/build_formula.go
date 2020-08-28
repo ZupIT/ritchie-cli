@@ -37,7 +37,8 @@ const (
 	docsDir                     = "docs"
 	srcDir                      = "src"
 	questionSelectFormulaGroup  = "Select a formula or group: "
-	questionAboutFoundedFormuça = "We found a formula, which one do you want to run the build: "
+	questionAboutFoundedFormula = "We found a formula, which one do you want to run the build: "
+	optionOtherFormula          = "Another formula"
 )
 
 type buildFormulaCmd struct {
@@ -163,16 +164,15 @@ func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string
 
 	var formulaOptions []string
 	var response string
-	otherFormula := "Another formula"
 
 	if isFormula(dirs) {
 		if !hasFormulaInDir(dirs) {
 			return dir, nil
 		}
 
-		formulaOptions = append(formulaOptions, currentFormula, otherFormula)
+		formulaOptions = append(formulaOptions, currentFormula, optionOtherFormula)
 
-		response, err = b.List(questionAboutFoundedFormuça, formulaOptions)
+		response, err = b.List(questionAboutFoundedFormula, formulaOptions)
 		if err != nil {
 			return "", err
 		}

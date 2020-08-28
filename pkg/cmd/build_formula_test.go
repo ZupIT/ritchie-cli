@@ -136,6 +136,74 @@ func TestBuildFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "Run with sucess when the selected formula is deeper in the tree",
+			fields: fieldsTestBuildFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, nil
+						case defaultWorkspace + "/group":
+							return []string{"verb", "src"}, nil
+						case defaultWorkspace + "/group/verb":
+							return []string{"src"}, nil
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return items[0], nil
+						}
+						if name == questionAboutFoundedFormula {
+							return optionOtherFormula, nil
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with sucess when selected formula is less deep in the tree",
+			fields: fieldsTestBuildFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, nil
+						case defaultWorkspace + "/group":
+							return []string{"verb", "src"}, nil
+						case defaultWorkspace + "/group/verb":
+							return []string{"src"}, nil
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return items[0], nil
+						}
+						if name == questionAboutFoundedFormula {
+							return "rit group", nil
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "Run with error when readFormula returns error on second call",
 			fields: fieldsTestBuildFormulaCmd{
 				directory: DirManagerCustomMock{
