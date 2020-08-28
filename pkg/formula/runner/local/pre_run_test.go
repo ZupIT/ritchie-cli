@@ -366,5 +366,4 @@ const configJson = `{
       "type": "password"
     }
   ]
-}
-`
+}`
