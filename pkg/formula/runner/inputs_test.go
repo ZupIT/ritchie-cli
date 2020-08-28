@@ -330,6 +330,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 	tests := []struct {
 		name string
 		in   in
+		want error
 	}{
 		{
 			name: "equal conditional",
@@ -337,6 +338,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "sample_list",
 				operator:    "==",
 			},
+			want: nil,
 		},
 		{
 			name: "not equal conditional",
@@ -344,6 +346,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "sample_list",
 				operator:    "!=",
 			},
+			want: nil,
 		},
 		{
 			name: "greater than conditional",
@@ -351,6 +354,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "sample_list",
 				operator:    ">",
 			},
+			want: nil,
 		},
 		{
 			name: "greater than or equal to conditional",
@@ -358,6 +362,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "sample_list",
 				operator:    ">=",
 			},
+			want: nil,
 		},
 		{
 			name: "less than conditional",
@@ -365,6 +370,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "sample_list",
 				operator:    "<",
 			},
+			want: nil,
 		},
 		{
 			name: "less than or equal to conditional",
@@ -372,6 +378,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "sample_list",
 				operator:    "<=",
 			},
+			want: nil,
 		},
 		{
 			name: "wrong operator conditional",
@@ -379,6 +386,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "sample_list",
 				operator:    "eq",
 			},
+			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
 		},
 		{
 			name: "non-existing variable conditional",
@@ -386,6 +394,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable:    "non_existing",
 				operator:    "==",
 			},
+			want: errors.New("config.json: conditional variable non_existing not found"),
 		},
 	}
 
@@ -412,8 +421,8 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 
 			got := inputManager.Inputs(cmd, setup, api.Prompt)
 
-			if got != nil {
-				t.Errorf("Error on conditional Inputs(%s): %v", tt.name, got)
+			if got != tt.want {
+				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
 			}
 		})
 	}
