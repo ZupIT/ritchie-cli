@@ -96,7 +96,7 @@ func (in InputManager) fromStdin(cmd *exec.Cmd, setup formula.Setup) error {
 		var inputVal string
 		var err error
 		switch iType := input.Type; iType {
-		case "text", "bool":
+		case "text", "bool", "password":
 			inputVal = fmt.Sprintf("%v", data[input.Name])
 		default:
 			inputVal, err = in.resolveIfReserved(input)
