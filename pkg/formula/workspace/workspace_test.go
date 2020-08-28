@@ -132,6 +132,83 @@ func TestWorkspaceManager_Add(t *testing.T) {
 	}
 }
 
+func TestManager_Delete(t *testing.T) {
+	cleanForm()
+	fullDir := createFullDir()
+
+	tmpDir := os.TempDir()
+	fileManager := stream.NewFileManager()
+
+	type in struct {
+		workspace   formula.Workspace
+		fileManager stream.FileWriteReadExister
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		out  error
+	}{
+		{
+			name: "success delete",
+			in: in{
+				workspace: formula.Workspace{
+					Name: "zup",
+					Dir:  fullDir,
+				},
+				fileManager: fileManager,
+			},
+			out: nil,
+		},
+		{
+			name: "invalid workspace",
+			in: in{
+				workspace: formula.Workspace{
+					Name: "zup",
+					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
+				},
+				fileManager: fileManager,
+			},
+			out: ErrInvalidWorkspace,
+		},
+		{
+			name: "read not found",
+			in: in{
+				workspace: formula.Workspace{
+					Name: "commons",
+					Dir:  fullDir,
+				},
+				fileManager: fileManagerMock{exist: true, readErr: errors.New("not found file")},
+			},
+			out: errors.New("not found file"),
+		},
+		{
+			name: "unmarshal error",
+			in: in{
+				workspace: formula.Workspace{
+					Name: "commons",
+					Dir:  fullDir,
+				},
+				fileManager: fileManagerMock{exist: true, read: []byte("error")},
+			},
+			out: errors.New("invalid character 'e' looking for beginning of value"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			in := tt.in
+
+			workspace := New(tmpDir, in.fileManager)
+			got := workspace.Delete(in.workspace)
+
+			if got != nil && got.Error() != tt.out.Error() {
+				t.Errorf("Add(%s) got %v, out %v", tt.name, got, tt.out)
+			}
+		})
+	}
+}
+
 func TestManager_List(t *testing.T) {
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()

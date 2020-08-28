@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+// TODO
+// Adicionar testes
+// Modificar texto no cobra
+// Deixar texto no functional igual o do cobra
+
 package cmd
 
 import (
