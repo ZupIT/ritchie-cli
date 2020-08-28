@@ -122,7 +122,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, in.fileManager)
+			workspace := New(tmpDir, tmpDir, in.fileManager)
 			got := workspace.Add(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
