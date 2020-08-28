@@ -253,6 +253,17 @@
         "result":"#compdef rit"
     },
     {
+        "entry":"Completion fish",
+        "steps":[
+            {
+                "key":"",
+                "value":"completion fish",
+                "action":"main"
+            }
+        ],
+        "result":"# fish completion for rit"
+    },
+    {
         "entry":"Version",
         "steps":[
             {
