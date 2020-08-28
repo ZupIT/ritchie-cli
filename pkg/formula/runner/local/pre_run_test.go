@@ -326,51 +326,45 @@ func (fi fileManagerMock) Append(path string, content []byte) error {
 }
 
 const configJson = `{
-    "dockerImageBuilder": "cimg/go:1.14",
-    "inputs": [
-      {
-        "name": "sample_text",
-        "type": "text",
-        "default": "",
-        "label": "Type : ",
-        "items": null,
-        "cache": {
-          "active": true,
-          "qty": 6,
-          "newLabel": "Type new value. "
-        }
+  "dockerImageBuilder": "cimg/go:1.14",
+  "inputs": [
+    {
+      "cache": {
+        "active": true,
+        "newLabel": "Type new value. ",
+        "qty": 3
       },
-      {
-        "name": "sample_list",
-        "type": "text",
-        "default": "in1",
-        "label": "Pick your : ",
-        "items": [
-          "in_list1",
-          "in_list2",
-          "in_list3",
-          "in_listN"
-        ],
-        "cache": {
-          "active": false,
-          "qty": 0,
-          "newLabel": ""
-        }
-      },
-      {
-        "name": "sample_bool",
-        "type": "bool",
-        "default": "false",
-        "label": "Pick: ",
-        "items": [
-          "false",
-          "true"
-        ],
-        "cache": {
-          "active": false,
-          "qty": 0,
-          "newLabel": ""
-        }
-      }
-    ]
-  }`
+      "label": "Type your name: ",
+      "name": "input_text",
+      "type": "text"
+    },
+    {
+      "default": "false",
+      "items": [
+        "false",
+        "true"
+      ],
+      "label": "Have you ever used Ritchie? ",
+      "name": "input_boolean",
+      "type": "bool"
+    },
+    {
+      "default": "everything",
+      "items": [
+        "daily tasks",
+        "workflows",
+        "toils",
+        "everything"
+      ],
+      "label": "What do you want to automate? ",
+      "name": "input_list",
+      "type": "text"
+    },
+    {
+      "label": "Tell us a secret: ",
+      "name": "input_password",
+      "type": "password"
+    }
+  ]
+}
+`
