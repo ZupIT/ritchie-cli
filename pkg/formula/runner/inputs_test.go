@@ -421,7 +421,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 
 			got := inputManager.Inputs(cmd, setup, api.Prompt)
 
-			if got != tt.want {
+			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
 			}
 		})
