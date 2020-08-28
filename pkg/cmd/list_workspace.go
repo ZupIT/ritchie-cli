@@ -23,7 +23,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
@@ -38,8 +37,8 @@ type listWorkspaceCmd struct {
 	rt rtutorial.Finder
 }
 
-func NewListWorkspaceCmd(wm workspace.Manager, rtf rtutorial.Finder) *cobra.Command {
-	lw := listWorkspaceCmd{wm, rtf}
+func NewListWorkspaceCmd(wl formula.WorkspaceLister, rtf rtutorial.Finder) *cobra.Command {
+	lw := listWorkspaceCmd{wl, rtf}
 	cmd := &cobra.Command{
 		Use:     "workspace",
 		Short:   "Show a list with all your available workspaces",

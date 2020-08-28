@@ -17,84 +17,82 @@
 package cmd
 
 import (
+	"errors"
+	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func Test_listWorkspaceCmd_runFunc(t *testing.T) {
-	// finderTutorial := rtutorial.NewFinder(os.TempDir(), stream.NewFileManager())
-	// type in struct {
-	// 	WorkspaceLister workspace.Manager
-	// }
-	// tests := []struct {
-	// 	name    string
-	// 	in      in
-	// 	wantErr bool
-	// }{
-	// 	{
-	// 		name: "Run with success",
-	// 		in: in{
-	// 			WorkspaceLister: WorkspaceListerCustomMock{
-	// 				list: func() (formula.Workspaces, error) {
-	// 					return formula.Workspaces{
-	// 						"workspace1": "path/to/workspace1",
-	// 					}, nil
-	// 				},
-	// 			},
-	// 		},
-	// 		wantErr: false,
-	// 	},
-	// 	{
-	// 		name: "Run with success with more than 1 workspace",
-	// 		in: in{
-	// 			WorkspaceLister: WorkspaceListerCustomMock{
-	// 				list: func() (formula.Workspaces, error) {
-	// 					return formula.Workspaces{
-	// 						"workspace1": "path/to/workspace1",
-	// 						"workspace2": "path/to/workspace2",
-	// 					}, nil
-	// 				},
-	// 			},
-	// 		},
-	// 		wantErr: false,
-	// 	},
-	// 	{
-	// 		name: "Return err when list fail",
-	// 		in: in{
-	// 			WorkspaceLister: WorkspaceListerCustomMock{
-	// 				list: func() (formula.Workspaces, error) {
-	// 					return nil, errors.New("some error")
-	// 				},
-	// 			},
-	// 		},
-	// 		wantErr: true,
-	// 	},
-	// }
-	// for _, tt := range tests {
-	// 	t.Run(tt.name, func(t *testing.T) {
-	// 		lr := NewListWorkspaceCmd(tt.in.WorkspaceLister, finderTutorial)
-	// 		lr.PersistentFlags().Bool("stdin", false, "input by stdin")
-	// 		if err := lr.Execute(); (err != nil) != tt.wantErr {
-	// 			t.Errorf("listWorkspaceCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
-	// 		}
-	// 	})
-	// }
+	finderTutorial := rtutorial.NewFinder(os.TempDir(), stream.NewFileManager())
+	type in struct {
+		WorkspaceLister formula.WorkspaceLister
+	}
+	tests := []struct {
+		name    string
+		in      in
+		wantErr bool
+	}{
+		{
+			name: "Run with success",
+			in: in{
+				WorkspaceLister: WorkspaceListerCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return formula.Workspaces{
+							"workspace1": "path/to/workspace1",
+						}, nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success with more than 1 workspace",
+			in: in{
+				WorkspaceLister: WorkspaceListerCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return formula.Workspaces{
+							"workspace1": "path/to/workspace1",
+							"workspace2": "path/to/workspace2",
+						}, nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Return err when list fail",
+			in: in{
+				WorkspaceLister: WorkspaceListerCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return nil, errors.New("some error")
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lr := NewListWorkspaceCmd(tt.in.WorkspaceLister, finderTutorial)
+			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
+			if err := lr.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("listWorkspaceCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }
 
 type WorkspaceListerCustomMock struct {
+	workspaceFile 		string
+	defaultWorkspaceDir string
+	file           		stream.FileWriteReadExister
 	list func() (formula.Workspaces, error)
 }
 
 func (m WorkspaceListerCustomMock) List() (formula.Workspaces, error) {
 	return m.list()
 }
-
-func (m WorkspaceListerCustomMock) Add() error {
-	return nil
-}
-
-func (m WorkspaceListerCustomMock) Validate() error {
-	return nil
-}
-

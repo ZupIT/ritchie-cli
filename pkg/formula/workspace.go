@@ -39,10 +39,6 @@ type WorkspaceLister interface {
 	List() (Workspaces, error)
 }
 
-type WorkspaceValidator interface {
-	Validate(workspace Workspace) error
-}
-
 type WorkspaceAddLister interface {
 	WorkspaceAdder
 	WorkspaceLister
