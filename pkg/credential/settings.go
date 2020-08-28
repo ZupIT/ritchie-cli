@@ -100,7 +100,6 @@ func formatCredValue(credential string) string {
 			if i > 10 {
 				break
 			}
-			resumedCredential = append(resumedCredential, r)
 		}
 		return string(resumedCredential) + "..."
 	} else {
