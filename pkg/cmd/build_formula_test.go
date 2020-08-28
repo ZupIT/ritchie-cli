@@ -22,50 +22,53 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestBuildFormulaCmd(t *testing.T) {
 	userHomeDir := os.TempDir()
 	defaultWorkspace := filepath.Join(userHomeDir, formula.DefaultWorkspaceDir)
-	workspaceManager := WorkspaceAddListValidatorCustomMock{
-		list: func() (formula.Workspaces, error) {
-			return formula.Workspaces{}, nil
-		},
-		validate: func(workspace formula.Workspace) error {
-			return nil
-		},
-	}
-	localBuild := LocalBuilderMock{
-		build: func(workspacePath, formulaPath string) error {
-			return nil
-		},
-	}
-	dirManager := DirManagerCustomMock{
-		exists: func(dir string) bool {
-			return true
-		},
-		list: func(dir string, hiddenDir bool) ([]string, error) {
-			switch dir {
-			case defaultWorkspace:
-				return []string{"group"}, nil
-			case defaultWorkspace + "/group":
-				return []string{"verb"}, nil
-			case defaultWorkspace + "/group/verb":
-				return []string{"src"}, nil
-			default:
-				return []string{"any"}, nil
-			}
-		},
-	}
 
-	commandBuildFormula := NewBuildFormulaCmd(
-		userHomeDir,
-		localBuild,
-		workspaceManager,
-		WatcherMock{},
-		dirManager,
-		inputTextMock{},
-		inputListCustomMock{
+	type fields struct {
+		localBuilder     formula.LocalBuilder
+		workspaceManager formula.WorkspaceAddListValidator
+		directory        stream.DirListChecker
+		inList           prompt.InputList
+	}
+	var fieldsDefault fields = fields{
+		localBuilder: LocalBuilderMock{
+			build: func(workspacePath, formulaPath string) error {
+				return nil
+			},
+		},
+		workspaceManager: WorkspaceAddListValidatorCustomMock{
+			list: func() (formula.Workspaces, error) {
+				return formula.Workspaces{}, nil
+			},
+			validate: func(workspace formula.Workspace) error {
+				return nil
+			},
+		},
+		directory: DirManagerCustomMock{
+			exists: func(dir string) bool {
+				return true
+			},
+			list: func(dir string, hiddenDir bool) ([]string, error) {
+				switch dir {
+				case defaultWorkspace:
+					return []string{"group"}, nil
+				case defaultWorkspace + "/group":
+					return []string{"verb"}, nil
+				case defaultWorkspace + "/group/verb":
+					return []string{"src"}, nil
+				default:
+					return []string{"any"}, nil
+				}
+			},
+		},
+		inList: inputListCustomMock{
 			list: func(name string, items []string) (string, error) {
 				if name == questionSelectFormulaGroup {
 					return items[0], nil
@@ -73,15 +76,55 @@ func TestBuildFormulaCmd(t *testing.T) {
 				return "Default (/tmp/ritchie-formulas-local)", nil
 			},
 		},
-		TutorialFinderMock{},
-	)
-	commandBuildFormula.PersistentFlags().Bool("stdin", false, "input by stdin")
-	if commandBuildFormula == nil {
-		t.Errorf("buildFormulaCmd got %v", commandBuildFormula)
-		return
 	}
 
-	if err := commandBuildFormula.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", commandBuildFormula.Use, err, nil)
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "Run with success",
+			fields: fields{
+				localBuilder:     fieldsDefault.localBuilder,
+				workspaceManager: fieldsDefault.workspaceManager,
+				directory:        fieldsDefault.directory,
+				inList:           fieldsDefault.inList,
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			commandBuildFormula := NewBuildFormulaCmd(
+				userHomeDir,
+				tt.fields.localBuilder,
+				tt.fields.workspaceManager,
+				WatcherMock{},
+				tt.fields.directory,
+				inputTextMock{},
+				tt.fields.inList,
+				TutorialFindWithReturnDisabled(),
+			)
+			commandBuildFormula.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+			if commandBuildFormula == nil {
+				t.Errorf("commandBuildFormula got %v", commandBuildFormula)
+				return
+			}
+
+			if err := commandBuildFormula.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("%s error = %v, wantErr %v", commandBuildFormula.Use, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TutorialFindWithReturnDisabled() rtutorial.Finder {
+	return TutorialFindSetterCustomMock{
+		find: func() (rtutorial.TutorialHolder, error) {
+			return rtutorial.TutorialHolder{Current: "disabled"}, nil
+		},
 	}
 }
