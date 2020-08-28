@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-// TODO
-// Adicionar testes
-// Modificar texto no cobra
-// Deixar texto no functional igual o do cobra
-
 package cmd
 
 import (
@@ -43,7 +38,6 @@ type deleteWorkspaceCmd struct {
 	workspace   formula.WorkspaceListDeleter
 	directory   stream.DirListChecker
 	inList      prompt.InputList
-	inText      prompt.InputText
 	inBool      prompt.InputBool
 }
 
@@ -52,7 +46,6 @@ func NewDeleteWorkspaceCmd(
 	workspace formula.WorkspaceListDeleter,
 	directory stream.DirListChecker,
 	inList prompt.InputList,
-	inText prompt.InputText,
 	inBool prompt.InputBool,
 ) *cobra.Command {
 	d := deleteWorkspaceCmd{
@@ -60,7 +53,6 @@ func NewDeleteWorkspaceCmd(
 		workspace,
 		directory,
 		inList,
-		inText,
 		inBool,
 	}
 
@@ -130,7 +122,7 @@ func WorkspaceListInput(
 		items = append(items, kv)
 	}
 
-	selected, err := inList.List("Select a formula workspace: ", items)
+	selected, err := inList.List("Select the workspace: ", items)
 	if err != nil {
 		return formula.Workspace{}, err
 	}

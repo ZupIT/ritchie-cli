@@ -272,7 +272,7 @@
                 "action":"main"
             }
         ],
-        "result":"Delete contexts and repositories."
+        "result":"Delete contexts, repositories and workspaces"
     },
     {
         "entry":"Show",
