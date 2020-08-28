@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -30,9 +31,10 @@ func Test_setFormulaRunnerCmd_runPrompt(t *testing.T) {
 		input  prompt.InputList
 	}
 	var tests = []struct {
-		name    string
-		in      in
-		wantErr bool
+		name       string
+		in         in
+		wantErr    bool
+		inputStdin string
 	}{
 		{
 			name: "success set formula run",
@@ -45,6 +47,7 @@ func Test_setFormulaRunnerCmd_runPrompt(t *testing.T) {
 				config: ConfigRunnerMock{},
 			},
 			wantErr: false,
+			inputStdin: "{\"runType\": \"local\"}\n",
 		},
 		{
 			name: "error to create config",
@@ -59,6 +62,7 @@ func Test_setFormulaRunnerCmd_runPrompt(t *testing.T) {
 				},
 			},
 			wantErr: true,
+			inputStdin: "{\"runType\": \"local\"}\n",
 		},
 		{
 			name: "error to select run type",
@@ -72,13 +76,37 @@ func Test_setFormulaRunnerCmd_runPrompt(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "error to invalid run type",
+			in: in{
+				input: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "invalid", nil
+					},
+				},
+				config: ConfigRunnerMock{},
+			},
+			wantErr: true,
+			inputStdin: "{\"runType\": \"invalid\"}\n",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewSetFormulaRunnerCmd(tt.in.config, tt.in.input)
-			o.PersistentFlags().Bool("stdin", false, "input by stdin")
-			if err := o.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("set credential command error = %v, wantErr %v", err, tt.wantErr)
+			setFormulaPrompt := NewSetFormulaRunnerCmd(tt.in.config, tt.in.input)
+			setFormulaStdin := NewSetFormulaRunnerCmd(tt.in.config, tt.in.input)
+
+			setFormulaPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
+			setFormulaStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+
+			newReader := strings.NewReader(tt.inputStdin)
+			setFormulaStdin.SetIn(newReader)
+
+			if err := setFormulaPrompt.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("set formula runner type prompt command error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if err := setFormulaStdin.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("set formula runner type stdin command error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

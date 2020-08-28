@@ -35,7 +35,8 @@ func TestPreRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
-	ritHome := filepath.Join(tmpDir, ".rit-setup")
+	ritHomeName := ".rit-pre-run-docker"
+	ritHome := filepath.Join(tmpDir, ritHomeName)
 	repoPath := filepath.Join(ritHome, "repos", "commons")
 	dockerBuilder := builder.NewBuildDocker()
 
@@ -125,7 +126,7 @@ func TestPreRun(t *testing.T) {
 			},
 			out: out{
 				wantErr: true,
-				err:     fmt.Errorf(loadConfigErrMsg, filepath.Join(os.TempDir(), ".rit-setup", "repos", "commons", "testing", "formula", "config.json")),
+				err:     fmt.Errorf(loadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
 			},
 		},
 		{
@@ -203,7 +204,6 @@ func TestPreRun(t *testing.T) {
 		})
 	}
 }
-
 
 type dockerBuildMock struct {
 	build func(formulaPath, dockerImg string) error

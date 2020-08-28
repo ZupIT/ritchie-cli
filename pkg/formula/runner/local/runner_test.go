@@ -38,7 +38,7 @@ func TestRun(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
 	homeDir, _ := os.UserHomeDir()
-	ritHome := filepath.Join(tmpDir, ".rit-runner")
+	ritHome := filepath.Join(tmpDir, ".rit-runner-local")
 	repoPath := filepath.Join(ritHome, "repos", "commons")
 
 	makeBuilder := builder.NewBuildMake()
