@@ -87,9 +87,6 @@ func Test_listWorkspaceCmd_runFunc(t *testing.T) {
 }
 
 type WorkspaceListerCustomMock struct {
-	workspaceFile 		string
-	defaultWorkspaceDir string
-	file           		stream.FileWriteReadExister
 	list func() (formula.Workspaces, error)
 }
 
