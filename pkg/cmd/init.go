@@ -40,8 +40,8 @@ const (
 	addRepoMsg         = "Run \"rit add repo\" to add a new repository manually."
 	AddCommonsQuestion = "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]"
 	AddMetricsQuestion = `To help us improve and deliver more value to the community, 
-do you agree to let us collect anonymous data about product 
-and feature use statistics and crash reports?`
+do you agree to let us collect anonymous data about the product, 
+feature usage statistics and crash reports?`
 	AcceptMetrics      = "Yes, I agree to contribute with data anonymously"
 	DoNotAcceptMetrics = "No, not for now."
 )
