@@ -76,7 +76,8 @@ func NewRootCmd(
 	dir stream.DirCreateChecker,
 	rtf rtutorial.Finder,
 	vm version.Manager,
-) *cobra.Command { o := &rootCmd{
+) *cobra.Command {
+	o := &rootCmd{
 		ritchieHome: ritchieHome,
 		dir:         dir,
 		rt:          rtf,
@@ -87,7 +88,7 @@ func NewRootCmd(
 		Use:                cmdUse,
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
-		Version:            versionFlag(vm),
+		Version:            o.versionFlag(),
 		PersistentPreRunE:  o.PreRunFunc(),
 		PersistentPostRunE: o.PostRunFunc(),
 		RunE:               runHelp,
@@ -145,20 +146,18 @@ func isCompleteCmd(cmd *cobra.Command) bool {
 	return strings.Contains(cmd.CommandPath(), "__complete")
 }
 
-func versionFlag(vm version.Manager) string {
-	latestVersion, err := vm.StableVersion()
+func (ro *rootCmd) versionFlag() string {
+	latestVersion, err := ro.vm.StableVersion()
 	if err == nil && latestVersion != Version {
 		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
-		return fmt.Sprintf(versionMsgWithLatestVersion,
+		return fmt.Sprintf(
+			versionMsgWithLatestVersion,
 			Version,
 			formattedLatestVersionMsg,
 			BuildDate,
 			runtime.Version())
 	}
-	return fmt.Sprintf(versionMsg,
-		Version,
-		BuildDate,
-		runtime.Version())
+	return fmt.Sprintf(versionMsg, Version, BuildDate, runtime.Version())
 }
 
 func runHelp(cmd *cobra.Command, _ []string) error {

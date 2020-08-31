@@ -18,7 +18,7 @@ package version
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -41,19 +41,17 @@ const (
 type Manager struct {
 	stableUrl string
 	file      stream.FileWriteReadExister
-	http      http.Client
 }
 
-var _ Manager = Manager{}
+var _ Resolver = Manager{}
 
 func NewManager(
 	stableVersionUrl string,
 	file stream.FileWriteReadExister,
-	http *http.Client) Manager {
+) Manager {
 	return Manager{
 		stableUrl: stableVersionUrl,
 		file:      file,
-		http:      *http,
 	}
 }
 
@@ -66,19 +64,29 @@ func (m Manager) StableVersion() (string, error) {
 	cachePath := filepath.Join(
 		api.RitchieHomeDir(),
 		stableVersionFileCache)
-	cacheData, err := m.file.Read(cachePath)
-	if err != nil {
-		return "", err
-	}
 
+	shouldRequestAndSave := false
 	cache := &stableVersionCache{}
 
-	if err = json.Unmarshal(cacheData, cache); err != nil {
-		return "", err
+	if !m.file.Exists(cachePath) {
+		shouldRequestAndSave = true
+	} else {
+		cacheData, err := m.file.Read(cachePath)
+		if err != nil {
+			return "", err
+		}
+
+		if err = json.Unmarshal(cacheData, cache); err != nil {
+			return "", err
+		}
+
+		if cache.ExpiresAt <= time.Now().Unix() {
+			shouldRequestAndSave = true
+		}
 	}
 
-	if cache.ExpiresAt <= time.Now().Unix() {
-		stableVersion, err := requestStableVersion(m.http, m.stableUrl)
+	if shouldRequestAndSave {
+		stableVersion, err := requestStableVersion(m.stableUrl)
 		if err != nil {
 			return "", err
 		}
@@ -88,6 +96,7 @@ func (m Manager) StableVersion() (string, error) {
 
 		return stableVersion, nil
 	}
+
 	return cache.Stable, nil
 }
 
@@ -99,33 +108,27 @@ func (m Manager) VerifyNewVersion(current, installed string) string {
 }
 
 func (m Manager) UpdateCache() error {
-	cachePath := filepath.Join(
-		api.RitchieHomeDir(),
-		stableVersionFileCache)
+	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
 
-	stableVersion, err := requestStableVersion(m.http, m.stableUrl)
+	stableVersion, err := requestStableVersion(m.stableUrl)
 	if err != nil {
 		return err
 	}
 
-	err = saveCache(stableVersion, cachePath, m.file)
-	return err
+	if err = saveCache(stableVersion, cachePath, m.file); err != nil {
+		return err
+	}
+	return nil
 }
 
-
-func requestStableVersion(httpClient http.Client, stableVersionUrl string) (string, error) {
-	request, _ := http.NewRequest(
-		http.MethodGet,
-		stableVersionUrl,
-		nil)
-
-	response, err := httpClient.Do(request)
+func requestStableVersion(stableVersionUrl string) (string, error) {
+	response, err := http.Get(stableVersionUrl)
 	if err != nil {
 		return "", err
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return "", errors.New("response status is not 200")
+		return "", fmt.Errorf("response status is not %d", http.StatusOK)
 	}
 
 	stableVersionBytes, err := ioutil.ReadAll(response.Body)
@@ -142,7 +145,7 @@ func saveCache(
 	stableVersion string,
 	cachePath string,
 	file stream.FileWriteReadExister,
-	) error {
+) error {
 	newCache := stableVersionCache{
 		Stable:    stableVersion,
 		ExpiresAt: time.Now().Add(time.Hour * 10).Unix(),
@@ -150,9 +153,8 @@ func saveCache(
 
 	newCacheJson, _ := json.Marshal(newCache)
 
-	err := file.Write(cachePath, newCacheJson)
-	return err
+	if err := file.Write(cachePath, newCacheJson); err != nil {
+		return err
+	}
+	return nil
 }
-
-
-

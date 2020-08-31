@@ -19,6 +19,7 @@ package upgrade
 import (
 	"fmt"
 
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
@@ -34,13 +35,15 @@ func NewDefaultUrlFinder() DefaultUrlFinder {
 
 func (duf DefaultUrlFinder) Url(resolver version.Resolver, os string) string {
 	stableVersion, err := resolver.StableVersion()
+
+
 	if err != nil {
 		return ""
 	}
 
 	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, os)
 
-	if os == "windows" {
+	if os == osutil.Windows {
 		upgradeUrl += ".exe"
 	}
 

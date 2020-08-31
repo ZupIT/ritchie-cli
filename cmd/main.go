@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -138,7 +137,6 @@ func buildCommands() *cobra.Command {
 	versionManager := version.NewManager(
 		version.StableVersionUrl,
 		fileManager,
-		&http.Client{Timeout: 100 * time.Second},
 	)
 	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()
 	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)

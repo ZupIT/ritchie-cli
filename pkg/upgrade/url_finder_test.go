@@ -18,7 +18,6 @@ package upgrade
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/version"
@@ -82,7 +81,6 @@ func TestUpgradeUrl(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			duf := NewDefaultUrlFinder()
 			if got := duf.Url(tt.in.resolver, tt.in.os); got != tt.want {
-				fmt.Println(got)
 				t.Errorf("UpgradeUrl() = %v, want %v", got, tt.want)
 			}
 		})
