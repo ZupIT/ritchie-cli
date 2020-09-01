@@ -38,6 +38,7 @@ type fieldsTestDeleteFormulaCmd struct {
 
 func TestNewDeleteFormulaCmd(t *testing.T) {
 	userHomeDir := os.TempDir()
+	ritchieHomeDir := filepath.Join(os.TempDir(), ".rit")
 	defaultWorkspace := filepath.Join(userHomeDir, formula.DefaultWorkspaceDir)
 	someError := errors.New("some error")
 	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
@@ -235,7 +236,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 
 			cmd := NewDeleteFormulaCmd(
 				userHomeDir,
-				filepath.Join(os.TempDir(), ".rit"),
+				ritchieHomeDir,
 				fields.workspaceManager,
 				fields.directory,
 				inputTrueMock{},
