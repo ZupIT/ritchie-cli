@@ -86,7 +86,7 @@
                 "action":"main"
             },
             {
-                "key":",feature usage statistics and crash reports?\u001B[0m  \u001B[36m[Use arrows to move, type to filter]\u001B[0m",
+                "key":"feature usage statistics and crash reports?\u001B[0m  \u001B[36m[Use arrows to move, type to filter]\u001B[0m",
                 "value":"Yes, I agree to contribute with data anonymously",
                 "action":"select"
             },
