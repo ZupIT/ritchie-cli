@@ -25,7 +25,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-func Test_setFormulaRunnerCmd_runPrompt(t *testing.T) {
+func Test_setFormulaRunnerCmd(t *testing.T) {
 	type in struct {
 		config formula.ConfigRunner
 		input  prompt.InputList
