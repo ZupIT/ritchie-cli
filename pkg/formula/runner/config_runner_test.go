@@ -45,7 +45,7 @@ func TestCreate(t *testing.T) {
 			in: in{
 				ritHome: tmpDir,
 				file:    fileManagerMock{},
-				runType: formula.Local,
+				runType: formula.LocalRun,
 			},
 			want: nil,
 		},
@@ -54,7 +54,7 @@ func TestCreate(t *testing.T) {
 			in: in{
 				ritHome: tmpDir,
 				file:    fileManagerMock{wErr: errors.New("error to write file")},
-				runType: formula.Local,
+				runType: formula.LocalRun,
 			},
 			want: errors.New("error to write file"),
 		},
@@ -97,7 +97,7 @@ func TestFind(t *testing.T) {
 				file:    fileManagerMock{rBytes: []byte("0"), exist: true},
 			},
 			out: out{
-				runType: formula.Local,
+				runType: formula.LocalRun,
 				err:     nil,
 			},
 		},
@@ -108,7 +108,7 @@ func TestFind(t *testing.T) {
 				file:    fileManagerMock{exist: false},
 			},
 			out: out{
-				runType: -1,
+				runType: formula.DefaultRun,
 				err:     ErrConfigNotFound,
 			},
 		},
@@ -119,7 +119,7 @@ func TestFind(t *testing.T) {
 				file:    fileManagerMock{rErr: errors.New("read config error"), exist: true},
 			},
 			out: out{
-				runType: -1,
+				runType: formula.DefaultRun,
 				err:     errors.New("read config error"),
 			},
 		},
@@ -130,7 +130,7 @@ func TestFind(t *testing.T) {
 				file:    fileManagerMock{rBytes: []byte("error"), exist: true},
 			},
 			out: out{
-				runType: -1,
+				runType: formula.DefaultRun,
 				err:     errors.New("strconv.Atoi: parsing \"error\": invalid syntax"),
 			},
 		},

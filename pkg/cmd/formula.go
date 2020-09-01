@@ -37,7 +37,7 @@ const (
 	rootCmdName = "root"
 )
 
-var ErrRunFormulaWithTwoFlag = errors.New("you cannot run formula with --docker and --local flags togethers")
+var ErrRunFormulaWithTwoFlag = errors.New("you cannot run formula with --docker and --local flags together")
 
 type FormulaCommand struct {
 	coreCmds    api.Commands
@@ -123,12 +123,12 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			inputType = api.Stdin
 		}
 
-		docker, err := cmd.Flags().GetBool(formula.Docker.String())
+		docker, err := cmd.Flags().GetBool(formula.DockerRun.String())
 		if err != nil {
 			return err
 		}
 
-		local, err := cmd.Flags().GetBool(formula.Local.String())
+		local, err := cmd.Flags().GetBool(formula.LocalRun.String())
 		if err != nil {
 			return err
 		}
@@ -142,13 +142,13 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			return ErrRunFormulaWithTwoFlag
 		}
 
-		runType := formula.RunnerType(-1)
+		runType := formula.DefaultRun
 		if docker {
-			runType = formula.Docker
+			runType = formula.DockerRun
 		}
 
 		if local {
-			runType = formula.Local
+			runType = formula.LocalRun
 		}
 
 		exe := formula.ExecuteData{
@@ -171,7 +171,7 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 
 func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
-	formulaFlags.BoolP(formula.Docker.String(), "d", false, "Use to run formulas inside docker")
-	formulaFlags.BoolP(formula.Local.String(), "l", false, "Use to run formulas locally")
+	formulaFlags.BoolP(formula.DockerRun.String(), "d", false, "Use to run formulas inside docker")
+	formulaFlags.BoolP(formula.LocalRun.String(), "l", false, "Use to run formulas locally")
 	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
 }

@@ -46,6 +46,10 @@ and feature use statistics and crash reports?`
 	AcceptMetrics             = "Yes, I agree to contribute with data anonymously"
 	DoNotAcceptMetrics        = "No, not for now."
 	SelectFormulaTypeQuestion = "Select a default formula run type:"
+	FormulaLocalRunWarning    = `
+In order to run formulas locally, you must have the formula language installed on your machine,
+if you don't want to install choose to run the formulas inside the docker.
+`
 )
 
 var (
@@ -174,7 +178,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 			s.Success(prompt.Green("Commons repository added successfully!\n"))
 		}
 
-		runType := formula.RunnerType(-1)
+		runType := formula.DefaultRun
 		for i := range formula.RunnerTypes {
 			if formula.RunnerTypes[i] == init.RunType {
 				runType = formula.RunnerType(i)
@@ -182,7 +186,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 			}
 		}
 
-		if runType == -1 {
+		if runType == formula.DefaultRun {
 			return ErrInvalidRunType
 		}
 
@@ -190,11 +194,8 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if runType == formula.Local {
-			prompt.Warning(`
-In order to run formulas locally, you must have the formula language installed on your machine,
-if you don't want to install choose to run the formulas inside the docker.
-`)
+		if runType == formula.LocalRun {
+			prompt.Warning(FormulaLocalRunWarning)
 		}
 
 		prompt.Success("Initialization successful!")
@@ -246,7 +247,7 @@ func (in initCmd) setRunnerType() error {
 		return err
 	}
 
-	runType := formula.RunnerType(-1)
+	runType := formula.DefaultRun
 	for i := range formula.RunnerTypes {
 		if formula.RunnerTypes[i] == selected {
 			runType = formula.RunnerType(i)
@@ -254,7 +255,7 @@ func (in initCmd) setRunnerType() error {
 		}
 	}
 
-	if runType == -1 {
+	if runType == formula.DefaultRun {
 		return ErrInvalidRunType
 	}
 
@@ -262,11 +263,8 @@ func (in initCmd) setRunnerType() error {
 		return err
 	}
 
-	if runType == formula.Local {
-		prompt.Warning(`
-In order to run formulas locally, you must have the formula language installed on your machine,
-if you don't want to install choose to run the formulas inside the docker.
-`)
+	if runType == formula.LocalRun {
+		prompt.Warning(FormulaLocalRunWarning)
 	}
 
 	return nil

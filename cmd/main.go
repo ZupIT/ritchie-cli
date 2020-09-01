@@ -139,8 +139,8 @@ func buildCommands() *cobra.Command {
 	formulaDockerRun := docker.NewRunner(postRunner, inputManager, formulaDockerPreRun, fileManager, ctxFinder, userHomeDir)
 
 	runners := formula.Runners{ // Config runner types
-		formula.Local:  formulaLocalRun,
-		formula.Docker: formulaDockerRun,
+		formula.LocalRun:  formulaLocalRun,
+		formula.DockerRun: formulaDockerRun,
 	}
 
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)

@@ -25,7 +25,6 @@ import (
 )
 
 func TestExecute(t *testing.T) {
-
 	type in struct {
 		runners formula.Runners
 		config  formula.ConfigRunner
@@ -41,14 +40,14 @@ func TestExecute(t *testing.T) {
 			name: "execute local success",
 			in: in{
 				runners: formula.Runners{
-					formula.Local:  localRunnerMock{},
-					formula.Docker: dockerRunnerMock{},
+					formula.LocalRun:  localRunnerMock{},
+					formula.DockerRun: dockerRunnerMock{},
 				},
-				config: configRunnerMock{runType: formula.Local},
+				config: configRunnerMock{runType: formula.LocalRun},
 				exe: formula.ExecuteData{
 					Def:     formula.Definition{},
 					InType:  0,
-					RunType: formula.Local,
+					RunType: formula.LocalRun,
 					Verbose: false,
 				},
 			},
@@ -58,14 +57,14 @@ func TestExecute(t *testing.T) {
 			name: "execute docker success",
 			in: in{
 				runners: formula.Runners{
-					formula.Local:  localRunnerMock{},
-					formula.Docker: dockerRunnerMock{},
+					formula.LocalRun:  localRunnerMock{},
+					formula.DockerRun: dockerRunnerMock{},
 				},
-				config: configRunnerMock{runType: formula.Local},
+				config: configRunnerMock{runType: formula.LocalRun},
 				exe: formula.ExecuteData{
 					Def:     formula.Definition{},
 					InType:  0,
-					RunType: formula.Docker,
+					RunType: formula.DockerRun,
 					Verbose: false,
 				},
 			},
@@ -75,14 +74,14 @@ func TestExecute(t *testing.T) {
 			name: "execute default success",
 			in: in{
 				runners: formula.Runners{
-					formula.Local:  localRunnerMock{},
-					formula.Docker: dockerRunnerMock{},
+					formula.LocalRun:  localRunnerMock{},
+					formula.DockerRun: dockerRunnerMock{},
 				},
-				config: configRunnerMock{runType: formula.Local},
+				config: configRunnerMock{runType: formula.LocalRun},
 				exe: formula.ExecuteData{
 					Def:     formula.Definition{},
 					InType:  0,
-					RunType: -1,
+					RunType: formula.DefaultRun,
 					Verbose: false,
 				},
 			},
@@ -92,14 +91,14 @@ func TestExecute(t *testing.T) {
 			name: "find default runner error",
 			in: in{
 				runners: formula.Runners{
-					formula.Local:  localRunnerMock{},
-					formula.Docker: dockerRunnerMock{},
+					formula.LocalRun:  localRunnerMock{},
+					formula.DockerRun: dockerRunnerMock{},
 				},
 				config: configRunnerMock{findErr: ErrConfigNotFound},
 				exe: formula.ExecuteData{
 					Def:     formula.Definition{},
 					InType:  0,
-					RunType: -1,
+					RunType: formula.DefaultRun,
 					Verbose: false,
 				},
 			},
@@ -109,14 +108,14 @@ func TestExecute(t *testing.T) {
 			name: "run formula error",
 			in: in{
 				runners: formula.Runners{
-					formula.Local:  localRunnerMock{},
-					formula.Docker: dockerRunnerMock{err: errors.New("error to run formula")},
+					formula.LocalRun:  localRunnerMock{},
+					formula.DockerRun: dockerRunnerMock{err: errors.New("error to run formula")},
 				},
-				config: configRunnerMock{runType: formula.Docker},
+				config: configRunnerMock{runType: formula.DockerRun},
 				exe: formula.ExecuteData{
 					Def:     formula.Definition{},
 					InType:  0,
-					RunType: -1,
+					RunType: formula.DefaultRun,
 					Verbose: false,
 				},
 			},

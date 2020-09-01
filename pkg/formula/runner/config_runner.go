@@ -59,17 +59,17 @@ func (c ConfigManager) Create(runType formula.RunnerType) error {
 
 func (c ConfigManager) Find() (formula.RunnerType, error) {
 	if !c.file.Exists(c.filePath) {
-		return -1, ErrConfigNotFound
+		return formula.DefaultRun, ErrConfigNotFound
 	}
 
 	data, err := c.file.Read(c.filePath)
 	if err != nil {
-		return -1, err
+		return formula.DefaultRun, err
 	}
 
 	runType, err := strconv.Atoi(string(data))
 	if err != nil {
-		return -1, err
+		return formula.DefaultRun, err
 	}
 
 	return formula.RunnerType(runType), nil

@@ -25,7 +25,6 @@ import (
 )
 
 func TestPostRun(t *testing.T) {
-
 	type in struct {
 		file   stream.FileNewListMoveRemover
 		dir    stream.DirRemover

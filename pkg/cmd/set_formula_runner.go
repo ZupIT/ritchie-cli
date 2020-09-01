@@ -47,7 +47,7 @@ func (c setFormulaRunnerCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		runType := formula.RunnerType(-1)
+		runType := formula.DefaultRun
 		for i := range formula.RunnerTypes {
 			if formula.RunnerTypes[i] == choose {
 				runType = formula.RunnerType(i)
@@ -55,7 +55,7 @@ func (c setFormulaRunnerCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		if runType == -1 {
+		if runType == formula.DefaultRun {
 			return ErrInvalidRunType
 		}
 
@@ -65,11 +65,8 @@ func (c setFormulaRunnerCmd) runPrompt() CommandRunnerFunc {
 
 		prompt.Success("The default formula runner has been successfully configured!")
 
-		if runType == formula.Local {
-			prompt.Warning(`
-In order to run formulas locally, you must have the formula language installed on your machine,
-if you don't want to install choose to run the formulas inside the docker.
-`)
+		if runType == formula.LocalRun {
+			prompt.Warning(FormulaLocalRunWarning)
 		}
 
 		return nil
@@ -86,7 +83,7 @@ func (c setFormulaRunnerCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		runType := formula.RunnerType(-1)
+		runType := formula.DefaultRun
 		for i := range formula.RunnerTypes {
 			if formula.RunnerTypes[i] == stdinData.RunType {
 				runType = formula.RunnerType(i)
@@ -94,7 +91,7 @@ func (c setFormulaRunnerCmd) runStdin() CommandRunnerFunc {
 			}
 		}
 
-		if runType == -1 {
+		if runType == formula.DefaultRun {
 			return ErrInvalidRunType
 		}
 
@@ -104,11 +101,8 @@ func (c setFormulaRunnerCmd) runStdin() CommandRunnerFunc {
 
 		prompt.Success("The default formula runner has been successfully configured!")
 
-		if runType == formula.Local {
-			prompt.Warning(`
-In order to run formulas locally, you must have the formula language installed on your machine,
-if you don't want to install choose to run the formulas inside the docker.
-`)
+		if runType == formula.LocalRun {
+			prompt.Warning(FormulaLocalRunWarning)
 		}
 
 		return nil

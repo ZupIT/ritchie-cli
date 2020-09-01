@@ -9,8 +9,9 @@ import (
 var RunnerTypes = []string{"local", "docker"}
 
 const (
-	Local RunnerType = iota
-	Docker
+	DefaultRun RunnerType = iota - 1
+	LocalRun
+	DockerRun
 )
 
 type RunnerType int
@@ -30,7 +31,7 @@ type Executor interface {
 }
 
 type PreRunner interface {
-		PreRun(def Definition) (Setup, error)
+	PreRun(def Definition) (Setup, error)
 }
 
 type Runner interface {

@@ -65,7 +65,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Local.String(), nil
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},
@@ -92,7 +92,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Docker.String(), nil
+							return formula.DockerRun.String(), nil
 						}
 						return DoNotAcceptMetrics, nil
 					},
@@ -123,7 +123,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Docker.String(), nil
+							return formula.DockerRun.String(), nil
 						}
 						return DoNotAcceptMetrics, nil
 					},
@@ -154,7 +154,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Local.String(), nil
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},
@@ -185,7 +185,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Local.String(), nil
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},
@@ -212,7 +212,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Local.String(), nil
+							return formula.LocalRun.String(), nil
 						}
 						return "", someError
 					},
@@ -264,7 +264,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Local.String(), nil
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},
@@ -291,7 +291,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Local.String(), nil
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},
@@ -318,7 +318,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.Local.String(), nil
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},

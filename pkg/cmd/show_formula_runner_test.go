@@ -36,7 +36,7 @@ func Test_showFormulaRunnerCmd_runPrompt(t *testing.T) {
 			name: "success show formula run type",
 			in: in{
 				config: ConfigRunnerMock{
-					runType: formula.Local,
+					runType: formula.LocalRun,
 				},
 			},
 			wantErr: false,
