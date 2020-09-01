@@ -138,7 +138,7 @@ func buildCommands() *cobra.Command {
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
 	formulaDockerRun := docker.NewRunner(postRunner, inputManager, formulaDockerPreRun, fileManager, ctxFinder, userHomeDir)
 
-	runners := formula.Runners{ // Config runner types
+	runners := formula.Runners{
 		formula.LocalRun:  formulaLocalRun,
 		formula.DockerRun: formulaDockerRun,
 	}
