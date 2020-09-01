@@ -33,9 +33,12 @@ import (
 )
 
 const (
-	newWorkspace = "Type new formula workspace?"
-	docsDir      = "docs"
-	srcDir       = "src"
+	newWorkspace                = "Type new formula workspace?"
+	docsDir                     = "docs"
+	srcDir                      = "src"
+	questionSelectFormulaGroup  = "Select a formula or group: "
+	questionAboutFoundedFormula = "We found a formula, which one do you want to run the build: "
+	optionOtherFormula          = "Another formula"
 )
 
 type buildFormulaCmd struct {
@@ -109,7 +112,7 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			}
 		}
 
-		formulaPath, err := b.readFormulas(wspace.Dir)
+		formulaPath, err := b.readFormulas(wspace.Dir, "rit")
 		if err != nil {
 			return err
 		}
@@ -151,7 +154,7 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 	s.Success(success)
 }
 
-func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
+func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string, error) {
 	dirs, err := b.directory.List(dir, false)
 	if err != nil {
 		return "", err
@@ -159,16 +162,33 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 
 	dirs = sliceutil.Remove(dirs, docsDir)
 
+	var formulaOptions []string
+	var response string
+
 	if isFormula(dirs) {
-		return dir, nil
+		if !hasFormulaInDir(dirs) {
+			return dir, nil
+		}
+
+		formulaOptions = append(formulaOptions, currentFormula, optionOtherFormula)
+
+		response, err = b.List(questionAboutFoundedFormula, formulaOptions)
+		if err != nil {
+			return "", err
+		}
+		if response == currentFormula {
+			return dir, nil
+		}
+		dirs = sliceutil.Remove(dirs, srcDir)
 	}
 
-	selected, err := b.List("Select a formula or group: ", dirs)
+	selected, err := b.List(questionSelectFormulaGroup, dirs)
 	if err != nil {
 		return "", err
 	}
 
-	dir, err = b.readFormulas(filepath.Join(dir, selected))
+	newFormulaSelected := fmt.Sprintf("%s %s", currentFormula, selected)
+	dir, err = b.readFormulas(filepath.Join(dir, selected), newFormulaSelected)
 	if err != nil {
 		return "", err
 	}
@@ -184,6 +204,13 @@ func isFormula(dirs []string) bool {
 	}
 
 	return false
+}
+
+func hasFormulaInDir(dirs []string) bool {
+	dirs = sliceutil.Remove(dirs, docsDir)
+	dirs = sliceutil.Remove(dirs, srcDir)
+
+	return len(dirs) > 0
 }
 
 func tutorialBuildFormula(tutorialStatus string) {

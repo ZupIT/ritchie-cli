@@ -42,6 +42,7 @@ type RunManager struct {
 	formula.PreRunner
 	file stream.FileWriteExistAppender
 	ctx  rcontext.Finder
+	homeDir string
 }
 
 func NewFormulaRunner(
@@ -50,6 +51,7 @@ func NewFormulaRunner(
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
 	ctx rcontext.Finder,
+	homeDir string,
 ) formula.Runner {
 	return RunManager{
 		PostRunner:  postRun,
@@ -57,6 +59,7 @@ func NewFormulaRunner(
 		PreRunner:   preRun,
 		file:        file,
 		ctx:         ctx,
+		homeDir:     homeDir,
 	}
 }
 
@@ -92,11 +95,12 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, do
 
 func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool) (*exec.Cmd, error) {
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
+	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir)
 	var args []string
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}
 	} else {
-		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}
 	}
 
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"

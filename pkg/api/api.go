@@ -59,6 +59,7 @@ var (
 		{Parent: "root_build", Usage: "formula"},
 		{Parent: "root", Usage: "upgrade"},
 		{Parent: "root", Usage: "tutorial"},
+		{Parent: "root", Usage: "metrics"},
 	}
 )
 

@@ -125,12 +125,6 @@ func (inputFalseMock) Bool(name string, items []string) (bool, error) {
 	return false, nil
 }
 
-type inputBoolErrorMock struct{}
-
-func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
-	return true, errors.New("some error")
-}
-
 type inputListMock struct{}
 
 func (inputListMock) List(name string, items []string) (string, error) {
@@ -138,11 +132,11 @@ func (inputListMock) List(name string, items []string) (string, error) {
 }
 
 type inputListCustomMock struct {
-	name string
+	list func(name string, items []string) (string, error)
 }
 
 func (m inputListCustomMock) List(name string, items []string) (string, error) {
-	return m.name, nil
+	return m.list(name, items)
 }
 
 type inputListErrorMock struct{}
@@ -405,6 +399,58 @@ func (t TutorialFindSetterCustomMock) Find() (rtutorial.TutorialHolder, error) {
 
 func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHolder, error) {
 	return t.set(tutorial)
+}
+
+type DirManagerCustomMock struct {
+	exists func(dir string) bool
+	list   func(dir string, hiddenDir bool) ([]string, error)
+	isDir  func(dir string) bool
+}
+
+func (d DirManagerCustomMock) Exists(dir string) bool {
+	return d.exists(dir)
+}
+
+func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error) {
+	return d.list(dir, hiddenDir)
+}
+
+func (d DirManagerCustomMock) IsDir(dir string) bool {
+	return d.isDir(dir)
+}
+
+type LocalBuilderMock struct {
+	build func(workspacePath, formulaPath string) error
+}
+
+func (l LocalBuilderMock) Build(workspacePath, formulaPath string) error {
+	return l.build(workspacePath, formulaPath)
+}
+
+type WatcherMock struct {
+	watch func(workspacePath, formulaPath string)
+}
+
+func (w WatcherMock) Watch(workspacePath, formulaPath string) {
+	w.watch(workspacePath, formulaPath)
+}
+
+type WorkspaceAddListValidatorCustomMock struct {
+	add      func(workspace formula.Workspace) error
+	list     func() (formula.Workspaces, error)
+	validate func(workspace formula.Workspace) error
+}
+
+func (w WorkspaceAddListValidatorCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
+}
+
+func (w WorkspaceAddListValidatorCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+func (w WorkspaceAddListValidatorCustomMock) Validate(workspace formula.Workspace) error {
+	return w.validate(workspace)
 }
 
 var (

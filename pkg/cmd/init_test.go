@@ -25,10 +25,28 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
+	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 func TestNewInitCmd(t *testing.T) {
-	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{}, inputTrueMock{})
+	cmd := NewInitCmd(
+		defaultRepoAdderMock,
+		defaultGitRepositoryMock,
+		TutorialFinderMock{},
+		inputListCustomMock{
+			list: func(name string, items []string) (string, error) {
+				if name == AddCommonsQuestion {
+					return "yes", nil
+				}
+				return AcceptMetrics, nil
+			},
+		},
+		sMocks.FileWriteReadExisterCustomMock{
+			WriteMock: func(path string, content []byte) error {
+				return nil
+			},
+		},
+	)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 	if cmd == nil {
@@ -42,7 +60,24 @@ func TestNewInitCmd(t *testing.T) {
 }
 
 func TestNewInitStdin(t *testing.T) {
-	cmd := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{}, inputTrueMock{})
+	cmd := NewInitCmd(
+		defaultRepoAdderMock,
+		defaultGitRepositoryMock,
+		TutorialFinderMock{},
+		inputListCustomMock{
+			list: func(name string, items []string) (string, error) {
+				if name == AddCommonsQuestion {
+					return "yes", nil
+				}
+				return AcceptMetrics, nil
+			},
+		},
+		sMocks.FileWriteReadExisterCustomMock{
+			WriteMock: func(path string, content []byte) error {
+				return nil
+			},
+		},
+	)
 	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 
 	input := "{\"addCommons\": \"yes\"}\n"
@@ -60,11 +95,12 @@ func TestNewInitStdin(t *testing.T) {
 }
 
 func Test_initCmd_runAnyEntry(t *testing.T) {
+	someError := errors.New("some error")
 	type fields struct {
-		repo   formula.RepositoryAdder
-		git    git.Repositories
-		inBool prompt.InputBool
-		find   rtutorial.Finder
+		repo      formula.RepositoryAdder
+		git       git.Repositories
+		inputList prompt.InputList
+		find      rtutorial.Finder
 	}
 
 	tests := []struct {
@@ -76,10 +112,17 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		{
 			name: "Run With Success when add commons",
 			fields: fields{
-				repo:   defaultRepoAdderMock,
-				git:    defaultGitRepositoryMock,
-				inBool: inputTrueMock{},
-				find:   TutorialFinderMock{},
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				find: TutorialFinderMock{},
+				inputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == AddCommonsQuestion {
+							return "yes", nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
 			},
 			wantErr:    false,
 			inputStdin: "{\"addCommons\": \"yes\"}\n",
@@ -87,10 +130,17 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		{
 			name: "Run With Success when not add commons",
 			fields: fields{
-				repo:   defaultRepoAdderMock,
-				git:    defaultGitRepositoryMock,
-				inBool: inputFalseMock{},
-				find:   TutorialFinderMock{},
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				inputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == AddCommonsQuestion {
+							return "no", nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+				find: TutorialFinderMock{},
 			},
 			wantErr:    false,
 			inputStdin: "{\"addCommons\": \"no\"}\n",
@@ -101,11 +151,18 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				repo: defaultRepoAdderMock,
 				git: GitRepositoryMock{
 					latestTag: func(info git.RepoInfo) (git.Tag, error) {
-						return git.Tag{}, errors.New("some error")
+						return git.Tag{}, someError
 					},
 				},
-				inBool: inputTrueMock{},
-				find:   TutorialFinderMock{},
+				inputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == AddCommonsQuestion {
+							return "yes", nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+				find: TutorialFinderMock{},
 			},
 			wantErr:    false,
 			inputStdin: "{\"addCommons\": \"yes\"}\n",
@@ -115,12 +172,19 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			fields: fields{
 				repo: repoListerAdderCustomMock{
 					add: func(d formula.Repo) error {
-						return errors.New("some error")
+						return someError
 					},
 				},
-				git:    defaultGitRepositoryMock,
-				inBool: inputTrueMock{},
-				find:   TutorialFinderMock{},
+				git: defaultGitRepositoryMock,
+				inputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == AddCommonsQuestion {
+							return "yes", nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+				find: TutorialFinderMock{},
 			},
 			wantErr:    false,
 			inputStdin: "{\"addCommons\": \"yes\"}\n",
@@ -133,18 +197,49 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 						return errors.New("some error")
 					},
 				},
-				git:    defaultGitRepositoryMock,
-				inBool: inputTrueMock{},
-				find:   TutorialFinderMock{},
+				git:  defaultGitRepositoryMock,
+				find: TutorialFinderMock{},
+				inputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == AddCommonsQuestion {
+							return "yes", nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
 			},
 			wantErr:    false,
 			inputStdin: "{\"addCommons\": \"yes\"}\n",
 		},
+		{
+			name: "Error in select response of metrics",
+			fields: fields{
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				inputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == AddCommonsQuestion {
+							return "yes", nil
+						}
+						return "any", someError
+					},
+				},
+				find: TutorialFinderMock{},
+			},
+			wantErr: true,
+		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initPrompt := NewInitCmd(tt.fields.repo, tt.fields.git, tt.fields.find, tt.fields.inBool)
-			initStdin := NewInitCmd(tt.fields.repo, tt.fields.git, tt.fields.find, tt.fields.inBool)
+			streamMock := sMocks.FileWriteReadExisterCustomMock{
+				WriteMock: func(path string, content []byte) error {
+					return nil
+				},
+			}
+
+			initPrompt := NewInitCmd(tt.fields.repo, tt.fields.git, tt.fields.find, tt.fields.inputList, streamMock)
+			initStdin := NewInitCmd(tt.fields.repo, tt.fields.git, tt.fields.find, tt.fields.inputList, streamMock)
 
 			initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 			initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
@@ -155,22 +250,6 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			if err := initPrompt.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err := initStdin.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("init_runStdin() error = %v, wantErr %v", err, tt.wantErr)
-			}
 		})
 	}
-}
-
-func Test_initCmd_runOnlyPrompt(t *testing.T) {
-	t.Run("Error when bool returns err", func(t *testing.T) {
-		wantErr := true
-
-		o := NewInitCmd(defaultRepoAdderMock, defaultGitRepositoryMock, TutorialFinderMock{}, inputBoolErrorMock{})
-		o.PersistentFlags().Bool("stdin", false, "input by stdin")
-
-		if err := o.Execute(); (err != nil) != wantErr {
-			t.Errorf("init_runPrompt() error = %v, wantErr %v", err, wantErr)
-		}
-	})
 }

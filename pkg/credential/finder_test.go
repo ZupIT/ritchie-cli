@@ -74,7 +74,7 @@ func TestFind(t *testing.T) {
 				provider:  "aws",
 			},
 			out: out{
-				cred: Detail{},
+				cred: Detail{Credential: Credential{}},
 				err:  errors.New(prompt.Red(fmt.Sprintf(errNotFoundTemplate, "aws"))),
 			},
 		},

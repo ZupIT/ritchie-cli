@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -27,7 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
-var (
+const (
 	// MsgUpgrade error message to inform user to upgrade rit version
 	MsgRitUpgrade = "\nWarning: Rit has a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
@@ -46,8 +47,7 @@ type stableVersionCache struct {
 }
 
 func (r DefaultVersionResolver) UpdateCache() error {
-	cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
-
+	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
 	stableVersion, err := requestStableVersion(r.StableVersionUrl, r.HttpClient)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (r DefaultVersionResolver) UpdateCache() error {
 }
 
 func (r DefaultVersionResolver) StableVersion() (string, error) {
-	cachePath := api.RitchieHomeDir() + "/" + stableVersionFileCache
+	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
 	cacheData, err := r.FileUtilService.ReadFile(cachePath)
 	cache := &stableVersionCache{}
 

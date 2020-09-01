@@ -59,7 +59,7 @@ func (f Finder) Find(provider string) (Detail, error) {
 	cb, err := f.file.Read(File(f.homePath, ctx.Current, provider))
 	if err != nil {
 		errMsg := fmt.Sprintf(errNotFoundTemplate, provider)
-		return Detail{}, errors.New(prompt.Red(errMsg))
+		return Detail{Credential: Credential{}}, errors.New(prompt.Red(errMsg))
 	}
 
 	cred := &Detail{}

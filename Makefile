@@ -24,18 +24,19 @@ IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
+METRIC_SERVER_URL=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_metric_server.sh)
 
 build-linux:
 	mkdir -p $(DIST_LINUX)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX)/$(BINARY_NAME) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/metric.ServerRestURL=$(METRIC_SERVER_URL) -X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-mac:
 	mkdir -p $(DIST_MAC)
-	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC)/$(BINARY_NAME) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/metric.ServerRestURL=$(METRIC_SERVER_URL) -X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-windows:
 	mkdir -p $(DIST_WIN)
-	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN)/$(BINARY_NAME).exe -v $(CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/metric.ServerRestURL=$(METRIC_SERVER_URL) -X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN)/$(BINARY_NAME).exe -v $(CMD_PATH)
 
 build: build-linux build-mac build-windows
 ifneq "$(BUCKET)" ""
