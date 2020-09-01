@@ -79,7 +79,7 @@ func setUpRitSingleUnix() {
 	fmt.Println("Running INIT")
 	initStepRit := Step{Key: "", Value: "init", Action: "rit"}
 	initAcceptsMetrics := Step{
-		Key:    "and feature use statistics and crash reports?\u001B[0m  \u001B[36m[Use arrows to move, type to filter]\u001B[0m",
+		Key:    "feature usage statistics and crash reports?\u001B[0m  \u001B[36m[Use arrows to move, type to filter]\u001B[0m",
 		Value:  "Yes, I agree to contribute with data anonymously",
 		Action: "select"}
 	initAddRepo := Step{
