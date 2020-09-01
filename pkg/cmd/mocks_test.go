@@ -346,6 +346,29 @@ func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
 }
 
+type treeGeneratorMock struct {
+}
+
+func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
+	return formula.Tree{
+		Commands: api.Commands{
+			{
+				Id:     "root_group",
+				Parent: "root",
+				Usage:  "group",
+				Help:   "group for add",
+			},
+			{
+				Id:      "root_group_verb",
+				Parent:  "root_group",
+				Usage:   "verb",
+				Help:    "verb for add",
+				Formula: true,
+			},
+		},
+	}, nil
+}
+
 type GitRepositoryMock struct {
 	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
 	tags      func(info git.RepoInfo) (git.Tags, error)

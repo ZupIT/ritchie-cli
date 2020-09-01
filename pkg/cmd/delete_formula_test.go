@@ -17,24 +17,270 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestNewDeleteFormulaCmdStdin(t *testing.T) {
+type fieldsTestDeleteFormulaCmd struct {
+	workspaceManager formula.WorkspaceAddListValidator
+	directory        stream.DirListChecker
+	inList           prompt.InputList
+}
+
+func TestNewDeleteFormulaCmd(t *testing.T) {
+	userHomeDir := os.TempDir()
+	defaultWorkspace := filepath.Join(userHomeDir, formula.DefaultWorkspaceDir)
+	someError := errors.New("some error")
+	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	if err := os.MkdirAll(filepath.Join(workspace, "group", "verb", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
+	}
+	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
+	}
+
+	var fieldsDefault fieldsTestDeleteFormulaCmd = fieldsTestDeleteFormulaCmd{
+		workspaceManager: WorkspaceAddListValidatorCustomMock{
+			list: func() (formula.Workspaces, error) {
+				return formula.Workspaces{}, nil
+			},
+			validate: func(workspace formula.Workspace) error {
+				return nil
+			},
+		},
+		directory: DirManagerCustomMock{
+			exists: func(dir string) bool {
+				return true
+			},
+			list: func(dir string, hiddenDir bool) ([]string, error) {
+				switch dir {
+				case defaultWorkspace:
+					return []string{"group"}, nil
+				case defaultWorkspace + "/group":
+					return []string{"verb"}, nil
+				case defaultWorkspace + "/group/verb":
+					return []string{"src"}, nil
+				default:
+					return []string{"any"}, nil
+				}
+			},
+		},
+		inList: inputListCustomMock{
+			list: func(name string, items []string) (string, error) {
+				if name == questionSelectFormulaGroup {
+					return items[0], nil
+				}
+				return "Default (/tmp/ritchie-formulas-local)", nil
+			},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		fields  fieldsTestDeleteFormulaCmd
+		wantErr bool
+	}{
+		{
+			name:    "Run with success",
+			fields:  fieldsTestDeleteFormulaCmd{},
+			wantErr: false,
+		},
+		{
+			name: "Run with error when workspace list returns err",
+			fields: fieldsTestDeleteFormulaCmd{
+				workspaceManager: WorkspaceAddListValidatorCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return formula.Workspaces{}, someError
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with error when readFormulas returns err",
+			fields: fieldsTestDeleteFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, someError
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with error when question about select formula or group returns err",
+			fields: fieldsTestDeleteFormulaCmd{
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return "any", someError
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with sucess when the selected formula is deeper in the tree",
+			fields: fieldsTestDeleteFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, nil
+						case defaultWorkspace + "/group":
+							return []string{"verb", "src"}, nil
+						case defaultWorkspace + "/group/verb":
+							return []string{"src"}, nil
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return items[0], nil
+						}
+						if name == questionAboutFoundedFormula {
+							return optionOtherFormula, nil
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with sucess when selected formula is less deep in the tree",
+			fields: fieldsTestDeleteFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, nil
+						case defaultWorkspace + "/group":
+							return []string{"verb", "src"}, nil
+						case defaultWorkspace + "/group/verb":
+							return []string{"src"}, nil
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return items[0], nil
+						}
+						if name == questionAboutFoundedFormula {
+							return "rit group", nil
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with error when readFormula returns error on second call",
+			fields: fieldsTestDeleteFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, nil
+						case defaultWorkspace + "/group":
+							return []string{"verb"}, someError
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fields := getFieldsDeleteFormula(fieldsDefault, tt.fields)
+
+			cmd := NewDeleteFormulaCmd(
+				userHomeDir,
+				filepath.Join(os.TempDir(), ".rit"),
+				fields.workspaceManager,
+				fields.directory,
+				inputTrueMock{},
+				inputTextMock{},
+				fields.inList,
+				treeGeneratorMock{},
+			)
+			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+			if cmd == nil {
+				t.Errorf("TestNewDeleteFormulaCmd got %v", cmd)
+				return
+			}
+
+			if err := cmd.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("%s error = %v, wantErr %v", cmd.Use, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func getFieldsDeleteFormula(fieldsDefault fieldsTestDeleteFormulaCmd, fieldsTest fieldsTestDeleteFormulaCmd) fieldsTestDeleteFormulaCmd {
+	var fields fieldsTestDeleteFormulaCmd = fieldsDefault
+
+	if fieldsTest.directory != nil {
+		fields.directory = fieldsTest.directory
+	}
+	if fieldsTest.inList != nil {
+		fields.inList = fieldsTest.inList
+	}
+	if fieldsTest.workspaceManager != nil {
+		fields.workspaceManager = fieldsTest.workspaceManager
+	}
+
+	return fields
+}
+
+func TestNewDeleteFormulaStdin(t *testing.T) {
 	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
 	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
-		t.Errorf("TestNewDeleteFormulaCmdStdin got error %v", err)
+		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
 	}
 
 	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "mock", "test", "scr"), os.ModePerm); err != nil {
-		t.Errorf("TestNewDeleteFormulaCmdStdin got error %v", err)
+		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
 	}
 
 	fileManager := stream.NewFileManager()
