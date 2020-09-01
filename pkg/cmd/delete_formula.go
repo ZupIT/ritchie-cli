@@ -34,14 +34,20 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const msgFormulaNotFound = "Could not find formula"
+const (
+	msgFormulaNotFound = "Could not find formula"
+
+	msgIncorrectFormulaName = "Formula name is incorrect"
+)
 
 var ErrCouldNotFindFormula = errors.New(msgFormulaNotFound)
 
+var ErrIncorrectFormulaName = errors.New(msgIncorrectFormulaName)
+
 type (
 	deleteFormulaStdin struct {
-		Workspace string   `json:"workspace"`
-		Groups    []string `json:"groups"`
+		WorkspacePath string `json:"workspace_path"`
+		Formula       string `json:"formula"`
 	}
 
 	deleteFormulaCmd struct {
@@ -161,14 +167,20 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
+		// rit my amazing formula -> ['my', 'amazing', 'formula']
+		groups, err := getGroupsFromFormulaName(deleteStdin.Formula)
+		if err != nil {
+			return err
+		}
+
 		// Delete formula on user workspace
-		if err := d.deleteFormula(deleteStdin.Workspace, deleteStdin.Groups, 0); err != nil {
+		if err := d.deleteFormula(deleteStdin.WorkspacePath, groups, 0); err != nil {
 			return err
 		}
 
 		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
-		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, deleteStdin.Groups) {
-			if err := d.deleteFormula(ritchieLocalWorkspace, deleteStdin.Groups, 0); err != nil {
+		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, groups) {
+			if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
 				return err
 			}
 
@@ -280,4 +292,14 @@ func canDelete(path string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func getGroupsFromFormulaName(formulaName string) ([]string, error) {
+	groups := strings.Split(formulaName, " ")
+
+	if len(groups) > 0 && groups[0] == "rit" {
+		return groups[1:], nil
+	}
+
+	return nil, ErrIncorrectFormulaName
 }

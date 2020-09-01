@@ -41,8 +41,9 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 	ritchieHomeDir := filepath.Join(os.TempDir(), ".rit")
 	defaultWorkspace := filepath.Join(userHomeDir, formula.DefaultWorkspaceDir)
 	someError := errors.New("some error")
-	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
-	if err := os.MkdirAll(filepath.Join(workspace, "group", "verb", "scr"), os.ModePerm); err != nil {
+
+	workspacePath := filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 	}
 	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "scr"), os.ModePerm); err != nil {
@@ -275,8 +276,8 @@ func getFieldsDeleteFormula(fieldsDefault fieldsTestDeleteFormulaCmd, fieldsTest
 }
 
 func TestNewDeleteFormulaStdin(t *testing.T) {
-	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
-	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
+	workspacePath := filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	if err := os.MkdirAll(filepath.Join(workspacePath, "mock", "test", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
 	}
 
@@ -300,7 +301,7 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 	)
 	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 
-	json := fmt.Sprintf("{\"workspace\": \"%s\", \"groups\": [\"mock\", \"test\"]}\n", workspace)
+	json := fmt.Sprintf("{\"workspace_path\": \"%s\", \"formula\": \"rit mock test\"}\n", workspacePath)
 	newReader := strings.NewReader(json)
 	cmd.SetIn(newReader)
 
