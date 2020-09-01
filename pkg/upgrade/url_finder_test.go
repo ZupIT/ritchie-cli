@@ -79,8 +79,8 @@ func TestUpgradeUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			duf := NewDefaultUrlFinder()
-			if got := duf.Url(tt.in.resolver, tt.in.os); got != tt.want {
+			duf := NewDefaultUrlFinder(tt.in.resolver)
+			if got := duf.Url(tt.in.os); got != tt.want {
 				t.Errorf("UpgradeUrl() = %v, want %v", got, tt.want)
 			}
 		})

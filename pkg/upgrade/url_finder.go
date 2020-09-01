@@ -24,18 +24,20 @@ import (
 )
 
 type UrlFinder interface {
-	Url(resolver version.Resolver, os string) string
+	Url(os string) string
 }
 
-type DefaultUrlFinder struct{}
-
-func NewDefaultUrlFinder() DefaultUrlFinder {
-	return DefaultUrlFinder{}
+type DefaultUrlFinder struct{
+	version version.Resolver
 }
 
-func (duf DefaultUrlFinder) Url(resolver version.Resolver, os string) string {
-	stableVersion, err := resolver.StableVersion()
+func NewDefaultUrlFinder(version version.Resolver) DefaultUrlFinder {
+	return DefaultUrlFinder{version: version}
+}
 
+func (duf DefaultUrlFinder) Url(os string) string {
+	//stableVersion, err := resolver.StableVersion()
+	stableVersion, err := duf.version.StableVersion()
 
 	if err != nil {
 		return ""

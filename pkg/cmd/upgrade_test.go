@@ -33,11 +33,11 @@ func (m stubUpgradeManager) Run(upgradeUrl string) error {
 }
 
 type stubUrlFinder struct {
-	url func(resolver version.Resolver) string
+	url func() string
 }
 
-func (uf stubUrlFinder) Url(resolver version.Resolver, os string) string {
-	return uf.url(resolver)
+func (uf stubUrlFinder) Url(os string) string {
+	return uf.url()
 }
 
 type stubVersionResolver struct {
@@ -89,7 +89,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
@@ -116,7 +116,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
@@ -143,7 +143,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
