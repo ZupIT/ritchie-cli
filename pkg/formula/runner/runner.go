@@ -40,8 +40,8 @@ type RunManager struct {
 	formula.PostRunner
 	formula.InputRunner
 	formula.PreRunner
-	file    stream.FileWriteExistAppender
-	ctx     rcontext.Finder
+	file stream.FileWriteExistAppender
+	ctx  rcontext.Finder
 	homeDir string
 }
 
