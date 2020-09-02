@@ -97,7 +97,6 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 	volume := fmt.Sprintf("%s:/app", setup.Pwd)
 	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir)
 	var args []string
-
 	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
 		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}
 	} else {
