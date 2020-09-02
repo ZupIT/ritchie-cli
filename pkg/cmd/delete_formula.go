@@ -35,9 +35,9 @@ import (
 )
 
 const (
-	msgFormulaNotFound = "Could not find formula"
-
+	msgFormulaNotFound      = "Could not find formula"
 	msgIncorrectFormulaName = "Formula name is incorrect"
+	foundFormulaQuestion    = "We found a formula, which one do you want to delete: "
 )
 
 var ErrCouldNotFindFormula = errors.New(msgFormulaNotFound)
@@ -59,6 +59,7 @@ type (
 		inText         prompt.InputText
 		inList         prompt.InputList
 		treeGen        formula.TreeGenerator
+		fileManager    stream.FileWriter
 	}
 )
 
@@ -71,6 +72,7 @@ func NewDeleteFormulaCmd(
 	inText prompt.InputText,
 	inList prompt.InputList,
 	treeGen formula.TreeGenerator,
+	fileManager stream.FileWriter,
 ) *cobra.Command {
 	d := deleteFormulaCmd{
 		userHomeDir,
@@ -81,6 +83,7 @@ func NewDeleteFormulaCmd(
 		inText,
 		inList,
 		treeGen,
+		fileManager,
 	}
 
 	cmd := &cobra.Command{
@@ -120,7 +123,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		groups, err := d.readFormulas(wspace.Dir)
+		groups, err := d.readFormulas(wspace.Dir, "rit")
 		if err != nil {
 			return err
 		}
@@ -193,25 +196,44 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 	}
 }
 
-func (d deleteFormulaCmd) readFormulas(dir string) ([]string, error) {
+func (d deleteFormulaCmd) readFormulas(dir string, currentFormula string) ([]string, error) {
 	dirs, err := d.directory.List(dir, false)
 	if err != nil {
 		return nil, err
 	}
 
 	dirs = sliceutil.Remove(dirs, docsDir)
+
 	var groups []string
+	var formulaOptions []string
+	var response string
+
 	if isFormula(dirs) {
-		return groups, nil
+		if !hasFormulaInDir(dirs) {
+			return groups, nil
+		}
+
+		formulaOptions = append(formulaOptions, currentFormula, optionOtherFormula)
+
+		response, err = d.inList.List(foundFormulaQuestion, formulaOptions)
+		if err != nil {
+			return nil, err
+		}
+		if response == currentFormula {
+			return groups, nil
+		}
+		dirs = sliceutil.Remove(dirs, srcDir)
 	}
 
-	selected, err := d.inList.List("Select a formula or group: ", dirs)
+	selected, err := d.inList.List(questionSelectFormulaGroup, dirs)
 	if err != nil {
 		return nil, err
 	}
 
+	newFormulaSelected := fmt.Sprintf("%s %s", currentFormula, selected)
+
 	var aux []string
-	aux, err = d.readFormulas(filepath.Join(dir, selected))
+	aux, err = d.readFormulas(filepath.Join(dir, selected), newFormulaSelected)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +284,7 @@ func (d deleteFormulaCmd) recriateTreeJson(workspace string) error {
 	}
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	if err := ioutil.WriteFile(filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json"), jsonString, os.ModePerm); err != nil {
+	if err := d.fileManager.Write(filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json"), jsonString); err != nil {
 		return err
 	}
 

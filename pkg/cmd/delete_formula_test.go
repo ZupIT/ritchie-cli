@@ -235,6 +235,13 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fields := getFieldsDeleteFormula(fieldsDefault, tt.fields)
 
+			if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb", "scr"), os.ModePerm); err != nil {
+				t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
+			}
+			if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "scr"), os.ModePerm); err != nil {
+				t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
+			}
+
 			cmd := NewDeleteFormulaCmd(
 				userHomeDir,
 				ritchieHomeDir,
@@ -244,6 +251,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				inputTextMock{},
 				fields.inList,
 				treeGeneratorMock{},
+				stream.FileManager{},
 			)
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -298,6 +306,7 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 		inputTextMock{},
 		inputListMock{},
 		treeGen,
+		stream.FileManager{},
 	)
 	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 
