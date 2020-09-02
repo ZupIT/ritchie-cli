@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
@@ -42,8 +43,13 @@ const (
 	AddMetricsQuestion = `To help us improve and deliver more value to the community, 
 do you agree to let us collect anonymous data about product 
 and feature use statistics and crash reports?`
-	AcceptMetrics      = "Yes, I agree to contribute with data anonymously"
-	DoNotAcceptMetrics = "No, not for now."
+	AcceptMetrics             = "Yes, I agree to contribute with data anonymously"
+	DoNotAcceptMetrics        = "No, not for now."
+	SelectFormulaTypeQuestion = "Select a default formula run type:"
+	FormulaLocalRunWarning    = `
+In order to run formulas locally, you must have the formula language installed on your machine,
+if you don't want to install choose to run the formulas inside the docker.
+`
 )
 
 var (
@@ -55,22 +61,35 @@ var (
 	errMsg             = prompt.Yellow("It was not possible to add the commons repository at this time, please try again later.")
 	ErrInitCommonsRepo = errors.New(errMsg)
 	CommonsRepoURL     = "https://github.com/ZupIT/ritchie-formulas"
+	ErrInvalidRunType  = fmt.Errorf("invalid formula run type, these run types are enabled [%v]", strings.Join(formula.RunnerTypes, ", "))
 )
 
 type initStdin struct {
-	AddRepo string `json:"addRepo"`
+	AddCommons  bool   `json:"addCommons"`
+	SendMetrics bool   `json:"sendMetrics"`
+	RunType     string `json:"runType"`
 }
 
 type initCmd struct {
-	repo formula.RepositoryAdder
-	git  git.Repositories
-	rt   rtutorial.Finder
+	repo     formula.RepositoryAdder
+	git      git.Repositories
+	tutorial rtutorial.Finder
+	config   formula.ConfigRunner
+	file     stream.FileWriteReadExister
 	prompt.InputList
-	stream.FileWriteReadExister
+	prompt.InputBool
 }
 
-func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutorial.Finder, inList prompt.InputList, file stream.FileWriteReadExister) *cobra.Command {
-	o := initCmd{repo: repo, git: git, rt: rtf, InputList: inList, FileWriteReadExister: file}
+func NewInitCmd(
+	repo formula.RepositoryAdder,
+	git git.Repositories,
+	tutorial rtutorial.Finder,
+	config formula.ConfigRunner,
+	file stream.FileWriteReadExister,
+	inList prompt.InputList,
+	inBool prompt.InputBool,
+) *cobra.Command {
+	o := initCmd{repo: repo, git: git, tutorial: tutorial, config: config, file: file, InputList: inList, InputBool: inBool}
 
 	cmd := &cobra.Command{
 		Use:   "init",
@@ -84,16 +103,47 @@ func NewInitCmd(repo formula.RepositoryAdder, git git.Repositories, rtf rtutoria
 
 func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if err := metricsAuthorization(in.InputList, in.FileWriteReadExister); err != nil {
+		if err := in.metricsAuthorization(); err != nil {
 			return err
 		}
 
-		choose, err := in.List(AddCommonsQuestion, []string{"yes", "no"})
+		if err := in.addCommonsRepo(); err != nil {
+			return err
+		}
+
+		if err := in.setRunnerType(); err != nil {
+			return err
+		}
+
+		prompt.Success("\nInitialization successful!\n")
+
+		if err := in.tutorialInit(); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func (in initCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		init := initStdin{}
+
+		err := stdin.ReadJson(cmd.InOrStdin(), &init)
 		if err != nil {
 			return err
 		}
 
-		if choose != "yes" {
+		sendMetrics := "no"
+		if init.SendMetrics {
+			sendMetrics = "yes"
+		}
+
+		if err = in.file.Write(metric.FilePath, []byte(sendMetrics)); err != nil {
+			return err
+		}
+
+		if !init.AddCommons {
 			fmt.Println()
 			prompt.Warning(addRepoInfo)
 			fmt.Println()
@@ -122,87 +172,43 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			if err := in.repo.Add(repo); err != nil {
 				s.Error(ErrInitCommonsRepo)
 				fmt.Println(addRepoMsg)
+				return nil
 			}
 
-			s.Success(prompt.Green("Commons repository added successfully!"))
+			s.Success(prompt.Green("Commons repository added successfully!\n"))
 		}
 
-		tutorialHolder, err := in.rt.Find()
-		if err != nil {
+		runType := formula.DefaultRun
+		for i := range formula.RunnerTypes {
+			if formula.RunnerTypes[i] == init.RunType {
+				runType = formula.RunnerType(i)
+				break
+			}
+		}
+
+		if runType == formula.DefaultRun {
+			return ErrInvalidRunType
+		}
+
+		if err := in.config.Create(runType); err != nil {
 			return err
 		}
-		tutorialInit(tutorialHolder.Current)
+
+		if runType == formula.LocalRun {
+			prompt.Warning(FormulaLocalRunWarning)
+		}
+
+		prompt.Success("Initialization successful!")
+
+		if err := in.tutorialInit(); err != nil {
+			return err
+		}
+
 		return nil
 	}
 }
 
-func (in initCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		init := initStdin{}
-
-		err := stdin.ReadJson(cmd.InOrStdin(), &init)
-		if err != nil {
-			return err
-		}
-
-		if init.AddRepo == "no" {
-			fmt.Printf("\n%s\n", prompt.Yellow(addRepoInfo))
-
-			fmt.Println(addRepoMsg)
-		} else {
-			s := spinner.StartNew("Adding the commons repository...")
-			time.Sleep(time.Second * 2)
-
-			repo := formula.Repo{
-				Provider: "Github",
-				Name:     "commons",
-				Url:      CommonsRepoURL,
-				Priority: 0,
-			}
-
-			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
-
-			tag, err := in.git.LatestTag(repoInfo)
-			if err != nil {
-				s.Error(ErrInitCommonsRepo)
-				fmt.Println(addRepoMsg)
-				return nil
-			}
-
-			repo.Version = formula.RepoVersion(tag.Name)
-
-			if err := in.repo.Add(repo); err != nil {
-				s.Error(ErrInitCommonsRepo)
-				fmt.Println(addRepoMsg)
-				return nil
-			}
-
-			s.Success(prompt.Green("Initialization successful!"))
-		}
-
-		tutorialHolder, err := in.rt.Find()
-		if err != nil {
-			return err
-		}
-		tutorialInit(tutorialHolder.Current)
-		return nil
-	}
-}
-
-func tutorialInit(tutorialStatus string) {
-	const tagTutorial = "\n[TUTORIAL]"
-	const MessageTitle = "How to create new formulas:"
-	const MessageBody = ` ∙ Run "rit create formula"
-  ∙ Open the project with your favorite text editor.` + "\n"
-
-	if tutorialStatus == tutorialStatusEnabled {
-		prompt.Info(tagTutorial)
-		prompt.Info(MessageTitle)
-		fmt.Println(MessageBody)
-	}
-}
-
-func metricsAuthorization(inList prompt.InputList, file stream.FileWriteReadExister) error {
+func (in initCmd) metricsAuthorization() error {
 	const welcome = "Welcome to Ritchie!\n"
 	const header = `Ritchie is a platform that helps you and your team to save time by 
 giving you the power to create powerful templates to execute important 
@@ -217,7 +223,7 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	prompt.Info(welcome)
 	fmt.Println(header)
 
-	choose, err := inList.List(AddMetricsQuestion, options)
+	choose, err := in.InputList.List(AddMetricsQuestion, options)
 	if err != nil {
 		return err
 	}
@@ -228,9 +234,104 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 		responseToWrite = "no"
 	}
 
-	err = file.Write(metric.FilePath, []byte(responseToWrite))
+	if err = in.file.Write(metric.FilePath, []byte(responseToWrite)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (in initCmd) setRunnerType() error {
+	selected, err := in.List(SelectFormulaTypeQuestion, formula.RunnerTypes)
 	if err != nil {
 		return err
 	}
+
+	runType := formula.DefaultRun
+	for i := range formula.RunnerTypes {
+		if formula.RunnerTypes[i] == selected {
+			runType = formula.RunnerType(i)
+			break
+		}
+	}
+
+	if runType == formula.DefaultRun {
+		return ErrInvalidRunType
+	}
+
+	if err := in.config.Create(runType); err != nil {
+		return err
+	}
+
+	if runType == formula.LocalRun {
+		prompt.Warning(FormulaLocalRunWarning)
+	}
+
+	return nil
+}
+
+func (in initCmd) addCommonsRepo() error {
+	choose, err := in.Bool(AddCommonsQuestion, []string{"yes", "no"})
+	if err != nil {
+		return err
+	}
+
+	if !choose {
+		fmt.Println()
+		prompt.Warning(addRepoInfo)
+		fmt.Println()
+		fmt.Println(addRepoMsg)
+		return nil
+	}
+
+	repo := formula.Repo{
+		Provider: "Github",
+		Name:     "commons",
+		Url:      CommonsRepoURL,
+		Priority: 0,
+	}
+
+	s := spinner.StartNew("Adding the commons repository...")
+	time.Sleep(time.Second * 2)
+
+	repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+
+	tag, err := in.git.LatestTag(repoInfo)
+	if err != nil {
+		s.Error(ErrInitCommonsRepo)
+		fmt.Println(addRepoMsg)
+		return nil
+	}
+
+	repo.Version = formula.RepoVersion(tag.Name)
+
+	if err := in.repo.Add(repo); err != nil {
+		s.Error(ErrInitCommonsRepo)
+		fmt.Println(addRepoMsg)
+		return nil
+	}
+
+	s.Success(prompt.Green("Commons repository added successfully!\n"))
+
+	return nil
+}
+
+func (in initCmd) tutorialInit() error {
+	tutorialHolder, err := in.tutorial.Find()
+	if err != nil {
+		return err
+	}
+
+	const tagTutorial = "\n[TUTORIAL]"
+	const MessageTitle = "How to create new formulas:"
+	const MessageBody = ` ∙ Run "rit create formula"
+  ∙ Open the project with your favorite text editor.` + "\n"
+
+	if tutorialHolder.Current == tutorialStatusEnabled {
+		prompt.Info(tagTutorial)
+		prompt.Info(MessageTitle)
+		fmt.Println(MessageBody)
+	}
+
 	return nil
 }
