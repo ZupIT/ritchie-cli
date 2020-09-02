@@ -18,16 +18,13 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -47,13 +44,12 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
-	Version          = ""
-	BuildDate        = "unknown"
-	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
-	MsgInit          = "To start using rit, you need to initialize rit first.\nCommand: rit init"
+	Version   = ""
+	BuildDate = "unknown"
+	MsgInit   = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 
 	allowList = []string{
-		fmt.Sprint(cmdUse),
+		cmdUse,
 		fmt.Sprintf("%s help", cmdUse),
 		fmt.Sprintf("%s completion zsh", cmdUse),
 		fmt.Sprintf("%s completion bash", cmdUse),
@@ -63,9 +59,8 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 		fmt.Sprintf("%s add repo", cmdUse),
 	}
-
 	upgradeList = []string{
-		fmt.Sprint(cmdUse),
+		cmdUse,
 	}
 )
 
@@ -73,16 +68,27 @@ type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
 	rt          rtutorial.Finder
+	vm          version.Manager
 }
 
-func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker, rtf rtutorial.Finder) *cobra.Command {
-	o := &rootCmd{ritchieHome: ritchieHome, dir: dir, rt: rtf}
+func NewRootCmd(
+	ritchieHome string,
+	dir stream.DirCreateChecker,
+	rtf rtutorial.Finder,
+	vm version.Manager,
+) *cobra.Command {
+	o := &rootCmd{
+		ritchieHome: ritchieHome,
+		dir:         dir,
+		rt:          rtf,
+		vm:          vm,
+	}
 
 	cmd := &cobra.Command{
 		Use:                cmdUse,
 		Short:              cmdShortDescription,
 		Long:               cmdDescription,
-		Version:            versionFlag(),
+		Version:            o.versionFlag(),
 		PersistentPreRunE:  o.PreRunFunc(),
 		PersistentPostRunE: o.PostRunFunc(),
 		RunE:               runHelp,
@@ -90,7 +96,6 @@ func NewRootCmd(ritchieHome string, dir stream.DirCreateChecker, rtf rtutorial.F
 		TraverseChildren:   true,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-
 	return cmd
 }
 
@@ -100,7 +105,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		if isAllowList(allowList, cmd) || isCompleteCmd(cmd) {
+		if isUpgradeCommand(allowList, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
 
@@ -108,15 +113,13 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
-
 		return nil
 	}
 }
 
 func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		verifyNewVersion(cmd)
-
+		printNewVersionMessage(cmd, ro)
 		if !ro.ritchieIsInitialized() && cmd.Use == cmdUse {
 			tutorialHolder, err := ro.rt.Find()
 			if err != nil {
@@ -128,35 +131,31 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	}
 }
 
-func verifyNewVersion(cmd *cobra.Command) {
-	if isAllowList(upgradeList, cmd) {
-		resolver := version.DefaultVersionResolver{
-			StableVersionUrl: StableVersionUrl,
-			FileUtilService:  fileutil.DefaultService{},
-			HttpClient:       &http.Client{Timeout: 1 * time.Second},
-		}
-		prompt.Warning(version.VerifyNewVersion(resolver, Version))
+func printNewVersionMessage(cmd *cobra.Command, ro *rootCmd) {
+	if isUpgradeCommand(upgradeList, cmd) {
+		currentStable, _ := ro.vm.StableVersion()
+		prompt.Warning(ro.vm.VerifyNewVersion(currentStable, Version))
 	}
 }
 
-func isAllowList(allowList []string, cmd *cobra.Command) bool {
-	return sliceutil.Contains(allowList, cmd.CommandPath())
+func isUpgradeCommand(upgradeList []string, cmd *cobra.Command) bool {
+	return sliceutil.Contains(upgradeList, cmd.CommandPath())
 }
 
 func isCompleteCmd(cmd *cobra.Command) bool {
 	return strings.Contains(cmd.CommandPath(), "__complete")
 }
 
-func versionFlag() string {
-	resolver := version.DefaultVersionResolver{
-		StableVersionUrl: StableVersionUrl,
-		FileUtilService:  fileutil.DefaultService{},
-		HttpClient:       &http.Client{Timeout: 1 * time.Second},
-	}
-	latestVersion, err := resolver.StableVersion()
+func (ro *rootCmd) versionFlag() string {
+	latestVersion, err := ro.vm.StableVersion()
 	if err == nil && latestVersion != Version {
 		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
-		return fmt.Sprintf(versionMsgWithLatestVersion, Version, formattedLatestVersionMsg, BuildDate, runtime.Version())
+		return fmt.Sprintf(
+			versionMsgWithLatestVersion,
+			Version,
+			formattedLatestVersionMsg,
+			BuildDate,
+			runtime.Version())
 	}
 	return fmt.Sprintf(versionMsg, Version, BuildDate, runtime.Version())
 }
@@ -173,12 +172,11 @@ func tutorialRit(tutorialStatus string) {
 	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
-		fmt.Println(MessageBody)
+		fmt.Print(MessageBody)
 	}
 }
 
 func (ro *rootCmd) ritchieIsInitialized() bool {
 	commonsRepoPath := filepath.Join(ro.ritchieHome, "repos", "commons")
-
 	return ro.dir.Exists(commonsRepoPath)
 }

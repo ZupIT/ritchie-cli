@@ -60,7 +60,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "success run with full data data",
+			name: "success run with full data",
 			in: in{
 				Setter: credSetterMock{},
 				credFile: credSettingsCustomMock{
@@ -307,6 +307,31 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "fail when write credential fields return err",
+			in: in{
+				Setter: credSetterMock{},
+				credFile: credSettingsCustomMock{
+					ReadCredentialsFieldsMock: func(path string) (credential.Fields, error) {
+						return credential.Fields{}, errors.New("error reading credentials")
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{},
+				InputText: inputTextCustomMock{
+					text: func(name string, required bool) (string, error) {
+						return "./path/to/my/credentialFile", nil
+					},
+				},
+				InputBool: inputFalseMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "type", nil
+					},
+				},
+				InputPassword: inputPasswordErrorMock{},
+			},
+			wantErr: true,
+		},
+		{
 			name: "fail when list return err",
 			in: in{
 				Setter:        credSetterMock{},
@@ -334,10 +359,26 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "fail when text bool err",
+			in: in{
+				Setter:    credSetterMock{},
+				credFile:  credSettingsMock{},
+				InputText: inputTextMock{},
+				InputBool: inputBoolErrorMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return credential.AddNew, nil
+					},
+				},
+				InputPassword: inputPasswordMock{},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewSetCredentialCmd(
+			cmd := NewSetCredentialCmd(
 				tt.in.Setter,
 				tt.in.credFile,
 				tt.in.file,
@@ -346,8 +387,8 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				tt.in.InputList,
 				tt.in.InputPassword,
 			)
-			o.PersistentFlags().Bool("stdin", false, "input by stdin")
-			if err := o.Execute(); (err != nil) != tt.wantErr {
+			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+			if err := cmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("set credential command error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
