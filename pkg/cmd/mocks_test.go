@@ -24,7 +24,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -347,14 +346,6 @@ func (cscm credSettingsCustomMock) CredentialsPath() string {
 	return ""
 }
 
-type runnerMock struct {
-	error error
-}
-
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool, verbose bool) error {
-	return r.error
-}
-
 type treeMock struct {
 	tree  formula.Tree
 	error error
@@ -497,3 +488,25 @@ var (
 		},
 	}
 )
+
+type FormulaExecutorMock struct {
+	err error
+}
+
+func (f FormulaExecutorMock) Execute(exe formula.ExecuteData) error {
+	return f.err
+}
+
+type ConfigRunnerMock struct {
+	runType   formula.RunnerType
+	createErr error
+	findErr   error
+}
+
+func (c ConfigRunnerMock) Create(runType formula.RunnerType) error {
+	return c.createErr
+}
+
+func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
+	return c.runType, c.findErr
+}

@@ -17,7 +17,6 @@
 package formula
 
 import (
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -93,23 +92,14 @@ type (
 		Short string `json:"short"`
 		Long  string `json:"long"`
 	}
+
+	ExecuteData struct {
+		Def     Definition
+		InType  api.TermInputType
+		RunType RunnerType
+		Verbose bool
+	}
 )
-
-type PreRunner interface {
-	PreRun(def Definition, docker bool) (Setup, error)
-}
-
-type Runner interface {
-	Run(def Definition, inputType api.TermInputType, docker bool, verbose bool) error
-}
-
-type PostRunner interface {
-	PostRun(p Setup, docker bool) error
-}
-
-type InputRunner interface {
-	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
-}
 
 type Creator interface {
 	Create(cf Create) error
