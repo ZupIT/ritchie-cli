@@ -460,11 +460,15 @@ func (e envResolverMock) Resolve(string) (string, error) {
 }
 
 type fileManagerMock struct {
-	rBytes []byte
-	rErr   error
-	wErr   error
-	aErr   error
-	exist  bool
+	rBytes   []byte
+	rErr     error
+	wErr     error
+	aErr     error
+	mErr     error
+	rmErr    error
+	lErr     error
+	exist    bool
+	listNews []string
 }
 
 func (fi fileManagerMock) Write(string, []byte) error {
@@ -481,4 +485,16 @@ func (fi fileManagerMock) Exists(string) bool {
 
 func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
+}
+
+func (fi fileManagerMock) Move(oldPath, newPath string, files []string) error {
+	return fi.mErr
+}
+
+func (fi fileManagerMock) Remove(path string) error {
+	return fi.rmErr
+}
+
+func (fi fileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
+	return fi.listNews, fi.lErr
 }
