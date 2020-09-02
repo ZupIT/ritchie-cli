@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -48,7 +47,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/watcher"
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
@@ -152,14 +150,14 @@ func buildCommands() *cobra.Command {
 	watchManager := watcher.New(formulaLocalBuilder, dirManager)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaLocalBuilder)
 
-	upgradeManager := upgrade.DefaultManager{Updater: upgrade.DefaultUpdater{}}
-	defaultUpgradeResolver := version.DefaultVersionResolver{
-		StableVersionUrl: cmd.StableVersionUrl,
-		FileUtilService:  fileutil.DefaultService{},
-		HttpClient:       &http.Client{Timeout: 1 * time.Second},
-	}
-	defaultUrlFinder := upgrade.DefaultUrlFinder{}
-	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder)
+	versionManager := version.NewManager(
+		version.StableVersionUrl,
+		fileManager,
+	)
+	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()
+	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)
+	defaultUrlFinder := upgrade.NewDefaultUrlFinder(versionManager)
+	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder, versionManager)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -172,7 +170,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(defaultUpgradeResolver, upgradeManager, defaultUrlFinder)
+	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 

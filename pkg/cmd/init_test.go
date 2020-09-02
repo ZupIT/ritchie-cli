@@ -314,7 +314,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 					createErr: nil,
 				},
 				tutorial: TutorialFinderMock{},
-				inBool:   inputBoolErrMock{},
+				inBool:   inputBoolErrorMock{},
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {

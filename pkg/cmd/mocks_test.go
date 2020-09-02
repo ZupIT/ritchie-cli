@@ -47,6 +47,20 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 	return "mocked text", nil
 }
 
+type inputTextValidatorCustomMock struct {
+	text func (name string, validate func(interface{}) error, helper ...string) (string, error)
+}
+
+func (i inputTextValidatorCustomMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return i.text(name, validate)
+}
+
+type inputTextValidatorErrorMock struct{}
+
+func (inputTextValidatorErrorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return "mocked text", errors.New("error on input text")
+}
+
 type inputTextErrorMock struct{}
 
 func (inputTextErrorMock) Text(name string, required bool, helper ...string) (string, error) {
@@ -80,6 +94,12 @@ type inputURLMock struct{}
 
 func (inputURLMock) URL(name, defaultValue string) (string, error) {
 	return "http://localhost/mocked", nil
+}
+
+type inputURLErrorMock struct{}
+
+func (inputURLErrorMock) URL(name, defaultValue string) (string, error) {
+	return "http://localhost/mocked", errors.New("error on input url")
 }
 
 type inputIntMock struct{}
@@ -124,10 +144,10 @@ func (inputFalseMock) Bool(name string, items []string) (bool, error) {
 	return false, nil
 }
 
-type inputBoolErrMock struct{}
+type inputBoolErrorMock struct{}
 
-func (inputBoolErrMock) Bool(name string, items []string) (bool, error) {
-	return false, errors.New("input bool error")
+func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
+	return false, errors.New("error on boolean list")
 }
 
 type inputListMock struct{}
