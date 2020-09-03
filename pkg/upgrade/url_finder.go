@@ -18,26 +18,34 @@ package upgrade
 
 import (
 	"fmt"
-	"runtime"
 
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
 type UrlFinder interface {
-	Url(resolver version.Resolver) string
+	Url(os string) string
 }
 
-type DefaultUrlFinder struct{}
+type DefaultUrlFinder struct{
+	version version.Resolver
+}
 
-func (duf DefaultUrlFinder) Url(resolver version.Resolver) string {
-	stableVersion, err := resolver.StableVersion()
+func NewDefaultUrlFinder(version version.Resolver) DefaultUrlFinder {
+	return DefaultUrlFinder{version: version}
+}
+
+func (duf DefaultUrlFinder) Url(os string) string {
+	//stableVersion, err := resolver.StableVersion()
+	stableVersion, err := duf.version.StableVersion()
+
 	if err != nil {
 		return ""
 	}
 
-	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, runtime.GOOS)
+	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, os)
 
-	if runtime.GOOS == "windows" {
+	if os == osutil.Windows {
 		upgradeUrl += ".exe"
 	}
 

@@ -24,165 +24,186 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
-type StubResolverVersions struct {
-	stableVersion func() (string, error)
-	updateCache   func() error
+var defaultVersion = "2.0.4"
+
+func buildStableBody(expiresAt int64) []byte {
+	cache := stableVersionCache{
+		Stable:    defaultVersion,
+		ExpiresAt: expiresAt,
+	}
+	b, _ := json.Marshal(cache)
+	return b
 }
 
-func (r StubResolverVersions) StableVersion() (string, error) {
-	return r.stableVersion()
-}
+var okStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(defaultVersion + "\n"))
+}))
 
-func (r StubResolverVersions) UpdateCache() error {
-	return r.updateCache()
-}
+var internalErrorStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(500)
+}))
 
-type StubFileUtilService struct {
-	readFile      func(string) ([]byte, error)
-	writeFilePerm func(string, []byte, int32) error
-}
+var wrongContentLengthStub = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Length", "1")
+}))
 
-func (s StubFileUtilService) ReadFile(path string) ([]byte, error) {
-	return s.readFile(path)
-}
+func TestManager_StableVersion(t *testing.T) {
+	notExpiredCache := time.Now().Add(time.Hour).Unix()
 
-func (s StubFileUtilService) WriteFilePerm(path string, content []byte, perm int32) error {
-	return s.writeFilePerm(path, content, perm)
-}
-
-func TestDefaultVersionResolver_StableVersion(t *testing.T) {
-
-	// case 1 Should get stableVersion
-	expectedResultCase1 := "1.0.0"
-
-	mockHttpCase1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(expectedResultCase1 + "\n"))
-	}))
-
-	// case 4 Should not get stableVersion from expired cache
-	expectedResultCase4 := "2.5.6"
-
-	mockHttpCase4 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(expectedResultCase4 + "\n"))
-	}))
-
-	type fields struct {
-		CurrentVersion   string
+	type in struct {
 		StableVersionUrl string
-		FileUtilService  fileutil.Service
+		file             stream.FileWriteReadExister
 		HttpClient       *http.Client
 	}
 	tests := []struct {
 		name    string
-		fields  fields
+		in      in
 		want    string
 		wantErr bool
 	}{
 		{
-			name: "Should get stableVersion",
-			fields: fields{
-				CurrentVersion:   "Any value",
-				StableVersionUrl: mockHttpCase1.URL,
-				FileUtilService: StubFileUtilService{
-					readFile: func(s string) ([]byte, error) {
-						return []byte{}, errors.New("some error")
+			name: "success get stableVersion from cache",
+			in: in{
+				StableVersionUrl: "any value",
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
 					},
-					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+					ReadMock: func(path string) ([]byte, error) {
+						return buildStableBody(notExpiredCache), nil
+					},
 				},
-				HttpClient: mockHttpCase1.Client(),
 			},
-			want:    expectedResultCase1,
+			want:    defaultVersion,
 			wantErr: false,
 		},
 		{
-			name: "Should return err when http.get fail",
-			fields: fields{
-				CurrentVersion:   "Any value",
+			name: "error reading from cache",
+			in: in{
 				StableVersionUrl: "any value",
-				FileUtilService: StubFileUtilService{
-					readFile: func(s string) ([]byte, error) {
-						return []byte{}, errors.New("some error")
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
 					},
-					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte(""), errors.New("reading error")
+					},
 				},
-				HttpClient: &http.Client{},
 			},
-			want:    "",
 			wantErr: true,
 		},
 		{
-			name: "Should get stableVersion from cache",
-			fields: fields{
-				CurrentVersion:   "Any value",
+			name: "error on unmarshal cache data",
+			in: in{
 				StableVersionUrl: "any value",
-				FileUtilService: StubFileUtilService{
-					readFile: func(_ string) ([]byte, error) {
-						cache := stableVersionCache{
-							"1.4.5",
-							time.Now().Add(time.Hour * 1).Unix(),
-						}
-
-						return json.Marshal(cache)
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
 					},
-					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
-				},
-				HttpClient: &http.Client{},
-			},
-			want:    "1.4.5",
-			wantErr: false,
-		},
-		{
-			name: "Should not get stableVersion from expired cache",
-			fields: fields{
-				CurrentVersion:   "Any value",
-				StableVersionUrl: mockHttpCase4.URL,
-				FileUtilService: StubFileUtilService{
-					readFile: func(_ string) ([]byte, error) {
-						cache := stableVersionCache{
-							"1.5.0",
-							time.Now().Add(time.Hour * 1 * -1).Unix(),
-						}
-
-						return json.Marshal(cache)
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte("{\"expiresAt\":\"2.0.4\"}"), nil
 					},
-					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
 				},
-				HttpClient: mockHttpCase4.Client(),
 			},
-			want:    expectedResultCase4,
-			wantErr: false,
-		},
-		{
-			name: "Error on save cache",
-			fields: fields{
-				CurrentVersion:   "Any value",
-				StableVersionUrl: mockHttpCase1.URL,
-				FileUtilService: StubFileUtilService{
-					readFile: func(s string) ([]byte, error) {
-						return []byte{}, errors.New("some error")
-					},
-					writeFilePerm: func(_ string, _ []byte, _ int32) error { return errors.New("some error") },
-				},
-				HttpClient: mockHttpCase1.Client(),
-			},
-			want:    "",
 			wantErr: true,
+		},
+		{
+			name: "error on request stable version with no url",
+			in: in{
+				StableVersionUrl: "",
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return buildStableBody(1), nil
+					},
+				},
+				HttpClient: okStub.Client(),
+			},
+			wantErr: true,
+		},
+		{
+			name: "error on request stable status not 200",
+			in: in{
+				StableVersionUrl: internalErrorStub.URL,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return buildStableBody(1), nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error on saving cache",
+			in: in{
+				StableVersionUrl: okStub.URL,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return buildStableBody(1), nil
+					},
+					WriteMock: func(path string, content []byte) error {
+						return errors.New("error on saving cache")
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error reading bytes from response body",
+			in: in{
+				StableVersionUrl: wrongContentLengthStub.URL,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return buildStableBody(1), nil
+					},
+					WriteMock: func(path string, content []byte) error {
+						return nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "success case when cache expired",
+			in: in{
+				StableVersionUrl: okStub.URL,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return buildStableBody(1), nil
+					},
+					WriteMock: func(path string, content []byte) error {
+						return nil
+					},
+				},
+			},
+			want:    defaultVersion,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := DefaultVersionResolver{
-				StableVersionUrl: tt.fields.StableVersionUrl,
-				FileUtilService:  tt.fields.FileUtilService,
-				HttpClient:       tt.fields.HttpClient,
-			}
+			r := NewManager(tt.in.StableVersionUrl, tt.in.file)
 			got, err := r.StableVersion()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("StableVersion() error = %v, wantErr %v", err, tt.wantErr)
-				return
 			}
 			if got != tt.want {
 				t.Errorf("StableVersion() got = %v, want %v", got, tt.want)
@@ -191,118 +212,102 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 	}
 }
 
-func TestVerifyNewVersion(t *testing.T) {
-	type args struct {
-		resolve        Resolver
-		currentVersion string
+func TestManager_UpdateCache(t *testing.T) {
+	type in struct {
+		StableVersionUrl string
+		file             stream.FileWriteReadExister
+		HttpClient       *http.Client
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		in      in
+		wantErr bool
 	}{
 		{
-			name: "Should return empty when current version equals to stableVersion",
-			args: args{
-				resolve: StubResolverVersions{
-					stableVersion: func() (string, error) {
-						return "1.0.0", nil
+			name: "success get update cache",
+			in: in{
+				StableVersionUrl: okStub.URL,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(path string, content []byte) error {
+						return nil
 					},
 				},
-				currentVersion: "1.0.0",
+				HttpClient: okStub.Client(),
 			},
-			want: "",
+			wantErr: false,
 		},
 		{
-			name: "Should return msg when current version it not equals to stableVersion",
-			args: args{
-				resolve: StubResolverVersions{
-					stableVersion: func() (string, error) {
-						return "1.0.1", nil
+			name: "error on request during update cache",
+			in: in{
+				StableVersionUrl: internalErrorStub.URL,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(path string, content []byte) error {
+						return nil
 					},
 				},
-				currentVersion: "1.0.0",
+				HttpClient: internalErrorStub.Client(),
 			},
-			want: MsgRitUpgrade,
+			wantErr: true,
 		},
 		{
-			name: "Should return empty on error in StableVersion ",
-			args: args{
-				resolve: StubResolverVersions{
-					stableVersion: func() (string, error) {
-						return "", errors.New("any error")
+			name: "error on writing file",
+			in: in{
+				StableVersionUrl: okStub.URL,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(path string, content []byte) error {
+						return errors.New("writing file error")
 					},
 				},
-				currentVersion: "1.0.0",
+				HttpClient: internalErrorStub.Client(),
 			},
-			want: "",
+			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := VerifyNewVersion(tt.args.resolve, tt.args.currentVersion); got != tt.want {
-				t.Errorf("VerifyNewVersion() = %v, want %v", got, tt.want)
+			r := NewManager(tt.in.StableVersionUrl, tt.in.file)
+			err := r.UpdateCache()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func TestDefaultVersionResolver_UpdateCache(t *testing.T) {
-
-	expectedResultCase1 := "1.0.0"
-
-	mockHttpCase1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(expectedResultCase1 + "\n"))
-	}))
-
-	type fields struct {
-		StableVersionUrl string
-		FileUtilService  fileutil.Service
-		HttpClient       *http.Client
+func TestManager_VerifyNewVersion(t *testing.T) {
+	type in struct {
+		current   string
+		installed string
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
+		name string
+		in   in
+		want string
 	}{
 		{
-			name: "error on requestStableVersion",
-			fields: fields{
-				StableVersionUrl: "any url",
-				FileUtilService: StubFileUtilService{
-					readFile: func(s string) ([]byte, error) {
-						return []byte{}, errors.New("some error")
-					},
-					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
-				},
-				HttpClient: &http.Client{},
+			name: "Should return empty when current version equals to current version",
+			in: in{
+				current:   defaultVersion,
+				installed: defaultVersion,
 			},
-			wantErr: true,
+			want: "",
 		},
 		{
-			name: "success",
-			fields: fields{
-				StableVersionUrl: mockHttpCase1.URL,
-				FileUtilService: StubFileUtilService{
-					readFile: func(s string) ([]byte, error) {
-						return []byte{}, nil
-					},
-					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
-				},
-				HttpClient: mockHttpCase1.Client(),
+			name: "Should message when version is outdated",
+			in: in{
+				current:   defaultVersion,
+				installed: "1.0.0",
 			},
-			wantErr: false,
+			want: MsgRitUpgrade,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := DefaultVersionResolver{
-				StableVersionUrl: tt.fields.StableVersionUrl,
-				FileUtilService:  tt.fields.FileUtilService,
-				HttpClient:       tt.fields.HttpClient,
-			}
-			if err := r.UpdateCache(); (err != nil) != tt.wantErr {
-				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)
+			r := NewManager("version url",
+				sMocks.FileWriteReadExisterMock{})
+			if got := r.VerifyNewVersion(tt.in.current, tt.in.installed); got != tt.want {
+				t.Errorf("VerifyNewVersion() = %v, want %v", got, tt.want)
 			}
 		})
 	}
