@@ -63,6 +63,7 @@ func NewUpgradeCmd(
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if !u.file.Exists(metric.FilePath) {
+
 			options := []string{AcceptMetrics, DoNotAcceptMetrics}
 			choose, err := u.input.List(AddMetricsQuestion, options)
 			if err != nil {

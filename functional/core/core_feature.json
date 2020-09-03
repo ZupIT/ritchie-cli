@@ -135,7 +135,7 @@
                 "action": "main"
             }
         ],
-        "result": "default\t{\"token\":\""
+        "result": "You dont have any credential"
     },
     {
         "entry": "Delete repo",
