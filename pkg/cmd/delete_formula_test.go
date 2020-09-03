@@ -30,10 +30,17 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+type FileManagerMock struct{}
+
+func (f FileManagerMock) Write(path string, content []byte) error {
+	return errors.New("some error")
+}
+
 type fieldsTestDeleteFormulaCmd struct {
 	workspaceManager formula.WorkspaceAddListValidator
 	directory        stream.DirListChecker
 	inList           prompt.InputList
+	fileManager      stream.FileWriter
 }
 
 func TestNewDeleteFormulaCmd(t *testing.T) {
@@ -87,6 +94,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				return "Default (/tmp/ritchie-formulas-local)", nil
 			},
 		},
+		fileManager: stream.FileManager{},
 	}
 
 	tests := []struct {
@@ -279,6 +287,41 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Run with error when recreate tree.json",
+			fields: fieldsTestDeleteFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						switch dir {
+						case defaultWorkspace:
+							return []string{"group"}, nil
+						case defaultWorkspace + "/group":
+							return []string{"verb", "src"}, nil
+						case defaultWorkspace + "/group/verb":
+							return []string{"src"}, nil
+						default:
+							return []string{"any"}, nil
+						}
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return items[0], nil
+						}
+						if name == questionAboutFoundedFormula {
+							return optionOtherFormula, nil
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+				fileManager: FileManagerMock{},
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -301,7 +344,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				inputTextMock{},
 				fields.inList,
 				treeGeneratorMock{},
-				stream.FileManager{},
+				fields.fileManager,
 			)
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
@@ -328,6 +371,9 @@ func getFieldsDeleteFormula(fieldsDefault fieldsTestDeleteFormulaCmd, fieldsTest
 	}
 	if fieldsTest.workspaceManager != nil {
 		fields.workspaceManager = fieldsTest.workspaceManager
+	}
+	if fieldsTest.fileManager != nil {
+		fields.fileManager = fieldsTest.fileManager
 	}
 
 	return fields
@@ -370,5 +416,46 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+
+	json = fmt.Sprintf("{\"workspace_path\": \"%s\", \"formula\": \"mock test\"}\n", workspacePath)
+	newReader = strings.NewReader(json)
+	cmd.SetIn(newReader)
+
+	if err := cmd.Execute(); err == nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, nil, ErrIncorrectFormulaName)
+	}
+
+	if err := os.MkdirAll(filepath.Join(workspacePath, "mock", "test", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "mock", "test", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
+	}
+
+	cmd = NewDeleteFormulaCmd(
+		os.TempDir(),
+		filepath.Join(os.TempDir(), ".rit"),
+		workspaceForm{},
+		dirManager,
+		inputTrueMock{},
+		inputTextMock{},
+		inputListMock{},
+		treeGen,
+		FileManagerMock{},
+	)
+	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
+
+	json = fmt.Sprintf("{\"workspace_path\": \"%s\", \"formula\": \"rit mock test\"}\n", workspacePath)
+	newReader = strings.NewReader(json)
+	cmd.SetIn(newReader)
+
+	if cmd == nil {
+		t.Errorf("NewDeleteFormulaCmd got %v", cmd)
+	}
+
+	if err := cmd.Execute(); err == nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, nil, errors.New("some error"))
 	}
 }

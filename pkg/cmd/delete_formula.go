@@ -154,7 +154,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 				return err
 			}
 
-			err = d.recriateTreeJson(ritchieLocalWorkspace)
+			err = d.recreateTreeJson(ritchieLocalWorkspace)
 			if err != nil {
 				return err
 			}
@@ -192,7 +192,7 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 				return err
 			}
 
-			if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
+			if err := d.recreateTreeJson(ritchieLocalWorkspace); err != nil {
 				return err
 			}
 		}
@@ -284,7 +284,7 @@ func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int)
 	return nil
 }
 
-func (d deleteFormulaCmd) recriateTreeJson(workspace string) error {
+func (d deleteFormulaCmd) recreateTreeJson(workspace string) error {
 	localTree, err := d.treeGen.Generate(workspace)
 	if err != nil {
 		return err
