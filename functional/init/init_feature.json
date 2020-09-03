@@ -1,37 +1,14 @@
 [
     {
-        "entry":"Show context",
+        "entry":"Create formula",
         "steps":[
             {
                 "key":"",
-                "value":"show context",
+                "value":"create formula",
                 "action":"main"
             }
         ],
-        "result":"To start using rit, you need to initialize rit first."
-    },
-    {
-        "entry":"Set context",
-        "steps":[
-            {
-                "key":"",
-                "value":"set context",
-                "action":"main"
-            }
-        ],
-        "result":"To start using rit, you need to initialize rit first."
-    },
-    {
-        "entry":"Delete context",
-        "steps":[
-            {
-                "key":"",
-                "value":"delete context",
-                "action":"main"
-            }
-
-        ],
-        "result":"To start using rit, you need to initialize rit first."
+        "result":"To start using rit with formulas, you need to initialize rit first and add an repo named 'commons'"
     },
     {
         "entry":"List repo",
@@ -42,40 +19,7 @@
                 "action":"main"
             }
         ],
-        "result":"To start using rit, you need to initialize rit first."
-    },
-    {
-        "entry":"Delete repo",
-        "steps":[
-            {
-                "key":"",
-                "value":"delete repo",
-                "action":"main"
-            }
-        ],
-        "result":"To start using rit, you need to initialize rit first."
-    },
-    {
-        "entry":"Set credentials",
-        "steps":[
-            {
-                "key":"",
-                "value":"set credential",
-                "action":"main"
-            }
-        ],
-        "result":"To start using rit, you need to initialize rit first."
-    },
-    {
-        "entry":"Update repo",
-        "steps":[
-            {
-                "key":"",
-                "value":"update repo",
-                "action":"main"
-            }
-        ],
-        "result":"To start using rit, you need to initialize rit first."
+        "result":"There are 0 repos"
     },
     {
         "entry":"Do INIT",

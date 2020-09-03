@@ -45,15 +45,9 @@ var _ = Describe("RitSingleInit", func() {
 			Expect(out).To(ContainSubstring(scenario.Result))
 		},
 
-		Entry("Show context", scenariosCore[0]),
-		Entry("Set context", scenariosCore[1]),
-		Entry("Delete context", scenariosCore[2]),
-		// Entry("Add new repo", scenariosCore[3]),
-		Entry("List repo", scenariosCore[3]),
-		Entry("Delete repo", scenariosCore[4]),
-		Entry("Set Credential", scenariosCore[5]),
-		Entry("Update repo", scenariosCore[6]),
-		Entry("Do init", scenariosCore[7]),
+		Entry("Create formula", scenariosCore[0]),
+		Entry("List repo", scenariosCore[1]),
+		Entry("Do init", scenariosCore[2]),
 	)
 
 })
