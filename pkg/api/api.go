@@ -101,8 +101,8 @@ func (t TermInputType) ToLower() string {
 // return usr.HomeDir
 func UserHomeDir() string {
 	if os.Geteuid() == 0 {
-		username := os.Getenv("SUDO_USER")
-		if username != "" {
+		username, found := os.LookupEnv("SUDO_USER")
+		if found {
 			u, err := user.Lookup(username)
 			if err != nil {
 				panic(err)
