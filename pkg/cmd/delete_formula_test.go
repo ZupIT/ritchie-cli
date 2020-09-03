@@ -46,6 +46,9 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 	}
+	if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb2", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
+	}
 	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 	}
@@ -224,6 +227,53 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 						default:
 							return []string{"any"}, nil
 						}
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with error when validate workspace",
+			fields: fieldsTestDeleteFormulaCmd{
+				workspaceManager: WorkspaceAddListValidatorCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return formula.Workspaces{}, nil
+					},
+					validate: func(workspace formula.Workspace) error {
+						return someError
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return "any", someError
+						}
+						return "Ritchie-Formulas (/tmp/ritchie-formulas)", nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with error when add new workspace",
+			fields: fieldsTestDeleteFormulaCmd{
+				workspaceManager: WorkspaceAddListValidatorCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return formula.Workspaces{}, nil
+					},
+					validate: func(workspace formula.Workspace) error {
+						return nil
+					},
+					add: func(workspace formula.Workspace) error {
+						return someError
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return "any", someError
+						}
+						return "Ritchie-Formulas (/tmp/ritchie-formulas)", nil
 					},
 				},
 			},

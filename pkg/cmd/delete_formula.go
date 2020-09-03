@@ -133,24 +133,29 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		question := fmt.Sprintf("Are you sure you want to delete the formula: rit %s", strings.Join(groups, " "))
-		if ans, err := d.inBool.Bool(question, []string{"no", "yes"}); err != nil {
+		ans, err := d.inBool.Bool(question, []string{"no", "yes"})
+		if err != nil {
 			return err
-		} else if !ans {
+		}
+		if !ans {
 			return nil
 		}
 
 		// Delete formula on user workspace
-		if err := d.deleteFormula(wspace.Dir, groups, 0); err != nil {
+		err = d.deleteFormula(wspace.Dir, groups, 0)
+		if err != nil {
 			return err
 		}
 
 		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
 		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, groups) {
-			if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
+			err := d.deleteFormula(ritchieLocalWorkspace, groups, 0)
+			if err != nil {
 				return err
 			}
 
-			if err := d.recriateTreeJson(ritchieLocalWorkspace); err != nil {
+			err = d.recriateTreeJson(ritchieLocalWorkspace)
+			if err != nil {
 				return err
 			}
 		}
@@ -258,7 +263,9 @@ func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int)
 	err := d.deleteFormula(newPath, groups, index+1)
 	if err != nil {
 		return err
-	} else if index == 0 {
+	}
+
+	if index == 0 {
 		return nil
 	}
 
@@ -284,7 +291,8 @@ func (d deleteFormulaCmd) recriateTreeJson(workspace string) error {
 	}
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	if err := d.fileManager.Write(filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json"), jsonString); err != nil {
+	err = d.fileManager.Write(filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json"), jsonString)
+	if err != nil {
 		return err
 	}
 
