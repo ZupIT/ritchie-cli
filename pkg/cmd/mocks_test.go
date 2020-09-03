@@ -20,6 +20,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 }
 
 type inputTextValidatorCustomMock struct {
-	text func (name string, validate func(interface{}) error, helper ...string) (string, error)
+	text func(name string, validate func(interface{}) error, helper ...string) (string, error)
 }
 
 func (i inputTextValidatorCustomMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {

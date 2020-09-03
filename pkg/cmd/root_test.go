@@ -21,15 +21,21 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
 func TestNewRootCmd(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
+	versionManager := version.NewManager(
+		version.StableVersionUrl,
+		fileManager,
+	)
 	cmd := NewRootCmd(
 		os.TempDir(),
 		dirManager,
 		TutorialFinderMock{},
+		versionManager,
 	)
 	if cmd == nil {
 		t.Errorf("NewCreateFormulaCmd got %v", cmd)
