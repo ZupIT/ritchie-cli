@@ -40,9 +40,10 @@ const (
 	foundFormulaQuestion    = "We found a formula, which one do you want to delete: "
 )
 
-var ErrCouldNotFindFormula = errors.New(msgFormulaNotFound)
-
-var ErrIncorrectFormulaName = errors.New(msgIncorrectFormulaName)
+var (
+	ErrCouldNotFindFormula  = errors.New(msgFormulaNotFound)
+	ErrIncorrectFormulaName = errors.New(msgIncorrectFormulaName)
+)
 
 type (
 	deleteFormulaStdin struct {
@@ -149,13 +150,11 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 
 		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
 		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, groups) {
-			err := d.deleteFormula(ritchieLocalWorkspace, groups, 0)
-			if err != nil {
+			if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
 				return err
 			}
 
-			err = d.recreateTreeJson(ritchieLocalWorkspace)
-			if err != nil {
+			if err = d.recreateTreeJson(ritchieLocalWorkspace); err != nil {
 				return err
 			}
 		}
@@ -251,8 +250,7 @@ func (d deleteFormulaCmd) readFormulas(dir string, currentFormula string) ([]str
 
 func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int) error {
 	if index == len(groups) {
-		err := os.RemoveAll(path)
-		if err != nil {
+		if err := os.RemoveAll(path); err != nil {
 			return err
 		}
 
@@ -260,8 +258,7 @@ func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int)
 	}
 
 	newPath := filepath.Join(path, groups[index])
-	err := d.deleteFormula(newPath, groups, index+1)
-	if err != nil {
+	if err := d.deleteFormula(newPath, groups, index+1); err != nil {
 		return err
 	}
 
@@ -275,8 +272,7 @@ func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int)
 	}
 
 	if ok {
-		err := os.RemoveAll(path)
-		if err != nil {
+		if err := os.RemoveAll(path); err != nil {
 			return err
 		}
 	}
@@ -291,17 +287,15 @@ func (d deleteFormulaCmd) recreateTreeJson(workspace string) error {
 	}
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	err = d.fileManager.Write(filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json"), jsonString)
-	if err != nil {
+	pathLocalTreeJson := filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json")
+	if err = d.fileManager.Write(pathLocalTreeJson, jsonString); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (d deleteFormulaCmd) formulaExistsInWorkspace(workspace string, groups []string) bool {
-	var path = workspace
-
+func (d deleteFormulaCmd) formulaExistsInWorkspace(path string, groups []string) bool {
 	for _, group := range groups {
 		path = filepath.Join(path, group)
 	}
@@ -327,7 +321,7 @@ func canDelete(path string) (bool, error) {
 func getGroupsFromFormulaName(formulaName string) ([]string, error) {
 	groups := strings.Split(formulaName, " ")
 
-	if len(groups) > 0 && groups[0] == "rit" {
+	if len(groups) > 0 && groups[0] == cmdUse {
 		return groups[1:], nil
 	}
 
