@@ -1,16 +1,5 @@
 [
     {
-        "entry":"Create formula",
-        "steps":[
-            {
-                "key":"",
-                "value":"create formula",
-                "action":"main"
-            }
-        ],
-        "result":"To start using rit with formulas, you need to initialize rit first and add an repo named 'commons'"
-    },
-    {
         "entry":"List repo",
         "steps":[
             {
@@ -20,6 +9,17 @@
             }
         ],
         "result":"There are 0 repos"
+    },
+    {
+        "entry":"Create formula",
+        "steps":[
+            {
+                "key":"",
+                "value":"create formula",
+                "action":"main"
+            }
+        ],
+        "result":"To start using rit with formulas, you need to initialize rit first and add an repo named 'commons'"
     },
     {
         "entry":"Do INIT",
