@@ -60,16 +60,6 @@ func NewUpgradeCmd(
 
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		err := u.resolver.UpdateCache()
-		if err != nil {
-			return prompt.NewError(err.Error() + "\n")
-		}
-		upgradeUrl := u.Url(u.resolver)
-		err = u.Run(upgradeUrl)
-		if err != nil {
-			return prompt.NewError(err.Error() + "\n")
-		}
-
 		if !u.file.Exists(metric.FilePath) {
 			options := []string{AcceptMetrics, DoNotAcceptMetrics}
 			choose, err := u.input.List(AddMetricsQuestion, options)
@@ -87,6 +77,17 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 				return err
 			}
 		}
+
+		err := u.resolver.UpdateCache()
+		if err != nil {
+			return prompt.NewError(err.Error() + "\n")
+		}
+		upgradeUrl := u.Url(u.resolver)
+		err = u.Run(upgradeUrl)
+		if err != nil {
+			return prompt.NewError(err.Error() + "\n")
+		}
+
 		prompt.Success("Rit upgraded with success")
 		return nil
 	}

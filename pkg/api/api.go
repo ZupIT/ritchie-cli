@@ -18,6 +18,7 @@ package api
 
 import (
 	"fmt"
+	"os"
 	"os/user"
 	"strings"
 )
@@ -95,12 +96,22 @@ func (t TermInputType) ToLower() string {
 }
 
 // UserHomeDir returns the home dir of the user
+// return usr.HomeDir
 func UserHomeDir() string {
-	usr, err := user.Current()
+	if os.Geteuid() == 0 {
+		username := os.Getenv("SUDO_USER")
+		u, err := user.Lookup(username)
+		if err != nil {
+			panic(err)
+		}
+		return u.HomeDir
+	}
+
+	usr, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
-	return usr.HomeDir
+	return usr
 }
 
 // RitchieHomeDir returns the home dir of the ritchie

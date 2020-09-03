@@ -119,6 +119,11 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 						return "any url"
 					},
 				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+				},
 			},
 			wantErr: true,
 		},
@@ -141,6 +146,11 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 				UrlFinder: stubUrlFinder{
 					func(resolver version.Resolver) string {
 						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
 					},
 				},
 			},
