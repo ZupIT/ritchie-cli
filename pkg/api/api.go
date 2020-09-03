@@ -18,7 +18,6 @@ package api
 
 import (
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 )
@@ -100,14 +99,14 @@ func (t TermInputType) ToLower() string {
 // UserHomeDir returns the home dir of the user
 // return usr.HomeDir
 func UserHomeDir() string {
-	if os.Geteuid() == 0 {
-		username := os.Getenv("SUDO_USER")
-		u, err := user.Lookup(username)
-		if err != nil {
-			panic(err)
-		}
-		return u.HomeDir
-	}
+	// if os.Geteuid() == 0 {
+	// 	username := os.Getenv("SUDO_USER")
+	// 	u, err := user.Lookup(username)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	return u.HomeDir
+	// }
 
 	usr, err := os.UserHomeDir()
 	if err != nil {
