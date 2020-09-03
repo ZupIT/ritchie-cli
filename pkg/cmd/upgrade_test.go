@@ -114,7 +114,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 						return "", nil
 					},
 					func() error {
-						return errors.New("some error")
+						return errors.New("update cache error")
 					},
 					func(current, installed string) string {
 						return ""
@@ -122,7 +122,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
-						return errors.New("some error")
+						return errors.New("upgrade url error")
 					},
 				},
 				UrlFinder: stubUrlFinder{
@@ -154,7 +154,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
-						return errors.New("some error")
+						return errors.New("upgrade url error")
 					},
 				},
 				UrlFinder: stubUrlFinder{
@@ -174,10 +174,10 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 			name: "success with no metrics file",
 			in: in{
 				resolver: stubVersionResolver{
-					func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", nil
 					},
-					func() error {
+					updateCache: func() error {
 						return nil
 					},
 				},
@@ -187,7 +187,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					url: func() string {
 						return "any url"
 					},
 				},
@@ -209,10 +209,10 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 			name: "fail on list with no metrics file",
 			in: in{
 				resolver: stubVersionResolver{
-					func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", nil
 					},
-					func() error {
+					updateCache: func() error {
 						return nil
 					},
 				},
@@ -222,7 +222,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
@@ -239,10 +239,10 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 			name: "fail on write with no metrics file",
 			in: in{
 				resolver: stubVersionResolver{
-					func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", nil
 					},
-					func() error {
+					updateCache: func() error {
 						return nil
 					},
 				},
@@ -252,7 +252,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
