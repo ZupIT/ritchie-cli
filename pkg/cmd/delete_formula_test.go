@@ -41,6 +41,7 @@ type fieldsTestDeleteFormulaCmd struct {
 	directory        stream.DirListChecker
 	inList           prompt.InputList
 	fileManager      stream.FileWriter
+	inBool           prompt.InputBool
 }
 
 func TestNewDeleteFormulaCmd(t *testing.T) {
@@ -95,6 +96,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			},
 		},
 		fileManager: stream.FileManager{},
+		inBool:      inputTrueMock{},
 	}
 
 	tests := []struct {
@@ -322,6 +324,24 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Run with success when choose not to delete formula",
+			fields: fieldsTestDeleteFormulaCmd{
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectFormulaGroup {
+							return items[0], nil
+						}
+						if name == questionAboutFoundedFormula {
+							return optionOtherFormula, nil
+						}
+						return "Default (/tmp/ritchie-formulas-local)", nil
+					},
+				},
+				inBool: inputFalseMock{},
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -340,7 +360,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				ritchieHomeDir,
 				fields.workspaceManager,
 				fields.directory,
-				inputTrueMock{},
+				fields.inBool,
 				inputTextMock{},
 				fields.inList,
 				treeGeneratorMock{},
@@ -374,6 +394,9 @@ func getFieldsDeleteFormula(fieldsDefault fieldsTestDeleteFormulaCmd, fieldsTest
 	}
 	if fieldsTest.fileManager != nil {
 		fields.fileManager = fieldsTest.fileManager
+	}
+	if fieldsTest.inBool != nil {
+		fields.inBool = fieldsTest.inBool
 	}
 
 	return fields
