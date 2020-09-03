@@ -143,8 +143,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		// Delete formula on user workspace
-		err = d.deleteFormula(wspace.Dir, groups, 0)
-		if err != nil {
+		if err := d.deleteFormula(wspace.Dir, groups, 0); err != nil {
 			return err
 		}
 
@@ -154,7 +153,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 				return err
 			}
 
-			if err = d.recreateTreeJson(ritchieLocalWorkspace); err != nil {
+			if err := d.recreateTreeJson(ritchieLocalWorkspace); err != nil {
 				return err
 			}
 		}
