@@ -25,82 +25,20 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
-
-func TestNewInitCmd(t *testing.T) {
-	cmd := NewInitCmd(
-		defaultRepoAdderMock,
-		defaultGitRepositoryMock,
-		TutorialFinderMock{},
-		inputListCustomMock{
-			list: func(name string, items []string) (string, error) {
-				if name == AddCommonsQuestion {
-					return "yes", nil
-				}
-				return AcceptMetrics, nil
-			},
-		},
-		sMocks.FileWriteReadExisterCustomMock{
-			WriteMock: func(path string, content []byte) error {
-				return nil
-			},
-		},
-	)
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-
-	if cmd == nil {
-		t.Errorf("NewInitCmd got %v", cmd)
-		return
-	}
-
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-	}
-}
-
-func TestNewInitStdin(t *testing.T) {
-	cmd := NewInitCmd(
-		defaultRepoAdderMock,
-		defaultGitRepositoryMock,
-		TutorialFinderMock{},
-		inputListCustomMock{
-			list: func(name string, items []string) (string, error) {
-				if name == AddCommonsQuestion {
-					return "yes", nil
-				}
-				return AcceptMetrics, nil
-			},
-		},
-		sMocks.FileWriteReadExisterCustomMock{
-			WriteMock: func(path string, content []byte) error {
-				return nil
-			},
-		},
-	)
-	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
-
-	input := "{\"addCommons\": \"yes\"}\n"
-	newReader := strings.NewReader(input)
-	cmd.SetIn(newReader)
-
-	if cmd == nil {
-		t.Errorf("NewInitCmd got %v", cmd)
-		return
-	}
-
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-	}
-}
 
 func Test_initCmd_runAnyEntry(t *testing.T) {
 	someError := errors.New("some error")
 	type fields struct {
-		repo      formula.RepositoryAdder
-		git       git.Repositories
-		inputList prompt.InputList
-		find      rtutorial.Finder
+		repo     formula.RepositoryAdder
+		git      git.Repositories
+		tutorial rtutorial.Finder
+		config   formula.ConfigRunner
+		file     stream.FileWriteReadExister
+		inList   prompt.InputList
+		inBool   prompt.InputBool
 	}
 
 	tests := []struct {
@@ -110,65 +48,92 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		inputStdin string
 	}{
 		{
-			name: "Run With Success when add commons",
+			name: "success to add commons repo and accept to send metrics",
 			fields: fields{
 				repo: defaultRepoAdderMock,
 				git:  defaultGitRepositoryMock,
-				find: TutorialFinderMock{},
-				inputList: inputListCustomMock{
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
-						if name == AddCommonsQuestion {
-							return "yes", nil
+						if name == SelectFormulaTypeQuestion {
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},
 				},
 			},
 			wantErr:    false,
-			inputStdin: "{\"addCommons\": \"yes\"}\n",
+			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"local\"}\n",
 		},
 		{
-			name: "Run With Success when not add commons",
+			name: "success when not add commons and not accept to send metrics",
 			fields: fields{
 				repo: defaultRepoAdderMock,
 				git:  defaultGitRepositoryMock,
-				inputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == AddCommonsQuestion {
-							return "no", nil
-						}
-						return AcceptMetrics, nil
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
 					},
 				},
-				find: TutorialFinderMock{},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputFalseMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return formula.DockerRun.String(), nil
+						}
+						return DoNotAcceptMetrics, nil
+					},
+				},
 			},
 			wantErr:    false,
-			inputStdin: "{\"addCommons\": \"no\"}\n",
+			inputStdin: "{\"addCommons\": false,\"sendMetrics\": false, \"runType\": \"docker\" }\n",
 		},
 		{
-			name: "Warning when call git.LatestTag",
+			name: "warning when call git.LatestTag",
 			fields: fields{
 				repo: defaultRepoAdderMock,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
 				git: GitRepositoryMock{
 					latestTag: func(info git.RepoInfo) (git.Tag, error) {
 						return git.Tag{}, someError
 					},
 				},
-				inputList: inputListCustomMock{
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
-						if name == AddCommonsQuestion {
-							return "yes", nil
+						if name == SelectFormulaTypeQuestion {
+							return formula.DockerRun.String(), nil
 						}
-						return AcceptMetrics, nil
+						return DoNotAcceptMetrics, nil
 					},
 				},
-				find: TutorialFinderMock{},
 			},
 			wantErr:    false,
-			inputStdin: "{\"addCommons\": \"yes\"}\n",
+			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"docker\"}\n",
 		},
 		{
-			name: "Warning when call repo.Add",
+			name: "warning when call repo.Add",
 			fields: fields{
 				repo: repoListerAdderCustomMock{
 					add: func(d formula.Repo) error {
@@ -176,70 +141,226 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 					},
 				},
 				git: defaultGitRepositoryMock,
-				inputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == AddCommonsQuestion {
-							return "yes", nil
-						}
-						return AcceptMetrics, nil
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
 					},
 				},
-				find: TutorialFinderMock{},
-			},
-			wantErr:    false,
-			inputStdin: "{\"addCommons\": \"yes\"}\n",
-		},
-		{
-			name: "Error when find returns err",
-			fields: fields{
-				repo: repoListerAdderCustomMock{
-					add: func(d formula.Repo) error {
-						return errors.New("some error")
-					},
+				config: ConfigRunnerMock{
+					createErr: nil,
 				},
-				git:  defaultGitRepositoryMock,
-				find: TutorialFinderMock{},
-				inputList: inputListCustomMock{
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
-						if name == AddCommonsQuestion {
-							return "yes", nil
+						if name == SelectFormulaTypeQuestion {
+							return formula.LocalRun.String(), nil
 						}
 						return AcceptMetrics, nil
 					},
 				},
 			},
 			wantErr:    false,
-			inputStdin: "{\"addCommons\": \"yes\"}\n",
+			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
 		},
 		{
-			name: "Error in select response of metrics",
+			name: "find tutorial error",
 			fields: fields{
 				repo: defaultRepoAdderMock,
 				git:  defaultGitRepositoryMock,
-				inputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == AddCommonsQuestion {
-							return "yes", nil
-						}
-						return "any", someError
+				tutorial: TutorialFindSetterCustomMock{
+					find: func() (rtutorial.TutorialHolder, error) {
+						return rtutorial.TutorialHolder{}, errors.New("not found tutorial")
 					},
 				},
-				find: TutorialFinderMock{},
+				inBool: inputTrueMock{},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return formula.LocalRun.String(), nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
+		},
+		{
+			name: "error in select response of metrics",
+			fields: fields{
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return formula.LocalRun.String(), nil
+						}
+						return "", someError
+					},
+				},
 			},
 			wantErr: true,
+		},
+		{
+			name: "error in select response of run tyoe",
+			fields: fields{
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return "", someError
+						}
+						return AcceptMetrics, nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error to write file",
+			fields: fields{
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return errors.New("error to write file")
+					},
+				},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return formula.LocalRun.String(), nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
+		},
+		{
+			name: "error to create config",
+			fields: fields{
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
+				config: ConfigRunnerMock{
+					createErr: errors.New("error to create config"),
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return formula.LocalRun.String(), nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
+		},
+		{
+			name: "error to select response of commons repo",
+			fields: fields{
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputBoolErrorMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return formula.LocalRun.String(), nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error stdin invalid formula run type",
+			fields: fields{
+				repo: defaultRepoAdderMock,
+				git:  defaultGitRepositoryMock,
+				file: sMocks.FileWriteReadExisterCustomMock{
+					WriteMock: func(string, []byte) error {
+						return nil
+					},
+				},
+				config: ConfigRunnerMock{
+					createErr: nil,
+				},
+				tutorial: TutorialFinderMock{},
+				inBool:   inputTrueMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == SelectFormulaTypeQuestion {
+							return "invalid", nil
+						}
+						return AcceptMetrics, nil
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"invalid\"}\n",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			streamMock := sMocks.FileWriteReadExisterCustomMock{
-				WriteMock: func(path string, content []byte) error {
-					return nil
-				},
-			}
+			field := tt.fields
 
-			initPrompt := NewInitCmd(tt.fields.repo, tt.fields.git, tt.fields.find, tt.fields.inputList, streamMock)
-			initStdin := NewInitCmd(tt.fields.repo, tt.fields.git, tt.fields.find, tt.fields.inputList, streamMock)
+			initPrompt := NewInitCmd(field.repo, field.git, field.tutorial, field.config, field.file, field.inList, field.inBool)
+			initStdin := NewInitCmd(field.repo, field.git, field.tutorial, field.config, field.file, field.inList, field.inBool)
 
 			initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 			initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
@@ -249,6 +370,10 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 
 			if err := initPrompt.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if err := initStdin.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("init_runStdin() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -36,16 +36,17 @@ func (m stubUpgradeManager) Run(upgradeUrl string) error {
 }
 
 type stubUrlFinder struct {
-	url func(resolver version.Resolver) string
+	url func() string
 }
 
-func (uf stubUrlFinder) Url(resolver version.Resolver) string {
-	return uf.url(resolver)
+func (uf stubUrlFinder) Url(os string) string {
+	return uf.url()
 }
 
 type stubVersionResolver struct {
-	stableVersion func() (string, error)
-	updateCache   func() error
+	stableVersion    func() (string, error)
+	updateCache      func() error
+	verifyNewVersion func(current, installed string) string
 }
 
 func (vr stubVersionResolver) StableVersion() (string, error) {
@@ -54,6 +55,10 @@ func (vr stubVersionResolver) StableVersion() (string, error) {
 
 func (vr stubVersionResolver) UpdateCache() error {
 	return vr.updateCache()
+}
+
+func (vr stubVersionResolver) VerifyNewVersion(current, installed string) string {
+	return vr.verifyNewVersion(current, installed)
 }
 
 func TestUpgradeCmd_runFunc(t *testing.T) {
@@ -79,6 +84,9 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					func() error {
 						return nil
 					},
+					func(current, installed string) string {
+						return ""
+					},
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
@@ -86,7 +94,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
@@ -108,6 +116,9 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					func() error {
 						return errors.New("some error")
 					},
+					func(current, installed string) string {
+						return ""
+					},
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
@@ -115,7 +126,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
@@ -137,6 +148,9 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					func() error {
 						return nil
 					},
+					func(current, installed string) string {
+						return ""
+					},
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
@@ -144,7 +158,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},

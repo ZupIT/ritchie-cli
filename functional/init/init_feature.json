@@ -93,6 +93,11 @@
                 "key":"Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]",
                 "value":"yes",
                 "action":"select"
+            },
+            {
+                "key":"Select a default formula run type:",
+                "value":"local",
+                "action":"select"
             }
         ],
         "result":""

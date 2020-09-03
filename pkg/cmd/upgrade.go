@@ -17,6 +17,8 @@
 package cmd
 
 import (
+	"runtime"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
@@ -82,10 +84,10 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return prompt.NewError(err.Error() + "\n")
 		}
-		upgradeUrl := u.Url(u.resolver)
-		err = u.Run(upgradeUrl)
-		if err != nil {
-			return prompt.NewError(err.Error() + "\n")
+
+		upgradeUrl := u.Url(runtime.GOOS)
+		if err := u.Run(upgradeUrl); err != nil {
+			return prompt.NewError(err.Error()+"\n")
 		}
 
 		prompt.Success("Rit upgraded with success")

@@ -86,8 +86,13 @@ func setUpRitSingleUnix() {
 		Key:    "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]",
 		Value:  "yes",
 		Action: "select"}
+	initSetRunType := Step{
+		Key:    "Select a default formula run type:",
+		Value:  "local",
+		Action: "select",
+	}
 
-	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepRit, initAcceptsMetrics, initAddRepo}}
+	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepRit, initAcceptsMetrics, initAddRepo, initSetRunType}}
 
 	err, _ := init.runStepsForUnix()
 	if err != nil {
