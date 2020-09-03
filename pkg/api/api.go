@@ -104,13 +104,12 @@ func UserHomeDir() string {
 		username, found := os.LookupEnv("SUDO_USER")
 		if found {
 			u, err := user.Lookup(username)
-			if err != nil {
-				panic(err)
+			if err == nil {
+				return u.HomeDir
 			}
-			return u.HomeDir
 		}
 	}
-
+	
 	usr, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
