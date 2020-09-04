@@ -19,30 +19,29 @@ package runner
 import (
 	"fmt"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type PostRunnerManager struct {
-	file stream.FileMoveRemover
+	file stream.FileNewListMoveRemover
 	dir  stream.DirRemover
 }
 
-func NewPostRunner(file stream.FileMoveRemover, dir stream.DirRemover) PostRunnerManager {
+func NewPostRunner(file stream.FileNewListMoveRemover, dir stream.DirRemover) PostRunnerManager {
 	return PostRunnerManager{file: file, dir: dir}
 }
 
 func (po PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 	if docker {
-		if err := po.file.Remove(envFile); err != nil {
+		if err := po.file.Remove(".env"); err != nil {
 			return err
 		}
 	}
 
 	defer po.removeWorkDir(p.TmpDir)
 
-	df, err := fileutil.ListNewFiles(p.BinPath, p.TmpDir)
+	df, err := po.file.ListNews(p.BinPath, p.TmpDir)
 	if err != nil {
 		return err
 	}

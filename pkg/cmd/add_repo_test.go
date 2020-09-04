@@ -54,12 +54,95 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputURL:           inputURLMock{},
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
-				InputList:          inputListCustomMock{name: "Github"},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
 			},
 			wantErr: false,
 		},
 		{
-			name: "Fail when repo.List return err",
+			name: "input bool error",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputBoolErrorMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "input password error",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordErrorMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "input list error",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList:          inputListErrorMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "input text error",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorErrorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList:          inputListMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "input text error",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLErrorMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList:          inputListMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name:
+			"Fail when repo.List return err",
 			fields: fields{
 				repo: repoListerAdderCustomMock{
 					list: func() (formula.Repos, error) {
@@ -72,7 +155,11 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputURL:           inputURLMock{},
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
-				InputList:          inputListCustomMock{name: "Github"},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
 			},
 			wantErr: true,
 		},

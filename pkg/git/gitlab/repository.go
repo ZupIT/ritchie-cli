@@ -83,11 +83,8 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		b, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return git.Tags{}, err
-		}
-		return git.Tags{}, errors.New(string(b))
+		errorMessage := fmt.Sprintf("There was an error adding the repository, status: %d - %s.", res.StatusCode, http.StatusText(res.StatusCode))
+		return git.Tags{}, errors.New(errorMessage)
 	}
 
 	var tags git.Tags

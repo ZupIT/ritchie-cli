@@ -17,14 +17,14 @@
 package api
 
 import (
-	"fmt"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
 const (
-	ritchieHomePattern = "%s/.rit"
-	CoreCmdsDesc       = "core commands:"
+	ritchieHomeName = ".rit"
+	CoreCmdsDesc    = "core commands:"
 )
 
 var (
@@ -48,8 +48,10 @@ var (
 		{Parent: "root_set", Usage: "context"},
 		{Parent: "root_set", Usage: "credential"},
 		{Parent: "root_set", Usage: "repo-priority"},
+		{Parent: "root_set", Usage: "formula-runner"},
 		{Parent: "root", Usage: "show"},
 		{Parent: "root_show", Usage: "context"},
+		{Parent: "root_show", Usage: "formula-runner"},
 		{Parent: "root", Usage: "create"},
 		{Parent: "root_create", Usage: "formula"},
 		{Parent: "root", Usage: "update"},
@@ -58,6 +60,7 @@ var (
 		{Parent: "root_build", Usage: "formula"},
 		{Parent: "root", Usage: "upgrade"},
 		{Parent: "root", Usage: "tutorial"},
+		{Parent: "root", Usage: "metrics"},
 	}
 )
 
@@ -104,5 +107,5 @@ func UserHomeDir() string {
 
 // RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
-	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
+	return filepath.Join(UserHomeDir(), ritchieHomeName)
 }

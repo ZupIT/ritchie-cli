@@ -27,10 +27,10 @@ import (
 )
 
 type listCredentialCmd struct {
-	credential.Settings
+	credential.ReaderWriterPather
 }
 
-func NewListCredentialCmd(ss credential.Settings) *cobra.Command {
+func NewListCredentialCmd(ss credential.ReaderWriterPather) *cobra.Command {
 	l := &listCredentialCmd{ss}
 
 	cmd := &cobra.Command{
@@ -41,6 +41,17 @@ func NewListCredentialCmd(ss credential.Settings) *cobra.Command {
 	}
 
 	return cmd
+}
+
+func (l listCredentialCmd) run() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		data, err := l.ReadCredentialsValue(l.CredentialsPath())
+		if err != nil {
+			return err
+		}
+		printCredentialsTable(data)
+		return nil
+	}
 }
 
 func printCredentialsTable(fields credential.ListCredDatas) {
@@ -60,16 +71,5 @@ func printCredentialsTable(fields credential.ListCredDatas) {
 		fmt.Printf("You dont have any credential, use %s\n", setCmd)
 	} else {
 		fmt.Println(table)
-	}
-}
-
-func (l listCredentialCmd) run() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		data, err := l.Settings.ReadCredentialsValue(l.CredentialsPath())
-		if err != nil {
-			return err
-		}
-		printCredentialsTable(data)
-		return nil
 	}
 }
