@@ -73,9 +73,10 @@ func requestStableVersion(stableVersionUrl string, httpClient *http.Client) (str
 
 	response, err := httpClient.Do(request)
 
-	if err != nil {
+	if err != nil || response.StatusCode != http.StatusOK {
 		return "", err
 	}
+
 	stableVersionBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return "", err
