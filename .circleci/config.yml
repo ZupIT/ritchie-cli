@@ -54,6 +54,7 @@ executors:
     docker:
       - image: *PYTHONWITHGO_IMAGE
         user: root
+    resource_class: small
     working_directory: /workspace
 
   ritchie-executor:
