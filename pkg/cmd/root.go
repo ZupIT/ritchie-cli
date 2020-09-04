@@ -46,7 +46,7 @@ Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 var (
 	Version   = ""
 	BuildDate = "unknown"
-	MsgInit   = "To start using rit with formulas, you need to initialize rit first and add an repo named 'commons'.\nCommand: 'rit init'"
+	MsgInit   = "To start using rit, you need to initialize rit first.\nCommand: rit init"
 
 	allowList = []string{
 		cmdUse,

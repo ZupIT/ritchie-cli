@@ -19,7 +19,7 @@
                 "action":"main"
             }
         ],
-        "result":"To start using rit with formulas, you need to initialize rit first and add an repo named 'commons'"
+        "result":"To start using rit, you need to initialize rit first."
     },
     {
         "entry":"Do INIT",
