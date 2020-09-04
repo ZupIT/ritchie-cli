@@ -378,6 +378,7 @@ workflows:
                 - beta
     jobs:
       - release_creator
+
   nightly:
     triggers:
       - schedule:
@@ -388,6 +389,7 @@ workflows:
                 - master
     jobs:
       - rebase_nightly
+
   beta:
     triggers:
       - schedule:
@@ -436,6 +438,7 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
+
   release:
     jobs:
       - build:
@@ -482,6 +485,7 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - release-publish
+
   delivery:
     jobs:
       - build:
