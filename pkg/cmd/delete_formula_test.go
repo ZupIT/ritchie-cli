@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,13 +56,13 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 	someError := errors.New("some error")
 
 	workspacePath := filepath.Join(os.TempDir(), "ritchie-formulas-local")
-	if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb", "scr"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb", "src"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 	}
-	if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb2", "scr"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb2", "src"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 	}
-	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "scr"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "src"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 	}
 
@@ -352,10 +353,10 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fields := getFieldsDeleteFormula(fieldsDefault, tt.fields)
 
-			if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb", "scr"), os.ModePerm); err != nil {
+			if err := os.MkdirAll(filepath.Join(workspacePath, "group", "verb", "src"), os.ModePerm); err != nil {
 				t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 			}
-			if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "scr"), os.ModePerm); err != nil {
+			if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "group", "verb", "src"), os.ModePerm); err != nil {
 				t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 			}
 
@@ -408,11 +409,19 @@ func getFieldsDeleteFormula(fieldsDefault fieldsTestDeleteFormulaCmd, fieldsTest
 
 func TestNewDeleteFormulaStdin(t *testing.T) {
 	workspacePath := filepath.Join(os.TempDir(), "ritchie-formulas-local")
-	if err := os.MkdirAll(filepath.Join(workspacePath, "mock", "test", "scr"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(workspacePath, "mock", "test", "src"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "mock", "test", "scr"), os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(workspacePath, "mock", "test", "help.txt"), []byte{'a'}, os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(workspacePath, "mock", "test", "nested", "src"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "mock", "test", "src"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
 	}
 
@@ -453,11 +462,11 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 		t.Errorf("%s = %v, want %v", cmd.Use, nil, ErrIncorrectFormulaName)
 	}
 
-	if err := os.MkdirAll(filepath.Join(workspacePath, "mock", "test", "scr"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(workspacePath, "mock", "test", "src"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "mock", "test", "scr"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(os.TempDir(), ".rit", "repos", "local", "mock", "test", "src"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteFormulaStdin got error %v", err)
 	}
 

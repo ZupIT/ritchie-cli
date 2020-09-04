@@ -294,11 +294,13 @@ func (d deleteFormulaCmd) safeRemoveFormula(path string) error {
 
 	for _, file := range files {
 		if file.IsDir() && (file.Name() == "src" || file.Name() == "bin") {
-			if err := os.RemoveAll(filepath.Join(path, file.Name())); err != nil {
+			pathToDelete := filepath.Join(path, file.Name())
+			if err := os.RemoveAll(pathToDelete); err != nil {
 				return err
 			}
 		} else if !file.IsDir() {
-			if err := d.fileManager.Remove(filepath.Join(path, file.Name())); err != nil {
+			pathToDelete := filepath.Join(path, file.Name())
+			if err := d.fileManager.Remove(pathToDelete); err != nil {
 				return err
 			}
 		}
