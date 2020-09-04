@@ -101,8 +101,8 @@ func (t TermInputType) ToLower() string {
 // if rit is called with sudo, it returns the same path
 func UserHomeDir() string {
 	if os.Geteuid() == 0 {
-		username, found := os.LookupEnv("SUDO_USER")
-		if found {
+		username := os.Getenv("SUDO_USER")
+		if username != "" {
 			u, err := user.Lookup(username)
 			if err == nil {
 				return u.HomeDir
