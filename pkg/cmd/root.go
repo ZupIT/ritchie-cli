@@ -59,8 +59,13 @@ var (
 		fmt.Sprintf("%s upgrade", cmdUse),
 		fmt.Sprintf("%s add repo", cmdUse),
 	}
+
 	upgradeList = []string{
 		cmdUse,
+	}
+
+	listCommandsBlockedByCommons = []string{
+		fmt.Sprintf("%s create formula", cmdUse),
 	}
 )
 
@@ -109,7 +114,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		if !ro.ritchieIsInitialized() {
+		if !ro.ritchieIsInitialized() && isBlockedByCommons(listCommandsBlockedByCommons, cmd) {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
@@ -140,6 +145,10 @@ func printNewVersionMessage(cmd *cobra.Command, ro *rootCmd) {
 
 func isUpgradeCommand(upgradeList []string, cmd *cobra.Command) bool {
 	return sliceutil.Contains(upgradeList, cmd.CommandPath())
+}
+
+func isBlockedByCommons(blockList []string, cmd *cobra.Command) bool {
+	return sliceutil.Contains(blockList, cmd.CommandPath())
 }
 
 func isCompleteCmd(cmd *cobra.Command) bool {
