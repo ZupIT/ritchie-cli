@@ -60,7 +60,7 @@ type (
 		inText         prompt.InputText
 		inList         prompt.InputList
 		treeGen        formula.TreeGenerator
-		fileManager    stream.FileWriter
+		fileManager    stream.FileWriteRemover
 	}
 )
 
@@ -73,7 +73,7 @@ func NewDeleteFormulaCmd(
 	inText prompt.InputText,
 	inList prompt.InputList,
 	treeGen formula.TreeGenerator,
-	fileManager stream.FileWriter,
+	fileManager stream.FileWriteRemover,
 ) *cobra.Command {
 	d := deleteFormulaCmd{
 		userHomeDir,
@@ -249,11 +249,18 @@ func (d deleteFormulaCmd) readFormulas(dir string, currentFormula string) ([]str
 
 func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int) error {
 	if index == len(groups) {
-		if err := os.RemoveAll(path); err != nil {
+		nested, err := nestedFormula(path)
+		if err != nil {
 			return err
 		}
 
-		return nil
+		if nested {
+			if err := d.safeRemoveFormula(path); err != nil {
+				return err
+			}
+		}
+
+		return os.RemoveAll(path)
 	}
 
 	newPath := filepath.Join(path, groups[index])
@@ -273,6 +280,27 @@ func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int)
 	if ok {
 		if err := os.RemoveAll(path); err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func (d deleteFormulaCmd) safeRemoveFormula(path string) error {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() && (file.Name() == "src" || file.Name() == "bin") {
+			if err := os.RemoveAll(filepath.Join(path, file.Name())); err != nil {
+				return err
+			}
+		} else if !file.IsDir() {
+			if err := d.fileManager.Remove(filepath.Join(path, file.Name())); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -300,6 +328,21 @@ func (d deleteFormulaCmd) formulaExistsInWorkspace(path string, groups []string)
 	}
 
 	return d.directory.Exists(path)
+}
+
+func nestedFormula(path string) (bool, error) {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return false, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() && file.Name() != "src" && file.Name() != "bin" {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func canDelete(path string) (bool, error) {

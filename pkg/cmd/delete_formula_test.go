@@ -36,11 +36,15 @@ func (f FileManagerMock) Write(path string, content []byte) error {
 	return errors.New("some error")
 }
 
+func (f FileManagerMock) Remove(path string) error {
+	return nil
+}
+
 type fieldsTestDeleteFormulaCmd struct {
 	workspaceManager formula.WorkspaceAddListValidator
 	directory        stream.DirListChecker
 	inList           prompt.InputList
-	fileManager      stream.FileWriter
+	fileManager      stream.FileWriteRemover
 	inBool           prompt.InputBool
 }
 
