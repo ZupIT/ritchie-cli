@@ -255,9 +255,7 @@ func (d deleteFormulaCmd) deleteFormula(path string, groups []string, index int)
 		}
 
 		if nested {
-			if err := d.safeRemoveFormula(path); err != nil {
-				return err
-			}
+			return d.safeRemoveFormula(path)
 		}
 
 		return os.RemoveAll(path)
