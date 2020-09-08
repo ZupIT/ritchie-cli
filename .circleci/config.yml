@@ -106,7 +106,8 @@ jobs:
       - run:
           name: lint
           command: |
-            golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
+            golangci-lint run --no-config --issues-exit-code=1 --timeout=5m -v
+          no_output_timeout: 5m
 
   horus:
     executor: horus-executor
@@ -145,6 +146,7 @@ jobs:
           name: codecov upload
           when: always
           command: bash <(curl -s https://codecov.io/bash)
+
   unix_functional_test:
     executor: ritchie-executor
     environment:
