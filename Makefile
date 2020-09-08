@@ -119,8 +119,8 @@ unit-test:
 functional-test:
 	mkdir -p $(BIN)
 	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/init/... | grep -v vendor/`
-	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/stdin/... | grep -v vendor/`
 	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/scaffold/... | grep -v vendor/`
+	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/stdin/... | grep -v vendor/`
 	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/core/... | grep -v vendor/`
 
 rebase-nightly:
