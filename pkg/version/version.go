@@ -72,8 +72,7 @@ func requestStableVersion(stableVersionUrl string, httpClient *http.Client) (str
 	}
 
 	response, err := httpClient.Do(request)
-	//  || response.StatusCode != http.StatusOK
-	if err != nil {
+	if err != nil || response.StatusCode != http.StatusOK {
 		return "", err
 	}
 
