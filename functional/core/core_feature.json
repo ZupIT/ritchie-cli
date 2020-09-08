@@ -1,370 +1,368 @@
 [
     {
-        "entry":"Show context",
-        "steps":[
+        "entry": "Show context",
+        "steps": [
             {
-                "key":"",
-                "value":"show context",
-                "action":"main"
+                "key": "",
+                "value": "show context",
+                "action": "main"
             }
         ],
-        "result":"Current context:"
+        "result": "Current context:"
     },
     {
-        "entry":"Set context",
-        "steps":[
+        "entry": "Set context",
+        "steps": [
             {
-                "key":"",
-                "value":"set context",
-                "action":"main"
+                "key": "",
+                "value": "set context",
+                "action": "main"
             },
             {
-                "key":"All:",
-                "value":"Type new context?",
-                "action":"select"
+                "key": "All:",
+                "value": "Type new context?",
+                "action": "select"
             },
             {
-                "key":"New context:",
-                "value":"Leonidas",
-                "action":"sendkey"
+                "key": "New context:",
+                "value": "Leonidas",
+                "action": "sendkey"
             }
-
         ],
-        "result":"Set context successful!"
+        "result": "Set context successful!"
     },
     {
-        "entry":"Delete context",
-        "steps":[
+        "entry": "Delete context",
+        "steps": [
             {
-                "key":"",
-                "value":"delete context",
-                "action":"main"
+                "key": "",
+                "value": "delete context",
+                "action": "main"
             },
             {
-                "key":"All:",
-                "value":"Leonidas",
-                "action":"select"
+                "key": "All:",
+                "value": "Leonidas",
+                "action": "select"
             },
             {
-                "key":"Are you sure want to delete this context?",
-                "value":"yes",
-                "action":"select"
-            }
-
-        ],
-        "result":"Delete context successful!"
-    },
-    {
-        "entry":"Add",
-        "steps":[
-            {
-                "key":"",
-                "value":"add",
-                "action":"main"
+                "key": "Are you sure want to delete this context?",
+                "value": "yes",
+                "action": "select"
             }
         ],
-        "result":"Add a new repository of formulas"
+        "result": "Delete context successful!"
     },
     {
-        "entry":"Add new repo",
-        "steps":[
+        "entry": "Add",
+        "steps": [
             {
-                "key":"Select your provider:",
-                "value":"Github",
-                "action":"select"
+                "key": "",
+                "value": "add",
+                "action": "main"
+            }
+        ],
+        "result": "Add a new repository of formulas"
+    },
+    {
+        "entry": "Add new repo",
+        "steps": [
+            {
+                "key": "Select your provider:",
+                "value": "Github",
+                "action": "select"
             },
             {
-                "key":"",
-                "value":"add repo",
-                "action":"main"
+                "key": "",
+                "value": "add repo",
+                "action": "main"
             },
             {
-                "key":"Repository name:",
-                "value":"Leonidas",
-                "action":"sendkey"
+                "key": "Repository name:",
+                "value": "Leonidas",
+                "action": "sendkey"
             },
             {
-                "key":"Repository URL:",
-                "value":"https://github.com/zupIt/ritchie-formulas",
-                "action":"sendkey"
+                "key": "Repository URL:",
+                "value": "https://github.com/zupIt/ritchie-formulas",
+                "action": "sendkey"
             },
             {
-                "key":"Is a private repository?",
-                "value":"no",
-                "action":"select"
+                "key": "Is a private repository?",
+                "value": "no",
+                "action": "select"
             },
             {
-                "key":"Select a tag version:",
-                "value":"1.0.0",
-                "action":"select"
+                "key": "Select a tag version:",
+                "value": "1.0.0",
+                "action": "select"
             },
             {
-                "key":"Set the priority:",
-                "value":"999",
-                "action":"sendkey"
+                "key": "Set the priority:",
+                "value": "999",
+                "action": "sendkey"
             }
         ],
-        "result":""
+        "result": ""
     },
     {
-        "entry":"List",
-        "steps":[
+        "entry": "List",
+        "steps": [
             {
-                "key":"",
-                "value":"list",
-                "action":"main"
+                "key": "",
+                "value": "list",
+                "action": "main"
             }
         ],
-        "result":"This command consists of multiple subcommands to interact with ritchie."
+        "result": "This command consists of multiple subcommands to interact with ritchie."
     },
     {
-        "entry":"List repo",
-        "steps":[
+        "entry": "List repo",
+        "steps": [
             {
-                "key":"",
-                "value":"list repo",
-                "action":"main"
+                "key": "",
+                "value": "list repo",
+                "action": "main"
             }
         ],
-        "result":"commons"
+        "result": "commons"
     },
     {
-        "entry":"List credential",
-        "steps":[
+        "entry": "List credential",
+        "steps": [
             {
-                "key":"",
-                "value":"list credential",
-                "action":"main"
+                "key": "",
+                "value": "list credential",
+                "action": "main"
             }
         ],
-        "result":"You dont have any credential"
+        "result": "You dont have any credential"
     },
     {
-        "entry":"Delete repo",
-        "steps":[
+        "entry": "Delete repo",
+        "steps": [
             {
-                "key":"",
-                "value":"delete repo",
-                "action":"main"
+                "key": "",
+                "value": "delete repo",
+                "action": "main"
             },
             {
-                "key":"Choose a repository to delete:",
-                "value":"Leonidas",
-                "action":"select"
+                "key": "Choose a repository to delete:",
+                "value": "Leonidas",
+                "action": "select"
             },
             {
-                "key":"Want to delete",
-                "value":"yes",
-                "action":"select"
+                "key": "Want to delete",
+                "value": "yes",
+                "action": "select"
             }
         ],
-        "result":"\"Leonidas\" has been removed from your repositories"
+        "result": "\"Leonidas\" has been removed from your repositories"
     },
     {
-        "entry":"Set credentials",
-        "steps":[
+        "entry": "Set credentials",
+        "steps": [
             {
-                "key":"",
-                "value":"set credential",
-                "action":"main"
+                "key": "",
+                "value": "set credential",
+                "action": "main"
             },
             {
-                "key":"Provider:",
-                "value":"Leonidas",
-                "action":"sendkey"
+                "key": "Provider:",
+                "value": "Leonidas",
+                "action": "sendkey"
             },
             {
-                "key":"Type your credential using the format",
-                "value":"email=email@email.com",
-                "action":"sendkey"
+                "key": "Type your credential using the format",
+                "value": "email=email@email.com",
+                "action": "sendkey"
             },
             {
-                "key":"Add more fields?",
-                "value":"no",
-                "action":"select"
+                "key": "Add more fields?",
+                "value": "no",
+                "action": "select"
             }
         ],
-        "result":""
+        "result": ""
     },
     {
-        "entry":"Set",
-        "steps":[
+        "entry": "Set",
+        "steps": [
             {
-                "key":"",
-                "value":"set",
-                "action":"main"
+                "key": "",
+                "value": "set",
+                "action": "main"
             }
         ],
-        "result":"Set contexts, credentials and priorities for formula repositories."
+        "result": "Set contexts, credentials and priorities for formula repositories."
     },
     {
-        "entry":"Update",
-        "steps":[
+        "entry": "Update",
+        "steps": [
             {
-                "key":"",
-                "value":"update",
-                "action":"main"
+                "key": "",
+                "value": "update",
+                "action": "main"
             }
         ],
-        "result":"Update repositories."
+        "result": "Update repositories."
     },
     {
-        "entry":"Update repo",
-        "steps":[
+        "entry": "Update repo",
+        "steps": [
             {
-                "key":"",
-                "value":"update repo",
-                "action":"main"
+                "key": "",
+                "value": "update repo",
+                "action": "main"
             }
         ],
-        "result":"Successfully got an update"
+        "result": "Successfully got an update"
     },
     {
-        "entry":"Completion",
-        "steps":[
+        "entry": "Completion",
+        "steps": [
             {
-                "key":"",
-                "value":"completion",
-                "action":"main"
+                "key": "",
+                "value": "completion",
+                "action": "main"
             }
         ],
-        "result":"Add autocomplete for terminal, available for (zsh, bash, fish, powershell)."
+        "result": "Add autocomplete for terminal, available for (zsh, bash, fish, powershell)."
     },
     {
-        "entry":"Completion bash",
-        "steps":[
+        "entry": "Completion bash",
+        "steps": [
             {
-                "key":"",
-                "value":"completion bash",
-                "action":"main"
+                "key": "",
+                "value": "completion bash",
+                "action": "main"
             }
         ],
-        "result":"#!/bin/bash"
+        "result": "#!/bin/bash"
     },
     {
-        "entry":"Completion zsh",
-        "steps":[
+        "entry": "Completion zsh",
+        "steps": [
             {
-                "key":"",
-                "value":"completion zsh",
-                "action":"main"
+                "key": "",
+                "value": "completion zsh",
+                "action": "main"
             }
         ],
-        "result":"#compdef rit"
+        "result": "#compdef rit"
     },
     {
-        "entry":"Completion fish",
-        "steps":[
+        "entry": "Completion fish",
+        "steps": [
             {
-                "key":"",
-                "value":"completion fish",
-                "action":"main"
+                "key": "",
+                "value": "completion fish",
+                "action": "main"
             }
         ],
-        "result":"# fish completion for rit"
+        "result": "# fish completion for rit"
     },
     {
-        "entry":"Completion powershell",
-        "steps":[
+        "entry": "Completion powershell",
+        "steps": [
             {
-                "key":"",
-                "value":"completion powershell",
-                "action":"main"
+                "key": "",
+                "value": "completion powershell",
+                "action": "main"
             }
         ],
-        "result":"using namespace System.Management.Automation"
+        "result": "using namespace System.Management.Automation"
     },
     {
-        "entry":"Version",
-        "steps":[
+        "entry": "Version",
+        "steps": [
             {
-                "key":"",
-                "value":"--version",
-                "action":"main"
+                "key": "",
+                "value": "--version",
+                "action": "main"
             }
         ],
-        "result":"rit version"
+        "result": "rit version"
     },
     {
-        "entry":"Delete",
-        "steps":[
+        "entry": "Delete",
+        "steps": [
             {
-                "key":"",
-                "value":"delete",
-                "action":"main"
+                "key": "",
+                "value": "delete",
+                "action": "main"
             }
         ],
-        "result":"Delete contexts, repositories and formulas."
+        "result": "Delete contexts, repositories and formulas."
     },
     {
-        "entry":"Show",
-        "steps":[
+        "entry": "Show",
+        "steps": [
             {
-                "key":"",
-                "value":"show",
-                "action":"main"
+                "key": "",
+                "value": "show",
+                "action": "main"
             }
         ],
-        "result":"Show current context."
+        "result": "Show current context."
     },
     {
-        "entry":"Create",
-        "steps":[
+        "entry": "Create",
+        "steps": [
             {
-                "key":"",
-                "value":"create",
-                "action":"main"
+                "key": "",
+                "value": "create",
+                "action": "main"
             }
         ],
-        "result":"Create a new formula."
+        "result": "Create a new formula."
     },
     {
-        "entry":"Build",
-        "steps":[
+        "entry": "Build",
+        "steps": [
             {
-                "key":"",
-                "value":"build",
-                "action":"main"
+                "key": "",
+                "value": "build",
+                "action": "main"
             }
         ],
-        "result":"Build formula with latest changes."
+        "result": "Build formula with latest changes."
     },
     {
-        "entry":"Help",
-        "steps":[
+        "entry": "Help",
+        "steps": [
             {
-                "key":"",
-                "value":"help",
-                "action":"main"
+                "key": "",
+                "value": "help",
+                "action": "main"
             }
         ],
-        "result":"Use \"rit <command> --help\" for more information about a given command."
+        "result": "Use \"rit <command> --help\" for more information about a given command."
     },
     {
-        "entry":"Tutorial disable",
-        "steps":[
+        "entry": "Tutorial disable",
+        "steps": [
             {
-                "key":"",
-                "value":"tutorial",
-                "action":"main"
+                "key": "",
+                "value": "tutorial",
+                "action": "main"
             },
             {
-                "key":"Status tutorial?",
-                "value":"disabled",
-                "action":"sendkey"
+                "key": "Status tutorial?",
+                "value": "disabled",
+                "action": "sendkey"
             }
         ],
-        "result":"Set tutorial successful!"
+        "result": "Set tutorial successful!"
     },
     {
-        "entry":"Upgrade",
-        "steps":[
+        "entry": "Upgrade",
+        "steps": [
             {
-                "key":"",
-                "value":"upgrade",
-                "action":"main"
+                "key": "",
+                "value": "upgrade",
+                "action": "main"
             }
         ],
-        "result":"Rit upgraded with success"
+        "result": "Rit upgraded with success"
     }
 ]

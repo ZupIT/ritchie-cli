@@ -170,7 +170,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder)
+	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder, inputList, fileManager)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 

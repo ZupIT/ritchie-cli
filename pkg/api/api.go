@@ -17,6 +17,7 @@
 package api
 
 import (
+	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -97,13 +98,24 @@ func (t TermInputType) ToLower() string {
 	return strings.ToLower(t.String())
 }
 
-// UserHomeDir returns the home dir of the user
+// UserHomeDir returns the home dir of the user,
+// if rit is called with sudo, it returns the same path
 func UserHomeDir() string {
-	usr, err := user.Current()
+	if os.Geteuid() == 0 {
+		username := os.Getenv("SUDO_USER")
+		if username != "" {
+			u, err := user.Lookup(username)
+			if err == nil {
+				return u.HomeDir
+			}
+		}
+	}
+
+	usr, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
-	return usr.HomeDir
+	return usr
 }
 
 // RitchieHomeDir returns the home dir of the ritchie
