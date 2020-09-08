@@ -86,13 +86,17 @@
                 "action":"main"
             },
             {
-                "key":"and feature use statistics and crash reports?\u001B[0m  \u001B[36m[Use arrows to move, type to filter]\u001B[0m",
-                "value":"Yes, I agree to contribute with data anonymously",
+                "key":"and feature use statistics and crash reports?\u001B[0m  \u001B[36m[Use arrows to move, type to filter]\u001B[0m",                "value":"Yes, I agree to contribute with data anonymously",
                 "action":"select"
             },
             {
                 "key":"Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]",
                 "value":"yes",
+                "action":"select"
+            },
+            {
+                "key":"Select a default formula run type:",
+                "value":"local",
                 "action":"select"
             }
         ],

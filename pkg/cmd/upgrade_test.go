@@ -20,6 +20,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
@@ -33,16 +36,17 @@ func (m stubUpgradeManager) Run(upgradeUrl string) error {
 }
 
 type stubUrlFinder struct {
-	url func(resolver version.Resolver) string
+	url func() string
 }
 
-func (uf stubUrlFinder) Url(resolver version.Resolver) string {
-	return uf.url(resolver)
+func (uf stubUrlFinder) Url(os string) string {
+	return uf.url()
 }
 
 type stubVersionResolver struct {
-	stableVersion func() (string, error)
-	updateCache   func() error
+	stableVersion    func() (string, error)
+	updateCache      func() error
+	verifyNewVersion func(current, installed string) string
 }
 
 func (vr stubVersionResolver) StableVersion() (string, error) {
@@ -53,20 +57,26 @@ func (vr stubVersionResolver) UpdateCache() error {
 	return vr.updateCache()
 }
 
+func (vr stubVersionResolver) VerifyNewVersion(current, installed string) string {
+	return vr.verifyNewVersion(current, installed)
+}
+
 func TestUpgradeCmd_runFunc(t *testing.T) {
-	type fields struct {
+	type in struct {
 		resolver  version.Resolver
 		Manager   upgrade.Manager
 		UrlFinder upgrade.UrlFinder
+		input     prompt.InputList
+		file      stream.FileWriteReadExister
 	}
 	tests := []struct {
 		name    string
-		fields  fields
+		in      in
 		wantErr bool
 	}{
 		{
 			name: "Run with success",
-			fields: fields{
+			in: in{
 				resolver: stubVersionResolver{
 					func() (string, error) {
 						return "1.0.0", nil
@@ -74,6 +84,9 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					func() error {
 						return nil
 					},
+					func(current, installed string) string {
+						return ""
+					},
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
@@ -81,8 +94,13 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
 					},
 				},
 			},
@@ -90,23 +108,31 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		},
 		{
 			name: "Should return err on UpdateCache",
-			fields: fields{
+			in: in{
 				resolver: stubVersionResolver{
 					func() (string, error) {
 						return "", nil
 					},
 					func() error {
-						return errors.New("some error")
+						return errors.New("update cache error")
+					},
+					func(current, installed string) string {
+						return ""
 					},
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
-						return errors.New("some error")
+						return errors.New("upgrade url error")
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
 					},
 				},
 			},
@@ -114,7 +140,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		},
 		{
 			name: "Should return err on Run",
-			fields: fields{
+			in: in{
 				resolver: stubVersionResolver{
 					func() (string, error) {
 						return "", nil
@@ -122,24 +148,135 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 					func() error {
 						return nil
 					},
+					func(current, installed string) string {
+						return ""
+					},
 				},
 				Manager: stubUpgradeManager{
 					func(upgradeUrl string) error {
-						return errors.New("some error")
+						return errors.New("upgrade url error")
 					},
 				},
 				UrlFinder: stubUrlFinder{
-					func(resolver version.Resolver) string {
+					func() string {
 						return "any url"
 					},
 				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "success with no metrics file",
+			in: in{
+				resolver: stubVersionResolver{
+					stableVersion: func() (string, error) {
+						return "1.0.0", nil
+					},
+					updateCache: func() error {
+						return nil
+					},
+				},
+				Manager: stubUpgradeManager{
+					func(upgradeUrl string) error {
+						return nil
+					},
+				},
+				UrlFinder: stubUrlFinder{
+					url: func() string {
+						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+					WriteMock: func(path string, content []byte) error {
+						return nil
+					},
+				},
+				input: inputListCustomMock{func(name string, items []string) (string, error) {
+					return DoNotAcceptMetrics, nil
+				}},
+			},
+			wantErr: false,
+		},
+		{
+			name: "fail on list with no metrics file",
+			in: in{
+				resolver: stubVersionResolver{
+					stableVersion: func() (string, error) {
+						return "1.0.0", nil
+					},
+					updateCache: func() error {
+						return nil
+					},
+				},
+				Manager: stubUpgradeManager{
+					func(upgradeUrl string) error {
+						return nil
+					},
+				},
+				UrlFinder: stubUrlFinder{
+					func() string {
+						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+				},
+				input: inputListErrorMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fail on write with no metrics file",
+			in: in{
+				resolver: stubVersionResolver{
+					stableVersion: func() (string, error) {
+						return "1.0.0", nil
+					},
+					updateCache: func() error {
+						return nil
+					},
+				},
+				Manager: stubUpgradeManager{
+					func(upgradeUrl string) error {
+						return nil
+					},
+				},
+				UrlFinder: stubUrlFinder{
+					func() string {
+						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+					WriteMock: func(path string, content []byte) error {
+						return errors.New("error writing file")
+					},
+				},
+				input: inputListMock{},
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := NewUpgradeCmd(tt.fields.resolver, tt.fields.Manager, tt.fields.UrlFinder)
+			u := NewUpgradeCmd(
+				tt.in.resolver,
+				tt.in.Manager,
+				tt.in.UrlFinder,
+				tt.in.input,
+				tt.in.file)
 			if err := u.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
 			}

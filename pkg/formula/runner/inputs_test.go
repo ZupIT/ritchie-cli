@@ -19,6 +19,7 @@ package runner
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -286,6 +287,147 @@ func TestInputManager_Inputs(t *testing.T) {
 	}
 }
 
+func TestInputManager_ConditionalInputs(t *testing.T) {
+
+	inputJson := `[
+	{
+        "name": "sample_list",
+        "type": "text",
+        "default": "in1",
+        "items": [
+            "in_list1",
+            "in_list2",
+            "in_list3",
+            "in_listN"
+        ],
+ 		"cache": {
+            "active": true,
+            "qty": 3,
+            "newLabel": "Type new value?"
+        },
+        "label": "Pick your : "
+    },
+ 	{
+        "name": "sample_text",
+        "type": "text",
+        "label": "Type : ",
+		"default": "test",
+		"condition": {
+			"variable": "%s",
+			"operator": "%s",
+			"value":    "in_list1"
+		}
+    }
+]`
+
+	fileManager := stream.NewFileManager()
+
+	type in struct {
+		variable       string
+		operator       string
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "equal conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "==",
+			},
+			want: nil,
+		},
+		{
+			name: "not equal conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "!=",
+			},
+			want: nil,
+		},
+		{
+			name: "greater than conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    ">",
+			},
+			want: nil,
+		},
+		{
+			name: "greater than or equal to conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    ">=",
+			},
+			want: nil,
+		},
+		{
+			name: "less than conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "<",
+			},
+			want: nil,
+		},
+		{
+			name: "less than or equal to conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "<=",
+			},
+			want: nil,
+		},
+		{
+			name: "wrong operator conditional",
+			in: in{
+				variable:    "sample_list",
+				operator:    "eq",
+			},
+			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
+		},
+		{
+			name: "non-existing variable conditional",
+			in: in{
+				variable:    "non_existing",
+				operator:    "==",
+			},
+			want: errors.New("config.json: conditional variable non_existing not found"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(fmt.Sprintf(inputJson, tt.in.variable, tt.in.operator)), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iText := inputMock{text: DefaultCacheNewLabel}
+			iList := inputMock{text: "in_list1"}
+			iBool := inputMock{boolean: false}
+			iPass := inputMock{text: "******"}
+
+			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iBool, iPass)
+
+			cmd := &exec.Cmd{}
+
+			got := inputManager.Inputs(cmd, setup, api.Prompt)
+
+			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
+				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
 type inputMock struct {
 	text    string
 	boolean bool
@@ -318,11 +460,15 @@ func (e envResolverMock) Resolve(string) (string, error) {
 }
 
 type fileManagerMock struct {
-	rBytes []byte
-	rErr   error
-	wErr   error
-	aErr   error
-	exist  bool
+	rBytes   []byte
+	rErr     error
+	wErr     error
+	aErr     error
+	mErr     error
+	rmErr    error
+	lErr     error
+	exist    bool
+	listNews []string
 }
 
 func (fi fileManagerMock) Write(string, []byte) error {
@@ -339,4 +485,16 @@ func (fi fileManagerMock) Exists(string) bool {
 
 func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
+}
+
+func (fi fileManagerMock) Move(oldPath, newPath string, files []string) error {
+	return fi.mErr
+}
+
+func (fi fileManagerMock) Remove(path string) error {
+	return fi.rmErr
+}
+
+func (fi fileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
+	return fi.listNews, fi.lErr
 }

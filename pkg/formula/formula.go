@@ -17,7 +17,6 @@
 package formula
 
 import (
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -43,18 +42,24 @@ const (
 
 type (
 	Input struct {
-		Name    string   `json:"name"`
-		Type    string   `json:"type"`
-		Default string   `json:"default"`
-		Label   string   `json:"label"`
-		Items   []string `json:"items"`
-		Cache   Cache    `json:"cache"`
+		Name    	string   	`json:"name"`
+		Type    	string   	`json:"type"`
+		Default 	string   	`json:"default"`
+		Label   	string   	`json:"label"`
+		Items   	[]string 	`json:"items"`
+		Cache   	Cache    	`json:"cache"`
+		Condition	Condition	`json:"condition"`
 	}
 
 	Cache struct {
 		Active   bool   `json:"active"`
 		Qty      int    `json:"qty"`
 		NewLabel string `json:"newLabel"`
+	}
+	Condition struct {
+		Variable	string `json:"variable"`
+		Operator	string `json:"operator"`
+		Value		string `json:"value"`
 	}
 	Create struct {
 		FormulaCmd    string `json:"formulaCmd"`
@@ -87,23 +92,14 @@ type (
 		Short string `json:"short"`
 		Long  string `json:"long"`
 	}
+
+	ExecuteData struct {
+		Def     Definition
+		InType  api.TermInputType
+		RunType RunnerType
+		Verbose bool
+	}
 )
-
-type PreRunner interface {
-	PreRun(def Definition, docker bool) (Setup, error)
-}
-
-type Runner interface {
-	Run(def Definition, inputType api.TermInputType, docker bool, verbose bool) error
-}
-
-type PostRunner interface {
-	PostRun(p Setup, docker bool) error
-}
-
-type InputRunner interface {
-	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
-}
 
 type Creator interface {
 	Create(cf Create) error

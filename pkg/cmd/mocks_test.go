@@ -24,7 +24,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -46,6 +45,20 @@ type inputTextValidatorMock struct{}
 
 func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
 	return "mocked text", nil
+}
+
+type inputTextValidatorCustomMock struct {
+	text func (name string, validate func(interface{}) error, helper ...string) (string, error)
+}
+
+func (i inputTextValidatorCustomMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return i.text(name, validate)
+}
+
+type inputTextValidatorErrorMock struct{}
+
+func (inputTextValidatorErrorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return "mocked text", errors.New("error on input text")
 }
 
 type inputTextErrorMock struct{}
@@ -81,6 +94,12 @@ type inputURLMock struct{}
 
 func (inputURLMock) URL(name, defaultValue string) (string, error) {
 	return "http://localhost/mocked", nil
+}
+
+type inputURLErrorMock struct{}
+
+func (inputURLErrorMock) URL(name, defaultValue string) (string, error) {
+	return "http://localhost/mocked", errors.New("error on input url")
 }
 
 type inputIntMock struct{}
@@ -123,6 +142,12 @@ type inputFalseMock struct{}
 
 func (inputFalseMock) Bool(name string, items []string) (bool, error) {
 	return false, nil
+}
+
+type inputBoolErrorMock struct{}
+
+func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
+	return false, errors.New("error on boolean list")
 }
 
 type inputListMock struct{}
@@ -325,14 +350,6 @@ func (cscm credSettingsCustomMock) CredentialsPath() string {
 	return ""
 }
 
-type runnerMock struct {
-	error error
-}
-
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool, verbose bool) error {
-	return r.error
-}
-
 type treeMock struct {
 	tree  formula.Tree
 	error error
@@ -401,6 +418,58 @@ func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHo
 	return t.set(tutorial)
 }
 
+type DirManagerCustomMock struct {
+	exists func(dir string) bool
+	list   func(dir string, hiddenDir bool) ([]string, error)
+	isDir  func(dir string) bool
+}
+
+func (d DirManagerCustomMock) Exists(dir string) bool {
+	return d.exists(dir)
+}
+
+func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error) {
+	return d.list(dir, hiddenDir)
+}
+
+func (d DirManagerCustomMock) IsDir(dir string) bool {
+	return d.isDir(dir)
+}
+
+type LocalBuilderMock struct {
+	build func(workspacePath, formulaPath string) error
+}
+
+func (l LocalBuilderMock) Build(workspacePath, formulaPath string) error {
+	return l.build(workspacePath, formulaPath)
+}
+
+type WatcherMock struct {
+	watch func(workspacePath, formulaPath string)
+}
+
+func (w WatcherMock) Watch(workspacePath, formulaPath string) {
+	w.watch(workspacePath, formulaPath)
+}
+
+type WorkspaceAddListValidatorCustomMock struct {
+	add      func(workspace formula.Workspace) error
+	list     func() (formula.Workspaces, error)
+	validate func(workspace formula.Workspace) error
+}
+
+func (w WorkspaceAddListValidatorCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
+}
+
+func (w WorkspaceAddListValidatorCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+func (w WorkspaceAddListValidatorCustomMock) Validate(workspace formula.Workspace) error {
+	return w.validate(workspace)
+}
+
 var (
 	defaultRepoAdderMock = repoListerAdderCustomMock{
 		add: func(d formula.Repo) error {
@@ -423,3 +492,25 @@ var (
 		},
 	}
 )
+
+type FormulaExecutorMock struct {
+	err error
+}
+
+func (f FormulaExecutorMock) Execute(exe formula.ExecuteData) error {
+	return f.err
+}
+
+type ConfigRunnerMock struct {
+	runType   formula.RunnerType
+	createErr error
+	findErr   error
+}
+
+func (c ConfigRunnerMock) Create(runType formula.RunnerType) error {
+	return c.createErr
+}
+
+func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
+	return c.runType, c.findErr
+}

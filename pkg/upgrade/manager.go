@@ -29,7 +29,11 @@ type Manager interface {
 }
 
 type DefaultManager struct {
-	Updater
+	updater
+}
+
+func NewDefaultManager(Updater updater) DefaultManager {
+	return DefaultManager{updater: Updater}
 }
 
 func (m DefaultManager) Run(upgradeUrl string) error {
@@ -42,12 +46,11 @@ func (m DefaultManager) Run(upgradeUrl string) error {
 		return errors.New("fail to download stable version")
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("fail to download stable version status:%d", resp.StatusCode)
 	}
 
-	err = m.Updater.Apply(resp.Body, update.Options{})
-	if err != nil {
+	if err := m.updater.Apply(resp.Body, update.Options{}); err != nil {
 		return errors.New(
 			"Fail to upgrade\n" +
 				"Please try running this command again as root/Administrator\n" +
