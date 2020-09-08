@@ -63,7 +63,7 @@ var (
 		cmdUse,
 	}
 
-	listCommandsBlockedByCommons = []string{
+	blockedCmdsByCommons = []string{
 		fmt.Sprintf("%s create formula", cmdUse),
 	}
 )
@@ -113,7 +113,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		if !ro.ritchieIsInitialized() && isBlockedByCommons(listCommandsBlockedByCommons, cmd) {
+		if !ro.ritchieIsInitialized() && isBlockedByCommons(blockedCmdsByCommons, cmd) {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
