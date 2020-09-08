@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -55,5 +56,25 @@ func TestDeleteWorkspaceCmd(t *testing.T) {
 
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+
+	cmd = NewDeleteWorkspaceCmd(
+		os.TempDir(),
+		workspaceForm{},
+		dirManager,
+		inputListCustomMock{
+			list: func(name string, items []string) (string, error) {
+				return "", errors.New("Some error")
+			},
+		},
+		inputTrueMock{},
+	)
+
+	if cmd == nil {
+		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
+	}
+
+	if err := cmd.Execute(); err == nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, nil, err)
 	}
 }
