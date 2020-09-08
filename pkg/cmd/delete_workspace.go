@@ -84,9 +84,11 @@ func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		question := fmt.Sprintf("Are you sure you want to delete the workspace: rit %s", wspace.Dir)
-		if ans, err := d.inBool.Bool(question, []string{"no", "yes"}); err != nil {
+		ans, err := d.inBool.Bool(question, []string{"no", "yes"})
+		if err != nil {
 			return err
-		} else if !ans {
+		}
+		if !ans {
 			return nil
 		}
 
@@ -127,14 +129,10 @@ func WorkspaceListInput(
 		return formula.Workspace{}, err
 	}
 
-	var workspaceName string
-	var workspacePath string
-	var wspace formula.Workspace
-
 	split := strings.Split(selected, " (")
-	workspaceName = split[0]
-	workspacePath = workspaces[workspaceName]
-	wspace = formula.Workspace{
+	workspaceName := split[0]
+	workspacePath := workspaces[workspaceName]
+	wspace := formula.Workspace{
 		Name: strings.Title(workspaceName),
 		Dir:  workspacePath,
 	}
