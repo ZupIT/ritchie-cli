@@ -1,5 +1,43 @@
 [
     {
+        "entry":"Show context",
+        "steps":[
+            {
+                "key":"",
+                "value":"show context",
+                "action":"main"
+            }
+        ],
+        "result":"Current context: default"
+    },
+    {
+        "entry":"Set context",
+        "steps":[
+            {
+                "key":"",
+                "value":"set context",
+                "action":"main"
+            },
+            {
+                "key": "All:",
+                "value": "default",
+                "action": "select"
+            }
+        ],
+        "result":"Set context successful!"
+    },
+    {
+        "entry":"Delete context",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete context",
+                "action":"main"
+            }
+        ],
+        "result":"You have no defined contexts"
+    },
+    {
         "entry":"List repo",
         "steps":[
             {
@@ -9,6 +47,17 @@
             }
         ],
         "result":"There are 0 repos"
+    },
+    {
+        "entry":"Delete repo",
+        "steps":[
+            {
+                "key":"",
+                "value":"delete repo",
+                "action":"main"
+            }
+        ],
+        "result":"You don't have any repositories"
     },
     {
         "entry":"Create formula",
@@ -22,7 +71,7 @@
         "result":"To start using rit, you need to initialize rit first."
     },
     {
-        "entry":"Do INIT",
+        "entry":"Do init",
         "steps":[
             {
                 "key":"",
