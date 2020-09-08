@@ -33,6 +33,7 @@ func TestRitSingleScaffold(t *testing.T) {
 
 var _ = Describe("RitScaffold", func() {
 	BeforeSuite(func() {
+		functional.RitClearConfigs()
 		functional.RitSingleInit()
 	})
 
