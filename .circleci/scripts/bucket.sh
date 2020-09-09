@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if expr "$VERSION" : '^[0-9]\+.0.0-qa' >/dev/null; then
-  echo "ritchie-cli-bucket234376412767550"
+  echo "ritchie-13528094685555"
 elif expr "$VERSION" : '.*\.nightly\..*' >/dev/null; then
   echo "ritchie-cli-bucket152849730126474"
 elif expr "$VERSION" : '.*\.pre\..*' >/dev/null; then
