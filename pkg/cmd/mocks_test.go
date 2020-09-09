@@ -48,7 +48,7 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 }
 
 type inputTextValidatorCustomMock struct {
-	text func (name string, validate func(interface{}) error, helper ...string) (string, error)
+	text func(name string, validate func(interface{}) error, helper ...string) (string, error)
 }
 
 func (i inputTextValidatorCustomMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
@@ -418,6 +418,7 @@ type DirManagerCustomMock struct {
 	exists func(dir string) bool
 	list   func(dir string, hiddenDir bool) ([]string, error)
 	isDir  func(dir string) bool
+	create func(dir string) error
 }
 
 func (d DirManagerCustomMock) Exists(dir string) bool {
@@ -430,6 +431,10 @@ func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error)
 
 func (d DirManagerCustomMock) IsDir(dir string) bool {
 	return d.isDir(dir)
+}
+
+func (d DirManagerCustomMock) Create(dir string) error {
+	return d.create(dir)
 }
 
 type LocalBuilderMock struct {
