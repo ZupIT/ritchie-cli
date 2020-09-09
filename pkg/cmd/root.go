@@ -62,6 +62,10 @@ var (
 	upgradeList = []string{
 		cmdUse,
 	}
+
+	blockedCmdsByCommons = []string{
+		fmt.Sprintf("%s create formula", cmdUse),
+	}
 )
 
 type rootCmd struct {
@@ -109,7 +113,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		if !ro.ritchieIsInitialized() {
+		if !ro.ritchieIsInitialized() && isBlockedByCommons(blockedCmdsByCommons, cmd) {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
@@ -144,6 +148,10 @@ func isUpgradeCommand(upgradeList []string, cmd *cobra.Command) bool {
 
 func isCompleteCmd(cmd *cobra.Command) bool {
 	return strings.Contains(cmd.CommandPath(), "__complete")
+}
+
+func isBlockedByCommons(blockList []string, cmd *cobra.Command) bool {
+	return sliceutil.Contains(blockList, cmd.CommandPath())
 }
 
 func (ro *rootCmd) versionFlag() string {

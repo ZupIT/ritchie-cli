@@ -33,6 +33,7 @@ func TestRitSingleCore(t *testing.T) {
 
 var _ = Describe("RitCore", func() {
 	BeforeSuite(func() {
+		functional.RitClearConfigs()
 		functional.RitSingleInit()
 	})
 
