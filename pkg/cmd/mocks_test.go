@@ -446,6 +446,7 @@ type DirManagerCustomMock struct {
 	exists func(dir string) bool
 	list   func(dir string, hiddenDir bool) ([]string, error)
 	isDir  func(dir string) bool
+	create func(dir string) error
 }
 
 func (d DirManagerCustomMock) Exists(dir string) bool {
@@ -458,6 +459,10 @@ func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error)
 
 func (d DirManagerCustomMock) IsDir(dir string) bool {
 	return d.isDir(dir)
+}
+
+func (d DirManagerCustomMock) Create(dir string) error {
+	return d.create(dir)
 }
 
 type LocalBuilderMock struct {

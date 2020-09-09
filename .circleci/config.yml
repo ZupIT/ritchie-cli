@@ -54,6 +54,7 @@ executors:
     docker:
       - image: *PYTHONWITHGO_IMAGE
         user: root
+    resource_class: medium
     working_directory: /workspace
 
   ritchie-executor:
@@ -105,7 +106,8 @@ jobs:
       - run:
           name: lint
           command: |
-            golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
+            golangci-lint run --no-config --issues-exit-code=1 --timeout=5m -v
+          no_output_timeout: 5m
 
   horus:
     executor: horus-executor
@@ -144,6 +146,7 @@ jobs:
           name: codecov upload
           when: always
           command: bash <(curl -s https://codecov.io/bash)
+
   unix_functional_test:
     executor: ritchie-executor
     environment:
@@ -377,6 +380,7 @@ workflows:
                 - beta
     jobs:
       - release_creator
+
   nightly:
     triggers:
       - schedule:
@@ -387,6 +391,7 @@ workflows:
                 - master
     jobs:
       - rebase_nightly
+
   beta:
     triggers:
       - schedule:
@@ -435,6 +440,7 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
+
   release:
     jobs:
       - build:
@@ -481,6 +487,7 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - release-publish
+
   delivery:
     jobs:
       - build:
