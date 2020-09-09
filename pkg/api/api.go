@@ -17,14 +17,15 @@
 package api
 
 import (
-	"fmt"
+	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
 const (
-	ritchieHomePattern = "%s/.rit"
-	CoreCmdsDesc       = "core commands:"
+	ritchieHomeName = ".rit"
+	CoreCmdsDesc    = "core commands:"
 )
 
 var (
@@ -48,8 +49,10 @@ var (
 		{Parent: "root_set", Usage: "context"},
 		{Parent: "root_set", Usage: "credential"},
 		{Parent: "root_set", Usage: "repo-priority"},
+		{Parent: "root_set", Usage: "formula-runner"},
 		{Parent: "root", Usage: "show"},
 		{Parent: "root_show", Usage: "context"},
+		{Parent: "root_show", Usage: "formula-runner"},
 		{Parent: "root", Usage: "create"},
 		{Parent: "root_create", Usage: "formula"},
 		{Parent: "root", Usage: "update"},
@@ -94,16 +97,27 @@ func (t TermInputType) ToLower() string {
 	return strings.ToLower(t.String())
 }
 
-// UserHomeDir returns the home dir of the user
+// UserHomeDir returns the home dir of the user,
+// if rit is called with sudo, it returns the same path
 func UserHomeDir() string {
-	usr, err := user.Current()
+	if os.Geteuid() == 0 {
+		username := os.Getenv("SUDO_USER")
+		if username != "" {
+			u, err := user.Lookup(username)
+			if err == nil {
+				return u.HomeDir
+			}
+		}
+	}
+
+	usr, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
-	return usr.HomeDir
+	return usr
 }
 
 // RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
-	return fmt.Sprintf(ritchieHomePattern, UserHomeDir())
+	return filepath.Join(UserHomeDir(), ritchieHomeName)
 }

@@ -26,7 +26,7 @@ import (
 
 func Test_Check(t *testing.T) {
 	type in struct {
-		file stream.FileReadExister
+		file stream.FileWriteReadExister
 	}
 
 	var tests = []struct {
@@ -38,7 +38,7 @@ func Test_Check(t *testing.T) {
 			name:           "success case expecting true",
 			expectedResult: true,
 			in: in{
-				file: sMocks.FileReadExisterCustomMock{
+				file: sMocks.FileWriteReadExisterCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
 						return []byte("yes"), nil
 					},
@@ -52,7 +52,7 @@ func Test_Check(t *testing.T) {
 			name:           "success case expecting false",
 			expectedResult: false,
 			in: in{
-				file: sMocks.FileReadExisterCustomMock{
+				file: sMocks.FileWriteReadExisterCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
 						return []byte("no"), nil
 					},
@@ -66,9 +66,12 @@ func Test_Check(t *testing.T) {
 			name:           "success case when metrics file doesn't exist",
 			expectedResult: false,
 			in: in{
-				file: sMocks.FileReadExisterCustomMock{
+				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return false
+					},
+					WriteMock: func(path string, content []byte) error {
+						return nil
 					},
 				},
 			},
@@ -77,7 +80,7 @@ func Test_Check(t *testing.T) {
 			name:           "success case expecting false when error reading file",
 			expectedResult: false,
 			in: in{
-				file: sMocks.FileReadExisterCustomMock{
+				file: sMocks.FileWriteReadExisterCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
 						return nil, errors.New("error reading file")
 					},

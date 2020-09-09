@@ -47,6 +47,11 @@ type FileLister interface {
 	List(file string) ([]string, error)
 }
 
+// FileNewLister list all new files compared between old and new path
+type FileNewLister interface {
+	ListNews(oldPath, newPath string) ([]string, error)
+}
+
 type FileCopier interface {
 	Copy(src, dst string) error
 }
@@ -64,9 +69,10 @@ type FileReadExister interface {
 	FileExister
 }
 
-type FileMoveRemover interface {
+type FileNewListMoveRemover interface {
 	FileMover
 	FileRemover
+	FileNewLister
 }
 
 type FileCopyExistListerWriter interface {
@@ -219,4 +225,35 @@ func (f FileManager) Move(oldPath, newPath string, files []string) error {
 		}
 	}
 	return nil
+}
+
+func (f FileManager) ListNews(oldPath, newPath string) ([]string, error) {
+	of, err := readFilesDir(oldPath)
+	if err != nil {
+		return nil, err
+	}
+	nf, err := readFilesDir(newPath)
+	if err != nil {
+		return nil, err
+	}
+	control := make(map[string]int)
+	for _, file := range of {
+		control[file.Name()]++
+	}
+	var ff []string
+	for _, file := range nf {
+		if control[file.Name()] == 0 {
+			ff = append(ff, file.Name())
+		}
+	}
+	return ff, nil
+}
+
+func readFilesDir(path string) ([]os.FileInfo, error) {
+	filesInfo, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return filesInfo, err
 }
