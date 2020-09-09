@@ -29,9 +29,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const msgWorkspaceIsNotValid = "The workspace informed is not valid"
+const (
+	msgWorkspaceIsNotValid = "The workspace informed is not valid"
+	msgEmptyWorkspaces     = "There are no workspaces to delete"
+)
 
-var ErrWorkspaceIsNotValid = errors.New(msgWorkspaceIsNotValid)
+var (
+	ErrWorkspaceIsNotValid = errors.New(msgWorkspaceIsNotValid)
+	ErrEmptyWorkspaces     = errors.New(msgEmptyWorkspaces)
+)
 
 type deleteWorkspaceCmd struct {
 	userHomeDir string
@@ -76,6 +82,10 @@ func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
 		defaultWorkspace := filepath.Join(d.userHomeDir, formula.DefaultWorkspaceDir)
 		if d.directory.Exists(defaultWorkspace) {
 			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
+		}
+
+		if len(workspaces) == 0 {
+			return ErrEmptyWorkspaces
 		}
 
 		wspace, err := WorkspaceListInput(workspaces, d.inList)
