@@ -32,8 +32,7 @@ func (SurveyMultiline) MultiLineText(name string, required bool) (string, error)
 
 	var validationQs []*survey.Question
 
-
-	if required{
+	if required {
 		validationQs = []*survey.Question{
 			{
 				Name:     "name",
@@ -41,7 +40,7 @@ func (SurveyMultiline) MultiLineText(name string, required bool) (string, error)
 				Validate: survey.Required,
 			},
 		}
-	}else {
+	} else {
 		validationQs = []*survey.Question{
 			{
 				Name:   "name",
@@ -51,4 +50,3 @@ func (SurveyMultiline) MultiLineText(name string, required bool) (string, error)
 	}
 	return value, survey.Ask(validationQs, &value)
 }
-

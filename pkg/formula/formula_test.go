@@ -71,7 +71,7 @@ func TestBinFilePath(t *testing.T) {
 	os := runtime.GOOS
 	run := "run.sh"
 	if os == osutil.Windows {
-		run =  "run.bat"
+		run = "run.bat"
 	}
 	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin", run)
 
@@ -110,7 +110,7 @@ func TestPkgName(t *testing.T) {
 }
 
 func TestConfigPath(t *testing.T) {
-	 want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "config.json")
+	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "config.json")
 
 	got := def.ConfigPath(def.FormulaPath(home))
 

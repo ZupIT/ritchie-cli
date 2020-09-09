@@ -40,19 +40,19 @@ func TestCredentialResolver(t *testing.T) {
 		output          string
 	}{
 		{
-			name: "Test resolve new provider",
+			name:            "Test resolve new provider",
 			credentialField: "CREDENTIAL_PROVIDER_KEY",
-			output: "key",
+			output:          "key",
 		},
 		{
-			name: "Test resolve new key",
+			name:            "Test resolve new key",
 			credentialField: "CREDENTIAL_PROVIDER_KEY2",
-			output: "key2",
+			output:          "key2",
 		},
 		{
-			name: "Test resolve existing key",
+			name:            "Test resolve existing key",
 			credentialField: "CREDENTIAL_PROVIDER_KEY2",
-			output: "key2",
+			output:          "key2",
 		},
 	}
 

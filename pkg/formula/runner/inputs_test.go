@@ -323,8 +323,8 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 	fileManager := stream.NewFileManager()
 
 	type in struct {
-		variable       string
-		operator       string
+		variable string
+		operator string
 	}
 
 	tests := []struct {
@@ -335,64 +335,64 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 		{
 			name: "equal conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "==",
+				variable: "sample_list",
+				operator: "==",
 			},
 			want: nil,
 		},
 		{
 			name: "not equal conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "!=",
+				variable: "sample_list",
+				operator: "!=",
 			},
 			want: nil,
 		},
 		{
 			name: "greater than conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    ">",
+				variable: "sample_list",
+				operator: ">",
 			},
 			want: nil,
 		},
 		{
 			name: "greater than or equal to conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    ">=",
+				variable: "sample_list",
+				operator: ">=",
 			},
 			want: nil,
 		},
 		{
 			name: "less than conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "<",
+				variable: "sample_list",
+				operator: "<",
 			},
 			want: nil,
 		},
 		{
 			name: "less than or equal to conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "<=",
+				variable: "sample_list",
+				operator: "<=",
 			},
 			want: nil,
 		},
 		{
 			name: "wrong operator conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "eq",
+				variable: "sample_list",
+				operator: "eq",
 			},
 			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
 		},
 		{
 			name: "non-existing variable conditional",
 			in: in{
-				variable:    "non_existing",
-				operator:    "==",
+				variable: "non_existing",
+				operator: "==",
 			},
 			want: errors.New("config.json: conditional variable non_existing not found"),
 		},

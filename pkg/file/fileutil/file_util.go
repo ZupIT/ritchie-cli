@@ -66,7 +66,6 @@ func ReadFile(path string) ([]byte, error) {
 	return f, err
 }
 
-
 // WriteFilePerm wrapper for ioutil.WriteFile
 // Deprecated: use the stream package to work with files and directories
 func WriteFilePerm(path string, content []byte, perm int32) error {
