@@ -453,21 +453,21 @@ func (w WatcherMock) Watch(workspacePath, formulaPath string) {
 	w.watch(workspacePath, formulaPath)
 }
 
-type WorkspaceAddListValidatorCustomMock struct {
+type WorkspaceAddListerCustomMock struct {
 	add      func(workspace formula.Workspace) error
 	list     func() (formula.Workspaces, error)
 	validate func(workspace formula.Workspace) error
 }
 
-func (w WorkspaceAddListValidatorCustomMock) Add(workspace formula.Workspace) error {
+func (w WorkspaceAddListerCustomMock) Add(workspace formula.Workspace) error {
 	return w.add(workspace)
 }
 
-func (w WorkspaceAddListValidatorCustomMock) List() (formula.Workspaces, error) {
+func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
 	return w.list()
 }
 
-func (w WorkspaceAddListValidatorCustomMock) Validate(workspace formula.Workspace) error {
+func (w WorkspaceAddListerCustomMock) Validate(workspace formula.Workspace) error {
 	return w.validate(workspace)
 }
 

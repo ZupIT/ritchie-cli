@@ -30,7 +30,7 @@ import (
 
 type fieldsTestBuildFormulaCmd struct {
 	localBuilder     formula.LocalBuilder
-	workspaceManager formula.WorkspaceAddListValidator
+	workspaceManager formula.WorkspaceAddLister
 	directory        stream.DirListChecker
 	inList           prompt.InputList
 }
@@ -46,7 +46,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 				return nil
 			},
 		},
-		workspaceManager: WorkspaceAddListValidatorCustomMock{
+		workspaceManager: WorkspaceAddListerCustomMock{
 			list: func() (formula.Workspaces, error) {
 				return formula.Workspaces{}, nil
 			},
@@ -94,7 +94,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 		{
 			name: "Run with error when workspace list returns err",
 			fields: fieldsTestBuildFormulaCmd{
-				workspaceManager: WorkspaceAddListValidatorCustomMock{
+				workspaceManager: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{}, someError
 					},
