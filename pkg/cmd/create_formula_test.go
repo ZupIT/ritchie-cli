@@ -102,9 +102,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 					LanguagesMock: func() ([]string, error) {
 						return []string{}, errors.New("error on language func")
 					},
-
 				},
-
 			},
 			wantErr: true,
 		},
@@ -119,10 +117,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 					LanguagesMock: func() ([]string, error) {
 						return []string{}, nil
 					},
-
 				},
 				inList: inputListErrorMock{},
-
 			},
 			wantErr: true,
 		},
