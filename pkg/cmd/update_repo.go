@@ -30,33 +30,18 @@ import (
 type updateRepoCmd struct {
 	repo          formula.RepositoryListUpdater
 	repoProviders formula.RepoProviders
-	prompt.InputText
-	prompt.InputPassword
-	prompt.InputURL
 	prompt.InputList
-	prompt.InputBool
-	prompt.InputInt
 }
 
 func NewUpdateRepoCmd(
 	repo formula.RepositoryListUpdater,
 	repoProviders formula.RepoProviders,
-	inText prompt.InputText,
-	inPass prompt.InputPassword,
-	inUrl prompt.InputURL,
 	inList prompt.InputList,
-	inBool prompt.InputBool,
-	inInt prompt.InputInt,
 ) *cobra.Command {
 	updateRepo := updateRepoCmd{
 		repo:          repo,
 		repoProviders: repoProviders,
-		InputText:     inText,
-		InputURL:      inUrl,
 		InputList:     inList,
-		InputBool:     inBool,
-		InputInt:      inInt,
-		InputPassword: inPass,
 	}
 
 	cmd := &cobra.Command{
