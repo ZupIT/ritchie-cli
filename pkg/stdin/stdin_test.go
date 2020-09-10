@@ -43,7 +43,8 @@ func TestReadJson(t *testing.T) {
 	tr := TestReader{}
 
 	// ReadJson through Reader and convert to chosen interface
-	err := ReadJson(reader, &tr); if err != nil {
+
+	if err := ReadJson(reader, &tr); err != nil {
 		t.Errorf("Got error %v", err)
 	}
 

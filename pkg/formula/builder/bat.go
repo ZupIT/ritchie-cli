@@ -28,9 +28,9 @@ import (
 )
 
 const (
-	buildFile   = "build.bat"
+	buildFile      = "build.bat"
 	msgBatBuildErr = "failed building formula with build.bat, verify your repository"
-	errMsgFmt   = `%s
+	errMsgFmt      = `%s
 More about error: %s`
 )
 

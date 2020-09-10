@@ -27,7 +27,7 @@ type UrlFinder interface {
 	Url(os string) string
 }
 
-type DefaultUrlFinder struct{
+type DefaultUrlFinder struct {
 	version version.Resolver
 }
 
