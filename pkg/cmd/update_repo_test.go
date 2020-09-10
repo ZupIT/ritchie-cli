@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -28,6 +29,15 @@ import (
 )
 
 func Test_NewUpdateRepoCmd(t *testing.T) {
+	repoTest := formula.Repo{
+		Provider: "Github",
+		Name:     "someRepo1",
+		Version:  "1.0.0",
+		Url:      "https://github.com/owner/repo",
+		Token:    "token",
+		Priority: 2,
+	}
+
 	type in struct {
 		repo   formula.RepositoryListUpdater
 		inList prompt.InputList
@@ -43,13 +53,10 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Provider: "Github",
-								Name:     "someRepo1",
-								Version:  "1.0.0",
-							},
-						}, nil
+						return formula.Repos{repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
 					},
 				},
 				inList: inputListCustomMock{
@@ -65,9 +72,10 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 				},
 			},
 			wantErr:    false,
-			inputStdin: "{\"name\": \"someRepo1\", \"version\": \"1.0.0\", \"url\": \"https://lala.com\", \"token\": \"\", priority:\"2\"}\n",
+			inputStdin: createJSONEntry(&repoTest),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			server := serverMock()
@@ -100,4 +108,9 @@ func serverMock() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
+}
+
+func createJSONEntry(v interface{}) string {
+	s, _ := json.Marshal(v)
+	return string(s)
 }
