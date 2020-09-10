@@ -53,7 +53,7 @@ func TestRun(t *testing.T) {
 	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	inputRunner := runner.NewInput(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputMock{}, inputMock{})
+	inputRunner := runner.NewInput(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputMock{}, inputMock{})
 
 	type in struct {
 		def         formula.Definition
@@ -191,6 +191,12 @@ type envResolverMock struct {
 
 func (e envResolverMock) Resolve(string) (string, error) {
 	return e.in, e.err
+}
+
+type inputTextValidatorMock struct{}
+
+func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return "mocked text", nil
 }
 
 type inputMock struct {
