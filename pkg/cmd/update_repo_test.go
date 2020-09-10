@@ -17,17 +17,20 @@
 package cmd
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-func Test_newUpdateRepoCmd(t *testing.T) {
+func Test_NewUpdateRepoCmd(t *testing.T) {
 	type in struct {
-		config formula.ConfigRunner
-		input  prompt.InputList
+		repo   formula.RepositoryListUpdater
+		inList prompt.InputList
 	}
 	var tests = []struct {
 		name       string
@@ -38,21 +41,43 @@ func Test_newUpdateRepoCmd(t *testing.T) {
 		{
 			name: "success set formula run",
 			in: in{
-				input: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return formula.LocalRun.String(), nil
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Provider: "Github",
+								Name:     "someRepo1",
+								Version:  "1.0.0",
+							},
+						}, nil
 					},
 				},
-				config: ConfigRunnerMock{},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == "Select a repository to update: " {
+							return "someRepo1", nil
+						}
+						if name == "Select your new version:" {
+							return "1.0.0", nil
+						}
+						return "any", nil
+					},
+				},
 			},
 			wantErr:    false,
-			inputStdin: "{\"runType\": \"local\"}\n",
+			inputStdin: "{\"name\": \"someRepo1\", \"version\": \"1.0.0\", \"url\": \"https://lala.com\", \"token\": \"\", priority:\"2\"}\n",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			newUpdateRepoPrompt := NewUpdateRepoCmd(tt.in.config, tt.in.input)
-			newUpdateRepoStdin := NewUpdateRepoCmd(tt.in.config, tt.in.input)
+			server := serverMock()
+			defer server.Close()
+
+			repoProviders := formula.NewRepoProviders()
+			repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+
+			newUpdateRepoPrompt := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
+			newUpdateRepoStdin := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
 
 			newUpdateRepoPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 			newUpdateRepoStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
@@ -69,4 +94,10 @@ func Test_newUpdateRepoCmd(t *testing.T) {
 			}
 		})
 	}
+}
+
+func serverMock() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 }

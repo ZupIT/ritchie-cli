@@ -515,3 +515,16 @@ func (c ConfigRunnerMock) Create(runType formula.RunnerType) error {
 func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
 	return c.runType, c.findErr
 }
+
+type RepositoryListUpdaterCustomMock struct {
+	list   func() (formula.Repos, error)
+	update func(name formula.RepoName, version formula.RepoVersion) error
+}
+
+func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
+	return m.list()
+}
+
+func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion) error {
+	return m.update(name, version)
+}
