@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -29,7 +28,6 @@ import (
 )
 
 type updateRepoCmd struct {
-	client        *http.Client
 	repo          formula.RepositoryListUpdater
 	repoProviders formula.RepoProviders
 	prompt.InputText
@@ -41,7 +39,6 @@ type updateRepoCmd struct {
 }
 
 func NewUpdateRepoCmd(
-	client *http.Client,
 	repo formula.RepositoryListUpdater,
 	repoProviders formula.RepoProviders,
 	inText prompt.InputText,
@@ -52,7 +49,6 @@ func NewUpdateRepoCmd(
 	inInt prompt.InputInt,
 ) *cobra.Command {
 	updateRepo := updateRepoCmd{
-		client:        client,
 		repo:          repo,
 		repoProviders: repoProviders,
 		InputText:     inText,
