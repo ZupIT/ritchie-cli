@@ -140,13 +140,6 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
 				if len(input.Pattern.Regex) > 0 {
-					// inputVal, err = in.InputTextValidator.Text(input.Label, func(text interface{}) error {
-					// 	re := regexp.MustCompile(input.Pattern.Regex)
-					// 	if re.MatchString(text.(string)) {
-					// 		return nil
-					// 	}
-					// 	return errors.New(input.Pattern.MismatchText)
-					// })
 					inputVal, err = in.textRegexValidator(input)
 				} else {
 					validate := input.Default == ""
