@@ -28,7 +28,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -103,7 +102,7 @@ func TestInputManager_Inputs(t *testing.T) {
 
 	type in struct {
 		iText          inputMock
-		iTextValidator prompt.InputTextValidator
+		iTextValidator inputTextValidatorMock
 		iList          inputMock
 		iBool          inputMock
 		iPass          inputMock
