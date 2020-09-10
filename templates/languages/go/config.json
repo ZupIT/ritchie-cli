@@ -1,0 +1,42 @@
+{
+  "dockerImageBuilder": "cimg/go:1.14",
+  "inputs": [
+    {
+      "cache": {
+        "active": true,
+        "newLabel": "Type new value. ",
+        "qty": 3
+      },
+      "label": "Type your name: ",
+      "name": "input_text",
+      "type": "text"
+    },
+    {
+      "default": "false",
+      "items": [
+        "false",
+        "true"
+      ],
+      "label": "Have you ever used Ritchie? ",
+      "name": "input_boolean",
+      "type": "bool"
+    },
+    {
+      "default": "everything",
+      "items": [
+        "daily tasks",
+        "workflows",
+        "toils",
+        "everything"
+      ],
+      "label": "What do you want to automate? ",
+      "name": "input_list",
+      "type": "text"
+    },
+    {
+      "label": "Tell us a secret: ",
+      "name": "input_password",
+      "type": "password"
+    }
+  ]
+}

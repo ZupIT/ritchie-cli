@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/fatih/color v1.9.0 // indirect
+	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/golang/protobuf v1.4.1
 	github.com/google/uuid v1.1.1
 	github.com/gookit/color v1.2.5

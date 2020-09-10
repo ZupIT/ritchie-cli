@@ -1,0 +1,37 @@
+{
+  "dockerImageBuilder": "cimg/python:3.8",
+  "inputs": [
+    {
+      "cache": {
+        "active": true,
+        "newLabel": "Type new value. ",
+        "qty": 6
+      },
+      "label": "Type : ",
+      "name": "sample_text",
+      "type": "text"
+    },
+    {
+      "default": "in1",
+      "items": [
+        "in_list1",
+        "in_list2",
+        "in_list3",
+        "in_listN"
+      ],
+      "label": "Pick your : ",
+      "name": "sample_list",
+      "type": "text"
+    },
+    {
+      "default": "false",
+      "items": [
+        "false",
+        "true"
+      ],
+      "label": "Pick: ",
+      "name": "sample_bool",
+      "type": "bool"
+    }
+  ]
+}
