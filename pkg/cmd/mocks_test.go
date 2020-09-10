@@ -467,10 +467,6 @@ func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
 	return w.list()
 }
 
-func (w WorkspaceAddListerCustomMock) Validate(workspace formula.Workspace) error {
-	return w.validate(workspace)
-}
-
 var (
 	defaultRepoAdderMock = repoListerAdderCustomMock{
 		add: func(d formula.Repo) error {

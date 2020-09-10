@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -48,9 +49,11 @@ func TestBuildFormulaCmd(t *testing.T) {
 		},
 		workspaceManager: WorkspaceAddListerCustomMock{
 			list: func() (formula.Workspaces, error) {
-				return formula.Workspaces{}, nil
+				return formula.Workspaces{
+					"Default": defaultWorkspace,
+				}, nil
 			},
-			validate: func(workspace formula.Workspace) error {
+			add: func(workspace formula.Workspace) error {
 				return nil
 			},
 		},
@@ -76,7 +79,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 				if name == questionSelectFormulaGroup {
 					return items[0], nil
 				}
-				return "Default (/tmp/ritchie-formulas-local)", nil
+				return fmt.Sprintf("Default (%s)", defaultWorkspace), nil
 			},
 		},
 	}
