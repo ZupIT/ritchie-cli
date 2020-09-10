@@ -42,24 +42,29 @@ const (
 
 type (
 	Input struct {
-		Name    	string   	`json:"name"`
-		Type    	string   	`json:"type"`
-		Default 	string   	`json:"default"`
-		Label   	string   	`json:"label"`
-		Items   	[]string 	`json:"items"`
-		Cache   	Cache    	`json:"cache"`
-		Condition	Condition	`json:"condition"`
+		Name      string    `json:"name"`
+		Type      string    `json:"type"`
+		Default   string    `json:"default"`
+		Label     string    `json:"label"`
+		Items     []string  `json:"items"`
+		Cache     Cache     `json:"cache"`
+		Condition Condition `json:"condition"`
+		Pattern   Pattern   `json:"pattern"`
 	}
 
+	Pattern struct {
+		Regex        string `json:"regex"`
+		MismatchText string `json:"mismatchText"`
+	}
 	Cache struct {
 		Active   bool   `json:"active"`
 		Qty      int    `json:"qty"`
 		NewLabel string `json:"newLabel"`
 	}
 	Condition struct {
-		Variable	string `json:"variable"`
-		Operator	string `json:"operator"`
-		Value		string `json:"value"`
+		Variable string `json:"variable"`
+		Operator string `json:"operator"`
+		Value    string `json:"value"`
 	}
 	Create struct {
 		FormulaCmd    string `json:"formulaCmd"`

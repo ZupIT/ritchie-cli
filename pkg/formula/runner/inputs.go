@@ -18,8 +18,10 @@ package runner
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -45,6 +47,7 @@ type InputManager struct {
 	file         stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
+	prompt.InputTextValidator
 	prompt.InputBool
 	prompt.InputPassword
 }
@@ -54,16 +57,18 @@ func NewInput(
 	file stream.FileWriteReadExister,
 	inList prompt.InputList,
 	inText prompt.InputText,
+	inTextValidator prompt.InputTextValidator,
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 ) formula.InputRunner {
 	return InputManager{
-		envResolvers:  env,
-		file:          file,
-		InputList:     inList,
-		InputText:     inText,
-		InputBool:     inBool,
-		InputPassword: inPass,
+		envResolvers:       env,
+		file:               file,
+		InputList:          inList,
+		InputText:          inText,
+		InputTextValidator: inTextValidator,
+		InputBool:          inBool,
+		InputPassword:      inPass,
 	}
 }
 
@@ -134,12 +139,24 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			if items != nil {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
-				validate := input.Default == ""
-				inputVal, err = in.Text(input.Label, validate)
-				if inputVal == "" {
-					inputVal = input.Default
+				if len(input.Pattern.Regex) > 0 {
+					// inputVal, err = in.InputTextValidator.Text(input.Label, func(text interface{}) error {
+					// 	re := regexp.MustCompile(input.Pattern.Regex)
+					// 	if re.MatchString(text.(string)) {
+					// 		return nil
+					// 	}
+					// 	return errors.New(input.Pattern.MismatchText)
+					// })
+					inputVal, err = in.textRegexValidator(input)
+				} else {
+					validate := input.Default == ""
+					inputVal, err = in.InputText.Text(input.Label, validate)
+					if inputVal == "" {
+						inputVal = input.Default
+					}
 				}
 			}
+
 		case "bool":
 			valBool, err = in.Bool(input.Label, items)
 			inputVal = strconv.FormatBool(valBool)
@@ -208,10 +225,14 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 	}
 	inputVal, err := in.List(input.Label, items)
 	if inputVal == newLabel {
-		validate := len(input.Default) == 0
-		inputVal, err = in.Text(input.Label, validate)
-		if len(inputVal) == 0 {
-			inputVal = input.Default
+		if len(input.Pattern.Regex) > 0 {
+			inputVal, err = in.textRegexValidator(input)
+		} else {
+			validate := len(input.Default) == 0
+			inputVal, err = in.InputText.Text(input.Label, validate)
+			if len(inputVal) == 0 {
+				inputVal = input.Default
+			}
 		}
 	}
 	return inputVal, err
@@ -277,16 +298,32 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 	// the code to the risks of running an eval function on a user-defined variable
 	// optimizations are welcome, being mindful of the points above
 	switch input.Condition.Operator {
-	case "==": return value == input.Condition.Value, nil
-	case "!=": return value != input.Condition.Value, nil
-	case ">":  return value > input.Condition.Value, nil
-	case ">=": return value >= input.Condition.Value, nil
-	case "<":  return value < input.Condition.Value, nil
-	case "<=": return value <= input.Condition.Value, nil
+	case "==":
+		return value == input.Condition.Value, nil
+	case "!=":
+		return value != input.Condition.Value, nil
+	case ">":
+		return value > input.Condition.Value, nil
+	case ">=":
+		return value >= input.Condition.Value, nil
+	case "<":
+		return value < input.Condition.Value, nil
+	case "<=":
+		return value <= input.Condition.Value, nil
 	default:
 		return false, fmt.Errorf(
 			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=)",
 			input.Condition.Operator,
 		)
 	}
+}
+
+func (in InputManager) textRegexValidator(input formula.Input) (string, error) {
+	return in.InputTextValidator.Text(input.Label, func(text interface{}) error {
+		re := regexp.MustCompile(input.Pattern.Regex)
+		if re.MatchString(text.(string)) {
+			return nil
+		}
+		return errors.New(input.Pattern.MismatchText)
+	})
 }

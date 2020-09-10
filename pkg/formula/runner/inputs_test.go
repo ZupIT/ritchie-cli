@@ -28,6 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -101,14 +102,15 @@ func TestInputManager_Inputs(t *testing.T) {
 	fileManager := stream.NewFileManager()
 
 	type in struct {
-		iText       inputMock
-		iList       inputMock
-		iBool       inputMock
-		iPass       inputMock
-		inType      api.TermInputType
-		creResolver env.Resolvers
-		file        stream.FileWriteReadExister
-		stdin       string
+		iText          inputMock
+		iTextValidator prompt.InputTextValidator
+		iList          inputMock
+		iBool          inputMock
+		iPass          inputMock
+		inType         api.TermInputType
+		creResolver    env.Resolvers
+		file           stream.FileWriteReadExister
+		stdin          string
 	}
 
 	tests := []struct {
@@ -119,146 +121,157 @@ func TestInputManager_Inputs(t *testing.T) {
 		{
 			name: "success stdin",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Stdin,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				stdin:       `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
-				file:        fileManager,
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Stdin,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				stdin:          `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
+				file:           fileManager,
 			},
 			want: nil,
 		},
 		{
 			name: "error stdin",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Stdin,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				stdin:       `"sample_text"`,
-				file:        fileManager,
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Stdin,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				stdin:          `"sample_text"`,
+				file:           fileManager,
 			},
 			want: stdin.ErrInvalidInput,
 		},
 		{
 			name: "success prompt",
 			in: in{
-				iText:       inputMock{text: ""},
-				iList:       inputMock{text: "Type new value?"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManager,
+				iText:          inputMock{text: ""},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "Type new value?"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Prompt,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:           fileManager,
 			},
 			want: nil,
 		},
 		{
 			name: "error read file load items",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManagerMock{rErr: errors.New("error to read file"), exist: true},
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Prompt,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:           fileManagerMock{rErr: errors.New("error to read file"), exist: true},
 			},
 			want: errors.New("error to read file"),
 		},
 		{
 			name: "error unmarshal load items",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManagerMock{rBytes: []byte("error"), exist: true},
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Prompt,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:           fileManagerMock{rBytes: []byte("error"), exist: true},
 			},
 			want: errors.New("invalid character 'e' looking for beginning of value"),
 		},
 		{
 			name: "cache file doesn't exist success",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManagerMock{exist: false},
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Prompt,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:           fileManagerMock{exist: false},
 			},
 			want: nil,
 		},
 		{
 			name: "cache file doesn't exist error file write",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManagerMock{wErr: errors.New("error to write file"), exist: false},
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Prompt,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:           fileManagerMock{wErr: errors.New("error to write file"), exist: false},
 			},
 			want: errors.New("error to write file"),
 		},
 		{
 			name: "persist cache file write error",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManagerMock{wErr: errors.New("error to write file"), rBytes: []byte(`["in_list1","in_list2"]`), exist: true},
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Prompt,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:           fileManagerMock{wErr: errors.New("error to write file"), rBytes: []byte(`["in_list1","in_list2"]`), exist: true},
 			},
 			want: nil,
 		},
 		{
 			name: "error unknown prompt",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.TermInputType(3),
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:        fileManager,
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.TermInputType(3),
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:           fileManager,
 			},
 			want: ErrInputNotRecognized,
 		},
 		{
 			name: "error env resolver prompt",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
-				file:        fileManager,
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Prompt,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
+				file:           fileManager,
 			},
 			want: errors.New("credential not found"),
 		},
 		{
 			name: "error env resolver stdin",
 			in: in{
-				iText:       inputMock{text: DefaultCacheNewLabel},
-				iList:       inputMock{text: "test"},
-				iBool:       inputMock{boolean: false},
-				iPass:       inputMock{text: "******"},
-				inType:      api.Stdin,
-				stdin:       `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
-				file:        fileManager,
+				iText:          inputMock{text: DefaultCacheNewLabel},
+				iTextValidator: inputTextValidatorMock{},
+				iList:          inputMock{text: "test"},
+				iBool:          inputMock{boolean: false},
+				iPass:          inputMock{text: "******"},
+				inType:         api.Stdin,
+				stdin:          `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
+				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
+				file:           fileManager,
 			},
 			want: errors.New("credential not found"),
 		},
@@ -267,11 +280,12 @@ func TestInputManager_Inputs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			iText := tt.in.iText
+			iTextValidator := tt.in.iTextValidator
 			iList := tt.in.iList
 			iBool := tt.in.iBool
 			iPass := tt.in.iPass
 
-			inputManager := NewInput(tt.in.creResolver, tt.in.file, iList, iText, iBool, iPass)
+			inputManager := NewInput(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 			if tt.in.inType == api.Stdin {
@@ -323,8 +337,8 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 	fileManager := stream.NewFileManager()
 
 	type in struct {
-		variable       string
-		operator       string
+		variable string
+		operator string
 	}
 
 	tests := []struct {
@@ -335,64 +349,64 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 		{
 			name: "equal conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "==",
+				variable: "sample_list",
+				operator: "==",
 			},
 			want: nil,
 		},
 		{
 			name: "not equal conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "!=",
+				variable: "sample_list",
+				operator: "!=",
 			},
 			want: nil,
 		},
 		{
 			name: "greater than conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    ">",
+				variable: "sample_list",
+				operator: ">",
 			},
 			want: nil,
 		},
 		{
 			name: "greater than or equal to conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    ">=",
+				variable: "sample_list",
+				operator: ">=",
 			},
 			want: nil,
 		},
 		{
 			name: "less than conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "<",
+				variable: "sample_list",
+				operator: "<",
 			},
 			want: nil,
 		},
 		{
 			name: "less than or equal to conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "<=",
+				variable: "sample_list",
+				operator: "<=",
 			},
 			want: nil,
 		},
 		{
 			name: "wrong operator conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "eq",
+				variable: "sample_list",
+				operator: "eq",
 			},
 			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
 		},
 		{
 			name: "non-existing variable conditional",
 			in: in{
-				variable:    "non_existing",
-				operator:    "==",
+				variable: "non_existing",
+				operator: "==",
 			},
 			want: errors.New("config.json: conditional variable non_existing not found"),
 		},
@@ -411,11 +425,12 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			}
 
 			iText := inputMock{text: DefaultCacheNewLabel}
+			iTextValidator := inputTextValidatorMock{}
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 
-			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iBool, iPass)
+			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 
@@ -426,6 +441,12 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			}
 		})
 	}
+}
+
+type inputTextValidatorMock struct{}
+
+func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return "mocked text", nil
 }
 
 type inputMock struct {
