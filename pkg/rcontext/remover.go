@@ -19,8 +19,9 @@ package rcontext
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"strings"
+
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
 type RemoveManager struct {

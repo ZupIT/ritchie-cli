@@ -18,9 +18,10 @@ package rcontext
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 )
 
 const (
