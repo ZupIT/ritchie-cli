@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
@@ -34,11 +35,12 @@ const (
 
 type listRepoCmd struct {
 	formula.RepositoryLister
-	rt rtutorial.Finder
+	repoProviders formula.RepoProviders
+	rt            rtutorial.Finder
 }
 
-func NewListRepoCmd(rl formula.RepositoryLister, rtf rtutorial.Finder) *cobra.Command {
-	lr := listRepoCmd{rl, rtf}
+func NewListRepoCmd(rl formula.RepositoryLister, rp formula.RepoProviders, rtf rtutorial.Finder) *cobra.Command {
+	lr := listRepoCmd{rl, rp, rtf}
 	cmd := &cobra.Command{
 		Use:     "repo",
 		Short:   "Show a list with all your available repositories",
@@ -55,7 +57,7 @@ func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		printRepos(repos)
+		lr.printRepos(repos)
 
 		if len(repos) != 1 {
 			prompt.Info(fmt.Sprintf(totalReposMsg, len(repos)))
@@ -72,16 +74,45 @@ func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 	}
 }
 
-func printRepos(repos formula.Repos) {
+func (lr listRepoCmd) printRepos(repos formula.Repos) {
 	table := uitable.New()
-	table.AddRow("PROVIDER", "NAME", "VERSION", "PRIORITY", "URL")
+	table.AddRow("PROVIDER", "NAME", "VERSION", "PRIORITY", "URL", "TAGS")
 	for _, repo := range repos {
-		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url)
+		tagsOfRepo, _ := lr.getTagsAvaliable(repo)
+		tagsNews := tagsOfRepo
+
+		maxTags := 5
+		if len(tagsNews) > 5 {
+			tagsNews = tagsOfRepo[:maxTags]
+		}
+
+		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, tagsNews)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
 	fmt.Println(string(raw))
 
+}
+
+func (lr listRepoCmd) getTagsAvaliable(repo formula.Repo) (git.Tags, error) {
+	formulaGit := lr.repoProviders.Resolve(repo.Provider)
+
+	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	tags, err := formulaGit.Repos.Tags(repoInfo)
+	if err != nil {
+		return git.Tags{}, err
+	}
+
+	return tags, nil
+}
+
+func index(vs git.Tags, t formula.RepoVersion) int {
+	for i, v := range vs {
+		if string(v.Name) == string(t) {
+			return i
+		}
+	}
+	return -1
 }
 
 func tutorialListRepo(tutorialStatus string) {
