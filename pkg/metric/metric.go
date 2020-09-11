@@ -51,7 +51,8 @@ type APIData struct {
 }
 
 type Data struct {
-	CommandError string `json:"commandError"`
+	CommandError     string `json:"commandError"`
+	CommonsRepoAdded bool   `json:"commonsRepoAdded,omitempty"`
 }
 
 type Sender interface {

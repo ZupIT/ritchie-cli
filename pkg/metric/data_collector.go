@@ -24,7 +24,7 @@ import (
 )
 
 var _ Collector = DataCollectorManager{}
-
+var CommonsRepoAdded = true
 type DataCollectorManager struct {
 	userId UserIdGenerator
 }
@@ -43,6 +43,7 @@ func (d DataCollectorManager) Collect(ritVersion string, commandError ...string)
 
 	data := Data{
 		CommandError: strings.Join(commandError, " "),
+		CommonsRepoAdded: CommonsRepoAdded,
 	}
 
 	metric := APIData{
