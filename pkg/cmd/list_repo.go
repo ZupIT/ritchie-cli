@@ -18,12 +18,12 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
@@ -75,18 +75,21 @@ func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 }
 
 func (lr listRepoCmd) printRepos(repos formula.Repos) {
+	maxTags := 5
+
 	table := uitable.New()
-	table.AddRow("PROVIDER", "NAME", "VERSION", "PRIORITY", "URL", "TAGS")
+	table.AddRow("PROVIDER", "NAME", "VERSION", "PRIORITY", "URL", "AVALIABLE VERSIONS")
 	for _, repo := range repos {
 		tagsOfRepo, _ := lr.getTagsAvaliable(repo)
-		tagsNews := tagsOfRepo
 
-		maxTags := 5
-		if len(tagsNews) > 5 {
-			tagsNews = tagsOfRepo[:maxTags]
+		if len(tagsOfRepo) > maxTags {
+			tagsOfRepo = tagsOfRepo[:maxTags]
+			tagsOfRepo = append(tagsOfRepo, "...")
 		}
 
-		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, tagsNews)
+		latestTags := strings.Join(tagsOfRepo, ", ")
+
+		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, latestTags)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
@@ -94,25 +97,24 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 
 }
 
-func (lr listRepoCmd) getTagsAvaliable(repo formula.Repo) (git.Tags, error) {
+func (lr listRepoCmd) getTagsAvaliable(repo formula.Repo) ([]string, error) {
+	var listTagsStr []string
 	formulaGit := lr.repoProviders.Resolve(repo.Provider)
 
 	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
 	tags, err := formulaGit.Repos.Tags(repoInfo)
 	if err != nil {
-		return git.Tags{}, err
+		return []string{}, err
 	}
 
-	return tags, nil
-}
-
-func index(vs git.Tags, t formula.RepoVersion) int {
-	for i, v := range vs {
-		if string(v.Name) == string(t) {
-			return i
+	for _, tag := range tags {
+		if tag.Name == repo.Version.String() {
+			tag.Name = tag.Name + "(current)"
 		}
+		listTagsStr = append(listTagsStr, tag.Name)
 	}
-	return -1
+
+	return listTagsStr, nil
 }
 
 func tutorialListRepo(tutorialStatus string) {

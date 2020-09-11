@@ -64,7 +64,6 @@ func (r RepoProvider) String() string {
 type Git struct {
 	Repos       git.Repositories
 	NewRepoInfo func(url string, token string) git.RepoInfo
-	ReposTags   func(repos git.Repositories, repoProviders RepoProviders) []git.RepoInfo
 }
 
 type RepoProviders map[RepoProvider]Git
