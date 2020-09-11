@@ -29,7 +29,7 @@ import (
 )
 
 func Test_NewUpdateRepoCmd(t *testing.T) {
-	repoTest := formula.Repo{
+	repoTest := &formula.Repo{
 		Provider: "Github",
 		Name:     "someRepo1",
 		Version:  "1.0.0",
@@ -53,7 +53,7 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
-						return formula.Repos{repoTest}, nil
+						return formula.Repos{*repoTest}, nil
 					},
 					update: func(name formula.RepoName, version formula.RepoVersion) error {
 						return nil
@@ -72,7 +72,7 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 				},
 			},
 			wantErr:    false,
-			inputStdin: createJSONEntry(&repoTest),
+			inputStdin: createJSONEntry(repoTest) + "\n",
 		},
 	}
 

@@ -19,7 +19,6 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -127,7 +126,7 @@ func (up updateRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		r := formula.Repo{}
 
-		err := stdin.ReadJson(os.Stdin, &r)
+		err := stdin.ReadJson(cmd.InOrStdin(), &r)
 		if err != nil {
 			return err
 		}
