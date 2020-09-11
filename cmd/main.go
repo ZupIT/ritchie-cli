@@ -276,7 +276,6 @@ func sendMetric(err ...string) {
 		data := metric.NewDataCollector(userIdManager)
 
 		collectData, _ = data.Collect(cmd.Version, err...)
-		fmt.Println(collectData)
 		metricManager.Send(collectData)
 	}
 }

@@ -24,7 +24,6 @@ import (
 )
 
 var _ Collector = DataCollectorManager{}
-var CommonsRepoAdded = true
 type DataCollectorManager struct {
 	userId UserIdGenerator
 }
