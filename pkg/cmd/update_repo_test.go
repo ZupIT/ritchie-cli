@@ -18,17 +18,22 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 func Test_NewUpdateRepoCmd(t *testing.T) {
+	someError := errors.New("some error")
+
 	repoTest := &formula.Repo{
 		Provider: "Github",
 		Name:     "someRepo1",
@@ -41,6 +46,7 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 	type in struct {
 		repo   formula.RepositoryListUpdater
 		inList prompt.InputList
+		Repos  git.Repositories
 	}
 	var tests = []struct {
 		name       string
@@ -49,7 +55,7 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 		inputStdin string
 	}{
 		{
-			name: "success set formula run",
+			name: "success case",
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
@@ -61,18 +67,151 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 				},
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
-						if name == "Select a repository to update: " {
+						if name == questionSelectARepo {
 							return "someRepo1", nil
 						}
-						if name == "Select your new version:" {
+						if name == questionAVersion {
 							return "1.0.0", nil
 						}
 						return "any", nil
 					},
 				},
+				Repos: defaultGitRepositoryMock,
 			},
 			wantErr:    false,
-			inputStdin: createJSONEntry(repoTest) + "\n",
+			inputStdin: createJSONEntry(repoTest),
+		},
+		{
+			name: "fails when repo list returns an error",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, someError
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListMock{},
+				Repos:  defaultGitRepositoryMock,
+			},
+			wantErr:    true,
+			inputStdin: "",
+		},
+		{
+			name: "fails when question about select repo returns an error",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectARepo {
+							return "", someError
+						}
+						return "any", nil
+					},
+				},
+				Repos: defaultGitRepositoryMock,
+			},
+			wantErr:    true,
+			inputStdin: "",
+		},
+		{
+			name: "fails when repos tags returns an error",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectARepo {
+							return "someRepo1", nil
+						}
+						if name == questionAVersion {
+							return "1.0.0", nil
+						}
+						return "any", nil
+					},
+				},
+				Repos: GitRepositoryMock{
+					latestTag: func(info git.RepoInfo) (git.Tag, error) {
+						return git.Tag{}, nil
+					},
+					tags: func(info git.RepoInfo) (git.Tags, error) {
+						return git.Tags{}, someError
+					},
+					zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+						return nil, nil
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "",
+		},
+		{
+			name: "fails when question about select version returns an error",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectARepo {
+							return "someRepo1", nil
+						}
+						if name == questionAVersion {
+							return "", someError
+						}
+						return "any", nil
+					},
+				},
+				Repos: defaultGitRepositoryMock,
+			},
+			wantErr:    true,
+			inputStdin: "",
+		},
+		{
+			name: "fails when repo update returns an error",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return someError
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectARepo {
+							return "someRepo1", nil
+						}
+						if name == questionAVersion {
+							return "1.0.0", nil
+						}
+						return "any", nil
+					},
+				},
+				Repos: defaultGitRepositoryMock,
+			},
+			wantErr:    true,
+			inputStdin: createJSONEntry(repoTest),
 		},
 	}
 
@@ -82,7 +221,7 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 			defer server.Close()
 
 			repoProviders := formula.NewRepoProviders()
-			repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+			repoProviders.Add("Github", formula.Git{Repos: tt.in.Repos, NewRepoInfo: github.NewRepoInfo})
 
 			newUpdateRepoPrompt := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
 			newUpdateRepoStdin := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
@@ -94,11 +233,12 @@ func Test_NewUpdateRepoCmd(t *testing.T) {
 			newUpdateRepoStdin.SetIn(newReader)
 
 			if err := newUpdateRepoPrompt.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("new update repo type prompt command error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Prompt command error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			if err := newUpdateRepoStdin.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("new update repo type stdin command error = %v, wantErr %v", err, tt.wantErr)
+			itsTestCaseWithStdin := tt.inputStdin != ""
+			if err := newUpdateRepoStdin.Execute(); (err != nil) != tt.wantErr && itsTestCaseWithStdin {
+				t.Errorf("Stdin command error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
