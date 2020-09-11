@@ -131,8 +131,7 @@ func (up updateRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		r := formula.Repo{}
 
-		err := stdin.ReadJson(cmd.InOrStdin(), &r)
-		if err != nil {
+		if err := stdin.ReadJson(cmd.InOrStdin(), &r); err != nil {
 			return err
 		}
 
