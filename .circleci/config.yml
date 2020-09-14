@@ -346,7 +346,7 @@ jobs:
             make rebase-beta
 
   unix_smoke_test:
-    executor: ritchie-tests-executor
+    executor: ritchie-tests-and-static-analisys-executor
     environment:
       <<: *ENVIRONMENT
     steps:
