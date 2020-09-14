@@ -18,18 +18,20 @@ package cmd
 
 import (
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 )
 
 func Test_listRepoCmd_runFunc(t *testing.T) {
-	finderTutorial := rtutorial.NewFinder(os.TempDir(), stream.NewFileManager())
+	repoProviders := formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+
 	type in struct {
 		RepositoryLister formula.RepositoryLister
+		Repos            git.Repositories
 	}
 	tests := []struct {
 		name    string
@@ -43,7 +45,10 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
-								Name: "someRepo1",
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
 							},
 						}, nil
 					},
@@ -58,10 +63,16 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
-								Name: "someRepo1",
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo1",
+								Token:    "token",
 							},
 							{
-								Name: "someRepo2",
+								Name:     "someRepo2",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo2",
+								Token:    "token",
 							},
 						}, nil
 					},
@@ -83,7 +94,7 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lr := NewListRepoCmd(tt.in.RepositoryLister, finderTutorial)
+			lr := NewListRepoCmd(tt.in.RepositoryLister, repoProviders, TutorialFinderMockReturnDisabled{})
 			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := lr.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
