@@ -19,7 +19,6 @@ package metric
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
