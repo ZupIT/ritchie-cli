@@ -116,6 +116,11 @@ type FileWriteCreatorReadExistRemover interface {
 	FileRemover
 }
 
+type FileWriteRemover interface {
+	FileWriter
+	FileRemover
+}
+
 // FileManager implements FileWriteReadExistRemover
 type FileManager struct {
 }

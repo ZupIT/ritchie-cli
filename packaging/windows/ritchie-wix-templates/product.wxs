@@ -21,9 +21,7 @@
          Compressed="yes" 
          Comments="Windows Installer Package" 
          AdminImage="no" 
-         ReadOnly="yes" 
-         InstallScope="perUser" 
-         InstallPrivileges="limited" />
+         ReadOnly="yes" />
 
       <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
 
