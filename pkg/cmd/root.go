@@ -25,6 +25,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -184,10 +185,9 @@ func tutorialRit(tutorialStatus string) {
 }
 
 func (ro *rootCmd) ritchieIsInitialized() bool {
-	metricsFile := filepath.Join(ro.ritchieHome, "metrics")
 	defaultRunnerFile := filepath.Join(ro.ritchieHome, "default-formula-runner")
 
-	if ro.file.Exists(metricsFile) && ro.file.Exists(defaultRunnerFile) {
+	if ro.file.Exists(metric.FilePath) && ro.file.Exists(defaultRunnerFile) {
 		return true
 	}
 
