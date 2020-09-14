@@ -273,11 +273,11 @@ func (in initCmd) addCommonsRepo() error {
 	if err != nil {
 		return err
 	}
-
+	metric.CommonsRepoAdded = "yes"
 	if !choose {
 		prompt.Warning(addRepoInfo)
 		fmt.Println(addRepoMsg)
-		metric.CommonsRepoAdded = false
+		metric.CommonsRepoAdded = "no"
 		return nil
 	}
 
