@@ -23,15 +23,15 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
 func Test_listRepoCmd_runFunc(t *testing.T) {
-	repoProviders := formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
-
+	someError := errors.New("some error")
 	type in struct {
 		RepositoryLister formula.RepositoryLister
 		Repos            git.Repositories
+		Tutorial         rtutorial.Finder
 	}
 	tests := []struct {
 		name    string
@@ -53,6 +53,8 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 						}, nil
 					},
 				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos:    defaultGitRepositoryMock,
 			},
 			wantErr: false,
 		},
@@ -77,6 +79,28 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 						}, nil
 					},
 				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos:    defaultGitRepositoryMock,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success when tutorial enabled",
+			in: in{
+				RepositoryLister: RepositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
+							},
+						}, nil
+					},
+				},
+				Tutorial: TutorialFinderMock{},
+				Repos:    defaultGitRepositoryMock,
 			},
 			wantErr: false,
 		},
@@ -85,7 +109,33 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 			in: in{
 				RepositoryLister: RepositoryListerCustomMock{
 					list: func() (formula.Repos, error) {
-						return nil, errors.New("some error")
+						return nil, someError
+					},
+				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos:    defaultGitRepositoryMock,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with success when tags fail",
+			in: in{
+				RepositoryLister: RepositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
+							},
+						}, nil
+					},
+				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos: GitRepositoryMock{
+					tags: func(info git.RepoInfo) (git.Tags, error) {
+						return git.Tags{git.Tag{Name: "1.0.0"}}, someError
 					},
 				},
 			},
@@ -94,7 +144,10 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lr := NewListRepoCmd(tt.in.RepositoryLister, repoProviders, TutorialFinderMockReturnDisabled{})
+			repoProviders := formula.NewRepoProviders()
+			repoProviders.Add("Github", formula.Git{Repos: tt.in.Repos, NewRepoInfo: github.NewRepoInfo})
+
+			lr := NewListRepoCmd(tt.in.RepositoryLister, repoProviders, tt.in.Tutorial)
 			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := lr.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
