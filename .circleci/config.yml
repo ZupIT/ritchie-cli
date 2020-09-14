@@ -7,7 +7,6 @@ references:
   images:
     go: &GOLANG_IMAGE cimg/go:1.14
     python: &PYTHON_IMAGE circleci/python:2.7-stretch
-    pythonwithgo : &PYTHONWITHGO_IMAGE ritclizup/pythonwithgo:1.1
     ruby: &RUBY_IMAGE cimg/ruby:2.6.5
     ci_machine: &CI_MACHINE_IMAGE ubuntu-1604:202004-01
     ubuntu: &UBUNTU_IMAGE cimg/base:2020.01
@@ -45,17 +44,10 @@ references:
         - master
 
 executors:
-  ritchie-tests-executor:
+  ritchie-tests-and-static-analisys-executor:
     machine:
       image: *CI_MACHINE_IMAGE
     working_directory: ~/workspace
-
-  ritchie-static-analisys-executor:
-    docker:
-      - image: *PYTHONWITHGO_IMAGE
-        user: root
-    resource_class: medium
-    working_directory: /workspace
 
   ritchie-executor:
     docker:
@@ -100,9 +92,14 @@ executors:
 
 jobs:
   lint:
-    executor: ritchie-static-analisys-executor
+    executor: ritchie-tests-and-static-analisys-executor
     steps:
       - checkout
+      - run:
+          name: golangci-lint install
+          command: |
+            download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
+            wget -O- -q $download |sudo sh -s -- -b /go/bin/ v1.31.0
       - run:
           name: lint
           command: |
