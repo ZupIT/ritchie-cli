@@ -27,8 +27,9 @@ func buildStableBodyMock(expiresAt int64) []byte {
 
 func Test_rootCmd(t *testing.T) {
 	type in struct {
-		dir stream.DirCreateChecker
-		vm  version.Manager
+		dir  stream.DirCreater
+		file stream.FileExister
+		vm   version.Manager
 	}
 
 	notExpiredCache := time.Now().Add(time.Hour).Unix()
@@ -54,11 +55,13 @@ func Test_rootCmd(t *testing.T) {
 			wantErr: false,
 			in: in{
 				dir: DirManagerCustomMock{
-					exists: func(dir string) bool {
-						return true
-					},
 					create: func(dir string) error {
 						return nil
+					},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
 					},
 				},
 				vm: versionManager,
@@ -69,7 +72,7 @@ func Test_rootCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpDir := os.TempDir()
-			rootCmd := NewRootCmd(tmpDir, tt.in.dir, TutorialFinderMock{}, tt.in.vm)
+			rootCmd := NewRootCmd(tmpDir, tt.in.dir, tt.in.file, TutorialFinderMock{}, tt.in.vm)
 
 			if err := rootCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("root error = %v | error wanted: %v", err, tt.wantErr)

@@ -157,7 +157,7 @@ func buildCommands() *cobra.Command {
 	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()
 	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)
 	defaultUrlFinder := upgrade.NewDefaultUrlFinder(versionManager)
-	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder, versionManager)
+	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
