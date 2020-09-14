@@ -8,7 +8,7 @@
                 "action":"main"
             }
         ],
-        "result":"Current context: default"
+        "result":"To start using rit, you need to initialize rit first."
     },
     {
         "entry":"Set context",
@@ -17,14 +17,9 @@
                 "key":"",
                 "value":"set context",
                 "action":"main"
-            },
-            {
-                "key": "All:",
-                "value": "default",
-                "action": "select"
             }
         ],
-        "result":"Set context successful!"
+        "result":"To start using rit, you need to initialize rit first."
     },
     {
         "entry":"Delete context",
@@ -35,7 +30,7 @@
                 "action":"main"
             }
         ],
-        "result":"You have no defined contexts"
+        "result":"To start using rit, you need to initialize rit first."
     },
     {
         "entry":"List repo",
@@ -46,7 +41,7 @@
                 "action":"main"
             }
         ],
-        "result":"There are 0 repos"
+        "result":"To start using rit, you need to initialize rit first."
     },
     {
         "entry":"Delete repo",
@@ -57,7 +52,7 @@
                 "action":"main"
             }
         ],
-        "result":"You don't have any repositories"
+        "result":"To start using rit, you need to initialize rit first."
     },
     {
         "entry":"Create formula",
