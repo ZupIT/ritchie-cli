@@ -2,6 +2,7 @@ package version
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -15,7 +16,8 @@ var (
 	// MsgUpgrade error message to inform user to upgrade rit version
 	MsgRitUpgrade = "\nWarning: Rit has a new stable version.\nPlease run: rit upgrade"
 	// stableVersionFileCache is the file name to cache stableVersion
-	stableVersionFileCache = "stable-version-cache.json"
+	stableVersionFileCache      = "stable-version-cache.json"
+	errUnexpectedResponseMethod = errors.New("Unexpected response method")
 )
 
 type DefaultVersionResolver struct {
@@ -72,8 +74,12 @@ func requestStableVersion(stableVersionUrl string, httpClient *http.Client) (str
 	}
 
 	response, err := httpClient.Do(request)
-	if err != nil || response.StatusCode != http.StatusOK {
+	if err != nil {
 		return "", err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return "", errUnexpectedResponseMethod
 	}
 
 	stableVersionBytes, err := ioutil.ReadAll(response.Body)
