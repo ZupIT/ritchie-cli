@@ -6,7 +6,6 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/fatih/color v1.9.0 // indirect
-	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/golang/protobuf v1.4.1
 	github.com/google/uuid v1.1.1
 	github.com/gookit/color v1.2.5
@@ -17,7 +16,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.7.0
-	github.com/pkg/errors v0.9.1
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/radovskyb/watcher v1.0.7
 	github.com/spf13/cobra v1.0.0
 	golang.org/x/sys v0.0.0-20200806125547-5acd03effb82 // indirect

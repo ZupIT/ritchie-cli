@@ -82,29 +82,14 @@ func TestCreateFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "error on template manager Validate func",
-			in: in{
-				inTextValidator: inputTextValidatorMock{},
-				tm: TemplateManagerCustomMock{ValidateMock: func() error {
-					return errors.New("error on validate func")
-				}},
-			},
-			wantErr: true,
-		},
-		{
 			name: "error on template manager Languages func",
 			in: in{
 				inTextValidator: inputTextValidatorMock{},
 				tm: TemplateManagerCustomMock{
-					ValidateMock: func() error {
-						return nil
-					},
 					LanguagesMock: func() ([]string, error) {
 						return []string{}, errors.New("error on language func")
 					},
-
 				},
-
 			},
 			wantErr: true,
 		},
@@ -113,16 +98,11 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inTextValidator: inputTextValidatorMock{},
 				tm: TemplateManagerCustomMock{
-					ValidateMock: func() error {
-						return nil
-					},
 					LanguagesMock: func() ([]string, error) {
 						return []string{}, nil
 					},
-
 				},
 				inList: inputListErrorMock{},
-
 			},
 			wantErr: true,
 		},
@@ -151,22 +131,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 }
 
 type TemplateManagerCustomMock struct {
-	LanguagesMock         func() ([]string, error)
-	LangTemplateFilesMock func(lang string) ([]template.File, error)
-	ResolverNewPathMock   func(oldPath, newDir, lang, workspacePath string) (string, error)
-	ValidateMock          func() error
+	LanguagesMock func() ([]string, error)
 }
 
 func (tm TemplateManagerCustomMock) Languages() ([]string, error) {
 	return tm.LanguagesMock()
-}
-
-func (tm TemplateManagerCustomMock) LangTemplateFiles(lang string) ([]template.File, error) {
-	return tm.LangTemplateFilesMock(lang)
-}
-func (tm TemplateManagerCustomMock) ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error) {
-	return tm.ResolverNewPathMock(oldPath, newDir, lang, workspacePath)
-}
-func (tm TemplateManagerCustomMock) Validate() error {
-	return tm.ValidateMock()
 }

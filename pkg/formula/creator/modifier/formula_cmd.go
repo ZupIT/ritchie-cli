@@ -27,9 +27,7 @@ type FormulaCmd struct {
 }
 
 func (f FormulaCmd) modify(b []byte) []byte {
-
 	content := string(b)
 	content = strings.ReplaceAll(content, "#rit-replace{formulaCmd}", f.cf.FormulaCmd)
 	return []byte(content)
-
 }

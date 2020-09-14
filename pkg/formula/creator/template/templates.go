@@ -2,6 +2,7 @@
 // sources:
 // templates/languages/csharp/Dockerfile
 // templates/languages/csharp/Makefile
+// templates/languages/csharp/README.md
 // templates/languages/csharp/build.bat
 // templates/languages/csharp/config.json
 // templates/languages/csharp/metadata.json
@@ -11,6 +12,7 @@
 // templates/languages/csharp/src/src.csproj
 // templates/languages/go/Dockerfile
 // templates/languages/go/Makefile
+// templates/languages/go/README.md
 // templates/languages/go/build.bat
 // templates/languages/go/config.json
 // templates/languages/go/metadata.json
@@ -21,6 +23,7 @@
 // templates/languages/go/src/pkg/formula/formula_test.go
 // templates/languages/java11/Dockerfile
 // templates/languages/java11/Makefile
+// templates/languages/java11/README.md
 // templates/languages/java11/build.bat
 // templates/languages/java11/config.json
 // templates/languages/java11/metadata.json
@@ -31,6 +34,7 @@
 // templates/languages/java11/src/test/java/com/ritchie/formula/FormulaTest.java
 // templates/languages/java8/Dockerfile
 // templates/languages/java8/Makefile
+// templates/languages/java8/README.md
 // templates/languages/java8/build.bat
 // templates/languages/java8/config.json
 // templates/languages/java8/metadata.json
@@ -41,6 +45,7 @@
 // templates/languages/java8/src/test/java/com/ritchie/formula/FormulaTest.java
 // templates/languages/node/Dockerfile
 // templates/languages/node/Makefile
+// templates/languages/node/README.md
 // templates/languages/node/build.bat
 // templates/languages/node/config.json
 // templates/languages/node/metadata.json
@@ -50,6 +55,7 @@
 // templates/languages/node/src/package.json
 // templates/languages/php/Dockerfile
 // templates/languages/php/Makefile
+// templates/languages/php/README.md
 // templates/languages/php/build.bat
 // templates/languages/php/config.json
 // templates/languages/php/metadata.json
@@ -59,6 +65,7 @@
 // templates/languages/php/src/index.php
 // templates/languages/python3/Dockerfile
 // templates/languages/python3/Makefile
+// templates/languages/python3/README.md
 // templates/languages/python3/build.bat
 // templates/languages/python3/config.json
 // templates/languages/python3/metadata.json
@@ -68,6 +75,7 @@
 // templates/languages/python3/src/requirements.txt
 // templates/languages/ruby/Dockerfile
 // templates/languages/ruby/Makefile
+// templates/languages/ruby/README.md
 // templates/languages/ruby/build.bat
 // templates/languages/ruby/config.json
 // templates/languages/ruby/metadata.json
@@ -77,6 +85,7 @@
 // templates/languages/ruby/src/index.rb
 // templates/languages/rust/Dockerfile
 // templates/languages/rust/Makefile
+// templates/languages/rust/README.md
 // templates/languages/rust/build.bat
 // templates/languages/rust/config.json
 // templates/languages/rust/metadata.json
@@ -86,12 +95,13 @@
 // templates/languages/rust/src/src/main.rs
 // templates/languages/shell/Dockerfile
 // templates/languages/shell/Makefile
+// templates/languages/shell/README.md
 // templates/languages/shell/config.json
 // templates/languages/shell/metadata.json
 // templates/languages/shell/set_umask.sh
 // templates/languages/shell/src/formula/formula.sh
 // templates/languages/shell/src/main.sh
-package creator
+package template
 
 import (
 	"bytes"
@@ -203,6 +213,26 @@ func templatesLanguagesCsharpMakefile() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "templates/languages/csharp/Makefile", size: 1221, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _templatesLanguagesCsharpReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesCsharpReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesCsharpReadmeMd,
+		"templates/languages/csharp/README.md",
+	)
+}
+
+func templatesLanguagesCsharpReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesCsharpReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/csharp/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -383,6 +413,26 @@ func templatesLanguagesGoMakefile() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "templates/languages/go/Makefile", size: 1344, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _templatesLanguagesGoReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x70\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x70\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x82\x1a\xa5\x90\x82\x24\x08\x08\x00\x00\xff\xff\x93\x1c\x07\x68\x69\x00\x00\x00")
+
+func templatesLanguagesGoReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesGoReadmeMd,
+		"templates/languages/go/README.md",
+	)
+}
+
+func templatesLanguagesGoReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesGoReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/go/README.md", size: 105, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -587,6 +637,26 @@ func templatesLanguagesJava11Makefile() (*asset, error) {
 	return a, nil
 }
 
+var _templatesLanguagesJava11ReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesJava11ReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesJava11ReadmeMd,
+		"templates/languages/java11/README.md",
+	)
+}
+
+func templatesLanguagesJava11ReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesJava11ReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/java11/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _templatesLanguagesJava11BuildBat = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x74\x91\x4f\x6f\x82\x40\x10\xc5\xef\x7c\x8a\x09\x71\x9b\xf6\x50\xb1\x3d\x92\x68\x4a\xf9\x53\x69\x91\x6d\xc5\xc6\x1e\x4c\xc8\x82\x4b\x5d\x85\xc5\x2e\x68\xda\x6f\xdf\xb0\x6a\x5d\x4a\x3c\x41\x7e\xf3\xe6\xcd\xbe\x19\xd3\x84\x67\xb2\x27\xb0\x25\x82\x14\xb4\xa6\xa2\xd2\x68\xba\x2a\xa1\xcc\x32\x2d\x72\x67\x01\xb6\xad\xa0\xf9\x81\x47\x3f\x8c\x3d\x1c\x38\xee\x74\x98\x30\xfe\x87\x42\x6b\xe2\x0e\x27\x84\xf1\xfe\x9a\x88\x03\xb5\x66\xb1\xe7\x07\xee\x10\x9d\x5b\xd0\x42\xec\x78\x3f\x21\xb5\x54\x44\xe3\x0b\x82\x6a\xa5\x99\xc9\x8e\xe5\x4b\x0d\x00\x20\x25\x79\x0e\xc5\x9e\x43\x9a\x53\xc2\x81\xf1\xaa\x6e\xc8\xdd\xe8\xea\x5e\xd6\x59\x06\x88\x0a\x51\x8a\x9c\xee\x69\x8e\x80\xd3\x2f\x18\x00\xfd\x66\x35\x18\x49\xab\x24\xe5\xc5\x66\xc9\x04\xa8\x33\x0f\x53\xca\xed\x0f\xd4\x44\x7c\xd2\x7a\x81\x4e\x89\x50\x4b\xa7\x70\xd9\x22\x8a\xc6\xc9\x78\x03\x23\x3a\x76\x4a\x6c\x5b\x41\x00\x66\x13\x7f\xee\x87\x0e\x9e\x47\x0a\x8d\xc6\x71\xe0\x87\xef\x1f\x0a\xb2\x5f\x63\x07\xdb\x2f\xee\x54\xb2\x27\x3c\xc3\xe0\xe0\xd0\xd5\xb4\x8e\x85\x3c\xc8\x83\x6b\x8f\x31\x60\xcf\x83\x11\xa0\xd3\x8e\xd1\xb9\xbe\x6e\xae\x78\xbb\x26\xc7\x88\x87\x14\xa3\x8e\x56\x9d\xd3\x7a\xd4\x3f\x13\xbd\x77\xbd\x64\x82\x93\x82\x82\xde\x1b\xe8\x37\xba\xa1\xda\x02\x3a\xde\xb0\x6b\xda\x8e\x25\xb7\xeb\x94\xe9\x86\x8a\x8c\xe5\xf4\xc2\xfa\x2b\x5a\xc7\xbb\x82\x54\x9b\x7e\xb5\xea\x4a\x54\x77\xf9\xf9\x0d\x00\x00\xff\xff\xeb\xd1\xaf\x29\xb4\x02\x00\x00")
 
 func templatesLanguagesJava11BuildBatBytes() ([]byte, error) {
@@ -783,6 +853,26 @@ func templatesLanguagesJava8Makefile() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "templates/languages/java8/Makefile", size: 574, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _templatesLanguagesJava8ReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesJava8ReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesJava8ReadmeMd,
+		"templates/languages/java8/README.md",
+	)
+}
+
+func templatesLanguagesJava8ReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesJava8ReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/java8/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -987,6 +1077,26 @@ func templatesLanguagesNodeMakefile() (*asset, error) {
 	return a, nil
 }
 
+var _templatesLanguagesNodeReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesNodeReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesNodeReadmeMd,
+		"templates/languages/node/README.md",
+	)
+}
+
+func templatesLanguagesNodeReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesNodeReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/node/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _templatesLanguagesNodeBuildBat = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x74\x91\xdf\x6b\xfa\x30\x14\xc5\xdf\xfb\x57\x5c\xe4\x1b\xf8\x0e\x66\xeb\x5e\x0b\xca\xb4\x3f\x66\x59\x69\x86\xed\x70\x0f\x83\x12\xdb\x48\x33\xdb\xb4\x24\x11\xf4\xc5\xbf\x7d\x24\x4e\xac\xab\x7b\xca\xe5\xe4\x73\x0f\xdc\x73\x5c\x17\x92\xb6\xa4\xd0\x11\x41\x1a\xaa\xa8\x90\x16\x2d\xaa\x16\xda\xed\xd6\x4a\x83\x2c\xc6\xde\x3c\xd6\x03\x2c\xa2\x24\x0f\x71\xec\x07\xab\xe9\x86\xf1\xb3\x34\xcf\xf2\x30\x8a\x83\x29\xba\x7e\xa2\x4f\xb1\xe7\xf6\x86\x28\x43\xa4\xcb\x3f\x00\x59\x59\xee\x66\xcf\xea\xd2\x02\x00\x68\x76\x25\x13\xd0\x87\x8c\x7c\x28\xda\xee\x08\x4e\x00\x4e\x04\x52\x14\x43\xa0\x28\xef\x68\xa4\xae\x81\x77\x0d\x30\x2e\x95\x9e\xc7\x63\xc9\x6a\xca\xd5\x65\xc3\xb6\xaf\x9c\xab\x4f\x58\x47\x89\x8f\xd7\x69\x4f\x4d\x97\x79\x1c\x25\xef\x1f\x3d\xc9\x7b\xcb\x7d\xec\xbd\x06\x2b\xa3\xbd\xe0\x0c\x83\x8f\x93\xc0\xb2\x06\x16\x26\xbe\xe7\xc0\x5b\x62\xc0\x61\x08\x33\x40\x97\x9c\xd0\xf5\x5f\x87\xd3\x1c\x3b\xa2\xaa\x29\x42\xa7\xb2\x9b\xc0\xec\x3e\x28\x15\x11\x0a\x9c\x05\x38\xeb\x79\x94\x01\xd7\x5d\x21\x74\x5e\x75\x4f\x93\xc7\xf1\x13\x42\x0e\xe3\x25\x3d\xd8\x5f\xf2\x97\x89\x75\x7b\x88\xf1\x33\x06\xa3\x7f\xff\x4b\x26\x38\x69\xf4\x38\x19\x3d\x8c\x7a\x0e\x80\x7e\x4a\x43\x83\x4b\x6f\x33\x30\xe5\xf8\x6d\xb1\xa3\x62\xcb\x6a\x7a\xa7\x09\x0d\x48\xaa\xf2\x7d\x43\xe4\xce\x96\xd5\x10\xe9\xbb\x9b\xe7\x3b\x00\x00\xff\xff\x76\x68\x86\xf1\x8f\x02\x00\x00")
 
 func templatesLanguagesNodeBuildBatBytes() ([]byte, error) {
@@ -1163,6 +1273,26 @@ func templatesLanguagesPhpMakefile() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "templates/languages/php/Makefile", size: 505, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _templatesLanguagesPhpReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesPhpReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesPhpReadmeMd,
+		"templates/languages/php/README.md",
+	)
+}
+
+func templatesLanguagesPhpReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesPhpReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/php/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1347,6 +1477,26 @@ func templatesLanguagesPython3Makefile() (*asset, error) {
 	return a, nil
 }
 
+var _templatesLanguagesPython3ReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesPython3ReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesPython3ReadmeMd,
+		"templates/languages/python3/README.md",
+	)
+}
+
+func templatesLanguagesPython3ReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesPython3ReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/python3/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _templatesLanguagesPython3BuildBat = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x74\x90\x51\x6b\xab\x30\x18\x86\xef\xf3\x2b\x3e\xa4\x81\x73\xe0\x9c\xda\x73\x2b\xb4\x1c\xab\x71\x95\x05\x53\xaa\xa3\xbb\x18\x48\xaa\x29\x4a\xab\x86\x24\x85\x79\xd3\xdf\x3e\x9a\x76\xd4\xce\xed\x4a\x79\xbf\xc7\x07\xdf\xd7\xf3\x60\x5d\x49\x90\x5c\xf1\x46\x18\xa1\x34\x12\x45\xd5\x41\xb7\xdf\xa3\x94\x64\x94\x05\x3e\xbd\xbc\xc0\x32\x4e\xf2\x88\xd1\x90\x6c\xe6\xbb\xba\xbd\x46\x7e\x96\x47\x31\x25\x73\x7c\x3f\xe2\x37\x75\x6a\xa7\x3b\x6e\x2c\x91\xae\x7e\x00\x74\x85\xbc\xdd\xa9\x3e\x96\x08\x00\xa0\x39\x94\xb5\x82\x21\x64\xe3\xf7\xa2\x93\x3d\xb8\x04\xdc\x18\xb4\x2a\xc6\x40\xe0\x53\x0a\xde\xe5\x37\xb6\x71\x12\xb2\x6d\x3a\x48\xd3\x55\x4e\xe3\xe4\xe5\x75\x10\x05\xeb\x3c\x64\xc1\x33\xd9\xd8\xec\x89\x65\x0c\x42\x96\x10\x84\x46\x0a\x3b\xc1\x7f\x12\xac\x18\xb0\x28\x82\x05\xe0\xcf\xae\xf8\x7e\xbf\x14\x6c\x7a\xc9\x4d\x35\xc7\xf8\x5c\xca\x19\x2c\xbe\x07\xb5\xe1\xca\x80\xbb\x04\x77\xeb\xc7\x19\xc8\xde\x54\x5d\x0b\x18\x5f\x3f\xf6\xce\xb3\x3f\x7f\xff\x61\xec\x36\xbc\x6e\xa7\xb2\xff\x62\x41\x8f\x4d\xac\xf0\x66\x70\x26\xbf\xca\x5a\xb5\xbc\x11\xe0\x4c\x66\xce\x6f\xe7\xae\x00\x7c\x9b\x1e\x8f\xba\x3e\xae\x60\x27\x0e\xbb\xe2\x20\xd4\xbe\x3e\x8a\xf1\xc6\x16\xd0\xc2\xe4\xa7\x86\xeb\xc3\x54\x57\x63\x64\x68\xb7\x8f\x8f\x00\x00\x00\xff\xff\x4a\x37\xba\x68\x54\x02\x00\x00")
 
 func templatesLanguagesPython3BuildBatBytes() ([]byte, error) {
@@ -1523,6 +1673,26 @@ func templatesLanguagesRubyMakefile() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "templates/languages/ruby/Makefile", size: 821, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _templatesLanguagesRubyReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesRubyReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesRubyReadmeMd,
+		"templates/languages/ruby/README.md",
+	)
+}
+
+func templatesLanguagesRubyReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesRubyReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/ruby/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1707,6 +1877,26 @@ func templatesLanguagesRustMakefile() (*asset, error) {
 	return a, nil
 }
 
+var _templatesLanguagesRustReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesRustReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesRustReadmeMd,
+		"templates/languages/rust/README.md",
+	)
+}
+
+func templatesLanguagesRustReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesRustReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/rust/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _templatesLanguagesRustBuildBat = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x7c\x51\x4d\x8f\x9b\x30\x10\xbd\xf3\x2b\xa6\x74\x2d\xb5\x52\x83\xd3\x2b\x12\xab\xb2\x60\x1a\x54\x8a\xab\x40\x95\x1e\x2a\x21\x03\x66\x41\xe1\x4b\xb6\x91\xba\x97\xfd\xed\x15\x4e\xd2\x90\x92\xf6\x64\xeb\xcd\x9b\x37\x33\xef\xd9\x36\xec\x27\xa9\x60\x64\x82\x75\x5c\x71\x21\x0d\x5e\xd4\x03\x0c\x55\x65\x24\x24\x8d\xa8\xe7\x46\xf3\x07\x9e\xc2\x38\x8b\xdd\xaf\xc4\xa9\x06\xd1\x4d\x2d\xfb\x03\x06\x34\xf2\xc9\xde\xc9\x9b\x5e\x43\xc9\x2e\x0b\xc2\x88\x38\xe8\x5a\x43\x3f\xc5\xd4\x5b\xb2\x3e\xb5\xb8\xe9\x3f\x08\x39\x53\x86\x9d\x4f\x4d\x5b\x1a\x00\x00\xdd\xb1\x6c\x04\x2c\x59\x1a\xfe\x55\x0c\xe3\x0b\x60\x02\x38\x04\x29\x8a\x35\xa1\x28\xef\x60\xac\x6d\xa1\x60\xe2\x79\x00\x3d\x00\x36\x1b\xc1\x5b\xce\x24\xbf\xb4\x58\xd6\x95\x68\xcf\x3b\x1e\xc2\xd8\xa7\x87\x64\x81\x26\xbb\x2c\x0a\xe3\xef\x3f\x16\x90\xf7\x2d\xf3\xa9\xf7\x85\xec\x35\xf6\x99\xa6\x14\x7c\x1a\x13\xc3\x58\x49\x68\x53\x3f\x11\x6f\x47\x81\x06\x01\x3c\x02\xba\x18\x81\xae\xf5\xd9\x9f\xee\x65\x64\xaa\x76\x10\x7a\x2d\xc7\x2d\x3c\xde\x27\x4a\xc5\x84\x02\xfc\x04\xf8\xe0\x86\x29\x20\x74\xea\xb2\x5f\xb7\x1f\x36\x1f\x11\xc2\x8a\x89\x67\xae\xf0\xf9\x46\x8c\x2e\xe1\xa1\xbf\x04\x8d\xdb\xa3\xb4\xb6\xf9\xf6\x0d\xce\x9b\x1e\xcb\xda\x9c\xd7\x3c\xe7\xb9\x18\x6e\x3e\x3c\xbc\x2b\x1b\xd1\xb3\x8e\xcf\xff\xad\xf9\xde\xfc\xcf\xc0\x95\xc6\xd2\xa5\x5b\xff\x74\xb2\xfe\x50\x1c\xb9\xa8\x9a\x96\xdf\x89\x71\x26\x48\xae\xb2\xa9\x63\xf2\x68\xc9\x7a\x4d\x59\xaa\xeb\xe7\x77\x00\x00\x00\xff\xff\x18\xde\xe7\x72\xe1\x02\x00\x00")
 
 func templatesLanguagesRustBuildBatBytes() ([]byte, error) {
@@ -1887,6 +2077,26 @@ func templatesLanguagesShellMakefile() (*asset, error) {
 	return a, nil
 }
 
+var _templatesLanguagesShellReadmeMd = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x52\x56\x08\xca\x2c\x49\xce\xc8\x4c\x55\x70\xcb\x2f\xca\x2d\xcd\x49\xe4\xe2\x52\x56\x56\x48\xce\xcf\xcd\x4d\xcc\x4b\xe1\xe2\x4a\x48\x48\x48\x4a\x2c\xce\xe0\x52\x2e\xca\x2c\xd1\x2d\x4a\x2d\xc8\x49\x4c\x4e\xad\x4e\x83\xa8\x74\xce\x4d\xa9\x05\x29\x00\xeb\x48\x49\x2d\x4e\x2e\xca\x2c\x28\xc9\xcc\xcf\xe3\xe2\x42\xe2\x28\xe4\xa7\x29\x40\xd5\x73\x01\x02\x00\x00\xff\xff\x7e\xcb\x23\xb0\x6c\x00\x00\x00")
+
+func templatesLanguagesShellReadmeMdBytes() ([]byte, error) {
+	return bindataRead(
+		_templatesLanguagesShellReadmeMd,
+		"templates/languages/shell/README.md",
+	)
+}
+
+func templatesLanguagesShellReadmeMd() (*asset, error) {
+	bytes, err := templatesLanguagesShellReadmeMdBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "templates/languages/shell/README.md", size: 108, mode: os.FileMode(420), modTime: time.Unix(1599665137, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _templatesLanguagesShellConfigJson = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x9c\x8f\x31\x6f\xf2\x30\x10\x86\x77\xff\x8a\xd3\xcd\x7c\x7c\x40\xab\x0e\x1e\xbb\x55\xaa\xaa\x0e\xdd\x2a\x84\x2e\xce\x41\x2d\x1c\x27\x8d\xcf\xd0\x08\xf1\xdf\x2b\x87\x94\x04\x81\x52\xa9\x8b\x87\xe7\xee\x3d\xbf\xcf\x41\x01\x60\x5e\x9a\x2d\xd7\x4f\x05\x6d\xf8\x31\x5a\x97\x73\x8d\x1a\xd0\xd8\x62\xf3\x3f\xa3\xc0\x3a\x08\x65\x8e\xff\x2d\x66\xd3\xd9\x3d\x4e\x52\xc2\xfa\x2a\x4a\x40\x0d\xef\x0a\x00\xe0\xd0\xbe\x00\x68\xc8\x7c\x30\xea\x33\x00\x40\x32\x62\x77\x89\x49\x1d\x79\xd2\x73\xcf\xfb\x67\xca\xd8\xa5\xaf\xde\x9a\x8a\xc1\xf3\x1e\x76\xe4\x22\x4f\x01\x07\x7b\x9f\xd2\xa0\x86\x87\x0e\x1c\x7f\x26\xe8\x2e\xc2\xba\xcf\xa0\xa7\x22\xfd\x87\x81\x8a\xca\xf1\x4a\xf8\x4b\xfa\xa1\x34\x55\x3b\x6c\xa9\x1a\x9c\x3c\x3b\xe4\xbc\xa6\xe8\x24\x2d\x59\x3f\xef\x93\x56\xb8\xe8\x95\x4f\xc8\xaf\x9c\x0d\x32\x1f\xf6\xed\xd8\xe2\x06\xbb\xbb\xc1\x5e\xb0\x43\xcb\x6b\xb3\x57\x6b\xb6\xd0\x94\xb1\x1e\xd3\x4b\x47\xfe\xa8\xb7\x26\x17\x78\x54\xf0\x72\x23\xdd\xaf\x23\xff\xd2\x78\xa4\x6b\x56\x96\xee\xba\x6b\x4b\x4f\x5d\x15\xc0\x52\x1d\xd5\x77\x00\x00\x00\xff\xff\xaa\x66\x5e\x01\x96\x02\x00\x00")
 
 func templatesLanguagesShellConfigJsonBytes() ([]byte, error) {
@@ -2041,6 +2251,7 @@ func AssetNames() []string {
 var _bindata = map[string]func() (*asset, error){
 	"templates/languages/csharp/Dockerfile":                                         templatesLanguagesCsharpDockerfile,
 	"templates/languages/csharp/Makefile":                                           templatesLanguagesCsharpMakefile,
+	"templates/languages/csharp/README.md":                                          templatesLanguagesCsharpReadmeMd,
 	"templates/languages/csharp/build.bat":                                          templatesLanguagesCsharpBuildBat,
 	"templates/languages/csharp/config.json":                                        templatesLanguagesCsharpConfigJson,
 	"templates/languages/csharp/metadata.json":                                      templatesLanguagesCsharpMetadataJson,
@@ -2050,6 +2261,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/csharp/src/src.csproj":                                     templatesLanguagesCsharpSrcSrcCsproj,
 	"templates/languages/go/Dockerfile":                                             templatesLanguagesGoDockerfile,
 	"templates/languages/go/Makefile":                                               templatesLanguagesGoMakefile,
+	"templates/languages/go/README.md":                                              templatesLanguagesGoReadmeMd,
 	"templates/languages/go/build.bat":                                              templatesLanguagesGoBuildBat,
 	"templates/languages/go/config.json":                                            templatesLanguagesGoConfigJson,
 	"templates/languages/go/metadata.json":                                          templatesLanguagesGoMetadataJson,
@@ -2060,6 +2272,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/go/src/pkg/formula/formula_test.go":                        templatesLanguagesGoSrcPkgFormulaFormula_testGo,
 	"templates/languages/java11/Dockerfile":                                         templatesLanguagesJava11Dockerfile,
 	"templates/languages/java11/Makefile":                                           templatesLanguagesJava11Makefile,
+	"templates/languages/java11/README.md":                                          templatesLanguagesJava11ReadmeMd,
 	"templates/languages/java11/build.bat":                                          templatesLanguagesJava11BuildBat,
 	"templates/languages/java11/config.json":                                        templatesLanguagesJava11ConfigJson,
 	"templates/languages/java11/metadata.json":                                      templatesLanguagesJava11MetadataJson,
@@ -2070,6 +2283,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/java11/src/test/java/com/ritchie/formula/FormulaTest.java": templatesLanguagesJava11SrcTestJavaComRitchieFormulaFormulatestJava,
 	"templates/languages/java8/Dockerfile":                                          templatesLanguagesJava8Dockerfile,
 	"templates/languages/java8/Makefile":                                            templatesLanguagesJava8Makefile,
+	"templates/languages/java8/README.md":                                           templatesLanguagesJava8ReadmeMd,
 	"templates/languages/java8/build.bat":                                           templatesLanguagesJava8BuildBat,
 	"templates/languages/java8/config.json":                                         templatesLanguagesJava8ConfigJson,
 	"templates/languages/java8/metadata.json":                                       templatesLanguagesJava8MetadataJson,
@@ -2080,6 +2294,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/java8/src/test/java/com/ritchie/formula/FormulaTest.java":  templatesLanguagesJava8SrcTestJavaComRitchieFormulaFormulatestJava,
 	"templates/languages/node/Dockerfile":                                           templatesLanguagesNodeDockerfile,
 	"templates/languages/node/Makefile":                                             templatesLanguagesNodeMakefile,
+	"templates/languages/node/README.md":                                            templatesLanguagesNodeReadmeMd,
 	"templates/languages/node/build.bat":                                            templatesLanguagesNodeBuildBat,
 	"templates/languages/node/config.json":                                          templatesLanguagesNodeConfigJson,
 	"templates/languages/node/metadata.json":                                        templatesLanguagesNodeMetadataJson,
@@ -2089,6 +2304,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/node/src/package.json":                                     templatesLanguagesNodeSrcPackageJson,
 	"templates/languages/php/Dockerfile":                                            templatesLanguagesPhpDockerfile,
 	"templates/languages/php/Makefile":                                              templatesLanguagesPhpMakefile,
+	"templates/languages/php/README.md":                                             templatesLanguagesPhpReadmeMd,
 	"templates/languages/php/build.bat":                                             templatesLanguagesPhpBuildBat,
 	"templates/languages/php/config.json":                                           templatesLanguagesPhpConfigJson,
 	"templates/languages/php/metadata.json":                                         templatesLanguagesPhpMetadataJson,
@@ -2098,6 +2314,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/php/src/index.php":                                         templatesLanguagesPhpSrcIndexPhp,
 	"templates/languages/python3/Dockerfile":                                        templatesLanguagesPython3Dockerfile,
 	"templates/languages/python3/Makefile":                                          templatesLanguagesPython3Makefile,
+	"templates/languages/python3/README.md":                                         templatesLanguagesPython3ReadmeMd,
 	"templates/languages/python3/build.bat":                                         templatesLanguagesPython3BuildBat,
 	"templates/languages/python3/config.json":                                       templatesLanguagesPython3ConfigJson,
 	"templates/languages/python3/metadata.json":                                     templatesLanguagesPython3MetadataJson,
@@ -2107,6 +2324,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/python3/src/requirements.txt":                              templatesLanguagesPython3SrcRequirementsTxt,
 	"templates/languages/ruby/Dockerfile":                                           templatesLanguagesRubyDockerfile,
 	"templates/languages/ruby/Makefile":                                             templatesLanguagesRubyMakefile,
+	"templates/languages/ruby/README.md":                                            templatesLanguagesRubyReadmeMd,
 	"templates/languages/ruby/build.bat":                                            templatesLanguagesRubyBuildBat,
 	"templates/languages/ruby/config.json":                                          templatesLanguagesRubyConfigJson,
 	"templates/languages/ruby/metadata.json":                                        templatesLanguagesRubyMetadataJson,
@@ -2116,6 +2334,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/ruby/src/index.rb":                                         templatesLanguagesRubySrcIndexRb,
 	"templates/languages/rust/Dockerfile":                                           templatesLanguagesRustDockerfile,
 	"templates/languages/rust/Makefile":                                             templatesLanguagesRustMakefile,
+	"templates/languages/rust/README.md":                                            templatesLanguagesRustReadmeMd,
 	"templates/languages/rust/build.bat":                                            templatesLanguagesRustBuildBat,
 	"templates/languages/rust/config.json":                                          templatesLanguagesRustConfigJson,
 	"templates/languages/rust/metadata.json":                                        templatesLanguagesRustMetadataJson,
@@ -2125,6 +2344,7 @@ var _bindata = map[string]func() (*asset, error){
 	"templates/languages/rust/src/src/main.rs":                                      templatesLanguagesRustSrcSrcMainRs,
 	"templates/languages/shell/Dockerfile":                                          templatesLanguagesShellDockerfile,
 	"templates/languages/shell/Makefile":                                            templatesLanguagesShellMakefile,
+	"templates/languages/shell/README.md":                                           templatesLanguagesShellReadmeMd,
 	"templates/languages/shell/config.json":                                         templatesLanguagesShellConfigJson,
 	"templates/languages/shell/metadata.json":                                       templatesLanguagesShellMetadataJson,
 	"templates/languages/shell/set_umask.sh":                                        templatesLanguagesShellSet_umaskSh,
@@ -2178,6 +2398,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"csharp": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesCsharpDockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesCsharpMakefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesCsharpReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesCsharpBuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesCsharpConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesCsharpMetadataJson, map[string]*bintree{}},
@@ -2193,6 +2414,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"go": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesGoDockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesGoMakefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesGoReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesGoBuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesGoConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesGoMetadataJson, map[string]*bintree{}},
@@ -2211,6 +2433,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"java11": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesJava11Dockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesJava11Makefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesJava11ReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesJava11BuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesJava11ConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesJava11MetadataJson, map[string]*bintree{}},
@@ -2245,6 +2468,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"java8": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesJava8Dockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesJava8Makefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesJava8ReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesJava8BuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesJava8ConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesJava8MetadataJson, map[string]*bintree{}},
@@ -2279,6 +2503,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"node": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesNodeDockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesNodeMakefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesNodeReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesNodeBuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesNodeConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesNodeMetadataJson, map[string]*bintree{}},
@@ -2294,6 +2519,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"php": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesPhpDockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesPhpMakefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesPhpReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesPhpBuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesPhpConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesPhpMetadataJson, map[string]*bintree{}},
@@ -2309,6 +2535,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"python3": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesPython3Dockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesPython3Makefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesPython3ReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesPython3BuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesPython3ConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesPython3MetadataJson, map[string]*bintree{}},
@@ -2324,6 +2551,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"ruby": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesRubyDockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesRubyMakefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesRubyReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesRubyBuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesRubyConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesRubyMetadataJson, map[string]*bintree{}},
@@ -2339,6 +2567,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"rust": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesRustDockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesRustMakefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesRustReadmeMd, map[string]*bintree{}},
 				"build.bat":     &bintree{templatesLanguagesRustBuildBat, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesRustConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesRustMetadataJson, map[string]*bintree{}},
@@ -2356,6 +2585,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"shell": &bintree{nil, map[string]*bintree{
 				"Dockerfile":    &bintree{templatesLanguagesShellDockerfile, map[string]*bintree{}},
 				"Makefile":      &bintree{templatesLanguagesShellMakefile, map[string]*bintree{}},
+				"README.md":     &bintree{templatesLanguagesShellReadmeMd, map[string]*bintree{}},
 				"config.json":   &bintree{templatesLanguagesShellConfigJson, map[string]*bintree{}},
 				"metadata.json": &bintree{templatesLanguagesShellMetadataJson, map[string]*bintree{}},
 				"set_umask.sh":  &bintree{templatesLanguagesShellSet_umaskSh, map[string]*bintree{}},

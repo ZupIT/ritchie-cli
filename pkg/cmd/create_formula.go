@@ -50,7 +50,7 @@ type createFormulaCmd struct {
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
-	tplM            template.Manager
+	template        template.Manager
 	rt              rtutorial.Finder
 }
 
@@ -72,7 +72,7 @@ func NewCreateFormulaCmd(
 		inText:          inText,
 		inTextValidator: inTextValidator,
 		inList:          inList,
-		tplM:            tplM,
+		template:        tplM,
 		rt:              rtf,
 	}
 
@@ -103,11 +103,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		if err := c.tplM.Validate(); err != nil {
-			return err
-		}
-
-		languages, err := c.tplM.Languages()
+		languages, err := c.template.Languages()
 		if err != nil {
 			return err
 		}

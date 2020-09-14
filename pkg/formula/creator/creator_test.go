@@ -23,8 +23,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -36,10 +34,10 @@ const (
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
 	langGo            = "go"
-	langJava          = "java"
+	langJava          = "java8"
 	langNode          = "node"
-	langPython        = "python"
-	langShell         = "bash shell"
+	langPython        = "python3"
+	langShell         = "shell"
 )
 
 func TestCreator(t *testing.T) {
@@ -52,15 +50,10 @@ func TestCreator(t *testing.T) {
 	_ = dirManager.Remove(resultDir)
 	_ = dirManager.Create(resultDir)
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds)
-
-	tplM := template.NewManager("../../../testdata", dirManager)
-
 	type in struct {
 		formCreate formula.Create
-		dir        stream.DirCreateChecker
+		dir        stream.DirCreateCopyRemoveChecker
 		file       stream.FileWriteReadExister
-		tplM       template.Manager
 	}
 
 	type out struct {
@@ -104,7 +97,6 @@ func TestCreator(t *testing.T) {
 				},
 				dir:  dirManager,
 				file: fileManager,
-				tplM: tplM,
 			},
 			out: out{
 				err: nil,
@@ -121,7 +113,6 @@ func TestCreator(t *testing.T) {
 				},
 				dir:  dirManager,
 				file: fileManager,
-				tplM: tplM,
 			},
 			out: out{
 				err: nil,
@@ -138,7 +129,6 @@ func TestCreator(t *testing.T) {
 				},
 				dir:  dirManager,
 				file: fileManager,
-				tplM: tplM,
 			},
 			out: out{
 				err: nil,
@@ -155,7 +145,6 @@ func TestCreator(t *testing.T) {
 				},
 				dir:  dirManager,
 				file: fileManager,
-				tplM: tplM,
 			},
 			out: out{
 				err: nil,
@@ -172,7 +161,6 @@ func TestCreator(t *testing.T) {
 				},
 				dir:  dirManager,
 				file: fileManager,
-				tplM: tplM,
 			},
 			out: out{
 				err: nil,
@@ -183,7 +171,7 @@ func TestCreator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			creator := NewCreator(treeMan, tt.in.dir, tt.in.file, tt.in.tplM)
+			creator := NewCreator(tt.in.dir, tt.in.file)
 			out := tt.out
 			got := creator.Create(in.formCreate)
 			if (got != nil && out.err == nil) || got != nil && got.Error() != out.err.Error() || out.err != nil && got == nil {
@@ -191,10 +179,4 @@ func TestCreator(t *testing.T) {
 			}
 		})
 	}
-}
-
-type repoListerMock struct{}
-
-func (repoListerMock) List() (formula.Repos, error) {
-	return formula.Repos{}, nil
 }

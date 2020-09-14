@@ -18,13 +18,13 @@ package creator
 
 import (
 	"encoding/json"
+	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/modifier"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -32,30 +32,23 @@ import (
 
 var (
 	ErrRepeatedCommand = prompt.NewError("this command already exists")
+	filesToModify      = []string{"README.md", "metadata.json"}
 )
 
 type CreateManager struct {
-	treeManager tree.Manager
-	dir         stream.DirCreateChecker
-	file        stream.FileWriteReadExister
-	tplM        template.Manager
+	dir  stream.DirCreateCopyRemoveChecker
+	file stream.FileWriteReadExister
 }
 
 func NewCreator(
-	tm tree.Manager,
-	dir stream.DirCreateChecker,
+	dir stream.DirCreateCopyRemoveChecker,
 	file stream.FileWriteReadExister,
-	tplM template.Manager,
 ) CreateManager {
-	return CreateManager{treeManager: tm, dir: dir, file: file, tplM: tplM}
+	return CreateManager{dir: dir, file: file}
 }
 
 func (c CreateManager) Create(cf formula.Create) error {
 	if err := c.isValidCmd(cf.FormulaPath); err != nil {
-		return err
-	}
-
-	if err := c.tplM.Validate(); err != nil {
 		return err
 	}
 
@@ -73,17 +66,16 @@ func (c CreateManager) Create(cf formula.Create) error {
 	return nil
 }
 
-func (c CreateManager) isValidCmd(fPath string) error {
-	if c.dir.Exists(fPath) {
+func (c CreateManager) isValidCmd(formulaPath string) error {
+	if c.dir.Exists(formulaPath) {
 		return ErrRepeatedCommand
 	}
 
 	return nil
 }
 
-func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath string, modifiers []modifier.Modifier) error {
-
-	if err := c.dir.Create(fPath); err != nil {
+func (c CreateManager) generateFormulaFiles(formulaPath, lang, fCmdName, workSpcPath string, modifiers []modifier.Modifier) error {
+	if err := c.dir.Create(formulaPath); err != nil {
 		return err
 	}
 
@@ -91,53 +83,32 @@ func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath s
 		return err
 	}
 
-	if err := c.applyLangTemplate(lang, fPath, workSpcPath, modifiers); err != nil {
+	if err := c.applyLangTemplate(lang, formulaPath); err != nil {
 		return err
+	}
+
+	for _, file := range filesToModify {
+		if err := c.modifyTemplateFile(formulaPath, file, modifiers); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string, modifiers []modifier.Modifier) error {
-
-	tFiles, err := c.tplM.LangTemplateFiles(lang)
-	if err != nil {
+func (c CreateManager) applyLangTemplate(lang, formulaPath string) error {
+	filePath := path.Join("templates", "languages", lang)
+	if err := template.RestoreAssets(formulaPath, filePath); err != nil {
 		return err
 	}
 
-	for _, f := range tFiles {
-		if f.IsDir {
-			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, workspacePath)
-			if err != nil {
-				return err
-			}
-			err = c.dir.Create(newPath)
-			if err != nil {
-				return err
-			}
-		} else {
-			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, workspacePath)
-			if err != nil {
-				return err
-			}
-			if c.file.Exists(newPath) {
-				continue
-			}
-			tpl, err := c.file.Read(f.Path)
-			if err != nil {
-				return err
-			}
-			newDir, _ := filepath.Split(newPath)
-			err = c.dir.Create(newDir)
-			if err != nil {
-				return err
-			}
-			tpl = modifier.Modify(tpl, modifiers)
-			err = c.file.Write(newPath, tpl)
-			if err != nil {
-				return err
-			}
-		}
+	oldPath := filepath.Join(formulaPath, filePath)
+	if err := c.dir.Copy(oldPath, formulaPath); err != nil {
+		return err
+	}
+
+	if err := c.dir.Remove(oldPath); err != nil {
+		return err
 	}
 
 	return nil
@@ -169,5 +140,21 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 			}
 		}
 	}
+	return nil
+}
+
+func (c CreateManager) modifyTemplateFile(formulaPath, fileName string, modifiers []modifier.Modifier) error {
+	filePath := filepath.Join(formulaPath, fileName)
+	data, err := c.file.Read(filePath)
+	if err != nil {
+		return err
+	}
+
+	data = modifier.Modify(data, modifiers)
+
+	if err := c.file.Write(filePath, data); err != nil {
+		return err
+	}
+
 	return nil
 }
