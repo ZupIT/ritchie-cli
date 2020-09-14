@@ -70,6 +70,36 @@ func TestDeleteWorkspaceCmd(t *testing.T) {
 		inputTrueMock{},
 	)
 
+	workspace = filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
+	}
+
+	if cmd == nil {
+		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
+	}
+
+	if err := cmd.Execute(); err == nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, nil, err)
+	}
+
+	cmd = NewDeleteWorkspaceCmd(
+		os.TempDir(),
+		workspaceForm{},
+		DirManagerCustomMock{
+			exists: func(dir string) bool {
+				return false
+			},
+		},
+		listMock{},
+		inputTrueMock{},
+	)
+
+	workspace = filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
+	}
+
 	if cmd == nil {
 		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
 	}
