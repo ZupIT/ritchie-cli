@@ -141,8 +141,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:
-			"Fail when repo.List return err",
+			name: "Fail when repo.List return err",
 			fields: fields{
 				repo: repoListerAdderCustomMock{
 					list: func() (formula.Repos, error) {

@@ -36,7 +36,7 @@ func (SurveyInt) Int(name string, helper ...string) (int64, error) {
 
 	validationQs := []*survey.Question{
 		{
-			Name: "name",
+			Name:     "name",
 			Validate: validateSurveyIntIn,
 		},
 	}
