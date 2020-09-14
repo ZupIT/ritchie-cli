@@ -103,7 +103,7 @@ jobs:
       - run:
           name: lint
           command: |
-            golangci-lint run --no-config --issues-exit-code=1 --timeout=5m -v
+            /go/bin/golangci-lint run --no-config --issues-exit-code=1 --timeout=5m -v
           no_output_timeout: 5m
 
   horus:
