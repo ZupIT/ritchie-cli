@@ -117,7 +117,7 @@ jobs:
             horus start -p ./ -i testdata,vendor
 
   unit_test:
-    executor: ritchie-tests-executor
+    executor: ritchie-tests-and-static-analisys-executor
     environment:
       <<: *ENVIRONMENT
     steps:
