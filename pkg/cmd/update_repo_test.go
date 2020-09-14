@@ -31,7 +31,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-func TestListRepoRunFunc(t *testing.T) {
+func TestUpdateRepoRun(t *testing.T) {
 	someError := errors.New("some error")
 
 	repoTest := &formula.Repo{
