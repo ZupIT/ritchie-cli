@@ -26,7 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func Test_listRepoCmd_runFunc(t *testing.T) {
+func TestListRepoRunFunc(t *testing.T) {
 	finderTutorial := rtutorial.NewFinder(os.TempDir(), stream.NewFileManager())
 	type in struct {
 		RepositoryLister formula.RepositoryLister
