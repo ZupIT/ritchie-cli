@@ -500,12 +500,13 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
-      - unix_functional_test_team:
-          name: unix-functional-test-team-code
-          filters:
-            <<: *FILTERS_CHECK_CODE
-          requires:
-            - build-code
+# this part of workflow are commented because we dont have QA environment anymore
+#      - unix_functional_test_team:
+#          name: unix-functional-test-team-code
+#          filters:
+#            <<: *FILTERS_CHECK_CODE
+#          requires:
+#            - build-code
   release:
     jobs:
       - build:

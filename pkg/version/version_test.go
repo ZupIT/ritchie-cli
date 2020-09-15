@@ -53,6 +53,10 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 		_, _ = w.Write([]byte(expectedResultCase4 + "\n"))
 	}))
 
+	internalErrorStub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(500)
+	}))
+
 	type fields struct {
 		CurrentVersion   string
 		StableVersionUrl string
@@ -138,6 +142,27 @@ func TestDefaultVersionResolver_StableVersion(t *testing.T) {
 			},
 			want:    expectedResultCase4,
 			wantErr: false,
+		},
+		{
+			name: "Should error when server response is not 200",
+			fields: fields{
+				CurrentVersion:   "Any value",
+				StableVersionUrl: internalErrorStub.URL,
+				FileUtilService: StubFileUtilService{
+					readFile: func(_ string) ([]byte, error) {
+						cache := stableVersionCache{
+							"1.5.0",
+							time.Now().Add(time.Hour * 1 * -1).Unix(),
+						}
+
+						return json.Marshal(cache)
+					},
+					writeFilePerm: func(_ string, _ []byte, _ int32) error { return nil },
+				},
+				HttpClient: internalErrorStub.Client(),
+			},
+			want:    "",
+			wantErr: true,
 		},
 		{
 			name: "Error on save cache",
