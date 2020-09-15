@@ -24,9 +24,10 @@ import (
 )
 
 var (
-	ServerRestURL = ""
-	ServerGrpcURL = ""
-	FilePath      = filepath.Join(api.RitchieHomeDir(), "metrics")
+	ServerRestURL    = ""
+	ServerGrpcURL    = ""
+	FilePath         = filepath.Join(api.RitchieHomeDir(), "metrics")
+	CommonsRepoAdded = ""
 )
 
 type Id string
@@ -51,7 +52,8 @@ type APIData struct {
 }
 
 type Data struct {
-	CommandError string `json:"commandError"`
+	CommandError     string `json:"commandError"`
+	CommonsRepoAdded string   `json:"commonsRepoAdded,omitempty"`
 }
 
 type Sender interface {
