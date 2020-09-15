@@ -26,7 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-func Test_listRepoCmd_runFunc(t *testing.T) {
+func TestListRepoRunFunc(t *testing.T) {
 	someError := errors.New("some error")
 	type in struct {
 		RepositoryLister formula.RepositoryLister
@@ -118,7 +118,7 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Run with success when tags fail",
+			name: "Run with success when lasted tag fail",
 			in: in{
 				RepositoryLister: RepositoryListerCustomMock{
 					list: func() (formula.Repos, error) {
@@ -134,10 +134,34 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 				},
 				Tutorial: TutorialFinderMockReturnDisabled{},
 				Repos: GitRepositoryMock{
-					tags: func(info git.RepoInfo) (git.Tags, error) {
-						return git.Tags{git.Tag{Name: "1.0.0"}}, someError
+					latestTag: func(info git.RepoInfo) (git.Tag, error) {
+						return git.Tag{}, someError
 					},
 				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Return err when find tutorial fail",
+			in: in{
+				RepositoryLister: RepositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
+							},
+						}, nil
+					},
+				},
+				Tutorial: TutorialFindSetterCustomMock{
+					find: func() (rtutorial.TutorialHolder, error) {
+						return rtutorial.TutorialHolder{}, someError
+					},
+				},
+				Repos: defaultGitRepositoryMock,
 			},
 			wantErr: true,
 		},

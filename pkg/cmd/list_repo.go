@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
@@ -75,21 +74,12 @@ func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 }
 
 func (lr listRepoCmd) printRepos(repos formula.Repos) {
-	maxTags := 5
-
 	table := uitable.New()
-	table.AddRow("PROVIDER", "NAME", "VERSION", "PRIORITY", "URL", "AVALIABLE VERSIONS")
+	table.AddRow("PROVIDER", "NAME", "CURRENT VERSION", "PRIORITY", "URL", "LATEST VERSION")
 	for _, repo := range repos {
-		tagsOfRepo, _ := lr.getTagsAvaliable(repo)
+		latestTag := lr.getLatestTag(repo)
 
-		if len(tagsOfRepo) > maxTags {
-			tagsOfRepo = tagsOfRepo[:maxTags]
-			tagsOfRepo = append(tagsOfRepo, "...")
-		}
-
-		latestTags := strings.Join(tagsOfRepo, ", ")
-
-		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, latestTags)
+		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, latestTag)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
@@ -97,24 +87,16 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 
 }
 
-func (lr listRepoCmd) getTagsAvaliable(repo formula.Repo) ([]string, error) {
-	var listTagsStr []string
+func (lr listRepoCmd) getLatestTag(repo formula.Repo) string {
 	formulaGit := lr.repoProviders.Resolve(repo.Provider)
 
 	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
-	tags, err := formulaGit.Repos.Tags(repoInfo)
+	tag, err := formulaGit.Repos.LatestTag(repoInfo)
 	if err != nil {
-		return []string{}, err
+		return "Couldn't get that information"
 	}
 
-	for _, tag := range tags {
-		if tag.Name == repo.Version.String() {
-			tag.Name = tag.Name + "(current)"
-		}
-		listTagsStr = append(listTagsStr, tag.Name)
-	}
-
-	return listTagsStr, nil
+	return tag.Name
 }
 
 func tutorialListRepo(tutorialStatus string) {
