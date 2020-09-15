@@ -14,39 +14,20 @@
  * limitations under the License.
  */
 
-package metric
+package cmd
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
+	"testing"
 )
 
-var _ Sender = SendManagerHttp{}
+func TestNewBuildCmd(t *testing.T) {
+	cmd := NewBuildCmd()
+	if cmd == nil {
+		t.Errorf("NewBuildCmd got %v", cmd)
 
-type SendManagerHttp struct {
-	URL    string
-	client *http.Client
-}
-
-func NewHttpSender(url string, client *http.Client) SendManagerHttp {
-	return SendManagerHttp{
-		URL:    url,
-		client: client,
-	}
-}
-
-func (sm SendManagerHttp) Send(APIData APIData) {
-	reqBody, err := json.Marshal(&APIData)
-	if err != nil {
-		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, sm.URL, bytes.NewBuffer(reqBody))
-	if err != nil {
-		return
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
-
-	req.Header.Add("Content-Type", "application/json")
-	_, _ = sm.client.Do(req)
 }
