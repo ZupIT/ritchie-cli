@@ -16,14 +16,18 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"testing"
+)
 
-// NewDeleteCmd create a new delete instance
-func NewDeleteCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:     "delete SUBCOMMAND",
-		Short:   "Delete contexts, repositories, formulas and workspaces",
-		Long:    "Delete contexts, repositories, formulas and workspaces",
-		Example: "rit delete context",
+func TestNewBuildCmd(t *testing.T) {
+	cmd := NewBuildCmd()
+	if cmd == nil {
+		t.Errorf("NewBuildCmd got %v", cmd)
+
+	}
+
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
 }
