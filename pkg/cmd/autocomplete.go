@@ -44,10 +44,12 @@ func NewAutocompleteCmd() *cobra.Command {
 	shells := strings.Join(supportedShell, ", ")
 
 	return &cobra.Command{
-		Use:     "completion SUBCOMMAND",
-		Short:   "Add autocomplete for terminal (" + shells + ")",
-		Long:    "Add autocomplete for terminal, available for (" + shells + ").",
-		Example: "rit completion zsh",
+		Use:       "completion SUBCOMMAND",
+		Short:     "Add autocomplete for terminal (" + shells + ")",
+		Long:      "Add autocomplete for terminal, available for (" + shells + ").",
+		Example:   "rit completion zsh",
+		ValidArgs: supportedShell,
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 
@@ -70,8 +72,10 @@ To install run:
  $ echo "source ~/.rit_completion" >> ~/.zshrc
 
 `,
-		Example: "rit completion zsh | source",
-		RunE:    a.runFunc(),
+		Example:   "rit completion zsh | source",
+		RunE:      a.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 
@@ -94,8 +98,10 @@ To install run:
  $ echo "source ~/.rit_completion" >> ~/.bashrc
 
 `,
-		Example: "rit completion bash | source",
-		RunE:    a.runFunc(),
+		Example:   "rit completion bash | source",
+		RunE:      a.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 
@@ -117,8 +123,10 @@ To install run:
  $ echo "rit completion fish | source" >> ~/.config/fish/config.fish
 
 `,
-		Example: "rit completion fish | source",
-		RunE:    a.runFunc(),
+		Example:   "rit completion fish | source",
+		RunE:      a.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 
@@ -136,8 +144,10 @@ Only powerShell >= version 5.X is supported
 To install run and after restart powerShell:
 	rit completion powershell >> $PROFILE
 `,
-		Example: "rit completion powershell >> $PROFILE",
-		RunE:    a.runFunc(),
+		Example:   "rit completion powershell >> $PROFILE",
+		RunE:      a.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 
