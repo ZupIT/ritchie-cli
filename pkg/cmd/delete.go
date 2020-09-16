@@ -25,7 +25,7 @@ func NewDeleteCmd() *cobra.Command {
 		Short:     "Delete contexts, repositories and formulas.",
 		Long:      "Delete contexts, repositories and formulas.",
 		Example:   "rit delete context",
-		ValidArgs: []string{"context, formula, repo"},
+		ValidArgs: []string{"context", "formula", "repo"},
 		Args:      cobra.OnlyValidArgs,
 	}
 }
