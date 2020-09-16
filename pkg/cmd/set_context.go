@@ -47,10 +47,12 @@ func NewSetContextCmd(
 	s := setContextCmd{fs, it, il}
 
 	cmd := &cobra.Command{
-		Use:     "context",
-		Short:   "Set context",
-		Example: "rit set context",
-		RunE:    RunFuncE(s.runStdin(), s.runPrompt()),
+		Use:       "context",
+		Short:     "Set context",
+		Example:   "rit set context",
+		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	cmd.LocalFlags()
