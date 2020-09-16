@@ -468,7 +468,7 @@ func TestInputManager_RegexType(t *testing.T) {
 	fileManager := stream.NewFileManager()
 
 	iText := inputMock{text: "a"}
-	iTextValidator := inputTextValidatorMock{}
+	iTextValidator := inputTextValidatorMock{str: "a"}
 	iList := inputMock{text: "in_list1"}
 	iBool := inputMock{boolean: false}
 	iPass := inputMock{text: "******"}
@@ -482,12 +482,27 @@ func TestInputManager_RegexType(t *testing.T) {
 	if got != nil {
 		t.Errorf("Inputs got %v, want %v", got, nil)
 	}
+
+	iText = inputMock{text: "g"}
+	iTextValidator = inputTextValidatorMock{str: "c"}
+
+	inputManager = NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+
+	cmd = &exec.Cmd{}
+
+	got = inputManager.Inputs(cmd, setup, api.Prompt)
+
+	if got == nil {
+		t.Errorf("Inputs got %v, want %v", nil, errors.New("mismatch"))
+	}
 }
 
-type inputTextValidatorMock struct{}
+type inputTextValidatorMock struct {
+	str string
+}
 
-func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return "a", validate("a")
+func (i inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return i.str, validate(i.str)
 }
 
 type inputMock struct {
