@@ -34,11 +34,12 @@ const (
 
 type listRepoCmd struct {
 	formula.RepositoryLister
-	rt rtutorial.Finder
+	repoProviders formula.RepoProviders
+	rt            rtutorial.Finder
 }
 
-func NewListRepoCmd(rl formula.RepositoryLister, rtf rtutorial.Finder) *cobra.Command {
-	lr := listRepoCmd{rl, rtf}
+func NewListRepoCmd(rl formula.RepositoryLister, rp formula.RepoProviders, rtf rtutorial.Finder) *cobra.Command {
+	lr := listRepoCmd{rl, rp, rtf}
 	cmd := &cobra.Command{
 		Use:     "repo",
 		Short:   "Show a list with all your available repositories",
@@ -55,7 +56,7 @@ func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		printRepos(repos)
+		lr.printRepos(repos)
 
 		if len(repos) != 1 {
 			prompt.Info(fmt.Sprintf(totalReposMsg, len(repos)))
@@ -72,16 +73,30 @@ func (lr listRepoCmd) runFunc() CommandRunnerFunc {
 	}
 }
 
-func printRepos(repos formula.Repos) {
+func (lr listRepoCmd) printRepos(repos formula.Repos) {
 	table := uitable.New()
-	table.AddRow("PROVIDER", "NAME", "VERSION", "PRIORITY", "URL")
+	table.AddRow("PROVIDER", "NAME", "CURRENT VERSION", "PRIORITY", "URL", "LATEST VERSION")
 	for _, repo := range repos {
-		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url)
+		latestTag := lr.getLatestTag(repo)
+
+		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, latestTag)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
 	fmt.Println(string(raw))
 
+}
+
+func (lr listRepoCmd) getLatestTag(repo formula.Repo) string {
+	formulaGit := lr.repoProviders.Resolve(repo.Provider)
+
+	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	tag, err := formulaGit.Repos.LatestTag(repoInfo)
+	if err != nil {
+		return "Couldn't get that information"
+	}
+
+	return tag.Name
 }
 
 func tutorialListRepo(tutorialStatus string) {
