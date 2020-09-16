@@ -52,8 +52,9 @@ type APIData struct {
 }
 
 type Data struct {
-	CommandError     string `json:"commandError"`
-	CommonsRepoAdded string   `json:"commonsRepoAdded,omitempty"`
+	CommandError         string  `json:"commandError"`
+	CommonsRepoAdded     string  `json:"commonsRepoAdded,omitempty"`
+	CommandExecutionTime float64 `json:"commandExecutionTime"`
 }
 
 type Sender interface {
@@ -69,5 +70,5 @@ type Checker interface {
 }
 
 type Collector interface {
-	Collect(ritVersion string, commandError ...string) (APIData, error)
+	Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error)
 }

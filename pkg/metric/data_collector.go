@@ -17,6 +17,7 @@
 package metric
 
 import (
+	"math"
 	"os"
 	"runtime"
 	"strings"
@@ -34,8 +35,9 @@ func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
 	}
 }
 
-func (d DataCollectorManager) Collect(ritVersion string, commandError ...string) (APIData, error) {
+func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error) {
 	userId, err := d.userId.Generate()
+	commandExecutionTime = math.Round(commandExecutionTime*100)/100
 	if err != nil {
 		return APIData{}, err
 	}
@@ -43,6 +45,7 @@ func (d DataCollectorManager) Collect(ritVersion string, commandError ...string)
 	data := Data{
 		CommandError: strings.Join(commandError, " "),
 		CommonsRepoAdded: CommonsRepoAdded,
+		CommandExecutionTime: commandExecutionTime,
 	}
 
 	metric := APIData{
