@@ -141,6 +141,9 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			} else {
 				if in.hasRegex(input) {
 					inputVal, err = in.textRegexValidator(input)
+					if err != nil {
+						return err
+					}
 				} else {
 					validate := input.Default == ""
 					inputVal, err = in.InputText.Text(input.Label, validate)
