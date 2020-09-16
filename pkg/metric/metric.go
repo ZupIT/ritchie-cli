@@ -55,6 +55,7 @@ type Data struct {
 	CommandError         string  `json:"commandError"`
 	CommonsRepoAdded     string  `json:"commonsRepoAdded,omitempty"`
 	CommandExecutionTime float64 `json:"commandExecutionTime"`
+	ShellType            string  `json:"shellType,omitempty"`
 }
 
 type Sender interface {

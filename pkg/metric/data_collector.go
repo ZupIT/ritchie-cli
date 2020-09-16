@@ -25,6 +25,7 @@ import (
 )
 
 var _ Collector = DataCollectorManager{}
+
 type DataCollectorManager struct {
 	userId UserIdGenerator
 }
@@ -37,15 +38,24 @@ func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
 
 func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error) {
 	userId, err := d.userId.Generate()
-	commandExecutionTime = math.Round(commandExecutionTime*100)/100
+	commandExecutionTime = math.Round(commandExecutionTime*100) / 100
 	if err != nil {
 		return APIData{}, err
 	}
 
+	shell := ""
+	if shellPath := os.Getenv("SHELL"); shellPath != "" {
+		if shellPathArr := strings.Split(shellPath, "/");
+			len(shellPathArr) > 1 {
+				shell = shellPathArr[2]
+		}
+	}
+
 	data := Data{
-		CommandError: strings.Join(commandError, " "),
-		CommonsRepoAdded: CommonsRepoAdded,
+		CommandError:         strings.Join(commandError, " "),
+		CommonsRepoAdded:     CommonsRepoAdded,
 		CommandExecutionTime: commandExecutionTime,
+		ShellType:            shell,
 	}
 
 	metric := APIData{

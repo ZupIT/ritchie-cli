@@ -25,7 +25,6 @@ func Test_Collector(t *testing.T) {
 	type in struct {
 		userIdGen UserIdGenerator
 	}
-
 	var tests = []struct {
 		name    string
 		wantErr bool
