@@ -139,7 +139,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			if items != nil {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
-				if len(input.Pattern.Regex) > 0 {
+				if in.hasRegex(input) {
 					inputVal, err = in.textRegexValidator(input)
 				} else {
 					validate := input.Default == ""
@@ -218,7 +218,7 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 	}
 	inputVal, err := in.List(input.Label, items)
 	if inputVal == newLabel {
-		if len(input.Pattern.Regex) > 0 {
+		if in.hasRegex(input) {
 			inputVal, err = in.textRegexValidator(input)
 		} else {
 			validate := len(input.Default) == 0
@@ -309,6 +309,10 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 			input.Condition.Operator,
 		)
 	}
+}
+
+func (in InputManager) hasRegex(input formula.Input) bool {
+	return len(input.Pattern.Regex) > 0
 }
 
 func (in InputManager) textRegexValidator(input formula.Input) (string, error) {
