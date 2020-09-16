@@ -442,6 +442,12 @@ func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHo
 	return t.set(tutorial)
 }
 
+type TutorialFinderMockReturnDisabled struct{}
+
+func (TutorialFinderMockReturnDisabled) Find() (rtutorial.TutorialHolder, error) {
+	return rtutorial.TutorialHolder{Current: "disabled"}, nil
+}
+
 type DirManagerCustomMock struct {
 	exists func(dir string) bool
 	list   func(dir string, hiddenDir bool) ([]string, error)
