@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package version
+package cmd
 
-type Resolver interface {
-	StableVersion() (string, error)
-	UpdateCache() error
-	VerifyNewVersion(current, installed string) string
+import (
+	"testing"
+)
+
+func TestNewBuildCmd(t *testing.T) {
+	cmd := NewBuildCmd()
+	if cmd == nil {
+		t.Errorf("NewBuildCmd got %v", cmd)
+
+	}
+
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
 }

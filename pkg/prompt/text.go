@@ -48,4 +48,3 @@ func (SurveyText) Text(name string, required bool, helper ...string) (string, er
 
 	return value, survey.Ask(validationQs, &value)
 }
-
