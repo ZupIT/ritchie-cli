@@ -68,10 +68,12 @@ func NewAddRepoCmd(
 		rt:                 rtf,
 	}
 	cmd := &cobra.Command{
-		Use:     "repo",
-		Short:   "Add a repository",
-		Example: "rit add repo",
-		RunE:    RunFuncE(addRepo.runStdin(), addRepo.runPrompt()),
+		Use:       "repo",
+		Short:     "Add a repository",
+		Example:   "rit add repo",
+		RunE:      RunFuncE(addRepo.runStdin(), addRepo.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.LocalFlags()
 
