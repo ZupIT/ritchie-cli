@@ -27,7 +27,6 @@ var (
 	ServerRestURL    = ""
 	ServerGrpcURL    = ""
 	FilePath         = filepath.Join(api.RitchieHomeDir(), "metrics")
-	CommonsRepoAdded = ""
 )
 
 type Id string
@@ -52,9 +51,10 @@ type APIData struct {
 }
 
 type Data struct {
-	CommandError         string  `json:"commandError"`
+	CommandError         string  `json:"commandError,omitempty"`
 	CommonsRepoAdded     string  `json:"commonsRepoAdded,omitempty"`
 	CommandExecutionTime float64 `json:"commandExecutionTime"`
+	RepoAdded            string  `json:"repoAdded,omitempty"`
 }
 
 type Sender interface {

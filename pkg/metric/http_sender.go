@@ -19,6 +19,7 @@ package metric
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -41,6 +42,7 @@ func (sm SendManagerHttp) Send(APIData APIData) {
 	if err != nil {
 		return
 	}
+	fmt.Println(string(reqBody))
 
 	req, err := http.NewRequest(http.MethodPost, sm.URL, bytes.NewBuffer(reqBody))
 	if err != nil {

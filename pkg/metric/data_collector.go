@@ -24,7 +24,12 @@ import (
 	"time"
 )
 
-var _ Collector = DataCollectorManager{}
+var (
+	_ Collector = DataCollectorManager{}
+	CommonsRepoAdded = ""
+	RepoAdded = ""
+	)
+
 type DataCollectorManager struct {
 	userId UserIdGenerator
 }
@@ -46,6 +51,7 @@ func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion s
 		CommandError: strings.Join(commandError, " "),
 		CommonsRepoAdded: CommonsRepoAdded,
 		CommandExecutionTime: commandExecutionTime,
+		RepoAdded: RepoAdded,
 	}
 
 	metric := APIData{
