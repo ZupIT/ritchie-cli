@@ -68,8 +68,8 @@ func Test_Collector(t *testing.T) {
 			},
 		},
 		{
-			name:    "fails on read file",
-			wantErr: true,
+			name:    "return empty repo when fails on read",
+			wantErr: false,
 			in: in{
 				userIdGen: UserIdGeneratorMock{
 					GenerateMock: func() (UserId, error) {
@@ -78,20 +78,6 @@ func Test_Collector(t *testing.T) {
 				file: sMocks.FileReaderCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
 						return nil, errors.New("error reading file")
-					}},
-			},
-		},
-		{
-			name:    "fails on unmarshal json",
-			wantErr: true,
-			in: in{
-				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() (UserId, error) {
-						return "", nil
-					}},
-				file: sMocks.FileReaderCustomMock{
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte(`{"someRandomKey":"andTheRespectiveRandomValue"}`), nil
 					}},
 			},
 		},

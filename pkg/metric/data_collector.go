@@ -61,29 +61,11 @@ func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion s
 
 	commandExecutionTime = math.Round(commandExecutionTime*100) / 100
 
-	repoBytes, err := d.file.Read(filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"))
-	if err != nil {
-		return APIData{}, err
-	}
-
-	repos := formula.Repos{}
-	err = json.Unmarshal(repoBytes, &repos)
-	if err != nil {
-		return APIData{}, err
-	}
-
-	repo := formula.Repo{}
-	for _, r := range repos {
-		if string(r.Name) == RepoName && r.Token == "" {
-			repo = r
-		}
-	}
-
 	data := Data{
 		CommandError:         strings.Join(commandError, " "),
 		CommonsRepoAdded:     CommonsRepoAdded,
 		CommandExecutionTime: commandExecutionTime,
-		FormulaRepo:          repo,
+		FormulaRepo:          d.repoData(),
 	}
 
 	metric := APIData{
@@ -96,6 +78,21 @@ func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion s
 	}
 
 	return metric, nil
+}
+
+func (d DataCollectorManager) repoData() formula.Repo {
+	repoBytes, _ := d.file.Read(
+		filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"),
+	)
+	repos := formula.Repos{}
+	_ = json.Unmarshal(repoBytes, &repos)
+
+	for _, r := range repos {
+		if string(r.Name) == RepoName && r.Token == "" {
+			return r
+		}
+	}
+	return formula.Repo{}
 }
 
 func metricID() string {
