@@ -24,9 +24,10 @@ import (
 )
 
 var (
-	ServerRestURL = ""
-	ServerGrpcURL = ""
-	FilePath      = filepath.Join(api.RitchieHomeDir(), "metrics")
+	ServerRestURL    = ""
+	ServerGrpcURL    = ""
+	FilePath         = filepath.Join(api.RitchieHomeDir(), "metrics")
+	CommonsRepoAdded = ""
 )
 
 type Id string
@@ -51,7 +52,9 @@ type APIData struct {
 }
 
 type Data struct {
-	CommandError string `json:"commandError"`
+	CommandError         string  `json:"commandError"`
+	CommonsRepoAdded     string  `json:"commonsRepoAdded,omitempty"`
+	CommandExecutionTime float64 `json:"commandExecutionTime"`
 }
 
 type Sender interface {
@@ -67,5 +70,5 @@ type Checker interface {
 }
 
 type Collector interface {
-	Collect(ritVersion string, commandError ...string) (APIData, error)
+	Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error)
 }

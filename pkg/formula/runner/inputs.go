@@ -265,7 +265,7 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
 		if strings.ToLower(components[0]) == variable {
-			value = strings.ToLower(components[1])
+			value = components[1]
 			break
 		}
 	}

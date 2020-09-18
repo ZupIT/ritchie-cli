@@ -56,7 +56,7 @@ func Test_Collector(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			collector := NewDataCollector(tt.in.userIdGen)
-			_, err := collector.Collect("2.0.0")
+			_, err := collector.Collect(1,"2.0.0")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("execution test failed: %s\nwant error: %t | got: %s", tt.name, tt.wantErr, err)
 			}

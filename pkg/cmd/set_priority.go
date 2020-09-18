@@ -50,10 +50,12 @@ func NewSetPriorityCmd(
 	}
 
 	cmd := &cobra.Command{
-		Use:     "repo-priority",
-		Short:   "Set a repository priority",
-		Example: "rit set repo-priority",
-		RunE:    s.runFunc(),
+		Use:       "repo-priority",
+		Short:     "Set a repository priority",
+		Example:   "rit set repo-priority",
+		RunE:      s.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd

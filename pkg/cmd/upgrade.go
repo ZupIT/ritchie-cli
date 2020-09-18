@@ -53,10 +53,12 @@ func NewUpgradeCmd(
 	}
 
 	return &cobra.Command{
-		Use:   "upgrade",
-		Short: "Update rit version",
-		Long:  `Update rit version to last stable version.`,
-		RunE:  u.runFunc(),
+		Use:       "upgrade",
+		Short:     "Update rit version",
+		Long:      `Update rit version to last stable version.`,
+		RunE:      u.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 

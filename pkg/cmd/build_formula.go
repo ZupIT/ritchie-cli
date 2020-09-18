@@ -78,7 +78,9 @@ func NewBuildFormulaCmd(
 		Short: "Build your formulas locally. Use --watch flag and get real-time updates.",
 		Long: `Use this command to build your formulas locally. To make formulas development easier, you can run 
 the command with the --watch flag and get real-time updates.`,
-		RunE: s.runFunc(),
+		RunE:      s.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.Flags().BoolP("watch", "w", false, "Use this flag to watch your developing formulas")
 
