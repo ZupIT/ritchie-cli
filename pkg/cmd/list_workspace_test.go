@@ -26,7 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func Test_listWorkspaceCmd_runFunc(t *testing.T) {
+func TestListWorkspaceRunFunc(t *testing.T) {
 	finderTutorial := rtutorial.NewFinder(os.TempDir(), stream.NewFileManager())
 	type in struct {
 		WorkspaceLister formula.WorkspaceLister
@@ -39,7 +39,7 @@ func Test_listWorkspaceCmd_runFunc(t *testing.T) {
 		{
 			name: "Run with success",
 			in: in{
-				WorkspaceLister: WorkspaceListerCustomMock{
+				WorkspaceLister: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{
 							"workspace1": "path/to/workspace1",
@@ -52,7 +52,7 @@ func Test_listWorkspaceCmd_runFunc(t *testing.T) {
 		{
 			name: "Run with success with more than 1 workspace",
 			in: in{
-				WorkspaceLister: WorkspaceListerCustomMock{
+				WorkspaceLister: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{
 							"workspace1": "path/to/workspace1",
@@ -66,7 +66,7 @@ func Test_listWorkspaceCmd_runFunc(t *testing.T) {
 		{
 			name: "Return err when list fail",
 			in: in{
-				WorkspaceLister: WorkspaceListerCustomMock{
+				WorkspaceLister: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return nil, errors.New("some error")
 					},
@@ -84,12 +84,4 @@ func Test_listWorkspaceCmd_runFunc(t *testing.T) {
 			}
 		})
 	}
-}
-
-type WorkspaceListerCustomMock struct {
-	list func() (formula.Workspaces, error)
-}
-
-func (m WorkspaceListerCustomMock) List() (formula.Workspaces, error) {
-	return m.list()
 }

@@ -21,7 +21,7 @@ import "github.com/spf13/cobra"
 const descListLong = `
 This command consists of multiple subcommands to interact with ritchie.
 
-It can be used to list repositories or credentials.
+It can be used to list repositories, credentials, or workspaces.
 `
 
 // NewListCmd create a new list instance
