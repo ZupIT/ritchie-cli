@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -232,6 +233,13 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	responseToWrite := "yes"
 	if choose == DoNotAcceptMetrics {
 		responseToWrite = "no"
+		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
+		metricManager.Send(metric.APIData{
+			Id: "rit_init",
+			Data: metric.Data{
+				MetricsAcceptance: responseToWrite},
+			},
+		)
 	}
 
 	if err = in.file.Write(metric.FilePath, []byte(responseToWrite)); err != nil {
