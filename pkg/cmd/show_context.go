@@ -33,10 +33,12 @@ func NewShowContextCmd(f rcontext.Finder) *cobra.Command {
 	s := showContextCmd{f}
 
 	return &cobra.Command{
-		Use:     "context",
-		Short:   "Show current context",
-		Example: "rit show context",
-		RunE:    s.runFunc(),
+		Use:       "context",
+		Short:     "Show current context",
+		Example:   "rit show context",
+		RunE:      s.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 
