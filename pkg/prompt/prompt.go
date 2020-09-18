@@ -37,7 +37,7 @@ type InputMultiline interface {
 }
 
 type InputList interface {
-	List(name string, items []string) (string, error)
+	List(name string, items []string, helper ...string) (string, error)
 }
 
 type InputInt interface {

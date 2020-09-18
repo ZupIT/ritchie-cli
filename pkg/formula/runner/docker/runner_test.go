@@ -226,7 +226,7 @@ type inputMock struct {
 	err     error
 }
 
-func (i inputMock) List(string, []string) (string, error) {
+func (i inputMock) List(string, []string, ...string) (string, error) {
 	return i.text, i.err
 }
 

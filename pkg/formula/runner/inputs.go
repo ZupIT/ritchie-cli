@@ -207,10 +207,10 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 		}
 		items = append(items, newLabel)
 	}
-	inputVal, err := in.List(input.Label, items)
+	inputVal, err := in.List(input.Label, items, input.Tutorial)
 	if inputVal == newLabel {
 		validate := len(input.Default) == 0
-		inputVal, err = in.Text(input.Label, validate)
+		inputVal, err = in.Text(input.Label, validate, input.Tutorial)
 		if len(inputVal) == 0 {
 			inputVal = input.Default
 		}
