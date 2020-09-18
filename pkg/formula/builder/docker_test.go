@@ -6,24 +6,16 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 func TestDockerBuild(t *testing.T) {
 	const dockerImg = "cimg/go:1.14"
 	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
-	ritHome := filepath.Join(tmpDir, ".rit-docker")
+	ritHome := filepath.Join(tmpDir, ".rit-builder")
 	repoPath := filepath.Join(ritHome, "repos", "commons")
 
-	_ = dirManager.Remove(ritHome)
-	_ = dirManager.Remove(repoPath)
-	_ = dirManager.Create(repoPath)
-	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
-	_ = streams.Unzip(zipFile, repoPath)
-
-	buildDocker := NewBuildDocker()
+	buildDocker := NewBuildDocker(fileManager)
 
 	type in struct {
 		formPath string
