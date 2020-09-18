@@ -18,16 +18,13 @@ package cmd
 
 import (
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestListWorkspaceRunFunc(t *testing.T) {
-	finderTutorial := rtutorial.NewFinder(os.TempDir(), stream.NewFileManager())
+	finderTutorial := TutorialFinderMock{}
 	type in struct {
 		WorkspaceLister formula.WorkspaceLister
 	}
