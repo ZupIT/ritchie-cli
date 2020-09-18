@@ -40,10 +40,12 @@ type deleteRepoCmd struct {
 func NewDeleteRepoCmd(rl formula.RepositoryLister, il prompt.InputList, rd formula.RepositoryDeleter) *cobra.Command {
 	dr := deleteRepoCmd{rl, il, rd}
 	cmd := &cobra.Command{
-		Use:     "repo",
-		Short:   "Delete a repository",
-		Example: "rit delete repo",
-		RunE:    RunFuncE(dr.runStdin(), dr.runFunc()),
+		Use:       "repo",
+		Short:     "Delete a repository",
+		Example:   "rit delete repo",
+		RunE:      RunFuncE(dr.runStdin(), dr.runFunc()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	return cmd
 }

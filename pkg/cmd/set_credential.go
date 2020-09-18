@@ -64,10 +64,12 @@ func NewSetCredentialCmd(
 	}
 
 	cmd := &cobra.Command{
-		Use:   "credential",
-		Short: "Set credential",
-		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE:  RunFuncE(s.runStdin(), s.runPrompt()),
+		Use:       "credential",
+		Short:     "Set credential",
+		Long:      `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
+		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.LocalFlags()
 	return cmd
