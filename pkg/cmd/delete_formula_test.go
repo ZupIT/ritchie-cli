@@ -42,7 +42,7 @@ func (f FileManagerMock) Remove(path string) error {
 }
 
 type fieldsTestDeleteFormulaCmd struct {
-	workspaceManager formula.WorkspaceAddListValidator
+	workspaceManager formula.WorkspaceAddLister
 	directory        stream.DirListChecker
 	inList           prompt.InputList
 	fileManager      stream.FileWriteRemover
@@ -67,12 +67,9 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 	}
 
 	var fieldsDefault fieldsTestDeleteFormulaCmd = fieldsTestDeleteFormulaCmd{
-		workspaceManager: WorkspaceAddListValidatorCustomMock{
+		workspaceManager: WorkspaceAddListerCustomMock{
 			list: func() (formula.Workspaces, error) {
 				return formula.Workspaces{}, nil
-			},
-			validate: func(workspace formula.Workspace) error {
-				return nil
 			},
 		},
 		directory: DirManagerCustomMock{
@@ -117,7 +114,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		{
 			name: "Run with error when workspace list returns err",
 			fields: fieldsTestDeleteFormulaCmd{
-				workspaceManager: WorkspaceAddListValidatorCustomMock{
+				workspaceManager: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{}, someError
 					},
@@ -248,36 +245,11 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Run with error when validate workspace",
-			fields: fieldsTestDeleteFormulaCmd{
-				workspaceManager: WorkspaceAddListValidatorCustomMock{
-					list: func() (formula.Workspaces, error) {
-						return formula.Workspaces{}, nil
-					},
-					validate: func(workspace formula.Workspace) error {
-						return someError
-					},
-				},
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == questionSelectFormulaGroup {
-							return "any", someError
-						}
-						return "Ritchie-Formulas (/tmp/ritchie-formulas)", nil
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
 			name: "Run with error when add new workspace",
 			fields: fieldsTestDeleteFormulaCmd{
-				workspaceManager: WorkspaceAddListValidatorCustomMock{
+				workspaceManager: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{}, nil
-					},
-					validate: func(workspace formula.Workspace) error {
-						return nil
 					},
 					add: func(workspace formula.Workspace) error {
 						return someError
