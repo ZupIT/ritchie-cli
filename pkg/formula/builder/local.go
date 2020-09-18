@@ -29,13 +29,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-)
-
-var (
-	msgBuildOnWindows = prompt.Yellow("This formula cannot be built on Windows.")
-	ErrBuildOnWindows = errors.New(msgBuildOnWindows)
 )
 
 type LocalManager struct {
@@ -99,6 +93,11 @@ func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) e
 		}
 		cmd = exec.Command(winBuild)
 	default:
+		shBuild := filepath.Join(formulaPath, "build.sh")
+		if m.file.Exists(shBuild) {
+			cmd = exec.Command(shBuild)
+			break
+		}
 		cmd = exec.Command("make", "build")
 	}
 

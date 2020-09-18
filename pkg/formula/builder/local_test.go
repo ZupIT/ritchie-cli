@@ -32,14 +32,12 @@ func TestBuild(t *testing.T) {
 	tmpDir := os.TempDir()
 	workspacePath := filepath.Join(tmpDir, "ritchie-formulas-test")
 	formulaPath := filepath.Join(tmpDir, "ritchie-formulas-test", "testing", "formula")
-	ritHome := filepath.Join(tmpDir, ".my-rit")
+	ritHome := filepath.Join(tmpDir, ".rit-builder")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	defaultTreeManager := tree.NewGenerator(dirManager, fileManager)
 
-	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
-	_ = dirManager.Create(ritHome)
 	_ = dirManager.Create(workspacePath)
 
 	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
