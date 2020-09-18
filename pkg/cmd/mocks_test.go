@@ -135,19 +135,19 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command
 
 type inputTrueMock struct{}
 
-func (inputTrueMock) Bool(name string, items []string) (bool, error) {
+func (inputTrueMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return true, nil
 }
 
 type inputFalseMock struct{}
 
-func (inputFalseMock) Bool(name string, items []string) (bool, error) {
+func (inputFalseMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return false, nil
 }
 
 type inputBoolErrorMock struct{}
 
-func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
+func (inputBoolErrorMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return false, errors.New("error on boolean list")
 }
 

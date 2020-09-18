@@ -25,7 +25,7 @@ type InputTextValidator interface {
 }
 
 type InputBool interface {
-	Bool(name string, items []string) (bool, error)
+	Bool(name string, items []string, helper ...string) (bool, error)
 }
 
 type InputPassword interface {
