@@ -34,10 +34,12 @@ func NewListCredentialCmd(ss credential.ReaderWriterPather) *cobra.Command {
 	l := &listCredentialCmd{ss}
 
 	cmd := &cobra.Command{
-		Use:     "credential",
-		Short:   "List credentials fields and part of values",
-		Example: "rit list credential",
-		RunE:    l.run(),
+		Use:       "credential",
+		Short:     "List credentials fields and part of values",
+		Example:   "rit list credential",
+		RunE:      l.run(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd

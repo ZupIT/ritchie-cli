@@ -77,10 +77,12 @@ func NewCreateFormulaCmd(
 	}
 
 	cmd := &cobra.Command{
-		Use:     "formula",
-		Short:   "Create a new formula",
-		Example: "rit create formula",
-		RunE:    RunFuncE(c.runStdin(), c.runPrompt()),
+		Use:       "formula",
+		Short:     "Create a new formula",
+		Example:   "rit create formula",
+		RunE:      RunFuncE(c.runStdin(), c.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	cmd.LocalFlags()

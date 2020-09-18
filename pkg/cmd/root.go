@@ -98,6 +98,8 @@ func NewRootCmd(
 		RunE:               runHelp,
 		SilenceErrors:      true,
 		TraverseChildren:   true,
+		ValidArgs:          []string{""},
+		Args:               cobra.OnlyValidArgs,
 	}
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	return cmd

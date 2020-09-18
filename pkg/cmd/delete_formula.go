@@ -88,10 +88,12 @@ func NewDeleteFormulaCmd(
 	}
 
 	cmd := &cobra.Command{
-		Use:     "formula",
-		Short:   "Delete specific formula",
-		Example: "rit delete formula",
-		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
+		Use:       "formula",
+		Short:     "Delete specific formula",
+		Example:   "rit delete formula",
+		RunE:      RunFuncE(d.runStdin(), d.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd

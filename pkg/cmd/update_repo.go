@@ -68,10 +68,12 @@ func NewUpdateRepoCmd(
 	}
 
 	cmd := &cobra.Command{
-		Use:     "repo",
-		Short:   "Update a repository.",
-		Example: "rit update repo",
-		RunE:    RunFuncE(updateRepo.runStdin(), updateRepo.runPrompt()),
+		Use:       "repo",
+		Short:     "Update a repository.",
+		Example:   "rit update repo",
+		RunE:      RunFuncE(updateRepo.runStdin(), updateRepo.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.LocalFlags()
 
