@@ -84,7 +84,7 @@ func TestBuild(t *testing.T) {
 				dirManager:  dirManager,
 				tree:        defaultTreeManager,
 			},
-			want: fmt.Errorf("Build error: \nmake[1]: *** No rule to make target `build'.  Stop.\n \nexit status 2"),
+			want: fmt.Errorf("Build error: \nmake: *** No rule to make target `build'.  Stop.\n \nexit status 2"),
 		},
 		{
 			name: "create dir error",
