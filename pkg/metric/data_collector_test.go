@@ -51,9 +51,10 @@ func Test_Collector(t *testing.T) {
 					GenerateMock: func() (UserId, error) {
 						return "", nil
 					}},
-				file: sMocks.FileReaderCustomMock{func(path string) ([]byte, error) {
-					return []byte(repoJson), nil
-				}},
+				file: sMocks.FileReaderCustomMock{
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte(repoJson), nil
+					}},
 			},
 		},
 		{
@@ -74,9 +75,10 @@ func Test_Collector(t *testing.T) {
 					GenerateMock: func() (UserId, error) {
 						return "", nil
 					}},
-				file: sMocks.FileReaderCustomMock{func(path string) ([]byte, error) {
-					return nil, errors.New("error reading file")
-				}},
+				file: sMocks.FileReaderCustomMock{
+					ReadMock: func(path string) ([]byte, error) {
+						return nil, errors.New("error reading file")
+					}},
 			},
 		},
 		{
@@ -87,9 +89,10 @@ func Test_Collector(t *testing.T) {
 					GenerateMock: func() (UserId, error) {
 						return "", nil
 					}},
-				file: sMocks.FileReaderCustomMock{func(path string) ([]byte, error) {
-					return []byte(`{"someRandomKey":"andTheRespectiveRandomValue"}`), nil
-				}},
+				file: sMocks.FileReaderCustomMock{
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte(`{"someRandomKey":"andTheRespectiveRandomValue"}`), nil
+					}},
 			},
 		},
 	}
