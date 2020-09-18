@@ -20,9 +20,11 @@ import "github.com/spf13/cobra"
 
 func NewShowCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "show SUB_COMMAND",
-		Short:   "Show context",
-		Long:    "Show current context.",
-		Example: "rit show context",
+		Use:       "show SUB_COMMAND",
+		Short:     "Show context and formula-runnner default",
+		Long:      "Show current context and formula-runnner default",
+		Example:   "rit show context",
+		ValidArgs: []string{"context", "formula-runner"},
+		Args:      cobra.OnlyValidArgs,
 	}
 }

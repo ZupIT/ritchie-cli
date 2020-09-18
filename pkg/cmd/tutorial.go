@@ -41,10 +41,12 @@ func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSette
 	o := tutorialCmd{homePath, il, fs}
 
 	cmd := &cobra.Command{
-		Use:   "tutorial",
-		Short: "Enable or disable the tutorial",
-		Long:  "Enable or disable the tutorial",
-		RunE:  RunFuncE(o.runStdin(), o.runPrompt()),
+		Use:       "tutorial",
+		Short:     "Enable or disable the tutorial",
+		Long:      "Enable or disable the tutorial",
+		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	cmd.LocalFlags()

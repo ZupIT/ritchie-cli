@@ -92,10 +92,12 @@ func NewInitCmd(
 	o := initCmd{repo: repo, git: git, tutorial: tutorial, config: config, file: file, InputList: inList, InputBool: inBool}
 
 	cmd := &cobra.Command{
-		Use:   "init",
-		Short: "Initialize rit configuration",
-		Long:  "Initialize rit configuration",
-		RunE:  RunFuncE(o.runStdin(), o.runPrompt()),
+		Use:       "init",
+		Short:     "Initialize rit configuration",
+		Long:      "Initialize rit configuration",
+		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd
