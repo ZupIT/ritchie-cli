@@ -135,7 +135,8 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
 				validate := input.Default == ""
-				inputVal, err = in.Text(input.Label, validate)
+				inputVal, err = in.Text(input.Label, validate, input.Tutorial)
+
 				if inputVal == "" {
 					inputVal = input.Default
 				}
