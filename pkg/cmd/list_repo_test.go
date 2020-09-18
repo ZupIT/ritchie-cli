@@ -18,18 +18,20 @@ package cmd
 
 import (
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func Test_listRepoCmd_runFunc(t *testing.T) {
-	finderTutorial := rtutorial.NewFinder(os.TempDir(), stream.NewFileManager())
+func TestListRepoRunFunc(t *testing.T) {
+	someError := errors.New("some error")
 	type in struct {
 		RepositoryLister formula.RepositoryLister
+		Repos            git.Repositories
+		Tutorial         rtutorial.Finder
 	}
 	tests := []struct {
 		name    string
@@ -43,11 +45,16 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
-								Name: "someRepo1",
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
 							},
 						}, nil
 					},
 				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos:    defaultGitRepositoryMock,
 			},
 			wantErr: false,
 		},
@@ -58,14 +65,42 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
-								Name: "someRepo1",
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo1",
+								Token:    "token",
 							},
 							{
-								Name: "someRepo2",
+								Name:     "someRepo2",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo2",
+								Token:    "token",
 							},
 						}, nil
 					},
 				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos:    defaultGitRepositoryMock,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success when tutorial enabled",
+			in: in{
+				RepositoryLister: RepositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
+							},
+						}, nil
+					},
+				},
+				Tutorial: TutorialFinderMock{},
+				Repos:    defaultGitRepositoryMock,
 			},
 			wantErr: false,
 		},
@@ -74,16 +109,69 @@ func Test_listRepoCmd_runFunc(t *testing.T) {
 			in: in{
 				RepositoryLister: RepositoryListerCustomMock{
 					list: func() (formula.Repos, error) {
-						return nil, errors.New("some error")
+						return nil, someError
 					},
 				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos:    defaultGitRepositoryMock,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Run with success when lasted tag fail",
+			in: in{
+				RepositoryLister: RepositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
+							},
+						}, nil
+					},
+				},
+				Tutorial: TutorialFinderMockReturnDisabled{},
+				Repos: GitRepositoryMock{
+					latestTag: func(info git.RepoInfo) (git.Tag, error) {
+						return git.Tag{}, someError
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Return err when find tutorial fail",
+			in: in{
+				RepositoryLister: RepositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
+							},
+						}, nil
+					},
+				},
+				Tutorial: TutorialFindSetterCustomMock{
+					find: func() (rtutorial.TutorialHolder, error) {
+						return rtutorial.TutorialHolder{}, someError
+					},
+				},
+				Repos: defaultGitRepositoryMock,
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lr := NewListRepoCmd(tt.in.RepositoryLister, finderTutorial)
+			repoProviders := formula.NewRepoProviders()
+			repoProviders.Add("Github", formula.Git{Repos: tt.in.Repos, NewRepoInfo: github.NewRepoInfo})
+
+			lr := NewListRepoCmd(tt.in.RepositoryLister, repoProviders, tt.in.Tutorial)
 			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := lr.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)

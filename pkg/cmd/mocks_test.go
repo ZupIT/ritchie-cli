@@ -20,6 +20,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 
 	"github.com/spf13/cobra"
@@ -349,14 +350,41 @@ func (cscm credSettingsCustomMock) CredentialsPath() string {
 type treeMock struct {
 	tree  formula.Tree
 	error error
+	value string
 }
 
 func (t treeMock) Tree() (map[string]formula.Tree, error) {
+	if t.value != "" {
+		return map[string]formula.Tree{t.value: t.tree}, t.error
+	}
 	return map[string]formula.Tree{"test": t.tree}, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
+}
+
+type treeGeneratorMock struct {
+}
+
+func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
+	return formula.Tree{
+		Commands: api.Commands{
+			{
+				Id:     "root_group",
+				Parent: "root",
+				Usage:  "group",
+				Help:   "group for add",
+			},
+			{
+				Id:      "root_group_verb",
+				Parent:  "root_group",
+				Usage:   "verb",
+				Help:    "verb for add",
+				Formula: true,
+			},
+		},
+	}, nil
 }
 
 type GitRepositoryMock struct {
@@ -412,6 +440,12 @@ func (t TutorialFindSetterCustomMock) Find() (rtutorial.TutorialHolder, error) {
 
 func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHolder, error) {
 	return t.set(tutorial)
+}
+
+type TutorialFinderMockReturnDisabled struct{}
+
+func (TutorialFinderMockReturnDisabled) Find() (rtutorial.TutorialHolder, error) {
+	return rtutorial.TutorialHolder{Current: "disabled"}, nil
 }
 
 type DirManagerCustomMock struct {
@@ -509,4 +543,17 @@ func (c ConfigRunnerMock) Create(runType formula.RunnerType) error {
 
 func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
 	return c.runType, c.findErr
+}
+
+type RepositoryListUpdaterCustomMock struct {
+	list   func() (formula.Repos, error)
+	update func(name formula.RepoName, version formula.RepoVersion) error
+}
+
+func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
+	return m.list()
+}
+
+func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion) error {
+	return m.update(name, version)
 }

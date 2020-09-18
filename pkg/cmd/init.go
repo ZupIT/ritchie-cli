@@ -50,17 +50,17 @@ and feature use statistics and crash reports?`
 In order to run formulas locally, you must have the formula language installed on your machine,
 if you don't want to install choose to run the formulas inside the docker.
 `
-)
-
-var (
-	addRepoInfo = `You can keep the configuration without adding the community repository,
+	addRepoInfo = "\n" + `You can keep the configuration without adding the community repository,
  but you will need to provide a git repo with the formulas templates and add them with 
  rit add repo command, naming this repository obligatorily as "commons".
  
- See how to do this on the example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`
+ See how to do this on the example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]` + "\n"
+	CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
+)
+
+var (
 	errMsg             = prompt.Yellow("It was not possible to add the commons repository at this time, please try again later.")
 	ErrInitCommonsRepo = errors.New(errMsg)
-	CommonsRepoURL     = "https://github.com/ZupIT/ritchie-formulas"
 	ErrInvalidRunType  = fmt.Errorf("invalid formula run type, these run types are enabled [%v]", strings.Join(formula.RunnerTypes, ", "))
 )
 
@@ -92,10 +92,12 @@ func NewInitCmd(
 	o := initCmd{repo: repo, git: git, tutorial: tutorial, config: config, file: file, InputList: inList, InputBool: inBool}
 
 	cmd := &cobra.Command{
-		Use:   "init",
-		Short: "Initialize rit configuration",
-		Long:  "Initialize rit configuration",
-		RunE:  RunFuncE(o.runStdin(), o.runPrompt()),
+		Use:       "init",
+		Short:     "Initialize rit configuration",
+		Long:      "Initialize rit configuration",
+		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd
@@ -144,9 +146,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if !init.AddCommons {
-			fmt.Println()
 			prompt.Warning(addRepoInfo)
-			fmt.Println()
 			fmt.Println(addRepoMsg)
 		} else {
 			repo := formula.Repo{
@@ -275,12 +275,11 @@ func (in initCmd) addCommonsRepo() error {
 	if err != nil {
 		return err
 	}
-
+	metric.CommonsRepoAdded = "yes"
 	if !choose {
-		fmt.Println()
 		prompt.Warning(addRepoInfo)
-		fmt.Println()
 		fmt.Println(addRepoMsg)
+		metric.CommonsRepoAdded = "no"
 		return nil
 	}
 

@@ -19,13 +19,17 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+)
+
+const (
+	questionSelectARepo = "Select a repository to update: "
+	questionAVersion    = "Select your new version: "
 )
 
 type updateRepoCmd struct {
@@ -64,10 +68,12 @@ func NewUpdateRepoCmd(
 	}
 
 	cmd := &cobra.Command{
-		Use:     "repo",
-		Short:   "Update a repository.",
-		Example: "rit update repo",
-		RunE:    RunFuncE(updateRepo.runStdin(), updateRepo.runPrompt()),
+		Use:       "repo",
+		Short:     "Update a repository.",
+		Example:   "rit update repo",
+		RunE:      RunFuncE(updateRepo.runStdin(), updateRepo.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.LocalFlags()
 
@@ -86,7 +92,7 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			reposName = append(reposName, repos[i].Name.String())
 		}
 
-		name, err := up.List("Select a repository to update: ", reposName)
+		name, err := up.List(questionSelectARepo, reposName)
 		if err != nil {
 			return err
 		}
@@ -107,7 +113,7 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		version, err := up.List("Select your new version:", tags.Names())
+		version, err := up.List(questionAVersion, tags.Names())
 		if err != nil {
 			return err
 		}
@@ -127,8 +133,7 @@ func (up updateRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		r := formula.Repo{}
 
-		err := stdin.ReadJson(os.Stdin, &r)
-		if err != nil {
+		if err := stdin.ReadJson(cmd.InOrStdin(), &r); err != nil {
 			return err
 		}
 

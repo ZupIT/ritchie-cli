@@ -53,10 +53,12 @@ func NewUpgradeCmd(
 	}
 
 	return &cobra.Command{
-		Use:   "upgrade",
-		Short: "Update rit version",
-		Long:  `Update rit version to last stable version.`,
-		RunE:  u.runFunc(),
+		Use:       "upgrade",
+		Short:     "Update rit version",
+		Long:      `Update rit version to last stable version.`,
+		RunE:      u.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 
@@ -88,7 +90,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 
 		upgradeUrl := u.Url(runtime.GOOS)
 		if err := u.Run(upgradeUrl); err != nil {
-			return prompt.NewError(err.Error()+"\n")
+			return prompt.NewError(err.Error() + "\n")
 		}
 
 		prompt.Success("Rit upgraded with success")

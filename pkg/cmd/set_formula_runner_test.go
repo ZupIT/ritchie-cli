@@ -46,7 +46,7 @@ func Test_setFormulaRunnerCmd(t *testing.T) {
 				},
 				config: ConfigRunnerMock{},
 			},
-			wantErr: false,
+			wantErr:    false,
 			inputStdin: "{\"runType\": \"local\"}\n",
 		},
 		{
@@ -61,7 +61,7 @@ func Test_setFormulaRunnerCmd(t *testing.T) {
 					createErr: errors.New("error to create config"),
 				},
 			},
-			wantErr: true,
+			wantErr:    true,
 			inputStdin: "{\"runType\": \"local\"}\n",
 		},
 		{
@@ -86,7 +86,7 @@ func Test_setFormulaRunnerCmd(t *testing.T) {
 				},
 				config: ConfigRunnerMock{},
 			},
-			wantErr: true,
+			wantErr:    true,
 			inputStdin: "{\"runType\": \"invalid\"}\n",
 		},
 	}

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -56,17 +57,22 @@ import (
 )
 
 func main() {
+	startTime := time.Now()
 	rootCmd := buildCommands()
 	err := rootCmd.Execute()
 	if err != nil {
-		sendMetric(err.Error())
+		sendMetric(executionTime(startTime), err.Error())
 		errFmt := fmt.Sprintf("%+v", err)
 		errFmt = prompt.Red(errFmt)
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %s\n", errFmt)
 		os.Exit(1)
 	}
+	sendMetric(executionTime(startTime))
+}
 
-	sendMetric()
+func executionTime(startTime time.Time) float64{
+	endTime := time.Now()
+	return endTime.Sub(startTime).Seconds()
 }
 
 func buildCommands() *cobra.Command {
@@ -190,7 +196,7 @@ func buildCommands() *cobra.Command {
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	listRepoCmd := cmd.NewListRepoCmd(repoLister, tutorialFinder)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	listWorkspaceCmd := cmd.NewListWorkspaceCmd(formulaWorkspace, tutorialFinder)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
@@ -198,6 +204,7 @@ func buildCommands() *cobra.Command {
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
+	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaLocalBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
@@ -208,7 +215,7 @@ func buildCommands() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd)
+	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	listCmd.AddCommand(listWorkspaceCmd)
@@ -269,7 +276,7 @@ func buildCommands() *cobra.Command {
 	return rootCmd
 }
 
-func sendMetric(err ...string) {
+func sendMetric(commandExecutionTime float64, err ...string) {
 	metricEnable := metric.NewChecker(stream.NewFileManager())
 	if metricEnable.Check() {
 		var collectData metric.APIData
@@ -277,7 +284,7 @@ func sendMetric(err ...string) {
 		userIdManager := metric.NewUserIdGenerator()
 		data := metric.NewDataCollector(userIdManager)
 
-		collectData, _ = data.Collect(cmd.Version, err...)
+		collectData, _ = data.Collect(commandExecutionTime, cmd.Version, err...)
 		metricManager.Send(collectData)
 	}
 }
