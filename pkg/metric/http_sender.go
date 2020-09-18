@@ -19,7 +19,6 @@ package metric
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -39,7 +38,6 @@ func NewHttpSender(url string, client *http.Client) SendManagerHttp {
 
 func (sm SendManagerHttp) Send(APIData APIData) {
 	reqBody, err := json.Marshal(&APIData)
-	fmt.Println(string(reqBody))
 	if err != nil {
 		return
 	}
