@@ -43,6 +43,7 @@ func TestRun(t *testing.T) {
 
 	makeBuilder := builder.NewBuildMake()
 	batBuilder := builder.NewBuildBat(fileManager)
+	shellBuilder := builder.NewBuildShell()
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
@@ -51,7 +52,7 @@ func TestRun(t *testing.T) {
 	_ = streams.Unzip(zipFile, repoPath)
 
 	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
-	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, dirManager, fileManager)
+	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputRunner := runner.NewInput(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputMock{}, inputMock{})
 

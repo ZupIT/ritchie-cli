@@ -38,7 +38,7 @@ func TestPreRun(t *testing.T) {
 	ritHomeName := ".rit-pre-run-docker"
 	ritHome := filepath.Join(tmpDir, ritHomeName)
 	repoPath := filepath.Join(ritHome, "repos", "commons")
-	dockerBuilder := builder.NewBuildDocker()
+	dockerBuilder := builder.NewBuildDocker(fileManager)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)

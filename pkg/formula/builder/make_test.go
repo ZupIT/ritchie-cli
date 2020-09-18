@@ -4,23 +4,12 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 func TestBuildMake(t *testing.T) {
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
-	ritHome := filepath.Join(tmpDir, ".rit-make")
+	ritHome := filepath.Join(tmpDir, ".rit-builder")
 	repoPath := filepath.Join(ritHome, "repos", "commons")
-
-	_ = dirManager.Remove(ritHome)
-	_ = dirManager.Remove(repoPath)
-	_ = dirManager.Create(repoPath)
-	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
-	_ = streams.Unzip(zipFile, repoPath)
 
 	buildMake := NewBuildMake()
 
@@ -64,7 +53,7 @@ func TestBuildMake(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := buildMake.Build(tt.in.formPath)
 
-			if tt.out.wantErr && got == nil {
+			if got != nil && !tt.out.wantErr {
 				t.Errorf("Run(%s) got %v, want not nil error", tt.name, got)
 			}
 		})

@@ -70,7 +70,7 @@ func main() {
 	sendMetric(executionTime(startTime))
 }
 
-func executionTime(startTime time.Time) float64{
+func executionTime(startTime time.Time) float64 {
 	endTime := time.Now()
 	return endTime.Sub(startTime).Seconds()
 }
@@ -129,14 +129,15 @@ func buildCommands() *cobra.Command {
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
 	formBuildMake := builder.NewBuildMake()
+	formBuildSh := builder.NewBuildShell()
 	formBuildBat := builder.NewBuildBat(fileManager)
-	formBuildDocker := builder.NewBuildDocker()
+	formBuildDocker := builder.NewBuildDocker(fileManager)
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
 
-	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, dirManager, fileManager)
+	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
 	formulaLocalRun := local.NewRunner(postRunner, inputManager, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)

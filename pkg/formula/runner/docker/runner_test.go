@@ -41,7 +41,7 @@ func TestRun(t *testing.T) {
 	ritHome := filepath.Join(tmpDir, ".rit-runner-docker")
 	repoPath := filepath.Join(ritHome, "repos", "commons")
 
-	dockerBuilder := builder.NewBuildDocker()
+	dockerBuilder := builder.NewBuildDocker(fileManager)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
