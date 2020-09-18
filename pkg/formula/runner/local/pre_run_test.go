@@ -49,11 +49,12 @@ func TestPreRun(t *testing.T) {
 	_ = json.Unmarshal([]byte(configJson), &config)
 
 	type in struct {
-		def       formula.Definition
-		makeBuild formula.MakeBuilder
-		batBuild  formula.BatBuilder
-		file      stream.FileReadExister
-		dir       stream.DirCreateListCopyRemover
+		def        formula.Definition
+		makeBuild  formula.MakeBuilder
+		batBuild   formula.BatBuilder
+		shellBuild formula.ShellBuilder
+		file       stream.FileReadExister
+		dir        stream.DirCreateListCopyRemover
 	}
 
 	type out struct {
@@ -81,6 +82,11 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
+				shellBuild: shellBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
 				file: fileManager,
 				dir:  dirManager,
 			},
@@ -104,6 +110,11 @@ func TestPreRun(t *testing.T) {
 				batBuild: batBuildMock{
 					build: func(formulaPath string) error {
 						return builder.ErrBuildFormulaMakefile
+					},
+				},
+				shellBuild: shellBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
 				file: fileManager,
@@ -161,6 +172,11 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
+				shellBuild: shellBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
 				file: fileManager,
 				dir:  dirManagerMock{createErr: errors.New("error to create dir")},
 			},
@@ -179,6 +195,11 @@ func TestPreRun(t *testing.T) {
 					},
 				},
 				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				shellBuild: shellBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
@@ -205,6 +226,11 @@ func TestPreRun(t *testing.T) {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
+				shellBuild: shellBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
 				file: fileManager,
 				dir:  dirManagerMock{},
 			},
@@ -226,6 +252,11 @@ func TestPreRun(t *testing.T) {
 						return builder.ErrBuildFormulaMakefile
 					},
 				},
+				shellBuild: shellBuildMock{
+					build: func(formulaPath string) error {
+						return builder.ErrBuildFormulaMakefile
+					},
+				},
 				file: fileManager,
 				dir:  dirManagerMock{removeErr: errors.New("remove bin dir error")},
 			},
@@ -241,7 +272,7 @@ func TestPreRun(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			_ = dirManager.Remove(filepath.Join(in.def.FormulaPath(ritHome), "bin"))
-			preRun := NewPreRun(ritHome, in.makeBuild, in.batBuild, in.dir, in.file)
+			preRun := NewPreRun(ritHome, in.makeBuild, in.batBuild, in.shellBuild, in.dir, in.file)
 			got, err := preRun.PreRun(in.def)
 
 			if tt.out.wantErr {
@@ -277,6 +308,14 @@ type batBuildMock struct {
 
 func (ba batBuildMock) Build(formulaPath string) error {
 	return ba.build(formulaPath)
+}
+
+type shellBuildMock struct {
+	build func(formulaPath string) error
+}
+
+func (sh shellBuildMock) Build(formulaPath string) error {
+	return sh.build(formulaPath)
 }
 
 type dirManagerMock struct {

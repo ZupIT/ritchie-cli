@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -41,6 +42,7 @@ type PreRunManager struct {
 	ritchieHome string
 	make        formula.MakeBuilder
 	bat         formula.BatBuilder
+	shell       formula.ShellBuilder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
 }
@@ -49,6 +51,7 @@ func NewPreRun(
 	ritchieHome string,
 	make formula.MakeBuilder,
 	bat formula.BatBuilder,
+	shell formula.ShellBuilder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
 ) PreRunManager {
@@ -56,6 +59,7 @@ func NewPreRun(
 		ritchieHome: ritchieHome,
 		make:        make,
 		bat:         bat,
+		shell:       shell,
 		dir:         dir,
 		file:        file,
 	}
@@ -111,14 +115,21 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 }
 
 func (pr PreRunManager) buildFormula(formulaPath string) error {
-	if runtime.GOOS == osutil.Windows { // Build formula local with build.bat
+	if runtime.GOOS == osutil.Windows { // Build formula with build.bat
 		if err := pr.bat.Build(formulaPath); err != nil {
 			return err
 		}
 		return nil
 	}
 
-	if err := pr.make.Build(formulaPath); err != nil { // Build formula local with Makefile
+	buildPath := filepath.Join(formulaPath, "build.sh")
+	if pr.file.Exists(buildPath) { // Build formula with build.sh
+		if err := pr.shell.Build(formulaPath); err != nil {
+			return err
+		}
+	}
+
+	if err := pr.make.Build(formulaPath); err != nil { // Build formula with Makefile
 		return err
 	}
 
