@@ -17,41 +17,73 @@
 package metric
 
 import (
+	"encoding/json"
 	"math"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 var (
-	_ Collector = DataCollectorManager{}
-	CommonsRepoAdded = ""
-	RepoAdded = ""
-	)
+	_                Collector = DataCollectorManager{}
+	CommonsRepoAdded           = ""
+	RepoName                   = ""
+)
 
 type DataCollectorManager struct {
-	userId UserIdGenerator
+	userId         UserIdGenerator
+	ritchieHomeDir string
+	file           stream.FileReader
 }
 
-func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
+func NewDataCollector(
+	userId UserIdGenerator,
+	ritchieHomeDir string,
+	file stream.FileReader,
+) DataCollectorManager {
 	return DataCollectorManager{
-		userId: userId,
+		userId:         userId,
+		ritchieHomeDir: ritchieHomeDir,
+		file:           file,
 	}
 }
 
 func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error) {
 	userId, err := d.userId.Generate()
-	commandExecutionTime = math.Round(commandExecutionTime*100)/100
 	if err != nil {
 		return APIData{}, err
 	}
 
+	commandExecutionTime = math.Round(commandExecutionTime*100) / 100
+
+	repoBytes, err := d.file.Read(filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"))
+	if err != nil {
+		return APIData{}, err
+	}
+
+	repos := formula.Repos{}
+	err = json.Unmarshal(repoBytes, &repos)
+	if err != nil {
+		return APIData{}, err
+	}
+
+	repo := formula.Repo{}
+	for _, r := range repos {
+		if string(r.Name) == RepoName && r.Token == "" {
+			repo = r
+		}
+	}
+
 	data := Data{
-		CommandError: strings.Join(commandError, " "),
-		CommonsRepoAdded: CommonsRepoAdded,
+		CommandError:         strings.Join(commandError, " "),
+		CommonsRepoAdded:     CommonsRepoAdded,
 		CommandExecutionTime: commandExecutionTime,
-		RepoAdded: RepoAdded,
+		FormulaRepo:          repo,
 	}
 
 	metric := APIData{

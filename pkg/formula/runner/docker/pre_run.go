@@ -29,6 +29,7 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -179,6 +180,8 @@ func buildRunImg(def formula.Definition) (string, error) {
 	if len(containerId) > 200 {
 		containerId = containerId[:200]
 	}
+
+	metric.RepoName = def.RepoName
 
 	args := []string{"build", "-t", containerId, "."}
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."

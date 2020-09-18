@@ -24,7 +24,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -122,7 +121,6 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-		metric.RepoAdded = url
 
 		isPrivate, err := ad.Bool("Is a private repository?", []string{"no", "yes"})
 		if err != nil {
@@ -131,7 +129,6 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 
 		var token string
 		if isPrivate {
-			metric.RepoAdded = "private repo"
 			token, err = ad.Password("Personal access tokens:")
 			if err != nil {
 				return err
