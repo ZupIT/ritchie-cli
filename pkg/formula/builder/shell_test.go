@@ -52,7 +52,6 @@ func TestBuildShell(t *testing.T) {
 
 	type out struct {
 		wantErr bool
-		err     error
 	}
 
 	tests := []struct {
