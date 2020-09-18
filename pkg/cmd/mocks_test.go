@@ -117,13 +117,13 @@ func (inputIntErrorMock) Int(name string, helper ...string) (int64, error) {
 
 type inputPasswordMock struct{}
 
-func (inputPasswordMock) Password(label string) (string, error) {
+func (inputPasswordMock) Password(label string, helper ...string) (string, error) {
 	return "s3cr3t", nil
 }
 
 type inputPasswordErrorMock struct{}
 
-func (inputPasswordErrorMock) Password(label string) (string, error) {
+func (inputPasswordErrorMock) Password(label string, helper ...string) (string, error) {
 	return "", errors.New("password error")
 }
 

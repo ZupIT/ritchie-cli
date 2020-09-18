@@ -211,7 +211,7 @@ func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 	return i.boolean, i.err
 }
 
-func (i inputMock) Password(string) (string, error) {
+func (i inputMock) Password(string, ...string) (string, error) {
 	return i.text, i.err
 }
 

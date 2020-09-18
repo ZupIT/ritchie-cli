@@ -145,7 +145,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			valBool, err = in.Bool(input.Label, items, input.Tutorial)
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
-			inputVal, err = in.Password(input.Label)
+			inputVal, err = in.Password(input.Label, input.Tutorial)
 		default:
 			inputVal, err = in.resolveIfReserved(input)
 		}

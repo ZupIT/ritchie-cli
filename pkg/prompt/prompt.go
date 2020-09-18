@@ -29,7 +29,7 @@ type InputBool interface {
 }
 
 type InputPassword interface {
-	Password(label string) (string, error)
+	Password(label string, helper ...string) (string, error)
 }
 
 type InputMultiline interface {
