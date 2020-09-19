@@ -69,7 +69,12 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 	var fieldsDefault fieldsTestDeleteFormulaCmd = fieldsTestDeleteFormulaCmd{
 		workspaceManager: WorkspaceAddListerCustomMock{
 			list: func() (formula.Workspaces, error) {
-				return formula.Workspaces{}, nil
+				return formula.Workspaces{
+					"Default": defaultWorkspace,
+				}, nil
+			},
+			add: func(workspace formula.Workspace) error {
+				return nil
 			},
 		},
 		directory: DirManagerCustomMock{
@@ -94,7 +99,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				if name == questionSelectFormulaGroup {
 					return items[0], nil
 				}
-				return "Default (/tmp/ritchie-formulas-local)", nil
+				return fmt.Sprintf("Default (%s)", defaultWorkspace), nil
 			},
 		},
 		fileManager: stream.FileManager{},
