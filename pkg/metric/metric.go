@@ -55,7 +55,7 @@ type Data struct {
 	CommandError         string       `json:"commandError,omitempty"`
 	CommonsRepoAdded     string       `json:"commonsRepoAdded,omitempty"`
 	CommandExecutionTime float64      `json:"commandExecutionTime"`
-	MetricsAcceptance    string  `json:"metricsAcceptance,omitempty"`
+	MetricsAcceptance    string       `json:"metricsAcceptance,omitempty"`
 	FormulaRepo          formula.Repo `json:"repo,omitempty"`
 }
 
