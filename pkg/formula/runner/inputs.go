@@ -135,16 +135,17 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
 				validate := input.Default == ""
-				inputVal, err = in.Text(input.Label, validate)
+				inputVal, err = in.Text(input.Label, validate, input.Tutorial)
+
 				if inputVal == "" {
 					inputVal = input.Default
 				}
 			}
 		case "bool":
-			valBool, err = in.Bool(input.Label, items)
+			valBool, err = in.Bool(input.Label, items, input.Tutorial)
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
-			inputVal, err = in.Password(input.Label)
+			inputVal, err = in.Password(input.Label, input.Tutorial)
 		default:
 			inputVal, err = in.resolveIfReserved(input)
 		}
@@ -206,10 +207,10 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 		}
 		items = append(items, newLabel)
 	}
-	inputVal, err := in.List(input.Label, items)
+	inputVal, err := in.List(input.Label, items, input.Tutorial)
 	if inputVal == newLabel {
 		validate := len(input.Default) == 0
-		inputVal, err = in.Text(input.Label, validate)
+		inputVal, err = in.Text(input.Label, validate, input.Tutorial)
 		if len(inputVal) == 0 {
 			inputVal = input.Default
 		}
@@ -265,7 +266,7 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
 		if strings.ToLower(components[0]) == variable {
-			value = strings.ToLower(components[1])
+			value = components[1]
 			break
 		}
 	}

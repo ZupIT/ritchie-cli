@@ -49,6 +49,7 @@ type (
 		Items     []string  `json:"items"`
 		Cache     Cache     `json:"cache"`
 		Condition Condition `json:"condition"`
+		Tutorial  string    `json:"tutorial"`
 	}
 
 	Cache struct {

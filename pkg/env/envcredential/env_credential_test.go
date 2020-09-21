@@ -74,6 +74,6 @@ type passwordMock struct {
 	value string
 }
 
-func (pass passwordMock) Password(string) (string, error) {
+func (pass passwordMock) Password(string, ...string) (string, error) {
 	return pass.value, nil
 }
