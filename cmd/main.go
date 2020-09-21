@@ -75,6 +75,8 @@ func executionTime(startTime time.Time) float64{
 	return endTime.Sub(startTime).Seconds()
 }
 
+var Data metric.DataCollectorManager
+
 func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
@@ -100,6 +102,9 @@ func buildCommands() *cobra.Command {
 	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
+
+	userIdManager := metric.NewUserIdGenerator()
+	Data = metric.NewDataCollector(userIdManager, ritchieHomeDir, fileManager)
 
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
@@ -281,10 +286,7 @@ func sendMetric(commandExecutionTime float64, err ...string) {
 	if metricEnable.Check() {
 		var collectData metric.APIData
 		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
-		userIdManager := metric.NewUserIdGenerator()
-		data := metric.NewDataCollector(userIdManager)
-
-		collectData, _ = data.Collect(commandExecutionTime, cmd.Version, err...)
+		collectData, _ = Data.Collect(commandExecutionTime, cmd.Version, err...)
 		metricManager.Send(collectData)
 	}
 }
