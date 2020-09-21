@@ -106,8 +106,10 @@ func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		if err := d.workspace.Delete(wspace); err != nil {
-			return err
+		if wspace.Dir != defaultWorkspace {
+			if err := d.workspace.Delete(wspace); err != nil {
+				return err
+			}
 		}
 
 		prompt.Success("✔ Workspace successfully deleted!")
