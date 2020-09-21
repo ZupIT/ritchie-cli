@@ -236,6 +236,7 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
 		metricManager.Send(metric.APIData{
 			Id: "rit_init",
+			Timestamp: time.Now(),
 			Data: metric.Data{
 				MetricsAcceptance: responseToWrite},
 			},
