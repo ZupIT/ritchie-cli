@@ -292,7 +292,7 @@
                 "action": "main"
             }
         ],
-        "result": "Delete contexts, repositories and formulas."
+        "result": "Delete contexts, repositories, formulas and workspaces"
     },
     {
         "entry": "Show",
