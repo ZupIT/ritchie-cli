@@ -29,14 +29,14 @@ import (
 
 type listErrorMock struct{}
 
-func (listErrorMock) List(name string, items []string) (string, error) {
+func (listErrorMock) List(name string, items []string, helper ...string) (string, error) {
 	workspace := filepath.Join(os.TempDir(), "formulas-ritchie")
 	return fmt.Sprintf("Formulas-Ritchie (%s)", workspace), nil
 }
 
 type listMock struct{}
 
-func (listMock) List(name string, items []string) (string, error) {
+func (listMock) List(name string, items []string, helper ...string) (string, error) {
 	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
 	return fmt.Sprintf("Default (%s)", workspace), nil
 }
