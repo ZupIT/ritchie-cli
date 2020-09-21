@@ -16,6 +16,14 @@
 
 package stream
 
+type FileReaderCustomMock struct {
+	ReadMock   func(path string) ([]byte, error)
+}
+
+func (fmr FileReaderCustomMock) Read(path string) ([]byte, error) {
+	return fmr.ReadMock(path)
+}
+
 type FileReadExisterCustomMock struct {
 	ReadMock   func(path string) ([]byte, error)
 	ExistsMock func(path string) bool

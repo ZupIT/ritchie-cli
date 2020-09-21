@@ -21,13 +21,13 @@ import (
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 var (
-	ServerRestURL    = ""
-	ServerGrpcURL    = ""
-	FilePath         = filepath.Join(api.RitchieHomeDir(), "metrics")
-	CommonsRepoAdded = ""
+	ServerRestURL = ""
+	ServerGrpcURL = ""
+	FilePath      = filepath.Join(api.RitchieHomeDir(), "metrics")
 )
 
 type Id string
@@ -52,10 +52,11 @@ type APIData struct {
 }
 
 type Data struct {
-	CommandError         string  `json:"commandError"`
-	CommonsRepoAdded     string  `json:"commonsRepoAdded,omitempty"`
-	CommandExecutionTime float64 `json:"commandExecutionTime"`
+	CommandError         string       `json:"commandError,omitempty"`
+	CommonsRepoAdded     string       `json:"commonsRepoAdded,omitempty"`
+	CommandExecutionTime float64      `json:"commandExecutionTime"`
 	MetricsAcceptance    string  `json:"metricsAcceptance,omitempty"`
+	FormulaRepo          formula.Repo `json:"repo,omitempty"`
 }
 
 type Sender interface {
