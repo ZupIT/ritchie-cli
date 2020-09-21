@@ -33,10 +33,12 @@ func NewShowFormulaRunnerCmd(c formula.ConfigRunner) *cobra.Command {
 	s := showFormulaRunnerCmd{c}
 
 	return &cobra.Command{
-		Use:     "formula-runner",
-		Short:   "Show the default formula runner",
-		Example: "rit show formula-runner",
-		RunE:    s.runFunc(),
+		Use:       "formula-runner",
+		Short:     "Show the default formula runner",
+		Example:   "rit show formula-runner",
+		RunE:      s.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"k8s.io/kubectl/pkg/util/templates"
 
@@ -56,18 +57,25 @@ import (
 )
 
 func main() {
+	startTime := time.Now()
 	rootCmd := buildCommands()
 	err := rootCmd.Execute()
 	if err != nil {
-		sendMetric(err.Error())
+		sendMetric(executionTime(startTime), err.Error())
 		errFmt := fmt.Sprintf("%+v", err)
 		errFmt = prompt.Red(errFmt)
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %s\n", errFmt)
 		os.Exit(1)
 	}
-
-	sendMetric()
+	sendMetric(executionTime(startTime))
 }
+
+func executionTime(startTime time.Time) float64 {
+	endTime := time.Now()
+	return endTime.Sub(startTime).Seconds()
+}
+
+var Data metric.DataCollectorManager
 
 func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
@@ -94,6 +102,9 @@ func buildCommands() *cobra.Command {
 	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
+
+	userIdManager := metric.NewUserIdGenerator()
+	Data = metric.NewDataCollector(userIdManager, ritchieHomeDir, fileManager)
 
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
@@ -123,14 +134,15 @@ func buildCommands() *cobra.Command {
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
 	formBuildMake := builder.NewBuildMake()
+	formBuildSh := builder.NewBuildShell()
 	formBuildBat := builder.NewBuildBat(fileManager)
-	formBuildDocker := builder.NewBuildDocker()
+	formBuildDocker := builder.NewBuildDocker(fileManager)
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
 
-	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, dirManager, fileManager)
+	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
 	formulaLocalRun := local.NewRunner(postRunner, inputManager, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
@@ -170,7 +182,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder)
+	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder, inputList, fileManager)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
@@ -190,13 +202,14 @@ func buildCommands() *cobra.Command {
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	listRepoCmd := cmd.NewListRepoCmd(repoLister, tutorialFinder)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
+	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaLocalBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
@@ -207,7 +220,7 @@ func buildCommands() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd)
+	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd, setFormulaRunnerCmd)
@@ -267,15 +280,12 @@ func buildCommands() *cobra.Command {
 	return rootCmd
 }
 
-func sendMetric(err ...string) {
+func sendMetric(commandExecutionTime float64, err ...string) {
 	metricEnable := metric.NewChecker(stream.NewFileManager())
 	if metricEnable.Check() {
 		var collectData metric.APIData
 		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
-		userIdManager := metric.NewUserIdGenerator()
-		data := metric.NewDataCollector(userIdManager)
-
-		collectData, _ = data.Collect(cmd.Version, err...)
+		collectData, _ = Data.Collect(commandExecutionTime, cmd.Version, err...)
 		metricManager.Send(collectData)
 	}
 }

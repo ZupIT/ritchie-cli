@@ -17,6 +17,7 @@
 package api
 
 import (
+	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -39,6 +40,7 @@ var (
 		{Parent: "root", Usage: "delete"},
 		{Parent: "root_delete", Usage: "context"},
 		{Parent: "root_delete", Usage: "repo"},
+		{Parent: "root_delete", Usage: "formula"},
 		{Parent: "root", Usage: "help"},
 		{Parent: "root", Usage: "init"},
 		{Parent: "root", Usage: "list"},
@@ -96,13 +98,23 @@ func (t TermInputType) ToLower() string {
 	return strings.ToLower(t.String())
 }
 
-// UserHomeDir returns the home dir of the user
+// UserHomeDir returns the home dir of the user,
+// if rit is called with sudo, it returns the same path
 func UserHomeDir() string {
-	usr, err := user.Current()
+	if os.Geteuid() == 0 {
+		username := os.Getenv("SUDO_USER")
+		if username != "" {
+			if u, err := user.Lookup(username); err == nil {
+				return u.HomeDir
+			}
+		}
+	}
+
+	usr, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
-	return usr.HomeDir
+	return usr
 }
 
 // RitchieHomeDir returns the home dir of the ritchie

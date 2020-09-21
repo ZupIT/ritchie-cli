@@ -20,6 +20,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 }
 
 type inputTextValidatorCustomMock struct {
-	text func (name string, validate func(interface{}) error, helper ...string) (string, error)
+	text func(name string, validate func(interface{}) error, helper ...string) (string, error)
 }
 
 func (i inputTextValidatorCustomMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
@@ -116,13 +117,13 @@ func (inputIntErrorMock) Int(name string, helper ...string) (int64, error) {
 
 type inputPasswordMock struct{}
 
-func (inputPasswordMock) Password(label string) (string, error) {
+func (inputPasswordMock) Password(label string, helper ...string) (string, error) {
 	return "s3cr3t", nil
 }
 
 type inputPasswordErrorMock struct{}
 
-func (inputPasswordErrorMock) Password(label string) (string, error) {
+func (inputPasswordErrorMock) Password(label string, helper ...string) (string, error) {
 	return "", errors.New("password error")
 }
 
@@ -134,25 +135,25 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command
 
 type inputTrueMock struct{}
 
-func (inputTrueMock) Bool(name string, items []string) (bool, error) {
+func (inputTrueMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return true, nil
 }
 
 type inputFalseMock struct{}
 
-func (inputFalseMock) Bool(name string, items []string) (bool, error) {
+func (inputFalseMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return false, nil
 }
 
 type inputBoolErrorMock struct{}
 
-func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
+func (inputBoolErrorMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return false, errors.New("error on boolean list")
 }
 
 type inputListMock struct{}
 
-func (inputListMock) List(name string, items []string) (string, error) {
+func (inputListMock) List(name string, items []string, helper ...string) (string, error) {
 	return "item-mocked", nil
 }
 
@@ -160,13 +161,13 @@ type inputListCustomMock struct {
 	list func(name string, items []string) (string, error)
 }
 
-func (m inputListCustomMock) List(name string, items []string) (string, error) {
+func (m inputListCustomMock) List(name string, items []string, helper ...string) (string, error) {
 	return m.list(name, items)
 }
 
 type inputListErrorMock struct{}
 
-func (inputListErrorMock) List(name string, items []string) (string, error) {
+func (inputListErrorMock) List(name string, items []string, helper ...string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 
@@ -349,14 +350,41 @@ func (cscm credSettingsCustomMock) CredentialsPath() string {
 type treeMock struct {
 	tree  formula.Tree
 	error error
+	value string
 }
 
 func (t treeMock) Tree() (map[string]formula.Tree, error) {
+	if t.value != "" {
+		return map[string]formula.Tree{t.value: t.tree}, t.error
+	}
 	return map[string]formula.Tree{"test": t.tree}, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
+}
+
+type treeGeneratorMock struct {
+}
+
+func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
+	return formula.Tree{
+		Commands: api.Commands{
+			{
+				Id:     "root_group",
+				Parent: "root",
+				Usage:  "group",
+				Help:   "group for add",
+			},
+			{
+				Id:      "root_group_verb",
+				Parent:  "root_group",
+				Usage:   "verb",
+				Help:    "verb for add",
+				Formula: true,
+			},
+		},
+	}, nil
 }
 
 type GitRepositoryMock struct {
@@ -414,10 +442,17 @@ func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHo
 	return t.set(tutorial)
 }
 
+type TutorialFinderMockReturnDisabled struct{}
+
+func (TutorialFinderMockReturnDisabled) Find() (rtutorial.TutorialHolder, error) {
+	return rtutorial.TutorialHolder{Current: "disabled"}, nil
+}
+
 type DirManagerCustomMock struct {
 	exists func(dir string) bool
 	list   func(dir string, hiddenDir bool) ([]string, error)
 	isDir  func(dir string) bool
+	create func(dir string) error
 }
 
 func (d DirManagerCustomMock) Exists(dir string) bool {
@@ -430,6 +465,10 @@ func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error)
 
 func (d DirManagerCustomMock) IsDir(dir string) bool {
 	return d.isDir(dir)
+}
+
+func (d DirManagerCustomMock) Create(dir string) error {
+	return d.create(dir)
 }
 
 type LocalBuilderMock struct {
@@ -509,4 +548,17 @@ func (c ConfigRunnerMock) Create(runType formula.RunnerType) error {
 
 func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
 	return c.runType, c.findErr
+}
+
+type RepositoryListUpdaterCustomMock struct {
+	list   func() (formula.Repos, error)
+	update func(name formula.RepoName, version formula.RepoVersion) error
+}
+
+func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
+	return m.list()
+}
+
+func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion) error {
+	return m.update(name, version)
 }

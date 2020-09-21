@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 var (
@@ -51,7 +52,10 @@ type APIData struct {
 }
 
 type Data struct {
-	CommandError string `json:"commandError"`
+	CommandError         string       `json:"commandError,omitempty"`
+	CommonsRepoAdded     string       `json:"commonsRepoAdded,omitempty"`
+	CommandExecutionTime float64      `json:"commandExecutionTime"`
+	FormulaRepo          formula.Repo `json:"repo,omitempty"`
 }
 
 type Sender interface {
@@ -67,5 +71,5 @@ type Checker interface {
 }
 
 type Collector interface {
-	Collect(ritVersion string, commandError ...string) (APIData, error)
+	Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error)
 }

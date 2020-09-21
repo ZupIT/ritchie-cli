@@ -33,6 +33,7 @@ func TestRitStdin(t *testing.T) {
 
 var _ = Describe("RitStdin", func() {
 	BeforeSuite(func() {
+		functional.RitClearConfigs()
 		functional.RitSingleInit()
 	})
 

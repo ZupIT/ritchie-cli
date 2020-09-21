@@ -29,6 +29,7 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -173,23 +174,25 @@ func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Defi
 }
 
 func buildRunImg(def formula.Definition) (string, error) {
-	s := spinner.StartNew("Building docker image to run formula...")
+	prompt.Info("Docker image build started")
 	formName := strings.ReplaceAll(def.Path, string(os.PathSeparator), "-")
 	containerId := fmt.Sprintf("rit-repo-%s-formula%s", def.RepoName, formName)
 	if len(containerId) > 200 {
 		containerId = containerId[:200]
 	}
 
+	metric.RepoName = def.RepoName
+
 	args := []string{"build", "-t", containerId, "."}
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 
 	if err := cmd.Run(); err != nil {
-		s.Stop()
 		return "", err
 	}
 
-	s.Success(prompt.Green("Docker image successfully built!"))
+	prompt.Success("Docker image successfully built!")
 	return containerId, nil
 }
 

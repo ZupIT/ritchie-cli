@@ -43,7 +43,8 @@ func TestInputManager_Inputs(t *testing.T) {
             "active": true,
             "qty": 6,
             "newLabel": "Type new value. "
-        }
+        },
+		"tutorial": "Add a text for this field."
     },
  	{
         "name": "sample_text",
@@ -66,7 +67,8 @@ func TestInputManager_Inputs(t *testing.T) {
             "qty": 3,
             "newLabel": "Type new value?"
         },
-        "label": "Pick your : "
+        "label": "Pick your : ",
+		"tutorial": "Select an item for this field."
     },
     {
         "name": "sample_bool",
@@ -76,12 +78,14 @@ func TestInputManager_Inputs(t *testing.T) {
             "false",
             "true"
         ],
-        "label": "Pick: "
+        "label": "Pick: ",
+		"tutorial": "Select true or false for this field."
     },
     {
         "name": "sample_password",
         "type": "password",
-        "label": "Pick: "
+        "label": "Pick: ",
+		"tutorial": "Add a secret password for this field."
     },
     {
         "name": "test_resolver",
@@ -323,8 +327,8 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 	fileManager := stream.NewFileManager()
 
 	type in struct {
-		variable       string
-		operator       string
+		variable string
+		operator string
 	}
 
 	tests := []struct {
@@ -335,64 +339,64 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 		{
 			name: "equal conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "==",
+				variable: "sample_list",
+				operator: "==",
 			},
 			want: nil,
 		},
 		{
 			name: "not equal conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "!=",
+				variable: "sample_list",
+				operator: "!=",
 			},
 			want: nil,
 		},
 		{
 			name: "greater than conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    ">",
+				variable: "sample_list",
+				operator: ">",
 			},
 			want: nil,
 		},
 		{
 			name: "greater than or equal to conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    ">=",
+				variable: "sample_list",
+				operator: ">=",
 			},
 			want: nil,
 		},
 		{
 			name: "less than conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "<",
+				variable: "sample_list",
+				operator: "<",
 			},
 			want: nil,
 		},
 		{
 			name: "less than or equal to conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "<=",
+				variable: "sample_list",
+				operator: "<=",
 			},
 			want: nil,
 		},
 		{
 			name: "wrong operator conditional",
 			in: in{
-				variable:    "sample_list",
-				operator:    "eq",
+				variable: "sample_list",
+				operator: "eq",
 			},
 			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
 		},
 		{
 			name: "non-existing variable conditional",
 			in: in{
-				variable:    "non_existing",
-				operator:    "==",
+				variable: "non_existing",
+				operator: "==",
 			},
 			want: errors.New("config.json: conditional variable non_existing not found"),
 		},
@@ -434,7 +438,7 @@ type inputMock struct {
 	err     error
 }
 
-func (i inputMock) List(string, []string) (string, error) {
+func (i inputMock) List(string, []string, ...string) (string, error) {
 	return i.text, i.err
 }
 
@@ -442,11 +446,11 @@ func (i inputMock) Text(string, bool, ...string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) Bool(string, []string) (bool, error) {
+func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 	return i.boolean, i.err
 }
 
-func (i inputMock) Password(string) (string, error) {
+func (i inputMock) Password(string, ...string) (string, error) {
 	return i.text, i.err
 }
 
