@@ -265,7 +265,7 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
 		if strings.ToLower(components[0]) == variable {
-			value = strings.ToLower(components[1])
+			value = components[1]
 			break
 		}
 	}
@@ -277,12 +277,18 @@ func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bo
 	// the code to the risks of running an eval function on a user-defined variable
 	// optimizations are welcome, being mindful of the points above
 	switch input.Condition.Operator {
-	case "==": return value == input.Condition.Value, nil
-	case "!=": return value != input.Condition.Value, nil
-	case ">":  return value > input.Condition.Value, nil
-	case ">=": return value >= input.Condition.Value, nil
-	case "<":  return value < input.Condition.Value, nil
-	case "<=": return value <= input.Condition.Value, nil
+	case "==":
+		return value == input.Condition.Value, nil
+	case "!=":
+		return value != input.Condition.Value, nil
+	case ">":
+		return value > input.Condition.Value, nil
+	case ">=":
+		return value >= input.Condition.Value, nil
+	case "<":
+		return value < input.Condition.Value, nil
+	case "<=":
+		return value <= input.Condition.Value, nil
 	default:
 		return false, fmt.Errorf(
 			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=)",
