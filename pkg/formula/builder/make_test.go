@@ -1,16 +1,11 @@
 package builder
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestBuildMake(t *testing.T) {
-	tmpDir := os.TempDir()
-	ritHome := filepath.Join(tmpDir, ".rit-builder")
-	repoPath := filepath.Join(ritHome, "repos", "commons")
-
 	buildMake := NewBuildMake()
 
 	type in struct {

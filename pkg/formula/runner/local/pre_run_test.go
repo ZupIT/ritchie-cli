@@ -101,7 +101,7 @@ func TestPreRun(t *testing.T) {
 		{
 			name: "local build error",
 			in: in{
-				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				def: formula.Definition{Path: "testing/without-build-sh", RepoName: "commons"},
 				makeBuild: makeBuildMock{
 					build: func(formulaPath string) error {
 						return builder.ErrBuildFormulaMakefile
@@ -110,11 +110,6 @@ func TestPreRun(t *testing.T) {
 				batBuild: batBuildMock{
 					build: func(formulaPath string) error {
 						return builder.ErrBuildFormulaMakefile
-					},
-				},
-				shellBuild: shellBuildMock{
-					build: func(formulaPath string) error {
-						return dirManager.Create(filepath.Join(formulaPath, "bin"))
 					},
 				},
 				file: fileManager,

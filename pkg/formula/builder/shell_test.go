@@ -25,12 +25,15 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
+var (
+	tmpDir   = os.TempDir()
+	ritHome  = filepath.Join(tmpDir, ".rit-builder")
+	repoPath = filepath.Join(ritHome, "repos", "commons")
+)
+
 func TestMain(m *testing.M) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	tmpDir := os.TempDir()
-	ritHome := filepath.Join(tmpDir, ".rit-builder")
-	repoPath := filepath.Join(ritHome, "repos", "commons")
 
 	_ = dirManager.Create(repoPath)
 	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
@@ -40,10 +43,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestBuildShell(t *testing.T) {
-	tmpDir := os.TempDir()
-	ritHome := filepath.Join(tmpDir, ".rit-builder")
-	repoPath := filepath.Join(ritHome, "repos", "commons")
-
 	buildShell := NewBuildShell()
 
 	type in struct {

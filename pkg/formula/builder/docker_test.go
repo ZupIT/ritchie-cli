@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -11,10 +10,6 @@ import (
 func TestDockerBuild(t *testing.T) {
 	const dockerImg = "cimg/go:1.14"
 	fileManager := stream.NewFileManager()
-	tmpDir := os.TempDir()
-	ritHome := filepath.Join(tmpDir, ".rit-builder")
-	repoPath := filepath.Join(ritHome, "repos", "commons")
-
 	buildDocker := NewBuildDocker(fileManager)
 
 	type in struct {

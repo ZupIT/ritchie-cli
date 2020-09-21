@@ -19,7 +19,6 @@ package builder
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -30,10 +29,8 @@ import (
 )
 
 func TestBuild(t *testing.T) {
-	tmpDir := os.TempDir()
 	workspacePath := filepath.Join(tmpDir, "ritchie-formulas-test")
 	formulaPath := filepath.Join(tmpDir, "ritchie-formulas-test", "testing", "formula")
-	ritHome := filepath.Join(tmpDir, ".rit-builder")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	defaultTreeManager := tree.NewGenerator(dirManager, fileManager)
