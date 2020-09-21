@@ -13,6 +13,9 @@ This repository contains the CLI core, which can execute formulas stored inside 
 In Ritchie's context, a formula is a script that can be executed automatically or interactively through a command line. 
 Adapting an existing script to Ritchie structure allows you to run it locally or through Docker, and to share it on a Github or Gitlab repository.
 
+## Full Documentation
+
+[Gitbook](https://docs.ritchiecli.io)
 
 ## Quick start
 
@@ -52,10 +55,6 @@ Then, you'll be able to test Ritchie CLI with the "hello-world" formula through 
 rit demo hello-world
 ```
 
-## Full Documentation
-
-[Gitbook](https://docs.ritchiecli.io)
-
 ## Ritchie Legacy-1.x
 
 With the release of version 2.0.0 of Ritchie, the previous version (Ritchie 1.x) has been deprecated. Therefore, only bugs fixes will be implemented in this version.
@@ -69,4 +68,3 @@ The legacy code is available at [Ritchie Legacy-1.0.0](https://github.com/ZupIT/
 ## Zup Products
 
 [Zup open source](https://opensource.zup.com.br)
-
