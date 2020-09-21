@@ -76,7 +76,6 @@ func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion s
 		Timestamp:  time.Now(),
 		Data:       data,
 	}
-
 	return metric, nil
 }
 
@@ -97,6 +96,6 @@ func (d DataCollectorManager) repoData() formula.Repo {
 
 func metricID() string {
 	args := os.Args
+	args[0] = "rit"
 	return strings.Join(args, "_")
-
 }
