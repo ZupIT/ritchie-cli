@@ -23,14 +23,33 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
+
+type listErrorMock struct{}
+
+func (listErrorMock) List(name string, items []string) (string, error) {
+	workspace := filepath.Join(os.TempDir(), "formulas-ritchie")
+	return fmt.Sprintf("Formulas-Ritchie (%s)", workspace), nil
+}
 
 type listMock struct{}
 
 func (listMock) List(name string, items []string) (string, error) {
 	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
 	return fmt.Sprintf("Default (%s)", workspace), nil
+}
+
+type workspaceMock struct{}
+
+func (workspaceMock) List() (formula.Workspaces, error) {
+	m := formula.Workspaces{"Formulas-Ritchie": filepath.Join(os.TempDir(), "formulas-ritchie")}
+	return m, nil
+}
+
+func (workspaceMock) Delete(workspace formula.Workspace) error {
+	return errors.New("Some error")
 }
 
 func TestDeleteWorkspaceCmd(t *testing.T) {
@@ -45,7 +64,7 @@ func TestDeleteWorkspaceCmd(t *testing.T) {
 		inputTrueMock{},
 	)
 
-	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	workspace := filepath.Join(os.TempDir(), "formulas-ritchie")
 	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
 	}
@@ -96,6 +115,27 @@ func TestDeleteWorkspaceCmd(t *testing.T) {
 	)
 
 	workspace = filepath.Join(os.TempDir(), "ritchie-formulas-local")
+	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
+		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
+	}
+
+	if cmd == nil {
+		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
+	}
+
+	if err := cmd.Execute(); err == nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, nil, err)
+	}
+
+	cmd = NewDeleteWorkspaceCmd(
+		os.TempDir(),
+		workspaceMock{},
+		dirManager,
+		listErrorMock{},
+		inputTrueMock{},
+	)
+
+	workspace = filepath.Join(os.TempDir(), "formulas-ritchie")
 	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
 		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
 	}
