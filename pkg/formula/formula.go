@@ -110,6 +110,10 @@ type MakeBuilder interface {
 	Build(formulaPath string) error
 }
 
+type ShellBuilder interface {
+	Build(formulaPath string) error
+}
+
 type BatBuilder interface {
 	Build(formulaPath string) error
 }
