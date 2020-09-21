@@ -34,13 +34,14 @@ const (
 )
 
 type Manager struct {
-	ritchieHome string
-	repoLister  formula.RepositoryLister
-	coreCmds    []api.Command
+	ritchieHome   string
+	repoLister    formula.RepositoryLister
+	coreCmds      []api.Command
+	repoProviders formula.RepoProviders
 }
 
-func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command) Manager {
-	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
+func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command, rp formula.RepoProviders) Manager {
+	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds, repoProviders: rp}
 }
 
 func (d Manager) Tree() (map[string]formula.Tree, error) {
@@ -99,11 +100,21 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		if err != nil {
 			continue
 		}
+		noticeNewVersion := ""
+		if !core {
+			if latestTag := d.getLatestTag(r); latestTag != r.Version.String() && latestTag != "" {
+				noticeNewVersion = "(new version " + latestTag + ")"
+			}
+		}
+
 		var cc []api.Command
 		for _, c := range treeRepo.Commands {
 			key := c.Parent + "_" + c.Usage
 			if trees[key].Usage == "" {
 				c.Repo = r.Name.String()
+				if noticeNewVersion != "" {
+					c.Repo = noticeNewVersion + " " + c.Repo
+				}
 				trees[key] = c
 				cc = append(cc, c)
 			}
@@ -112,6 +123,18 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	}
 
 	return treeMain
+}
+
+func (d Manager) getLatestTag(repo formula.Repo) string {
+	formulaGit := d.repoProviders.Resolve(repo.Provider)
+
+	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	tag, err := formulaGit.Repos.LatestTag(repoInfo)
+	if err != nil {
+		return ""
+	}
+
+	return tag.Name
 }
 
 func (d Manager) localTree() (formula.Tree, error) {

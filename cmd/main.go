@@ -70,7 +70,7 @@ func main() {
 	sendMetric(executionTime(startTime))
 }
 
-func executionTime(startTime time.Time) float64{
+func executionTime(startTime time.Time) float64 {
 	endTime := time.Now()
 	return endTime.Sub(startTime).Seconds()
 }
@@ -119,7 +119,7 @@ func buildCommands() *cobra.Command {
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
 	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, repoProviders)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder, credSetter, inputPassword)
