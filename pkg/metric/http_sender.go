@@ -19,10 +19,16 @@ package metric
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 var _ Sender = SendManagerHttp{}
+
+var (
+	BasicUser = ""
+	BasicPass = ""
+)
 
 type SendManagerHttp struct {
 	URL    string
@@ -37,6 +43,7 @@ func NewHttpSender(url string, client *http.Client) SendManagerHttp {
 }
 
 func (sm SendManagerHttp) Send(APIData APIData) {
+	fmt.Println(sm.URL)
 	reqBody, err := json.Marshal(&APIData)
 	if err != nil {
 		return
@@ -47,6 +54,7 @@ func (sm SendManagerHttp) Send(APIData APIData) {
 		return
 	}
 
+	req.SetBasicAuth(BasicUser, BasicPass)
 	req.Header.Add("Content-Type", "application/json")
 	_, _ = sm.client.Do(req)
 }
