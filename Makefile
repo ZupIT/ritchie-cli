@@ -25,8 +25,8 @@ IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
 METRIC_SERVER_URL=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_metric_server.sh)
-METRIC_BASIC_USER=$(METRIC_BASIC_USER)
-METRIC_BASIC_PASS=$(METRIC_BASIC_PASS)
+METRIC_BASIC_USER=$(METRIC_BASIC_USERNAME)
+METRIC_BASIC_PASS=$(METRIC_BASIC_PASSWORD)
 BUILD_ENVS='-X $(MODULE)/pkg/metric.BasicUser=$(METRIC_BASIC_USER) -X $(MODULE)/pkg/metric.BasicPass=$(METRIC_BASIC_PASS) -X $(MODULE)/pkg/metric.ServerRestURL=$(METRIC_SERVER_URL) -X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)'
 
 build-linux:
