@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
@@ -79,6 +78,7 @@ type initCmd struct {
 	file     stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputBool
+	metricSender metric.SendManagerHttp
 }
 
 func NewInitCmd(
@@ -89,8 +89,18 @@ func NewInitCmd(
 	file stream.FileWriteReadExister,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
+	metricSender metric.SendManagerHttp,
 ) *cobra.Command {
-	o := initCmd{repo: repo, git: git, tutorial: tutorial, config: config, file: file, InputList: inList, InputBool: inBool}
+	o := initCmd{
+		repo: repo,
+		git: git,
+		tutorial: tutorial,
+		config: config,
+		file: file,
+		InputList: inList,
+		InputBool: inBool,
+		metricSender: metricSender,
+	}
 
 	cmd := &cobra.Command{
 		Use:       "init",
@@ -233,14 +243,13 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	responseToWrite := "yes"
 	if choose == DoNotAcceptMetrics {
 		responseToWrite = "no"
-		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
-		metricManager.Send(metric.APIData{
+		in.metricSender.Send(metric.APIData{
 			Id: "rit_init",
 			Timestamp: time.Now(),
 			Data: metric.Data{
-				MetricsAcceptance: responseToWrite},
+				MetricsAcceptance: responseToWrite,
 			},
-		)
+		})
 	}
 
 	if err = in.file.Write(metric.FilePath, []byte(responseToWrite)); err != nil {

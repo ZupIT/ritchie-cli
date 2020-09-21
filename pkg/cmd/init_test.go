@@ -18,11 +18,13 @@ package cmd
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -359,8 +361,10 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			field := tt.fields
 
-			initPrompt := NewInitCmd(field.repo, field.git, field.tutorial, field.config, field.file, field.inList, field.inBool)
-			initStdin := NewInitCmd(field.repo, field.git, field.tutorial, field.config, field.file, field.inList, field.inBool)
+			metricSender := metric.NewHttpSender("", http.DefaultClient)
+
+			initPrompt := NewInitCmd(field.repo, field.git, field.tutorial, field.config, field.file, field.inList, field.inBool, metricSender)
+			initStdin := NewInitCmd(field.repo, field.git, field.tutorial, field.config, field.file, field.inList, field.inBool, metricSender)
 
 			initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 			initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
