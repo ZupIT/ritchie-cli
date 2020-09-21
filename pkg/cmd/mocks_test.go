@@ -200,6 +200,10 @@ func (workspaceForm) Add(workspace formula.Workspace) error {
 	return nil
 }
 
+func (workspaceForm) Delete(workspace formula.Workspace) error {
+	return nil
+}
+
 func (workspaceForm) List() (formula.Workspaces, error) {
 	return formula.Workspaces{}, nil
 }
