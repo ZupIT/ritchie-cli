@@ -104,8 +104,7 @@ func UserHomeDir() string {
 	if os.Geteuid() == 0 {
 		username := os.Getenv("SUDO_USER")
 		if username != "" {
-			u, err := user.Lookup(username)
-			if err == nil {
+			if u, err := user.Lookup(username); err == nil {
 				return u.HomeDir
 			}
 		}

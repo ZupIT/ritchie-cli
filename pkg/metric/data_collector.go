@@ -17,35 +17,55 @@
 package metric
 
 import (
+	"encoding/json"
 	"math"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-var _ Collector = DataCollectorManager{}
+var (
+	_                Collector = DataCollectorManager{}
+	CommonsRepoAdded           = ""
+	RepoName                   = ""
+)
+
 type DataCollectorManager struct {
-	userId UserIdGenerator
+	userId         UserIdGenerator
+	ritchieHomeDir string
+	file           stream.FileReader
 }
 
-func NewDataCollector(userId UserIdGenerator) DataCollectorManager {
+func NewDataCollector(
+	userId UserIdGenerator,
+	ritchieHomeDir string,
+	file stream.FileReader,
+) DataCollectorManager {
 	return DataCollectorManager{
-		userId: userId,
+		userId:         userId,
+		ritchieHomeDir: ritchieHomeDir,
+		file:           file,
 	}
 }
 
 func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error) {
 	userId, err := d.userId.Generate()
-	commandExecutionTime = math.Round(commandExecutionTime*100)/100
 	if err != nil {
 		return APIData{}, err
 	}
 
+	commandExecutionTime = math.Round(commandExecutionTime*100) / 100
+
 	data := Data{
-		CommandError: strings.Join(commandError, " "),
-		CommonsRepoAdded: CommonsRepoAdded,
+		CommandError:         strings.Join(commandError, " "),
+		CommonsRepoAdded:     CommonsRepoAdded,
 		CommandExecutionTime: commandExecutionTime,
+		FormulaRepo:          d.repoData(),
 	}
 
 	metric := APIData{
@@ -58,6 +78,21 @@ func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion s
 	}
 
 	return metric, nil
+}
+
+func (d DataCollectorManager) repoData() formula.Repo {
+	repoBytes, _ := d.file.Read(
+		filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"),
+	)
+	repos := formula.Repos{}
+	_ = json.Unmarshal(repoBytes, &repos)
+
+	for _, r := range repos {
+		if string(r.Name) == RepoName && r.Token == "" {
+			return r
+		}
+	}
+	return formula.Repo{}
 }
 
 func metricID() string {
