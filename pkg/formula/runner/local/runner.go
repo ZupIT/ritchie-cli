@@ -65,6 +65,8 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
+	defer ru.PostRun(setup, false)
+
 	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
@@ -80,10 +82,6 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	}
 
 	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	if err := ru.PostRun(setup, false); err != nil {
 		return err
 	}
 

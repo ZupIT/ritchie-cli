@@ -70,16 +70,14 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
+	defer ru.PostRun(setup, true)
+
 	cmd, err := ru.runDocker(setup, inputType, verbose)
 	if err != nil {
 		return err
 	}
 
 	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	if err := ru.PostRun(setup, true); err != nil {
 		return err
 	}
 
