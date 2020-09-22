@@ -74,10 +74,34 @@ func (m Manager) Add(workspace formula.Workspace) error {
 	return nil
 }
 
+func (m Manager) Delete(workspace formula.Workspace) error {
+	workspaces, err := m.List()
+	if err != nil {
+		return err
+	}
+
+	if _, exists := workspaces[workspace.Name]; exists {
+		delete(workspaces, workspace.Name)
+		content, err := json.Marshal(workspaces)
+		if err != nil {
+			return err
+		}
+
+		if err := m.file.Write(m.workspaceFile, content); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return ErrInvalidWorkspace
+}
+
 func (m Manager) List() (formula.Workspaces, error) {
 	workspaces := formula.Workspaces{}
 	if !m.file.Exists(m.workspaceFile) {
-		return formula.Workspaces{}, nil
+		workspaces[formula.DefaultWorkspaceName] = m.defaultWorkspaceDir
+		return workspaces, nil
 	}
 
 	file, err := m.file.Read(m.workspaceFile)

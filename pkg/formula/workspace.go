@@ -39,6 +39,15 @@ type WorkspaceLister interface {
 	List() (Workspaces, error)
 }
 
+type WorkspaceDeleter interface {
+	Delete(workspace Workspace) error
+}
+
+type WorkspaceListDeleter interface {
+	WorkspaceDeleter
+	WorkspaceLister
+}
+
 type WorkspaceAddLister interface {
 	WorkspaceAdder
 	WorkspaceLister

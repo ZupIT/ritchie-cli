@@ -1,12 +1,51 @@
 # Changelog
 
-## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
+## [2.0.6](https://github.com/zupit/ritchie-cli/tree/2.0.6) (2020-09-22)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.5...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.0.5...2.0.6)
 
 **Closed issues:**
 
+- hello-world demo fails using --docker [\#531](https://github.com/ZupIT/ritchie-cli/issues/531)
+- Inform the user when any local formula repository has a new release available [\#516](https://github.com/ZupIT/ritchie-cli/issues/516)
 - Frees use of formulas that do not require the commons repository [\#495](https://github.com/ZupIT/ritchie-cli/issues/495)
+- Create new command rit delete workspace [\#471](https://github.com/ZupIT/ritchie-cli/issues/471)
+- Use new metrics API version [\#464](https://github.com/ZupIT/ritchie-cli/issues/464)
+- Download Ritchie OS requirements when installing. [\#428](https://github.com/ZupIT/ritchie-cli/issues/428)
+- Use github credentials to add private repo. [\#382](https://github.com/ZupIT/ritchie-cli/issues/382)
+- Collect new metrics [\#489](https://github.com/ZupIT/ritchie-cli/issues/489)
+- Ritchie doesn't find the $HOME PATH with space [\#438](https://github.com/ZupIT/ritchie-cli/issues/438)
+- Add Shell script strategy to build formulas [\#436](https://github.com/ZupIT/ritchie-cli/issues/436)
+- MSI insufficient privileges [\#433](https://github.com/ZupIT/ritchie-cli/issues/433)
+- Command line validation [\#393](https://github.com/ZupIT/ritchie-cli/issues/393)
+- Add a tutorial field to the config.json file [\#391](https://github.com/ZupIT/ritchie-cli/issues/391)
+- Add command to remove a particular formula from a workspace. [\#388](https://github.com/ZupIT/ritchie-cli/issues/388)
+- View the download progress of the docker image [\#387](https://github.com/ZupIT/ritchie-cli/issues/387)
+
+**Merged pull requests:**
+
+- add metrics acceptance question info [\#537](https://github.com/ZupIT/ritchie-cli/pull/537) ([victor-schumacher](https://github.com/victor-schumacher))
+- Add support to the tutorial field in config.json [\#534](https://github.com/ZupIT/ritchie-cli/pull/534) ([kaduartur](https://github.com/kaduartur))
+- Add shell build strategy to build formulas [\#533](https://github.com/ZupIT/ritchie-cli/pull/533) ([kaduartur](https://github.com/kaduartur))
+- add repo info to metrics [\#532](https://github.com/ZupIT/ritchie-cli/pull/532) ([victor-schumacher](https://github.com/victor-schumacher))
+- Displays error when invalid argument added to command [\#530](https://github.com/ZupIT/ritchie-cli/pull/530) ([brunats](https://github.com/brunats))
+- Command's run time [\#523](https://github.com/ZupIT/ritchie-cli/pull/523) ([victor-schumacher](https://github.com/victor-schumacher))
+- change executor to a ubuntu machine [\#519](https://github.com/ZupIT/ritchie-cli/pull/519) ([victor-schumacher](https://github.com/victor-schumacher))
+- Added tests to update repo command [\#515](https://github.com/ZupIT/ritchie-cli/pull/515) ([brunats](https://github.com/brunats))
+- Added changes suggested by goimports [\#509](https://github.com/ZupIT/ritchie-cli/pull/509) ([brunats](https://github.com/brunats))
+- show docker logs on formula build [\#506](https://github.com/ZupIT/ritchie-cli/pull/506) ([victor-schumacher](https://github.com/victor-schumacher))
+- Fixed privileges for the msi installer to use the program files folder. [\#505](https://github.com/ZupIT/ritchie-cli/pull/505) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+- Release 2.0.5 merge [\#504](https://github.com/ZupIT/ritchie-cli/pull/504) ([zup-ci](https://github.com/zup-ci))
+- Delete workspace command [\#481](https://github.com/ZupIT/ritchie-cli/pull/481) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+- Create new command rit delete formula [\#447](https://github.com/ZupIT/ritchie-cli/pull/447) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+- Remove the ritchie path from the metricId [\#540](https://github.com/ZupIT/ritchie-cli/pull/540) ([DittrichLucas](https://github.com/DittrichLucas))
+- Upgrade metric api [\#539](https://github.com/ZupIT/ritchie-cli/pull/539) ([kaduartur](https://github.com/kaduartur))
+- Preparing for the Hacktoberfest [\#538](https://github.com/ZupIT/ritchie-cli/pull/538) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+- Fixing conditional bug [\#527](https://github.com/ZupIT/ritchie-cli/pull/527) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Add column from latest version on list repo command [\#518](https://github.com/ZupIT/ritchie-cli/pull/518) ([brunats](https://github.com/brunats))
+- Added commons repository acceptance info to metrics [\#517](https://github.com/ZupIT/ritchie-cli/pull/517) ([victor-schumacher](https://github.com/victor-schumacher))
+- update lint executor [\#514](https://github.com/ZupIT/ritchie-cli/pull/514) ([victor-schumacher](https://github.com/victor-schumacher))
+- change bucket [\#508](https://github.com/ZupIT/ritchie-cli/pull/508) ([ernelio](https://github.com/ernelio))
 
 ## [2.0.5](https://github.com/zupit/ritchie-cli/tree/2.0.5) (2020-09-08)
 
@@ -284,6 +323,7 @@
 - Improvement/rit completion [\#273](https://github.com/ZupIT/ritchie-cli/pull/273) ([viniciussousazup](https://github.com/viniciussousazup))
 - \[fix\] del in uninstaller hook win [\#267](https://github.com/ZupIT/ritchie-cli/pull/267) ([ernelio](https://github.com/ernelio))
 - Add signature in single [\#265](https://github.com/ZupIT/ritchie-cli/pull/265) ([ernelio](https://github.com/ernelio))
+- \[FEATURE\] Added `rit set priority` command [\#260](https://github.com/ZupIT/ritchie-cli/pull/260) ([marcoscostazup](https://github.com/marcoscostazup))
 - Release 1.0.0-beta.19 merge [\#259](https://github.com/ZupIT/ritchie-cli/pull/259) ([zup-ci](https://github.com/zup-ci))
 - FEATURE - Improving information about help [\#256](https://github.com/ZupIT/ritchie-cli/pull/256) ([brunats](https://github.com/brunats))
 - \[Feature\] Adding ruby language support [\#252](https://github.com/ZupIT/ritchie-cli/pull/252) ([henriquemoraes8](https://github.com/henriquemoraes8))

@@ -28,10 +28,14 @@ func NewSurveyPassword() SurveyPassword {
 	return SurveyPassword{}
 }
 
-func (SurveyPassword) Password(label string) (string, error) {
+func (SurveyPassword) Password(label string, helper ...string) (string, error) {
 	password := ""
 	prompt := &survey.Password{
 		Message: label,
+	}
+
+	if len(helper) > 0 {
+		prompt.Help = helper[0]
 	}
 
 	return password, survey.AskOne(prompt, &password)
