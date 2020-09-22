@@ -6,10 +6,16 @@
 
 ## Ritchie - One CLI to rule them all
 
-Ritchie is an open source framework that creates and tweaks a CLI for your team. It allows you to easily create, build and share formulas.
+Ritchie CLI is an open source product that allows you to create, store and share any kind of automations, executing them through command lines, to run operations or start workflows.
 
-This repository contains the CLI core, which can execute formulas stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas).
+This repository contains the CLI core, which can execute formulas stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas) or [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo)
 
+In Ritchie's context, a formula is a script that can be executed automatically or interactively through a command line. 
+Adapting an existing script to Ritchie structure allows you to run it locally or through Docker, and to share it on a Github or Gitlab repository.
+
+## Full Documentation
+
+[Gitbook](https://docs.ritchiecli.io)
 
 ## Quick start
 
@@ -35,17 +41,19 @@ rit init
 
 ### Run your first formula
 
-After you finished the previous steps - installation and initialization -, you can run a ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas/tree/master/demo/hello-world)) to test Ritchie. 
+After you finished the previous steps -installation and initialization - to access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas/tree/master/demo/hello-world)) to test Ritchie, you'll need to add the [ritchie-formulas-demo repository](https://github.com/ZupIT/ritchie-formulas) locally.
 
+To do so, you can use the `rit add repo` command, or execute the command line below:
+
+```bash
+echo '{"provider":"Github", "name":"demo", "version":"2.0.0", "url":"https://github.com/ZupIT/ritchie-formulas-demo", "token": null, "priority":"1"}' | rit add repo --stdin
+```
+
+Then, you'll be able to test Ritchie CLI with the "hello-world" formula through the command line below:
 
 ```bash
 rit demo hello-world
 ```
-
-
-## Full Documentation
-
-- [Gitbook](https://docs.ritchiecli.io)
 
 ## Ritchie Legacy-1.x
 
@@ -57,8 +65,6 @@ The legacy code is available at [Ritchie Legacy-1.0.0](https://github.com/ZupIT/
 
 [Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
 
-
 ## Zup Products
 
-- [Zup open source](https://opensource.zup.com.br)
-
+[Zup open source](https://opensource.zup.com.br)
