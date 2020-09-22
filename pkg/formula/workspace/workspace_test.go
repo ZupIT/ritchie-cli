@@ -29,7 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestWorkspaceManager_Add(t *testing.T) {
+func TestWorkspaceManagerAdd(t *testing.T) {
 	cleanForm()
 	fullDir := createFullDir()
 
@@ -132,7 +132,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 	}
 }
 
-func TestManager_Delete(t *testing.T) {
+func TestManagerDelete(t *testing.T) {
 	cleanForm()
 	fullDir := createFullDir()
 
@@ -199,7 +199,7 @@ func TestManager_Delete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, in.fileManager)
+			workspace := New(tmpDir, tmpDir, in.fileManager)
 			got := workspace.Delete(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -209,7 +209,7 @@ func TestManager_Delete(t *testing.T) {
 	}
 }
 
-func TestManager_List(t *testing.T) {
+func TestManagerList(t *testing.T) {
 	tmpDir := os.TempDir()
 	fileManager := stream.NewFileManager()
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
@@ -247,7 +247,7 @@ func TestManager_List(t *testing.T) {
 				fileManager: fileManager,
 			},
 			out: out{
-				listSize: 0,
+				listSize: 1,
 				error:    nil,
 			},
 		},
