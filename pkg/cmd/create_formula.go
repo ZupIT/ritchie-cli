@@ -41,6 +41,7 @@ var (
 )
 
 const notAllowedChars = `\/><,@`
+var notAllowedWords = []string{"tutorial"}
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -103,6 +104,12 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 
 		if strings.ContainsAny(formulaCmd, notAllowedChars) {
 			return ErrNotAllowedCharacter
+		}
+
+		for i := range notAllowedWords {
+			if strings.Contains(formulaCmd, notAllowedWords[i]) {
+				return errors.New("not allowed word "+ notAllowedWords[i])
+			}
 		}
 
 		if err := c.tplM.Validate(); err != nil {

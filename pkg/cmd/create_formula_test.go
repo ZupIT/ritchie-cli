@@ -82,6 +82,16 @@ func TestCreateFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "error with a not allowed word on formula cmd",
+			in: in{
+				inTextValidator: inputTextValidatorCustomMock{
+					text: func(name string, validate func(interface{}) error, helper ...string) (string, error) {
+						return "tutorial", nil
+					}},
+			},
+			wantErr: true,
+		},
+		{
 			name: "error on template manager Validate func",
 			in: in{
 				inTextValidator: inputTextValidatorMock{},
