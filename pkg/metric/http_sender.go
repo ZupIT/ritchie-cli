@@ -24,6 +24,11 @@ import (
 
 var _ Sender = SendManagerHttp{}
 
+var (
+	BasicUser = ""
+	BasicPass = ""
+)
+
 type SendManagerHttp struct {
 	URL    string
 	client *http.Client
@@ -47,6 +52,7 @@ func (sm SendManagerHttp) Send(APIData APIData) {
 		return
 	}
 
+	req.SetBasicAuth(BasicUser, BasicPass)
 	req.Header.Add("Content-Type", "application/json")
 	_, _ = sm.client.Do(req)
 }
