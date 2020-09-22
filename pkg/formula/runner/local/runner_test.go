@@ -43,6 +43,7 @@ func TestRun(t *testing.T) {
 
 	makeBuilder := builder.NewBuildMake()
 	batBuilder := builder.NewBuildBat(fileManager)
+	shellBuilder := builder.NewBuildShell()
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
@@ -51,7 +52,7 @@ func TestRun(t *testing.T) {
 	_ = streams.Unzip(zipFile, repoPath)
 
 	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
-	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, dirManager, fileManager)
+	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputRunner := runner.NewInput(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputMock{}, inputMock{})
 
@@ -205,7 +206,7 @@ type inputMock struct {
 	err     error
 }
 
-func (i inputMock) List(string, []string) (string, error) {
+func (i inputMock) List(string, []string, ...string) (string, error) {
 	return i.text, i.err
 }
 
@@ -213,11 +214,11 @@ func (i inputMock) Text(string, bool, ...string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) Bool(string, []string) (bool, error) {
+func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 	return i.boolean, i.err
 }
 
-func (i inputMock) Password(string) (string, error) {
+func (i inputMock) Password(string, ...string) (string, error) {
 	return i.text, i.err
 }
 

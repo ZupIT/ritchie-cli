@@ -33,10 +33,12 @@ func NewSetFormulaRunnerCmd(c formula.ConfigRunner, i prompt.InputList) *cobra.C
 	s := setFormulaRunnerCmd{c, i}
 
 	return &cobra.Command{
-		Use:     "formula-runner",
-		Short:   "Set the default formula runner",
-		Example: "rit set formula-runner",
-		RunE:    RunFuncE(s.runStdin(), s.runPrompt()),
+		Use:       "formula-runner",
+		Short:     "Set the default formula runner",
+		Example:   "rit set formula-runner",
+		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 }
 

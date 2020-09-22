@@ -24,17 +24,22 @@ import (
 	"os/exec"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
-	buildFile      = "build.bat"
+	buildBat       = "build.bat"
 	msgBatBuildErr = "failed building formula with build.bat, verify your repository"
 	errMsgFmt      = `%s
 More about error: %s`
 )
 
-var ErrBuildFormulaBuildBat = errors.New(msgBatBuildErr)
+var (
+	ErrBuildFormulaBuildBat = errors.New(msgBatBuildErr)
+	msgBuildOnWindows       = prompt.Yellow("This formula cannot be built on Windows.")
+	ErrBuildOnWindows       = errors.New(msgBuildOnWindows)
+)
 
 type BatManager struct {
 	file stream.FileExister
@@ -49,12 +54,12 @@ func (ba BatManager) Build(formulaPath string) error {
 		return err
 	}
 
-	if !ba.file.Exists(buildFile) {
+	if !ba.file.Exists(buildBat) {
 		return ErrBuildOnWindows
 	}
 
 	var stderr bytes.Buffer
-	cmd := exec.Command(buildFile)
+	cmd := exec.Command(buildBat)
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf(errMsgFmt, ErrBuildFormulaBuildBat, stderr.String())

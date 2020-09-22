@@ -41,10 +41,12 @@ type listRepoCmd struct {
 func NewListRepoCmd(rl formula.RepositoryLister, rp formula.RepoProviders, rtf rtutorial.Finder) *cobra.Command {
 	lr := listRepoCmd{rl, rp, rtf}
 	cmd := &cobra.Command{
-		Use:     "repo",
-		Short:   "Show a list with all your available repositories",
-		Example: "rit list repo",
-		RunE:    lr.runFunc(),
+		Use:       "repo",
+		Short:     "Show a list with all your available repositories",
+		Example:   "rit list repo",
+		RunE:      lr.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	return cmd
 }

@@ -46,10 +46,12 @@ func NewDeleteContextCmd(
 	d := deleteContextCmd{fr, ib, il}
 
 	cmd := &cobra.Command{
-		Use:     "context",
-		Short:   "Delete context for credentials",
-		Example: "rit delete context",
-		RunE:    RunFuncE(d.runStdin(), d.runPrompt()),
+		Use:       "context",
+		Short:     "Delete context for credentials",
+		Example:   "rit delete context",
+		RunE:      RunFuncE(d.runStdin(), d.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	cmd.LocalFlags()

@@ -50,6 +50,7 @@ type (
 		Cache     Cache     `json:"cache"`
 		Condition Condition `json:"condition"`
 		Pattern   Pattern   `json:"pattern"`
+		Tutorial  string    `json:"tutorial"`
 	}
 
 	Pattern struct {
@@ -111,6 +112,10 @@ type Creator interface {
 }
 
 type MakeBuilder interface {
+	Build(formulaPath string) error
+}
+
+type ShellBuilder interface {
 	Build(formulaPath string) error
 }
 

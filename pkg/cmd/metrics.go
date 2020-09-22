@@ -20,10 +20,12 @@ func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList) *c
 	}
 
 	cmd := &cobra.Command{
-		Use:   "metrics",
-		Short: "Turn metrics on and off",
-		Long:  "Stop or start to send anonymous metrics to ritchie team.",
-		RunE:  m.run(),
+		Use:       "metrics",
+		Short:     "Turn metrics on and off",
+		Long:      "Stop or start to send anonymous metrics to ritchie team.",
+		RunE:      m.run(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd

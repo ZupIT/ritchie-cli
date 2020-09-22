@@ -70,10 +70,12 @@ func main() {
 	sendMetric(executionTime(startTime))
 }
 
-func executionTime(startTime time.Time) float64{
+func executionTime(startTime time.Time) float64 {
 	endTime := time.Now()
 	return endTime.Sub(startTime).Seconds()
 }
+
+var Data metric.DataCollectorManager
 
 func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
@@ -100,6 +102,9 @@ func buildCommands() *cobra.Command {
 	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
+
+	userIdManager := metric.NewUserIdGenerator()
+	Data = metric.NewDataCollector(userIdManager, ritchieHomeDir, fileManager)
 
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
@@ -129,14 +134,15 @@ func buildCommands() *cobra.Command {
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
 	formBuildMake := builder.NewBuildMake()
+	formBuildSh := builder.NewBuildShell()
 	formBuildBat := builder.NewBuildBat(fileManager)
-	formBuildDocker := builder.NewBuildDocker()
+	formBuildDocker := builder.NewBuildDocker(fileManager)
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
 
-	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, dirManager, fileManager)
+	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
 	formulaLocalRun := local.NewRunner(postRunner, inputManager, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
@@ -203,6 +209,7 @@ func buildCommands() *cobra.Command {
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
+	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, dirManager, inputList, inputBool)
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder)
@@ -214,7 +221,7 @@ func buildCommands() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd)
+	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd, setFormulaRunnerCmd)
@@ -279,10 +286,7 @@ func sendMetric(commandExecutionTime float64, err ...string) {
 	if metricEnable.Check() {
 		var collectData metric.APIData
 		metricManager := metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
-		userIdManager := metric.NewUserIdGenerator()
-		data := metric.NewDataCollector(userIdManager)
-
-		collectData, _ = data.Collect(commandExecutionTime, cmd.Version, err...)
+		collectData, _ = Data.Collect(commandExecutionTime, cmd.Version, err...)
 		metricManager.Send(collectData)
 	}
 }

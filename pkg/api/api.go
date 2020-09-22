@@ -40,6 +40,7 @@ var (
 		{Parent: "root", Usage: "delete"},
 		{Parent: "root_delete", Usage: "context"},
 		{Parent: "root_delete", Usage: "repo"},
+		{Parent: "root_delete", Usage: "workspace"},
 		{Parent: "root_delete", Usage: "formula"},
 		{Parent: "root", Usage: "help"},
 		{Parent: "root", Usage: "init"},
@@ -104,8 +105,7 @@ func UserHomeDir() string {
 	if os.Geteuid() == 0 {
 		username := os.Getenv("SUDO_USER")
 		if username != "" {
-			u, err := user.Lookup(username)
-			if err == nil {
+			if u, err := user.Lookup(username); err == nil {
 				return u.HomeDir
 			}
 		}
