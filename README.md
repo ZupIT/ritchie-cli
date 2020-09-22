@@ -46,7 +46,7 @@ After you finished the previous steps -installation and initialization - to acce
 To do so, you can use the `rit add repo` command, or execute the command line below:
 
 ```bash
-echo '{"provider":"Github", "name":"demo", "version":"2.0.0", "url":"https://github.com/ZupIT/ritchie-formulas-demo", "token": null, "priority":"1"}' | rit add repo --stdin
+echo '{"provider":"Github", "name":"demo", "version":"2.0.0", "url":"https://github.com/ZupIT/ritchie-formulas-demo", "token": null, "priority":1}' | rit add repo --stdin
 ```
 
 Then, you'll be able to test Ritchie CLI with the "hello-world" formula through the command line below:
