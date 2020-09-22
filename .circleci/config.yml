@@ -194,6 +194,7 @@ jobs:
           name: Running build
           command: |
             . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/credentials.sh
             make build-circle
       - run:
           name: Persist version file
