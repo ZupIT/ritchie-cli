@@ -134,7 +134,13 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			if items != nil {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
-				validate := input.Default == ""
+				var validate bool
+				if input.Required == nil {
+					validate = input.Default == ""
+				} else {
+					validate = *input.Required
+				}
+
 				inputVal, err = in.Text(input.Label, validate, input.Tutorial)
 
 				if inputVal == "" {
