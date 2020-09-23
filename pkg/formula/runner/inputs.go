@@ -134,7 +134,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			if items != nil {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
-				validate := input.Default == ""
+				validate := isRequired(input)
 				inputVal, err = in.Text(input.Label, validate, input.Tutorial)
 
 				if inputVal == "" {
@@ -209,7 +209,7 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 	}
 	inputVal, err := in.List(input.Label, items, input.Tutorial)
 	if inputVal == newLabel {
-		validate := len(input.Default) == 0
+		validate := isRequired(input)
 		inputVal, err = in.Text(input.Label, validate, input.Tutorial)
 		if len(inputVal) == 0 {
 			inputVal = input.Default
@@ -254,6 +254,14 @@ func (in InputManager) resolveIfReserved(input formula.Input) (string, error) {
 		return resolver.Resolve(input.Type)
 	}
 	return "", nil
+}
+
+func isRequired(input formula.Input) bool {
+	if input.Required == nil {
+		return input.Default == ""
+	}
+
+	return *input.Required
 }
 
 func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
