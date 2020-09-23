@@ -26,6 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -65,6 +66,13 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
+	defer func() {
+		if err := ru.PostRun(setup, false); err != nil {
+			prompt.Error(err.Error())
+			return
+		}
+	}()
+
 	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
@@ -83,11 +91,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
-	if err := ru.PostRun(setup, false); err != nil {
-		return err
-	}
-
-	metric.RepoName =  def.RepoName
+	metric.RepoName = def.RepoName
 
 	return nil
 }
