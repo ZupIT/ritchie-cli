@@ -117,13 +117,13 @@ func (inputIntErrorMock) Int(name string, helper ...string) (int64, error) {
 
 type inputPasswordMock struct{}
 
-func (inputPasswordMock) Password(label string) (string, error) {
+func (inputPasswordMock) Password(label string, helper ...string) (string, error) {
 	return "s3cr3t", nil
 }
 
 type inputPasswordErrorMock struct{}
 
-func (inputPasswordErrorMock) Password(label string) (string, error) {
+func (inputPasswordErrorMock) Password(label string, helper ...string) (string, error) {
 	return "", errors.New("password error")
 }
 
@@ -135,25 +135,25 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command
 
 type inputTrueMock struct{}
 
-func (inputTrueMock) Bool(name string, items []string) (bool, error) {
+func (inputTrueMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return true, nil
 }
 
 type inputFalseMock struct{}
 
-func (inputFalseMock) Bool(name string, items []string) (bool, error) {
+func (inputFalseMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return false, nil
 }
 
 type inputBoolErrorMock struct{}
 
-func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
+func (inputBoolErrorMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return false, errors.New("error on boolean list")
 }
 
 type inputListMock struct{}
 
-func (inputListMock) List(name string, items []string) (string, error) {
+func (inputListMock) List(name string, items []string, helper ...string) (string, error) {
 	return "item-mocked", nil
 }
 
@@ -161,13 +161,13 @@ type inputListCustomMock struct {
 	list func(name string, items []string) (string, error)
 }
 
-func (m inputListCustomMock) List(name string, items []string) (string, error) {
+func (m inputListCustomMock) List(name string, items []string, helper ...string) (string, error) {
 	return m.list(name, items)
 }
 
 type inputListErrorMock struct{}
 
-func (inputListErrorMock) List(name string, items []string) (string, error) {
+func (inputListErrorMock) List(name string, items []string, helper ...string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 
@@ -197,6 +197,10 @@ func (formCreator) Build(workspacePath, formulaPath string) error {
 type workspaceForm struct{}
 
 func (workspaceForm) Add(workspace formula.Workspace) error {
+	return nil
+}
+
+func (workspaceForm) Delete(workspace formula.Workspace) error {
 	return nil
 }
 

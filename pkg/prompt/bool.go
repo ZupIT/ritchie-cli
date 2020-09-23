@@ -30,12 +30,17 @@ func NewSurveyBool() SurveyBool {
 	return SurveyBool{}
 }
 
-func (SurveyBool) Bool(name string, items []string) (bool, error) {
+func (SurveyBool) Bool(name string, items []string, helper ...string) (bool, error) {
 	choice := ""
 	prompt := &survey.Select{
 		Message: name,
 		Options: items,
 	}
+
+	if len(helper) > 0 {
+		prompt.Help = helper[0]
+	}
+
 	if err := survey.AskOne(prompt, &choice); err != nil {
 		return false, err
 	}

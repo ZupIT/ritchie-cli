@@ -41,7 +41,7 @@ func TestRun(t *testing.T) {
 	ritHome := filepath.Join(tmpDir, ".rit-runner-docker")
 	repoPath := filepath.Join(ritHome, "repos", "commons")
 
-	dockerBuilder := builder.NewBuildDocker()
+	dockerBuilder := builder.NewBuildDocker(fileManager)
 
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
@@ -226,7 +226,7 @@ type inputMock struct {
 	err     error
 }
 
-func (i inputMock) List(string, []string) (string, error) {
+func (i inputMock) List(string, []string, ...string) (string, error) {
 	return i.text, i.err
 }
 
@@ -234,11 +234,11 @@ func (i inputMock) Text(string, bool, ...string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) Bool(string, []string) (bool, error) {
+func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 	return i.boolean, i.err
 }
 
-func (i inputMock) Password(string) (string, error) {
+func (i inputMock) Password(string, ...string) (string, error) {
 	return i.text, i.err
 }
 
