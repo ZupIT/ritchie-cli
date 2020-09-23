@@ -27,6 +27,7 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -106,8 +107,13 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
+		for i := range api.CoreCmds {
+			fmt.Println(api.CoreCmds[i].Usage)
+		}
+
 		for i := range notAllowedWords {
 			if strings.Contains(formulaCmd, notAllowedWords[i]) {
+				fmt.Println(api.CoreCmds[i].Usage)
 				return errors.New("not allowed word "+ notAllowedWords[i])
 			}
 		}
