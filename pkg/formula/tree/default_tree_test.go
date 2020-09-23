@@ -17,81 +17,74 @@
 package tree
 
 import (
+	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/mock"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 func TestTree(t *testing.T) {
-	type in struct {
-		RepositoryLister formula.RepositoryLister
-		Repos            git.Repositories
-		Core             bool
-		// wantMergedTree   formula.Tree
-	}
-	tests := []struct {
-		name    string
-		in      in
-		wantErr bool
-	}{
+	var tmpDir = os.TempDir()
+	defer os.Remove(tmpDir)
+
+	var ritHome = filepath.Join(tmpDir, ".rit-tree")
+	defer os.Remove(ritHome)
+
+	workspacePath := filepath.Join(ritHome, "repos", "someRepo1")
+	formulaPath := filepath.Join(ritHome, "repos", "someRepo1", "testing", "formula")
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	defaultTreeManager := NewGenerator(dirManager, fileManager)
+
+	_ = dirManager.Remove(workspacePath)
+	_ = dirManager.Create(workspacePath)
+	defer os.Remove(workspacePath)
+
+	zipFile1 := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	_ = streams.Unzip(zipFile1, workspacePath)
+
+	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, defaultTreeManager)
+	_ = builderManager.Build(workspacePath, formulaPath)
+
+	repos := formula.Repos{
 		{
-			name: "Run with success",
-			in: in{
-				RepositoryLister: RepositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name:     "someRepo1",
-								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
-								Token:    "token",
-							},
-						}, nil
-					},
-				},
-				Repos: mock.DefaultGitRepositoryMock,
-				Core:  false,
-			},
-			wantErr: false,
-			// wantMergedTree:,
+			Name:     "someRepo1",
+			Provider: "Github",
+			Url:      "https://github.com/owner/repo",
+			Token:    "token",
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// repoProviders := formula.NewRepoProviders()
-			// repoProviders.Add("Github", formula.Git{Repos: tt.in.Repos, NewRepoInfo: github.NewRepoInfo})
+	repoLister := repositoryListerCustomMock{
+		list: func() (formula.Repos, error) {
+			return repos, nil
+		},
+	}
 
-			// commands := api.Commands{
-			// 	{
-			// 		Id:     "root_mock",
-			// 		Parent: "root",
-			// 		Usage:  "mock",
-			// 		Help:   "mock for add",
-			// 	},
-			// 	{
-			// 		Id:      "root_mock_test",
-			// 		Parent:  "root_mock",
-			// 		Usage:   "test",
-			// 		Help:    "test for add",
-			// 		Formula: true,
-			// 	},
-			// }
+	githubRepo := github.NewRepoManager(http.DefaultClient)
+	repoProviders := formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 
-			// newTree := NewTreeManager("any", tt.in.RepositoryLister, commands, repoProviders)
-			// mergedTree := newTree.MergedTree(tt.in.Core)
-			// if mergedTree != tt.wantMergedTree {
-			// 	t.Errorf("NewTreeManager_MergedTree() mergedTree = %v, want mergedTree %v", ermergedTreer, tt.wantErwantMergedTreer)
-			// }
-		})
+	newTree := NewTreeManager(ritHome, repoLister, api.CoreCmds, repoProviders)
+	mergedTree := newTree.MergedTree(true)
+
+	nullTree := formula.Tree{Commands: []api.Command{}}
+
+	if len(mergedTree.Commands) == len(nullTree.Commands) {
+		t.Errorf("NewTreeManager_MergedTree() mergedTree = %v, want mergedTree %v", mergedTree, nullTree)
 	}
 }
 
-type RepositoryListerCustomMock struct {
+type repositoryListerCustomMock struct {
 	list func() (formula.Repos, error)
 }
 
-func (m RepositoryListerCustomMock) List() (formula.Repos, error) {
+func (m repositoryListerCustomMock) List() (formula.Repos, error) {
 	return m.list()
 }
