@@ -95,6 +95,29 @@ func TestMergedTree(t *testing.T) {
 	}
 }
 
+func TestTree(t *testing.T) {
+	defer os.Remove(ritHome)
+
+	repoLister := repositoryListerCustomMock{
+		list: func() (formula.Repos, error) {
+			return formula.Repos{}, nil
+		},
+	}
+
+	newTree := NewTreeManager(ritHome, repoLister, api.CoreCmds)
+	tree, err := newTree.Tree()
+
+	trees := make(map[string]formula.Tree)
+	trees[core] = formula.Tree{Commands: api.CoreCmds}
+	if len(tree) == len(trees) {
+		t.Errorf("NewTreeManager_Tree() tree = %v", tree)
+	}
+
+	if err != nil {
+		t.Errorf("NewTreeManager_Tree() error = %v", err)
+	}
+}
+
 type repositoryListerCustomMock struct {
 	list func() (formula.Repos, error)
 }
