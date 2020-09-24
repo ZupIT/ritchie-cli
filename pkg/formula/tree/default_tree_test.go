@@ -17,6 +17,7 @@
 package tree
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -47,6 +48,8 @@ var (
 			return nil, nil
 		},
 	}
+
+	errFoo = errors.New("some error")
 )
 
 func TestMergedTree(t *testing.T) {
@@ -98,23 +101,54 @@ func TestMergedTree(t *testing.T) {
 func TestTree(t *testing.T) {
 	defer os.Remove(ritHome)
 
-	repoLister := repositoryListerCustomMock{
-		list: func() (formula.Repos, error) {
-			return formula.Repos{}, nil
+	type in struct {
+		repo formula.RepositoryLister
+	}
+
+	tests := []struct {
+		name    string
+		in      in
+		wantErr bool
+	}{
+		{
+			name: "run in sucess",
+			in: in{
+				repo: repositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "return error when repository lister resturns error",
+			in: in{
+				repo: repositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, errFoo
+					},
+				},
+			},
+			wantErr: true,
 		},
 	}
 
-	newTree := NewTreeManager(ritHome, repoLister, api.CoreCmds)
-	tree, err := newTree.Tree()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			in := tt.in
+			newTree := NewTreeManager(ritHome, in.repo, api.CoreCmds)
 
-	trees := make(map[string]formula.Tree)
-	trees[core] = formula.Tree{Commands: api.CoreCmds}
-	if len(tree) == len(trees) {
-		t.Errorf("NewTreeManager_Tree() tree = %v", tree)
-	}
+			tree, err := newTree.Tree()
 
-	if err != nil {
-		t.Errorf("NewTreeManager_Tree() error = %v", err)
+			if (tree == nil) != tt.wantErr {
+				t.Errorf("NewTreeManager_Tree() tree = %v", tree)
+			}
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewTreeManager_Tree() error = %v", err)
+			}
+		})
 	}
 }
 
