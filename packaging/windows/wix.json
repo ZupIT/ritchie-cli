@@ -15,17 +15,14 @@
       {
           "name": "PATH",
           "value": "[INSTALLDIR]",
-          "permanent": "no",
+          "permanent": "yes",
           "system": "no",
           "action": "set",
           "part": "last"
       }
     ]
   },
-  "hooks": [
-    {"when":"install", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"},
-    {"when":"uninstall", "command":"cmd.exe /c if exist %systemdrive%%homepath%\\.rit rmdir /s /q %systemdrive%%homepath%\\.rit"}
-  ],
+  "shortcuts": {},
   "choco": {
       "description": "ritchie cli",
       "project-url": "https://github.com/ZupIT/ritchie-cli/tree/master/",
