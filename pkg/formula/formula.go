@@ -51,6 +51,7 @@ type (
 		Condition Condition `json:"condition"`
 		Pattern   Pattern   `json:"pattern"`
 		Tutorial  string    `json:"tutorial"`
+		Required  *bool     `json:"required"`
 	}
 
 	Pattern struct {

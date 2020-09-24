@@ -52,6 +52,12 @@ func TestInputManager_Inputs(t *testing.T) {
         "label": "Type : ",
 		"default": "test"
     },
+	{
+        "name": "sample_text_2",
+        "type": "text",
+        "label": "Type : ",
+		"required": true
+    },
     {
         "name": "sample_list",
         "type": "text",

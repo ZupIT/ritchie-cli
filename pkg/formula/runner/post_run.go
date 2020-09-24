@@ -18,6 +18,7 @@ package runner
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -54,6 +55,7 @@ func (po PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 }
 
 func (po PostRunnerManager) removeWorkDir(tmpDir string) {
+	tmpDir = filepath.Dir(tmpDir) // remove .rit/tmp
 	if err := po.dir.Remove(tmpDir); err != nil {
 		fmt.Sprintln("Error in remove dir")
 	}
