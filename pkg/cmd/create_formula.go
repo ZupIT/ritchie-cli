@@ -42,7 +42,6 @@ var (
 )
 
 const notAllowedChars = `\/><,@`
-var notAllowedWords = []string{"tutorial"}
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -107,15 +106,8 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return ErrNotAllowedCharacter
 		}
 
-		for i := range api.CoreCmds {
-			fmt.Println(api.CoreCmds[i].Usage)
-		}
-
-		for i := range notAllowedWords {
-			if strings.Contains(formulaCmd, notAllowedWords[i]) {
-				fmt.Println(api.CoreCmds[i].Usage)
-				return errors.New("not allowed word "+ notAllowedWords[i])
-			}
+		if err := coreCmdVerify(formulaCmd); err != nil {
+			return err
 		}
 
 		if err := c.tplM.Validate(); err != nil {
@@ -164,6 +156,22 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		return nil
 	}
 }
+
+func coreCmdVerify(formulaCmd string) error {
+	wordAfterCore := strings.Split(formulaCmd, " ")[1]
+	for i := range api.CoreCmds {
+		if wordAfterCore == api.CoreCmds[i].Usage {
+			errorString := fmt.Sprintf("core command verb %q after rit\n" +
+				"Use your formula group before the verb\n" +
+				"Example: rit aws list bucket\n",
+				api.CoreCmds[i].Usage)
+
+			return errors.New(errorString)
+		}
+	}
+	return nil
+}
+
 
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {

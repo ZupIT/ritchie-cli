@@ -86,7 +86,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inTextValidator: inputTextValidatorCustomMock{
 					text: func(name string, validate func(interface{}) error, helper ...string) (string, error) {
-						return "tutorial", nil
+						return "rit tutorial", nil
 					}},
 			},
 			wantErr: true,
