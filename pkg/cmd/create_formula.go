@@ -172,7 +172,6 @@ func coreCmdVerify(formulaCmd string) error {
 	return nil
 }
 
-
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
