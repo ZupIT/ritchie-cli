@@ -32,38 +32,36 @@ import (
 
 func TestTree(t *testing.T) {
 	var tmpDir = os.TempDir()
-	defer os.Remove(tmpDir)
-
 	var ritHome = filepath.Join(tmpDir, ".rit-tree")
 	defer os.Remove(ritHome)
 
-	workspacePath := filepath.Join(ritHome, "repos", "someRepo1")
-	formulaPath := filepath.Join(ritHome, "repos", "someRepo1", "testing", "formula")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	defaultTreeManager := NewGenerator(dirManager, fileManager)
 
+	workspacePath := filepath.Join(ritHome, "repos", "someRepo1")
 	_ = dirManager.Remove(workspacePath)
 	_ = dirManager.Create(workspacePath)
 	defer os.Remove(workspacePath)
 
-	zipFile1 := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
-	_ = streams.Unzip(zipFile1, workspacePath)
+	formulaPath := filepath.Join(ritHome, "repos", "someRepo1", "testing", "formula")
 
+	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	_ = streams.Unzip(zipFile, workspacePath)
+
+	defaultTreeManager := NewGenerator(dirManager, fileManager)
 	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, defaultTreeManager)
 	_ = builderManager.Build(workspacePath, formulaPath)
 
-	repos := formula.Repos{
-		{
-			Name:     "someRepo1",
-			Provider: "Github",
-			Url:      "https://github.com/owner/repo",
-			Token:    "token",
-		},
-	}
 	repoLister := repositoryListerCustomMock{
 		list: func() (formula.Repos, error) {
-			return repos, nil
+			return formula.Repos{
+				{
+					Name:     "someRepo1",
+					Provider: "Github",
+					Url:      "https://github.com/owner/repo",
+					Token:    "token",
+				},
+			}, nil
 		},
 	}
 
@@ -75,9 +73,8 @@ func TestTree(t *testing.T) {
 	mergedTree := newTree.MergedTree(true)
 
 	nullTree := formula.Tree{Commands: []api.Command{}}
-
 	if len(mergedTree.Commands) == len(nullTree.Commands) {
-		t.Errorf("NewTreeManager_MergedTree() mergedTree = %v, want mergedTree %v", mergedTree, nullTree)
+		t.Errorf("NewTreeManager_MergedTree() mergedTree = %v", mergedTree)
 	}
 }
 
