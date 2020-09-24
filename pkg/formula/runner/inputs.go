@@ -222,15 +222,16 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 	inputVal, err := in.List(input.Label, items, input.Tutorial)
 	if inputVal == newLabel {
 		if in.hasRegex(input) {
-			inputVal, err = in.textRegexValidator(input)
-		} else {
-			validate := len(input.Default) == 0
-			inputVal, err = in.InputText.Text(input.Label, validate, input.Tutorial)
-			if len(inputVal) == 0 {
-				inputVal = input.Default
-			}
+			return in.textRegexValidator(input)
+		}
+
+		validate := len(input.Default) == 0
+		inputVal, err = in.InputText.Text(input.Label, validate, input.Tutorial)
+		if len(inputVal) == 0 {
+			inputVal = input.Default
 		}
 	}
+
 	return inputVal, err
 }
 
