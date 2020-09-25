@@ -35,13 +35,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-var (
-	ErrDontStartWithRit = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
-	ErrTooShortCommand  = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
-)
-
-const notAllowedChars = `\/><,@`
-
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
 	homeDir         string
@@ -224,16 +217,19 @@ func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 
 func formulaCommandValidator(formulaCmd string) error {
 	if len(strings.TrimSpace(formulaCmd)) < 1 {
-		return errors.New("this input must not be empty")
+		return prompt.
+			NewError("this input must not be empty")
 	}
 
 	s := strings.Split(formulaCmd, " ")
 	if s[0] != "rit" {
-		return ErrDontStartWithRit
+		return prompt.
+			NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 	}
 
 	if len(s) <= 2 {
-		return ErrTooShortCommand
+		return prompt.
+			NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	}
 
 	if err := characterValidator(formulaCmd); err != nil {
@@ -243,7 +239,7 @@ func formulaCommandValidator(formulaCmd string) error {
 	if err := coreCmdValidator(formulaCmd); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -263,7 +259,7 @@ func coreCmdValidator(formulaCmd string) error {
 }
 
 func characterValidator(formula string) error {
-	if strings.ContainsAny(formula, notAllowedChars) {
+	if strings.ContainsAny(formula, `\/><,@`) {
 		return prompt.NewError(`not allowed character on formula name \/,><@-`)
 	}
 	return nil
