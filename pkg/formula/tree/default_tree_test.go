@@ -34,10 +34,16 @@ import (
 var (
 	tmpDir  = os.TempDir()
 	ritHome = filepath.Join(tmpDir, ".rit-tree")
+
+	coreCmds = []api.Command{
+		{Parent: "root", Usage: "add"},
+		{Parent: "root_add", Usage: "repo"},
+		{Parent: "root", Usage: "metrics"},
+	}
 )
 
 func TestMergedTree(t *testing.T) {
-	defer os.Remove(ritHome)
+	defer cleanRitHome()
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
@@ -45,7 +51,6 @@ func TestMergedTree(t *testing.T) {
 	workspacePath := filepath.Join(ritHome, "repos", "someRepo1")
 	_ = dirManager.Remove(workspacePath)
 	_ = dirManager.Create(workspacePath)
-	defer os.Remove(workspacePath)
 
 	formulaPath := filepath.Join(ritHome, "repos", "someRepo1", "testing", "formula")
 
@@ -73,7 +78,7 @@ func TestMergedTree(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 
-	newTree := NewTreeManager(ritHome, repoLister, api.CoreCmds)
+	newTree := NewTreeManager(ritHome, repoLister, coreCmds)
 	mergedTree := newTree.MergedTree(true)
 
 	nullTree := formula.Tree{Commands: []api.Command{}}
@@ -83,28 +88,78 @@ func TestMergedTree(t *testing.T) {
 }
 
 func TestTree(t *testing.T) {
-	defer os.Remove(ritHome)
+	defer cleanRitHome()
+
 	errFoo := errors.New("some error")
+	expectedTreeEmpty := map[string]formula.Tree{}
+	expectedTreeComplete := map[string]formula.Tree{
+		"CORE": {
+			Commands: api.Commands{
+				{
+					Id:       "",
+					Parent:   "root",
+					Usage:    "add",
+					Help:     "",
+					LongHelp: "",
+					Formula:  false,
+					Repo:     "",
+				},
+				{
+					Id:       "",
+					Parent:   "root_add",
+					Usage:    "repo",
+					Help:     "",
+					LongHelp: "",
+					Formula:  false,
+					Repo:     "",
+				},
+				{
+					Id:       "",
+					Parent:   "root",
+					Usage:    "metrics",
+					Help:     "",
+					LongHelp: "",
+					Formula:  false,
+					Repo:     "",
+				},
+			},
+		},
+		"LOCAL": {
+			Commands: api.Commands{},
+		},
+		"someRepo1": {
+			Commands: api.Commands{},
+		},
+	}
 
 	type in struct {
 		repo formula.RepositoryLister
 	}
 
 	tests := []struct {
-		name    string
-		in      in
-		wantErr bool
+		name         string
+		in           in
+		wantErr      bool
+		expectedTree map[string]formula.Tree
 	}{
 		{
 			name: "run in sucess",
 			in: in{
 				repo: repositoryListerCustomMock{
 					list: func() (formula.Repos, error) {
-						return formula.Repos{}, nil
+						return formula.Repos{
+							{
+								Name:     "someRepo1",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+								Token:    "token",
+							},
+						}, nil
 					},
 				},
 			},
-			wantErr: false,
+			wantErr:      false,
+			expectedTree: expectedTreeComplete,
 		},
 		{
 			name: "return error when repository lister resturns error",
@@ -115,18 +170,19 @@ func TestTree(t *testing.T) {
 					},
 				},
 			},
-			wantErr: true,
+			wantErr:      true,
+			expectedTree: expectedTreeEmpty,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			newTree := NewTreeManager(ritHome, in.repo, api.CoreCmds)
+			newTree := NewTreeManager(ritHome, in.repo, coreCmds)
 
 			tree, err := newTree.Tree()
 
-			if (tree == nil) != tt.wantErr {
+			if !isSameTree(tree, tt.expectedTree) {
 				t.Errorf("NewTreeManager_Tree() tree = %v", tree)
 			}
 
@@ -135,6 +191,50 @@ func TestTree(t *testing.T) {
 			}
 		})
 	}
+}
+
+func cleanRitHome() {
+	fileManager := stream.NewFileManager()
+	_ = fileManager.Remove(ritHome)
+}
+
+func isSameTree(tree, expected map[string]formula.Tree) bool {
+	if len(tree) != len(expected) {
+		return false
+	}
+	for i, v := range tree {
+		if !isSameFormulaTree(v, expected[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func isSameFormulaTree(formula, expected formula.Tree) bool {
+	for i, v := range formula.Commands {
+		if !isSameCommand(v, expected.Commands[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func isSameCommand(command, expected api.Command) bool {
+	var (
+		idIsDiff       = command.Id != expected.Id
+		parentIsDiff   = command.Parent != expected.Parent
+		usageIsDiff    = command.Usage != expected.Usage
+		helpIsDiff     = command.Help != expected.Help
+		longHelpIsDiff = command.LongHelp != expected.LongHelp
+		formulaIsDiff  = command.Formula != expected.Formula
+		repoIsDiff     = command.Repo != expected.Repo
+	)
+
+	if idIsDiff || parentIsDiff || usageIsDiff || helpIsDiff || longHelpIsDiff || formulaIsDiff || repoIsDiff {
+		return false
+	}
+
+	return true
 }
 
 type repositoryListerCustomMock struct {
