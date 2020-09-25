@@ -16,7 +16,7 @@
             Manufacturer="{{.Company}}"
             Language="1033">
 
-      <Package 
+      <Package
                InstallerVersion="200"
                Compressed="yes" 
                Comments="Windows Installer Package"
