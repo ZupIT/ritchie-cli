@@ -19,8 +19,7 @@
       <Package 
                InstallerVersion="200"
                Compressed="yes" 
-               Comments="Windows Installer Package" 
-               InstallScope="perMachine" 
+               Comments="Windows Installer Package"
                AdminImage="no"
                ReadOnly="yes"/>
 
