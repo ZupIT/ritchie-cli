@@ -45,7 +45,7 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 		t.Errorf("NewCreateFormulaCmd got %v", cmd)
 		return
 	}
-
+	
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
 	}
