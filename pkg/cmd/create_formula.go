@@ -36,9 +36,8 @@ import (
 )
 
 var (
-	ErrNotAllowedCharacter = prompt.NewError(`not allowed character on formula name \/,><@-`)
-	ErrDontStartWithRit    = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
-	ErrTooShortCommand     = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrDontStartWithRit = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrTooShortCommand  = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 )
 
 const notAllowedChars = `\/><,@`
@@ -102,11 +101,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		if strings.ContainsAny(formulaCmd, notAllowedChars) {
-			return ErrNotAllowedCharacter
-		}
-
-		if err := coreCmdVerify(formulaCmd); err != nil {
+		if err := formulaCommandVerify(formulaCmd); err != nil {
 			return err
 		}
 
@@ -157,21 +152,6 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func coreCmdVerify(formulaCmd string) error {
-	wordAfterCore := strings.Split(formulaCmd, " ")[1]
-	for i := range api.CoreCmds {
-		if wordAfterCore == api.CoreCmds[i].Usage {
-			errorString := fmt.Sprintf("core command verb %q after rit\n" +
-				"Use your formula group before the verb\n" +
-				"Example: rit aws list bucket\n",
-				api.CoreCmds[i].Usage)
-
-			return errors.New(errorString)
-		}
-	}
-	return nil
-}
-
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
@@ -181,13 +161,50 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if strings.ContainsAny(cf.FormulaCmd, notAllowedChars) {
-			return ErrNotAllowedCharacter
+		if err := formulaCommandVerify(cf.FormulaCmd); err != nil {
+			return err
 		}
 
 		c.create(cf, cf.WorkspacePath, cf.FormulaPath)
 		return nil
 	}
+}
+
+// formulaCommandVerify looks for not allowed characters and core commands words after root
+// examples: rit @my formula, rit list formula
+func formulaCommandVerify(formulaCmd string) error {
+
+	if err := characterVerify(formulaCmd); err != nil {
+		return err
+	}
+
+	if err := coreCmdVerify(formulaCmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func coreCmdVerify(formulaCmd string) error {
+	wordAfterCore := strings.Split(formulaCmd, " ")[1]
+	for i := range api.CoreCmds {
+		if wordAfterCore == api.CoreCmds[i].Usage {
+			errorString := fmt.Sprintf("core command verb %q after rit\n"+
+				"Use your formula group before the verb\n"+
+				"Example: rit aws list bucket\n",
+				api.CoreCmds[i].Usage)
+
+			return errors.New(errorString)
+		}
+	}
+	return nil
+}
+
+func characterVerify(formula string) error {
+	if strings.ContainsAny(formula, notAllowedChars) {
+		return prompt.NewError(`not allowed character on formula name \/,><@-`)
+	}
+	return nil
 }
 
 func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath string) {
