@@ -453,59 +453,6 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 }
 
 func TestInputManager_RegexType(t *testing.T) {
-	// 	inputJson := `[
-	//     {
-	//         "name": "sample_text",
-	//         "type": "text",
-	// 				"label": "Type : ",
-	// 				"pattern": {
-	// 					"regex": "a|b",
-	// 					"mismatchText": "mismatch"
-	// 				}
-	//     }
-	// ]`
-
-	// 	var inputs []formula.Input
-	// 	_ = json.Unmarshal([]byte(inputJson), &inputs)
-
-	// 	setup := formula.Setup{
-	// 		Config: formula.Config{
-	// 			Inputs: inputs,
-	// 		},
-	// 		FormulaPath: os.TempDir(),
-	// 	}
-
-	// 	fileManager := stream.NewFileManager()
-
-	// 	iText := inputMock{text: "a"}
-	// 	iTextValidator := inputTextValidatorMock{str: "a"}
-	// 	iList := inputMock{text: "in_list1"}
-	// 	iBool := inputMock{boolean: false}
-	// 	iPass := inputMock{text: "******"}
-
-	// 	inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
-
-	// 	cmd := &exec.Cmd{}
-
-	// 	got := inputManager.Inputs(cmd, setup, api.Prompt)
-
-	// 	if got != nil {
-	// 		t.Errorf("Inputs got %v, want %v", got, nil)
-	// 	}
-
-	// 	iText = inputMock{text: "g"}
-	// 	iTextValidator = inputTextValidatorMock{str: "c"}
-
-	// 	inputManager = NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
-
-	// 	cmd = &exec.Cmd{}
-
-	// 	got = inputManager.Inputs(cmd, setup, api.Prompt)
-
-	// 	if got == nil {
-	// 		t.Errorf("Inputs got %v, want %v", nil, errors.New("mismatch"))
-	// 	}
-
 	type in struct {
 		inputJson      string
 		inText         inputMock
