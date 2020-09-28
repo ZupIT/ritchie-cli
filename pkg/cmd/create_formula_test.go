@@ -81,7 +81,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 			},
 			wantErr: true,
 		},
-
 		{
 			name: "error on template manager Validate func",
 			in: in{
