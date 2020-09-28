@@ -194,8 +194,7 @@ func TestTree(t *testing.T) {
 }
 
 func cleanRitHome() {
-	fileManager := stream.NewFileManager()
-	_ = fileManager.Remove(ritHome)
+	_ = os.RemoveAll(ritHome)
 }
 
 func isSameTree(tree, expected map[string]formula.Tree) bool {
@@ -212,6 +211,10 @@ func isSameTree(tree, expected map[string]formula.Tree) bool {
 
 func isSameFormulaTree(formula, expected formula.Tree) bool {
 	for i, v := range formula.Commands {
+		commandsExists := expected.Commands[i] != api.Command{}
+		if !commandsExists {
+			return false
+		}
 		if !isSameCommand(v, expected.Commands[i]) {
 			return false
 		}
