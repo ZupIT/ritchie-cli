@@ -17,6 +17,7 @@
 package tree
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -25,10 +26,8 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 var (
@@ -45,27 +44,59 @@ var (
 func TestMergedTree(t *testing.T) {
 	defer cleanRitHome()
 
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
+	treeLocalFile := filepath.Join(ritHome, "repos", "local")
+	treeSomeRepoFile := filepath.Join(ritHome, "repos", "someRepo")
 
-	workspacePath := filepath.Join(ritHome, "repos", "someRepo1")
-	_ = dirManager.Remove(workspacePath)
-	_ = dirManager.Create(workspacePath)
+	createDir(ritHome)
+	createDir(treeLocalFile)
+	createDir(treeSomeRepoFile)
 
-	formulaPath := filepath.Join(ritHome, "repos", "someRepo1", "testing", "formula")
+	localTree := formula.Tree{Commands: []api.Command{
+		{Parent: "root", Usage: "jedis-list"},
+		{Parent: "root_jedis-list", Usage: "add"},
+	}}
 
-	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
-	_ = streams.Unzip(zipFile, workspacePath)
+	someRepoTree := formula.Tree{Commands: []api.Command{
+		{Parent: "root", Usage: "pokemon-list"},
+		{Parent: "root_pokemon-list", Usage: "add"},
+	}}
 
-	defaultTreeManager := NewGenerator(dirManager, fileManager)
-	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, defaultTreeManager)
-	_ = builderManager.Build(workspacePath, formulaPath)
+	addTreeLocal(treeLocalFile, localTree)
+	addTreeLocal(treeSomeRepoFile, someRepoTree)
+
+	expectedTreeComplete := formula.Tree{
+		Commands: api.Commands{
+			coreCmds[0],
+			coreCmds[1],
+			coreCmds[2],
+			{
+				Parent: "root",
+				Usage:  "jedis-list",
+				Repo:   "local",
+			},
+			{
+				Parent: "root_jedis-list",
+				Usage:  "add",
+				Repo:   "local",
+			},
+			{
+				Parent: "root",
+				Usage:  "pokemon-list",
+				Repo:   "someRepo",
+			},
+			{
+				Parent: "root_pokemon-list",
+				Usage:  "add",
+				Repo:   "someRepo",
+			},
+		},
+	}
 
 	repoLister := repositoryListerCustomMock{
 		list: func() (formula.Repos, error) {
 			return formula.Repos{
 				{
-					Name:     "someRepo1",
+					Name:     "someRepo",
 					Provider: "Github",
 					Url:      "https://github.com/owner/repo",
 					Token:    "token",
@@ -81,9 +112,8 @@ func TestMergedTree(t *testing.T) {
 	newTree := NewTreeManager(ritHome, repoLister, coreCmds)
 	mergedTree := newTree.MergedTree(true)
 
-	nullTree := formula.Tree{Commands: []api.Command{}}
-	if len(mergedTree.Commands) == len(nullTree.Commands) {
-		t.Errorf("NewTreeManager_MergedTree() mergedTree = %v", mergedTree)
+	if !isSameFormulaTree(mergedTree, expectedTreeComplete) {
+		t.Errorf("NewTreeManager_MergedTree() mergedTree = %v, expectedTree = %v", mergedTree, expectedTreeComplete)
 	}
 }
 
@@ -95,33 +125,9 @@ func TestTree(t *testing.T) {
 	expectedTreeComplete := map[string]formula.Tree{
 		"CORE": {
 			Commands: api.Commands{
-				{
-					Id:       "",
-					Parent:   "root",
-					Usage:    "add",
-					Help:     "",
-					LongHelp: "",
-					Formula:  false,
-					Repo:     "",
-				},
-				{
-					Id:       "",
-					Parent:   "root_add",
-					Usage:    "repo",
-					Help:     "",
-					LongHelp: "",
-					Formula:  false,
-					Repo:     "",
-				},
-				{
-					Id:       "",
-					Parent:   "root",
-					Usage:    "metrics",
-					Help:     "",
-					LongHelp: "",
-					Formula:  false,
-					Repo:     "",
-				},
+				coreCmds[0],
+				coreCmds[1],
+				coreCmds[2],
 			},
 		},
 		"LOCAL": {
@@ -195,6 +201,23 @@ func TestTree(t *testing.T) {
 
 func cleanRitHome() {
 	_ = os.RemoveAll(ritHome)
+}
+
+func createDir(path string) {
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
+	_ = dirManager.Remove(path)
+	_ = dirManager.Create(path)
+}
+
+func addTreeLocal(dest string, tree formula.Tree) {
+	fileManager := stream.NewFileManager()
+
+	treeJSON, _ := json.MarshalIndent(tree, "", "\t")
+
+	treeLocalFile := filepath.Join(dest, "tree.json")
+	_ = fileManager.Write(treeLocalFile, treeJSON)
 }
 
 func isSameTree(tree, expected map[string]formula.Tree) bool {
