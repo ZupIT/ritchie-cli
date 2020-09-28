@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 
+ <!-- The URL for add/remove programs -->
+<?define InfoURL="https://docs.ritchiecli.io/" ?>
+
 <?if $(sys.BUILDARCH)="x86"?>
     <?define Program_Files="ProgramFilesFolder"?>
 <?elseif $(sys.BUILDARCH)="x64"?>
@@ -22,6 +25,11 @@
          Comments="Windows Installer Package"
          AdminImage="no"
          ReadOnly="yes"/>
+
+      <WixVariable Id="WixUIBannerBmp" Value="C:\workspace\workspace\docs\img\ritchie-banner.bmp" />
+      <WixVariable Id="WixUIDialogBmp" Value="C:\workspace\workspace\docs\img\ritchie-banner.bmp" />
+
+      <Property Id="ARPHELPLINK" Value="$(var.InfoURL)" />
 
       <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
 
