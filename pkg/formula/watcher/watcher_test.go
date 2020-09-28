@@ -47,7 +47,11 @@ func TestWatch(t *testing.T) {
 
 	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, treeGenerator)
 
-	watchManager := New(builderManager, dirManager)
+	watchManager := New(
+		builderManager,
+		dirManager,
+		sendMetric func(commandExecutionTime float64, err ...string),
+	)
 
 	go func() {
 		watchManager.watcher.Wait()
