@@ -44,16 +44,16 @@ var (
 func TestMergedTree(t *testing.T) {
 	defer cleanRitHome()
 
-	treeLocalFile := filepath.Join(ritHome, "repos", "local")
-	treeSomeRepoFile := filepath.Join(ritHome, "repos", "someRepo")
+	treeLocalDir := filepath.Join(ritHome, "repos", "local")
+	treeSomeRepoDir := filepath.Join(ritHome, "repos", "someRepo")
 
 	createDir(ritHome)
-	createDir(treeLocalFile)
-	createDir(treeSomeRepoFile)
+	createDir(treeLocalDir)
+	createDir(treeSomeRepoDir)
 
 	localTree := formula.Tree{Commands: []api.Command{
-		{Parent: "root", Usage: "jedis-list"},
-		{Parent: "root_jedis-list", Usage: "add"},
+		{Parent: "root", Usage: "jedi-list"},
+		{Parent: "root_jedi-list", Usage: "add"},
 	}}
 
 	someRepoTree := formula.Tree{Commands: []api.Command{
@@ -61,8 +61,8 @@ func TestMergedTree(t *testing.T) {
 		{Parent: "root_pokemon-list", Usage: "add"},
 	}}
 
-	addTreeLocal(treeLocalFile, localTree)
-	addTreeLocal(treeSomeRepoFile, someRepoTree)
+	addTreeLocal(treeLocalDir, localTree)
+	addTreeLocal(treeSomeRepoDir, someRepoTree)
 
 	expectedTreeComplete := formula.Tree{
 		Commands: api.Commands{
@@ -71,11 +71,11 @@ func TestMergedTree(t *testing.T) {
 			coreCmds[2],
 			{
 				Parent: "root",
-				Usage:  "jedis-list",
+				Usage:  "jedi-list",
 				Repo:   "local",
 			},
 			{
-				Parent: "root_jedis-list",
+				Parent: "root_jedi-list",
 				Usage:  "add",
 				Repo:   "local",
 			},
