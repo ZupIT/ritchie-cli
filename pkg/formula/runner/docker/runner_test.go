@@ -125,7 +125,7 @@ func TestRun(t *testing.T) {
 				context:     ctxFinder,
 			},
 			out: out{
-				err: errors.New("post runner error"),
+				err: nil,
 			},
 		},
 		{
