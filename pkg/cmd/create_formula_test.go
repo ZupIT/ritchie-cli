@@ -127,20 +127,16 @@ func TestCreateFormulaCmd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//inputTextValidator := prompt.NewSurveyTextValidator()
-
 			createFormulaCmd := NewCreateFormulaCmd(
 				os.TempDir(),
 				formCreator{},
 				tt.in.tm,
 				workspaceForm{},
 				tt.in.inText,
-				 tt.in.inTextValidator,
-				//inputTextValidator,
+				tt.in.inTextValidator,
 				tt.in.inList,
 				TutorialFinderMock{},
 			)
-
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := createFormulaCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("%s = %v, want %v", createFormulaCmd.Use, err, nil)
