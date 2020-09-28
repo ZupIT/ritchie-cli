@@ -26,8 +26,8 @@
          AdminImage="no"
          ReadOnly="yes"/>
 
-      <WixVariable Id="WixUIBannerBmp" Value="C:\workspace\workspace\docs\img\ritchie-banner.bmp" />
-      <WixVariable Id="WixUIDialogBmp" Value="C:\workspace\workspace\docs\img\ritchie-banner.bmp" />
+      <WixVariable Id="WixUIBannerBmp" Value="C:\workspace\docs\img\ritchie-banner.bmp" />
+      <WixVariable Id="WixUIDialogBmp" Value="C:\workspace\docs\img\ritchie-banner.bmp" />
 
       <Property Id="ARPHELPLINK" Value="$(var.InfoURL)" />
 
