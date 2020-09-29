@@ -94,5 +94,101 @@
             }
         ],
         "result": ""
+    },
+    {
+        "entry": "Create formula STDIN",
+        "steps": [
+            {
+                "key": "",
+                "value": "{\"formulaCmd\":\"rit create formula\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "action": "echo"
+            },
+            {
+                "key": "",
+                "value": "create formula --stdin",
+                "action": "main"
+            }
+        ],
+        "result": ""
+    },
+    {
+        "entry": "Create formula STDIN - empty formula name",
+        "steps": [
+            {
+                "key": "",
+                "value": "{\"formulaCmd\":\"\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "action": "echo"
+            },
+            {
+                "key": "",
+                "value": "create formula --stdin",
+                "action": "main"
+            }
+        ],
+        "result": "this input must not be empty"
+    },
+    {
+        "entry": "Create formula STDIN - too short formula name",
+        "steps": [
+            {
+                "key": "",
+                "value": "{\"formulaCmd\":\"rit tooShort\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "action": "echo"
+            },
+            {
+                "key": "",
+                "value": "create formula --stdin",
+                "action": "main"
+            }
+        ],
+        "result": "Rit formula's command needs at least 2 words"
+    },
+    {
+        "entry": "Create formula STDIN - no rit on formula name",
+        "steps": [
+            {
+                "key": "",
+                "value": "{\"formulaCmd\":\"no rit\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "action": "echo"
+            },
+            {
+                "key": "",
+                "value": "create formula --stdin",
+                "action": "main"
+            }
+        ],
+        "result": "Rit formula's command needs to start with"
+    },
+    {
+        "entry": "Create formula STDIN - not allowed char",
+        "steps": [
+            {
+                "key": "",
+                "value": "{\"formulaCmd\":\"rit @formula<\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "action": "echo"
+            },
+            {
+                "key": "",
+                "value": "create formula --stdin",
+                "action": "main"
+            }
+        ],
+        "result": "not allowed character on formula name"
+    },
+    {
+        "entry": "Create formula STDIN - core command after rit",
+        "steps": [
+            {
+                "key": "",
+                "value": "{\"formulaCmd\":\"rit create myFormula\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "action": "echo"
+            },
+            {
+                "key": "",
+                "value": "create formula --stdin",
+                "action": "main"
+            }
+        ],
+        "result": "core command verb"
     }
 ]

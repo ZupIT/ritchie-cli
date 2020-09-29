@@ -224,12 +224,12 @@ func formulaCommandValidator(formulaCmd string) error {
 	s := strings.Split(formulaCmd, " ")
 	if s[0] != "rit" {
 		return prompt.
-			NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+			NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	}
 
 	if len(s) <= 2 {
 		return prompt.
-			NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+			NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 	}
 
 	if err := characterValidator(formulaCmd); err != nil {
