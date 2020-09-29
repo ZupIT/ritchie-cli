@@ -256,12 +256,15 @@ func (in InputManager) resolveIfReserved(input formula.Input) (string, error) {
 
 func (in InputManager) textValidator(input formula.Input) (string, error) {
 	required := isRequired(input)
+	var inputVal string
+	var err error
 
 	if in.hasRegex(input) {
-		return in.textRegexValidator(input, required)
+		inputVal, err = in.textRegexValidator(input, required)
+	} else {
+		inputVal, err = in.InputText.Text(input.Label, required, input.Tutorial)
 	}
 
-	inputVal, err := in.InputText.Text(input.Label, required, input.Tutorial)
 	if inputVal == "" {
 		inputVal = input.Default
 	}
