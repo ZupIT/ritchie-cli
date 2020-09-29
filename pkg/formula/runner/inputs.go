@@ -139,20 +139,8 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			if items != nil {
 				inputVal, err = in.loadInputValList(items, input)
 			} else {
-				if in.hasRegex(input) {
-					inputVal, err = in.textRegexValidator(input)
-					if err != nil {
-						return err
-					}
-				} else {
-					validate := isRequired(input)
-					inputVal, err = in.InputText.Text(input.Label, validate, input.Tutorial)
-					if inputVal == "" {
-						inputVal = input.Default
-					}
-				}
+				inputVal, err = in.textValidator(input)
 			}
-
 		case "bool":
 			valBool, err = in.Bool(input.Label, items, input.Tutorial)
 			inputVal = strconv.FormatBool(valBool)
@@ -219,17 +207,10 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 		}
 		items = append(items, newLabel)
 	}
+
 	inputVal, err := in.List(input.Label, items, input.Tutorial)
 	if inputVal == newLabel {
-		if in.hasRegex(input) {
-			return in.textRegexValidator(input)
-		}
-
-		validate := len(input.Default) == 0
-		inputVal, err = in.InputText.Text(input.Label, validate, input.Tutorial)
-		if len(inputVal) == 0 {
-			inputVal = input.Default
-		}
+		return in.textValidator(input)
 	}
 
 	return inputVal, err
@@ -271,6 +252,21 @@ func (in InputManager) resolveIfReserved(input formula.Input) (string, error) {
 		return resolver.Resolve(input.Type)
 	}
 	return "", nil
+}
+
+func (in InputManager) textValidator(input formula.Input) (string, error) {
+	required := isRequired(input)
+
+	if in.hasRegex(input) {
+		return in.textRegexValidator(input, required)
+	}
+
+	inputVal, err := in.InputText.Text(input.Label, required, input.Tutorial)
+	if inputVal == "" {
+		inputVal = input.Default
+	}
+
+	return inputVal, err
 }
 
 func isRequired(input formula.Input) bool {
@@ -327,10 +323,12 @@ func (in InputManager) hasRegex(input formula.Input) bool {
 	return len(input.Pattern.Regex) > 0
 }
 
-func (in InputManager) textRegexValidator(input formula.Input) (string, error) {
+func (in InputManager) textRegexValidator(input formula.Input, required bool) (string, error) {
 	return in.InputTextValidator.Text(input.Label, func(text interface{}) error {
 		re := regexp.MustCompile(input.Pattern.Regex)
 		if re.MatchString(text.(string)) {
+			return nil
+		} else if !required && text.(string) == "" {
 			return nil
 		}
 		return errors.New(input.Pattern.MismatchText)
