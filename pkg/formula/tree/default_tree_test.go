@@ -233,12 +233,16 @@ func isSameTree(tree, expected map[string]formula.Tree) bool {
 }
 
 func isSameFormulaTree(formula, expected formula.Tree) bool {
-	for i, v := range formula.Commands {
-		commandsExists := expected.Commands[i] != api.Command{}
+	if len(formula.Commands) != len(expected.Commands) {
+		return false
+	}
+
+	for i, v := range expected.Commands {
+		commandsExists := formula.Commands[i] != api.Command{}
 		if !commandsExists {
 			return false
 		}
-		if !isSameCommand(v, expected.Commands[i]) {
+		if !isSameCommand(v, formula.Commands[i]) {
 			return false
 		}
 	}
