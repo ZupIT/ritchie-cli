@@ -72,7 +72,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-
 			name: "error on template manager Validate func",
 			in: in{
 				inTextValidator: inputTextValidatorMock{},
@@ -127,7 +126,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tt.in.inList,
 				TutorialFinderMock{},
 			)
-
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := createFormulaCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("%s = %v, want %v", createFormulaCmd.Use, err, nil)
