@@ -328,7 +328,8 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 		re := regexp.MustCompile(input.Pattern.Regex)
 		if re.MatchString(text.(string)) {
 			return nil
-		} else if !required && text.(string) == "" {
+		}
+		if !required && text.(string) == "" {
 			return nil
 		}
 		return errors.New(input.Pattern.MismatchText)
