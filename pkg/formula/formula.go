@@ -50,6 +50,7 @@ type (
 		Cache     Cache     `json:"cache"`
 		Condition Condition `json:"condition"`
 		Tutorial  string    `json:"tutorial"`
+		Required  *bool     `json:"required"`
 	}
 
 	Cache struct {

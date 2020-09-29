@@ -38,8 +38,8 @@ const (
 	versionMsgWithLatestVersion = "%s\n  %s\n  Build date: %s\n  Built with: %s\n"
 	cmdUse                      = "rit"
 	cmdShortDescription         = "rit is a NoOps CLI"
-	cmdDescription              = `A CLI that developers can build and operate
-your applications without help from the infra staff.
+	cmdDescription              = `A CLI to create, store and share any kind of 
+automations, executing them through command lines.
 Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
