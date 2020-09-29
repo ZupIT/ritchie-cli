@@ -100,7 +100,7 @@
         "steps": [
             {
                 "key": "",
-                "value": "{\"formulaCmd\":\"rit create formula\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "value": "{\"formulaCmd\":\"rit formula formula\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
                 "action": "echo"
             },
             {
@@ -164,7 +164,7 @@
         "steps": [
             {
                 "key": "",
-                "value": "{\"formulaCmd\":\"rit @formula<\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
+                "value": "{\"formulaCmd\":\"rit @formula< formula\", \"lang\":\"shell\", \"workspacePath\":\"/home/victor/ritchie-formulas-local\", \"formulaPath\":\"/demo/create/formula\"}",
                 "action": "echo"
             },
             {
