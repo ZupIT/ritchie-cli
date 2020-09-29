@@ -326,12 +326,10 @@ func (in InputManager) hasRegex(input formula.Input) bool {
 func (in InputManager) textRegexValidator(input formula.Input, required bool) (string, error) {
 	return in.InputTextValidator.Text(input.Label, func(text interface{}) error {
 		re := regexp.MustCompile(input.Pattern.Regex)
-		if re.MatchString(text.(string)) {
+		if re.MatchString(text.(string)) || (!required && text.(string) == "") {
 			return nil
 		}
-		if !required && text.(string) == "" {
-			return nil
-		}
+
 		return errors.New(input.Pattern.MismatchText)
 	})
 }
