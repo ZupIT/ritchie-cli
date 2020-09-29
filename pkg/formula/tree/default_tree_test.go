@@ -109,7 +109,19 @@ func TestMergedTree(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 
-	newTree := NewTreeManager(ritHome, repoLister, coreCmds)
+	fileManager := FileWriteReadExist{
+		exists: func(path string) bool {
+			return false
+		},
+		read: func(path string) ([]byte, error) {
+			return []byte("some data"), nil
+		},
+		write: func(path string, content []byte) error {
+			return nil
+		},
+	}
+
+	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager)
 	mergedTree := newTree.MergedTree(true)
 
 	if !isSameFormulaTree(mergedTree, expectedTreeComplete) {
@@ -184,7 +196,18 @@ func TestTree(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			newTree := NewTreeManager(ritHome, in.repo, coreCmds)
+			fileManager := FileWriteReadExist{
+				exists: func(path string) bool {
+					return false
+				},
+				read: func(path string) ([]byte, error) {
+					return []byte("some data"), nil
+				},
+				write: func(path string, content []byte) error {
+					return nil
+				},
+			}
+			newTree := NewTreeManager(ritHome, in.repo, coreCmds, fileManager)
 
 			tree, err := newTree.Tree()
 
@@ -233,12 +256,15 @@ func isSameTree(tree, expected map[string]formula.Tree) bool {
 }
 
 func isSameFormulaTree(formula, expected formula.Tree) bool {
-	for i, v := range formula.Commands {
-		commandsExists := expected.Commands[i] != api.Command{}
+	if len(formula.Commands) != len(expected.Commands) {
+		return false
+	}
+	for i, v := range expected.Commands {
+		commandsExists := formula.Commands[i] != api.Command{}
 		if !commandsExists {
 			return false
 		}
-		if !isSameCommand(v, expected.Commands[i]) {
+		if !isSameCommand(v, formula.Commands[i]) {
 			return false
 		}
 	}
@@ -269,4 +295,22 @@ type repositoryListerCustomMock struct {
 
 func (m repositoryListerCustomMock) List() (formula.Repos, error) {
 	return m.list()
+}
+
+type FileWriteReadExist struct {
+	write  func(path string, content []byte) error
+	read   func(path string) ([]byte, error)
+	exists func(path string) bool
+}
+
+func (m FileWriteReadExist) Write(path string, content []byte) error {
+	return m.write(path, content)
+}
+
+func (m FileWriteReadExist) Read(path string) ([]byte, error) {
+	return m.read(path)
+}
+
+func (m FileWriteReadExist) Exists(path string) bool {
+	return m.exists(path)
 }
