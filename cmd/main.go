@@ -160,7 +160,7 @@ func buildCommands() *cobra.Command {
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
 
-	watchManager := watcher.New(formulaLocalBuilder, dirManager)
+	watchManager := watcher.New(formulaLocalBuilder, dirManager, sendMetric)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaLocalBuilder)
 
 	versionManager := version.NewManager(
