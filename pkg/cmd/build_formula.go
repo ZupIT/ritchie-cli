@@ -76,7 +76,7 @@ func NewBuildFormulaCmd(
 	cmd := &cobra.Command{
 		Use:   "formula",
 		Short: "Build your formulas locally. Use --watch flag and get real-time updates.",
-		Long: `Use this command to build your formulas locally. To make formulas development easier, you can run 
+		Long: `Use this command to build your formulas locally. To make formulas development easier, you can run
 the command with the --watch flag and get real-time updates.`,
 		RunE:      s.runFunc(),
 		ValidArgs: []string{""},
@@ -152,8 +152,13 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 		return
 	}
 
-	success := prompt.Green("✔ Build completed!")
+	success := prompt.Green("✔ Build completed!\n")
 	s.Success(success)
+
+	const MessageWatch = `Are you testing your formula? You can use the flag --watch to avoid
+using the rit build formula for every modification.Try it on another window.` + "\n"
+
+	prompt.Info(MessageWatch)
 }
 
 func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string, error) {
