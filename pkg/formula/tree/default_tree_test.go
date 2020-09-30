@@ -195,10 +195,8 @@ func TestTree(t *testing.T) {
 				},
 				file: FileReadExisterMock{
 					exists: func(path string) bool {
-						if strings.Contains(path, "/someRepo/tree.json") {
-							return true
-						}
-						return false
+						isSomeRepo := strings.Contains(path, "/someRepo/tree.json")
+						return isSomeRepo
 					},
 					read: func(path string) ([]byte, error) {
 						if strings.Contains(path, "/someRepo/tree.json") {
@@ -286,10 +284,8 @@ func TestTree(t *testing.T) {
 				},
 				file: FileReadExisterMock{
 					exists: func(path string) bool {
-						if strings.Contains(path, "/someRepo/tree.json") {
-							return true
-						}
-						return false
+						isSomeRepo := strings.Contains(path, "/someRepo/tree.json")
+						return isSomeRepo
 					},
 					read: func(path string) ([]byte, error) {
 						if strings.Contains(path, "/someRepo/tree.json") {
