@@ -32,15 +32,26 @@ import (
 )
 
 type WatchManager struct {
-	watcher *watcher.Watcher
-	formula formula.LocalBuilder
-	dir     stream.DirListChecker
+	watcher    *watcher.Watcher
+	formula    formula.LocalBuilder
+	dir        stream.DirListChecker
+	sendMetric func(commandExecutionTime float64, err ...string)
 }
 
-func New(formula formula.LocalBuilder, dir stream.DirListChecker) *WatchManager {
+func New(
+	formula formula.LocalBuilder,
+	dir stream.DirListChecker,
+	sendMetric func(commandExecutionTime float64, err ...string),
+) *WatchManager {
+
 	w := watcher.New()
 
-	return &WatchManager{watcher: w, formula: formula, dir: dir}
+	return &WatchManager{
+		watcher:    w,
+		formula:    formula,
+		dir:        dir,
+		sendMetric: sendMetric,
+	}
 }
 
 func (w *WatchManager) Watch(workspacePath, formulaPath string) {
@@ -69,6 +80,9 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 
 	watchText := fmt.Sprintf("Watching dir %s \n", formulaPath)
 	prompt.Info(watchText)
+
+	startTime := time.Now().Second()
+	w.sendMetric(float64(startTime))
 
 	if err := w.watcher.Start(time.Second * 2); err != nil {
 		log.Fatalln(err)
