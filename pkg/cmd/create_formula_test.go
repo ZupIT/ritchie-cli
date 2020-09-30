@@ -136,7 +136,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tt.in.inList,
 				TutorialFinderMock{},
 			)
-
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := createFormulaCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("%s = %v, want %v", createFormulaCmd.Use, err, nil)
