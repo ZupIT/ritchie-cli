@@ -106,7 +106,7 @@ func TestMergedTree(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 
-	fileManager := FileReadExist{
+	fileManager := FileReadExisterMock{
 		exists: func(path string) bool {
 			isLocalRepo := strings.Contains(path, "/local/tree.json")
 			isSomeRepo := strings.Contains(path, "/someRepo/tree.json")
@@ -169,7 +169,7 @@ func TestTree(t *testing.T) {
 
 	type in struct {
 		repo formula.RepositoryLister
-		file FileReadExist
+		file FileReadExisterMock
 	}
 
 	tests := []struct {
@@ -193,7 +193,7 @@ func TestTree(t *testing.T) {
 						}, nil
 					},
 				},
-				file: FileReadExist{
+				file: FileReadExisterMock{
 					exists: func(path string) bool {
 						if strings.Contains(path, "/someRepo/tree.json") {
 							return true
@@ -219,7 +219,7 @@ func TestTree(t *testing.T) {
 						return formula.Repos{}, errFoo
 					},
 				},
-				file: FileReadExist{
+				file: FileReadExisterMock{
 					exists: func(path string) bool {
 						return false
 					},
@@ -239,7 +239,7 @@ func TestTree(t *testing.T) {
 						return formula.Repos{}, errFoo
 					},
 				},
-				file: FileReadExist{
+				file: FileReadExisterMock{
 					exists: func(path string) bool {
 						return true
 					},
@@ -259,7 +259,7 @@ func TestTree(t *testing.T) {
 						return formula.Repos{}, errFoo
 					},
 				},
-				file: FileReadExist{
+				file: FileReadExisterMock{
 					exists: func(path string) bool {
 						return true
 					},
@@ -284,7 +284,7 @@ func TestTree(t *testing.T) {
 							}}, nil
 					},
 				},
-				file: FileReadExist{
+				file: FileReadExisterMock{
 					exists: func(path string) bool {
 						if strings.Contains(path, "/someRepo/tree.json") {
 							return true
@@ -385,15 +385,15 @@ func (m repositoryListerCustomMock) List() (formula.Repos, error) {
 	return m.list()
 }
 
-type FileReadExist struct {
+type FileReadExisterMock struct {
 	read   func(path string) ([]byte, error)
 	exists func(path string) bool
 }
 
-func (m FileReadExist) Read(path string) ([]byte, error) {
+func (m FileReadExisterMock) Read(path string) ([]byte, error) {
 	return m.read(path)
 }
 
-func (m FileReadExist) Exists(path string) bool {
+func (m FileReadExisterMock) Exists(path string) bool {
 	return m.exists(path)
 }
