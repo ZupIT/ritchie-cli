@@ -156,7 +156,7 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 	s.Success(success)
 
 	const MessageWatch = `Are you testing your formula? You can use the flag --watch to avoid
-using the rit build formula for every modification.Try it on another window.` + "\n"
+using the rit build formula for every modification. Try it on another window.` + "\n"
 
 	prompt.Info(MessageWatch)
 }
