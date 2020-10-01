@@ -19,6 +19,7 @@ package tree
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -31,8 +32,9 @@ import (
 )
 
 var (
-	tmpDir  = os.TempDir()
-	ritHome = filepath.Join(tmpDir, ".rit-tree")
+	tmpDir           = os.TempDir()
+	ritHome          = filepath.Join(tmpDir, ".rit-tree")
+	pathTreeSomeRepo = fmt.Sprintf(treeRepoCmdPattern, ritHome, "someRepo")
 
 	coreCmds = []api.Command{
 		{Parent: "root", Usage: "add"},
@@ -54,6 +56,9 @@ func TestMergedTree(t *testing.T) {
 		{Parent: "root", Usage: "jedi-list"},
 		{Parent: "root_jedi-list", Usage: "add"},
 	}}
+
+	pathTreeLocalRepo := fmt.Sprintf(treeLocalCmdPattern, ritHome)
+	pathTreeOtherRepo := fmt.Sprintf(treeRepoCmdPattern, ritHome, "otherRepo")
 
 	expectedTreeComplete := formula.Tree{
 		Commands: api.Commands{
@@ -108,9 +113,9 @@ func TestMergedTree(t *testing.T) {
 
 	fileManager := FileReadExisterMock{
 		exists: func(path string) bool {
-			isLocalRepo := strings.Contains(path, "/local/tree.json")
-			isSomeRepo := strings.Contains(path, "/someRepo/tree.json")
-			isOtherRepo := strings.Contains(path, "/otherRepo/tree.json")
+			isLocalRepo := strings.Contains(path, pathTreeLocalRepo)
+			isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
+			isOtherRepo := strings.Contains(path, pathTreeOtherRepo)
 
 			if isLocalRepo || isSomeRepo || isOtherRepo {
 				return true
@@ -118,9 +123,9 @@ func TestMergedTree(t *testing.T) {
 			return false
 		},
 		read: func(path string) ([]byte, error) {
-			isLocalRepo := strings.Contains(path, "/local/tree.json")
-			isSomeRepo := strings.Contains(path, "/someRepo/tree.json")
-			isOtherRepo := strings.Contains(path, "/otherRepo/tree.json")
+			isLocalRepo := strings.Contains(path, pathTreeLocalRepo)
+			isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
+			isOtherRepo := strings.Contains(path, pathTreeOtherRepo)
 
 			if isLocalRepo {
 				return []byte(getStringOfTree(localTree)), nil
@@ -195,11 +200,11 @@ func TestTree(t *testing.T) {
 				},
 				file: FileReadExisterMock{
 					exists: func(path string) bool {
-						isSomeRepo := strings.Contains(path, "/someRepo/tree.json")
+						isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
 						return isSomeRepo
 					},
 					read: func(path string) ([]byte, error) {
-						if strings.Contains(path, "/someRepo/tree.json") {
+						if strings.Contains(path, pathTreeSomeRepo) {
 							return []byte(getStringOfTree(someRepoTree)), nil
 						}
 						return []byte("some data"), nil
@@ -284,11 +289,11 @@ func TestTree(t *testing.T) {
 				},
 				file: FileReadExisterMock{
 					exists: func(path string) bool {
-						isSomeRepo := strings.Contains(path, "/someRepo/tree.json")
+						isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
 						return isSomeRepo
 					},
 					read: func(path string) ([]byte, error) {
-						if strings.Contains(path, "/someRepo/tree.json") {
+						if strings.Contains(path, pathTreeSomeRepo) {
 							return []byte("some"), errFoo
 						}
 						return []byte("some data"), nil
