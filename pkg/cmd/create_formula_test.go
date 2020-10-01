@@ -140,7 +140,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 			if err := createFormulaCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("%s = %v, want %v", createFormulaCmd.Use, err, nil)
 			}
-
 		})
 	}
 
