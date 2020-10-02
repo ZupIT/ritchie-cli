@@ -27,6 +27,7 @@
          ReadOnly="yes"/>
 
       <WixVariable Id="WixUIBannerBmp" Value="C:\workspace\docs\img\ritchie-banner.bmp" />
+      <WixVariable Id="WixUIDialogBmp" Value="C:\workspace\docs\img\ritchie-dialog.bmp" />
 
       <Property Id="ARPHELPLINK" Value="$(var.InfoURL)" />
 
@@ -77,6 +78,7 @@
       </UI>
 
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+      <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Thank you for installing Ritchie!" />
 
       <!-- this should help to propagate env var changes -->
       <CustomActionRef Id="WixBroadcastEnvironmentChange" />
