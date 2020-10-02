@@ -72,7 +72,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	}
 
 	defer func() {
-		if err := ru.PostRun(setup, false); err != nil {
+		if err := ru.PostRun(setup, true); err != nil {
 			prompt.Error(err.Error())
 			return
 		}

@@ -27,20 +27,13 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
-
-var (
-	ErrNotAllowedCharacter = prompt.NewError(`not allowed character on formula name \/,><@-`)
-	ErrDontStartWithRit    = prompt.NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
-	ErrTooShortCommand     = prompt.NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
-)
-
-const notAllowedChars = `\/><,@`
 
 // createFormulaCmd type for add formula command
 type createFormulaCmd struct {
@@ -101,10 +94,6 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		if strings.ContainsAny(formulaCmd, notAllowedChars) {
-			return ErrNotAllowedCharacter
-		}
-
 		if err := c.tplM.Validate(); err != nil {
 			return err
 		}
@@ -161,8 +150,8 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if strings.ContainsAny(cf.FormulaCmd, notAllowedChars) {
-			return ErrNotAllowedCharacter
+		if err := formulaCommandValidator(cf.FormulaCmd); err != nil {
+			return err
 		}
 
 		c.create(cf, cf.WorkspacePath, cf.FormulaPath)
@@ -219,17 +208,59 @@ func formulaPath(workspacePath, cmd string) string {
 }
 
 func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
-	if len(strings.TrimSpace(cmd.(string))) < 1 {
-		return errors.New("this input must not be empty")
+	if err := formulaCommandValidator(cmd.(string)); err != nil {
+		return err
 	}
 
-	s := strings.Split(cmd.(string), " ")
+	return nil
+}
+
+func formulaCommandValidator(formulaCmd string) error {
+	if len(strings.TrimSpace(formulaCmd)) < 1 {
+		return prompt.
+			NewError("this input must not be empty")
+	}
+
+	s := strings.Split(formulaCmd, " ")
 	if s[0] != "rit" {
-		return ErrDontStartWithRit
+		return prompt.
+			NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	}
 
 	if len(s) <= 2 {
-		return ErrTooShortCommand
+		return prompt.
+			NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	}
+
+	if err := characterValidator(formulaCmd); err != nil {
+		return err
+	}
+
+	if err := coreCmdValidator(formulaCmd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func coreCmdValidator(formulaCmd string) error {
+	wordAfterCore := strings.Split(formulaCmd, " ")[1]
+	for i := range api.CoreCmds {
+		if wordAfterCore == api.CoreCmds[i].Usage {
+			errorString := fmt.Sprintf("core command verb %q after rit\n"+
+				"Use your formula group before the verb\n"+
+				"Example: rit aws list bucket\n",
+				api.CoreCmds[i].Usage)
+
+			return errors.New(errorString)
+		}
+	}
+	return nil
+}
+
+func characterValidator(formula string) error {
+	if strings.ContainsAny(formula, `\/><,@`) {
+		return prompt.NewError(`not allowed character on formula name \/,><@-`)
 	}
 	return nil
 }
