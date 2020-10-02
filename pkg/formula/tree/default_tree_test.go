@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -28,6 +29,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 )
 
@@ -140,7 +142,21 @@ func TestMergedTree(t *testing.T) {
 		},
 	}
 
-	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager)
+	var defaultGitRepositoryMock = GitRepositoryMock{
+		latestTag: func(info git.RepoInfo) (git.Tag, error) {
+			return git.Tag{}, nil
+		},
+		tags: func(info git.RepoInfo) (git.Tags, error) {
+			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
+		},
+		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+			return nil, nil
+		},
+	}
+	repoProviders = formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+
+	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager, repoProviders)
 	mergedTree := newTree.MergedTree(true)
 
 	if !isSameFormulaTree(mergedTree, expectedTreeComplete) {
@@ -307,8 +323,22 @@ func TestTree(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var defaultGitRepositoryMock = GitRepositoryMock{
+				latestTag: func(info git.RepoInfo) (git.Tag, error) {
+					return git.Tag{}, nil
+				},
+				tags: func(info git.RepoInfo) (git.Tags, error) {
+					return git.Tags{git.Tag{Name: "1.0.0"}}, nil
+				},
+				zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+					return nil, nil
+				},
+			}
+			repoProviders := formula.NewRepoProviders()
+			repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+
 			in := tt.in
-			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file)
+			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file, repoProviders)
 
 			tree, err := newTree.Tree()
 
@@ -397,4 +427,22 @@ func (m FileReadExisterMock) Read(path string) ([]byte, error) {
 
 func (m FileReadExisterMock) Exists(path string) bool {
 	return m.exists(path)
+}
+
+type GitRepositoryMock struct {
+	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
+	tags      func(info git.RepoInfo) (git.Tags, error)
+	latestTag func(info git.RepoInfo) (git.Tag, error)
+}
+
+func (m GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
+	return m.zipball(info, version)
+}
+
+func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
+	return m.tags(info)
+}
+
+func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
+	return m.latestTag(info)
 }
