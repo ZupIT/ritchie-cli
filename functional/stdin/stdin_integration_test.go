@@ -41,8 +41,7 @@ var _ = Describe("RitStdin", func() {
 
 	DescribeTable("When running core command",
 		func(scenario functional.Scenario) {
-			out, err := scenario.RunStdin()
-			Expect(err).To(Succeed())
+			out, _ := scenario.RunStdin()
 			Expect(out).To(ContainSubstring(scenario.Result))
 		},
 
@@ -52,5 +51,11 @@ var _ = Describe("RitStdin", func() {
 		Entry(scenariosStdin[3].Entry, scenariosStdin[3]),
 		Entry(scenariosStdin[4].Entry, scenariosStdin[4]),
 		Entry(scenariosStdin[5].Entry, scenariosStdin[5]),
+		Entry(scenariosStdin[6].Entry, scenariosStdin[6]),
+		Entry(scenariosStdin[7].Entry, scenariosStdin[7]),
+		Entry(scenariosStdin[8].Entry, scenariosStdin[8]),
+		Entry(scenariosStdin[9].Entry, scenariosStdin[9]),
+		Entry(scenariosStdin[10].Entry, scenariosStdin[10]),
+		Entry(scenariosStdin[11].Entry, scenariosStdin[11]),
 	)
 })

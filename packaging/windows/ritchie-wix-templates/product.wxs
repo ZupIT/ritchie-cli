@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 
+ <!-- The URL for add/remove programs -->
+<?define InfoURL="https://docs.ritchiecli.io/" ?>
+
 <?if $(sys.BUILDARCH)="x86"?>
     <?define Program_Files="ProgramFilesFolder"?>
 <?elseif $(sys.BUILDARCH)="x64"?>
@@ -16,12 +19,17 @@
             Manufacturer="{{.Company}}"
             Language="1033">
 
-      <Package 
-         InstallerVersion="200" 
-         Compressed="yes" 
-         Comments="Windows Installer Package" 
-         AdminImage="no" 
-         ReadOnly="yes" />
+      <Package
+         InstallerVersion="200"
+         Compressed="yes"
+         Comments="Windows Installer Package"
+         AdminImage="no"
+         ReadOnly="yes"/>
+
+      <WixVariable Id="WixUIBannerBmp" Value="C:\workspace\docs\img\ritchie-banner.bmp" />
+      <WixVariable Id="WixUIDialogBmp" Value="C:\workspace\docs\img\ritchie-dialog.bmp" />
+
+      <Property Id="ARPHELPLINK" Value="$(var.InfoURL)" />
 
       <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
 
@@ -32,21 +40,11 @@
       </Upgrade>
       <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
 
-      <!-- Gets the user profile home path i.e: C:\Users\<userName>
-      <SetDirectory Id="USERPROFILEFOLDER" Value="[%USERPROFILE]"/>--> 
-
       <Directory Id="TARGETDIR" Name="SourceDir">
-         <Directory Id="ProgramFiles64Folder">
+         <Directory Id="$(var.Program_Files)">
             <Directory Id="INSTALLDIR" Name="{{.Product}}">
                <Component Id="ApplicationFiles" Guid="{{.Files.GUID}}">
-                  <File Id="ApplicationFile0" Source="C:\workspace\workspace\dist\windows\rit.exe"/>
-                     <RegistryValue Root="HKCU"
-                        Key="Software\{{$.Company}}\{{$.Product}}"
-                        Name="InstallFolder-0"
-                        Value="[INSTALLFOLDER]"
-                        Type="string"
-                        KeyPath="yes"/>
-                  <RemoveFolder Id="USERPROFILEFOLDER" On="uninstall"/>
+                    <File Id="ApplicationFile0" Source="C:\workspace\workspace\dist\windows\rit.exe"/>
                </Component>
             </Directory>
          </Directory>
@@ -65,35 +63,13 @@
         </Component>
         {{end}}
       </Directory>
-
-      {{range $i, $e := .InstallHooks}}
-      <SetProperty Id="CustomInstallExec{{$i}}" Value="{{$e.CookedCommand}}" Before="CustomInstallExec{{$i}}" Sequence="execute"/>
-      <CustomAction Id="CustomInstallExec{{$i}}" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Return="check" Impersonate="no"/>
-      {{end}}
-      {{range $i, $e := .UninstallHooks}}
-      <SetProperty Id="CustomUninstallExec{{$i}}" Value="{{$e.CookedCommand}}" Before="CustomUninstallExec{{$i}}" Sequence="execute"/>
-      <CustomAction Id="CustomUninstallExec{{$i}}" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Return="check" Impersonate="no"/>
-      {{end}}
       <InstallExecuteSequence>
          <RemoveExistingProducts After="InstallValidate"/>
-         {{range $i, $e := .InstallHooks}}
-         <Custom Action="CustomInstallExec{{$i}}" After="{{if eq $i 0}}InstallFiles{{else}}CustomInstallExec{{dec $i}}{{end}}">NOT Installed AND NOT REMOVE</Custom>
-         {{end}}
-         {{range $i, $e := .UninstallHooks}}
-         <Custom Action="CustomUninstallExec{{$i}}" After="{{if eq $i 0}}InstallInitialize{{else}}CustomUninstallExec{{dec $i}}{{end}}">REMOVE ~= "ALL"</Custom>
-         {{end}}
       </InstallExecuteSequence>
 
       <Feature Id="DefaultFeature" Level="1">
-         {{if gt (.Env.Vars | len) 0}}
          <ComponentRef Id="ENVS"/>
-         {{end}}
-         {{if gt (.Files.Items | len) 0}}
          <ComponentRef Id="ApplicationFiles"/>
-         {{end}}
-         {{range $i, $e := .Directories}}
-         <ComponentGroupRef Id="AppFiles{{$i}}" />
-         {{end}}
       </Feature>
 
       <UI>
@@ -102,6 +78,7 @@
       </UI>
 
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+      <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Thank you for installing Ritchie!" />
 
       <!-- this should help to propagate env var changes -->
       <CustomActionRef Id="WixBroadcastEnvironmentChange" />
