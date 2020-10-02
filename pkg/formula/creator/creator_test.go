@@ -66,11 +66,11 @@ func TestCreator(t *testing.T) {
 			return nil, nil
 		},
 	}
-
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+	isRootCommand := false
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds, FileReadExisterMock{}, repoProviders)
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds, FileReadExisterMock{}, repoProviders, isRootCommand)
 
 	tplM := template.NewManager("../../../testdata", dirManager)
 

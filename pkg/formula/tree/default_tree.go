@@ -38,10 +38,11 @@ type Manager struct {
 	coreCmds      []api.Command
 	file          stream.FileReadExister
 	repoProviders formula.RepoProviders
+	isRootCommand bool
 }
 
-func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command, file stream.FileReadExister, rp formula.RepoProviders) Manager {
-	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds, file: file, repoProviders: rp}
+func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command, file stream.FileReadExister, rp formula.RepoProviders, isRootCommand bool) Manager {
+	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds, file: file, repoProviders: rp, isRootCommand: isRootCommand}
 }
 
 func (d Manager) Tree() (map[string]formula.Tree, error) {
@@ -101,7 +102,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 			continue
 		}
 		noticeNewVersion := ""
-		if !core {
+		if d.isRootCommand {
 			if latestTag := d.getLatestTag(r); latestTag != r.Version.String() && latestTag != "" {
 				noticeNewVersion = "(new version " + latestTag + ")"
 			}

@@ -80,31 +80,38 @@ func TestMergedTree(t *testing.T) {
 			{
 				Parent: "root",
 				Usage:  "pokemon-list",
-				Repo:   "someRepo",
+				Repo:   "(new version 2.0.0) someRepo",
 			},
 			{
 				Parent: "root_pokemon-list",
 				Usage:  "add",
-				Repo:   "someRepo",
+				Repo:   "(new version 2.0.0) someRepo",
 			},
 		},
+	}
+
+	someRepo := formula.Repo{
+		Provider: formula.RepoProvider("Github"),
+		Name:     formula.RepoName("someRepo"),
+		Version:  formula.RepoVersion("1.0.0"),
+		Token:    "token",
+		Url:      "https://github.com/owner/someRepo",
+		Priority: int(5),
+	}
+	otherRepo := formula.Repo{
+		Provider: formula.RepoProvider("Github"),
+		Name:     formula.RepoName("otherRepo"),
+		Version:  formula.RepoVersion("1.0.0"),
+		Token:    "token",
+		Url:      "https://github.com/owner/otherRepo",
+		Priority: int(5),
 	}
 
 	repoLister := repositoryListerCustomMock{
 		list: func() (formula.Repos, error) {
 			return formula.Repos{
-				{
-					Name:     "someRepo",
-					Provider: "Github",
-					Url:      "https://github.com/owner/repo",
-					Token:    "token",
-				},
-				{
-					Name:     "otherRepo",
-					Provider: "Github",
-					Url:      "https://github.com/owner/noame",
-					Token:    "",
-				},
+				someRepo,
+				otherRepo,
 			}, nil
 		},
 	}
@@ -144,6 +151,9 @@ func TestMergedTree(t *testing.T) {
 
 	var defaultGitRepositoryMock = GitRepositoryMock{
 		latestTag: func(info git.RepoInfo) (git.Tag, error) {
+			if strings.Contains(info.LatestTagUrl(), someRepo.Name.String()) {
+				return git.Tag{Name: "2.0.0"}, nil
+			}
 			return git.Tag{}, nil
 		},
 		tags: func(info git.RepoInfo) (git.Tags, error) {
@@ -156,7 +166,9 @@ func TestMergedTree(t *testing.T) {
 	repoProviders = formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
-	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager, repoProviders)
+	isRootCommand := true
+
+	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager, repoProviders, isRootCommand)
 	mergedTree := newTree.MergedTree(true)
 
 	if !isSameFormulaTree(mergedTree, expectedTreeComplete) {
@@ -336,9 +348,10 @@ func TestTree(t *testing.T) {
 			}
 			repoProviders := formula.NewRepoProviders()
 			repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+			isRootCommand := false
 
 			in := tt.in
-			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file, repoProviders)
+			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file, repoProviders, isRootCommand)
 
 			tree, err := newTree.Tree()
 
