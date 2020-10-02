@@ -197,7 +197,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 }
 
 func createSuccess(s *spinner.Spinner, lang string) {
-	msg := fmt.Sprintf("✔ %s formula successfully created!", lang)
+	msg := fmt.Sprintf("%s formula successfully created!", lang)
 	success := prompt.Green(msg)
 	s.Success(success)
 }

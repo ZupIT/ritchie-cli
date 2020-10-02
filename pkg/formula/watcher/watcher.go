@@ -100,7 +100,7 @@ func (w WatchManager) build(workspacePath, formulaPath string) {
 		return
 	}
 
-	success := prompt.Green("✔ Build completed!")
+	success := prompt.Green("Build completed!")
 	s.Success(success)
 	prompt.Info("Now you can run your formula with Ritchie!")
 }
