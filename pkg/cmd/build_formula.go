@@ -152,7 +152,7 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 		return
 	}
 
-	success := prompt.Green("✔ Build completed!\n")
+	success := prompt.Green("Build completed!\n")
 	s.Success(success)
 
 	const MessageWatch = `Are you testing your formula? You can use the flag --watch to avoid
