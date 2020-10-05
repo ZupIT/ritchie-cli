@@ -19,50 +19,46 @@ package tree
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 var (
-	tmpDir  = os.TempDir()
-	ritHome = filepath.Join(tmpDir, ".rit-tree")
+	tmpDir           = os.TempDir()
+	ritHome          = filepath.Join(tmpDir, ".rit-tree")
+	pathTreeSomeRepo = fmt.Sprintf(treeRepoCmdPattern, ritHome, "someRepo")
 
 	coreCmds = []api.Command{
 		{Parent: "root", Usage: "add"},
 		{Parent: "root_add", Usage: "repo"},
 		{Parent: "root", Usage: "metrics"},
 	}
+
+	someRepoTree = formula.Tree{Commands: []api.Command{
+		{Parent: "root", Usage: "pokemon-list"},
+		{Parent: "root_pokemon-list", Usage: "add"},
+	}}
 )
 
 func TestMergedTree(t *testing.T) {
 	defer cleanRitHome()
 
-	treeLocalDir := filepath.Join(ritHome, "repos", "local")
-	treeSomeRepoDir := filepath.Join(ritHome, "repos", "someRepo")
-
-	createDir(ritHome)
-	createDir(treeLocalDir)
-	createDir(treeSomeRepoDir)
-
+	errFoo := errors.New("some error")
 	localTree := formula.Tree{Commands: []api.Command{
 		{Parent: "root", Usage: "jedi-list"},
 		{Parent: "root_jedi-list", Usage: "add"},
 	}}
 
-	someRepoTree := formula.Tree{Commands: []api.Command{
-		{Parent: "root", Usage: "pokemon-list"},
-		{Parent: "root_pokemon-list", Usage: "add"},
-	}}
-
-	addTreeLocal(treeLocalDir, localTree)
-	addTreeLocal(treeSomeRepoDir, someRepoTree)
+	pathTreeLocalRepo := fmt.Sprintf(treeLocalCmdPattern, ritHome)
+	pathTreeOtherRepo := fmt.Sprintf(treeRepoCmdPattern, ritHome, "otherRepo")
 
 	expectedTreeComplete := formula.Tree{
 		Commands: api.Commands{
@@ -101,6 +97,12 @@ func TestMergedTree(t *testing.T) {
 					Url:      "https://github.com/owner/repo",
 					Token:    "token",
 				},
+				{
+					Name:     "otherRepo",
+					Provider: "Github",
+					Url:      "https://github.com/owner/noame",
+					Token:    "",
+				},
 			}, nil
 		},
 	}
@@ -109,11 +111,40 @@ func TestMergedTree(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 
-	newTree := NewTreeManager(ritHome, repoLister, coreCmds)
+	fileManager := FileReadExisterMock{
+		exists: func(path string) bool {
+			isLocalRepo := strings.Contains(path, pathTreeLocalRepo)
+			isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
+			isOtherRepo := strings.Contains(path, pathTreeOtherRepo)
+
+			if isLocalRepo || isSomeRepo || isOtherRepo {
+				return true
+			}
+			return false
+		},
+		read: func(path string) ([]byte, error) {
+			isLocalRepo := strings.Contains(path, pathTreeLocalRepo)
+			isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
+			isOtherRepo := strings.Contains(path, pathTreeOtherRepo)
+
+			if isLocalRepo {
+				return []byte(getStringOfTree(localTree)), nil
+			}
+			if isSomeRepo {
+				return []byte(getStringOfTree(someRepoTree)), nil
+			}
+			if isOtherRepo {
+				return []byte("any"), errFoo
+			}
+			return []byte("some data"), nil
+		},
+	}
+
+	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager)
 	mergedTree := newTree.MergedTree(true)
 
 	if !isSameFormulaTree(mergedTree, expectedTreeComplete) {
-		t.Errorf("NewTreeManager_MergedTree() mergedTree = %v, expectedTree = %v", mergedTree, expectedTreeComplete)
+		t.Errorf("NewTreeManager_MergedTree() \n\tmergedTree = %v\n\texpectedTree = %v", mergedTree, expectedTreeComplete)
 	}
 }
 
@@ -133,13 +164,17 @@ func TestTree(t *testing.T) {
 		"LOCAL": {
 			Commands: api.Commands{},
 		},
-		"someRepo1": {
-			Commands: api.Commands{},
+		"someRepo": {
+			Commands: api.Commands{
+				someRepoTree.Commands[0],
+				someRepoTree.Commands[1],
+			},
 		},
 	}
 
 	type in struct {
 		repo formula.RepositoryLister
+		file FileReadExisterMock
 	}
 
 	tests := []struct {
@@ -155,7 +190,7 @@ func TestTree(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
-								Name:     "someRepo1",
+								Name:     "someRepo",
 								Provider: "Github",
 								Url:      "https://github.com/owner/repo",
 								Token:    "token",
@@ -163,16 +198,105 @@ func TestTree(t *testing.T) {
 						}, nil
 					},
 				},
+				file: FileReadExisterMock{
+					exists: func(path string) bool {
+						isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
+						return isSomeRepo
+					},
+					read: func(path string) ([]byte, error) {
+						if strings.Contains(path, pathTreeSomeRepo) {
+							return []byte(getStringOfTree(someRepoTree)), nil
+						}
+						return []byte("some data"), nil
+					},
+				},
 			},
 			wantErr:      false,
 			expectedTree: expectedTreeComplete,
 		},
 		{
-			name: "return error when repository lister resturns error",
+			name: "return error when repository lister returns error",
 			in: in{
 				repo: repositoryListerCustomMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{}, errFoo
+					},
+				},
+				file: FileReadExisterMock{
+					exists: func(path string) bool {
+						return false
+					},
+					read: func(path string) ([]byte, error) {
+						return []byte("some data"), nil
+					},
+				},
+			},
+			wantErr:      true,
+			expectedTree: expectedTreeEmpty,
+		},
+		{
+			name: "return error when local tree in read returns error",
+			in: in{
+				repo: repositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, errFoo
+					},
+				},
+				file: FileReadExisterMock{
+					exists: func(path string) bool {
+						return true
+					},
+					read: func(path string) ([]byte, error) {
+						return []byte("some data"), errFoo
+					},
+				},
+			},
+			wantErr:      true,
+			expectedTree: expectedTreeEmpty,
+		},
+		{
+			name: "return error when local tree in read returns error",
+			in: in{
+				repo: repositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, errFoo
+					},
+				},
+				file: FileReadExisterMock{
+					exists: func(path string) bool {
+						return true
+					},
+					read: func(path string) ([]byte, error) {
+						return []byte("some data"), nil
+					},
+				},
+			},
+			wantErr:      true,
+			expectedTree: expectedTreeEmpty,
+		},
+		{
+			name: "return error when tree by repo returns error",
+			in: in{
+				repo: repositoryListerCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:     "someRepo",
+								Provider: "Github",
+								Url:      "https://github.com/owner/repo",
+							}}, nil
+					},
+				},
+				file: FileReadExisterMock{
+					exists: func(path string) bool {
+						isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
+						return isSomeRepo
+					},
+					read: func(path string) ([]byte, error) {
+						if strings.Contains(path, pathTreeSomeRepo) {
+							return []byte("some"), errFoo
+						}
+						return []byte("some data"), nil
 					},
 				},
 			},
@@ -184,16 +308,16 @@ func TestTree(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			newTree := NewTreeManager(ritHome, in.repo, coreCmds)
+			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file)
 
 			tree, err := newTree.Tree()
 
 			if !isSameTree(tree, tt.expectedTree) {
-				t.Errorf("NewTreeManager_Tree() tree = %v", tree)
+				t.Errorf("NewTreeManager_Tree() \n\ttree = %v\n\texpected = %v", tree, tt.expectedTree)
 			}
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("NewTreeManager_Tree() error = %v", err)
+				t.Errorf("NewTreeManager_Tree() \n\terror = %v\n\twantErr = %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -201,23 +325,6 @@ func TestTree(t *testing.T) {
 
 func cleanRitHome() {
 	_ = os.RemoveAll(ritHome)
-}
-
-func createDir(path string) {
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
-
-	_ = dirManager.Remove(path)
-	_ = dirManager.Create(path)
-}
-
-func addTreeLocal(dest string, tree formula.Tree) {
-	fileManager := stream.NewFileManager()
-
-	treeJSON, _ := json.MarshalIndent(tree, "", "\t")
-
-	treeLocalFile := filepath.Join(dest, "tree.json")
-	_ = fileManager.Write(treeLocalFile, treeJSON)
 }
 
 func isSameTree(tree, expected map[string]formula.Tree) bool {
@@ -236,7 +343,6 @@ func isSameFormulaTree(formula, expected formula.Tree) bool {
 	if len(formula.Commands) != len(expected.Commands) {
 		return false
 	}
-
 	for i, v := range expected.Commands {
 		commandsExists := formula.Commands[i] != api.Command{}
 		if !commandsExists {
@@ -267,10 +373,28 @@ func isSameCommand(command, expected api.Command) bool {
 	return true
 }
 
+func getStringOfTree(formula formula.Tree) string {
+	bytes, _ := json.MarshalIndent(formula, "", "\t")
+	return string(bytes)
+}
+
 type repositoryListerCustomMock struct {
 	list func() (formula.Repos, error)
 }
 
 func (m repositoryListerCustomMock) List() (formula.Repos, error) {
 	return m.list()
+}
+
+type FileReadExisterMock struct {
+	read   func(path string) ([]byte, error)
+	exists func(path string) bool
+}
+
+func (m FileReadExisterMock) Read(path string) ([]byte, error) {
+	return m.read(path)
+}
+
+func (m FileReadExisterMock) Exists(path string) bool {
+	return m.exists(path)
 }
