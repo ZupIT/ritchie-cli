@@ -49,10 +49,15 @@ type (
 		Items     []string  `json:"items"`
 		Cache     Cache     `json:"cache"`
 		Condition Condition `json:"condition"`
+		Pattern   Pattern   `json:"pattern"`
 		Tutorial  string    `json:"tutorial"`
 		Required  *bool     `json:"required"`
 	}
 
+	Pattern struct {
+		Regex        string `json:"regex"`
+		MismatchText string `json:"mismatchText"`
+	}
 	Cache struct {
 		Active   bool   `json:"active"`
 		Qty      int    `json:"qty"`
