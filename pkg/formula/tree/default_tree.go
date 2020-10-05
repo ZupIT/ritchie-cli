@@ -22,6 +22,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -104,7 +105,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		noticeNewVersion := ""
 		if d.isRootCommand {
 			if latestTag := d.getLatestTag(r); latestTag != r.Version.String() && latestTag != "" {
-				noticeNewVersion = "(new version " + latestTag + ")"
+				noticeNewVersion = prompt.Bold("(new version " + latestTag + ")")
 			}
 		}
 

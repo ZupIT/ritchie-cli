@@ -31,6 +31,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 var (
@@ -80,12 +81,12 @@ func TestMergedTree(t *testing.T) {
 			{
 				Parent: "root",
 				Usage:  "pokemon-list",
-				Repo:   "(new version 2.0.0) someRepo",
+				Repo:   prompt.Bold("(new version 2.0.0)") + " someRepo",
 			},
 			{
 				Parent: "root_pokemon-list",
 				Usage:  "add",
-				Repo:   "(new version 2.0.0) someRepo",
+				Repo:   prompt.Bold("(new version 2.0.0)") + " someRepo",
 			},
 		},
 	}
