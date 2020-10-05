@@ -81,7 +81,7 @@ var MetricSender = metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient
 func buildCommands() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
-	isRootCommand := len(os.Args[1:]) > 0
+	isRootCommand := len(os.Args[1:]) == 0
 
 	// prompt
 	inputText := prompt.NewSurveyText()
