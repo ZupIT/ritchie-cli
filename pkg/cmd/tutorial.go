@@ -68,7 +68,7 @@ func (o tutorialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success("Set tutorial successful!")
+		prompt.Success(obj.Tutorial+"d")
 
 		return nil
 	}
@@ -96,7 +96,7 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-		prompt.Success("Set tutorial successful!")
+		prompt.Success("Tutorial " + response)
 		return nil
 	}
 }

@@ -97,7 +97,7 @@ ifneq "$(IS_RELEASE)" ""
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
 endif
 ifneq "$(IS_QA)" ""
-	echo -n "$(RELEASE_VERSION)" > stable.txt
+	echo -n "1.0.0-qa" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"

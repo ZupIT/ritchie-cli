@@ -116,7 +116,7 @@ func formatCredValue(credential string) string {
 }
 
 func (s Settings) WriteCredentialsFields(fields Fields, path string) error {
-	fieldsData, err := json.Marshal(fields)
+	fieldsData, err := json.MarshalIndent(fields, "", "\t")
 	if err != nil {
 		return err
 	}
