@@ -52,7 +52,7 @@ func TestCreator(t *testing.T) {
 	_ = dirManager.Remove(resultDir)
 	_ = dirManager.Create(resultDir)
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds)
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds, FileReadExisterMock{})
 
 	tplM := template.NewManager("../../../testdata", dirManager)
 
@@ -197,4 +197,14 @@ type repoListerMock struct{}
 
 func (repoListerMock) List() (formula.Repos, error) {
 	return formula.Repos{}, nil
+}
+
+type FileReadExisterMock struct{}
+
+func (m FileReadExisterMock) Read(path string) ([]byte, error) {
+	return []byte("some data"), nil
+}
+
+func (m FileReadExisterMock) Exists(path string) bool {
+	return false
 }
