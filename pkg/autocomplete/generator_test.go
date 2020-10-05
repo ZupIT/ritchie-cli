@@ -32,6 +32,16 @@ func (repoListerMock) List() (formula.Repos, error) {
 	return formula.Repos{}, nil
 }
 
+type FileReadExisterMock struct{}
+
+func (m FileReadExisterMock) Read(path string) ([]byte, error) {
+	return []byte("some data"), nil
+}
+
+func (m FileReadExisterMock) Exists(path string) bool {
+	return false
+}
+
 func TestGenerate(t *testing.T) {
 	type in struct {
 		shell ShellName
@@ -41,7 +51,7 @@ func TestGenerate(t *testing.T) {
 		err error
 	}
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.Commands{})
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.Commands{}, FileReadExisterMock{})
 	autocomplete := NewGenerator(treeMan)
 
 	tests := []struct {

@@ -40,8 +40,8 @@ import (
 const (
 	addRepoMsg         = "Run \"rit add repo\" to add a new repository manually."
 	AddCommonsQuestion = "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]"
-	AddMetricsQuestion = `To help us improve and deliver more value to the community, 
-do you agree to let us collect anonymous data about product 
+	AddMetricsQuestion = `To help us improve and deliver more value to the community,
+do you agree to let us collect anonymous data about product
 and feature use statistics and crash reports?`
 	AcceptMetrics             = "Yes, I agree to contribute with data anonymously"
 	DoNotAcceptMetrics        = "No, not for now."
@@ -51,9 +51,9 @@ In order to run formulas locally, you must have the formula language installed o
 if you don't want to install choose to run the formulas inside the docker.
 `
 	addRepoInfo = "\n" + `You can keep the configuration without adding the community repository,
- but you will need to provide a git repo with the formulas templates and add them with 
+ but you will need to provide a git repo with the formulas templates and add them with
  rit add repo command, naming this repository obligatorily as "commons".
- 
+
  See how to do this on the example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]` + "\n"
 	CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 )
@@ -92,13 +92,13 @@ func NewInitCmd(
 	metricSender metric.SendManagerHttp,
 ) *cobra.Command {
 	o := initCmd{
-		repo: repo,
-		git: git,
-		tutorial: tutorial,
-		config: config,
-		file: file,
-		InputList: inList,
-		InputBool: inBool,
+		repo:         repo,
+		git:          git,
+		tutorial:     tutorial,
+		config:       config,
+		file:         file,
+		InputList:    inList,
+		InputBool:    inBool,
 		metricSender: metricSender,
 	}
 
@@ -221,9 +221,9 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 
 func (in initCmd) metricsAuthorization() error {
 	const welcome = "Welcome to Ritchie!\n"
-	const header = `Ritchie is a platform that helps you and your team to save time by 
-giving you the power to create powerful templates to execute important 
-tasks across your team and organization with minimum time and with standards, 
+	const header = `Ritchie is a platform that helps you and your team to save time by
+giving you the power to create powerful templates to execute important
+tasks across your team and organization with minimum time and with standards,
 delivering autonomy to developers with security.
 
 You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.
@@ -244,7 +244,7 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	if choose == DoNotAcceptMetrics {
 		responseToWrite = "no"
 		in.metricSender.Send(metric.APIData{
-			Id: "rit_init",
+			Id:        "rit_init",
 			Timestamp: time.Now(),
 			Data: metric.Data{
 				MetricsAcceptance: responseToWrite,
@@ -342,12 +342,14 @@ func (in initCmd) tutorialInit() error {
 	const tagTutorial = "\n[TUTORIAL]"
 	const MessageTitle = "How to create new formulas:"
 	const MessageBody = ` ∙ Run "rit create formula"
-  ∙ Open the project with your favorite text editor.` + "\n"
+ ∙ Open the project with your favorite text editor.` + "\n"
+	const MessageCommons = "Take a look at the formulas you can run and test to see what you can with Ritchie using \"rit\"\n"
 
 	if tutorialHolder.Current == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)
 		prompt.Info(MessageTitle)
 		fmt.Println(MessageBody)
+		prompt.Info(MessageCommons)
 	}
 
 	return nil

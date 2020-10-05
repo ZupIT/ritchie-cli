@@ -72,16 +72,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "error with a not allowed char on formula cmd",
-			in: in{
-				inTextValidator: inputTextValidatorCustomMock{
-					text: func(name string, validate func(interface{}) error, helper ...string) (string, error) {
-						return "rit@", nil
-					}},
-			},
-			wantErr: true,
-		},
-		{
 			name: "error on template manager Validate func",
 			in: in{
 				inTextValidator: inputTextValidatorMock{},
@@ -140,7 +130,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 			if err := createFormulaCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("%s = %v, want %v", createFormulaCmd.Use, err, nil)
 			}
-
 		})
 	}
 

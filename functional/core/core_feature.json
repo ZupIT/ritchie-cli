@@ -352,7 +352,7 @@
                 "action": "sendkey"
             }
         ],
-        "result": "Set tutorial successful!"
+        "result": "Tutorial disabled!"
     },
     {
         "entry": "Upgrade",

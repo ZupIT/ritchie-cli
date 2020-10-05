@@ -112,7 +112,7 @@ func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		prompt.Success("✔ Workspace successfully deleted!")
+		prompt.Success("Workspace successfully deleted!")
 
 		return nil
 	}
