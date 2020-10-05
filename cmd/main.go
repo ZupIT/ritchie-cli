@@ -142,7 +142,7 @@ func buildCommands() *cobra.Command {
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputBool, inputPassword)
+	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
 
 	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
 	formulaLocalRun := local.NewRunner(postRunner, inputManager, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
