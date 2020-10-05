@@ -1,11 +1,6 @@
 #!/bin/sh -xe
 
 idempotent_config() {
-  if [ -d ${HOME}"/.rit" ]; then
-	  echo "~/.rit directory already exists, moving on"
-  else
-	  mkdir ${HOME}"/.rit"
-  fi
   if [ -n "$SHELL_TYPE" ]; then
 
     if [ -f ${HOME}"/."${SHELL_TYPE}"rc" ]; then
