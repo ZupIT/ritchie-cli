@@ -226,6 +226,7 @@ func (m FileReadExisterMock) Read(path string) ([]byte, error) {
 func (m FileReadExisterMock) Exists(path string) bool {
 	return false
 }
+<<<<<<< HEAD
 
 type GitRepositoryMock struct {
 	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
@@ -244,3 +245,5 @@ func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
 func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	return m.latestTag(info)
 }
+=======
+>>>>>>> 555ee9da6974d148036fb2bca7fd448cf417f9e6
