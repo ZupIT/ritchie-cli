@@ -18,6 +18,7 @@ package repo
 
 import (
 	"encoding/json"
+	"os"
 	"path/filepath"
 	"sort"
 
@@ -54,4 +55,15 @@ func (li ListManager) List() (formula.Repos, error) {
 	sort.Sort(repos)
 
 	return repos, nil
+}
+
+// ListLocal method returns an empty formula.RepoName if there is no local folder on li.ritHome
+func (li ListManager) ListLocal() (formula.RepoName, error) {
+	localReposPath := filepath.Join(li.ritHome, reposDirName, "local")
+
+	if _, err := os.Stat(localReposPath); os.IsNotExist(err) {
+		return "", err
+	}
+
+	return "local", nil
 }
