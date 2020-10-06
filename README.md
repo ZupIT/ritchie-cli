@@ -14,7 +14,7 @@ In Ritchie's context, **a formula is a script** that can be executed automatical
 
 Adapting an existing script to Ritchie structure allows you to run it **locally** or through **Docker**, and to share it on a **Github** or **Gitlab** repository.
 
-<img class="special-img-class" src="/docs/img/formulas-explanation.png"  alt="Formulas explanation"/>
+<img class="special-img-class" src="/docs/img/formulas-explanation.png" alt="Formulas explanation"/>
 
 ## Full Documentation
 
@@ -44,7 +44,7 @@ rit init
 
 ### Run your first formula
 
-To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you'll need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas) repository locally. To do so, you can use the `rit add repo` command, or execute the command line below:
+To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you'll need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally. To do so, you can use the `rit add repo` command, or execute the command line below:
 
 ```bash
 echo '{"provider":"Github", "name":"demo", "version":"2.0.0", "url":"https://github.com/ZupIT/ritchie-formulas-demo", "token": null, "priority":1}' | rit add repo --stdin
