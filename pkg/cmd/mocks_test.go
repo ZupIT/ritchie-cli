@@ -567,9 +567,8 @@ func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
 }
 
 type RepositoryListUpdaterCustomMock struct {
-	list      func() (formula.Repos, error)
-	listLocal func() (formula.RepoName, error)
-	update    func(name formula.RepoName, version formula.RepoVersion) error
+	list   func() (formula.Repos, error)
+	update func(name formula.RepoName, version formula.RepoVersion) error
 }
 
 func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {

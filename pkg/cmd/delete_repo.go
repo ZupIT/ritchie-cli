@@ -80,13 +80,15 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 
 		selectedRepoName := formula.RepoName(repo)
 
-		switch err := selectedRepoName; err {
+		var errReturn error
+		switch selectedRepoName {
 		case repoLocal:
-			dr.DeleteLocal()
+			errReturn = dr.DeleteLocal()
 		default:
-			dr.Delete(selectedRepoName)
+			errReturn = dr.Delete(selectedRepoName)
 		}
-		if err != nil {
+
+		if errReturn != nil {
 			return err
 		}
 

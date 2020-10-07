@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -53,9 +52,8 @@ func TestDeleteLocalWithSuccess(t *testing.T) {
 
 func TestDeleteLocalWhenErr(t *testing.T) {
 	type in struct {
-		ritHome  string
-		dir      stream.DirRemover
-		repoName formula.RepoName
+		ritHome string
+		dir     stream.DirRemover
 	}
 	tests := []struct {
 		name    string

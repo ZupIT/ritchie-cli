@@ -239,9 +239,8 @@ func TestUpdateManager_Update(t *testing.T) {
 }
 
 type repositoryListCreatorCustomMock struct {
-	create    func(repo formula.Repo) error
-	list      func() (formula.Repos, error)
-	listLocal func() (formula.RepoName, error)
+	create func(repo formula.Repo) error
+	list   func() (formula.Repos, error)
 }
 
 func (m repositoryListCreatorCustomMock) Create(repo formula.Repo) error {
