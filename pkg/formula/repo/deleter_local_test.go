@@ -51,7 +51,7 @@ func TestDeleteLocalWithSuccess(t *testing.T) {
 	}
 }
 
-func TestDeleteWhenErr(t *testing.T) {
+func TestDeleteLocalWhenErr(t *testing.T) {
 	type in struct {
 		ritHome  string
 		dir      stream.DirRemover
@@ -68,39 +68,6 @@ func TestDeleteWhenErr(t *testing.T) {
 				dir: DirCreateListCopyRemoverCustomMock{
 					remove: func(dir string) error {
 						return errors.New("some error")
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Return err when read fail",
-			in: in{
-				dir: DirCreateListCopyRemoverCustomMock{
-					remove: func(dir string) error {
-						return nil
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Return err when fail to parse json",
-			in: in{
-				dir: DirCreateListCopyRemoverCustomMock{
-					remove: func(dir string) error {
-						return nil
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Return err when fail to write",
-			in: in{
-				dir: DirCreateListCopyRemoverCustomMock{
-					remove: func(dir string) error {
-						return nil
 					},
 				},
 			},

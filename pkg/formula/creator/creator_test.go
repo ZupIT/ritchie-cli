@@ -199,6 +199,10 @@ func (repoListerMock) List() (formula.Repos, error) {
 	return formula.Repos{}, nil
 }
 
+func (repoListerMock) ListLocal() (formula.RepoName, error) {
+	return "local", nil
+}
+
 type FileReadExisterMock struct{}
 
 func (m FileReadExisterMock) Read(path string) ([]byte, error) {

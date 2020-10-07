@@ -239,8 +239,9 @@ func TestUpdateManager_Update(t *testing.T) {
 }
 
 type repositoryListCreatorCustomMock struct {
-	create func(repo formula.Repo) error
-	list   func() (formula.Repos, error)
+	create    func(repo formula.Repo) error
+	list      func() (formula.Repos, error)
+	listLocal func() (formula.RepoName, error)
 }
 
 func (m repositoryListCreatorCustomMock) Create(repo formula.Repo) error {
@@ -249,4 +250,8 @@ func (m repositoryListCreatorCustomMock) Create(repo formula.Repo) error {
 
 func (m repositoryListCreatorCustomMock) List() (formula.Repos, error) {
 	return m.list()
+}
+
+func (m repositoryListCreatorCustomMock) ListLocal() (formula.RepoName, error) {
+	return "local", nil
 }

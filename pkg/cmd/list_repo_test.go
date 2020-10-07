@@ -181,9 +181,14 @@ func TestListRepoRunFunc(t *testing.T) {
 }
 
 type RepositoryListerCustomMock struct {
-	list func() (formula.Repos, error)
+	list      func() (formula.Repos, error)
+	listLocal func() (formula.RepoName, error)
 }
 
 func (m RepositoryListerCustomMock) List() (formula.Repos, error) {
 	return m.list()
+}
+
+func (m RepositoryListerCustomMock) ListLocal() (formula.RepoName, error) {
+	return m.listLocal()
 }
