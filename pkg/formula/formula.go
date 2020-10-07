@@ -34,6 +34,7 @@ const (
 	PwdEnv        = "CURRENT_PWD"
 	CtxEnv        = "CONTEXT"
 	VerboseEnv    = "VERBOSE_MODE"
+	DockerExecutionEnv    = "DOCKER_EXECUTION"
 	BinUnix       = "run.sh"
 	BinWindows    = "run.bat"
 	BinDir        = "bin"
