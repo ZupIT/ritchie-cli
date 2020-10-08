@@ -18,12 +18,11 @@ package runner
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -70,8 +69,8 @@ func NewPreRunBuilder(
 	}
 }
 
-func (b PreRunBuilderManager) Build(formulaRelativePath string) {
-	workspace, err := b.getModifiedWorkspace(formulaRelativePath)
+func (b PreRunBuilderManager) Build(relativePath string) {
+	workspace, err := b.modifiedWorkspace(relativePath)
 	if err != nil {
 		fmt.Println(prompt.Yellow(messageChangeError))
 		return
@@ -87,20 +86,20 @@ func (b PreRunBuilderManager) Build(formulaRelativePath string) {
 		return
 	}
 
-	if err = b.buildOnWorkspace(*workspace, formulaRelativePath); err != nil {
+	if err = b.buildOnWorkspace(*workspace, relativePath); err != nil {
 		fmt.Println(prompt.Red(messageBuildError))
 		return
 	}
 }
 
-func (b PreRunBuilderManager) getModifiedWorkspace(formulaRelativePath string) (*formula.Workspace, error) {
+func (b PreRunBuilderManager) modifiedWorkspace(relativePath string) (*formula.Workspace, error) {
 	workspaces, err := b.workspace.List()
 	if err != nil {
 		return nil, err
 	}
 
 	for workspaceName, workspacePath := range workspaces {
-		formulaAbsolutePath := filepath.Join(workspacePath, formulaRelativePath)
+		formulaAbsolutePath := filepath.Join(workspacePath, relativePath)
 		hasChanged, err := b.hasFormulaChanged(formulaAbsolutePath)
 		if err != nil {
 			return nil, err
@@ -117,14 +116,14 @@ func (b PreRunBuilderManager) getModifiedWorkspace(formulaRelativePath string) (
 }
 
 func (b PreRunBuilderManager) hasFormulaChanged(path string) (bool, error) {
-	currentHash, err := b.getCurrentHash(path)
+	currentHash, err := b.currentHash(path)
 
 	// Formula doesn't exist on this workspace
 	if err != nil {
 		return false, nil
 	}
 
-	previousHash, err := b.getPreviousHash(path)
+	previousHash, err := b.previousHash(path)
 	if err != nil || previousHash != currentHash {
 		updateErr := b.updateHash(path, currentHash)
 		if updateErr != nil {
@@ -140,8 +139,8 @@ func (b PreRunBuilderManager) hasFormulaChanged(path string) (bool, error) {
 	return previousHash != currentHash, nil
 }
 
-func (b PreRunBuilderManager) getPreviousHash(formulaPath string) (string, error) {
-	filePath := b.getHashPath(formulaPath)
+func (b PreRunBuilderManager) previousHash(formulaPath string) (string, error) {
+	filePath := b.hashPath(formulaPath)
 
 	hash, err := b.file.Read(filePath)
 	if err != nil {
@@ -151,33 +150,25 @@ func (b PreRunBuilderManager) getPreviousHash(formulaPath string) (string, error
 	return string(hash), nil
 }
 
-func (b PreRunBuilderManager) getCurrentHash(formulaPath string) (string, error) {
+func (b PreRunBuilderManager) currentHash(formulaPath string) (string, error) {
 	return b.dir.Hash(filepath.Join(formulaPath, sourceDir))
 }
 
 func (b PreRunBuilderManager) updateHash(formulaPath string, hash string) error {
-	filePath := b.getHashPath(formulaPath)
+	filePath := b.hashPath(formulaPath)
 
-	_ = b.dir.Create(b.getHashDir())
+	hashDir := filepath.Join(b.ritchieHome, hashesPath)
+	_ = b.dir.Create(hashDir)
 	return b.file.Write(filePath, []byte(hash))
 }
 
-func (b PreRunBuilderManager) getHashDir() string {
-	return filepath.Join(b.ritchieHome, hashesPath)
-}
-
-func (b PreRunBuilderManager) getHashPath(formulaPath string) string {
-	divider := "/"
-	if runtime.GOOS == osutil.Windows {
-		divider = "\\"
-	}
-
-	fileName := strings.ReplaceAll(formulaPath, divider, "-") + hashesExt
+func (b PreRunBuilderManager) hashPath(formulaPath string) string {
+	fileName := strings.ReplaceAll(formulaPath, string(os.PathSeparator), "-") + hashesExt
 	return filepath.Join(b.ritchieHome, hashesPath, fileName)
 }
 
-func (b PreRunBuilderManager) buildOnWorkspace(workspace formula.Workspace, formulaRelativePath string) error {
-	formulaAbsolutePath := filepath.Join(workspace.Dir, formulaRelativePath)
+func (b PreRunBuilderManager) buildOnWorkspace(workspace formula.Workspace, relativePath string) error {
+	formulaAbsolutePath := filepath.Join(workspace.Dir, relativePath)
 	s := spinner.StartNew(messageBuilding)
 	if err := b.builder.Build(workspace.Dir, formulaAbsolutePath); err != nil {
 		s.Error(err)
