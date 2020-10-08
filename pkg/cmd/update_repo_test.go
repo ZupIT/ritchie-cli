@@ -31,6 +31,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
+const (
+	questionAVersion = "Select your new version for \"someRepo1\":"
+)
+
 func TestUpdateRepoRun(t *testing.T) {
 	someError := errors.New("some error")
 
