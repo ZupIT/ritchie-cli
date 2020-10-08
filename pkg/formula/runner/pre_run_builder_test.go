@@ -34,6 +34,7 @@ type preRunBuilderTest struct {
 	previousHash        string
 	createHashDirError  error
 	writeHashError      error
+	promptError         error
 
 	mustBuild         bool
 	mustPromptRebuild bool
@@ -49,6 +50,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHash:        "hash",
 		createHashDirError:  nil,
 		writeHashError:      nil,
+		promptError:         nil,
 
 		mustBuild:         false,
 		mustPromptRebuild: false,
@@ -62,6 +64,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHash:        "anotherhash",
 		createHashDirError:  nil,
 		writeHashError:      nil,
+		promptError:         nil,
 
 		mustBuild:         true,
 		mustPromptRebuild: true,
@@ -75,6 +78,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHash:        "anotherhash",
 		createHashDirError:  nil,
 		writeHashError:      nil,
+		promptError:         nil,
 
 		mustBuild:         false,
 		mustPromptRebuild: true,
@@ -88,6 +92,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHash:        "anotherhash",
 		createHashDirError:  nil,
 		writeHashError:      fmt.Errorf("Failed to save hash"),
+		promptError:         nil,
 
 		mustBuild:         false,
 		mustPromptRebuild: false,
@@ -101,6 +106,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHash:        "anotherhash",
 		createHashDirError:  fmt.Errorf("Failed to create dir"),
 		writeHashError:      nil,
+		promptError:         nil,
 
 		mustBuild:         false,
 		mustPromptRebuild: true,
@@ -114,9 +120,24 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHash:        "anotherhash",
 		createHashDirError:  nil,
 		writeHashError:      nil,
+		promptError:         nil,
 
 		mustBuild:         false,
 		mustPromptRebuild: false,
+	},
+	{
+		name: "should not build when user Ctrl+C's on prompt",
+
+		workspaces:          map[string]string{"default": "/pathtodefault"},
+		rebuildPromptAnswer: true,
+		currentHash:         "hash",
+		previousHash:        "anotherhash",
+		createHashDirError:  nil,
+		writeHashError:      nil,
+		promptError:         fmt.Errorf("Ctrl+C on survey"),
+
+		mustBuild:         false,
+		mustPromptRebuild: true,
 	},
 }
 
@@ -128,7 +149,7 @@ func TestPreRunBuilder(t *testing.T) {
 	for _, test := range preRunBuilderTests {
 		t.Run(test.name, func(t *testing.T) {
 			builderMock := newBuilderMock()
-			inputBoolMock := newInputBoolMock(test.rebuildPromptAnswer)
+			inputBoolMock := newInputBoolMock(test.rebuildPromptAnswer, test.promptError)
 
 			preRunBuilder := NewPreRunBuilder(ritHome, workspaceListerMock{test.workspaces}, builderMock,
 				dirHashManagerMock{test.createHashDirError, nil, test.currentHash, nil},
@@ -158,15 +179,16 @@ func TestPreRunBuilder(t *testing.T) {
 type inputBoolMock struct {
 	hasBeenCalled *bool
 	answer        bool
+	err           error
 }
 
-func newInputBoolMock(answer bool) inputBoolMock {
+func newInputBoolMock(answer bool, err error) inputBoolMock {
 	hasBeenCalled := false
-	return inputBoolMock{&hasBeenCalled, answer}
+	return inputBoolMock{&hasBeenCalled, answer, err}
 }
 func (in inputBoolMock) Bool(string, []string, ...string) (bool, error) {
 	*in.hasBeenCalled = true
-	return in.answer, nil
+	return in.answer, in.err
 }
 func (in inputBoolMock) HasBeenCalled() bool {
 	return *in.hasBeenCalled
