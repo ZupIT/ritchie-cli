@@ -49,7 +49,10 @@ func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
 		runner = ex.runners[configType]
 	}
 
-	ex.preRunBuilder.Build(exe.Def.Path)
+	if exe.Def.RepoName == "local" {
+		ex.preRunBuilder.Build(exe.Def.Path)
+	}
+
 	if err := runner.Run(exe.Def, exe.InType, exe.Verbose); err != nil {
 		return err
 	}
