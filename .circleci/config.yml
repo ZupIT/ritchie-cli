@@ -161,6 +161,7 @@ jobs:
           name: Running Functional tests for CLI
           command: |
             make functional-test
+          no_output_timeout: 10m
 
   windows_functional_test:
     executor: windows-executor
