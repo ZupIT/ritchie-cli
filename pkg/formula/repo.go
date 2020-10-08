@@ -95,6 +95,9 @@ type RepositoryAdder interface {
 
 type RepositoryLister interface {
 	List() (Repos, error)
+}
+
+type RepositoryListerLocal interface {
 	ListLocal() (RepoName, error)
 }
 

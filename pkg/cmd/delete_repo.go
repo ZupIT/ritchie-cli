@@ -33,13 +33,14 @@ const (
 
 type deleteRepoCmd struct {
 	formula.RepositoryLister
+	formula.RepositoryListerLocal
 	prompt.InputList
 	formula.RepositoryDeleter
 	formula.RepositoryLocalDeleter
 }
 
-func NewDeleteRepoCmd(rl formula.RepositoryLister, il prompt.InputList, rd formula.RepositoryDeleter, rld formula.RepositoryLocalDeleter) *cobra.Command {
-	dr := deleteRepoCmd{rl, il, rd, rld}
+func NewDeleteRepoCmd(rl formula.RepositoryLister, rll formula.RepositoryListerLocal, il prompt.InputList, rd formula.RepositoryDeleter, rld formula.RepositoryLocalDeleter) *cobra.Command {
+	dr := deleteRepoCmd{rl, rll, il, rd, rld}
 	cmd := &cobra.Command{
 		Use:       "repo",
 		Short:     "Delete a repository",
@@ -68,7 +69,7 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 			reposNames = append(reposNames, r.Name.String())
 		}
 
-		repoLocal, err := dr.RepositoryLister.ListLocal()
+		repoLocal, err := dr.RepositoryListerLocal.ListLocal()
 		if err == nil {
 			reposNames = append(reposNames, repoLocal.String())
 		}

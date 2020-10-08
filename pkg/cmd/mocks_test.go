@@ -164,17 +164,12 @@ func (inputListErrorMock) List(name string, items []string, helper ...string) (s
 }
 
 type repoListerAdderCustomMock struct {
-	list      func() (formula.Repos, error)
-	listLocal func() (formula.RepoName, error)
-	add       func(d formula.Repo) error
+	list func() (formula.Repos, error)
+	add  func(d formula.Repo) error
 }
 
 func (a repoListerAdderCustomMock) List() (formula.Repos, error) {
 	return a.list()
-}
-
-func (a repoListerAdderCustomMock) ListLocal() (formula.RepoName, error) {
-	return a.listLocal()
 }
 
 func (a repoListerAdderCustomMock) Add(d formula.Repo) error {
@@ -250,10 +245,6 @@ func (repoListerMock) List() (formula.Repos, error) {
 	return formula.Repos{}, nil
 }
 
-func (repoListerMock) ListLocal() (formula.RepoName, error) {
-	return "local", nil
-}
-
 type repoListerNonEmptyMock struct{}
 
 func (repoListerNonEmptyMock) List() (formula.Repos, error) {
@@ -265,18 +256,10 @@ func (repoListerNonEmptyMock) List() (formula.Repos, error) {
 	}, nil
 }
 
-func (repoListerNonEmptyMock) ListLocal() (formula.RepoName, error) {
-	return "local", nil
-}
-
 type repoListerErrorMock struct{}
 
 func (repoListerErrorMock) List() (formula.Repos, error) {
 	return formula.Repos{}, errors.New("some error")
-}
-
-func (repoListerErrorMock) ListLocal() (formula.RepoName, error) {
-	return "", errors.New("some error")
 }
 
 type repoPrioritySetterMock struct{}
@@ -526,9 +509,6 @@ var (
 		list: func() (formula.Repos, error) {
 			return formula.Repos{}, nil
 		},
-		listLocal: func() (formula.RepoName, error) {
-			return "local", nil
-		},
 	}
 
 	defaultGitRepositoryMock = GitRepositoryMock{
@@ -573,10 +553,6 @@ type RepositoryListUpdaterCustomMock struct {
 
 func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
 	return m.list()
-}
-
-func (m RepositoryListUpdaterCustomMock) ListLocal() (formula.RepoName, error) {
-	return "local", nil
 }
 
 func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion) error {

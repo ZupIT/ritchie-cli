@@ -250,7 +250,3 @@ func (m repositoryListCreatorCustomMock) Create(repo formula.Repo) error {
 func (m repositoryListCreatorCustomMock) List() (formula.Repos, error) {
 	return m.list()
 }
-
-func (m repositoryListCreatorCustomMock) ListLocal() (formula.RepoName, error) {
-	return "local", nil
-}

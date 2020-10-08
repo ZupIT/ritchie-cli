@@ -17,41 +17,27 @@
 package repo
 
 import (
-	"encoding/json"
+	"os"
 	"path/filepath"
-	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-type ListManager struct {
+type ListLocalManager struct {
 	ritHome string
-	file    stream.FileReadExister
 }
 
-func NewLister(ritHome string, file stream.FileReadExister) ListManager {
-	return ListManager{ritHome: ritHome, file: file}
+func NewListerLocal(ritHome string) ListLocalManager {
+	return ListLocalManager{ritHome: ritHome}
 }
 
-// List method returns an empty []formula.Repo if there is no repositories.json
-func (li ListManager) List() (formula.Repos, error) {
-	repos := formula.Repos{}
-	reposFilePath := filepath.Join(li.ritHome, reposDirName, reposFileName)
-	if !li.file.Exists(reposFilePath) {
-		return repos, nil
+// ListLocal method returns an empty formula.RepoName if there is no local folder on li.ritHome
+func (li ListLocalManager) ListLocal() (formula.RepoName, error) {
+	localReposPath := filepath.Join(li.ritHome, reposDirName, "local")
+
+	if _, err := os.Stat(localReposPath); os.IsNotExist(err) {
+		return "", err
 	}
 
-	file, err := li.file.Read(reposFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := json.Unmarshal(file, &repos); err != nil {
-		return nil, err
-	}
-
-	sort.Sort(repos)
-
-	return repos, nil
+	return "local", nil
 }

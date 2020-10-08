@@ -379,16 +379,11 @@ func getStringOfTree(formula formula.Tree) string {
 }
 
 type repositoryListerCustomMock struct {
-	list      func() (formula.Repos, error)
-	listLocal func() (formula.RepoName, error)
+	list func() (formula.Repos, error)
 }
 
 func (m repositoryListerCustomMock) List() (formula.Repos, error) {
 	return m.list()
-}
-
-func (m repositoryListerCustomMock) ListLocal() (formula.RepoName, error) {
-	return m.listLocal()
 }
 
 type FileReadExisterMock struct {
