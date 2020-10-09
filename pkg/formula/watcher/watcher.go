@@ -34,6 +34,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+const stoppedText = "Press CTRL+C to stop"
+
 type WatchManager struct {
 	watcher    *watcher.Watcher
 	formula    formula.LocalBuilder
@@ -58,9 +60,6 @@ func New(
 }
 
 func (w *WatchManager) closeWatch() {
-	currentTime := time.Now().Second()
-	w.sendMetric(float64(currentTime))
-
 	fmt.Println("\nStopping...")
 
 	w.watcher.Wait()
@@ -79,7 +78,7 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 			case event := <-w.watcher.Event:
 				if !event.IsDir() && !strings.Contains(event.Path, "/dist") {
 					w.build(workspacePath, formulaPath)
-					prompt.Info("Waiting for changes...")
+					fmt.Println(prompt.Bold("Waiting for changes...") + "\n" + stoppedText + "\n")
 				}
 			case err := <-w.watcher.Error:
 				prompt.Error(err.Error())
@@ -98,7 +97,6 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 	w.build(workspacePath, formulaPath)
 
 	watchText := fmt.Sprintf("Watching dir %s", formulaPath)
-	stoppedText := "Press CTRL+C to stop"
 	fmt.Println(prompt.Bold(watchText) + "\n" + stoppedText + "\n")
 
 	if err := w.watcher.Start(time.Second * 2); err != nil {
