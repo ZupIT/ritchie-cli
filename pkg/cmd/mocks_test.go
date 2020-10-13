@@ -48,14 +48,6 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 	return "mocked text", nil
 }
 
-type inputTextValidatorCustomMock struct {
-	text func(name string, validate func(interface{}) error, helper ...string) (string, error)
-}
-
-func (i inputTextValidatorCustomMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return i.text(name, validate)
-}
-
 type inputTextValidatorErrorMock struct{}
 
 func (inputTextValidatorErrorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {

@@ -149,7 +149,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		prompt.Success("✔ Formula successfully deleted!")
+		prompt.Success("Formula successfully deleted!")
 
 		return nil
 	}

@@ -19,11 +19,11 @@ package tree
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -34,13 +34,16 @@ const (
 )
 
 type Manager struct {
-	ritchieHome string
-	repoLister  formula.RepositoryLister
-	coreCmds    []api.Command
+	ritchieHome   string
+	repoLister    formula.RepositoryLister
+	coreCmds      []api.Command
+	file          stream.FileReadExister
+	repoProviders formula.RepoProviders
+	isRootCommand bool
 }
 
-func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command) Manager {
-	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds}
+func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command, file stream.FileReadExister, rp formula.RepoProviders, isRootCommand bool) Manager {
+	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds, file: file, repoProviders: rp, isRootCommand: isRootCommand}
 }
 
 func (d Manager) Tree() (map[string]formula.Tree, error) {
@@ -99,11 +102,21 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		if err != nil {
 			continue
 		}
+		noticeNewVersion := ""
+		if d.isRootCommand {
+			if latestTag := d.getLatestTag(r); latestTag != r.Version.String() && latestTag != "" {
+				noticeNewVersion = prompt.Bold("(new version " + latestTag + ")")
+			}
+		}
+
 		var cc []api.Command
 		for _, c := range treeRepo.Commands {
 			key := c.Parent + "_" + c.Usage
 			if trees[key].Usage == "" {
 				c.Repo = r.Name.String()
+				if noticeNewVersion != "" {
+					c.Repo = noticeNewVersion + " " + c.Repo
+				}
 				trees[key] = c
 				cc = append(cc, c)
 			}
@@ -114,23 +127,36 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	return treeMain
 }
 
+func (d Manager) getLatestTag(repo formula.Repo) string {
+	formulaGit := d.repoProviders.Resolve(repo.Provider)
+
+	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	tag, err := formulaGit.Repos.LatestTag(repoInfo)
+	if err != nil {
+		return ""
+	}
+
+	return tag.Name
+}
+
 func (d Manager) localTree() (formula.Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeLocalCmdPattern, d.ritchieHome)
-	return loadTree(treeCmdFile)
+	return d.loadTree(treeCmdFile)
 }
 
 func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {
 	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repoName)
-	return loadTree(treeCmdFile)
+	return d.loadTree(treeCmdFile)
 }
 
-func loadTree(treeCmdFile string) (formula.Tree, error) {
+func (d Manager) loadTree(treeCmdFile string) (formula.Tree, error) {
 	tree := formula.Tree{}
-	if !fileutil.Exists(treeCmdFile) {
+
+	if !d.file.Exists(treeCmdFile) {
 		return tree, nil
 	}
 
-	treeFile, err := ioutil.ReadFile(treeCmdFile)
+	treeFile, err := d.file.Read(treeCmdFile)
 	if err != nil {
 		return tree, err
 	}

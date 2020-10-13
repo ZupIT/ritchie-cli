@@ -46,8 +46,13 @@ func TestWatch(t *testing.T) {
 	_ = streams.Unzip(zipFile, workspacePath)
 
 	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, treeGenerator)
+	sendMetric := func(commandExecutionTime float64, err ...string) {}
 
-	watchManager := New(builderManager, dirManager)
+	watchManager := New(
+		builderManager,
+		dirManager,
+		sendMetric,
+	)
 
 	go func() {
 		watchManager.watcher.Wait()
