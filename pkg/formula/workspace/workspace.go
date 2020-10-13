@@ -99,8 +99,8 @@ func (m Manager) Delete(workspace formula.Workspace) error {
 
 func (m Manager) List() (formula.Workspaces, error) {
 	workspaces := formula.Workspaces{}
+	workspaces[formula.DefaultWorkspaceName] = m.defaultWorkspaceDir
 	if !m.file.Exists(m.workspaceFile) {
-		workspaces[formula.DefaultWorkspaceName] = m.defaultWorkspaceDir
 		return workspaces, nil
 	}
 
@@ -112,8 +112,6 @@ func (m Manager) List() (formula.Workspaces, error) {
 	if err := json.Unmarshal(file, &workspaces); err != nil {
 		return nil, err
 	}
-
-	workspaces[formula.DefaultWorkspaceName] = m.defaultWorkspaceDir
 
 	return workspaces, nil
 }

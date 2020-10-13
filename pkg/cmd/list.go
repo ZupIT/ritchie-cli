@@ -28,9 +28,9 @@ It can be used to list repositories, credentials, or workspaces.
 func NewListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:       "list SUBCOMMAND",
-		Short:     "List repositories or credentials",
+		Short:     "List repositories, credentials, or workspaces",
 		Long:      descListLong,
-		Example:   "rit list repo, rit list credential",
+		Example:   "rit list repo, rit list credential, rit list workspace",
 		ValidArgs: []string{"credential", "repo"},
 		Args:      cobra.OnlyValidArgs,
 	}
