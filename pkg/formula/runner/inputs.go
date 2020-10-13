@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -146,6 +148,11 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
 			inputVal, err = in.Password(input.Label, input.Tutorial)
+		case "url":
+			dl := makeRequest(input.RequestInfo)
+			inputVal, err := in.List("input.Label", dl, "input.Tutorial")
+			fmt.Println(err)
+			fmt.Println(inputVal)
 		default:
 			inputVal, err = in.resolveIfReserved(input)
 		}
@@ -335,4 +342,26 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 
 		return errors.New(input.Pattern.MismatchText)
 	})
+}
+
+func makeRequest(info formula.RequestInfo) []string{
+	response, err := http.Get(info.Url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// TODO verify http status
+	bytes, _ := ioutil.ReadAll(response.Body)
+	var a []map[string]interface{}
+
+
+	if err = json.Unmarshal(bytes, &a); err != nil {
+		fmt.Println(err)
+	}
+	var dynamicOptions []string
+	for _ , as := range a {
+		if str, ok :=as[info.Key].(string); ok {
+			dynamicOptions = append(dynamicOptions, str)
+		}
+	}
+	return dynamicOptions
 }

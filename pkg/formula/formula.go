@@ -42,16 +42,22 @@ const (
 
 type (
 	Input struct {
-		Name      string    `json:"name"`
-		Type      string    `json:"type"`
-		Default   string    `json:"default"`
-		Label     string    `json:"label"`
-		Items     []string  `json:"items"`
-		Cache     Cache     `json:"cache"`
-		Condition Condition `json:"condition"`
-		Pattern   Pattern   `json:"pattern"`
-		Tutorial  string    `json:"tutorial"`
-		Required  *bool     `json:"required"`
+		Name        string      `json:"name"`
+		Type        string      `json:"type"`
+		Default     string      `json:"default"`
+		Label       string      `json:"label"`
+		Items       []string    `json:"items"`
+		Cache       Cache       `json:"cache"`
+		Condition   Condition   `json:"condition"`
+		Pattern     Pattern     `json:"pattern"`
+		RequestInfo RequestInfo `json:"requestInfo"`
+		Tutorial    string      `json:"tutorial"`
+		Required    *bool       `json:"required"`
+	}
+
+	RequestInfo struct {
+		Url string `json:"url"`
+		Key string `json:"path"`
 	}
 
 	Pattern struct {
