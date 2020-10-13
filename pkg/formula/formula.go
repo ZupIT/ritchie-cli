@@ -28,17 +28,17 @@ import (
 )
 
 const (
-	ReposDir      = "repos"
-	TmpDir        = "tmp"
-	DefaultConfig = "config.json"
-	PwdEnv        = "CURRENT_PWD"
-	CtxEnv        = "CONTEXT"
-	VerboseEnv    = "VERBOSE_MODE"
-	DockerExecutionEnv    = "DOCKER_EXECUTION"
-	BinUnix       = "run.sh"
-	BinWindows    = "run.bat"
-	BinDir        = "bin"
-	EnvPattern    = "%s=%s"
+	ReposDir           = "repos"
+	TmpDir             = "tmp"
+	DefaultConfig      = "config.json"
+	PwdEnv             = "CURRENT_PWD"
+	CtxEnv             = "CONTEXT"
+	VerboseEnv         = "VERBOSE_MODE"
+	DockerExecutionEnv = "DOCKER_EXECUTION"
+	BinUnix            = "run.sh"
+	BinWindows         = "run.bat"
+	BinDir             = "bin"
+	EnvPattern         = "%s=%s"
 )
 
 type (
