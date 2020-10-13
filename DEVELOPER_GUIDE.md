@@ -37,11 +37,6 @@ the organisation of the commands!
 Currently, we have two main ways of running formulas. Formulas can be run interactively or via stdin. This folder
 contains the files to run formulas on the different supported OSes and with different input formats.
 
-#### Internal
-
-Ritchie collects anonymous usage metrics with user consent, so we can understand user behavior and always
-keep improving the cli. Commands are sent to a database using protocol buffers via grpc connection. 
-
 #### Packaging
 
 Contains code and instructions to package Ritchie for different supported OS distributions. Here we have scripts
@@ -49,8 +44,29 @@ for the Windows installer, rpm and debian distributions, and other installation 
 
 #### Pkg
 
-This module is the core of the project, any command or functionality is developed here and added to **Cobra**
-via `main`. 
+This module is the core of the project, any command or functionality is generally developed here and added to **Cobra**
+via `main`. Some of the features developed are listed below:
+* api: contains main constants such as the user home directory and core commands list.
+* autocomplete: contains inline scripts and logic for the `rit completion` commands.
+* cmd: contains most of core commands implementation. You can find commands such as listing, creating, 
+and deleting resources here. For simple implementations they are enough, but they might call dedicated modules
+to perform certain actions.
+* credential: contains logic related to credential manipulation, such as the files they are saved and how to manage
+them.
+* env: helper to resolve credential from input runners.
+* formula: contains all formula manipulation implementations, such as building, resolving, creating, 
+and running formulas
+* git: module to add, remove, or manage other formula repos.
+* http: header definitions
+* metric: sends collected anonymous metrics via http requests.
+* prompt: Ritchie's adaptations on the `survey` module for user input.
+* rcontext: manages user contexts. Handles files modifications and context activation so users can run formulas
+using different sets of credentials (i.e.: development, staging, production)
+* rtutorial: basic implementation of tutorial texts. Tutorial are helper texts that can be added to each command
+to provide the user with more context on that action.
+* stdin: JSON stdin parser
+* upgrade: manages and performs upgrades on Ritchie
+* version: manages and resolves Ritchie's versioning
 
 #### Testdata
 
