@@ -148,11 +148,12 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
 			inputVal, err = in.Password(input.Label, input.Tutorial)
-		case "url":
-			dl := makeRequest(input.RequestInfo)
-			inputVal, err := in.List("input.Label", dl, "input.Tutorial")
-			fmt.Println(err)
-			fmt.Println(inputVal)
+		case "dynamic":
+			dl, err := dynamicList(input.RequestInfo)
+			if err != nil {
+				return err
+			}
+			inputVal, err = in.List(input.Label, dl, input.Tutorial)
 		default:
 			inputVal, err = in.resolveIfReserved(input)
 		}
@@ -344,24 +345,44 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 	})
 }
 
-func makeRequest(info formula.RequestInfo) []string{
+// make a http request
+// find for value
+func dynamicList(info formula.RequestInfo) ([]string, error) {
+	body, err := makeRequest(info)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := findValues(info.Url, body)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+//
+func makeRequest(info formula.RequestInfo) ([]map[string]interface{}, error) {
 	response, err := http.Get(info.Url)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 	// TODO verify http status
-	bytes, _ := ioutil.ReadAll(response.Body)
-	var a []map[string]interface{}
+	body, _ := ioutil.ReadAll(response.Body)
+	var requestData []map[string]interface{}
 
-
-	if err = json.Unmarshal(bytes, &a); err != nil {
-		fmt.Println(err)
+	if err = json.Unmarshal(body, &requestData); err != nil {
+		return nil, err
 	}
+	return requestData, nil
+}
+
+func findValues(formulaKey string, requestData []map[string]interface{}) ([]string, error) {
 	var dynamicOptions []string
-	for _ , as := range a {
-		if str, ok :=as[info.Key].(string); ok {
+	for _, k := range requestData {
+		fmt.Println(k)
+		if str, ok := k[formulaKey].(string); ok {
 			dynamicOptions = append(dynamicOptions, str)
 		}
 	}
-	return dynamicOptions
+	return dynamicOptions, nil
 }

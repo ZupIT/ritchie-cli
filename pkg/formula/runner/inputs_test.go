@@ -195,7 +195,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
 				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:           fileManagerMock{rBytes: []byte("error"), exist: true},
+				file:           fileManagerMock{rBytes: []byte(""), exist: true},
 			},
 			want: errors.New("invalid character 'e' looking for beginning of value"),
 		},
