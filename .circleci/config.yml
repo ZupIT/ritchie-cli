@@ -195,13 +195,13 @@ jobs:
       - run:
           name: Running build
           command: |
-            . ./.circleci/scripts/version.sh
-            . ./.circleci/scripts/credentials.sh
+            . ./.circleci/scripts/routing.sh version
+            . ./.circleci/scripts/routing.sh credentials
             make build-circle
       - run:
           name: Persist version file
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             echo $RELEASE_VERSION > dist/release_version.txt
       - persist_to_workspace:
           root: dist
@@ -246,9 +246,9 @@ jobs:
           name: Delivering cli binary
           command: |
             pip install awscli
-            . ./.circleci/scripts/version.sh
-            . ./.circleci/scripts/bucket.sh
-            . ./.circleci/scripts/credentials.sh
+            . ./.circleci/scripts/routing.sh version
+            . ./.circleci/scripts/routing.sh bucket
+            . ./.circleci/scripts/routing.sh credentials
             make delivery
 
   deb-package:
@@ -262,7 +262,7 @@ jobs:
       - run:
           name: Generating package for debian
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             . ./.circleci/scripts/gen-deb.sh
       - persist_to_workspace:
           root: dist
@@ -280,7 +280,7 @@ jobs:
       - run:
           name: Generating package for rpm
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             . ./.circleci/scripts/gen-rpm.sh
       - persist_to_workspace:
           root: dist
@@ -312,7 +312,7 @@ jobs:
       - run:
           name: Releasing
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             make release
 
   release_creator:
@@ -357,7 +357,7 @@ jobs:
       - run:
           name: Load Versions
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             echo $RELEASE_VERSION
       - run:
           name: install Ritchie
