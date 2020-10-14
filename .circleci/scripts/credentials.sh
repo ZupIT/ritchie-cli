@@ -6,6 +6,12 @@ if expr "$CIRCLE_BRANCH" : 'qa' >/dev/null; then
   export METRIC_BASIC_USER="$METRIC_BASIC_USER_QA"
   export METRIC_BASIC_PASS="$METRIC_BASIC_PASS_QA"
 
+elif expr "$CIRCLE_BRANCH" : '^staging' >/dev/null; then
+  export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID_STG"
+  export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY_STG"
+  export METRIC_BASIC_USER="$METRIC_BASIC_USER_STG"
+  export METRIC_BASIC_PASS="$METRIC_BASIC_PASS_STG"
+
 elif expr "$CIRCLE_BRANCH" : '^release-.*' >/dev/null; then
   export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID_PROD"
   export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY_PROD"
