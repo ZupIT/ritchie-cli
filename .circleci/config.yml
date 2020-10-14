@@ -28,6 +28,7 @@ references:
     branches:
       only:
         - qa
+        - staging
         - nightly
         - beta
 

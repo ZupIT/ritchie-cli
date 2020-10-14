@@ -17,10 +17,10 @@ GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
-RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
 IS_RELEASE=$(shell echo ${VERSION} | egrep "^([0-9]{1,}\.)+[0-9]{1,}$")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
+IS_STG=$(shell echo $(VERSION) | egrep "*stg.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
 GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
 NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
@@ -56,6 +56,10 @@ ifneq "$(IS_RELEASE)" ""
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 endif
 ifneq "$(IS_QA)" ""
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+endif
+ifneq "$(IS_STG)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 endif
@@ -97,6 +101,13 @@ ifneq "$(IS_RELEASE)" ""
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
 endif
 ifneq "$(IS_QA)" ""
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	mkdir latest
+	cp dist/installer/ritchiecli.msi latest/
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+endif
+ifneq "$(IS_STG)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
