@@ -1,3 +1,4 @@
+SHELL=/bin/bash
 # Go aliases
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build
@@ -19,12 +20,12 @@ GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 # Routing stuff
-BUCKET=$(shell ./.circleci/scripts/routing.sh bucket)
 IS_RELEASE=$(shell echo $(VERSION) | egrep "^([0-9]{1,}\.)+[0-9]{1,}$")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
 IS_STG=$(shell echo $(VERSION) | egrep "*stg.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
+BUCKET=$(shell ./.circleci/scripts/routing.sh bucket)
 GONNA_RELEASE=$(shell ./.circleci/scripts/routing.sh gonna_release)
 NEXT_VERSION=$(shell ./.circleci/scripts/routing.sh next_version)
 METRIC_SERVER_URL=$(shell ./.circleci/scripts/routing.sh metric_server)
