@@ -39,7 +39,12 @@ type deleteRepoCmd struct {
 	formula.RepositoryLocalDeleter
 }
 
-func NewDeleteRepoCmd(rl formula.RepositoryLister, rll formula.RepositoryListerLocal, il prompt.InputList, rd formula.RepositoryDeleter, rld formula.RepositoryLocalDeleter) *cobra.Command {
+func NewDeleteRepoCmd(
+	rl formula.RepositoryLister,
+	rll formula.RepositoryListerLocal,
+	il prompt.InputList,
+	rd formula.RepositoryDeleter,
+	rld formula.RepositoryLocalDeleter) *cobra.Command {
 	dr := deleteRepoCmd{rl, rll, il, rd, rld}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -58,8 +63,9 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
+		repoLocal, err := dr.RepositoryListerLocal.ListLocal()
 
-		if len(repos) == 0 {
+		if len(repos) == 0 && repoLocal == "" {
 			prompt.Warning("You don't have any repositories")
 			return nil
 		}
@@ -69,7 +75,6 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 			reposNames = append(reposNames, r.Name.String())
 		}
 
-		repoLocal, err := dr.RepositoryListerLocal.ListLocal()
 		if err == nil {
 			reposNames = append(reposNames, repoLocal.String())
 		}
