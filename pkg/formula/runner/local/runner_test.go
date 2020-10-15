@@ -19,7 +19,6 @@ package local
 import (
 	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -170,14 +169,6 @@ func TestRun(t *testing.T) {
 		})
 	}
 
-}
-
-type inputRunnerMock struct {
-	err error
-}
-
-func (in inputRunnerMock) Inputs(cmd *exec.Cmd, setup formula.Setup, inputType api.TermInputType) error {
-	return in.err
 }
 
 type preRunnerMock struct {
