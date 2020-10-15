@@ -179,7 +179,7 @@ func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string
 
 		formulaOptions = append(formulaOptions, currentFormula, optionOtherFormula)
 
-		response, err = b.List(questionAboutFoundedFormula, formulaOptions)
+		response, err = b.List(questionAboutFoundedFormula, formulaOptions, "")
 		if err != nil {
 			return "", err
 		}
@@ -189,7 +189,7 @@ func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string
 		dirs = sliceutil.Remove(dirs, srcDir)
 	}
 
-	selected, err := b.List(questionSelectFormulaGroup, dirs)
+	selected, err := b.List(questionSelectFormulaGroup, dirs, "")
 	if err != nil {
 		return "", err
 	}

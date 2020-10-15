@@ -106,13 +106,13 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 	}
 
 	providerArr := credential.NewProviderArr(credentials)
-	providerChoose, err := s.List("Select your provider", providerArr)
+	providerChoose, err := s.List("Select your provider", providerArr, "")
 	if err != nil {
 		return credDetail, err
 	}
 
 	if providerChoose == credential.AddNew {
-		newProvider, err := s.Text("Define your provider name:", true)
+		newProvider, err := s.Text("Define your provider name:", true, "")
 		if err != nil {
 			return credDetail, err
 		}
@@ -121,18 +121,18 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 		var newField credential.Field
 		addMoreCredentials := true
 		for addMoreCredentials {
-			newField.Name, err = s.Text("Define your field name: (ex.:token, secretAccessKey)", true)
+			newField.Name, err = s.Text("Define your field name: (ex.:token, secretAccessKey)", true, "")
 			if err != nil {
 				return credDetail, err
 			}
 
-			newField.Type, err = s.List("Select your field type:", inputTypes)
+			newField.Type, err = s.List("Select your field type:", inputTypes, "")
 			if err != nil {
 				return credDetail, err
 			}
 
 			newFields = append(newFields, newField)
-			addMoreCredentials, err = s.Bool("Add more credentials fields to this provider?", []string{"no", "yes"})
+			addMoreCredentials, err = s.Bool("Add more credentials fields to this provider?", []string{"no", "yes"}, "no")
 			if err != nil {
 				return credDetail, err
 			}
@@ -147,11 +147,11 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
-	inputWayChoose, _ := s.List("Want to enter your credential typing or through a file?", inputWay)
+	inputWayChoose, _ := s.List("Want to enter your credential typing or through a file?", inputWay, "")
 	for _, i := range inputs {
 		var value string
 		if inputWayChoose == inputWay[1] {
-			path, err := s.Text("Enter the credential file path for "+prompt.Cyan(i.Name)+":", true)
+			path, err := s.Text("Enter the credential file path for "+prompt.Cyan(i.Name)+":", true, "")
 			if err != nil {
 				return credential.Detail{}, err
 			}
@@ -177,7 +177,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 					return credDetail, err
 				}
 			} else {
-				value, err = s.Text(i.Name+":", true)
+				value, err = s.Text(i.Name+":", true, "")
 				if err != nil {
 					return credDetail, err
 				}

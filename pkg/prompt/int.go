@@ -31,7 +31,7 @@ func NewSurveyInt() SurveyInt {
 	return SurveyInt{}
 }
 
-func (SurveyInt) Int(name string, helper ...string) (int64, error) {
+func (SurveyInt) Int(name string, defaultValue int64, helper ...string) (int64, error) {
 	var value string
 
 	validationQs := []*survey.Question{
