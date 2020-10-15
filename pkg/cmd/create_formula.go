@@ -103,7 +103,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		lang, err := c.inList.List("Choose the language: ", languages)
+		lang, err := c.inList.List("Choose the language: ", languages, "")
 		if err != nil {
 			return err
 		}
@@ -277,7 +277,7 @@ func FormulaWorkspaceInput(
 	}
 
 	items = append(items, newWorkspace)
-	selected, err := inList.List("Select a formula workspace: ", items)
+	selected, err := inList.List("Select a formula workspace: ", items, "")
 	if err != nil {
 		return formula.Workspace{}, err
 	}
@@ -286,12 +286,12 @@ func FormulaWorkspaceInput(
 	var workspacePath string
 	var wspace formula.Workspace
 	if selected == newWorkspace {
-		workspaceName, err = inText.Text("Workspace name: ", true)
+		workspaceName, err = inText.Text("Workspace name: ", true, "")
 		if err != nil {
 			return formula.Workspace{}, err
 		}
 
-		workspacePath, err = inText.Text("Workspace path (e.g.: /home/user/github):", true)
+		workspacePath, err = inText.Text("Workspace path (e.g.: /home/user/github):", true, "")
 		if err != nil {
 			return formula.Workspace{}, err
 		}

@@ -136,7 +136,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		question := fmt.Sprintf("Are you sure you want to delete the formula: rit %s", strings.Join(groups, " "))
-		ans, err := d.inBool.Bool(question, []string{"no", "yes"})
+		ans, err := d.inBool.Bool(question, []string{"no", "yes"}, "yes")
 		if err != nil {
 			return err
 		}
@@ -220,7 +220,7 @@ func (d deleteFormulaCmd) readFormulas(dir string, currentFormula string) ([]str
 
 		formulaOptions = append(formulaOptions, currentFormula, optionOtherFormula)
 
-		response, err = d.inList.List(foundFormulaQuestion, formulaOptions)
+		response, err = d.inList.List(foundFormulaQuestion, formulaOptions, "")
 		if err != nil {
 			return nil, err
 		}
@@ -230,7 +230,7 @@ func (d deleteFormulaCmd) readFormulas(dir string, currentFormula string) ([]str
 		dirs = sliceutil.Remove(dirs, srcDir)
 	}
 
-	selected, err := d.inList.List(questionSelectFormulaGroup, dirs)
+	selected, err := d.inList.List(questionSelectFormulaGroup, dirs, "")
 	if err != nil {
 		return nil, err
 	}

@@ -26,13 +26,15 @@ func NewSurveyText() SurveyText {
 	return SurveyText{}
 }
 
-func (SurveyText) Text(name string, required bool, helper ...string) (string, error) {
+func (SurveyText) Text(name string, required bool, defaultValue string, helper ...string) (string, error) {
 
 	var value string
+	var input = &survey.Input{Message: name, Default: defaultValue}
 
 	validationQs := []*survey.Question{
 		{
-			Name: "name",
+			Name:   "name",
+			Prompt: input,
 		},
 	}
 
@@ -41,9 +43,7 @@ func (SurveyText) Text(name string, required bool, helper ...string) (string, er
 	}
 
 	if len(helper) > 0 {
-		validationQs[0].Prompt = &survey.Input{Message: name, Help: helper[0]}
-	} else {
-		validationQs[0].Prompt = &survey.Input{Message: name}
+		input.Help = helper[0]
 	}
 
 	return value, survey.Ask(validationQs, &value)
