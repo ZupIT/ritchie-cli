@@ -40,6 +40,10 @@ type InputList interface {
 	List(name string, items []string, helper ...string) (string, error)
 }
 
+type InputMultiSelect interface {
+	MultiSelect(name string, items []string, helper ...string) ([]string, error)
+}
+
 type InputInt interface {
 	Int(name string, helper ...string) (int64, error)
 }
