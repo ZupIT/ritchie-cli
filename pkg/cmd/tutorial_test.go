@@ -75,7 +75,7 @@ func TestTutorialRunAnyEntry(t *testing.T) {
 			name: "Run With Success when set tutorial enabled",
 			fields: fields{
 				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						return "enabled", nil
 					},
 				},
@@ -88,7 +88,7 @@ func TestTutorialRunAnyEntry(t *testing.T) {
 			name: "Run With Success when set tutorial disabled",
 			fields: fields{
 				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						return "disabled", nil
 					},
 				},
@@ -101,7 +101,7 @@ func TestTutorialRunAnyEntry(t *testing.T) {
 			name: "Return error when set return error",
 			fields: fields{
 				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						return "enabled", nil
 					},
 				},
@@ -154,7 +154,7 @@ func TestTutorialRunOnlyPrompt(t *testing.T) {
 			name: "Return error when find return error",
 			fields: fields{
 				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						return "enabled", nil
 					},
 				},

@@ -82,7 +82,7 @@ func NewAddRepoCmd(
 
 func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		provider, err := ad.List("Select your provider:", ad.repoProviders.List())
+		provider, err := ad.List("Select your provider:", ad.repoProviders.List(), "")
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			repo := repos[i]
 			if repo.Name == formula.RepoCommonsName && formula.RepoName(name) == formula.RepoCommonsName {
 				prompt.Warning("You are trying to replace the \"commons\" repository!")
-				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"})
+				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"}, "yes")
 				if !choice {
 					prompt.Info("Operation cancelled")
 					return nil
@@ -111,7 +111,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 
 			if repo.Name == formula.RepoName(name) {
 				prompt.Warning(fmt.Sprintf("Your repository %q is gonna be overwritten.", repo.Name))
-				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"})
+				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"}, "yes")
 				if !choice {
 					prompt.Info("Operation cancelled")
 					return nil
@@ -124,7 +124,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		isPrivate, err := ad.Bool("Is a private repository?", []string{"no", "yes"})
+		isPrivate, err := ad.Bool("Is a private repository?", []string{"no", "yes"}, "no")
 		if err != nil {
 			return err
 		}
@@ -154,12 +154,12 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			tagNames = append(tagNames, tags[i].Name)
 		}
 
-		version, err := ad.List("Select a tag version:", tagNames)
+		version, err := ad.List("Select a tag version:", tagNames, "")
 		if err != nil {
 			return err
 		}
 
-		priority, err := ad.Int("Set the priority:", "0 is higher priority, the lower higher the priority")
+		priority, err := ad.Int("Set the priority:", 0, "0 is higher priority, the lower higher the priority")
 		if err != nil {
 			return err
 		}

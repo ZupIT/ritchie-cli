@@ -34,7 +34,7 @@ import (
 
 type inputTextMock struct{}
 
-func (inputTextMock) Text(name string, required bool, helper ...string) (string, error) {
+func (inputTextMock) Text(name string, required bool, defaultValue string, helper ...string) (string, error) {
 	return "mocked text", nil
 }
 
@@ -56,17 +56,17 @@ func (inputTextValidatorErrorMock) Text(name string, validate func(interface{}) 
 
 type inputTextErrorMock struct{}
 
-func (inputTextErrorMock) Text(name string, required bool, helper ...string) (string, error) {
+func (inputTextErrorMock) Text(name string, required bool, defaultValue string, helper ...string) (string, error) {
 	return "", errors.New("error on input text")
 }
 
 type inputTextCustomMock struct {
-	text             func(name string, required bool) (string, error)
+	text             func(name string, required bool, defaultValue string) (string, error)
 	textWithValidate func(name string, validate func(interface{}) error) (string, error)
 }
 
-func (m inputTextCustomMock) Text(name string, required bool, helper ...string) (string, error) {
-	return m.text(name, required)
+func (m inputTextCustomMock) Text(name string, required bool, defaultValue string, helper ...string) (string, error) {
+	return m.text(name, required, defaultValue)
 }
 
 func (m inputTextCustomMock) TextWithValidate(name string, validate func(interface{}) error, helper ...string) (string, error) {
@@ -75,7 +75,7 @@ func (m inputTextCustomMock) TextWithValidate(name string, validate func(interfa
 
 type inputSecretMock struct{}
 
-func (inputSecretMock) Text(name string, required bool, helper ...string) (string, error) {
+func (inputSecretMock) Text(name string, required bool, defaultValue string, helper ...string) (string, error) {
 	return "username=ritchie", nil
 }
 
@@ -97,13 +97,13 @@ func (inputURLErrorMock) URL(name, defaultValue string) (string, error) {
 
 type inputIntMock struct{}
 
-func (inputIntMock) Int(name string, helper ...string) (int64, error) {
+func (inputIntMock) Int(name string, defaultValue int64, helper ...string) (int64, error) {
 	return 0, nil
 }
 
 type inputIntErrorMock struct{}
 
-func (inputIntErrorMock) Int(name string, helper ...string) (int64, error) {
+func (inputIntErrorMock) Int(name string, defaultValue int64, helper ...string) (int64, error) {
 	return 0, errors.New("some error")
 }
 
@@ -127,39 +127,39 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command
 
 type inputTrueMock struct{}
 
-func (inputTrueMock) Bool(name string, items []string, helper ...string) (bool, error) {
+func (inputTrueMock) Bool(name string, items []string, defaultValue string, helper ...string) (bool, error) {
 	return true, nil
 }
 
 type inputFalseMock struct{}
 
-func (inputFalseMock) Bool(name string, items []string, helper ...string) (bool, error) {
+func (inputFalseMock) Bool(name string, items []string, defaultValue string, helper ...string) (bool, error) {
 	return false, nil
 }
 
 type inputBoolErrorMock struct{}
 
-func (inputBoolErrorMock) Bool(name string, items []string, helper ...string) (bool, error) {
+func (inputBoolErrorMock) Bool(name string, items []string, defaultValue string, helper ...string) (bool, error) {
 	return false, errors.New("error on boolean list")
 }
 
 type inputListMock struct{}
 
-func (inputListMock) List(name string, items []string, helper ...string) (string, error) {
+func (inputListMock) List(name string, items []string, defaultValue string, helper ...string) (string, error) {
 	return "item-mocked", nil
 }
 
 type inputListCustomMock struct {
-	list func(name string, items []string) (string, error)
+	list func(name string, items []string, defaultValue string) (string, error)
 }
 
-func (m inputListCustomMock) List(name string, items []string, helper ...string) (string, error) {
-	return m.list(name, items)
+func (m inputListCustomMock) List(name string, items []string, defaultValue string, helper ...string) (string, error) {
+	return m.list(name, items, defaultValue)
 }
 
 type inputListErrorMock struct{}
 
-func (inputListErrorMock) List(name string, items []string, helper ...string) (string, error) {
+func (inputListErrorMock) List(name string, items []string, defaultValue string, helper ...string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 

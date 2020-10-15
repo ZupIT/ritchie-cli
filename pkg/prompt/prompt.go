@@ -17,7 +17,7 @@
 package prompt
 
 type InputText interface {
-	Text(name string, required bool, helper ...string) (string, error)
+	Text(name string, required bool, defaultValue string, helper ...string) (string, error)
 }
 
 type InputTextValidator interface {
@@ -25,7 +25,7 @@ type InputTextValidator interface {
 }
 
 type InputBool interface {
-	Bool(name string, items []string, helper ...string) (bool, error)
+	Bool(name string, items []string, defaultValue string, helper ...string) (bool, error)
 }
 
 type InputPassword interface {
@@ -33,15 +33,15 @@ type InputPassword interface {
 }
 
 type InputMultiline interface {
-	MultiLineText(name string, required bool) (string, error)
+	MultiLineText(name string, required bool, defaultValue string) (string, error)
 }
 
 type InputList interface {
-	List(name string, items []string, helper ...string) (string, error)
+	List(name string, items []string, defaultValue string, helper ...string) (string, error)
 }
 
 type InputInt interface {
-	Int(name string, helper ...string) (int64, error)
+	Int(name string, defaultValue int64, helper ...string) (int64, error)
 }
 
 type InputEmail interface {

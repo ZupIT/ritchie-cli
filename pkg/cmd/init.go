@@ -234,7 +234,7 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	prompt.Info(welcome)
 	fmt.Println(header)
 
-	choose, err := in.InputList.List(AddMetricsQuestion, options)
+	choose, err := in.InputList.List(AddMetricsQuestion, options, options[1])
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 }
 
 func (in initCmd) setRunnerType() error {
-	selected, err := in.List(SelectFormulaTypeQuestion, formula.RunnerTypes)
+	selected, err := in.List(SelectFormulaTypeQuestion, formula.RunnerTypes, formula.RunnerTypes[0])
 	if err != nil {
 		return err
 	}
@@ -289,7 +289,7 @@ func (in initCmd) setRunnerType() error {
 }
 
 func (in initCmd) addCommonsRepo() error {
-	choose, err := in.Bool(AddCommonsQuestion, []string{"yes", "no"})
+	choose, err := in.Bool(AddCommonsQuestion, []string{"yes", "no"}, "yes")
 	if err != nil {
 		return err
 	}

@@ -142,7 +142,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 				inputVal, err = in.textValidator(input)
 			}
 		case "bool":
-			valBool, err = in.Bool(input.Label, items, input.Tutorial)
+			valBool, err = in.Bool(input.Label, items, input.Default, input.Tutorial)
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
 			inputVal, err = in.Password(input.Label, input.Tutorial)
@@ -262,11 +262,7 @@ func (in InputManager) textValidator(input formula.Input) (string, error) {
 	if in.hasRegex(input) {
 		inputVal, err = in.textRegexValidator(input, required)
 	} else {
-		inputVal, err = in.InputText.Text(input.Label, required, input.Tutorial)
-	}
-
-	if inputVal == "" {
-		inputVal = input.Default
+		inputVal, err = in.InputText.Text(input.Label, required, input.Default, input.Tutorial)
 	}
 
 	return inputVal, err

@@ -79,12 +79,12 @@ func (s setPriorityCmd) runFunc() CommandRunnerFunc {
 			reposNames = append(reposNames, r.Name.String())
 		}
 
-		repoName, err := s.InputList.List("Repository:", reposNames)
+		repoName, err := s.InputList.List("Repository:", reposNames, "")
 		if err != nil {
 			return err
 		}
 
-		priority, err := s.InputInt.Int("New priority:")
+		priority, err := s.InputInt.Int("New priority:", 0)
 		if err != nil {
 			return err
 		}
