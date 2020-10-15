@@ -3,6 +3,8 @@ package formula
 import (
 	"os/exec"
 
+	"github.com/spf13/pflag"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
@@ -26,6 +28,8 @@ func (e RunnerType) String() string {
 
 type Runners map[RunnerType]Runner
 
+type TermInputTypes map[api.TermInputType]InputRunner
+
 type Executor interface {
 	Execute(exe ExecuteData) error
 }
@@ -35,15 +39,19 @@ type PreRunner interface {
 }
 
 type Runner interface {
-	Run(def Definition, inputType api.TermInputType, verbose bool) error
+	Run(def Definition, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) error
 }
 
 type PostRunner interface {
 	PostRun(p Setup, docker bool) error
 }
 
+type InputResolver interface {
+	Resolve(inType api.TermInputType) (InputRunner, error)
+}
+
 type InputRunner interface {
-	Inputs(cmd *exec.Cmd, setup Setup, inputType api.TermInputType) error
+	Inputs(cmd *exec.Cmd, setup Setup, flags *pflag.FlagSet) error
 }
 
 type ConfigRunner interface {

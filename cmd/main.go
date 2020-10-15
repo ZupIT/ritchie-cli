@@ -28,6 +28,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
+	fprompt "github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/docker"
@@ -141,13 +144,23 @@ func buildCommands() *cobra.Command {
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
+
+	promptInManager := fprompt.NewInputManager(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
+	stdinInManager := stdin.NewInputManager(envResolvers)
+	flagInManager := flag.NewInputManager(envResolvers, promptInManager)
+	termInputTypes := formula.TermInputTypes{
+		api.Prompt: promptInManager,
+		api.Stdin:  stdinInManager,
+		api.Flag:   flagInManager,
+	}
+
+	inputResolver := runner.NewInputResolver(termInputTypes)
 
 	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
-	formulaLocalRun := local.NewRunner(postRunner, inputManager, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
+	formulaLocalRun := local.NewRunner(postRunner, inputResolver, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
-	formulaDockerRun := docker.NewRunner(postRunner, inputManager, formulaDockerPreRun, fileManager, ctxFinder, userHomeDir)
+	formulaDockerRun := docker.NewRunner(postRunner, inputResolver, formulaDockerPreRun, fileManager, ctxFinder, userHomeDir)
 
 	runners := formula.Runners{
 		formula.LocalRun:  formulaLocalRun,
@@ -229,7 +242,7 @@ func buildCommands() *cobra.Command {
 	showCmd.AddCommand(showCtxCmd, showFormulaRunnerCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
 
-	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaExec)
+	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaExec, fileManager)
 	if err := formulaCmd.Add(rootCmd); err != nil {
 		panic(err)
 	}

@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
@@ -75,9 +76,11 @@ type (
 		FormulaPath   string `json:"formulaPath"`
 	}
 
+	Inputs []Input
+
 	Config struct {
-		DockerIB string  `json:"dockerImageBuilder"`
-		Inputs   []Input `json:"inputs"`
+		DockerIB string `json:"dockerImageBuilder"`
+		Inputs   Inputs `json:"inputs"`
 	}
 
 	// Definition type that represents a Formula
@@ -105,6 +108,7 @@ type (
 		InType  api.TermInputType
 		RunType RunnerType
 		Verbose bool
+		Flags   *pflag.FlagSet
 	}
 )
 
