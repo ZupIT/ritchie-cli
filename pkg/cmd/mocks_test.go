@@ -127,39 +127,39 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command
 
 type inputTrueMock struct{}
 
-func (inputTrueMock) Bool(name string, items []string, helper ...string) (bool, error) {
+func (inputTrueMock) Bool(name string, items []string, defaultValue string, helper ...string) (bool, error) {
 	return true, nil
 }
 
 type inputFalseMock struct{}
 
-func (inputFalseMock) Bool(name string, items []string, helper ...string) (bool, error) {
+func (inputFalseMock) Bool(name string, items []string, defaultValue string, helper ...string) (bool, error) {
 	return false, nil
 }
 
 type inputBoolErrorMock struct{}
 
-func (inputBoolErrorMock) Bool(name string, items []string, helper ...string) (bool, error) {
+func (inputBoolErrorMock) Bool(name string, items []string, defaultValue string, helper ...string) (bool, error) {
 	return false, errors.New("error on boolean list")
 }
 
 type inputListMock struct{}
 
-func (inputListMock) List(name string, items []string, helper ...string) (string, error) {
+func (inputListMock) List(name string, items []string, defaultValue string, helper ...string) (string, error) {
 	return "item-mocked", nil
 }
 
 type inputListCustomMock struct {
-	list func(name string, items []string) (string, error)
+	list func(name string, items []string, defaultValue string) (string, error)
 }
 
-func (m inputListCustomMock) List(name string, items []string, helper ...string) (string, error) {
-	return m.list(name, items)
+func (m inputListCustomMock) List(name string, items []string, defaultValue string, helper ...string) (string, error) {
+	return m.list(name, items, defaultValue)
 }
 
 type inputListErrorMock struct{}
 
-func (inputListErrorMock) List(name string, items []string, helper ...string) (string, error) {
+func (inputListErrorMock) List(name string, items []string, defaultValue string, helper ...string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 

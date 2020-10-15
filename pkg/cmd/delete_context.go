@@ -77,12 +77,12 @@ func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		ctx, err := d.List("Contexts:", ctxHolder.All)
+		ctx, err := d.List("Contexts:", ctxHolder.All, "")
 		if err != nil {
 			return err
 		}
 
-		if b, err := d.Bool("Are you sure want to delete this context?", []string{"yes", "no"}); err != nil {
+		if b, err := d.Bool("Are you sure want to delete this context?", []string{"yes", "no"}, "yes"); err != nil {
 			return err
 		} else if !b {
 			return nil

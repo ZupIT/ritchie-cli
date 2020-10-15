@@ -199,7 +199,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 						return nil
 					},
 				},
-				input: inputListCustomMock{func(name string, items []string) (string, error) {
+				input: inputListCustomMock{func(name string, items []string, defaultValue string) (string, error) {
 					return DoNotAcceptMetrics, nil
 				}},
 			},

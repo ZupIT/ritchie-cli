@@ -65,7 +65,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
@@ -92,7 +92,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputFalseMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.DockerRun.String(), nil
 						}
@@ -123,7 +123,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.DockerRun.String(), nil
 						}
@@ -154,7 +154,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
@@ -185,7 +185,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
@@ -212,7 +212,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
@@ -238,7 +238,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return "", someError
 						}
@@ -264,7 +264,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
@@ -291,7 +291,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
@@ -318,7 +318,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputBoolErrorMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
@@ -344,7 +344,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorial: TutorialFinderMock{},
 				inBool:   inputTrueMock{},
 				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
+					list: func(name string, items []string, defaultValue string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
 							return "invalid", nil
 						}

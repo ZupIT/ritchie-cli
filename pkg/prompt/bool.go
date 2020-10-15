@@ -30,11 +30,12 @@ func NewSurveyBool() SurveyBool {
 	return SurveyBool{}
 }
 
-func (SurveyBool) Bool(name string, items []string, helper ...string) (bool, error) {
+func (SurveyBool) Bool(name string, items []string, defaultValue string, helper ...string) (bool, error) {
 	choice := ""
 	prompt := &survey.Select{
 		Message: name,
 		Options: items,
+		Default: defaultValue,
 	}
 
 	if len(helper) > 0 {

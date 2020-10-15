@@ -203,10 +203,11 @@ func (inputTextValidatorMock) Text(name string, validate func(interface{}) error
 type inputMock struct {
 	text    string
 	boolean bool
+	dValue  string
 	err     error
 }
 
-func (i inputMock) List(string, []string, ...string) (string, error) {
+func (i inputMock) List(string, []string, string, ...string) (string, error) {
 	return i.text, i.err
 }
 
@@ -214,7 +215,7 @@ func (i inputMock) Text(string, bool, string, ...string) (string, error) {
 	return i.text, i.err
 }
 
-func (i inputMock) Bool(string, []string, ...string) (bool, error) {
+func (i inputMock) Bool(string, []string, string, ...string) (bool, error) {
 	return i.boolean, i.err
 }
 

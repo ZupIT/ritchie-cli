@@ -67,7 +67,7 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 			reposNames = append(reposNames, r.Name.String())
 		}
 
-		repo, err := dr.InputList.List("Repository:", reposNames)
+		repo, err := dr.InputList.List("Repository:", reposNames, "")
 		if err != nil {
 			return err
 		}

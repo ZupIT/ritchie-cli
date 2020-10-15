@@ -44,7 +44,7 @@ func NewSetFormulaRunnerCmd(c formula.ConfigRunner, i prompt.InputList) *cobra.C
 
 func (c setFormulaRunnerCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		choose, err := c.input.List("Select a default formula run type", formula.RunnerTypes)
+		choose, err := c.input.List("Select a default formula run type", formula.RunnerTypes, formula.RunnerTypes[0])
 		if err != nil {
 			return err
 		}
