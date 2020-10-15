@@ -17,17 +17,21 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -43,17 +47,20 @@ type FormulaCommand struct {
 	coreCmds    api.Commands
 	treeManager formula.TreeManager
 	formula     formula.Executor
+	file        stream.FileReader
 }
 
 func NewFormulaCommand(
 	coreCmds api.Commands,
 	treeManager formula.TreeManager,
 	formula formula.Executor,
+	file stream.FileReader,
 ) *FormulaCommand {
 	return &FormulaCommand{
 		coreCmds:    coreCmds,
 		treeManager: treeManager,
 		formula:     formula,
+		file:        file,
 	}
 }
 
@@ -98,42 +105,41 @@ func newSubCmd(cmd api.Command) *cobra.Command {
 }
 
 func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
+	formulaPath := path(cmd)
 	formulaCmd := &cobra.Command{
 		Use:   cmd.Usage,
 		Short: cmd.Help,
 		Long:  cmd.LongHelp,
+		RunE:  f.execFormulaFunc(cmd.Repo, formulaPath),
 	}
 
-	addFlags(formulaCmd)
-	path := strings.ReplaceAll(strings.Replace(cmd.Parent, "root", "", 1), "_", string(os.PathSeparator))
-	path = fmt.Sprintf("%s%s%s", path, string(os.PathSeparator), cmd.Usage)
-	formulaCmd.RunE = f.execFormulaFunc(cmd.Repo, path)
+	def := formula.Definition{
+		Path:     formulaPath,
+		RepoName: cmd.Repo,
+	}
+
+	flags := formulaCmd.Flags()
+	defaultFlags(flags)
+	f.inputFlags(def, flags)
 
 	return formulaCmd
 }
 
 func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
-		if err != nil {
-			return err
-		}
-		inputType := api.Prompt
-		if stdin {
-			inputType = api.Stdin
-		}
-
-		docker, err := cmd.Flags().GetBool(formula.DockerRun.String())
+		flags := cmd.Flags()
+		flagsCount := 0
+		docker, err := flags.GetBool(formula.DockerRun.String())
 		if err != nil {
 			return err
 		}
 
-		local, err := cmd.Flags().GetBool(formula.LocalRun.String())
+		local, err := flags.GetBool(formula.LocalRun.String())
 		if err != nil {
 			return err
 		}
 
-		verbose, err := cmd.Flags().GetBool(verboseFlag)
+		verbose, err := flags.GetBool(verboseFlag)
 		if err != nil {
 			return err
 		}
@@ -144,11 +150,29 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 
 		runType := formula.DefaultRun
 		if docker {
+			flagsCount++
 			runType = formula.DockerRun
 		}
 
 		if local {
+			flagsCount++
 			runType = formula.LocalRun
+		}
+
+		if verbose {
+			flagsCount++
+		}
+
+		stdin, err := flags.GetBool(api.Stdin.ToLower())
+		if err != nil {
+			return err
+		}
+
+		inputType := api.Prompt
+		if stdin {
+			inputType = api.Stdin
+		} else if flags.NFlag() > flagsCount {
+			inputType = api.Flag
 		}
 
 		exe := formula.ExecuteData{
@@ -159,6 +183,7 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			InType:  inputType,
 			RunType: runType,
 			Verbose: verbose,
+			Flags:   flags,
 		}
 
 		if err := f.formula.Execute(exe); err != nil {
@@ -169,9 +194,31 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 	}
 }
 
-func addFlags(cmd *cobra.Command) {
-	formulaFlags := cmd.Flags()
-	formulaFlags.BoolP(formula.DockerRun.String(), "d", false, "Use to run formulas inside docker")
-	formulaFlags.BoolP(formula.LocalRun.String(), "l", false, "Use to run formulas locally")
-	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
+func defaultFlags(flags *pflag.FlagSet) {
+	flags.BoolP(formula.DockerRun.String(), "d", false, "Use to run formulas inside docker")
+	flags.BoolP(formula.LocalRun.String(), "l", false, "Use to run formulas locally")
+	flags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
+	flags.BoolP("non-interactive", "n", false, "Use this flag when you need to run formulas with input flags e cannot have terminal interactions e.q. (pipelines)")
+}
+
+func (f FormulaCommand) inputFlags(def formula.Definition, flags *pflag.FlagSet) {
+	s := def.FormulaPath(api.RitchieHomeDir())
+	configPath := def.ConfigPath(s)
+	file, _ := f.file.Read(configPath)
+	var config formula.Config
+	_ = json.Unmarshal(file, &config)
+
+	for _, in := range config.Inputs {
+		switch in.Type {
+		case input.TextType, input.PassType:
+			flags.String(in.Name, "", in.Tutorial)
+		case input.BoolType:
+			flags.Bool(in.Name, false, in.Tutorial)
+		}
+	}
+}
+
+func path(cmd api.Command) string {
+	path := strings.ReplaceAll(strings.Replace(cmd.Parent, "root", "", 1), "_", string(os.PathSeparator))
+	return filepath.Join(path, cmd.Usage)
 }
