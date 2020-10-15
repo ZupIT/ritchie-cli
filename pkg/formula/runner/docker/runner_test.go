@@ -231,7 +231,6 @@ func (i inputTextValidatorMock) Text(name string, validate func(interface{}) err
 type inputMock struct {
 	text    string
 	boolean bool
-	dValue  string
 	err     error
 }
 
