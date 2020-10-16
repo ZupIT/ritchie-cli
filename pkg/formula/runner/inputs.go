@@ -154,7 +154,11 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			if err != nil {
 				return err
 			}
+
 			inputVal, err = in.List(input.Label, dl, input.Tutorial)
+			if err != nil {
+				return err
+			}
 		default:
 			inputVal, err = in.resolveIfReserved(input)
 		}
