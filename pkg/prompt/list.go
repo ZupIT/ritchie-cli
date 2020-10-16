@@ -27,12 +27,11 @@ func NewSurveyList() SurveyList {
 }
 
 // List show a prompt with options and parse to string.
-func (SurveyList) List(name string, items []string, defaultValue string, helper ...string) (string, error) {
+func (SurveyList) List(name string, items []string, helper ...string) (string, error) {
 	choice := ""
 	prompt := &survey.Select{
 		Message: name,
 		Options: items,
-		Default: defaultValue,
 	}
 
 	if len(helper) > 0 {

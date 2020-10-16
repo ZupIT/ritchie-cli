@@ -66,7 +66,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectARepo {
 							return "someRepo1", nil
 						}
@@ -110,7 +110,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectARepo {
 							return "", someError
 						}
@@ -134,7 +134,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectARepo {
 							return "someRepo1", nil
 						}
@@ -171,7 +171,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectARepo {
 							return "someRepo1", nil
 						}
@@ -198,7 +198,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectARepo {
 							return "someRepo1", nil
 						}

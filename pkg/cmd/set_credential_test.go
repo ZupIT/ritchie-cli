@@ -51,7 +51,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				InputText: inputSecretMock{},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return credential.AddNew, nil
 					},
 				},
@@ -86,7 +86,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				InputText: inputTextMock{},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
@@ -125,7 +125,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
@@ -160,7 +160,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				InputText: inputTextMock{},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
@@ -195,7 +195,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				InputText: inputTextMock{},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
@@ -227,7 +227,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				InputText: inputTextMock{},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
@@ -266,7 +266,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "type", nil
 					},
 				},
@@ -298,7 +298,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "type", nil
 					},
 				},
@@ -323,7 +323,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "type", nil
 					},
 				},
@@ -351,7 +351,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				InputText: inputTextErrorMock{},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return credential.AddNew, nil
 					},
 				},
@@ -367,7 +367,7 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 				InputText: inputTextMock{},
 				InputBool: inputBoolErrorMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return credential.AddNew, nil
 					},
 				},
