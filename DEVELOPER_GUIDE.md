@@ -3,6 +3,35 @@
 Digging in the project for the first time might make it difficult to understand where to start. Hopefully, this
 guide will provide you with a better understanding of the project structure. 
 
+## Running the project
+
+There are some ways to setup the development environment. You can run directly from your favorite
+IDE or overwrite Ritchie's binary on your machine. The most popular IDEs are [GoLand](https://www.jetbrains.com/pt-br/go/)
+from JetBrains and [VSCode](https://code.visualstudio.com/) from Windows. 
+
+#### Running on GoLand
+
+* On the top menu go to `Run > Edit Configurations`. Click on the `+` button on the top left and select to create a 
+new `Go Build`.
+
+* On **Files**, select the `cmd/main.go` file as the entry point of your program.
+
+* As for **Working Directory**, use the project root
+
+* Under **Program Arguments**, write the command you want to run without the `rit`. For instance, if you want to 
+debug `rit create formula`, just add `create formula` on this field. 
+
+<img class="special-img-class" src="/docs/img/go-land-setup.png"  alt="Edit Configurations screen of GoLand"/>
+
+#### Overwriting your current binary
+
+If you want to basically use your local code as the running Ritchie distribution on your machine, just run this 
+simple command from your project root directory in the terminal:
+
+* Linux: `make build-linux && sudo mv ./dist/linux/rit /usr/local/bin`
+* Mac: `make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin`
+* Windows: `make build-windows && runas \user:administrator move .\dist\windows\rit.exe "\Program Files (x86)\rit"`
+
 ## The main libraries
 
 There are two main libraries that are most used throughout the project. These are the ones that aid us directly
@@ -71,3 +100,64 @@ to provide the user with more context on that action.
 #### Testdata
 
 Contains multiple dummy files used for tests.
+
+## Testing your code
+
+Ritchie relies heavily on dependency injection to test its code. If you are creating a new command, you should
+pass on any required dependencies from the `main.go` initialization file. Usually you pass on inputs to prevent
+the test from blocking the execution flow while awaiting for an user input. For instance, suppose you have a list
+that offers the options `a, b, c`. Then, you simply pass a mock that returns `a` straight away in place of the listing
+struct to perform your test.
+
+#### Manipulations on your file system
+
+When testing, think about the intended behavior of your command. Does it create or modify a file? Does it manipulate
+a directory? You can make use of the `os.TempDir()` command to setup your sandbox file system and manipulate files
+and folders there. Let's suppose your implementation edits the credential config file. You do not want to meddle
+with your own config file every time you run a test. So simply create one in a temp directory and pass its path
+to the command *as if it was ritchie's home directory.
+
+Do not forget to remove your temp directory to not flood your file system with trash on each run! You can use `defer`
+to ensure a piece of code will always be executed after the method returns regardless of where the execution ended. 
+
+`defer os.RemoveAll(filePath)`
+
+#### Test structure
+
+Test files are suffixed with `_test`. Test functions have the format `TestCamelCase` which will be printed when 
+you execute them. If your test has multiple outcome branches, you can create a struct array to iterate over such cases.
+The struct usually has the format:
+```go
+    tests := []struct {
+		name    string   // Name of the test to display
+		fields  fields   // Contains all necessary struct mocks or values to perform the test
+		output  bool     // Expected result to compare to
+	}
+```
+
+A typical test has the following structure
+```go
+    // Mocks initialization here
+    
+	var tests = []struct {
+		name            string
+		fields          fields
+		output          string
+	}{
+		{
+			name:            "Some name",
+			fields:          fields{ ... },
+			output:          "Some output",
+		},
+		...,
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Your execution code here that compares with the output
+		})
+	}
+```
+
+> Note: we are currently reviewing how our tests are written, we are trying to make a more assertive test framework
+>on Ritchie cli, such as simulating the user input via stdin instead of mocking it, so these practices might change.
