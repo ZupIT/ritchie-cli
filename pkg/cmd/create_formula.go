@@ -277,7 +277,7 @@ func FormulaWorkspaceInput(
 	}
 
 	items = append(items, newWorkspace)
-	selected, err := inList.List("Select a formula workspace: ", items, "")
+	selected, err := inList.List("Select a formula workspace: ", items)
 	if err != nil {
 		return formula.Workspace{}, err
 	}

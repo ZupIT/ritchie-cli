@@ -106,7 +106,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 	}
 
 	providerArr := credential.NewProviderArr(credentials)
-	providerChoose, err := s.List("Select your provider", providerArr, "")
+	providerChoose, err := s.List("Select your provider", providerArr)
 	if err != nil {
 		return credDetail, err
 	}
@@ -126,13 +126,13 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 				return credDetail, err
 			}
 
-			newField.Type, err = s.List("Select your field type:", inputTypes, "")
+			newField.Type, err = s.List("Select your field type:", inputTypes)
 			if err != nil {
 				return credDetail, err
 			}
 
 			newFields = append(newFields, newField)
-			addMoreCredentials, err = s.Bool("Add more credentials fields to this provider?", []string{"no", "yes"}, "no")
+			addMoreCredentials, err = s.Bool("Add more credentials fields to this provider?", []string{"no", "yes"})
 			if err != nil {
 				return credDetail, err
 			}
@@ -147,7 +147,7 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
-	inputWayChoose, _ := s.List("Want to enter your credential typing or through a file?", inputWay, "")
+	inputWayChoose, _ := s.List("Want to enter your credential typing or through a file?", inputWay)
 	for _, i := range inputs {
 		var value string
 		if inputWayChoose == inputWay[1] {

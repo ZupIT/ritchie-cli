@@ -93,7 +93,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			},
 		},
 		inList: inputListCustomMock{
-			list: func(name string, items []string, defaultValue string) (string, error) {
+			list: func(name string, items []string) (string, error) {
 				if name == questionSelectFormulaGroup {
 					return items[0], nil
 				}
@@ -148,7 +148,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name: "Run with error when question about select formula or group returns err",
 			fields: fieldsTestDeleteFormulaCmd{
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return "any", someError
 						}
@@ -179,7 +179,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}
@@ -213,7 +213,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}
@@ -259,7 +259,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return "any", someError
 						}
@@ -284,7 +284,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return "any", someError
 						}
@@ -315,7 +315,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}
@@ -333,7 +333,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name: "Run with success when choose not to delete formula",
 			fields: fieldsTestDeleteFormulaCmd{
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}
