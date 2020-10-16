@@ -56,8 +56,8 @@ type (
 	}
 
 	RequestInfo struct {
-		Url string `json:"url"`
-		Key string `json:"path"`
+		Url      string `json:"url"`
+		JsonPath string `json:"jsonPath"`
 	}
 
 	Pattern struct {

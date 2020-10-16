@@ -27,13 +27,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -149,7 +150,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 		case "password":
 			inputVal, err = in.Password(input.Label, input.Tutorial)
 		case "dynamic":
-			dl, err := dynamicList(input.RequestInfo)
+			dl, err := in.dynamicList(input.RequestInfo)
 			if err != nil {
 				return err
 			}
@@ -345,30 +346,27 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 	})
 }
 
-// make a http request
-// find for value
-func dynamicList(info formula.RequestInfo) ([]string, error) {
+func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
 	body, err := makeRequest(info)
 	if err != nil {
 		return nil, err
 	}
 
-	list, err := findValues(info.Url, body)
+	list, err := findValues(info.JsonPath, body)
 	if err != nil {
 		return nil, err
 	}
 	return list, nil
 }
 
-//
-func makeRequest(info formula.RequestInfo) ([]map[string]interface{}, error) {
+func makeRequest(info formula.RequestInfo) (interface{}, error) {
 	response, err := http.Get(info.Url)
 	if err != nil {
 		return nil, err
 	}
 	// TODO verify http status
 	body, _ := ioutil.ReadAll(response.Body)
-	var requestData []map[string]interface{}
+	requestData :=  interface{}(nil)
 
 	if err = json.Unmarshal(body, &requestData); err != nil {
 		return nil, err
@@ -376,13 +374,13 @@ func makeRequest(info formula.RequestInfo) ([]map[string]interface{}, error) {
 	return requestData, nil
 }
 
-func findValues(formulaKey string, requestData []map[string]interface{}) ([]string, error) {
-	var dynamicOptions []string
-	for _, k := range requestData {
-		fmt.Println(k)
-		if str, ok := k[formulaKey].(string); ok {
-			dynamicOptions = append(dynamicOptions, str)
-		}
+func findValues(jsonPath string, requestData interface{}) ([]string, error) {
+	dynamicOptions, err := jsonpath.Get(jsonPath, requestData)
+	if err != nil {
+		return nil, err
 	}
-	return dynamicOptions, nil
+	dynamicOptionsStr := fmt.Sprintf("%v", dynamicOptions)
+	dynamicOptionsArr := strings.Split(dynamicOptionsStr, " ")
+
+	return dynamicOptionsArr, nil
 }

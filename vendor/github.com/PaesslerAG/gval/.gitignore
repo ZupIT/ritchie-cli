@@ -21,4 +21,10 @@ _testmain.go
 
 *.exe
 *.test
-*.prof
+coverage.out
+
+manual_test.go
+*.out
+*.err
+
+.vscode
