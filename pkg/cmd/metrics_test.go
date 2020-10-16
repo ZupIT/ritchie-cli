@@ -36,7 +36,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 					},
 				},
 				input: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "yes", nil
 					},
 				},
@@ -58,7 +58,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 					},
 				},
 				input: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "no", nil
 					},
 				},
@@ -80,7 +80,7 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 					},
 				},
 				input: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "yes", nil
 					},
 				},

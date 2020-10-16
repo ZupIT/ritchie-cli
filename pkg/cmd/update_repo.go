@@ -92,7 +92,7 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			reposName = append(reposName, repos[i].Name.String())
 		}
 
-		name, err := up.List(questionSelectARepo, reposName, "")
+		name, err := up.List(questionSelectARepo, reposName)
 		if err != nil {
 			return err
 		}
@@ -113,7 +113,7 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		version, err := up.List(questionAVersion, tags.Names(), "")
+		version, err := up.List(questionAVersion, tags.Names())
 		if err != nil {
 			return err
 		}
