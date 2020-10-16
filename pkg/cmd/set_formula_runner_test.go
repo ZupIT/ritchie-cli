@@ -40,7 +40,7 @@ func Test_setFormulaRunnerCmd(t *testing.T) {
 			name: "success set formula run",
 			in: in{
 				input: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return formula.LocalRun.String(), nil
 					},
 				},
@@ -53,7 +53,7 @@ func Test_setFormulaRunnerCmd(t *testing.T) {
 			name: "error to create config",
 			in: in{
 				input: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return formula.LocalRun.String(), nil
 					},
 				},
@@ -68,7 +68,7 @@ func Test_setFormulaRunnerCmd(t *testing.T) {
 			name: "error to select run type",
 			in: in{
 				input: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return formula.LocalRun.String(), errors.New("error to select run type")
 					},
 				},
@@ -80,7 +80,7 @@ func Test_setFormulaRunnerCmd(t *testing.T) {
 			name: "error to invalid run type",
 			in: in{
 				input: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "invalid", nil
 					},
 				},

@@ -72,7 +72,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 			},
 		},
 		inList: inputListCustomMock{
-			list: func(name string, items []string, defaultValue string) (string, error) {
+			list: func(name string, items []string) (string, error) {
 				if name == questionSelectFormulaGroup {
 					return items[0], nil
 				}
@@ -125,7 +125,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 			name: "Run with error when question about select formula or group returns err",
 			fields: fieldsTestBuildFormulaCmd{
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return "any", someError
 						}
@@ -156,7 +156,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}
@@ -190,7 +190,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 					},
 				},
 				inList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}

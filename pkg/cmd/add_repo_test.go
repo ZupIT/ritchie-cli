@@ -55,7 +55,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "Github", nil
 					},
 				},
@@ -73,7 +73,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputBool:          inputBoolErrorMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "Github", nil
 					},
 				},
@@ -91,7 +91,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "Github", nil
 					},
 				},
@@ -155,7 +155,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
-					list: func(name string, items []string, defaultValue string) (string, error) {
+					list: func(name string, items []string) (string, error) {
 						return "Github", nil
 					},
 				},
