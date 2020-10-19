@@ -33,7 +33,7 @@ type InputPassword interface {
 }
 
 type InputMultiline interface {
-	MultiLineText(name string, required bool, defaultValue string) (string, error)
+	MultiLineText(name string, required bool) (string, error)
 }
 
 type InputList interface {
@@ -41,7 +41,7 @@ type InputList interface {
 }
 
 type InputInt interface {
-	Int(name string, defaultValue int64, helper ...string) (int64, error)
+	Int(name string, defaultValue string, helper ...string) (int64, error)
 }
 
 type InputEmail interface {

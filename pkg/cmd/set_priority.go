@@ -84,7 +84,7 @@ func (s setPriorityCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		priority, err := s.InputInt.Int("New priority:", 0)
+		priority, err := s.InputInt.Int("New priority:", "0")
 		if err != nil {
 			return err
 		}
