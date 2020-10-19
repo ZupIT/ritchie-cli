@@ -19,6 +19,7 @@ package workspace
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -27,6 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 func TestWorkspaceManager_Add(t *testing.T) {
@@ -360,6 +362,184 @@ func TestValidate(t *testing.T) {
 		})
 	}
 
+}
+
+func TestPreviousHash(t *testing.T) {
+	dirManager := dirHashManagerMock{nil, nil, "", nil}
+	ritHome := "/path/to/rit"
+
+	type in struct {
+		formulaPath     string
+		hashFileContent []byte
+		hashFileError   error
+	}
+	type out struct {
+		hash string
+		path string
+		err  error
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		out  out
+	}{
+		{
+			name: "shoud return hash file content on success",
+			in:   in{"/path/to/formula", []byte("hash"), nil},
+			out:  out{"hash", "/path/to/rit/hashes/-path-to-formula.txt", nil},
+		},
+		{
+			name: "shoud fail when file doesn't exist",
+			in:   in{"/path/to/formula", nil, fmt.Errorf("File doesn't exist")},
+			out:  out{"", "/path/to/rit/hashes/-path-to-formula.txt", fmt.Errorf("File doesn't exist")},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hashPath := ""
+			fileManager := sMocks.FileWriteReadExisterCustomMock{
+				WriteMock: func(string, []byte) error {
+					return nil
+				},
+				ExistsMock: func(string) bool {
+					return true
+				},
+				ReadMock: func(path string) ([]byte, error) {
+					hashPath = path
+					return tt.in.hashFileContent, tt.in.hashFileError
+				},
+			}
+			workspace := New(ritHome, dirManager, fileManager)
+			hash, err := workspace.PreviousHash(tt.in.formulaPath)
+
+			if hashPath != tt.out.path {
+				t.Errorf("Validate(%s) expected hash to be read from %s instead of %s", tt.name, tt.out.path, hashPath)
+			}
+
+			if err == nil && tt.out.err != nil {
+				t.Errorf("Validate(%s) expected '%v' error but didn't get any", tt.name, tt.out.err)
+			}
+			if err != nil && tt.out.err == nil {
+				t.Errorf("Validate(%s) didn't expect error but got '%v'", tt.name, err)
+			}
+			if err != nil && tt.out.err != nil && err.Error() != tt.out.err.Error() {
+				t.Errorf("Validate(%s) got error '%v', expected error '%v'", tt.name, err, tt.out.err)
+			}
+
+			if err == nil && hash != tt.out.hash {
+				t.Errorf("Validate(%s) got hash '%v', expected hash '%v'", tt.name, hash, tt.out.hash)
+			}
+		})
+	}
+}
+
+func TestUpdateHash(t *testing.T) {
+	ritHome := "/path/to/rit"
+
+	type in struct {
+		formulaPath string
+		hash        string
+		createErr   error
+		writeErr    error
+	}
+	type out struct {
+		err     error
+		path    string
+		content []byte
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		out  out
+	}{
+		{
+			name: "should update the correct file",
+			in: in{
+				formulaPath: "/path/to/formula",
+				hash:        "hash",
+				createErr:   nil,
+				writeErr:    nil,
+			},
+			out: out{
+				err:     nil,
+				path:    "/path/to/rit/hashes/-path-to-formula.txt",
+				content: []byte("hash"),
+			},
+		},
+		{
+			name: "should ignore dir creation errors",
+			in: in{
+				formulaPath: "/path/to/formula",
+				hash:        "hash",
+				createErr:   fmt.Errorf("Directory already exists"),
+				writeErr:    nil,
+			},
+			out: out{
+				err:     nil,
+				path:    "/path/to/rit/hashes/-path-to-formula.txt",
+				content: []byte("hash"),
+			},
+		},
+		{
+			name: "should fail on file creation errors",
+			in: in{
+				formulaPath: "/path/to/formula",
+				hash:        "hash",
+				createErr:   nil,
+				writeErr:    fmt.Errorf("Unable to write file"),
+			},
+			out: out{
+				err:     fmt.Errorf("Unable to write file"),
+				path:    "/path/to/rit/hashes/-path-to-formula.txt",
+				content: []byte("hash"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hashPath := ""
+			hashContent := []byte{}
+
+			dirManager := dirHashManagerMock{tt.in.createErr, nil, "", nil}
+			fileManager := sMocks.FileWriteReadExisterCustomMock{
+				WriteMock: func(path string, content []byte) error {
+					hashPath = path
+					hashContent = content
+					return tt.in.writeErr
+				},
+				ExistsMock: func(string) bool {
+					return true
+				},
+				ReadMock: func(string) ([]byte, error) {
+					return []byte{}, nil
+				},
+			}
+			workspace := New(ritHome, dirManager, fileManager)
+			err := workspace.UpdateHash(tt.in.formulaPath, tt.in.hash)
+
+			if hashPath != tt.out.path {
+				t.Errorf("Validate(%s) expected hash to be written to %s instead of %s", tt.name, tt.out.path, hashPath)
+			}
+
+			if string(hashContent) != string(tt.out.content) {
+				t.Errorf("Validate(%s) expected hash %s to be written instead of %s", tt.name, string(tt.out.content), string(hashContent))
+			}
+
+			if err == nil && tt.out.err != nil {
+				t.Errorf("Validate(%s) expected '%v' error but didn't get any", tt.name, tt.out.err)
+			}
+			if err != nil && tt.out.err == nil {
+				t.Errorf("Validate(%s) didn't expect error but got '%v'", tt.name, err)
+			}
+			if err != nil && tt.out.err != nil && err.Error() != tt.out.err.Error() {
+				t.Errorf("Validate(%s) got error '%v', expected error '%v'", tt.name, err, tt.out.err)
+			}
+		})
+	}
 }
 
 func cleanForm() {
