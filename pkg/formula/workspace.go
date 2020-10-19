@@ -64,6 +64,13 @@ type WorkspaceAddListValidator interface {
 	WorkspaceValidator
 }
 
+type WorkspaceAddListValidateHasher interface {
+	WorkspaceAdder
+	WorkspaceLister
+	WorkspaceValidator
+	WorkspaceHasher
+}
+
 type WorkspaceListHasher interface {
 	WorkspaceLister
 	WorkspaceHasher

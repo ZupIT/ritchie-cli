@@ -501,6 +501,18 @@ func (w WorkspaceAddListValidatorCustomMock) Validate(workspace formula.Workspac
 	return w.validate(workspace)
 }
 
+func (w WorkspaceAddListValidatorCustomMock) CurrentHash(string) (string, error) {
+	return "", nil
+}
+
+func (w WorkspaceAddListValidatorCustomMock) PreviousHash(string) (string, error) {
+	return "", nil
+}
+
+func (w WorkspaceAddListValidatorCustomMock) UpdateHash(string, string) error {
+	return nil
+}
+
 var (
 	defaultRepoAdderMock = repoListerAdderCustomMock{
 		add: func(d formula.Repo) error {

@@ -43,7 +43,7 @@ const (
 
 type buildFormulaCmd struct {
 	userHomeDir string
-	workspace   formula.WorkspaceAddListValidator
+	workspace   formula.WorkspaceAddListValidateHasher
 	formula     formula.LocalBuilder
 	watcher     formula.Watcher
 	directory   stream.DirListChecker
@@ -55,7 +55,7 @@ type buildFormulaCmd struct {
 func NewBuildFormulaCmd(
 	userHomeDir string,
 	formula formula.LocalBuilder,
-	workManager formula.WorkspaceAddListValidator,
+	workManager formula.WorkspaceAddListValidateHasher,
 	watcher formula.Watcher,
 	directory stream.DirListChecker,
 	inText prompt.InputText,
@@ -145,6 +145,10 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 	buildInfo := prompt.Red("Building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
+
+	// Failures to generate the hash must not prevent the user from build formulas
+	hash, _ := b.workspace.CurrentHash(formulaPath)
+	_ = b.workspace.UpdateHash(formulaPath, hash)
 
 	if err := b.formula.Build(workspacePath, formulaPath); err != nil {
 		errorMsg := prompt.Red(err.Error())

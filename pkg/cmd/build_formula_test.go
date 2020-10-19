@@ -30,7 +30,7 @@ import (
 
 type fieldsTestBuildFormulaCmd struct {
 	localBuilder     formula.LocalBuilder
-	workspaceManager formula.WorkspaceAddListValidator
+	workspaceManager formula.WorkspaceAddListValidateHasher
 	directory        stream.DirListChecker
 	inList           prompt.InputList
 }
