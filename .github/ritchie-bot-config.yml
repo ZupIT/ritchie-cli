@@ -12,7 +12,9 @@ merge_branch:
     'victor-schumacher',
     'viniciussousazup',
     'brunasilvazup',
-    'lucasdittrichzup'
+    'lucasdittrichzup',
+    'henriquemoraeszup',
+    'victorschumacherzup'
   ] # Users enabled to merge with comment
 
 issue_project:
