@@ -96,6 +96,15 @@ func TestInputManager_Inputs(t *testing.T) {
     {
         "name": "test_resolver",
         "type": "CREDENTIAL_TEST"
+    },
+	{
+      "label": "Choose your repositorie ",
+      "name": "repo_list",
+      "type": "dynamic",
+      "requestInfo": {
+        "url":"https://api.github.com/users/victor-schumacher/repos",
+        "jsonPath":"$..full_name"
+      }
     }
 ]`
 	var inputs []formula.Input

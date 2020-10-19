@@ -368,7 +368,11 @@ func makeRequest(info formula.RequestInfo) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO verify http status
+
+	if response.StatusCode < 200 && response.StatusCode > 299 {
+		return nil, errors.New("dynamic list request was not in 2xx range")
+	}
+
 	body, _ := ioutil.ReadAll(response.Body)
 	requestData :=  interface{}(nil)
 
