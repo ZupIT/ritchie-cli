@@ -87,7 +87,7 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 		tutorialStatusCurrent := tutorialHolder.Current
 		fmt.Println("Current tutorial status: ", tutorialStatusCurrent)
 
-		response, err := o.List(msg, statusTypes)
+		response, err := o.List(msg, statusTypes, statusTypes[0])
 		if err != nil {
 			return err
 		}
