@@ -96,9 +96,8 @@ func TestInputManager_Inputs(t *testing.T) {
     {
         "name": "test_resolver",
         "type": "CREDENTIAL_TEST"
-    },
+    }
 ]`
-
 	var inputs []formula.Input
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 
