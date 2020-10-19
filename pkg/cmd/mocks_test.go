@@ -97,13 +97,13 @@ func (inputURLErrorMock) URL(name, defaultValue string) (string, error) {
 
 type inputIntMock struct{}
 
-func (inputIntMock) Int(name string, defaultValue int64, helper ...string) (int64, error) {
+func (inputIntMock) Int(name string, defaultValue string, helper ...string) (int64, error) {
 	return 0, nil
 }
 
 type inputIntErrorMock struct{}
 
-func (inputIntErrorMock) Int(name string, defaultValue int64, helper ...string) (int64, error) {
+func (inputIntErrorMock) Int(name string, defaultValue string, helper ...string) (int64, error) {
 	return 0, errors.New("some error")
 }
 

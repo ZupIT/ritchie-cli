@@ -159,7 +159,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		priority, err := ad.Int("Set the priority:", 0, "0 is higher priority, the lower higher the priority")
+		priority, err := ad.Int("Set the priority:", "0", "0 is higher priority, the lower higher the priority")
 		if err != nil {
 			return err
 		}
