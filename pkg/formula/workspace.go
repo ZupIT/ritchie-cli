@@ -47,6 +47,12 @@ type WorkspaceDeleter interface {
 	Delete(workspace Workspace) error
 }
 
+type WorkspaceHasher interface {
+	CurrentHash(formulaPath string) (string, error)
+	PreviousHash(formulaPath string) (string, error)
+	UpdateHash(formulaPath string, hash string) error
+}
+
 type WorkspaceListDeleter interface {
 	WorkspaceDeleter
 	WorkspaceLister
@@ -56,4 +62,9 @@ type WorkspaceAddListValidator interface {
 	WorkspaceAdder
 	WorkspaceLister
 	WorkspaceValidator
+}
+
+type WorkspaceListHasher interface {
+	WorkspaceLister
+	WorkspaceHasher
 }

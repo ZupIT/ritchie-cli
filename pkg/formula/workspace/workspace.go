@@ -18,7 +18,9 @@ package workspace
 
 import (
 	"encoding/json"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -27,16 +29,31 @@ import (
 
 var (
 	ErrInvalidWorkspace = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
+
+	sourceDir  = "src"
+	hashesPath = "hashes"
+	hashesExt  = ".txt"
 )
 
 type Manager struct {
+	ritchieHome   string
 	workspaceFile string
+	dir           stream.DirCreateHasher
 	file          stream.FileWriteReadExister
 }
 
-func New(ritchieHome string, fileManager stream.FileWriteReadExister) Manager {
+func New(
+	ritchieHome string,
+	dirManager stream.DirCreateHasher,
+	fileManager stream.FileWriteReadExister,
+) Manager {
 	workspaceFile := filepath.Join(ritchieHome, formula.WorkspacesFile)
-	return Manager{workspaceFile: workspaceFile, file: fileManager}
+	return Manager{
+		ritchieHome:   ritchieHome,
+		workspaceFile: workspaceFile,
+		dir:           dirManager,
+		file:          fileManager,
+	}
 }
 
 func (m Manager) Add(workspace formula.Workspace) error {
@@ -113,4 +130,32 @@ func (m Manager) Validate(workspace formula.Workspace) error {
 	}
 
 	return nil
+}
+
+func (m Manager) PreviousHash(formulaPath string) (string, error) {
+	filePath := m.hashPath(formulaPath)
+
+	hash, err := m.file.Read(filePath)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hash), nil
+}
+
+func (m Manager) CurrentHash(formulaPath string) (string, error) {
+	return m.dir.Hash(filepath.Join(formulaPath, sourceDir))
+}
+
+func (m Manager) UpdateHash(formulaPath string, hash string) error {
+	filePath := m.hashPath(formulaPath)
+
+	hashDir := filepath.Join(m.ritchieHome, hashesPath)
+	_ = m.dir.Create(hashDir)
+	return m.file.Write(filePath, []byte(hash))
+}
+
+func (m Manager) hashPath(formulaPath string) string {
+	fileName := strings.ReplaceAll(formulaPath, string(os.PathSeparator), "-") + hashesExt
+	return filepath.Join(m.ritchieHome, hashesPath, fileName)
 }

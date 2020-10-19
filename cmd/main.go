@@ -156,9 +156,9 @@ func buildCommands() *cobra.Command {
 	}
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, dirManager, fileManager)
 
-	preRunBuilder := runner.NewPreRunBuilder(ritchieHomeDir, formulaWorkspace, formulaLocalBuilder, dirManager, fileManager, inputBool)
+	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formulaLocalBuilder, inputBool)
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 

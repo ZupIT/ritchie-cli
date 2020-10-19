@@ -18,8 +18,6 @@ package runner
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -32,7 +30,8 @@ type preRunBuilderTest struct {
 	rebuildPromptAnswer bool
 	currentHash         string
 	previousHash        string
-	createHashDirError  error
+	currentHashError    error
+	previousHashError   error
 	writeHashError      error
 	promptError         error
 
@@ -48,7 +47,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		rebuildPromptAnswer: false,
 		currentHash:         "hash",
 		previousHash:        "hash",
-		createHashDirError:  nil,
+		currentHashError:    nil,
+		previousHashError:   nil,
 		writeHashError:      nil,
 		promptError:         nil,
 
@@ -62,7 +62,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		rebuildPromptAnswer: true,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
-		createHashDirError:  nil,
+		currentHashError:    nil,
+		previousHashError:   nil,
 		writeHashError:      nil,
 		promptError:         nil,
 
@@ -76,7 +77,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		rebuildPromptAnswer: false,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
-		createHashDirError:  nil,
+		currentHashError:    nil,
+		previousHashError:   nil,
 		writeHashError:      nil,
 		promptError:         nil,
 
@@ -90,26 +92,13 @@ var preRunBuilderTests = []preRunBuilderTest{
 		rebuildPromptAnswer: false,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
-		createHashDirError:  nil,
+		currentHashError:    nil,
+		previousHashError:   nil,
 		writeHashError:      fmt.Errorf("Failed to save hash"),
 		promptError:         nil,
 
 		mustBuild:         false,
 		mustPromptRebuild: false,
-	},
-	{
-		name: "should ignore directory creation errors",
-
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: false,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		createHashDirError:  fmt.Errorf("Failed to create dir"),
-		writeHashError:      nil,
-		promptError:         nil,
-
-		mustBuild:         false,
-		mustPromptRebuild: true,
 	},
 	{
 		name: "should not prompt to rebuild nor fail when no workspaces are returned",
@@ -118,7 +107,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		rebuildPromptAnswer: true,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
-		createHashDirError:  nil,
+		currentHashError:    nil,
+		previousHashError:   nil,
 		writeHashError:      nil,
 		promptError:         nil,
 
@@ -132,29 +122,54 @@ var preRunBuilderTests = []preRunBuilderTest{
 		rebuildPromptAnswer: true,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
-		createHashDirError:  nil,
+		currentHashError:    nil,
+		previousHashError:   nil,
 		writeHashError:      nil,
 		promptError:         fmt.Errorf("Ctrl+C on survey"),
 
 		mustBuild:         false,
 		mustPromptRebuild: true,
 	},
+	{
+		name: "should not prompt to build when the formula doesn't exist on any workspace",
+
+		workspaces:          map[string]string{"default": "/pathtodefault"},
+		rebuildPromptAnswer: true,
+		currentHash:         "",
+		previousHash:        "hash",
+		currentHashError:    fmt.Errorf("Formula doesn't exist here"),
+		previousHashError:   nil,
+		writeHashError:      nil,
+		promptError:         nil,
+
+		mustBuild:         false,
+		mustPromptRebuild: false,
+	},
+	{
+		name: "should not prompt to build when no previous hash exists",
+
+		workspaces:          map[string]string{"default": "/pathtodefault"},
+		rebuildPromptAnswer: true,
+		currentHash:         "hash",
+		previousHash:        "",
+		currentHashError:    nil,
+		previousHashError:   fmt.Errorf("No previous hash"),
+		writeHashError:      nil,
+		promptError:         nil,
+
+		mustBuild:         false,
+		mustPromptRebuild: false,
+	},
 }
 
 func TestPreRunBuilder(t *testing.T) {
-	tmpDir := os.TempDir()
-	ritHomeName := ".rit-pre-run-builder"
-	ritHome := filepath.Join(tmpDir, ritHomeName)
-
 	for _, test := range preRunBuilderTests {
 		t.Run(test.name, func(t *testing.T) {
 			builderMock := newBuilderMock()
 			inputBoolMock := newInputBoolMock(test.rebuildPromptAnswer, test.promptError)
 
-			preRunBuilder := NewPreRunBuilder(ritHome, workspaceListerMock{test.workspaces}, builderMock,
-				dirHashManagerMock{test.createHashDirError, nil, test.currentHash, nil},
-				fileManagerMock{[]byte(test.previousHash), nil, test.writeHashError, nil, nil, nil, nil, false, []string{}},
-				inputBoolMock)
+			preRunBuilder := NewPreRunBuilder(workspaceListHasherMock{test.workspaces, test.currentHash, test.currentHashError, test.previousHash,
+				test.previousHashError, test.writeHashError}, builderMock, inputBoolMock)
 			preRunBuilder.Build("/testing/formula")
 
 			if builderMock.HasBuilt() != test.mustBuild {
@@ -210,27 +225,27 @@ func (bm builderMock) HasBuilt() bool {
 	return *bm.hasBuilt
 }
 
-type dirHashManagerMock struct {
-	createErr error
-	removeErr error
-	hash      string
-	hashErr   error
+type workspaceListHasherMock struct {
+	workspaces        formula.Workspaces
+	currentHash       string
+	currentHashError  error
+	previousHash      string
+	previousHashError error
+	updateHashError   error
 }
 
-func (di dirHashManagerMock) Create(dir string) error {
-	return di.createErr
-}
-func (di dirHashManagerMock) Remove(dir string) error {
-	return di.removeErr
-}
-func (di dirHashManagerMock) Hash(dir string) (string, error) {
-	return di.hash, di.hashErr
-}
-
-type workspaceListerMock struct {
-	workspaces formula.Workspaces
-}
-
-func (wm workspaceListerMock) List() (formula.Workspaces, error) {
+func (wm workspaceListHasherMock) List() (formula.Workspaces, error) {
 	return wm.workspaces, nil
+}
+
+func (wm workspaceListHasherMock) CurrentHash(string) (string, error) {
+	return wm.currentHash, wm.currentHashError
+}
+
+func (wm workspaceListHasherMock) PreviousHash(string) (string, error) {
+	return wm.previousHash, wm.previousHashError
+}
+
+func (wm workspaceListHasherMock) UpdateHash(string, string) error {
+	return wm.updateHashError
 }

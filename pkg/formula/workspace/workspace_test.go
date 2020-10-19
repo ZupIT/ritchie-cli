@@ -34,6 +34,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 	fullDir := createFullDir()
 
 	tmpDir := os.TempDir()
+	dirManager := dirHashManagerMock{nil, nil, "", nil}
 	fileManager := stream.NewFileManager()
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	if err := fileManager.Remove(workspaceFile); err != nil {
@@ -122,7 +123,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, in.fileManager)
+			workspace := New(tmpDir, dirManager, in.fileManager)
 			got := workspace.Add(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -137,6 +138,7 @@ func TestManager_Delete(t *testing.T) {
 	fullDir := createFullDir()
 
 	tmpDir := os.TempDir()
+	dirManager := dirHashManagerMock{nil, nil, "", nil}
 	fileManager := stream.NewFileManager()
 
 	type in struct {
@@ -199,7 +201,7 @@ func TestManager_Delete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, in.fileManager)
+			workspace := New(tmpDir, dirManager, in.fileManager)
 			got := workspace.Delete(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -211,6 +213,7 @@ func TestManager_Delete(t *testing.T) {
 
 func TestManager_List(t *testing.T) {
 	tmpDir := os.TempDir()
+	dirManager := dirHashManagerMock{nil, nil, "", nil}
 	fileManager := stream.NewFileManager()
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 
@@ -284,7 +287,7 @@ func TestManager_List(t *testing.T) {
 				_ = fileManager.Write(workspaceFile, content)
 			}
 
-			workspace := New(tmpDir, in.fileManager)
+			workspace := New(tmpDir, dirManager, in.fileManager)
 			got, err := workspace.List()
 
 			if err != nil && err.Error() != out.error.Error() {
@@ -303,6 +306,7 @@ func TestValidate(t *testing.T) {
 	fullDir := createFullDir()
 
 	tmpDir := os.TempDir()
+	dirManager := dirHashManagerMock{nil, nil, "", nil}
 	fileManager := stream.NewFileManager()
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	if err := fileManager.Remove(workspaceFile); err != nil {
@@ -347,7 +351,7 @@ func TestValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, in.fileManager)
+			workspace := New(tmpDir, dirManager, in.fileManager)
 			got := workspace.Validate(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -386,4 +390,21 @@ func (f fileManagerMock) Read(string) ([]byte, error) {
 
 func (f fileManagerMock) Write(string, []byte) error {
 	return f.writeErr
+}
+
+type dirHashManagerMock struct {
+	createErr error
+	removeErr error
+	hash      string
+	hashErr   error
+}
+
+func (di dirHashManagerMock) Create(dir string) error {
+	return di.createErr
+}
+func (di dirHashManagerMock) Remove(dir string) error {
+	return di.removeErr
+}
+func (di dirHashManagerMock) Hash(dir string) (string, error) {
+	return di.hash, di.hashErr
 }

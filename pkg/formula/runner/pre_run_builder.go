@@ -18,13 +18,10 @@ package runner
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 )
 
@@ -36,36 +33,23 @@ const (
 	messageChangePrompt = "This formula has changed since the last run, would you like to rebuild?"
 	messageYes          = "yes"
 	messageNo           = "no"
-
-	sourceDir  = "src"
-	hashesPath = "hashes"
-	hashesExt  = ".txt"
 )
 
 type PreRunBuilderManager struct {
-	ritchieHome string
-	workspace   formula.WorkspaceLister
-	builder     formula.LocalBuilder
-	dir         stream.DirCreateHasher
-	file        stream.FileReadWriter
-	inBool      prompt.InputBool
+	workspace formula.WorkspaceListHasher
+	builder   formula.LocalBuilder
+	inBool    prompt.InputBool
 }
 
 func NewPreRunBuilder(
-	ritchieHome string,
-	workspace formula.WorkspaceLister,
+	workspace formula.WorkspaceListHasher,
 	builder formula.LocalBuilder,
-	dir stream.DirCreateHasher,
-	file stream.FileReadWriter,
 	inBool prompt.InputBool,
 ) PreRunBuilderManager {
 	return PreRunBuilderManager{
-		ritchieHome: ritchieHome,
-		workspace:   workspace,
-		builder:     builder,
-		dir:         dir,
-		file:        file,
-		inBool:      inBool,
+		workspace: workspace,
+		builder:   builder,
+		inBool:    inBool,
 	}
 }
 
@@ -116,16 +100,16 @@ func (b PreRunBuilderManager) modifiedWorkspace(relativePath string) (*formula.W
 }
 
 func (b PreRunBuilderManager) hasFormulaChanged(path string) (bool, error) {
-	currentHash, err := b.currentHash(path)
+	currentHash, err := b.workspace.CurrentHash(path)
 
 	// Formula doesn't exist on this workspace
 	if err != nil {
 		return false, nil
 	}
 
-	previousHash, err := b.previousHash(path)
+	previousHash, err := b.workspace.PreviousHash(path)
 	if err != nil || previousHash != currentHash {
-		updateErr := b.updateHash(path, currentHash)
+		updateErr := b.workspace.UpdateHash(path, currentHash)
 		if updateErr != nil {
 			return false, updateErr
 		}
@@ -137,34 +121,6 @@ func (b PreRunBuilderManager) hasFormulaChanged(path string) (bool, error) {
 	}
 
 	return previousHash != currentHash, nil
-}
-
-func (b PreRunBuilderManager) previousHash(formulaPath string) (string, error) {
-	filePath := b.hashPath(formulaPath)
-
-	hash, err := b.file.Read(filePath)
-	if err != nil {
-		return "", err
-	}
-
-	return string(hash), nil
-}
-
-func (b PreRunBuilderManager) currentHash(formulaPath string) (string, error) {
-	return b.dir.Hash(filepath.Join(formulaPath, sourceDir))
-}
-
-func (b PreRunBuilderManager) updateHash(formulaPath string, hash string) error {
-	filePath := b.hashPath(formulaPath)
-
-	hashDir := filepath.Join(b.ritchieHome, hashesPath)
-	_ = b.dir.Create(hashDir)
-	return b.file.Write(filePath, []byte(hash))
-}
-
-func (b PreRunBuilderManager) hashPath(formulaPath string) string {
-	fileName := strings.ReplaceAll(formulaPath, string(os.PathSeparator), "-") + hashesExt
-	return filepath.Join(b.ritchieHome, hashesPath, fileName)
 }
 
 func (b PreRunBuilderManager) buildOnWorkspace(workspace formula.Workspace, relativePath string) error {
