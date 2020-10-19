@@ -366,7 +366,6 @@ func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
 func makeRequest(info formula.RequestInfo) (interface{}, error) {
 	response, err := http.Get(info.Url)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
