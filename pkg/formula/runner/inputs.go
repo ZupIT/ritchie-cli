@@ -366,19 +366,18 @@ func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
 func makeRequest(info formula.RequestInfo) (interface{}, error) {
 	response, err := http.Get(info.Url)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
-	if response.StatusCode < 200 && response.StatusCode > 299 {
+	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return nil, errors.New("dynamic list request was not in 2xx range")
 	}
 
 	body, _ := ioutil.ReadAll(response.Body)
 	requestData :=  interface{}(nil)
 
-	if err = json.Unmarshal(body, &requestData); err != nil {
-		return nil, err
-	}
+	_ = json.Unmarshal(body, &requestData)
 	return requestData, nil
 }
 

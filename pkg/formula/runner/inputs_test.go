@@ -97,16 +97,8 @@ func TestInputManager_Inputs(t *testing.T) {
         "name": "test_resolver",
         "type": "CREDENTIAL_TEST"
     },
-	{
-      "label": "Choose your repositorie ",
-      "name": "repo_list",
-      "type": "dynamic",
-      "requestInfo": {
-        "url":"https://api.github.com/users/victor-schumacher/repos",
-        "jsonPath":"$..full_name"
-      }
-    }
 ]`
+
 	var inputs []formula.Input
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 
@@ -116,7 +108,6 @@ func TestInputManager_Inputs(t *testing.T) {
 		},
 		FormulaPath: os.TempDir(),
 	}
-
 	fileManager := stream.NewFileManager()
 
 	type in struct {
@@ -529,6 +520,132 @@ func TestInputManager_RegexType(t *testing.T) {
 				iTextValidator: inputTextValidatorMock{str: "abcc"},
 			},
 			want: nil,
+		},
+	}
+
+	fileManager := stream.NewFileManager()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(tt.in.inputJson), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iText := tt.in.inText
+			iTextValidator := tt.in.iTextValidator
+			iList := inputMock{text: "in_list1"}
+			iBool := inputMock{boolean: false}
+			iPass := inputMock{text: "******"}
+
+			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+
+			cmd := &exec.Cmd{}
+
+			got := inputManager.Inputs(cmd, setup, api.Prompt)
+
+			if tt.want != nil && got == nil {
+				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, nil, tt.want)
+			}
+
+			if tt.want == nil && got != nil {
+				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, got, nil)
+			}
+		})
+	}
+}
+
+func TestInputManager_DynamicInputs(t *testing.T) {
+	type in struct {
+		inputJson      string
+		inText         inputMock
+		iTextValidator inputTextValidatorMock
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "Success dynamic input test",
+			in: in{
+				inputJson: `[
+					     {
+      						"label": "Choose your repositorie ",
+      						"name": "repo_list",
+      						"type": "dynamic",
+      						"requestInfo": {
+      						  "url":"https://api.github.com/users/victor-schumacher/repos",
+      						  "jsonPath":"$..full_name"
+      					 	}
+    					}
+					]`,
+				inText:         inputMock{text: "a"},
+				iTextValidator: inputTextValidatorMock{str: "a"},
+			},
+			want: nil,
+		},
+		{
+			name: "fail dynamic input when http status is not ok",
+			in: in{
+				inputJson: `[
+					     {
+      						"label": "Choose your repositorie ",
+      						"name": "repo_list",
+      						"type": "dynamic",
+      						"requestInfo": {
+      						  "url":"https://github.com/ZupIT/ritchie-cli/issuesa",
+      						  "jsonPath":"$..full_name"
+      					 	}
+    					}
+					]`,
+				inText:         inputMock{text: "a"},
+				iTextValidator: inputTextValidatorMock{str: "a"},
+			},
+			want: errors.New("dynamic list request was not in 2xx range"),
+		},
+		{
+			name: "fail dynamic input when jsonpath is wrong",
+			in: in{
+				inputJson: `[
+					     {
+      						"label": "Choose your repositorie ",
+      						"name": "repo_list",
+      						"type": "dynamic",
+      						"requestInfo": {
+      						  "url":"https://api.github.com/users/victor-schumacher/repos",
+      						  "jsonPath":"$.[*]full_name"
+      					 	}
+    					}
+					]`,
+				inText:         inputMock{text: "a"},
+				iTextValidator: inputTextValidatorMock{str: "a"},
+			},
+			want: errors.New(`unexpected "[" while scanning JSON select expected Ident, "." or "*"`),
+		},
+		{
+			name: "fail dynamic input when config.json url is empty",
+			in: in{
+				inputJson: `[
+					     {
+      						"label": "Choose your repositorie ",
+      						"name": "repo_list",
+      						"type": "dynamic",
+      						"requestInfo": {
+      						  "url":"",
+      						  "jsonPath":"$.[*]full_name"
+      					 	}
+    					}
+					]`,
+				inText:         inputMock{text: "a"},
+				iTextValidator: inputTextValidatorMock{str: "a"},
+			},
+			want: errors.New(`unsupported protocol scheme ""`),
 		},
 	}
 
