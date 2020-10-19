@@ -20,7 +20,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -30,6 +33,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
+
+const stoppedText = "Press CTRL+C to stop"
 
 type WatchManager struct {
 	watcher    *watcher.Watcher
@@ -54,18 +59,31 @@ func New(
 	}
 }
 
+func (w *WatchManager) closeWatch() {
+	fmt.Println("\nStopping...")
+
+	w.watcher.Wait()
+	w.watcher.Close()
+}
+
 func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 	w.watcher.FilterOps(watcher.Write)
+	sigs := make(chan os.Signal, 1)
+
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
 		for {
 			select {
 			case event := <-w.watcher.Event:
 				if !event.IsDir() && !strings.Contains(event.Path, "/dist") {
 					w.build(workspacePath, formulaPath)
-					prompt.Info("Waiting for changes...")
+					fmt.Println(prompt.Bold("Waiting for changes...") + "\n" + stoppedText + "\n")
 				}
 			case err := <-w.watcher.Error:
 				prompt.Error(err.Error())
+			case <-sigs:
+				w.closeWatch()
 			case <-w.watcher.Closed:
 				return
 			}
@@ -78,11 +96,8 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 
 	w.build(workspacePath, formulaPath)
 
-	watchText := fmt.Sprintf("Watching dir %s \n", formulaPath)
-	prompt.Info(watchText)
-
-	startTime := time.Now().Second()
-	w.sendMetric(float64(startTime))
+	watchText := fmt.Sprintf("Watching dir %s", formulaPath)
+	fmt.Println(prompt.Bold(watchText) + "\n" + stoppedText + "\n")
 
 	if err := w.watcher.Start(time.Second * 2); err != nil {
 		log.Fatalln(err)
