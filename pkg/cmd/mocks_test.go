@@ -501,16 +501,37 @@ func (w WorkspaceAddListValidatorCustomMock) Validate(workspace formula.Workspac
 	return w.validate(workspace)
 }
 
-func (w WorkspaceAddListValidatorCustomMock) CurrentHash(string) (string, error) {
-	return "", nil
+type WorkspaceAddListValidateHasherCustomMock struct {
+	add          func(workspace formula.Workspace) error
+	list         func() (formula.Workspaces, error)
+	validate     func(workspace formula.Workspace) error
+	currentHash  func(path string) (string, error)
+	previousHash func(path string) (string, error)
+	updateHash   func(path, hash string) error
 }
 
-func (w WorkspaceAddListValidatorCustomMock) PreviousHash(string) (string, error) {
-	return "", nil
+func (w WorkspaceAddListValidateHasherCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
 }
 
-func (w WorkspaceAddListValidatorCustomMock) UpdateHash(string, string) error {
-	return nil
+func (w WorkspaceAddListValidateHasherCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+func (w WorkspaceAddListValidateHasherCustomMock) Validate(workspace formula.Workspace) error {
+	return w.validate(workspace)
+}
+
+func (w WorkspaceAddListValidateHasherCustomMock) CurrentHash(path string) (string, error) {
+	return w.currentHash(path)
+}
+
+func (w WorkspaceAddListValidateHasherCustomMock) PreviousHash(path string) (string, error) {
+	return w.previousHash(path)
+}
+
+func (w WorkspaceAddListValidateHasherCustomMock) UpdateHash(path string, hash string) error {
+	return w.updateHash(path, hash)
 }
 
 var (

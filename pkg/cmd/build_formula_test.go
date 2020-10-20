@@ -46,11 +46,20 @@ func TestBuildFormulaCmd(t *testing.T) {
 				return nil
 			},
 		},
-		workspaceManager: WorkspaceAddListValidatorCustomMock{
+		workspaceManager: WorkspaceAddListValidateHasherCustomMock{
 			list: func() (formula.Workspaces, error) {
 				return formula.Workspaces{}, nil
 			},
 			validate: func(workspace formula.Workspace) error {
+				return nil
+			},
+			currentHash: func(string) (string, error) {
+				return "hash", nil
+			},
+			previousHash: func(string) (string, error) {
+				return "hash", nil
+			},
+			updateHash: func(string, string) error {
 				return nil
 			},
 		},
@@ -94,9 +103,18 @@ func TestBuildFormulaCmd(t *testing.T) {
 		{
 			name: "Run with error when workspace list returns err",
 			fields: fieldsTestBuildFormulaCmd{
-				workspaceManager: WorkspaceAddListValidatorCustomMock{
+				workspaceManager: WorkspaceAddListValidateHasherCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{}, someError
+					},
+					currentHash: func(string) (string, error) {
+						return "hash", nil
+					},
+					previousHash: func(string) (string, error) {
+						return "hash", nil
+					},
+					updateHash: func(string, string) error {
+						return nil
 					},
 				},
 			},
