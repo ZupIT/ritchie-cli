@@ -260,7 +260,7 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 }
 
 func (in initCmd) setRunnerType() error {
-	selected, err := in.List(SelectFormulaTypeQuestion, formula.RunnerTypes)
+	selected, err := in.List(SelectFormulaTypeQuestion, formula.RunnerTypes, formula.RunnerTypes[0])
 	if err != nil {
 		return err
 	}

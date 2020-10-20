@@ -103,7 +103,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		lang, err := c.inList.List("Choose the language: ", languages)
+		lang, err := c.inList.List("Choose the language: ", languages, "")
 		if err != nil {
 			return err
 		}

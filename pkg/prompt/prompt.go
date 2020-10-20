@@ -33,7 +33,7 @@ type InputPassword interface {
 }
 
 type InputMultiline interface {
-	MultiLineText(name string, required bool) (string, error)
+	MultiLineText(name string, required bool, defaultValue string) (string, error)
 }
 
 type InputList interface {

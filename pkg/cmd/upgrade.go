@@ -67,7 +67,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		if !u.file.Exists(metric.FilePath) {
 
 			options := []string{AcceptMetrics, DoNotAcceptMetrics}
-			choose, err := u.input.List(AddMetricsQuestion, options)
+			choose, err := u.input.List(AddMetricsQuestion, options, options[1])
 			if err != nil {
 				return err
 			}

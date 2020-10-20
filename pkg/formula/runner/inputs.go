@@ -142,7 +142,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 				inputVal, err = in.textValidator(input)
 			}
 		case "bool":
-			valBool, err = in.Bool(input.Label, items, input.Tutorial)
+			valBool, err = in.Bool(input.Label, items, input.Default, input.Tutorial)
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
 			inputVal, err = in.Password(input.Label, input.Tutorial)
