@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
+	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/golang/protobuf v1.4.1

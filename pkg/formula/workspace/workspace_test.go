@@ -31,7 +31,7 @@ import (
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
-func TestWorkspaceManager_Add(t *testing.T) {
+func TestWorkspaceManagerAdd(t *testing.T) {
 	cleanForm()
 	fullDir := createFullDir()
 
@@ -125,7 +125,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, dirManager, in.fileManager)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
 			got := workspace.Add(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -135,7 +135,7 @@ func TestWorkspaceManager_Add(t *testing.T) {
 	}
 }
 
-func TestManager_Delete(t *testing.T) {
+func TestManagerDelete(t *testing.T) {
 	cleanForm()
 	fullDir := createFullDir()
 
@@ -203,7 +203,7 @@ func TestManager_Delete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, dirManager, in.fileManager)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
 			got := workspace.Delete(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -213,7 +213,7 @@ func TestManager_Delete(t *testing.T) {
 	}
 }
 
-func TestManager_List(t *testing.T) {
+func TestManagerList(t *testing.T) {
 	tmpDir := os.TempDir()
 	dirManager := dirHashManagerMock{nil, nil, "", nil}
 	fileManager := stream.NewFileManager()
@@ -241,7 +241,7 @@ func TestManager_List(t *testing.T) {
 				fileManager: fileManager,
 			},
 			out: out{
-				listSize: 1,
+				listSize: 2,
 				error:    nil,
 			},
 		},
@@ -252,7 +252,7 @@ func TestManager_List(t *testing.T) {
 				fileManager: fileManager,
 			},
 			out: out{
-				listSize: 0,
+				listSize: 1,
 				error:    nil,
 			},
 		},
@@ -289,7 +289,7 @@ func TestManager_List(t *testing.T) {
 				_ = fileManager.Write(workspaceFile, content)
 			}
 
-			workspace := New(tmpDir, dirManager, in.fileManager)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
 			got, err := workspace.List()
 
 			if err != nil && err.Error() != out.error.Error() {
@@ -353,8 +353,8 @@ func TestValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, dirManager, in.fileManager)
-			got := workspace.Validate(in.workspace)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
+			got := workspace.Add(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
 				t.Errorf("Validate(%s) got %v, out %v", tt.name, got, tt.out)
@@ -411,7 +411,7 @@ func TestPreviousHash(t *testing.T) {
 					return tt.in.hashFileContent, tt.in.hashFileError
 				},
 			}
-			workspace := New(ritHome, dirManager, fileManager)
+			workspace := New(ritHome, ritHome, dirManager, fileManager)
 			hash, err := workspace.PreviousHash(tt.in.formulaPath)
 
 			if hashPath != tt.out.path {
@@ -518,7 +518,7 @@ func TestUpdateHash(t *testing.T) {
 					return []byte{}, nil
 				},
 			}
-			workspace := New(ritHome, dirManager, fileManager)
+			workspace := New(ritHome, ritHome, dirManager, fileManager)
 			err := workspace.UpdateHash(tt.in.formulaPath, tt.in.hash)
 
 			if hashPath != tt.out.path {

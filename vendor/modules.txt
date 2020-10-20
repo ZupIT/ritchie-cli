@@ -8,6 +8,11 @@ github.com/Azure/go-ansiterm
 github.com/Azure/go-ansiterm/winterm
 # github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd
 github.com/MakeNowJust/heredoc
+# github.com/PaesslerAG/gval v1.0.0
+github.com/PaesslerAG/gval
+# github.com/PaesslerAG/jsonpath v0.1.1
+## explicit
+github.com/PaesslerAG/jsonpath
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/denisbrodbeck/machineid v1.0.1

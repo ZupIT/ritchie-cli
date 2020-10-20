@@ -156,7 +156,7 @@ func buildCommands() *cobra.Command {
 	}
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, dirManager, fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager)
 
 	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formulaLocalBuilder, inputBool)
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
@@ -207,6 +207,7 @@ func buildCommands() *cobra.Command {
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
+	listWorkspaceCmd := cmd.NewListWorkspaceCmd(formulaWorkspace, tutorialFinder)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
 	autocompleteZsh := cmd.NewAutocompleteZsh(autocompleteGen)
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
@@ -227,6 +228,7 @@ func buildCommands() *cobra.Command {
 	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
+	listCmd.AddCommand(listWorkspaceCmd)
 	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd, setFormulaRunnerCmd)
 	showCmd.AddCommand(showCtxCmd, showFormulaRunnerCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
