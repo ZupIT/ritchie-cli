@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest a new feature for this project
-labels: feature
+labels: :sparkles: feature
 assignees: ''
 
 ---

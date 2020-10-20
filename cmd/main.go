@@ -148,7 +148,7 @@ func buildCommands() *cobra.Command {
 
 	promptInManager := fprompt.NewInputManager(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
 	stdinInManager := stdin.NewInputManager(envResolvers)
-	flagInManager := flag.NewInputManager(envResolvers, promptInManager)
+	flagInManager := flag.NewInputManager(envResolvers)
 	termInputTypes := formula.TermInputTypes{
 		api.Prompt: promptInManager,
 		api.Stdin:  stdinInManager,

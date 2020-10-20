@@ -56,7 +56,7 @@ func TestRun(t *testing.T) {
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	pInputRunner := prompt.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputMock{}, inputMock{})
 	sInputRunner := stdin.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
-	fInputRunner := flag.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, pInputRunner)
+	fInputRunner := flag.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
 
 	types := formula.TermInputTypes{
 		api.Prompt: pInputRunner,

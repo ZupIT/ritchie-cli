@@ -192,30 +192,22 @@ func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]str
 	}
 }
 
-func (in InputManager) textValidator(input formula.Input) (string, error) {
-	required := isRequired(input)
+func (in InputManager) textValidator(i formula.Input) (string, error) {
+	required := input.IsRequired(i)
 	var inputVal string
 	var err error
 
-	if in.hasRegex(input) {
-		inputVal, err = in.textRegexValidator(input, required)
+	if in.hasRegex(i) {
+		inputVal, err = in.textRegexValidator(i, required)
 	} else {
-		inputVal, err = in.InputText.Text(input.Label, required, input.Tutorial)
+		inputVal, err = in.InputText.Text(i.Label, required, i.Tutorial)
 	}
 
 	if inputVal == "" {
-		inputVal = input.Default
+		inputVal = i.Default
 	}
 
 	return inputVal, err
-}
-
-func isRequired(input formula.Input) bool {
-	if input.Required == nil {
-		return input.Default == ""
-	}
-
-	return *input.Required
 }
 
 func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {

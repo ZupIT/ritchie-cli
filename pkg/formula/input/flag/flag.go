@@ -31,14 +31,10 @@ import (
 
 type InputManager struct {
 	envResolvers env.Resolvers
-	prompt       formula.InputRunner
 }
 
-func NewInputManager(env env.Resolvers, prompt formula.InputRunner) formula.InputRunner {
-	return InputManager{
-		envResolvers: env,
-		prompt:       prompt,
-	}
+func NewInputManager(env env.Resolvers) formula.InputRunner {
+	return InputManager{envResolvers: env}
 }
 
 func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.FlagSet) error {
@@ -69,34 +65,16 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		}
 	}
 
-	ni, err := flags.GetBool(input.NonInteractive)
-	if err != nil {
-		return err
-	}
-
 	if len(emptyInputs) > 0 {
-		if err := in.validateEmptyInputs(cmd, setup, flags, emptyInputs, ni); err != nil {
-			return err
+		var emptyFlags []string
+		for i := 0; i < len(emptyInputs); i++ {
+			if input.IsRequired(emptyInputs[i]) {
+				emptyFlags = append(emptyFlags, fmt.Sprintf("--%s", emptyInputs[i].Name))
+			}
 		}
+
+		return fmt.Errorf("this flags cannot be empty [%s]", strings.Join(emptyFlags, ", "))
 	}
 
 	return nil
-}
-
-func (in InputManager) validateEmptyInputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.FlagSet, emptyInputs formula.Inputs, ni bool) error {
-	if !ni { // Call inputs by prompt when the interactive mode is active
-		newSetup := setup
-		newSetup.Config.Inputs = emptyInputs
-		if err := in.prompt.Inputs(cmd, newSetup, flags); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	emptyFlags := make([]string, len(emptyInputs))
-	for i := 0; i < len(emptyInputs); i++ {
-		emptyFlags[i] = fmt.Sprintf("--%s", emptyInputs[i].Name)
-	}
-
-	return fmt.Errorf("this flags cannot be empty [%s]", strings.Join(emptyFlags, ", "))
 }

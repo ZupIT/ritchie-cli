@@ -13,7 +13,6 @@ const (
 	TextType       = "text"
 	BoolType       = "bool"
 	PassType       = "password"
-	NonInteractive = "non-interactive"
 )
 
 // addEnv Add environment variable to run formulas.
@@ -33,4 +32,12 @@ func ResolveIfReserved(envResolvers env.Resolvers, input formula.Input) (string,
 		return resolver.Resolve(input.Type)
 	}
 	return "", nil
+}
+
+func IsRequired(input formula.Input) bool {
+	if input.Required == nil {
+		return input.Default == ""
+	}
+
+	return *input.Required
 }

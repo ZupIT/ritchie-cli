@@ -43,8 +43,6 @@ func TestInputs(t *testing.T) {
 
 	type in struct {
 		creResolver      env.Resolvers
-		inputPromptMock  formula.InputRunner
-		nonInteractive   bool
 		defaultFlagValue string
 	}
 
@@ -57,43 +55,21 @@ func TestInputs(t *testing.T) {
 			name: "success flags",
 			in: in{
 				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				nonInteractive:   false,
 				defaultFlagValue: "text",
-			},
-			want: nil,
-		},
-		{
-			name: "success flags with prompt",
-			in: in{
-				inputPromptMock: promptMock{},
-				creResolver:     env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				nonInteractive:  false,
 			},
 			want: nil,
 		},
 		{
 			name: "error flags empty",
 			in: in{
-				inputPromptMock: promptMock{},
 				creResolver:     env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				nonInteractive:  true,
 			},
-			want: errors.New("this flags cannot be empty [--sample_text_cache, --sample_text, --sample_text_2, --sample_list, --sample_password]"),
+			want: errors.New("this flags cannot be empty [--sample_text_cache, --sample_text_2, --sample_password]"),
 		},
 		{
-			name: "flags to prompt error",
-			in: in{
-				inputPromptMock: promptMock{err: errors.New("error to prompt inputs")},
-				creResolver:     env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				nonInteractive:  false,
-			},
-			want: errors.New("error to prompt inputs"),
-		},
-		{
-			name: "error env resolver prompt",
+			name: "error env resolver",
 			in: in{
 				creResolver:     env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
-				nonInteractive:   false,
 				defaultFlagValue: "text",
 			},
 			want: errors.New("credential not found"),
@@ -102,11 +78,10 @@ func TestInputs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			inputManager := NewInputManager(tt.in.creResolver, tt.in.inputPromptMock)
+			inputManager := NewInputManager(tt.in.creResolver)
 
 			cmd := &exec.Cmd{}
 			flags := pflag.NewFlagSet("test", 0)
-			flags.Bool(input.NonInteractive, tt.in.nonInteractive, "")
 
 			for _, in := range inputs {
 				switch in.Type {
