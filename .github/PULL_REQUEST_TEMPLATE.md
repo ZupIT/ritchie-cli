@@ -10,12 +10,10 @@ guide https://docs.ritchiecli.io/community
 Please provide the following information:
 -->
 
-**- What I did**
+### Description
+<!-- What are the reasons and motivation of this PR -->
 
-**- How to verify it**
+### How to verify it
 
-**- Description for the changelog**
-<!--
-Write a short (one line) summary that describes the changes in this
-pull request for inclusion in the changelog:
--->
+### Changelog
+<!-- One line summary that describes the changes introduced in this pull request -->

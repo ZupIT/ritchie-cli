@@ -101,14 +101,6 @@ func TestInputs(t *testing.T) {
 	}
 }
 
-type promptMock struct {
-	err error
-}
-
-func (p promptMock) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.FlagSet) error {
-	return p.err
-}
-
 type envResolverMock struct {
 	in  string
 	err error

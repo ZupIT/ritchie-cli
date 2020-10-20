@@ -66,6 +66,10 @@ The legacy code is available at [Ritchie Legacy-1.0.0](https://github.com/ZupIT/
 
 [Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
 
+## Developer Guide
+
+[Check out the developer guide to understand where to start when doing a PR](https://github.com/ZupIT/ritchie-cli/blob/master/DEVELOPER_GUIDE.md)
+
 ## Zup Products
 
 [Zup open source](https://opensource.zup.com.br)

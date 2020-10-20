@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	TextType       = "text"
-	BoolType       = "bool"
-	PassType       = "password"
+	TextType    = "text"
+	BoolType    = "bool"
+	PassType    = "password"
+	DynamicType = "dynamic"
 )
 
 // addEnv Add environment variable to run formulas.

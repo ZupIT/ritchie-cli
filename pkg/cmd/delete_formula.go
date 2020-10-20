@@ -54,7 +54,7 @@ type (
 	deleteFormulaCmd struct {
 		userHomeDir    string
 		ritchieHomeDir string
-		workspace      formula.WorkspaceAddListValidator
+		workspace      formula.WorkspaceAddLister
 		directory      stream.DirListChecker
 		inBool         prompt.InputBool
 		inText         prompt.InputText
@@ -67,7 +67,7 @@ type (
 func NewDeleteFormulaCmd(
 	userHomeDir string,
 	ritchieHomeDir string,
-	workspace formula.WorkspaceAddListValidator,
+	workspace formula.WorkspaceAddLister,
 	directory stream.DirListChecker,
 	inBool prompt.InputBool,
 	inText prompt.InputText,
@@ -106,24 +106,13 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := filepath.Join(d.userHomeDir, formula.DefaultWorkspaceDir)
-		if d.directory.Exists(defaultWorkspace) {
-			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
-		}
-
 		wspace, err := FormulaWorkspaceInput(workspaces, d.inList, d.inText)
 		if err != nil {
 			return err
 		}
 
-		if wspace.Dir != defaultWorkspace {
-			if err := d.workspace.Validate(wspace); err != nil {
-				return err
-			}
-
-			if err := d.workspace.Add(wspace); err != nil {
-				return err
-			}
+		if err := d.workspace.Add(wspace); err != nil {
+			return err
 		}
 
 		groups, err := d.readFormulas(wspace.Dir, "rit")

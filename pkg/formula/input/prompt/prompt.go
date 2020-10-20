@@ -20,12 +20,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/spf13/pflag"
+
+	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
@@ -100,6 +104,16 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 			inputVal = strconv.FormatBool(valBool)
 		case input.PassType:
 			inputVal, err = in.Password(i.Label, i.Tutorial)
+		case input.DynamicType:
+			dl, err := in.dynamicList(i.RequestInfo)
+			if err != nil {
+				return err
+			}
+
+			inputVal, err = in.List(i.Label, dl, i.Tutorial)
+			if err != nil {
+				return err
+			}
 		default:
 			inputVal, err = input.ResolveIfReserved(in.envResolvers, i)
 		}
@@ -265,4 +279,45 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 
 		return errors.New(input.Pattern.MismatchText)
 	})
+}
+
+func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
+	body, err := makeRequest(info)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := findValues(info.JsonPath, body)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func makeRequest(info formula.RequestInfo) (interface{}, error) {
+	response, err := http.Get(info.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
+	}
+
+	body, _ := ioutil.ReadAll(response.Body)
+	requestData := interface{}(nil)
+
+	_ = json.Unmarshal(body, &requestData)
+	return requestData, nil
+}
+
+func findValues(jsonPath string, requestData interface{}) ([]string, error) {
+	dynamicOptions, err := jsonpath.Get(jsonPath, requestData)
+	if err != nil {
+		return nil, err
+	}
+	dynamicOptionsStr := fmt.Sprintf("%v", dynamicOptions)
+	dynamicOptionsArr := strings.Split(dynamicOptionsStr, " ")
+
+	return dynamicOptionsArr, nil
 }
