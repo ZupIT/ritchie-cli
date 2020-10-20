@@ -370,11 +370,11 @@ func makeRequest(info formula.RequestInfo) (interface{}, error) {
 	}
 
 	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return nil, errors.New("dynamic list request was not in 2xx range")
+		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
 	}
 
 	body, _ := ioutil.ReadAll(response.Body)
-	requestData :=  interface{}(nil)
+	requestData := interface{}(nil)
 
 	_ = json.Unmarshal(body, &requestData)
 	return requestData, nil

@@ -579,7 +579,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       						"name": "repo_list",
       						"type": "dynamic",
       						"requestInfo": {
-      						  "url":"https://api.github.com/users/victor-schumacher/repos",
+      						  "url":"https://api.github.com/orgs/zupIt/repos",
       						  "jsonPath":"$..full_name"
       					 	}
     					}
