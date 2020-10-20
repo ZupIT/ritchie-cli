@@ -575,7 +575,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			in: in{
 				inputJson: `[
 					     {
-      						"label": "Choose your repositorie ",
+      						"label": "Choose your repository ",
       						"name": "repo_list",
       						"type": "dynamic",
       						"requestInfo": {
@@ -594,7 +594,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			in: in{
 				inputJson: `[
 					     {
-      						"label": "Choose your repositorie ",
+      						"label": "Choose your repository ",
       						"name": "repo_list",
       						"type": "dynamic",
       						"requestInfo": {
@@ -613,11 +613,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			in: in{
 				inputJson: `[
 					     {
-      						"label": "Choose your repositorie ",
+      						"label": "Choose your repository ",
       						"name": "repo_list",
       						"type": "dynamic",
       						"requestInfo": {
-      						  "url":"https://api.github.com/users/victor-schumacher/repos",
+      						  "url":"https://api.github.com/orgs/ZupIT/repos",
       						  "jsonPath":"$.[*]full_name"
       					 	}
     					}
@@ -632,7 +632,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			in: in{
 				inputJson: `[
 					     {
-      						"label": "Choose your repositorie ",
+      						"label": "Choose your repository ",
       						"name": "repo_list",
       						"type": "dynamic",
       						"requestInfo": {
