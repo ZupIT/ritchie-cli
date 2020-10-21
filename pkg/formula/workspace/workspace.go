@@ -135,15 +135,6 @@ func (m Manager) List() (formula.Workspaces, error) {
 	return workspaces, nil
 }
 
-func (m Manager) Validate(workspace formula.Workspace) error {
-	dir := workspace.Dir
-	if !m.file.Exists(dir) {
-		return ErrInvalidWorkspace
-	}
-
-	return nil
-}
-
 func (m Manager) PreviousHash(formulaPath string) (string, error) {
 	filePath := m.hashPath(formulaPath)
 
