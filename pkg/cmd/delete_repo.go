@@ -39,12 +39,14 @@ type deleteRepoCmd struct {
 	formula.RepositoryLocalDeleter
 }
 
+// NewDeleteRepoCmd is the constructor for delete repo command
 func NewDeleteRepoCmd(
 	rl formula.RepositoryLister,
 	rll formula.RepositoryListerLocal,
 	il prompt.InputList,
 	rd formula.RepositoryDeleter,
-	rld formula.RepositoryLocalDeleter) *cobra.Command {
+	rld formula.RepositoryLocalDeleter,
+) *cobra.Command {
 	dr := deleteRepoCmd{rl, rll, il, rd, rld}
 	cmd := &cobra.Command{
 		Use:       "repo",
