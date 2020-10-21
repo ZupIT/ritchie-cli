@@ -79,7 +79,7 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		return formula.Setup{}, err
 	}
 
-	binFilePath := def.BinFilePath(formulaPath)
+	binFilePath := def.UnixBinFilePath(formulaPath)
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
 		time.Sleep(2 * time.Second)
