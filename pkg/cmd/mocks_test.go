@@ -149,6 +149,18 @@ func (inputListMock) List(name string, items []string, helper ...string) (string
 	return "item-mocked", nil
 }
 
+type repositoryDeleteMock struct{}
+
+func (repositoryDeleteMock) Delete(name formula.RepoName) error {
+	return nil
+}
+
+type repositoryDeleteLocalMock struct{}
+
+func (repositoryDeleteLocalMock) DeleteLocal() error {
+	return nil
+}
+
 type inputListCustomMock struct {
 	list func(name string, items []string) (string, error)
 }
@@ -243,6 +255,36 @@ type repoListerMock struct{}
 
 func (repoListerMock) List() (formula.Repos, error) {
 	return formula.Repos{}, nil
+}
+
+type repoListerLocalMock struct{}
+
+func (repoListerLocalMock) ListLocal() (formula.RepoName, error) {
+	return "local", nil
+}
+
+type repoListerCustomMock struct {
+	list func() (formula.Repos, error)
+}
+
+func (r repoListerCustomMock) List() (formula.Repos, error) {
+	return r.list()
+}
+
+type repoListerLocalCustomMock struct {
+	listLocal func() (formula.RepoName, error)
+}
+
+func (r repoListerLocalCustomMock) ListLocal() (formula.RepoName, error) {
+	return r.listLocal()
+}
+
+type testBeforeSetupMock struct {
+	setup func()
+}
+
+func (r testBeforeSetupMock) Setup() {
+	r.setup()
 }
 
 type repoListerNonEmptyMock struct{}
