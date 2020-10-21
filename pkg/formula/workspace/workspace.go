@@ -30,7 +30,6 @@ import (
 var (
 	ErrInvalidWorkspace = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
 
-	sourceDir  = "src"
 	hashesPath = "hashes"
 	hashesExt  = ".txt"
 )
@@ -147,7 +146,7 @@ func (m Manager) PreviousHash(formulaPath string) (string, error) {
 }
 
 func (m Manager) CurrentHash(formulaPath string) (string, error) {
-	return m.dir.Hash(filepath.Join(formulaPath, sourceDir))
+	return m.dir.Hash(formulaPath)
 }
 
 func (m Manager) UpdateHash(formulaPath string, hash string) error {
