@@ -415,21 +415,13 @@ func TestPreviousHash(t *testing.T) {
 			hash, err := workspace.PreviousHash(tt.in.formulaPath)
 
 			if hashPath != tt.out.path {
-				t.Errorf("Validate(%s) expected hash to be read from %s instead of %s", tt.name, tt.out.path, hashPath)
+				t.Errorf("Expected hash to be read from %s instead of %s", tt.out.path, hashPath)
 			}
-
-			if err == nil && tt.out.err != nil {
-				t.Errorf("Validate(%s) expected '%v' error but didn't get any", tt.name, tt.out.err)
+			if (err != nil) != (tt.out.err != nil) || (err != nil && err.Error() != tt.out.err.Error()) {
+				t.Errorf("Got error '%v', expected error '%v'", err, tt.out.err)
 			}
-			if err != nil && tt.out.err == nil {
-				t.Errorf("Validate(%s) didn't expect error but got '%v'", tt.name, err)
-			}
-			if err != nil && tt.out.err != nil && err.Error() != tt.out.err.Error() {
-				t.Errorf("Validate(%s) got error '%v', expected error '%v'", tt.name, err, tt.out.err)
-			}
-
 			if err == nil && hash != tt.out.hash {
-				t.Errorf("Validate(%s) got hash '%v', expected hash '%v'", tt.name, hash, tt.out.hash)
+				t.Errorf("Got hash '%v', expected hash '%v'", hash, tt.out.hash)
 			}
 		})
 	}
@@ -522,21 +514,13 @@ func TestUpdateHash(t *testing.T) {
 			err := workspace.UpdateHash(tt.in.formulaPath, tt.in.hash)
 
 			if hashPath != tt.out.path {
-				t.Errorf("Validate(%s) expected hash to be written to %s instead of %s", tt.name, tt.out.path, hashPath)
+				t.Errorf("Expected hash to be written to %s instead of %s", tt.out.path, hashPath)
 			}
-
 			if string(hashContent) != string(tt.out.content) {
-				t.Errorf("Validate(%s) expected hash %s to be written instead of %s", tt.name, string(tt.out.content), string(hashContent))
+				t.Errorf("Expected hash %s to be written instead of %s", string(tt.out.content), string(hashContent))
 			}
-
-			if err == nil && tt.out.err != nil {
-				t.Errorf("Validate(%s) expected '%v' error but didn't get any", tt.name, tt.out.err)
-			}
-			if err != nil && tt.out.err == nil {
-				t.Errorf("Validate(%s) didn't expect error but got '%v'", tt.name, err)
-			}
-			if err != nil && tt.out.err != nil && err.Error() != tt.out.err.Error() {
-				t.Errorf("Validate(%s) got error '%v', expected error '%v'", tt.name, err, tt.out.err)
+			if (err != nil) != (tt.out.err != nil) || (err != nil && err.Error() != tt.out.err.Error()) {
+				t.Errorf("Got error '%v', expected error '%v'", err, tt.out.err)
 			}
 		})
 	}
