@@ -65,15 +65,15 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		}
 	}
 
-	if len(emptyInputs) > 0 {
-		var emptyFlags []string
-		for i := 0; i < len(emptyInputs); i++ {
-			if input.IsRequired(emptyInputs[i]) {
-				emptyFlags = append(emptyFlags, fmt.Sprintf("--%s", emptyInputs[i].Name))
-			}
+	var emptyFlags []string
+	for _, e := range emptyInputs {
+		if input.IsRequired(e) {
+			emptyFlags = append(emptyFlags, fmt.Sprintf("--%s", e.Name))
 		}
+	}
 
-		return fmt.Errorf("this flags cannot be empty [%s]", strings.Join(emptyFlags, ", "))
+	if len(emptyInputs) > 0 {
+		return fmt.Errorf("these flags cannot be empty [%s]", strings.Join(emptyFlags, ", "))
 	}
 
 	return nil

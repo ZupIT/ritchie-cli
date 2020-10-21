@@ -64,7 +64,7 @@ func TestInputs(t *testing.T) {
 			in: in{
 				creResolver:     env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
 			},
-			want: errors.New("this flags cannot be empty [--sample_text_cache, --sample_text_2, --sample_password]"),
+			want: errors.New("these flags cannot be empty [--sample_text_cache, --sample_text_2, --sample_password]"),
 		},
 		{
 			name: "error env resolver",
