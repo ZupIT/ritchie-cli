@@ -172,20 +172,14 @@ func TestPreRunBuilder(t *testing.T) {
 				test.previousHashError, test.writeHashError}, builderMock, inputBoolMock)
 			preRunBuilder.Build("/testing/formula")
 
-			if builderMock.HasBuilt() != test.mustBuild {
-				if test.mustBuild {
-					t.Error("Expected formula to build but it didn't")
-				} else {
-					t.Error("Expected formula not to build but it did")
-				}
+			gotBuilt := builderMock.HasBuilt()
+			if gotBuilt != test.mustBuild {
+				t.Errorf("Got build %v, wanted %v", gotBuilt, test.mustBuild)
 			}
 
-			if inputBoolMock.HasBeenCalled() != test.mustPromptRebuild {
-				if test.mustPromptRebuild {
-					t.Error("Expected formula to prompt for rebuild but it didn't")
-				} else {
-					t.Error("Expected formula not to prompt for rebuild but it did")
-				}
+			gotPrompted := inputBoolMock.HasBeenCalled()
+			if gotPrompted != test.mustPromptRebuild {
+				t.Errorf("Got rebuild prompt %v, wanted %v", gotBuilt, test.mustBuild)
 			}
 		})
 	}
