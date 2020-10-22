@@ -225,7 +225,8 @@ func addReservedFlags(flags *pflag.FlagSet) {
 		case reflect.Int:
 			flags.IntP(flag.name, flag.shortName, flag.defValue.(int), flag.description)
 		default:
-			prompt.Warning("this type of flag is not supported")
+			warning := fmt.Sprintf("The %q type is not supported for the %q flag", flag.kind.String(), flag.name)
+			prompt.Warning(warning)
 		}
 	}
 }
@@ -271,7 +272,7 @@ func isInputFlag(cmd *cobra.Command) bool {
 	flags := cmd.Flags()
 	c := 0
 	for _, flag := range reservedFlags {
-		if changed := flags.Changed(flag.name); changed {
+		if flags.Changed(flag.name) {
 			c++
 		}
 	}
