@@ -79,7 +79,7 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		return formula.Setup{}, err
 	}
 
-	binFilePath := def.BinFilePath(formulaPath)
+	binFilePath := def.UnixBinFilePath(formulaPath)
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
 		time.Sleep(2 * time.Second)
@@ -183,6 +183,7 @@ func buildRunImg(def formula.Definition) (string, error) {
 
 	metric.RepoName = def.RepoName
 
+	containerId = strings.ToLower(containerId)
 	args := []string{"build", "-t", containerId, "."}
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
