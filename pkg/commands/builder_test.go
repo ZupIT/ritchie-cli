@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package main
+package commands
 
 import (
-	"fmt"
-	"os"
-	"time"
-
-	"github.com/ZupIT/ritchie-cli/pkg/commands"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"bytes"
+	"io/ioutil"
+	"strings"
+	"testing"
 )
 
-func main() {
-	startTime := time.Now()
-	rootCmd := commands.Build()
-	err := rootCmd.Execute()
-	if err != nil {
-		commands.SendMetric(commands.ExecutionTime(startTime), err.Error())
-		errFmt := fmt.Sprintf("%+v", err)
-		errFmt = prompt.Red(errFmt)
-		_, _ = fmt.Fprintf(os.Stderr, "Error: %s\n", errFmt)
-		os.Exit(1)
-	}
-	commands.SendMetric(commands.ExecutionTime(startTime))
+func TestBuild(t *testing.T) {
+	t.Run("Build commands successfully", func(t *testing.T) {
+		cmd := Build()
+		b := bytes.NewBufferString("")
+		cmd.SetArgs([]string{"--version"})
+		cmd.SetOut(b)
+		cmd.Execute()
+		out, err := ioutil.ReadAll(b)
+		if err != nil {
+			t.Fatal(err)
+		}
+		outString := string(out)
+		if !strings.Contains(outString, "rit version") {
+			t.Fatalf("expected \"%s\" got \"%s\"", "rit version", outString)
+		}
+	})
 }
