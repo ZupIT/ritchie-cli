@@ -29,7 +29,9 @@ func TestBuild(t *testing.T) {
 		b := bytes.NewBufferString("")
 		cmd.SetArgs([]string{"--version"})
 		cmd.SetOut(b)
-		cmd.Execute()
+		if err := cmd.Execute(); err != nil {
+			t.Fatal(err)
+		}
 		out, err := ioutil.ReadAll(b)
 		if err != nil {
 			t.Fatal(err)
