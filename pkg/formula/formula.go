@@ -164,6 +164,10 @@ func (d *Definition) TmpWorkDirPath(home string) string {
 	return filepath.Join(home, TmpDir, u)
 }
 
+func (d *Definition) UnixBinFilePath(fPath string) string {
+	return filepath.Join(fPath, BinDir, BinUnix)
+}
+
 // BinFilePath builds the bin file path from formula path
 func (d *Definition) BinFilePath(fPath string) string {
 	return filepath.Join(fPath, BinDir, d.BinName())
