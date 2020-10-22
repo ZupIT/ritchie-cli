@@ -180,7 +180,7 @@ func TestPreRun(t *testing.T) {
 				err:     errors.New("error to create dir"),
 			},
 		},
-		
+
 		{
 			name: "Chdir error",
 			in: in{
