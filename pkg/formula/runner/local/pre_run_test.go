@@ -181,59 +181,6 @@ func TestPreRun(t *testing.T) {
 			},
 		},
 		{
-			name: "copy work dir error",
-			in: in{
-				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				makeBuild: makeBuildMock{
-					build: func(formulaPath string) error {
-						return dirManager.Create(filepath.Join(formulaPath, "bin"))
-					},
-				},
-				batBuild: batBuildMock{
-					build: func(formulaPath string) error {
-						return dirManager.Create(filepath.Join(formulaPath, "bin"))
-					},
-				},
-				shellBuild: shellBuildMock{
-					build: func(formulaPath string) error {
-						return dirManager.Create(filepath.Join(formulaPath, "bin"))
-					},
-				},
-				file: fileManager,
-				dir:  dirManagerMock{copyErr: errors.New("error to copy dir")},
-			},
-			out: out{
-				wantErr: true,
-				err:     errors.New("error to copy dir"),
-			},
-		},
-		{
-			name: "Chdir error",
-			in: in{
-				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				makeBuild: makeBuildMock{
-					build: func(formulaPath string) error {
-						return dirManager.Create(filepath.Join(formulaPath, "bin"))
-					},
-				},
-				batBuild: batBuildMock{
-					build: func(formulaPath string) error {
-						return dirManager.Create(filepath.Join(formulaPath, "bin"))
-					},
-				},
-				shellBuild: shellBuildMock{
-					build: func(formulaPath string) error {
-						return dirManager.Create(filepath.Join(formulaPath, "bin"))
-					},
-				},
-				file: fileManager,
-				dir:  dirManagerMock{},
-			},
-			out: out{
-				wantErr: true,
-			},
-		},
-		{
 			name: "local build error delete bin dir",
 			in: in{
 				def: formula.Definition{Path: "testing/formula", RepoName: "commons"},
