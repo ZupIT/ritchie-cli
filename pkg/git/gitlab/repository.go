@@ -16,6 +16,7 @@
 package gitlab
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -97,7 +98,7 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	apiUrl := info.LatestTagUrl()
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
 	if err != nil {
 		return git.Tag{}, err
 	}

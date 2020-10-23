@@ -35,9 +35,9 @@ import (
 )
 
 const (
-	msgFormulaNotFound      = "Could not find formula"
-	msgIncorrectFormulaName = "Formula name is incorrect"
-	foundFormulaQuestion    = "We found a formula, which one do you want to delete: "
+	msgFormulaNotFound      = "could not find formula"
+	msgIncorrectFormulaName = "formula name is incorrect"
+	foundFormulaQuestion    = "we found a formula, which one do you want to delete: "
 )
 
 var (
