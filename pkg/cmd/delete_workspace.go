@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	msgWorkspaceIsNotValid = "The workspace informed is not valid"
-	msgEmptyWorkspaces     = "There are no workspaces to delete"
+	msgWorkspaceIsNotValid = "the workspace informed is not valid"
+	msgEmptyWorkspaces     = "there are no workspaces to delete"
 )
 
 var (
