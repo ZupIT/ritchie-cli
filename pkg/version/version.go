@@ -35,22 +35,22 @@ const (
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
 
-	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+	StableVersionURL = "https://commons-repo.ritchiecli.io/stable.txt"
 )
 
 type Manager struct {
-	stableUrl string
+	stableURL string
 	file      stream.FileWriteReadExister
 }
 
 var _ Resolver = Manager{}
 
 func NewManager(
-	stableVersionUrl string,
+	stableVersionURL string,
 	file stream.FileWriteReadExister,
 ) Manager {
 	return Manager{
-		stableUrl: stableVersionUrl,
+		stableURL: stableVersionURL,
 		file:      file,
 	}
 }
@@ -86,7 +86,7 @@ func (m Manager) StableVersion() (string, error) {
 	}
 
 	if shouldRequestAndSave {
-		stableVersion, err := requestStableVersion(m.stableUrl)
+		stableVersion, err := requestStableVersion(m.stableURL)
 		if err != nil {
 			return "", err
 		}
@@ -110,7 +110,7 @@ func (m Manager) VerifyNewVersion(current, installed string) string {
 func (m Manager) UpdateCache() error {
 	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
 
-	stableVersion, err := requestStableVersion(m.stableUrl)
+	stableVersion, err := requestStableVersion(m.stableURL)
 	if err != nil {
 		return err
 	}

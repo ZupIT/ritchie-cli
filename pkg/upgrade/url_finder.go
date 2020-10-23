@@ -35,7 +35,7 @@ func NewDefaultUrlFinder(version version.Resolver) DefaultUrlFinder {
 	return DefaultUrlFinder{version: version}
 }
 
-func (duf DefaultUrlFinder) Url(os string) string {
+func (duf DefaultUrlFinder) Url(os string) string { //nolint:stylecheck
 	//stableVersion, err := resolver.StableVersion()
 	stableVersion, err := duf.version.StableVersion()
 
@@ -43,11 +43,11 @@ func (duf DefaultUrlFinder) Url(os string) string {
 		return ""
 	}
 
-	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, os)
+	upgradeURL := fmt.Sprintf(upgradeUrlFormat, stableVersion, os)
 
 	if os == osutil.Windows {
-		upgradeUrl += ".exe"
+		upgradeURL += ".exe"
 	}
 
-	return upgradeUrl
+	return upgradeURL
 }
