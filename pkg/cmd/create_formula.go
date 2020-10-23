@@ -35,7 +35,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-// createFormulaCmd type for add formula command
+// createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
 	formula         formula.CreateBuilder
@@ -47,7 +47,7 @@ type createFormulaCmd struct {
 	rt              rtutorial.Finder
 }
 
-// CreateFormulaCmd creates a new cmd instance
+// CreateFormulaCmd creates a new cmd instance.
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,

@@ -24,7 +24,7 @@ import (
 // CommandRunnerFunc represents that runner func for commands
 type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
 
-// RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc
+// RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc.
 func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
