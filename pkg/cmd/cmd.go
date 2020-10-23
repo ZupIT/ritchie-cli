@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// CommandRunnerFunc represents that runner func for commands
+// CommandRunnerFunc represents that runner func for commands.
 type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
 
 // RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc.
