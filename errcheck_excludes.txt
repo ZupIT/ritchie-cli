@@ -1,0 +1,5 @@
+(io.Closer).Close
+(*os.File).Close
+(*io.PipeReader).Close
+(*io.PipeWriter).Close
+(*archive/zip.ReadCloser).Close

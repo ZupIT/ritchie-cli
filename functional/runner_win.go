@@ -34,6 +34,8 @@ func (scenario *Scenario) runStdinForWindows() (bytes.Buffer, error) {
 	args := append([]string{"-Command", "Write-Output", "'" + writeOutput + "'", "|", "rit"}, rit...)
 	cmd := exec.Command("powershell", args...)
 	_, pipeWriter := io.Pipe()
+	defer pipeWriter.Close()
+
 	cmd.Stdout = pipeWriter
 
 	var stderr bytes.Buffer
@@ -52,8 +54,6 @@ func (scenario *Scenario) runStdinForWindows() (bytes.Buffer, error) {
 		log.Printf("Error while running: %q", err)
 		b2 = stderr
 	}
-
-	pipeWriter.Close()
 
 	fmt.Println(&b2)
 	fmt.Println("--------")
