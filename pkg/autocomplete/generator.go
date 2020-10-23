@@ -160,7 +160,7 @@ func loadCommands(cc []api.Command) map[string]CompletionCommand {
 }
 
 func loadBashCommands(cc map[string]CompletionCommand) []BashCommand {
-	var bb []BashCommand
+	bb := make([]BashCommand, 0, len(cc))
 	for key, val := range cc {
 		rootCommand := key
 		level := len(strings.Split(key, "_"))
