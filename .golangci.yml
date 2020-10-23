@@ -23,6 +23,7 @@ linters:
   enable-all: true
   disable:
     - gci
+    - testpackage
   presets:
   fast: false
 
