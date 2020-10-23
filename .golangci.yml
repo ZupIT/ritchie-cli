@@ -40,6 +40,9 @@ linters:
     - goconst
     - stylecheck
     - lll
+    - noctx
+    - godot
+    - gocritic
   presets:
   fast: false
 
