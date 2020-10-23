@@ -30,7 +30,7 @@ type UserIdManager struct {
 	hash hash.Hash
 }
 
-func NewUserIdGenerator() UserIdManager {
+func NewUserIdGenerator() UserIdManager { //nolint:stylecheck
 	return UserIdManager{hash: sha256.New()}
 }
 
