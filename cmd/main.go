@@ -105,8 +105,8 @@ func buildCommands() *cobra.Command {
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
-	userIdManager := metric.NewUserIdGenerator()
-	Data = metric.NewDataCollector(userIdManager, ritchieHomeDir, fileManager)
+	userIDManager := metric.NewUserIdGenerator()
+	Data = metric.NewDataCollector(userIDManager, ritchieHomeDir, fileManager)
 
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
@@ -192,7 +192,7 @@ func buildCommands() *cobra.Command {
 	)
 	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()
 	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)
-	defaultUrlFinder := upgrade.NewDefaultUrlFinder(versionManager)
+	defaultURLFinder := upgrade.NewDefaultUrlFinder(versionManager)
 	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder, versionManager)
 
 	// level 1
@@ -215,7 +215,7 @@ func buildCommands() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder, inputList, fileManager)
+	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultURLFinder, inputList, fileManager)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
