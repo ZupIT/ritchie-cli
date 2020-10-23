@@ -21,6 +21,8 @@ linters-settings:
 
 linters:
   enable-all: true
+  disable:
+    - gci
   presets:
   fast: false
 
