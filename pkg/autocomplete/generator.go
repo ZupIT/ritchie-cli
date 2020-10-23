@@ -99,14 +99,14 @@ func loadToFish(cmd *cobra.Command) (string, error) {
 
 func loadToBash(t formula.Tree) string {
 	a := autoCompletionBash
-	a = strings.Replace(a, binaryNamePattern, binaryName, -1)
+	a = strings.ReplaceAll(a, binaryNamePattern, binaryName)
 	a = strings.Replace(a, dynamicCodePattern, loadDynamicCommands(t), 1)
 	return a
 }
 
 func loadToZsh(t formula.Tree) string {
 	a := autoCompletionZsh
-	a = strings.Replace(a, binaryNamePattern, binaryName, -1)
+	a = strings.ReplaceAll(a, binaryNamePattern, binaryName)
 	a = strings.Replace(a, autocompleteBashPattern, loadToBash(t), 1)
 	return a
 }
@@ -118,10 +118,10 @@ func loadDynamicCommands(t formula.Tree) string {
 	var allCommands string
 	for _, b := range bashCommands {
 		functionName := formatterFunctionName(b.RootCommand)
-		c := strings.Replace(command, rootCommandPattern, b.RootCommand, -1)
-		c = strings.Replace(c, lastCommandPattern, b.LastCommand, -1)
-		c = strings.Replace(c, funcNamePattern, functionName, -1)
-		allCommands += strings.Replace(c, commandsPattern, b.Commands, -1)
+		c := strings.ReplaceAll(command, rootCommandPattern, b.RootCommand)
+		c = strings.ReplaceAll(c, lastCommandPattern, b.LastCommand)
+		c = strings.ReplaceAll(c, funcNamePattern, functionName)
+		allCommands += strings.ReplaceAll(c, commandsPattern, b.Commands)
 	}
 	return allCommands
 }
@@ -166,7 +166,7 @@ func loadBashCommands(cc map[string]CompletionCommand) []BashCommand {
 		level := len(strings.Split(key, "_"))
 		var commands string
 		for _, v := range val.Content {
-			commands += strings.Replace(lineCommand, "${command}", v, -1) + "\n"
+			commands += strings.ReplaceAll(lineCommand, "${command}", v) + "\n"
 		}
 		if rootCommand == firstLevel {
 			rootCommand = fmt.Sprintf("%s_%s", binaryName, rootCommand)
