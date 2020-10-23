@@ -28,6 +28,7 @@ linters:
     - gomnd
     - wsl
     - goerr113
+    - scopelint
   presets:
   fast: false
 
@@ -55,6 +56,11 @@ issues:
     - linters:
         - stylecheck
       text: "ST1005:"
+
+    #  at least one file in a package should have a package comment
+    - linters:
+        - stylecheck
+      text: "ST1000:"
 
   exclude-use-default: false
   max-issues-per-linter: 0
