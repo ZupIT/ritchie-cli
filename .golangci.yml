@@ -24,6 +24,7 @@ linters:
   disable:
     - gci
     - testpackage
+    - nlreturn
   presets:
   fast: false
 
