@@ -25,6 +25,7 @@ linters:
     - gci
     - testpackage
     - nlreturn
+    - gomnd
   presets:
   fast: false
 
