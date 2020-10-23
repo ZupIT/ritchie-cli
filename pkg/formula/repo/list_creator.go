@@ -23,7 +23,10 @@ type ListCreateManager struct {
 	formula.RepositoryCreator
 }
 
-func NewListCreator(repoList formula.RepositoryLister, repoCreate formula.RepositoryCreator) formula.RepositoryListCreator {
+func NewListCreator(
+	repoList formula.RepositoryLister,
+	repoCreate formula.RepositoryCreator,
+) formula.RepositoryListCreator {
 	return ListCreateManager{
 		RepositoryLister:  repoList,
 		RepositoryCreator: repoCreate,
