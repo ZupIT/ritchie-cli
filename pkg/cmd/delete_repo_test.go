@@ -49,7 +49,7 @@ func TestNewDeleteRepoCmd(t *testing.T) {
 			fields: fieldsTestDeleteRepoCmd{
 				repositoryLister: repoListerMock{},
 				repositoryListerLocal: repoListerLocalCustomMock{
-					listLocal: func() (formula.RepoName, error) {
+					list: func() (formula.RepoName, error) {
 						return "", someError
 					},
 				},
@@ -116,13 +116,13 @@ func TestNewDeleteRepoCmd(t *testing.T) {
 			)
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
-			if err := cmd.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("%s error = %v, wantErr %v", cmd.Use, err, tt.wantErr)
-			}
-
 			if cmd == nil {
 				t.Errorf("TestNewDeleteRepoCmd got %v", cmd)
 				return
+			}
+
+			if err := cmd.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("%s error = %v, wantErr %v", cmd.Use, err, tt.wantErr)
 			}
 		})
 	}

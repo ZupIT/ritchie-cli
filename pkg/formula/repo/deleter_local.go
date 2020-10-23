@@ -35,7 +35,7 @@ func NewLocalDeleter(ritHome string, dir stream.DirRemover) DeleteLocalManager {
 	}
 }
 
-func (dm DeleteLocalManager) DeleteLocal() error {
+func (dm DeleteLocalManager) Delete() error {
 	if err := dm.deleteRepoDir("local"); err != nil {
 		return err
 	}

@@ -26,7 +26,6 @@ import (
 )
 
 func TestDeleteLocalWithSuccess(t *testing.T) {
-
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
@@ -40,7 +39,7 @@ func TestDeleteLocalWithSuccess(t *testing.T) {
 	_ = dirManager.Create(repoPath)
 
 	deleter := NewLocalDeleter(ritHomePath, dirManager)
-	err := deleter.DeleteLocal()
+	err := deleter.Delete()
 	if err != nil {
 		t.Errorf("Delete return err %v", err)
 	}
@@ -78,7 +77,7 @@ func TestDeleteLocalWhenErr(t *testing.T) {
 				ritHome: tt.in.ritHome,
 				dir:     tt.in.dir,
 			}
-			if err := dm.DeleteLocal(); (err != nil) != tt.wantErr {
+			if err := dm.Delete(); (err != nil) != tt.wantErr {
 				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

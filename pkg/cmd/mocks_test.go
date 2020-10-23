@@ -157,7 +157,7 @@ func (repositoryDeleteMock) Delete(name formula.RepoName) error {
 
 type repositoryDeleteLocalMock struct{}
 
-func (repositoryDeleteLocalMock) DeleteLocal() error {
+func (repositoryDeleteLocalMock) Delete() error {
 	return nil
 }
 
@@ -259,7 +259,7 @@ func (repoListerMock) List() (formula.Repos, error) {
 
 type repoListerLocalMock struct{}
 
-func (repoListerLocalMock) ListLocal() (formula.RepoName, error) {
+func (repoListerLocalMock) List() (formula.RepoName, error) {
 	return "local", nil
 }
 
@@ -272,11 +272,11 @@ func (r repoListerCustomMock) List() (formula.Repos, error) {
 }
 
 type repoListerLocalCustomMock struct {
-	listLocal func() (formula.RepoName, error)
+	list func() (formula.RepoName, error)
 }
 
-func (r repoListerLocalCustomMock) ListLocal() (formula.RepoName, error) {
-	return r.listLocal()
+func (r repoListerLocalCustomMock) List() (formula.RepoName, error) {
+	return r.list()
 }
 
 type testBeforeSetupMock struct {

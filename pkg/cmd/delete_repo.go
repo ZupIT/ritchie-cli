@@ -65,9 +65,10 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-		repoLocal, err := dr.RepositoryListerLocal.ListLocal()
+		repoLocal, err := dr.RepositoryListerLocal.List()
+		repoLocalExists := err == nil
 
-		if len(repos) == 0 && repoLocal == "" {
+		if len(repos) == 0 && !repoLocalExists {
 			prompt.Warning("You don't have any repositories")
 			return nil
 		}
@@ -77,7 +78,7 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 			reposNames = append(reposNames, r.Name.String())
 		}
 
-		if err == nil {
+		if repoLocalExists {
 			reposNames = append(reposNames, repoLocal.String())
 		}
 
@@ -88,15 +89,13 @@ func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
 
 		selectedRepoName := formula.RepoName(repo)
 
-		var errReturn error
-		switch selectedRepoName {
-		case repoLocal:
-			errReturn = dr.DeleteLocal()
-		default:
-			errReturn = dr.Delete(selectedRepoName)
+		if selectedRepoName == repoLocal {
+			err = dr.RepositoryLocalDeleter.Delete()
+		} else {
+			err = dr.RepositoryDeleter.Delete(selectedRepoName)
 		}
 
-		if errReturn != nil {
+		if err != nil {
 			return err
 		}
 
@@ -115,7 +114,15 @@ func (dr deleteRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err := dr.Delete(repo.Name); err != nil {
+		repoLocal, _ := dr.RepositoryListerLocal.List()
+
+		if repo.Name == repoLocal {
+			err = dr.RepositoryLocalDeleter.Delete()
+		} else {
+			err = dr.RepositoryDeleter.Delete(repo.Name)
+		}
+
+		if err != nil {
 			return err
 		}
 

@@ -23,16 +23,16 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-type ListLocalManager struct {
+type ListerLocalManager struct {
 	ritHome string
 }
 
-func NewListerLocal(ritHome string) ListLocalManager {
-	return ListLocalManager{ritHome: ritHome}
+func NewListerLocal(ritHome string) ListerLocalManager {
+	return ListerLocalManager{ritHome: ritHome}
 }
 
-// ListLocal method returns an empty formula.RepoName if there is no local folder on li.ritHome
-func (li ListLocalManager) ListLocal() (formula.RepoName, error) {
+// List method returns an empty formula.RepoName if there is no local folder on li.ritHome
+func (li ListerLocalManager) List() (formula.RepoName, error) {
 	localReposPath := filepath.Join(li.ritHome, reposDirName, "local")
 
 	if _, err := os.Stat(localReposPath); os.IsNotExist(err) {

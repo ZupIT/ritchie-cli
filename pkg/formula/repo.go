@@ -98,7 +98,7 @@ type RepositoryLister interface {
 }
 
 type RepositoryListerLocal interface {
-	ListLocal() (RepoName, error)
+	List() (RepoName, error)
 }
 
 type RepositoryUpdater interface {
@@ -110,7 +110,7 @@ type RepositoryDeleter interface {
 }
 
 type RepositoryLocalDeleter interface {
-	DeleteLocal() error
+	Delete() error
 }
 
 type RepositoryPrioritySetter interface {

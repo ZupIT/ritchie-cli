@@ -26,8 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestListManager_ListLocal(t *testing.T) {
-
+func TestListManager_ListerLocal(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
@@ -75,13 +74,13 @@ func TestListManager_ListLocal(t *testing.T) {
 			li := NewListerLocal(
 				tt.in.ritHome,
 			)
-			got, err := li.ListLocal()
+			got, err := li.List()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ListLocal() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ListLocal() got = %v, want %v", got, tt.want)
+				t.Errorf("List() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
