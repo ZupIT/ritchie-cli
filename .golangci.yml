@@ -37,6 +37,9 @@ linters:
     - funlen
     - gosec
     - interfacer
+    - goconst
+    - stylecheck
+    - lll
   presets:
   fast: false
 
@@ -75,6 +78,10 @@ issues:
     - linters:
         - stylecheck
       text: "ST1020:"
+
+    - linters:
+        - gocritic
+      text: "sloppyLen:"
 
   exclude-use-default: false
   max-issues-per-linter: 0
