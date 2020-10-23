@@ -50,10 +50,10 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 	}
 
 	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	resp, err := re.client.Do(req)
+	resp, err := re.client.Do(req) //nolint:bodyclose
 	if err != nil {
 		return nil, err
-	} //nolint:bodyclose
+	}
 
 	return resp.Body, nil
 }

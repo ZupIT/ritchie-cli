@@ -307,7 +307,7 @@ func FormulaWorkspaceInput(
 	return wspace, nil
 }
 
-func tutorialCreateFormula(tutorialStatus string, formulaCmd string) {
+func tutorialCreateFormula(_ string, formulaCmd string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const messageTitle = "In order to test your new formula:"
 	const messageBody = ` ∙ Run %q

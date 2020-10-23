@@ -29,6 +29,7 @@ linters:
     - wsl
     - goerr113
     - scopelint
+    - whitespace
   presets:
   fast: false
 

@@ -55,5 +55,11 @@ func (sm SendManagerHttp) Send(APIData APIData) {
 
 	req.SetBasicAuth(BasicUser, BasicPass)
 	req.Header.Add("Content-Type", "application/json")
-	_, _ = sm.client.Do(req)
+	resp, err := sm.client.Do(req)
+	if err != nil {
+		return
+	}
+	if err := resp.Body.Close(); err != nil {
+		return
+	}
 }

@@ -369,6 +369,8 @@ func makeRequest(info formula.RequestInfo) (interface{}, error) {
 		return nil, err
 	}
 
+	defer response.Body.Close()
+
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
 	}

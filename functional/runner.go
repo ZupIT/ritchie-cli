@@ -101,7 +101,7 @@ func LoadScenarios(file string) []Scenario {
 	if err != nil {
 		log.Fatal("Error reading scenarios json:", err)
 	}
-	err = json.Unmarshal([]byte(b), &res)
+	err = json.Unmarshal(b, &res)
 	if err != nil {
 		log.Fatal("Error unmarshal json:", err)
 	}
