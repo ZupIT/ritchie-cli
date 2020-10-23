@@ -45,7 +45,7 @@ func (us UserIdManager) Generate() (UserId, error) {
 		return "", err
 	}
 
-	userId := hex.EncodeToString(us.hash.Sum(nil))
+	userID := hex.EncodeToString(us.hash.Sum(nil))
 
-	return UserId(userId), nil
+	return UserId(userID), nil
 }
