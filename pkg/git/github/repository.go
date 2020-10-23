@@ -60,7 +60,7 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiUrl := info.TagsUrl()
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
 	if err != nil {
 		return git.Tags{}, err
 	}
