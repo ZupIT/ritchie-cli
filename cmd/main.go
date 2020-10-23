@@ -142,13 +142,35 @@ func buildCommands() *cobra.Command {
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
+	inputManager := runner.NewInput(
+		envResolvers,
+		fileManager,
+		inputList,
+		inputText,
+		inputTextValidator,
+		inputBool,
+		inputPassword,
+	)
 
-	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
+	formulaLocalPreRun := local.NewPreRun(
+		ritchieHomeDir,
+		formBuildMake,
+		formBuildBat,
+		formBuildSh,
+		dirManager,
+		fileManager,
+	)
 	formulaLocalRun := local.NewRunner(postRunner, inputManager, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
-	formulaDockerRun := docker.NewRunner(postRunner, inputManager, formulaDockerPreRun, fileManager, ctxFinder, userHomeDir)
+	formulaDockerRun := docker.NewRunner(
+		postRunner,
+		inputManager,
+		formulaDockerPreRun,
+		fileManager,
+		ctxFinder,
+		userHomeDir,
+	)
 
 	runners := formula.Runners{
 		formula.LocalRun:  formulaLocalRun,
@@ -178,7 +200,16 @@ func buildCommands() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, configManager, fileManager, inputList, inputBool, MetricSender)
+	initCmd := cmd.NewInitCmd(
+		repoAdder,
+		githubRepo,
+		tutorialFinder,
+		configManager,
+		fileManager,
+		inputList,
+		inputBool,
+		MetricSender,
+	)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -202,8 +233,28 @@ func buildCommands() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder)
-	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	addRepoCmd := cmd.NewAddRepoCmd(
+		repoAddLister,
+		repoProviders,
+		inputTextValidator,
+		inputPassword,
+		inputURL,
+		inputList,
+		inputBool,
+		inputInt,
+		tutorialFinder,
+	)
+	updateRepoCmd := cmd.NewUpdateRepoCmd(
+		http.DefaultClient,
+		repoListUpdater,
+		repoProviders,
+		inputText,
+		inputPassword,
+		inputURL,
+		inputList,
+		inputBool,
+		inputInt,
+	)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	listWorkspaceCmd := cmd.NewListWorkspaceCmd(formulaWorkspace, tutorialFinder)
@@ -213,7 +264,17 @@ func buildCommands() *cobra.Command {
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, dirManager, inputList, inputBool)
-	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
+	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(
+		userHomeDir,
+		ritchieHomeDir,
+		formulaWorkspace,
+		dirManager,
+		inputBool,
+		inputText,
+		inputList,
+		treeGen,
+		fileManager,
+	)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(
 		userHomeDir,
