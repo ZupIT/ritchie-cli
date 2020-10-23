@@ -121,8 +121,8 @@ func (m Manager) UpdateCache() error {
 	return nil
 }
 
-func requestStableVersion(stableVersionUrl string) (string, error) {
-	response, err := http.Get(stableVersionUrl)
+func requestStableVersion(stableVersionURL string) (string, error) {
+	response, err := http.Get(stableVersionURL)
 	if err != nil {
 		return "", err
 	}
@@ -151,9 +151,12 @@ func saveCache(
 		ExpiresAt: time.Now().Add(time.Hour * 10).Unix(),
 	}
 
-	newCacheJson, _ := json.Marshal(newCache)
+	newCacheJSON, err := json.Marshal(newCache)
+	if err != nil {
+		return err
+	}
 
-	if err := file.Write(cachePath, newCacheJson); err != nil {
+	if err := file.Write(cachePath, newCacheJSON); err != nil {
 		return err
 	}
 	return nil
