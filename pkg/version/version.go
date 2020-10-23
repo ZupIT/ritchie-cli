@@ -126,6 +126,7 @@ func requestStableVersion(stableVersionURL string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("response status is not %d", http.StatusOK)
