@@ -364,7 +364,7 @@ func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
 }
 
 func makeRequest(info formula.RequestInfo) (interface{}, error) {
-	response, err := http.Get(info.Url)
+	response, err := http.Get(info.Url) //nolint:noctx
 	if err != nil {
 		return nil, err
 	}

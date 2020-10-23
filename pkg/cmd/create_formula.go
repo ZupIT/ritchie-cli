@@ -265,7 +265,7 @@ func FormulaWorkspaceInput(
 	inList prompt.InputList,
 	inText prompt.InputText,
 ) (formula.Workspace, error) {
-	var items []string
+	items := make([]string, 0, len(workspaces))
 	for k, v := range workspaces {
 		kv := fmt.Sprintf("%s (%s)", k, v)
 		items = append(items, kv)

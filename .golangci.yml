@@ -30,6 +30,7 @@ linters:
     - goerr113
     - scopelint
     - whitespace
+    - nestif
   presets:
   fast: false
 
