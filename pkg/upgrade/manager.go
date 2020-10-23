@@ -25,7 +25,7 @@ import (
 )
 
 type Manager interface {
-	Run(upgradeUrl string) error
+	Run(upgradeURL string) error
 }
 
 type DefaultManager struct {
@@ -36,12 +36,12 @@ func NewDefaultManager(Updater updater) DefaultManager {
 	return DefaultManager{updater: Updater}
 }
 
-func (m DefaultManager) Run(upgradeUrl string) error {
-	if upgradeUrl == "" {
+func (m DefaultManager) Run(upgradeURL string) error {
+	if upgradeURL == "" {
 		return errors.New("fail to resolve upgrade url")
 	}
 
-	resp, err := http.Get(upgradeUrl)
+	resp, err := http.Get(upgradeURL)
 	if err != nil {
 		return errors.New("fail to download stable version")
 	}

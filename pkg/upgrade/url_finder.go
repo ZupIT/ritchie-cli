@@ -43,7 +43,7 @@ func (duf DefaultUrlFinder) Url(os string) string { //nolint:stylecheck
 		return ""
 	}
 
-	upgradeURL := fmt.Sprintf(upgradeUrlFormat, stableVersion, os)
+	upgradeURL := fmt.Sprintf(upgradeURLFormat, stableVersion, os)
 
 	if os == osutil.Windows {
 		upgradeURL += ".exe"
