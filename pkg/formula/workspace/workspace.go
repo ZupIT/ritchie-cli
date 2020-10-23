@@ -30,9 +30,9 @@ var (
 )
 
 type Manager struct {
-	workspaceFile 		string
+	workspaceFile       string
 	defaultWorkspaceDir string
-	file           		stream.FileWriteReadExister
+	file                stream.FileWriteReadExister
 }
 
 func New(ritchieHome string, userHome string, fileManager stream.FileWriteReadExister) Manager {

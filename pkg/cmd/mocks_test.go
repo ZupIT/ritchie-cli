@@ -484,8 +484,8 @@ func (w WatcherMock) Watch(workspacePath, formulaPath string) {
 }
 
 type WorkspaceAddListerCustomMock struct {
-	add      func(workspace formula.Workspace) error
-	list     func() (formula.Workspaces, error)
+	add  func(workspace formula.Workspace) error
+	list func() (formula.Workspaces, error)
 }
 
 func (w WorkspaceAddListerCustomMock) Add(workspace formula.Workspace) error {

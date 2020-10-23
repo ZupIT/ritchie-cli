@@ -372,7 +372,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				field.inList,
 				field.inBool,
 				metricSender,
-				)
+			)
 			initStdin := NewInitCmd(
 				field.repo,
 				field.git,
@@ -382,7 +382,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				field.inList,
 				field.inBool,
 				metricSender,
-				)
+			)
 
 			initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 			initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
