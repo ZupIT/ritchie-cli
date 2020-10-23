@@ -24,9 +24,9 @@ import (
 )
 
 const (
-	ZipUrlPattern       = "https://api.github.com/repos/%s/%s/zipball/%s"
-	TagsUrlPattern      = "https://api.github.com/repos/%s/%s/releases"
-	LatestTagUrlPattern = "https://api.github.com/repos/%s/%s/releases/latest"
+	ZipUrlPattern       = "https://api.github.com/repos/%s/%s/zipball/%s"      //nolint:stylecheck
+	TagsUrlPattern      = "https://api.github.com/repos/%s/%s/releases"        //nolint:stylecheck
+	LatestTagUrlPattern = "https://api.github.com/repos/%s/%s/releases/latest" //nolint:stylecheck
 )
 
 type DefaultRepoInfo struct {
@@ -51,13 +51,13 @@ func NewRepoInfo(url string, token string) git.RepoInfo {
 
 // ZipUrl returns the GitHub API URL for download zipball repository
 // e.g. https://api.github.com/repos/{{owner}}/{{repo}}/zipball/{{tag-version}}
-func (in DefaultRepoInfo) ZipUrl(version string) string {
+func (in DefaultRepoInfo) ZipUrl(version string) string { //nolint:stylecheck
 	return fmt.Sprintf(ZipUrlPattern, in.owner, in.repo, version)
 }
 
 // TagsUrl returns the GitHub API URL for get all tags
 // e.g. https://api.github.com/repos/{{owner}}/{{repo}}/tags
-func (in DefaultRepoInfo) TagsUrl() string {
+func (in DefaultRepoInfo) TagsUrl() string { //nolint:stylecheck
 	return fmt.Sprintf(TagsUrlPattern, in.owner, in.repo)
 }
 
