@@ -43,6 +43,7 @@ linters:
     - noctx
     - godot
     - gocritic
+    - gocognit
   presets:
   fast: false
 
