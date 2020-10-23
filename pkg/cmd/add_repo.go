@@ -29,7 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const defaultRepoUrl = "https://github.com/ZupIT/ritchie-formulas"
+const defaultRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 
@@ -119,7 +119,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		url, err := ad.URL("Repository URL:", defaultRepoUrl)
+		url, err := ad.URL("Repository URL:", defaultRepoURL)
 		if err != nil {
 			return err
 		}

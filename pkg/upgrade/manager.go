@@ -41,7 +41,7 @@ func (m DefaultManager) Run(upgradeURL string) error {
 		return errors.New("fail to resolve upgrade url")
 	}
 
-	resp, err := http.Get(upgradeURL)
+	resp, err := http.Get(upgradeURL) //nolint:noctx
 	if err != nil {
 		return errors.New("fail to download stable version")
 	}
