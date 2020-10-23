@@ -53,7 +53,7 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 	resp, err := re.client.Do(req)
 	if err != nil {
 		return nil, err
-	}
+	} //nolint:bodyclose
 
 	return resp.Body, nil
 }

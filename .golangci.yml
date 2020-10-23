@@ -26,6 +26,8 @@ linters:
     - testpackage
     - nlreturn
     - gomnd
+    - wsl
+    - goerr113
   presets:
   fast: false
 
@@ -44,42 +46,15 @@ issues:
         - unparam
         - unused
         - sqlclosecheck
-        - goerr113
 
     - linters:
         - lll
       source: "^//go:generate "
 
-    # Exclude "package comment" as unnececcary
+    # error strings should not be capitalized
     - linters:
         - stylecheck
-      text: "ST1000:"
-
-    # Exclude "same receiver name" warnings
-    - linters:
-        - stylecheck
-      text: "ST1016:"
-
-    # Exclude naming warnings (at least for now)
-    - linters:
-        - stylecheck
-      text: "ST1003:"
-
-    # Exclude function,var,const comment prefix warning for now
-    - linters:
-        - stylecheck
-      text: "ST1020:"
-    - linters:
-        - stylecheck
-      text: "ST1021:"
-    - linters:
-        - stylecheck
-      text: "ST1022:"
-
-    # Exclude "always receives" warnings as false positives
-    - linters:
-        - unparam
-      text: "always receives"
+      text: "ST1005:"
 
   exclude-use-default: false
   max-issues-per-linter: 0
