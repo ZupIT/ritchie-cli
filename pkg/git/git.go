@@ -24,7 +24,7 @@ type Tag struct {
 type Tags []Tag
 
 func (t Tags) Names() []string {
-	var tags []string
+	tags := make([]string, 0, len(t))
 	for i := range t {
 		tags = append(tags, t[i].Name)
 	}

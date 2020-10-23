@@ -42,7 +42,8 @@ Config file path not found: %s`
 )
 
 var (
-	ErrDockerNotInstalled  = errors.New("you must have the docker installed to run formulas inside it, check how to install it at: [https://docs.docker.com/get-docker]")
+	ErrDockerNotInstalled = errors.New("you must have the docker installed to run formulas inside it," +
+		" check how to install it at: [https://docs.docker.com/get-docker]")
 	ErrDockerImageNotFound = errors.New("config.json does not contain the" +
 		" \"dockerImageBuilder\" field, to run this formula with docker add a docker image name to it")
 	ErrDockerfileNotFound = errors.New("the formula cannot be executed inside the docker," +
