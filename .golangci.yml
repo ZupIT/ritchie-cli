@@ -34,6 +34,9 @@ linters:
     - gochecknoglobals
     - golint
     - gofumpt
+    - funlen
+    - gosec
+    - interfacer
   presets:
   fast: false
 
@@ -52,6 +55,7 @@ issues:
         - unparam
         - unused
         - sqlclosecheck
+        - stylecheck
 
     - linters:
         - lll
