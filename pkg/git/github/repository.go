@@ -38,8 +38,8 @@ func NewRepoManager(client *http.Client) RepoManager {
 }
 
 func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
-	zipUrl := info.ZipUrl(version)
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, zipUrl, nil)
+	zipURL := info.ZipUrl(version)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, zipURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 }
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
-	apiUrl := info.TagsUrl()
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
+	apiURL := info.TagsUrl()
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiURL, nil)
 	if err != nil {
 		return git.Tags{}, err
 	}
@@ -92,8 +92,8 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 }
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
-	apiUrl := info.LatestTagUrl()
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
+	apiURL := info.LatestTagUrl()
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiURL, nil)
 	if err != nil {
 		return git.Tag{}, err
 	}

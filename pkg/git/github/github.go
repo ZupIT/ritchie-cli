@@ -63,7 +63,7 @@ func (in DefaultRepoInfo) TagsUrl() string {
 
 // LatestTagUrl returns the GitHub API URL for get latest tag release
 // https://api.github.com/repos/:owner/:repo/releases/latest
-func (in DefaultRepoInfo) LatestTagUrl() string {
+func (in DefaultRepoInfo) LatestTagUrl() string { //nolint:stylecheck
 	return fmt.Sprintf(LatestTagUrlPattern, in.owner, in.repo)
 }
 
