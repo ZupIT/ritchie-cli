@@ -33,6 +33,7 @@ linters:
     - nestif
     - gochecknoglobals
     - golint
+    - gofumpt
   presets:
   fast: false
 
@@ -61,10 +62,15 @@ issues:
         - stylecheck
       text: "ST1005:"
 
-    #  at least one file in a package should have a package comment
+    # at least one file in a package should have a package comment
     - linters:
         - stylecheck
       text: "ST1000:"
+
+    # comment on exported method Name should be of the form "Name ..."
+    - linters:
+        - stylecheck
+      text: "ST1020:"
 
   exclude-use-default: false
   max-issues-per-linter: 0
