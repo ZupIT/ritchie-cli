@@ -54,7 +54,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 		ginkgo.Skip("Scenarios with multi steps for windows doesnt work")
 		return "", nil
 	} else {
-		err, resp := scenario.runStepsForUnix()
+		resp, err := scenario.runStepsForUnix()
 		return resp, err
 	}
 }

@@ -187,6 +187,7 @@ func buildRunImg(def formula.Definition) (string, error) {
 
 	containerId = strings.ToLower(containerId)
 	args := []string{"build", "-t", containerId, "."}
+	//nolint:gosec
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
