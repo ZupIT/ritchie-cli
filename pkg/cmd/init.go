@@ -54,7 +54,8 @@ if you don't want to install choose to run the formulas inside the docker.
  but you will need to provide a git repo with the formulas templates and add them with
  rit add repo command, naming this repository obligatorily as "commons".
 
- See how to do this on the example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]` + "\n"
+ See how to do this on the example: 
+[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]` + "\n"
 	CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 )
 

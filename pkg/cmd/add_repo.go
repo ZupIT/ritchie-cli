@@ -177,7 +177,8 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", repository.Name)
+		successMsg := fmt.Sprintf("The %q repository was added with success, "+
+			"now you can use your formulas with the Ritchie!", repository.Name)
 		prompt.Success(successMsg)
 
 		tutorialHolder, err := ad.rt.Find()
@@ -203,7 +204,8 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", r.Name)
+		successMsg := fmt.Sprintf("The %q repository was added with success, "+
+			"now you can use your formulas with the Ritchie!", r.Name)
 		prompt.Success(successMsg)
 
 		tutorialHolder, err := ad.rt.Find()

@@ -173,5 +173,6 @@ func addFlags(cmd *cobra.Command) {
 	formulaFlags := cmd.Flags()
 	formulaFlags.BoolP(formula.DockerRun.String(), "d", false, "Use to run formulas inside docker")
 	formulaFlags.BoolP(formula.LocalRun.String(), "l", false, "Use to run formulas locally")
-	formulaFlags.BoolP(verboseFlag, "a", false, "Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
+	formulaFlags.BoolP(verboseFlag, "a", false,
+		"Verbose mode (All). Indicate to a formula that it should show log messages in more detail")
 }
