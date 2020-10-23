@@ -146,7 +146,6 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 	if err != nil {
 		return formula.Config{}, err
 	}
-	
 	var formulaConfig formula.Config
 	if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
 		return formula.Config{}, err
