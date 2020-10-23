@@ -215,8 +215,26 @@ func buildCommands() *cobra.Command {
 	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, dirManager, inputList, inputBool)
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formulaLocalBuilder, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(
+		userHomeDir,
+		createBuilder,
+		tplManager,
+		formulaWorkspace,
+		inputText,
+		inputTextValidator,
+		inputList,
+		tutorialFinder,
+	)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(
+		userHomeDir,
+		formulaLocalBuilder,
+		formulaWorkspace,
+		watchManager,
+		dirManager,
+		inputText,
+		inputList,
+		tutorialFinder,
+	)
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 
