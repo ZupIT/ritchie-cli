@@ -190,7 +190,7 @@ func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 	prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
 
 	if tutorialStatus == tutorialStatusEnabled {
-		tutorialCreateFormula(tutorialStatus, formulaCmd)
+		tutorialCreateFormula(formulaCmd)
 	} else {
 		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
 	}
@@ -307,7 +307,7 @@ func FormulaWorkspaceInput(
 	return wspace, nil
 }
 
-func tutorialCreateFormula(_ string, formulaCmd string) {
+func tutorialCreateFormula(formulaCmd string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const messageTitle = "In order to test your new formula:"
 	const messageBody = ` ∙ Run %q
