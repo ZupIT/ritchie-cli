@@ -177,11 +177,12 @@ func buildCommands() *cobra.Command {
 		formula.DockerRun: formulaDockerRun,
 	}
 
-	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
-	formulaExec := runner.NewExecutor(runners, configManager)
-
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager)
+
+	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formulaLocalBuilder, inputBool)
+	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
+	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
 	watchManager := watcher.New(formulaLocalBuilder, dirManager, sendMetric)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaLocalBuilder)
