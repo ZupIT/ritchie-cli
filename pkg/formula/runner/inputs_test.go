@@ -101,7 +101,7 @@ func TestInputManager_Inputs(t *testing.T) {
 	var inputs []formula.Input
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 	_ = os.Setenv("SAMPLE_TEXT", "someValue")
-	
+
 	setup := formula.Setup{
 		Config: formula.Config{
 			Inputs: inputs,

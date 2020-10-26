@@ -180,7 +180,6 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 // add the variable inName=inValue to cmd.Env
 func addEnv(cmd *exec.Cmd, inName, inValue string) {
 	envKey := strings.ToUpper(inName)
-	fmt.Println(envKey)
 	if _, exist := os.LookupEnv(envKey); exist {
 		warnMsg := fmt.Sprintf(
 			"The input param %s has the same name of a machine variable." +
