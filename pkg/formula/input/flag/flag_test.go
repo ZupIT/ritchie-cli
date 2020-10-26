@@ -19,6 +19,7 @@ package flag
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"testing"
@@ -31,19 +32,15 @@ import (
 )
 
 func TestInputs(t *testing.T) {
-	var inputs []formula.Input
-	_ = json.Unmarshal([]byte(inputJson), &inputs)
-
 	setup := formula.Setup{
-		Config: formula.Config{
-			Inputs: inputs,
-		},
 		FormulaPath: os.TempDir(),
 	}
 
 	type in struct {
 		creResolver      env.Resolvers
 		defaultFlagValue string
+		valueForList     string
+		operator         string
 	}
 
 	tests := []struct {
@@ -56,28 +53,67 @@ func TestInputs(t *testing.T) {
 			in: in{
 				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
 				defaultFlagValue: "text",
+				valueForList:     "in_list2",
+				operator:         "==",
+			},
+			want: nil,
+		},
+		{
+			name: "success with input omitted",
+			in: in{
+				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				defaultFlagValue: "text",
+				valueForList:     "in_list2",
+				operator:         "!=",
 			},
 			want: nil,
 		},
 		{
 			name: "error flags empty",
 			in: in{
-				creResolver:     env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver:  env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				valueForList: "in_list2",
+				operator:     "==",
 			},
 			want: errors.New("these flags cannot be empty [--sample_text_cache, --sample_text_2, --sample_password]"),
 		},
 		{
 			name: "error env resolver",
 			in: in{
-				creResolver:     env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
+				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
 				defaultFlagValue: "text",
+				valueForList:     "in_list2",
+				operator:         "==",
 			},
 			want: errors.New("credential not found"),
+		},
+		{
+			name: "invalid value for item",
+			in: in{
+				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				defaultFlagValue: "text",
+				valueForList:     "invalid",
+				operator:         "==",
+			},
+			want: errors.New("only these input items [in_list1, in_list2, in_list3, in_listN] are accepted in the \"--sample_list\" flag"),
+		},
+		{
+			name: "invalid operator",
+			in: in{
+				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				defaultFlagValue: "text",
+				valueForList:     "in_list2",
+				operator:         "eq",
+			},
+			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(fmt.Sprintf(inputJson, tt.in.operator)), &inputs)
+
 			inputManager := NewInputManager(tt.in.creResolver)
 
 			cmd := &exec.Cmd{}
@@ -86,10 +122,18 @@ func TestInputs(t *testing.T) {
 			for _, in := range inputs {
 				switch in.Type {
 				case input.TextType, input.PassType:
-					flags.String(in.Name, tt.in.defaultFlagValue, in.Tutorial)
+					if len(in.Items) > 0 {
+						flags.String(in.Name, tt.in.valueForList, in.Tutorial)
+					} else {
+						flags.String(in.Name, tt.in.defaultFlagValue, in.Tutorial)
+					}
 				case input.BoolType:
 					flags.Bool(in.Name, false, in.Tutorial)
 				}
+			}
+
+			setup.Config = formula.Config{
+				Inputs: inputs,
 			}
 
 			got := inputManager.Inputs(cmd, setup, flags)
@@ -151,6 +195,17 @@ const inputJson = `[
         },
         "label": "Pick your : ",
 		"tutorial": "Select an item for this field."
+    },
+	{
+        "name": "sample_text_condition",
+        "type": "text",
+        "label": "Type : ",
+		"default": "test",
+		"condition": {
+			"variable": "sample_list",
+			"operator": "%s",
+			"value":    "in_list2"
+		}
     },
     {
         "name": "sample_bool",

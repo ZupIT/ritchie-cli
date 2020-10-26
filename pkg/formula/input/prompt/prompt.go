@@ -84,7 +84,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 		if err != nil {
 			return err
 		}
-		conditionPass, err := in.verifyConditional(cmd, i)
+		conditionPass, err := input.VerifyConditional(cmd, i)
 		if err != nil {
 			return err
 		}
@@ -211,7 +211,7 @@ func (in InputManager) textValidator(i formula.Input) (string, error) {
 	var inputVal string
 	var err error
 
-	if in.hasRegex(i) {
+	if input.HasRegex(i) {
 		inputVal, err = in.textRegexValidator(i, required)
 	} else {
 		inputVal, err = in.InputText.Text(i.Label, required, i.Tutorial)
@@ -222,52 +222,6 @@ func (in InputManager) textValidator(i formula.Input) (string, error) {
 	}
 
 	return inputVal, err
-}
-
-func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
-	if input.Condition.Variable == "" {
-		return true, nil
-	}
-
-	var value string
-	variable := input.Condition.Variable
-	for _, envVal := range cmd.Env {
-		components := strings.Split(envVal, "=")
-		if strings.ToLower(components[0]) == variable {
-			value = components[1]
-			break
-		}
-	}
-	if value == "" {
-		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
-	}
-
-	// Currently using case implementation to avoid adding a dependency module or exposing
-	// the code to the risks of running an eval function on a user-defined variable
-	// optimizations are welcome, being mindful of the points above
-	switch input.Condition.Operator {
-	case "==":
-		return value == input.Condition.Value, nil
-	case "!=":
-		return value != input.Condition.Value, nil
-	case ">":
-		return value > input.Condition.Value, nil
-	case ">=":
-		return value >= input.Condition.Value, nil
-	case "<":
-		return value < input.Condition.Value, nil
-	case "<=":
-		return value <= input.Condition.Value, nil
-	default:
-		return false, fmt.Errorf(
-			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=)",
-			input.Condition.Operator,
-		)
-	}
-}
-
-func (in InputManager) hasRegex(input formula.Input) bool {
-	return len(input.Pattern.Regex) > 0
 }
 
 func (in InputManager) textRegexValidator(input formula.Input, required bool) (string, error) {

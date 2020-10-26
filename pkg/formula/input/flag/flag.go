@@ -29,6 +29,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
 
+const (
+	errInvalidInputItemsMsg = "only these input items [%s] are accepted in the %q flag"
+)
+
 type InputManager struct {
 	envResolvers env.Resolvers
 }
@@ -43,9 +47,23 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 	for _, i := range inputs {
 		var inputVal string
 		var err error
+
+		conditionPass, err := input.VerifyConditional(cmd, i)
+		if err != nil {
+			return err
+		}
+		if !conditionPass {
+			continue
+		}
+
 		switch i.Type {
-		case input.TextType, input.PassType:
+		case input.TextType, input.PassType, input.DynamicType:
 			inputVal, err = flags.GetString(i.Name)
+			if len(i.Items) > 0 && !i.Items.Contains(inputVal) {
+				items := strings.Join(i.Items, ", ")
+				formattedName := fmt.Sprintf("--%s", i.Name)
+				return fmt.Errorf(errInvalidInputItemsMsg, items, formattedName)
+			}
 		case input.BoolType:
 			var inBool bool
 			inBool, err = flags.GetBool(i.Name)
