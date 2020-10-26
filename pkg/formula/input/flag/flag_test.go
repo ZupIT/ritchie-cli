@@ -36,13 +36,6 @@ func TestInputs(t *testing.T) {
 		FormulaPath: os.TempDir(),
 	}
 
-	type in struct {
-		creResolver      env.Resolvers
-		defaultFlagValue string
-		valueForList     string
-		operator         string
-	}
-
 	tests := []struct {
 		name string
 		in   in
@@ -51,19 +44,14 @@ func TestInputs(t *testing.T) {
 		{
 			name: "success flags",
 			in: in{
-				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
 				defaultFlagValue: "text",
-				valueForList:     "in_list2",
-				operator:         "==",
 			},
 			want: nil,
 		},
 		{
 			name: "success with input omitted",
 			in: in{
-				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
 				defaultFlagValue: "text",
-				valueForList:     "in_list2",
 				operator:         "!=",
 			},
 			want: nil,
@@ -71,48 +59,45 @@ func TestInputs(t *testing.T) {
 		{
 			name: "error flags empty",
 			in: in{
-				creResolver:  env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				valueForList: "in_list2",
-				operator:     "==",
+				defaultFlagValue: "",
 			},
 			want: errors.New("these flags cannot be empty [--sample_text_cache, --sample_text_2, --sample_password]"),
 		},
 		{
 			name: "error env resolver",
 			in: in{
-				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
-				defaultFlagValue: "text",
-				valueForList:     "in_list2",
-				operator:         "==",
+				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
 			},
 			want: errors.New("credential not found"),
 		},
 		{
 			name: "invalid value for item",
 			in: in{
-				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				defaultFlagValue: "text",
-				valueForList:     "invalid",
-				operator:         "==",
+				valueForList: "invalid",
 			},
 			want: errors.New("only these input items [in_list1, in_list2, in_list3, in_listN] are accepted in the \"--sample_list\" flag"),
 		},
 		{
 			name: "invalid operator",
 			in: in{
-				creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				defaultFlagValue: "text",
-				valueForList:     "in_list2",
-				operator:         "eq",
+				operator: "eq",
 			},
 			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
+		},
+		{
+			name: "mismatch error operator",
+			in: in{
+				valueForRegex: "text_error",
+			},
+			want: errors.New("mismatch error"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tt.in = defaultFields(tt.in)
 			var inputs []formula.Input
-			_ = json.Unmarshal([]byte(fmt.Sprintf(inputJson, tt.in.operator)), &inputs)
+			_ = json.Unmarshal([]byte(fmt.Sprintf(inputJson, tt.in.regex, tt.in.operator)), &inputs)
 
 			inputManager := NewInputManager(tt.in.creResolver)
 
@@ -124,6 +109,8 @@ func TestInputs(t *testing.T) {
 				case input.TextType, input.PassType:
 					if len(in.Items) > 0 {
 						flags.String(in.Name, tt.in.valueForList, in.Tutorial)
+					} else if input.HasRegex(in) {
+						flags.String(in.Name, tt.in.valueForRegex, in.Tutorial)
 					} else {
 						flags.String(in.Name, tt.in.defaultFlagValue, in.Tutorial)
 					}
@@ -143,6 +130,52 @@ func TestInputs(t *testing.T) {
 			}
 		})
 	}
+}
+
+type in struct {
+	creResolver      env.Resolvers
+	defaultFlagValue string
+	valueForList     string
+	valueForRegex    string
+	regex            string
+	operator         string
+}
+
+func defaultFields(testFields in) in {
+	defaultFields := in{
+		creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+		defaultFlagValue: "text",
+		valueForList:     "in_list2",
+		valueForRegex:    "text_ok",
+		regex:            "text_ok",
+		operator:         "==",
+	}
+
+	if testFields.creResolver != nil {
+		defaultFields.creResolver = testFields.creResolver
+	}
+
+	if testFields.defaultFlagValue != defaultFields.defaultFlagValue {
+		defaultFields.defaultFlagValue = testFields.defaultFlagValue
+	}
+
+	if testFields.valueForRegex != "" {
+		defaultFields.valueForRegex = testFields.valueForRegex
+	}
+
+	if testFields.valueForList != "" {
+		defaultFields.valueForList = testFields.valueForList
+	}
+
+	if testFields.regex != "" {
+		defaultFields.regex = testFields.regex
+	}
+
+	if testFields.operator != "" {
+		defaultFields.operator = testFields.operator
+	}
+
+	return defaultFields
 }
 
 type envResolverMock struct {
@@ -178,6 +211,15 @@ const inputJson = `[
         "label": "Type : ",
 		"required": true
     },
+	{
+		"name": "sample_text_3",
+        "type": "text",
+        "label": "Type : ",
+		"pattern": {
+			"regex": "%s",
+			"mismatchText": "mismatch error"
+		}
+	},
     {
         "name": "sample_list",
         "type": "text",
