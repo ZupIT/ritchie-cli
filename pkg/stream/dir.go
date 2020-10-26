@@ -22,6 +22,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/mod/sumdb/dirhash"
 )
 
 type DirCreater interface {
@@ -45,6 +47,10 @@ type DirCopier interface {
 	Copy(src, dst string) error
 }
 
+type DirHasher interface {
+	Hash(dir string) (string, error)
+}
+
 type DirCreateListCopier interface {
 	DirCreater
 	DirLister
@@ -66,6 +72,11 @@ type DirListChecker interface {
 type DirCreateChecker interface {
 	DirCreater
 	DirChecker
+}
+
+type DirCreateHasher interface {
+	DirCreater
+	DirHasher
 }
 
 type DirManager struct {
@@ -164,4 +175,8 @@ func (m DirManager) Copy(src, dest string) error {
 		}
 	}
 	return nil
+}
+
+func (m DirManager) Hash(dir string) (string, error) {
+	return dirhash.HashDir(dir, "", dirhash.DefaultHash)
 }

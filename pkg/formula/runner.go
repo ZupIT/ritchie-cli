@@ -34,6 +34,10 @@ type Executor interface {
 	Execute(exe ExecuteData) error
 }
 
+type PreRunBuilder interface {
+	Build(string)
+}
+
 type PreRunner interface {
 	PreRun(def Definition) (Setup, error)
 }
