@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -178,7 +179,16 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 // addEnv Add environment variable to run formulas.
 // add the variable inName=inValue to cmd.Env
 func addEnv(cmd *exec.Cmd, inName, inValue string) {
-	e := fmt.Sprintf(formula.EnvPattern, strings.ToUpper(inName), inValue)
+	envKey := strings.ToUpper(inName)
+	fmt.Println(envKey)
+	if _, exist := os.LookupEnv(envKey); exist {
+		warnMsg := fmt.Sprintf(
+			"The input param %s has the same name of a machine variable." +
+				" It will probably result on unexpect behavior", envKey)
+		prompt.Warning(warnMsg)
+	}
+
+	e := fmt.Sprintf(formula.EnvPattern, envKey, inValue)
 	cmd.Env = append(cmd.Env, e)
 }
 
