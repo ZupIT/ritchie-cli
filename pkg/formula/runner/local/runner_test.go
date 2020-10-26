@@ -158,12 +158,12 @@ func TestRun(t *testing.T) {
 		{
 			name: "success with a non default context",
 			in: in{
-				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:      preRunner,
-				postRun:     postRunner,
-				inputRun:    inputRunner,
-				fileManager: fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				context:     ctxFinderMock{ctx: rcontext.ContextHolder{
+				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				preRun:        preRunner,
+				postRun:       postRunner,
+				inputResolver: inputResolver,
+				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
+				context: ctxFinderMock{ctx: rcontext.ContextHolder{
 					Current: "prod",
 				}},
 			},
