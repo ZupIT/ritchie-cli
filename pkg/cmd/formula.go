@@ -240,8 +240,13 @@ func (f FormulaCommand) addInputFlags(def formula.Definition, flags *pflag.FlagS
 
 	for _, in := range config.Inputs {
 		switch in.Type {
-		case input.TextType, input.PassType:
-			flags.String(in.Name, in.Default, in.Tutorial)
+		case input.TextType, input.PassType, input.DynamicType:
+			if len(in.Items) > 0 {
+				tutorial := fmt.Sprintf("%s | accepted items for this field [%s]", in.Tutorial, strings.Join(in.Items, ", "))
+				flags.String(in.Name, in.Default, tutorial)
+			} else {
+				flags.String(in.Name, in.Default, in.Tutorial)
+			}
 		case input.BoolType:
 			flags.Bool(in.Name, false, in.Tutorial)
 		}
