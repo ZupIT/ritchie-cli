@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -114,6 +115,7 @@ func (in InputManager) fromStdin(cmd *exec.Cmd, setup formula.Setup) error {
 		}
 
 		if len(inputVal) != 0 {
+			checkForSameEnv(input.Name)
 			addEnv(cmd, input.Name, inputVal)
 		}
 	}
@@ -169,6 +171,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 
 		if len(inputVal) != 0 {
 			in.persistCache(setup.FormulaPath, inputVal, input, items)
+			checkForSameEnv(input.Name)
 			addEnv(cmd, input.Name, inputVal)
 		}
 	}
@@ -180,6 +183,16 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 func addEnv(cmd *exec.Cmd, inName, inValue string) {
 	e := fmt.Sprintf(formula.EnvPattern, strings.ToUpper(inName), inValue)
 	cmd.Env = append(cmd.Env, e)
+}
+
+func checkForSameEnv(envKey string){
+	envKey = strings.ToUpper(envKey)
+	if _, exist := os.LookupEnv(envKey); exist {
+		warnMsg := fmt.Sprintf(
+			"The input param %s has the same name of a machine variable." +
+				" It will probably result on unexpect behavior", envKey)
+		prompt.Warning(warnMsg)
+	}
 }
 
 func (in InputManager) persistCache(formulaPath, inputVal string, input formula.Input, items []string) {
