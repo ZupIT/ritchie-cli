@@ -185,11 +185,11 @@ func addEnv(cmd *exec.Cmd, inName, inValue string) {
 	cmd.Env = append(cmd.Env, e)
 }
 
-func checkForSameEnv(envKey string){
+func checkForSameEnv(envKey string) {
 	envKey = strings.ToUpper(envKey)
 	if _, exist := os.LookupEnv(envKey); exist {
 		warnMsg := fmt.Sprintf(
-			"The input param %s has the same name of a machine variable." +
+			"The input param %s has the same name of a machine variable."+
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}

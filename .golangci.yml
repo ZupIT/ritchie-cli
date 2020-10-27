@@ -21,30 +21,42 @@ linters-settings:
     suggest-new: true
 
 linters:
-  enable-all: true
-  disable:
-    - gci
-    - testpackage
-    - nlreturn
-    - gomnd
-    - wsl
-    - goerr113
-    - scopelint
-    - whitespace
-    - nestif
-    - gochecknoglobals
-    - golint
-    - gofumpt
-    - funlen
-    - gosec
-    - interfacer
-    - goconst
-    - stylecheck
-    - lll
-    - noctx
-    - godot
-    - gocritic
-    - gocognit
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - asciicheck
+    - bodyclose
+    - depguard
+    - dogsled
+    - dupl
+    - exhaustive
+    - exportloopref
+    - gochecknoinits
+    - gocyclo
+    - godox
+    - gofmt
+    - goheader
+    - goimports
+    - gomodguard
+    - goprintffuncname
+    - maligned
+    - misspell
+    - nakedret
+    - nolintlint
+    - prealloc
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - unparam
   presets:
   fast: false
 
