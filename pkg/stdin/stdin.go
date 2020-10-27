@@ -17,8 +17,10 @@
 package stdin
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -31,4 +33,18 @@ func ReadJson(reader io.Reader, v interface{}) error {
 	}
 
 	return nil
+}
+
+func ExistsEntry(reader io.Reader) bool {
+	fmt.Println(1)
+	r := bufio.NewReader(reader)
+
+	fmt.Println(2)
+	n := r.Buffered()
+
+	fmt.Println(3)
+	fmt.Println("n: ", n)
+
+	fmt.Println(4)
+	return true
 }

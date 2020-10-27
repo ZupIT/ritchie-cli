@@ -25,14 +25,14 @@ import (
 
 const msg = "read stdin test"
 
-type TestReader struct {
+type TestStdin struct {
 	Test string `json:"test"`
 }
 
 func TestReadJson(t *testing.T) {
 
 	// Convert interface to Json for test
-	i := TestReader{Test: msg}
+	i := TestStdin{Test: msg}
 	jsonData, _ := json.Marshal(i)
 
 	// Insert Json inside a new Reader (simulating os.Stdin)
@@ -40,7 +40,7 @@ func TestReadJson(t *testing.T) {
 	stdin.Write(jsonData)
 	reader := bufio.NewReader(&stdin)
 
-	tr := TestReader{}
+	tr := TestStdin{}
 
 	// ReadJson through Reader and convert to chosen interface
 
@@ -51,5 +51,23 @@ func TestReadJson(t *testing.T) {
 	// Assert the decoder result is the initial message
 	if msg != tr.Test {
 		t.Errorf("Expected : %v but got %v", msg, tr.Test)
+	}
+}
+
+func TestExistsEntry(t *testing.T) {
+
+	// Convert interface to Json for test
+	i := TestStdin{Test: msg}
+	jsonData, _ := json.Marshal(i)
+
+	// Insert Json inside a new Reader (simulating os.Stdin)
+	var stdin bytes.Buffer
+	stdin.Write(jsonData)
+	reader := bufio.NewReader(&stdin)
+
+	// ReadJson through Reader and convert to chosen interface
+
+	if exists := ExistsEntry(reader); !exists {
+		t.Errorf("Got: %v expected: %v", exists, true)
 	}
 }
