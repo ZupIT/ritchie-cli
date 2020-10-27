@@ -30,3 +30,7 @@ type TreeManager interface {
 type TreeGenerator interface {
 	Generate(repoPath string) (Tree, error)
 }
+
+type TreeChecker interface {
+	CheckCommands()
+}

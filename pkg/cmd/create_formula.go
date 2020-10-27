@@ -30,6 +30,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -45,6 +46,7 @@ type createFormulaCmd struct {
 	inList          prompt.InputList
 	tplM            template.Manager
 	rt              rtutorial.Finder
+	treeChecker     tree.CheckerManager
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -57,6 +59,7 @@ func NewCreateFormulaCmd(
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 	rtf rtutorial.Finder,
+	treeChecker tree.CheckerManager,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,
@@ -67,6 +70,7 @@ func NewCreateFormulaCmd(
 		inList:          inList,
 		tplM:            tplM,
 		rt:              rtf,
+		treeChecker:     treeChecker,
 	}
 
 	cmd := &cobra.Command{
@@ -130,7 +134,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			WorkspacePath: wspace.Dir,
 			FormulaPath:   formulaPath,
 		}
-
+		c.treeChecker.CheckCommands()
 		c.create(cf, wspace.Dir, formulaPath)
 		return nil
 	}

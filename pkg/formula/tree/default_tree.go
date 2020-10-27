@@ -26,6 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+// FIXME there are some slashes here, it works with windows?
 const (
 	treeLocalCmdPattern = "%s/repos/local/tree.json"
 	treeRepoCmdPattern  = "%s/repos/%s/tree.json"
@@ -167,3 +168,5 @@ func (d Manager) loadTree(treeCmdFile string) (formula.Tree, error) {
 
 	return tree, nil
 }
+
+
