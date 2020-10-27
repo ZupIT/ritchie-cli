@@ -387,10 +387,15 @@ func makeRequest(info formula.RequestInfo) (interface{}, error) {
 		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
 	}
 
-	body, _ := ioutil.ReadAll(response.Body)
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
 	requestData := interface{}(nil)
 
-	_ = json.Unmarshal(body, &requestData)
+	if err := json.Unmarshal(body, &requestData); err != nil {
+		return nil, err
+	}
 	return requestData, nil
 }
 
