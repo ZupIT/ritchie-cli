@@ -157,7 +157,7 @@ func Build() *cobra.Command {
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaLocalBuilder)
 
 	versionManager := version.NewManager(
-		version.StableVersionURL,
+		version.StableVersionUrl,
 		fileManager,
 	)
 	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()

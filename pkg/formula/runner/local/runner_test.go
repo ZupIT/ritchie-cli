@@ -152,7 +152,7 @@ func TestRun(t *testing.T) {
 				postRun:     postRunner,
 				inputRun:    inputRunner,
 				fileManager: fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				context: ctxFinderMock{ctx: rcontext.ContextHolder{
+				context:     ctxFinderMock{ctx: rcontext.ContextHolder{
 					Current: "prod",
 				}},
 			},

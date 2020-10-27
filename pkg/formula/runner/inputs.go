@@ -185,11 +185,11 @@ func addEnv(cmd *exec.Cmd, inName, inValue string) {
 	cmd.Env = append(cmd.Env, e)
 }
 
-func checkForSameEnv(envKey string) {
+func checkForSameEnv(envKey string){
 	envKey = strings.ToUpper(envKey)
 	if _, exist := os.LookupEnv(envKey); exist {
 		warnMsg := fmt.Sprintf(
-			"The input param %s has the same name of a machine variable."+
+			"The input param %s has the same name of a machine variable." +
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}
@@ -377,12 +377,10 @@ func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
 }
 
 func makeRequest(info formula.RequestInfo) (interface{}, error) {
-	response, err := http.Get(info.Url) //nolint:noctx
+	response, err := http.Get(info.Url)
 	if err != nil {
 		return nil, err
 	}
-
-	defer response.Body.Close()
 
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
