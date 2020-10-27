@@ -48,7 +48,6 @@ linters:
     - goimports
     - gomodguard
     - goprintffuncname
-    - maligned
     - misspell
     - nakedret
     - nolintlint
