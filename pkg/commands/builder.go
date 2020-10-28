@@ -138,7 +138,7 @@ func Build() *cobra.Command {
 		Make:   formBuildMake,
 		Shell:  formBuildSh,
 		Bat:    formBuildBat,
-		Docker: nil,
+		Docker: formBuildDocker,
 		Local:  nil,
 	}
 

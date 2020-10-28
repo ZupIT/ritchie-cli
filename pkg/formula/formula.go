@@ -137,10 +137,6 @@ type Builder interface {
 	Build(info BuildInfo) error
 }
 
-type DockerBuilder interface {
-	Build(formulaPath, dockerImg string) error
-}
-
 type LocalBuilder interface {
 	Build(workspacePath, formulaPath string) error
 }
