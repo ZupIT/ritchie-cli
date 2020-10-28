@@ -42,7 +42,7 @@ type PreRunManager struct {
 	ritchieHome string
 	make        formula.MakeBuilder
 	bat         formula.BatBuilder
-	shell       formula.ShellBuilder
+	shell       formula.Builder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
 }
@@ -51,7 +51,7 @@ func NewPreRun(
 	ritchieHome string,
 	make formula.MakeBuilder,
 	bat formula.BatBuilder,
-	shell formula.ShellBuilder,
+	shell formula.Builder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
 ) PreRunManager {
@@ -124,7 +124,7 @@ func (pr PreRunManager) buildFormula(formulaPath string) error {
 
 	buildPath := filepath.Join(formulaPath, "build.sh")
 	if pr.file.Exists(buildPath) { // Build formula with build.sh
-		if err := pr.shell.Build(formulaPath); err != nil {
+		if err := pr.shell.Build(formula.BuildInfo{FormulaPath: formulaPath}); err != nil {
 			return err
 		}
 	}

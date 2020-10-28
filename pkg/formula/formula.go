@@ -115,8 +115,18 @@ type (
 	}
 )
 
+type BuildInfo struct {
+	FormulaPath string
+	DockerImg   string
+	Workspace   Workspace
+}
+
 type Creator interface {
 	Create(cf Create) error
+}
+
+type Builder interface {
+	Build(info BuildInfo) error
 }
 
 type MakeBuilder interface {
