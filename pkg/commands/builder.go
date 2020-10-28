@@ -137,7 +137,7 @@ func Build() *cobra.Command {
 	_ = formula.Builders{
 		Make:   formBuildMake,
 		Shell:  formBuildSh,
-		Bat:    nil,
+		Bat:    formBuildBat,
 		Docker: nil,
 		Local:  nil,
 	}
