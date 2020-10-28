@@ -47,7 +47,7 @@ func TestBuildShell(t *testing.T) {
 	buildShell := NewBuildShell()
 
 	type in struct {
-		info formula.BuildInfo
+		formPath string
 	}
 
 	type out struct {
@@ -62,27 +62,21 @@ func TestBuildShell(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				info: formula.BuildInfo{
-					FormulaPath: filepath.Join(repoPath, "testing", "formula"),
-				},
+				formPath: filepath.Join(repoPath, "testing", "formula"),
 			},
 			out: out{wantErr: false},
 		},
 		{
 			name: "shell error",
 			in: in{
-				info: formula.BuildInfo{
-					FormulaPath: repoPath,
-				},
+				formPath: repoPath,
 			},
 			out: out{wantErr: true},
 		},
 		{
 			name: "Chdir error",
 			in: in{
-				info: formula.BuildInfo{
-					FormulaPath: filepath.Join(repoPath, "invalid"),
-				},
+				formPath: filepath.Join(repoPath, "invalid"),
 			},
 			out: out{wantErr: true},
 		},
@@ -90,7 +84,8 @@ func TestBuildShell(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := buildShell.Build(tt.in.info)
+			info := formula.BuildInfo{FormulaPath: tt.in.formPath}
+			got := buildShell.Build(info)
 
 			if got != nil && !tt.out.wantErr {
 				t.Errorf("Run(%s) got %v, want not nil error", tt.name, got)

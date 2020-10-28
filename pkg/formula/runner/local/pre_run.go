@@ -40,7 +40,7 @@ var _ formula.PreRunner = PreRunManager{}
 
 type PreRunManager struct {
 	ritchieHome string
-	make        formula.MakeBuilder
+	make        formula.Builder
 	bat         formula.BatBuilder
 	shell       formula.Builder
 	dir         stream.DirCreateListCopyRemover
@@ -49,7 +49,7 @@ type PreRunManager struct {
 
 func NewPreRun(
 	ritchieHome string,
-	make formula.MakeBuilder,
+	make formula.Builder,
 	bat formula.BatBuilder,
 	shell formula.Builder,
 	dir stream.DirCreateListCopyRemover,
@@ -129,7 +129,7 @@ func (pr PreRunManager) buildFormula(formulaPath string) error {
 		}
 	}
 
-	if err := pr.make.Build(formulaPath); err != nil { // Build formula with Makefile
+	if err := pr.make.Build(formula.BuildInfo{FormulaPath: formulaPath}); err != nil { // Build formula with Makefile
 		return err
 	}
 

@@ -126,11 +126,21 @@ func Build() *cobra.Command {
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
+
 	formBuildMake := builder.NewBuildMake()
 	formBuildSh := builder.NewBuildShell()
 	formBuildBat := builder.NewBuildBat(fileManager)
 	formBuildDocker := builder.NewBuildDocker(fileManager)
 	formulaLocalBuilder := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
+
+	// TODO: implement for all builders
+	_ = formula.Builders{
+		Make:   formBuildMake,
+		Shell:  formBuildSh,
+		Bat:    nil,
+		Docker: nil,
+		Local:  nil,
+	}
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	inputManager := runner.NewInput(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
