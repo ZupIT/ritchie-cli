@@ -18,7 +18,6 @@ package builder
 
 import (
 	"errors"
-	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -72,16 +71,6 @@ func TestBuild(t *testing.T) {
 				tree:        defaultTreeManager,
 			},
 			want: nil,
-		},
-		{
-			name: "error try build without files",
-			in: in{
-				formulaPath: filepath.Join(tmpDir, "ritchie-formulas-test", "testing", "without-build-files"),
-				fileManager: fileManager,
-				dirManager:  dirManager,
-				tree:        defaultTreeManager,
-			},
-			want: fmt.Errorf("Build error: \nmake: *** No rule to make target 'build'.  Stop.\n \nexit status 2"),
 		},
 		{
 			name: "create dir error",

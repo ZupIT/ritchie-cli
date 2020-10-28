@@ -81,7 +81,7 @@ type Command struct {
 
 type Commands []Command
 
-// TermInputType represents the source of the inputs will be readed
+// TermInputType represents the source of the inputs will be read
 type TermInputType int
 
 const (
@@ -89,10 +89,12 @@ const (
 	Prompt TermInputType = iota
 	// Stdin input
 	Stdin
+	// Flag input
+	Flag
 )
 
 func (t TermInputType) String() string {
-	return [...]string{"Prompt", "Stdin"}[t]
+	return [...]string{"Prompt", "Stdin", "Flag"}[t]
 }
 
 // ToLower converts the input type to lower case
