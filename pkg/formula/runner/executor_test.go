@@ -20,6 +20,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/spf13/pflag"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
@@ -139,7 +141,7 @@ type localRunnerMock struct {
 	err error
 }
 
-func (l localRunnerMock) Run(formula.Definition, api.TermInputType, bool) error {
+func (l localRunnerMock) Run(def formula.Definition, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) error {
 	return l.err
 }
 
@@ -147,7 +149,7 @@ type dockerRunnerMock struct {
 	err error
 }
 
-func (d dockerRunnerMock) Run(formula.Definition, api.TermInputType, bool) error {
+func (d dockerRunnerMock) Run(def formula.Definition, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) error {
 	return d.err
 }
 
