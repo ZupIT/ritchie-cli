@@ -20,18 +20,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -111,6 +115,7 @@ func (in InputManager) fromStdin(cmd *exec.Cmd, setup formula.Setup) error {
 		}
 
 		if len(inputVal) != 0 {
+			checkForSameEnv(input.Name)
 			addEnv(cmd, input.Name, inputVal)
 		}
 	}
@@ -146,6 +151,16 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			inputVal = strconv.FormatBool(valBool)
 		case "password":
 			inputVal, err = in.Password(input.Label, input.Tutorial)
+		case "dynamic":
+			dl, err := in.dynamicList(input.RequestInfo)
+			if err != nil {
+				return err
+			}
+
+			inputVal, err = in.List(input.Label, dl, input.Tutorial)
+			if err != nil {
+				return err
+			}
 		default:
 			inputVal, err = in.resolveIfReserved(input)
 		}
@@ -156,6 +171,7 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 
 		if len(inputVal) != 0 {
 			in.persistCache(setup.FormulaPath, inputVal, input, items)
+			checkForSameEnv(input.Name)
 			addEnv(cmd, input.Name, inputVal)
 		}
 	}
@@ -167,6 +183,16 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 func addEnv(cmd *exec.Cmd, inName, inValue string) {
 	e := fmt.Sprintf(formula.EnvPattern, strings.ToUpper(inName), inValue)
 	cmd.Env = append(cmd.Env, e)
+}
+
+func checkForSameEnv(envKey string){
+	envKey = strings.ToUpper(envKey)
+	if _, exist := os.LookupEnv(envKey); exist {
+		warnMsg := fmt.Sprintf(
+			"The input param %s has the same name of a machine variable." +
+				" It will probably result on unexpect behavior", envKey)
+		prompt.Warning(warnMsg)
+	}
 }
 
 func (in InputManager) persistCache(formulaPath, inputVal string, input formula.Input, items []string) {
@@ -335,4 +361,45 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 
 		return errors.New(input.Pattern.MismatchText)
 	})
+}
+
+func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
+	body, err := makeRequest(info)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := findValues(info.JsonPath, body)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func makeRequest(info formula.RequestInfo) (interface{}, error) {
+	response, err := http.Get(info.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
+	}
+
+	body, _ := ioutil.ReadAll(response.Body)
+	requestData := interface{}(nil)
+
+	_ = json.Unmarshal(body, &requestData)
+	return requestData, nil
+}
+
+func findValues(jsonPath string, requestData interface{}) ([]string, error) {
+	dynamicOptions, err := jsonpath.Get(jsonPath, requestData)
+	if err != nil {
+		return nil, err
+	}
+	dynamicOptionsStr := fmt.Sprintf("%v", dynamicOptions)
+	dynamicOptionsArr := strings.Split(dynamicOptionsStr, " ")
+
+	return dynamicOptionsArr, nil
 }

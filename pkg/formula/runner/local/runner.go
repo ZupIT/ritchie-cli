@@ -102,11 +102,18 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 		return err
 	}
 
+	if ctx.Current != "" {
+		prompt.Info(
+			fmt.Sprintf("Formula running on context: %s\n", prompt.Cyan(ctx.Current)),
+		)
+	}
+
 	cmd.Env = os.Environ()
+	dockerEnv := fmt.Sprintf(formula.EnvPattern, formula.DockerExecutionEnv, "false")
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, pwd)
 	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, ctx.Current)
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
-	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv)
+	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv)
 
 	return nil
 }

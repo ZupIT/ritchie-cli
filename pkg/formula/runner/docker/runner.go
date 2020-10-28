@@ -122,10 +122,11 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 		return err
 	}
 
+	dockerEnv := fmt.Sprintf(formula.EnvPattern, formula.DockerExecutionEnv, "true")
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, pwd)
 	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, ctx.Current)
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
-	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv)
+	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv)
 
 	for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
 		if !ru.file.Exists(envFile) {
