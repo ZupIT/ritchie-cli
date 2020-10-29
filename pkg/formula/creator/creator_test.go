@@ -94,9 +94,9 @@ func TestCreator(t *testing.T) {
 			name: "command exists",
 			in: in{
 				formCreate: formula.Create{
-					FormulaCmd:    fCmdExists,
-					Lang:          langGo,
-					WorkspacePath: resultDir,
+					FormulaCmd: fCmdExists,
+					Lang:       langGo,
+					Workspace:  formula.Workspace{Dir: resultDir},
 					FormulaPath: func() string {
 						fp := path.Join(resultDir, "/add/repo")
 						_ = dirManager.Remove(fp)
@@ -115,10 +115,10 @@ func TestCreator(t *testing.T) {
 			name: "command correct-go",
 			in: in{
 				formCreate: formula.Create{
-					FormulaCmd:    fCmdCorrectGo,
-					Lang:          langGo,
-					WorkspacePath: resultDir,
-					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_go"),
+					FormulaCmd:  fCmdCorrectGo,
+					Lang:        langGo,
+					Workspace:   formula.Workspace{Dir: resultDir},
+					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_go"),
 				},
 				dir:  dirManager,
 				file: fileManager,
@@ -132,10 +132,10 @@ func TestCreator(t *testing.T) {
 			name: "command correct-java",
 			in: in{
 				formCreate: formula.Create{
-					FormulaCmd:    fCmdCorrectJava,
-					Lang:          langJava,
-					WorkspacePath: resultDir,
-					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_java"),
+					FormulaCmd:  fCmdCorrectJava,
+					Lang:        langJava,
+					Workspace:   formula.Workspace{Dir: resultDir},
+					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_java"),
 				},
 				dir:  dirManager,
 				file: fileManager,
@@ -149,10 +149,10 @@ func TestCreator(t *testing.T) {
 			name: "command correct-node",
 			in: in{
 				formCreate: formula.Create{
-					FormulaCmd:    fCmdCorrectNode,
-					Lang:          langNode,
-					WorkspacePath: resultDir,
-					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_node"),
+					FormulaCmd:  fCmdCorrectNode,
+					Lang:        langNode,
+					Workspace:   formula.Workspace{Dir: resultDir},
+					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_node"),
 				},
 				dir:  dirManager,
 				file: fileManager,
@@ -166,10 +166,10 @@ func TestCreator(t *testing.T) {
 			name: "command correct-python",
 			in: in{
 				formCreate: formula.Create{
-					FormulaCmd:    fCmdCorrectPython,
-					Lang:          langPython,
-					WorkspacePath: resultDir,
-					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_python"),
+					FormulaCmd:  fCmdCorrectPython,
+					Lang:        langPython,
+					Workspace:   formula.Workspace{Dir: resultDir},
+					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_python"),
 				},
 				dir:  dirManager,
 				file: fileManager,
@@ -183,10 +183,10 @@ func TestCreator(t *testing.T) {
 			name: "command correct-shell",
 			in: in{
 				formCreate: formula.Create{
-					FormulaCmd:    fCmdCorrectShell,
-					Lang:          langShell,
-					WorkspacePath: resultDir,
-					FormulaPath:   path.Join(resultDir, "/scaffold/generate/test_shell"),
+					FormulaCmd:  fCmdCorrectShell,
+					Lang:        langShell,
+					Workspace:   formula.Workspace{Dir: resultDir},
+					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_shell"),
 				},
 				dir:  dirManager,
 				file: fileManager,

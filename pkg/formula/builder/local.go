@@ -44,11 +44,11 @@ func NewBuildLocal(
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileWriteReadExister,
 	tree formula.TreeGenerator,
-) formula.LocalBuilder {
+) LocalManager {
 	return LocalManager{ritHome: ritHome, dir: dir, file: file, tree: tree}
 }
 
-func (m LocalManager) Build(workspacePath, formulaPath string) error {
+func (m LocalManager) Build(info formula.BuildInfo) error {
 
 	dest := filepath.Join(m.ritHome, "repos", "local")
 
@@ -56,7 +56,7 @@ func (m LocalManager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
-	if err := m.copyWorkSpace(workspacePath, dest); err != nil {
+	if err := m.copyWorkSpace(info.Workspace.Dir, dest); err != nil {
 		return err
 	}
 
@@ -64,7 +64,7 @@ func (m LocalManager) Build(workspacePath, formulaPath string) error {
 		return err
 	}
 
-	if err := m.buildFormulaBin(workspacePath, formulaPath, dest); err != nil {
+	if err := m.buildFormulaBin(info.Workspace.Dir, info.FormulaPath, dest); err != nil {
 		return err
 	}
 

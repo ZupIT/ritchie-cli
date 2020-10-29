@@ -147,7 +147,8 @@ func TestBuild(t *testing.T) {
 	for _, tt := range testes {
 		t.Run(tt.name, func(t *testing.T) {
 			builderManager := NewBuildLocal(ritHome, tt.in.dirManager, tt.in.fileManager, tt.in.tree)
-			got := builderManager.Build(workspacePath, tt.in.formulaPath)
+			info := formula.BuildInfo{FormulaPath: tt.in.formulaPath, Workspace: formula.Workspace{Dir: workspacePath}}
+			got := builderManager.Build(info)
 
 			if (tt.want == nil && got != nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Build(%s) got %v, want %v", tt.name, got, tt.want)

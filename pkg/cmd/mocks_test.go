@@ -182,7 +182,7 @@ func (formCreator) Create(cf formula.Create) error {
 	return nil
 }
 
-func (formCreator) Build(workspacePath, formulaPath string) error {
+func (formCreator) Build(info formula.BuildInfo) error {
 	return nil
 }
 
@@ -471,8 +471,8 @@ type LocalBuilderMock struct {
 	build func(workspacePath, formulaPath string) error
 }
 
-func (l LocalBuilderMock) Build(workspacePath, formulaPath string) error {
-	return l.build(workspacePath, formulaPath)
+func (l LocalBuilderMock) Build(info formula.BuildInfo) error {
+	return l.build(info.Workspace.Dir, info.FormulaPath)
 }
 
 type WatcherMock struct {

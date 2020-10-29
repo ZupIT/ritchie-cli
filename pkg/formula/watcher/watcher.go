@@ -38,13 +38,13 @@ const stoppedText = "Press CTRL+C to stop"
 
 type WatchManager struct {
 	watcher    *watcher.Watcher
-	formula    formula.LocalBuilder
+	formula    formula.Builder
 	dir        stream.DirListChecker
 	sendMetric func(commandExecutionTime float64, err ...string)
 }
 
 func New(
-	formula formula.LocalBuilder,
+	formula formula.Builder,
 	dir stream.DirListChecker,
 	sendMetric func(commandExecutionTime float64, err ...string),
 ) *WatchManager {
@@ -109,7 +109,8 @@ func (w WatchManager) build(workspacePath, formulaPath string) {
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
 
-	if err := w.formula.Build(workspacePath, formulaPath); err != nil {
+	info := formula.BuildInfo{FormulaPath: formulaPath, Workspace: formula.Workspace{Dir: workspacePath}}
+	if err := w.formula.Build(info); err != nil {
 		errorMsg := prompt.Red(err.Error())
 		s.Error(errors.New(errorMsg))
 		return

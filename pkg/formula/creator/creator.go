@@ -59,14 +59,14 @@ func (c CreateManager) Create(cf formula.Create) error {
 		return err
 	}
 
-	if err := c.dir.Create(cf.WorkspacePath); err != nil {
+	if err := c.dir.Create(cf.Workspace.Dir); err != nil {
 		return err
 	}
 
 	fCmdName := cf.FormulaCmdName()
 
 	modifiers := modifier.NewModifiers(cf)
-	if err := c.generateFormulaFiles(cf.FormulaPath, cf.Lang, fCmdName, cf.WorkspacePath, modifiers); err != nil {
+	if err := c.generateFormulaFiles(cf.FormulaPath, cf.Lang, fCmdName, cf.Workspace.Dir, modifiers); err != nil {
 		return err
 	}
 
