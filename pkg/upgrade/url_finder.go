@@ -36,7 +36,6 @@ func NewDefaultUrlFinder(version version.Resolver) DefaultUrlFinder { //nolint:s
 }
 
 func (duf DefaultUrlFinder) Url(os string) string { //nolint:stylecheck
-	//stableVersion, err := resolver.StableVersion()
 	stableVersion, err := duf.version.StableVersion()
 
 	if err != nil {
