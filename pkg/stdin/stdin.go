@@ -22,6 +22,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
+
+	"github.com/spf13/cobra"
 )
 
 var ErrInvalidInput = errors.New("the STDIN inputs weren't informed correctly. Check the JSON used to execute the command")
@@ -35,16 +38,49 @@ func ReadJson(reader io.Reader, v interface{}) error {
 	return nil
 }
 
-func ExistsEntry(reader io.Reader) bool {
-	fmt.Println(1)
-	r := bufio.NewReader(reader)
+// func ExistsEntry(reader io.Reader) bool {
+// 	type Message struct {
+// 		Name, Text string
+// 	}
+// 	var m Message
 
-	fmt.Println(2)
-	n := r.Buffered()
+// 	if err := ReadJson(reader, &m); err != nil {
+// 		return false
+// 	}
+// 	return true
+// }
 
-	fmt.Println(3)
-	fmt.Println("n: ", n)
+func reading(r io.Reader, w io.Writer, v interface{}) {
+	nr := bufio.NewReader(r)
+	b, e := nr.Peek(1)
+	fmt.Println("peek v")
+	fmt.Println(b, e)
+	fmt.Println("peek ^")
+	// buf := make([]byte, 4)
+	// for {
+	// 	n, err := r.Read(buf)
+	// 	fmt.Println(n, err, buf[:n])
+	// 	if err == io.EOF {
+	// 		break
+	// 	}
+	// }
+}
 
-	fmt.Println(4)
+func ExistsEntry(reader io.Reader, cmd *cobra.Command) bool {
+	init := []string{""}
+
+	go reading(cmd.InOrStdin(), cmd.OutOrStdout(), &init)
+
+	fmt.Println("init: ", init)
+
+	tempo := 10
+	i := 1
+	for i < tempo {
+		time.Sleep(1 * time.Second)
+		fmt.Println(".")
+
+		i++
+	}
+
 	return true
 }

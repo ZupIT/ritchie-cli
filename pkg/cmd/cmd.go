@@ -31,7 +31,10 @@ type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
 // RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc
 func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		exits := stdin.ExistsEntry(os.Stdin)
+
+		cmd.Println("cmd print")
+
+		exits := stdin.ExistsEntry(os.Stdin, cmd)
 		fmt.Println("exits: ", exits)
 
 		s, err := cmd.Flags().GetBool(api.Stdin.ToLower())

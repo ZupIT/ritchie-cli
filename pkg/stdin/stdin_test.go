@@ -54,20 +54,35 @@ func TestReadJson(t *testing.T) {
 	}
 }
 
-func TestExistsEntry(t *testing.T) {
+// func TestExistsEntry(t *testing.T) {
+// 	var tests = []struct {
+// 		name           string
+// 		expectedResult bool
+// 		inputMsg       interface{}
+// 	}{
+// 		{
+// 			name:           "return true when json data inputed",
+// 			expectedResult: true,
+// 			inputMsg:       TestStdin{Test: msg},
+// 		},
+// 		{
+// 			name:           "return false when json data not inputed",
+// 			expectedResult: false,
+// 			inputMsg:       nil,
+// 		},
+// 	}
 
-	// Convert interface to Json for test
-	i := TestStdin{Test: msg}
-	jsonData, _ := json.Marshal(i)
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			jsonData, _ := json.Marshal(tt.inputMsg)
 
-	// Insert Json inside a new Reader (simulating os.Stdin)
-	var stdin bytes.Buffer
-	stdin.Write(jsonData)
-	reader := bufio.NewReader(&stdin)
+// 			var stdin bytes.Buffer
+// 			stdin.Write(jsonData)
+// 			reader := bufio.NewReader(&stdin)
 
-	// ReadJson through Reader and convert to chosen interface
-
-	if exists := ExistsEntry(reader); !exists {
-		t.Errorf("Got: %v expected: %v", exists, true)
-	}
-}
+// 			if result := ExistsEntry(reader); result != tt.expectedResult {
+// 				t.Errorf("Got: %v expected: %v", result, tt.expectedResult)
+// 			}
+// 		})
+// 	}
+// }
