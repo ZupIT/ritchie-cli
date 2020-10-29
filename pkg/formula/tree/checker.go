@@ -87,7 +87,7 @@ func printConflictingCommandsWarning(conflictingCommands []string) {
 }
 
 func formatCommands(commands []string)  []string {
-	for i, _ := range commands {
+	for i := range commands {
         commands[i] = strings.Replace(commands[i], "root", "rit", 1)
 		commands[i] = strings.ReplaceAll(commands[i], "_", " ")
 	}
