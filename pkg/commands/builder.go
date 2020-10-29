@@ -144,6 +144,15 @@ func Build() *cobra.Command {
 		Local:  formBuildLocal,
 	}
 
+	// TODO: implement for all builders
+	_ = formula.Builders{
+		Make:   formBuildMake,
+		Shell:  formBuildSh,
+		Bat:    formBuildBat,
+		Docker: formBuildDocker,
+		Local:  nil,
+	}
+
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 
 	promptInManager := fprompt.NewInputManager(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
