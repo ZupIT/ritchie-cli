@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -39,6 +40,7 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 		inputTextValidatorMock{},
 		inputListMock{},
 		TutorialFinderMock{},
+		tree.CheckerManager{},
 	)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
@@ -125,6 +127,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tt.in.inTextValidator,
 				tt.in.inList,
 				TutorialFinderMock{},
+				tree.CheckerManager{},
 			)
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := createFormulaCmd.Execute(); (err != nil) != tt.wantErr {

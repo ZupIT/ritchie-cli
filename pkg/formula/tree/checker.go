@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -38,32 +39,16 @@ func (cm CheckerManager) readCommands() []formula.Tree {
 	repos, _ := cm.dir.List(repoDir, false)
 
 	tree := formula.Tree{}
-	treeArr := make([]formula.Tree, len(repos))
+	var treeArr []formula.Tree
 	for _, r := range repos {
 		path := fmt.Sprintf(treeRepoCmdPattern, api.RitchieHomeDir(), r)
 		bytes, _ := cm.file.Read(path)
 		_ = json.Unmarshal(bytes, &tree)
 		treeArr = append(treeArr, tree)
+		tree = formula.Tree{}
 	}
+
 	return treeArr
-}
-
-func conflictingCommands(cmds []string) []string {
-	moreThanOne := 0
-	duplicatedCommands := []string{""}
-	for _, c := range cmds {
-		for _, c2 := range cmds {
-			if c == c2 {
-				moreThanOne++
-				if moreThanOne == 2 {
-					duplicatedCommands = append(duplicatedCommands, c)
-				}
-			}
-		}
-	moreThanOne = 0
-	}
-
-	return duplicatedCommands
 }
 
 func filterCommands(tree []formula.Tree) []string {
@@ -76,10 +61,36 @@ func filterCommands(tree []formula.Tree) []string {
 	return allCommands
 }
 
+func conflictingCommands(commands []string) []string {
+	duplicateFrequency := make(map[string]int)
+	duplicatedCommands := []string{""}
+	for _, item := range commands {
+		_, exist := duplicateFrequency[item]
+		if exist {
+			duplicateFrequency[item] += 1 // increase counter by 1 if already in the map
+			duplicatedCommands = append(duplicatedCommands, item)
+		} else {
+			duplicateFrequency[item] = 1 // else start counting from 1
+		}
+	}
+	return duplicatedCommands
+
+}
+
+
 func printConflictingCommandsWarning(conflictingCommands []string) {
 	// TODO improve the warn information
-	prompt.Warning("There are some conflicting commands on formulas" +
-		"it can cause unexpected behaviors")
+	fmt.Print(prompt.Yellow("The following formula commands are conflicting:"))
+	fc := formatCommands(conflictingCommands)
+	for _, c := range fc {
+		fmt.Println(c)
+	}
+}
 
-	fmt.Println(conflictingCommands)
+func formatCommands(commands []string)  []string {
+	for i, _ := range commands {
+        commands[i] = strings.Replace(commands[i], "root", "rit", 1)
+		commands[i] = strings.ReplaceAll(commands[i], "_", " ")
+	}
+	return commands
 }
