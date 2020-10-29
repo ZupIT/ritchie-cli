@@ -35,9 +35,10 @@ func NewMetricsCmd(file stream.FileWriteReadExister, inList prompt.InputList) *c
 func (m metricsCmd) run() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		options := []string{"yes", "no"}
-		choose, err := m.input.List("You want to send anonymous data "+
-			"about the product, feature use, statistics and crash reports?",
-			options)
+		choose, err := m.input.List(
+			"You want to send anonymous data about the product, feature use, statistics and crash reports?",
+			options,
+		)
 		if err != nil {
 			return err
 		}
