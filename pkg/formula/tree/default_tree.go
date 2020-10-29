@@ -168,5 +168,3 @@ func (d Manager) loadTree(treeCmdFile string) (formula.Tree, error) {
 
 	return tree, nil
 }
-
-
