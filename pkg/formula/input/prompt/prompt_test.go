@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package runner
+package prompt
 
 import (
 	"encoding/json"
@@ -22,13 +22,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -119,7 +117,6 @@ func TestInputManager_Inputs(t *testing.T) {
 		inType         api.TermInputType
 		creResolver    env.Resolvers
 		file           stream.FileWriteReadExister
-		stdin          string
 	}
 
 	tests := []struct {
@@ -127,36 +124,6 @@ func TestInputManager_Inputs(t *testing.T) {
 		in   in
 		want error
 	}{
-		{
-			name: "success stdin",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Stdin,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				stdin:          `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
-				file:           fileManager,
-			},
-			want: nil,
-		},
-		{
-			name: "error stdin",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Stdin,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				stdin:          `"sample_text"`,
-				file:           fileManager,
-			},
-			want: stdin.ErrInvalidInput,
-		},
 		{
 			name: "success prompt",
 			in: in{
@@ -242,20 +209,6 @@ func TestInputManager_Inputs(t *testing.T) {
 			want: nil,
 		},
 		{
-			name: "error unknown prompt",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.TermInputType(3),
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
-				file:           fileManager,
-			},
-			want: ErrInputNotRecognized,
-		},
-		{
 			name: "error env resolver prompt",
 			in: in{
 				iText:          inputMock{text: DefaultCacheNewLabel},
@@ -264,21 +217,6 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
-				file:           fileManager,
-			},
-			want: errors.New("credential not found"),
-		},
-		{
-			name: "error env resolver stdin",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Stdin,
-				stdin:          `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
 				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
 				file:           fileManager,
 			},
@@ -294,14 +232,10 @@ func TestInputManager_Inputs(t *testing.T) {
 			iBool := tt.in.iBool
 			iPass := tt.in.iPass
 
-			inputManager := NewInput(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
-			if tt.in.inType == api.Stdin {
-				cmd.Stdin = strings.NewReader(tt.in.stdin)
-			}
-
-			got := inputManager.Inputs(cmd, setup, tt.in.inType)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
@@ -439,11 +373,11 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 
-			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 
-			got := inputManager.Inputs(cmd, setup, api.Prompt)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
@@ -542,11 +476,11 @@ func TestInputManager_RegexType(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 
-			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 
-			got := inputManager.Inputs(cmd, setup, api.Prompt)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if tt.want != nil && got == nil {
 				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, nil, tt.want)
@@ -668,11 +602,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 
-			inputManager := NewInput(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 
-			got := inputManager.Inputs(cmd, setup, api.Prompt)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if tt.want != nil && got == nil {
 				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, nil, tt.want)

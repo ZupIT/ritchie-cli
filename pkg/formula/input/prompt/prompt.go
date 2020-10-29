@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package runner
+package prompt
 
 import (
 	"encoding/json"
@@ -28,14 +28,16 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/pflag"
+
 	"github.com/PaesslerAG/jsonpath"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
@@ -43,8 +45,6 @@ const (
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 )
-
-var ErrInputNotRecognized = prompt.NewError("terminal input not recognized")
 
 type InputManager struct {
 	envResolvers env.Resolvers
@@ -56,7 +56,7 @@ type InputManager struct {
 	prompt.InputPassword
 }
 
-func NewInput(
+func NewInputManager(
 	env env.Resolvers,
 	file stream.FileWriteReadExister,
 	inList prompt.InputList,
@@ -76,62 +76,16 @@ func NewInput(
 	}
 }
 
-func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, inputType api.TermInputType) error {
-	switch inputType {
-	case api.Prompt:
-		if err := in.fromPrompt(cmd, setup); err != nil {
-			return err
-		}
-	case api.Stdin:
-		if err := in.fromStdin(cmd, setup); err != nil {
-			return err
-		}
-	default:
-		return ErrInputNotRecognized
-	}
-
-	return nil
-}
-
-func (in InputManager) fromStdin(cmd *exec.Cmd, setup formula.Setup) error {
-	data := make(map[string]interface{})
-	if err := stdin.ReadJson(cmd.Stdin, &data); err != nil {
-		return err
-	}
-
+func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagSet) error {
 	config := setup.Config
-
-	for _, input := range config.Inputs {
-		var inputVal string
-		var err error
-		switch iType := input.Type; iType {
-		case "text", "bool", "password":
-			inputVal = fmt.Sprintf("%v", data[input.Name])
-		default:
-			inputVal, err = in.resolveIfReserved(input)
-			if err != nil {
-				return err
-			}
-		}
-
-		if len(inputVal) != 0 {
-			checkForSameEnv(input.Name)
-			addEnv(cmd, input.Name, inputVal)
-		}
-	}
-	return nil
-}
-
-func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
-	config := setup.Config
-	for _, input := range config.Inputs {
+	for _, i := range config.Inputs {
 		var inputVal string
 		var valBool bool
-		items, err := in.loadItems(input, setup.FormulaPath)
+		items, err := in.loadItems(i, setup.FormulaPath)
 		if err != nil {
 			return err
 		}
-		conditionPass, err := in.verifyConditional(cmd, input)
+		conditionPass, err := input.VerifyConditional(cmd, i)
 		if err != nil {
 			return err
 		}
@@ -139,30 +93,30 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 			continue
 		}
 
-		switch iType := input.Type; iType {
-		case "text":
+		switch iType := i.Type; iType {
+		case input.TextType:
 			if items != nil {
-				inputVal, err = in.loadInputValList(items, input)
+				inputVal, err = in.loadInputValList(items, i)
 			} else {
-				inputVal, err = in.textValidator(input)
+				inputVal, err = in.textValidator(i)
 			}
-		case "bool":
-			valBool, err = in.Bool(input.Label, items, input.Tutorial)
+		case input.BoolType:
+			valBool, err = in.Bool(i.Label, items, i.Tutorial)
 			inputVal = strconv.FormatBool(valBool)
-		case "password":
-			inputVal, err = in.Password(input.Label, input.Tutorial)
-		case "dynamic":
-			dl, err := in.dynamicList(input.RequestInfo)
+		case input.PassType:
+			inputVal, err = in.Password(i.Label, i.Tutorial)
+		case input.DynamicType:
+			dl, err := in.dynamicList(i.RequestInfo)
 			if err != nil {
 				return err
 			}
 
-			inputVal, err = in.List(input.Label, dl, input.Tutorial)
+			inputVal, err = in.List(i.Label, dl, i.Tutorial)
 			if err != nil {
 				return err
 			}
 		default:
-			inputVal, err = in.resolveIfReserved(input)
+			inputVal, err = input.ResolveIfReserved(in.envResolvers, i)
 		}
 
 		if err != nil {
@@ -170,26 +124,19 @@ func (in InputManager) fromPrompt(cmd *exec.Cmd, setup formula.Setup) error {
 		}
 
 		if len(inputVal) != 0 {
-			in.persistCache(setup.FormulaPath, inputVal, input, items)
-			checkForSameEnv(input.Name)
-			addEnv(cmd, input.Name, inputVal)
+			in.persistCache(setup.FormulaPath, inputVal, i, items)
+			checkForSameEnv(i.Name)
+			input.AddEnv(cmd, i.Name, inputVal)
 		}
 	}
 	return nil
 }
 
-// addEnv Add environment variable to run formulas.
-// add the variable inName=inValue to cmd.Env
-func addEnv(cmd *exec.Cmd, inName, inValue string) {
-	e := fmt.Sprintf(formula.EnvPattern, strings.ToUpper(inName), inValue)
-	cmd.Env = append(cmd.Env, e)
-}
-
-func checkForSameEnv(envKey string) {
+func checkForSameEnv(envKey string){
 	envKey = strings.ToUpper(envKey)
 	if _, exist := os.LookupEnv(envKey); exist {
 		warnMsg := fmt.Sprintf(
-			"The input param %s has the same name of a machine variable."+
+			"The input param %s has the same name of a machine variable." +
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}
@@ -271,85 +218,22 @@ func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]str
 	}
 }
 
-func (in InputManager) resolveIfReserved(input formula.Input) (string, error) {
-	s := strings.Split(input.Type, "_")
-	resolver := in.envResolvers[s[0]]
-	if resolver != nil {
-		return resolver.Resolve(input.Type)
-	}
-	return "", nil
-}
-
-func (in InputManager) textValidator(input formula.Input) (string, error) {
-	required := isRequired(input)
+func (in InputManager) textValidator(i formula.Input) (string, error) {
+	required := input.IsRequired(i)
 	var inputVal string
 	var err error
 
-	if in.hasRegex(input) {
-		inputVal, err = in.textRegexValidator(input, required)
+	if input.HasRegex(i) {
+		inputVal, err = in.textRegexValidator(i, required)
 	} else {
-		inputVal, err = in.InputText.Text(input.Label, required, input.Tutorial)
+		inputVal, err = in.InputText.Text(i.Label, required, i.Tutorial)
 	}
 
 	if inputVal == "" {
-		inputVal = input.Default
+		inputVal = i.Default
 	}
 
 	return inputVal, err
-}
-
-func isRequired(input formula.Input) bool {
-	if input.Required == nil {
-		return input.Default == ""
-	}
-
-	return *input.Required
-}
-
-func (in InputManager) verifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
-	if input.Condition.Variable == "" {
-		return true, nil
-	}
-
-	var value string
-	variable := input.Condition.Variable
-	for _, envVal := range cmd.Env {
-		components := strings.Split(envVal, "=")
-		if strings.ToLower(components[0]) == variable {
-			value = components[1]
-			break
-		}
-	}
-	if value == "" {
-		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
-	}
-
-	// Currently using case implementation to avoid adding a dependency module or exposing
-	// the code to the risks of running an eval function on a user-defined variable
-	// optimizations are welcome, being mindful of the points above
-	switch input.Condition.Operator {
-	case "==":
-		return value == input.Condition.Value, nil
-	case "!=":
-		return value != input.Condition.Value, nil
-	case ">":
-		return value > input.Condition.Value, nil
-	case ">=":
-		return value >= input.Condition.Value, nil
-	case "<":
-		return value < input.Condition.Value, nil
-	case "<=":
-		return value <= input.Condition.Value, nil
-	default:
-		return false, fmt.Errorf(
-			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=)",
-			input.Condition.Operator,
-		)
-	}
-}
-
-func (in InputManager) hasRegex(input formula.Input) bool {
-	return len(input.Pattern.Regex) > 0
 }
 
 func (in InputManager) textRegexValidator(input formula.Input, required bool) (string, error) {
@@ -381,21 +265,15 @@ func makeRequest(info formula.RequestInfo) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
 
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
+	body, _ := ioutil.ReadAll(response.Body)
 	requestData := interface{}(nil)
 
-	if err := json.Unmarshal(body, &requestData); err != nil {
-		return nil, err
-	}
+	_ = json.Unmarshal(body, &requestData)
 	return requestData, nil
 }
 

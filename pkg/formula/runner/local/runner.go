@@ -23,6 +23,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/spf13/pflag"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
@@ -35,7 +37,7 @@ var _ formula.Runner = RunManager{}
 
 type RunManager struct {
 	formula.PostRunner
-	formula.InputRunner
+	formula.InputResolver
 	formula.PreRunner
 	file    stream.FileWriteExistAppender
 	ctx     rcontext.Finder
@@ -44,23 +46,23 @@ type RunManager struct {
 
 func NewRunner(
 	postRun formula.PostRunner,
-	input formula.InputRunner,
+	input formula.InputResolver,
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
 	ctx rcontext.Finder,
 	homeDir string,
 ) formula.Runner {
 	return RunManager{
-		PostRunner:  postRun,
-		InputRunner: input,
-		PreRunner:   preRun,
-		file:        file,
-		ctx:         ctx,
-		homeDir:     homeDir,
+		PostRunner:    postRun,
+		InputResolver: input,
+		PreRunner:     preRun,
+		file:          file,
+		ctx:           ctx,
+		homeDir:       homeDir,
 	}
 }
 
-func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, verbose bool) error {
+func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) error {
 	setup, err := ru.PreRun(def)
 	if err != nil {
 		return err
@@ -83,7 +85,12 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
-	if err := ru.Inputs(cmd, setup, inputType); err != nil {
+	inputRunner, err := ru.InputResolver.Resolve(inputType)
+	if err != nil {
+		return err
+	}
+
+	if err := inputRunner.Inputs(cmd, setup, flags); err != nil {
 		return err
 	}
 

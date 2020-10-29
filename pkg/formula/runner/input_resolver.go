@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
-package cmd
+package runner
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-// CommandRunnerFunc represents that runner func for commands.
-type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
+var ErrInputNotRecognized = prompt.NewError("terminal input not recognized")
 
-// RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc.
-func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
-		if err != nil {
-			return err
-		}
+var _ formula.InputResolver = Resolver{}
 
-		if stdin {
-			return stdinFunc(cmd, args)
-		}
-		return promptFunc(cmd, args)
+type Resolver struct {
+	types formula.TermInputTypes
+}
+
+func NewInputResolver(types formula.TermInputTypes) Resolver {
+	return Resolver{types: types}
+}
+
+func (r Resolver) Resolve(inType api.TermInputType) (formula.InputRunner, error) {
+	inputRunner := r.types[inType]
+	if inputRunner == nil {
+		return nil, ErrInputNotRecognized
 	}
+
+	return inputRunner, nil
 }
