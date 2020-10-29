@@ -79,7 +79,6 @@ func conflictingCommands(commands []string) []string {
 
 
 func printConflictingCommandsWarning(conflictingCommands []string) {
-	// TODO improve the warn information
 	fmt.Print(prompt.Yellow("The following formula commands are conflicting:"))
 	fc := formatCommands(conflictingCommands)
 	for _, c := range fc {

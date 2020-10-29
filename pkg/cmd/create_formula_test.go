@@ -31,6 +31,7 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tplM := template.NewManager("../../testdata", dirManager)
+	tChecker := tree.NewChecker(dirManager, fileManager)
 	cmd := NewCreateFormulaCmd(
 		os.TempDir(),
 		formCreator{},
@@ -40,7 +41,7 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 		inputTextValidatorMock{},
 		inputListMock{},
 		TutorialFinderMock{},
-		tree.CheckerManager{},
+		tChecker,
 	)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
