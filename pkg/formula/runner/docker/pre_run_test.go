@@ -52,7 +52,7 @@ func TestPreRun(t *testing.T) {
 
 	type in struct {
 		def         formula.Definition
-		dockerBuild formula.DockerBuilder
+		dockerBuild formula.Builder
 		file        stream.FileReadExister
 		dir         stream.DirCreateListCopyRemover
 	}
@@ -221,8 +221,8 @@ type dockerBuildMock struct {
 	build func(formulaPath, dockerImg string) error
 }
 
-func (do dockerBuildMock) Build(formulaPath, dockerImg string) error {
-	return do.build(formulaPath, dockerImg)
+func (do dockerBuildMock) Build(info formula.BuildInfo) error {
+	return do.build(info.FormulaPath, info.DockerImg)
 }
 
 type dirManagerMock struct {

@@ -122,28 +122,26 @@ type (
 	}
 )
 
-func (ii Items) Contains(item string) bool {
-	return sliceutil.Contains(ii, item)
+type BuildInfo struct {
+	FormulaPath string
+	DockerImg   string
+	Workspace   Workspace
+}
+
+type Builders struct {
+	Make   Builder
+	Shell  Builder
+	Bat    Builder
+	Docker Builder
+	Local  Builder
 }
 
 type Creator interface {
 	Create(cf Create) error
 }
 
-type MakeBuilder interface {
-	Build(formulaPath string) error
-}
-
-type ShellBuilder interface {
-	Build(formulaPath string) error
-}
-
-type BatBuilder interface {
-	Build(formulaPath string) error
-}
-
-type DockerBuilder interface {
-	Build(formulaPath, dockerImg string) error
+type Builder interface {
+	Build(info BuildInfo) error
 }
 
 type LocalBuilder interface {
@@ -207,4 +205,8 @@ func (c Create) FormulaCmdName() string {
 func (c Create) PkgName() string {
 	d := strings.Split(c.FormulaCmd, " ")
 	return d[len(d)-1]
+}
+
+func (ii Items) Contains(item string) bool {
+	return sliceutil.Contains(ii, item)
 }

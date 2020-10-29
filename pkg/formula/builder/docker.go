@@ -40,22 +40,25 @@ const (
 
 var ErrDockerBuild = errors.New("failed building formula with Docker, we will try to build your formula locally")
 
-type Manager struct {
+var _ formula.Builder = DockerManager{}
+
+type DockerManager struct {
 	file stream.FileExister
 }
 
-func NewBuildDocker(file stream.FileExister) formula.DockerBuilder {
-	return Manager{file: file}
+func NewBuildDocker(file stream.FileExister) DockerManager {
+	return DockerManager{file: file}
 }
 
-func (do Manager) Build(formulaPath, dockerImg string) error {
+func (do DockerManager) Build(info formula.BuildInfo) error {
+	formulaPath := info.FormulaPath
 	volume := fmt.Sprintf(volumePattern, formulaPath)
 	containerCmd, err := do.containerCmd(formulaPath)
 	if err != nil {
 		return err
 	}
 
-	args := []string{"run", "--rm", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", dockerImg, "-c", containerCmd}
+	args := []string{"run", "--rm", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", info.DockerImg, "-c", containerCmd}
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", args...)
@@ -70,7 +73,7 @@ func (do Manager) Build(formulaPath, dockerImg string) error {
 	return nil
 }
 
-func (do Manager) containerCmd(formulaPath string) (string, error) {
+func (do DockerManager) containerCmd(formulaPath string) (string, error) {
 	os := runtime.GOOS
 	switch os {
 	case osutil.Windows:
