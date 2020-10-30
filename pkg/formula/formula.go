@@ -80,10 +80,10 @@ type (
 		Value    string `json:"value"`
 	}
 	Create struct {
-		FormulaCmd    string `json:"formulaCmd"`
-		Lang          string `json:"lang"`
-		WorkspacePath string `json:"workspacePath"`
-		FormulaPath   string `json:"formulaPath"`
+		FormulaCmd  string    `json:"formulaCmd"`
+		Lang        string    `json:"lang"`
+		Workspace   Workspace `json:"workspace"`
+		FormulaPath string    `json:"formulaPath"`
 	}
 
 	Inputs []Input
@@ -144,17 +144,13 @@ type Builder interface {
 	Build(info BuildInfo) error
 }
 
-type LocalBuilder interface {
-	Build(workspacePath, formulaPath string) error
-}
-
 type Watcher interface {
 	Watch(workspacePath, formulaPath string)
 }
 
 type CreateBuilder interface {
 	Creator
-	LocalBuilder
+	Builder
 }
 
 // FormulaPath builds the formula path from ritchie home

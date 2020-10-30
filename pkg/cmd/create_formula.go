@@ -125,13 +125,13 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		formulaPath := formulaPath(wspace.Dir, formulaCmd)
 
 		cf := formula.Create{
-			FormulaCmd:    formulaCmd,
-			Lang:          lang,
-			WorkspacePath: wspace.Dir,
-			FormulaPath:   formulaPath,
+			FormulaCmd:  formulaCmd,
+			Lang:        lang,
+			Workspace:   wspace,
+			FormulaPath: formulaPath,
 		}
 
-		c.create(cf, wspace.Dir, formulaPath)
+		c.create(cf)
 		return nil
 	}
 }
@@ -149,12 +149,12 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		c.create(cf, cf.WorkspacePath, cf.FormulaPath)
+		c.create(cf)
 		return nil
 	}
 }
 
-func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath string) {
+func (c createFormulaCmd) create(cf formula.Create) {
 	buildInfo := prompt.Bold("Creating and building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
@@ -165,7 +165,8 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	if err := c.formula.Build(workspacePath, formulaPath); err != nil {
+	info := formula.BuildInfo{FormulaPath: cf.FormulaPath, Workspace: cf.Workspace}
+	if err := c.formula.Build(info); err != nil {
 		err := prompt.NewError(err.Error())
 		s.Error(err)
 		return
@@ -177,7 +178,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 	createSuccess(s, cf.Lang)
-	buildSuccess(formulaPath, cf.FormulaCmd, tutorialHolder.Current)
+	buildSuccess(cf.FormulaPath, cf.FormulaCmd, tutorialHolder.Current)
 }
 
 func createSuccess(s *spinner.Spinner, lang string) {

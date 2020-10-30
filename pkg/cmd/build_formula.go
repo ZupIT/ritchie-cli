@@ -44,7 +44,7 @@ const (
 type buildFormulaCmd struct {
 	userHomeDir string
 	workspace   formula.WorkspaceAddListHasher
-	formula     formula.LocalBuilder
+	formula     formula.Builder
 	watcher     formula.Watcher
 	directory   stream.DirListChecker
 	prompt.InputText
@@ -54,7 +54,7 @@ type buildFormulaCmd struct {
 
 func NewBuildFormulaCmd(
 	userHomeDir string,
-	formula formula.LocalBuilder,
+	formula formula.Builder,
 	workManager formula.WorkspaceAddListHasher,
 	watcher formula.Watcher,
 	directory stream.DirListChecker,
@@ -118,7 +118,11 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		b.build(wspace.Dir, formulaPath)
+		info := formula.BuildInfo{
+			FormulaPath: formulaPath,
+			Workspace:   wspace,
+		}
+		b.build(info)
 
 		tutorialHolder, err := b.rt.Find()
 		if err != nil {
@@ -130,16 +134,16 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 	}
 }
 
-func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
+func (b buildFormulaCmd) build(info formula.BuildInfo) {
 	buildInfo := prompt.Red("Building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
 
 	// Failures to generate the hash must not prevent the user from build formulas
-	hash, _ := b.workspace.CurrentHash(formulaPath)
-	_ = b.workspace.UpdateHash(formulaPath, hash)
+	hash, _ := b.workspace.CurrentHash(info.FormulaPath)
+	_ = b.workspace.UpdateHash(info.FormulaPath, hash)
 
-	if err := b.formula.Build(workspacePath, formulaPath); err != nil {
+	if err := b.formula.Build(info); err != nil {
 		errorMsg := prompt.Red(err.Error())
 		s.Error(errors.New(errorMsg))
 		return
