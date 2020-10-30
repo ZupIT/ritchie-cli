@@ -12,7 +12,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-// TODO rit home dir must be a parameter
 type CheckerManager struct {
 	dir  stream.DirLister
 	file stream.FileReader
@@ -37,7 +36,6 @@ func (cm CheckerManager) CheckCommands() {
 func (cm CheckerManager) readCommands() []formula.Tree {
 	repoDir := filepath.Join(api.RitchieHomeDir(), "repos")
 	repos, _ := cm.dir.List(repoDir, false)
-
 	tree := formula.Tree{}
 	var treeArr []formula.Tree
 	for _, r := range repos {
@@ -74,22 +72,15 @@ func conflictingCommands(commands []string) []string {
 		}
 	}
 	return duplicatedCommands
-
 }
 
 
 func printConflictingCommandsWarning(conflictingCommands []string) {
-	fmt.Print(prompt.Yellow("The following formula commands are conflicting:"))
-	fc := formatCommands(conflictingCommands)
-	for _, c := range fc {
-		fmt.Println(c)
-	}
-}
-
-func formatCommands(commands []string)  []string {
-	for i := range commands {
-        commands[i] = strings.Replace(commands[i], "root", "rit", 1)
-		commands[i] = strings.ReplaceAll(commands[i], "_", " ")
-	}
-	return commands
+	lastCommandIndex := len(conflictingCommands) - 1
+	lastCommand := conflictingCommands[lastCommandIndex]
+	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
+	lastCommand = strings.ReplaceAll(lastCommand, "_", " ")
+	msg := fmt.Sprintf("The following formula command are conflicting: %s", lastCommand)
+	msg = prompt.Yellow(msg)
+	fmt.Print(msg)
 }
