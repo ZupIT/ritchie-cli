@@ -11,5 +11,4 @@ func TestChecker(t *testing.T) {
 		treeChecker := NewChecker(stream.DirManager{}, stream.FileManager{})
 		treeChecker.CheckCommands()
 	})
-
 }

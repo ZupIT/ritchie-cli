@@ -27,10 +27,9 @@ func NewChecker(dir stream.DirLister, file stream.FileReader) CheckerManager {
 // warning attempt can be confusing to the user.
 func (cm CheckerManager) CheckCommands() {
 	trees := cm.readCommands()
-	commands := filterCommands(trees)
-	conflictingCommands := conflictingCommands(commands)
-	printConflictingCommandsWarning(conflictingCommands)
-
+	commands := cm.filterCommands(trees)
+	conflictingCommands := cm.conflictingCommands(commands)
+	cm.printConflictingCommandsWarning(conflictingCommands)
 }
 
 func (cm CheckerManager) readCommands() []formula.Tree {
@@ -49,7 +48,7 @@ func (cm CheckerManager) readCommands() []formula.Tree {
 	return treeArr
 }
 
-func filterCommands(tree []formula.Tree) []string {
+func (cm CheckerManager) filterCommands(tree []formula.Tree) []string {
 	allCommands := []string{""}
 	for _, t := range tree {
 		for _, c := range t.Commands {
@@ -59,7 +58,7 @@ func filterCommands(tree []formula.Tree) []string {
 	return allCommands
 }
 
-func conflictingCommands(commands []string) []string {
+func (cm CheckerManager) conflictingCommands(commands []string) []string {
 	duplicateFrequency := make(map[string]int)
 	duplicatedCommands := []string{""}
 	for _, item := range commands {
@@ -74,13 +73,12 @@ func conflictingCommands(commands []string) []string {
 	return duplicatedCommands
 }
 
-
-func printConflictingCommandsWarning(conflictingCommands []string) {
+func (cm CheckerManager) printConflictingCommandsWarning(conflictingCommands []string) {
 	lastCommandIndex := len(conflictingCommands) - 1
 	lastCommand := conflictingCommands[lastCommandIndex]
 	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
 	lastCommand = strings.ReplaceAll(lastCommand, "_", " ")
 	msg := fmt.Sprintf("The following formula command are conflicting: %s", lastCommand)
 	msg = prompt.Yellow(msg)
-	fmt.Print(msg)
+	fmt.Println(msg)
 }
