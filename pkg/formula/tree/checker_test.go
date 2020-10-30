@@ -17,6 +17,14 @@ func TestChecker(t *testing.T) {
 							"help": "short help placeholder for bucket",
 							"longHelp": "long help placeholder for bucket used by index page and -h",
 							"formula": true
+						},
+						{
+							"id": "root_aws_create_bucket",
+							"parent": "root_aws_create",
+							"usage": "bucket",
+							"help": "short help placeholder for bucket",
+							"longHelp": "long help placeholder for bucket used by index page and -h",
+							"formula": true
 						}
 					]
 				}
