@@ -24,6 +24,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
 var creds = make(map[string][]credential.Field)
@@ -394,3 +396,191 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 		})
 	}
 }
+
+// --------------- TESTS -------------->
+
+func (spec *SetCredentialSuite) TestSetCredentialWithSucess() {
+	spec.TestInText.On("Text", mock.Anything, mock.Anything).Return("username=ritchie", nil)
+	spec.TestInBool.On("Bool", mock.Anything).Return(false)
+	spec.TestInList.On("List", mock.Anything, mock.Anything).Return(string(credential.AddNew), nil)
+	spec.TestInPassword.On("Password", mock.Anything).Return("s3cr3t", nil)
+	spec.TestInSetter.On("Set", mock.Anything).Return(nil)
+
+	spec.TestInReader.On("ReadCredentialsFields", mock.Anything).Return(credential.Fields{}, nil)
+	spec.TestInReader.On("ReadCredentialsValue", mock.Anything).Return([]credential.ListCredData{}, nil)
+	spec.TestInReader.On("WriteDefaultCredentialsFields", mock.Anything).Return(nil)
+	spec.TestInReader.On("WriteCredentialsFields", mock.Anything, mock.Anything).Return(nil)
+	spec.TestInReader.On("ProviderPath").Return("")
+	spec.TestInReader.On("CredentialsPath").Return("")
+
+	cmd := NewSetCredentialCmd(
+		spec.TestInSetter,
+		spec.TestInReader,
+		spec.TestInFile,
+		spec.TestInText,
+		spec.TestInBool,
+		spec.TestInList,
+		spec.TestInPassword,
+	)
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+	spec.Nil(cmd.Execute())
+}
+
+// func (spec *SetCredentialSuite) TestSetCredentialWithSucess2() {
+
+// }
+
+// <-------------- TESTS ---------------
+
+// --------------- RUNNER -------------->
+
+func TestSetCredentialSuite(t *testing.T) {
+	suite.Run(t, &SetCredentialSuite{})
+}
+
+// <-------------- RUNNER ---------------
+
+// --------------- SETUP -------------->
+
+type SetCredentialSuite struct {
+	suite.Suite
+
+	TestInList     *inputList
+	TestInBool     *inputBool
+	TestInText     *inputText
+	TestInPassword *inputPassword
+	TestInSetter   *setter
+	TestInFile     *fileReadExister
+	TestInReader   *readerWriterPather
+}
+
+func (suite *SetCredentialSuite) SetupTest() {
+	suite.TestInList = new(inputList)
+	suite.TestInBool = new(inputBool)
+	suite.TestInText = new(inputText)
+	suite.TestInPassword = new(inputPassword)
+	suite.TestInSetter = new(setter)
+	suite.TestInFile = new(fileReadExister)
+	suite.TestInReader = new(readerWriterPather)
+}
+
+// <-------------- SETUP ---------------
+
+// --------------- MOCKS -------------->
+
+// INPUTS ----->
+
+type inputPassword struct {
+	mock.Mock
+}
+
+type inputText struct {
+	mock.Mock
+}
+
+type inputBool struct {
+	mock.Mock
+}
+
+type inputList struct {
+	mock.Mock
+}
+
+func (i *inputPassword) Password(label string, helper ...string) (string, error) {
+	args := i.Called(label, helper)
+
+	return args.String(0), args.Error(0)
+}
+
+func (i *inputText) Text(name string, required bool, helper ...string) (string, error) {
+	args := i.Called(name, required, helper)
+
+	return args.String(0), args.Error(0)
+}
+
+func (l *inputList) List(name string, items []string, helper ...string) (string, error) {
+	args := l.Called(name, items)
+
+	return args.String(0), args.Error(0)
+}
+
+func (i *inputBool) Bool(name string, items []string, helper ...string) (bool, error) {
+	args := i.Called(name, items, helper)
+
+	return args.Bool(0), args.Error(0)
+}
+
+// INPUTS <------------
+
+// OUTRAS FUNCOES ----->
+
+type setter struct {
+	mock.Mock
+}
+
+type readerWriterPather struct {
+	mock.Mock
+}
+
+type fileReadExister struct {
+	mock.Mock
+}
+
+func (s *setter) Set(d credential.Detail) error {
+	args := s.Called(d)
+
+	return args.Error(0)
+}
+
+func (r *readerWriterPather) ReadCredentialsFields(path string) (credential.Fields, error) {
+	args := r.Called(path)
+
+	return args.Get(0).(credential.Fields), args.Error(0)
+}
+
+func (r *readerWriterPather) ReadCredentialsValue(path string) ([]credential.ListCredData, error) {
+	args := r.Called(path)
+
+	return args.Get(0).([]credential.ListCredData), args.Error(0)
+}
+
+func (r *readerWriterPather) WriteCredentialsFields(fields credential.Fields, path string) error {
+	args := r.Called(fields, path)
+
+	return args.Error(0)
+}
+
+func (r *readerWriterPather) WriteDefaultCredentialsFields(path string) error {
+	args := r.Called(path)
+
+	return args.Error(0)
+}
+
+func (r *readerWriterPather) ProviderPath() string {
+	args := r.Called()
+
+	return args.String(0)
+}
+
+func (r *readerWriterPather) CredentialsPath() string {
+	args := r.Called()
+
+	return args.String(0)
+}
+
+func (f *fileReadExister) Exists(path string) bool {
+	args := f.Called(path)
+
+	return args.Bool(0)
+}
+
+func (f *fileReadExister) Read(path string) ([]byte, error) {
+	args := f.Called(path)
+
+	return args.Get(0).([]byte), args.Error(0)
+}
+
+// OUTRAS FUNCOES <-----
+
+// <-------------- MOCKS ---------------
