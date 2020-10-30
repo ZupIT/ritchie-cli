@@ -33,6 +33,7 @@ type SetterTestSuite struct {
 	HomePath          string
 	TestContextFinder *contextFinderMock
 
+	contextHolderNil     *rcontext.ContextHolder
 	contextHolderDefault *rcontext.ContextHolder
 	contextHolderProd    *rcontext.ContextHolder
 
@@ -42,11 +43,19 @@ type SetterTestSuite struct {
 func (suite *SetterTestSuite) SetupSuite() {
 	nameSuite := "SetterTestSuite"
 	tempDir := os.TempDir()
+	detailExample := &Detail{
+		Service:    "github",
+		Username:   "ritchie",
+		Credential: Credential{"token": "123", "username": "hackerman"},
+		Type:       "",
+	}
 
 	suite.HomePath = filepath.Join(tempDir, nameSuite)
 	suite.TestContextFinder = new(contextFinderMock)
+	suite.contextHolderNil = &rcontext.ContextHolder{Current: ""}
 	suite.contextHolderDefault = &rcontext.ContextHolder{Current: "default"}
 	suite.contextHolderProd = &rcontext.ContextHolder{Current: "prod", All: []string{"defauld", "prod"}}
+	suite.DetailCredentialInfo = detailExample
 }
 
 func (suite *SetterTestSuite) SetupTest() {
@@ -66,20 +75,27 @@ func (suite *SetterTestSuite) AfterTest(suiteName, testName string) {
 // ---------- > TESTS <----------
 
 func (suite *SetterTestSuite) TestSetCredentialToContextDefault() {
-	detailExample := &Detail{
-		Service:    "github",
-		Username:   "ritchie",
-		Credential: Credential{"token": "123", "username": "hackerman"},
-		Type:       "",
-	}
-	filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, detailExample.Service)
+	filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
 	suite.TestContextFinder.On("Find").Return(*suite.contextHolderDefault, nil)
-	suite.DetailCredentialInfo = detailExample
-
 	setter := NewSetter(suite.HomePath, suite.TestContextFinder)
 
 	suite.NoFileExists(filePathExpectedCreated)
+
+	response := setter.Set(*suite.DetailCredentialInfo)
+
+	suite.Nil(response)
+	suite.FileExists(filePathExpectedCreated)
+}
+
+func (suite *SetterTestSuite) TestSetCredentialToContextDefaultWhenContextNotInformed() {
+	filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
+
+	suite.TestContextFinder.On("Find").Return(*suite.contextHolderNil, nil)
+	setter := NewSetter(suite.HomePath, suite.TestContextFinder)
+
+	suite.NoFileExists(filePathExpectedCreated)
+
 	response := setter.Set(*suite.DetailCredentialInfo)
 
 	suite.Nil(response)

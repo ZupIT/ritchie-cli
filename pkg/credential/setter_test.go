@@ -46,11 +46,11 @@ func TestSet(t *testing.T) {
 		in   Detail
 		out  error
 	}{
-		{
-			name: "github credential",
-			in:   githubCred,
-			out:  nil,
-		},
+		// {
+		// 	name: "github credential",
+		// 	in:   githubCred,
+		// 	out:  nil,
+		// },
 	}
 
 	for _, tt := range tests {
