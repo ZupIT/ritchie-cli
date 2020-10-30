@@ -33,6 +33,7 @@ func TestChecker(t *testing.T) {
 	tests := []struct{
 		name string
 		file stream.FileReader
+		dir DirManagerCustomMock
 	}{
 		{
 			name: "Should success run",
@@ -41,13 +42,40 @@ func TestChecker(t *testing.T) {
 					return []byte(treeJson), nil
 				},
 			},
+			dir: DirManagerCustomMock{
+				list: func(dir string, hiddenDir bool) ([]string, error) {
+					return []string{"commons"}, nil
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			treeChecker := NewChecker(stream.DirManager{}, tt.file)
+			treeChecker := NewChecker(tt.dir, tt.file)
 			treeChecker.CheckCommands()
 		})
 	}
 
+}
+type DirManagerCustomMock struct {
+	exists func(dir string) bool
+	list   func(dir string, hiddenDir bool) ([]string, error)
+	isDir  func(dir string) bool
+	create func(dir string) error
+}
+
+func (d DirManagerCustomMock) Exists(dir string) bool {
+	return d.exists(dir)
+}
+
+func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error) {
+	return d.list(dir, hiddenDir)
+}
+
+func (d DirManagerCustomMock) IsDir(dir string) bool {
+	return d.isDir(dir)
+}
+
+func (d DirManagerCustomMock) Create(dir string) error {
+	return d.create(dir)
 }
