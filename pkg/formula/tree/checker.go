@@ -29,7 +29,9 @@ func (cm CheckerManager) CheckCommands() {
 	trees := cm.readCommands()
 	commands := cm.filterCommands(trees)
 	conflictingCommands := cm.conflictingCommands(commands)
-	cm.printConflictingCommandsWarning(conflictingCommands)
+	if len(commands) > 0 {
+		cm.printConflictingCommandsWarning(conflictingCommands)
+	}
 }
 
 func (cm CheckerManager) readCommands() []formula.Tree {
