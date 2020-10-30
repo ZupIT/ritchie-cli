@@ -490,7 +490,7 @@ func (spec *DeleteFormulaSuite) TestDeleteFormulaWithSucess() {
 	testDir.On("List", spec.DefaultWorkspace+"/group/verb").Return([]string{"src"}, nil)
 	testDir.On("List", mock.Anything).Return([]string{"any"}, nil)
 
-	testInList.On("List", questionSelectFormulaGroup, mock.Anything).Return(items[0], nil)
+	testInList.On("List", questionSelectFormulaGroup, mock.Anything).Return("aa", nil)
 	testInList.On("List", mock.Anything, mock.Anything).Return(fmt.Sprintf("Default (%s)", spec.DefaultWorkspace), nil)
 
 	testInBool.On("Bool", mock.Anything, mock.Anything).Return(true)
