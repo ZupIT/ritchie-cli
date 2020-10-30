@@ -53,7 +53,7 @@ func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
 		ex.preRunBuilder.Build(exe.Def.Path)
 	}
 
-	if err := runner.Run(exe.Def, exe.InType, exe.Verbose); err != nil {
+	if err := runner.Run(exe.Def, exe.InType, exe.Verbose, exe.Flags); err != nil {
 		return err
 	}
 
