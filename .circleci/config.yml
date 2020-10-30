@@ -28,6 +28,7 @@ references:
     branches:
       only:
         - qa
+        - staging
         - nightly
         - beta
 
@@ -44,7 +45,7 @@ references:
         - master
 
 executors:
-  ritchie-tests-executor:
+  ritchie-tests-and-static-analisys-executor:
     machine:
       image: *CI_MACHINE_IMAGE
     working_directory: ~/workspace
@@ -92,18 +93,20 @@ executors:
 
 jobs:
   lint:
-    executor: ritchie-tests-executor
+    executor: ritchie-tests-and-static-analisys-executor
     steps:
       - checkout
       - run:
-          name: Install golangci-lint
+          name: golangci-lint install
           command: |
             download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
-            wget -O- -q $download |sudo sh -s -- -b /go/bin/ v1.24.0
+            wget -O- -q $download |sudo sh -s -- -b /go/bin/ v1.31.0
       - run:
           name: lint
           command: |
-            /go/bin/golangci-lint run --no-config --issues-exit-code=1 --deadline=10m -v
+            /go/bin/golangci-lint run --no-config --issues-exit-code=1 --timeout=5m -v
+          no_output_timeout: 5m
+
   horus:
     executor: horus-executor
     steps:
@@ -111,11 +114,11 @@ jobs:
       - run:
           name: Horus Security Analysis
           command: |
-            curl -fsSL https://horus-assets.s3.amazonaws.com/install.sh | bash
-            horus start -p ./ -i testdata,vendor
+            curl -fsSL https://horus-assets.s3.amazonaws.com/install.sh | bash -s v1-3-0
+            horusec start -p ./ -i testdata,vendor
 
   unit_test:
-    executor: ritchie-tests-executor
+    executor: ritchie-tests-and-static-analisys-executor
     environment:
       <<: *ENVIRONMENT
     steps:
@@ -141,6 +144,7 @@ jobs:
           name: codecov upload
           when: always
           command: bash <(curl -s https://codecov.io/bash)
+
   unix_functional_test:
     executor: ritchie-executor
     environment:
@@ -158,6 +162,7 @@ jobs:
           name: Running Functional tests for CLI
           command: |
             make functional-test
+          no_output_timeout: 10m
 
   windows_functional_test:
     executor: windows-executor
@@ -190,12 +195,13 @@ jobs:
       - run:
           name: Running build
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
+            . ./.circleci/scripts/routing.sh credentials
             make build-circle
       - run:
           name: Persist version file
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             echo $RELEASE_VERSION > dist/release_version.txt
       - persist_to_workspace:
           root: dist
@@ -240,9 +246,9 @@ jobs:
           name: Delivering cli binary
           command: |
             pip install awscli
-            . ./.circleci/scripts/version.sh
-            . ./.circleci/scripts/bucket.sh
-            . ./.circleci/scripts/credentials.sh
+            . ./.circleci/scripts/routing.sh version
+            . ./.circleci/scripts/routing.sh bucket
+            . ./.circleci/scripts/routing.sh credentials
             make delivery
 
   deb-package:
@@ -256,7 +262,7 @@ jobs:
       - run:
           name: Generating package for debian
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             . ./.circleci/scripts/gen-deb.sh
       - persist_to_workspace:
           root: dist
@@ -274,7 +280,7 @@ jobs:
       - run:
           name: Generating package for rpm
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             . ./.circleci/scripts/gen-rpm.sh
       - persist_to_workspace:
           root: dist
@@ -306,7 +312,7 @@ jobs:
       - run:
           name: Releasing
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             make release
 
   release_creator:
@@ -343,7 +349,7 @@ jobs:
             make rebase-beta
 
   unix_smoke_test:
-    executor: ritchie-tests-executor
+    executor: ritchie-tests-and-static-analisys-executor
     environment:
       <<: *ENVIRONMENT
     steps:
@@ -351,7 +357,7 @@ jobs:
       - run:
           name: Load Versions
           command: |
-            . ./.circleci/scripts/version.sh
+            . ./.circleci/scripts/routing.sh version
             echo $RELEASE_VERSION
       - run:
           name: install Ritchie
@@ -374,6 +380,7 @@ workflows:
                 - beta
     jobs:
       - release_creator
+
   nightly:
     triggers:
       - schedule:
@@ -384,6 +391,7 @@ workflows:
                 - master
     jobs:
       - rebase_nightly
+
   beta:
     triggers:
       - schedule:
@@ -413,7 +421,7 @@ workflows:
           filters:
             <<: *FILTERS_CHECK_CODE
           requires:
-            - lint 
+            - lint
       - unit_test:
           name: unit-test
           filters:
@@ -432,6 +440,7 @@ workflows:
             <<: *FILTERS_CHECK_CODE
           requires:
             - build-code
+
   release:
     jobs:
       - build:
@@ -478,6 +487,7 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - release-publish
+
   delivery:
     jobs:
       - build:

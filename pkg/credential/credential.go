@@ -42,9 +42,9 @@ type Field struct {
 type ListCredDatas []ListCredData
 
 type ListCredData struct {
-	Provider string
+	Provider   string
 	Credential string
-	Context  string
+	Context    string
 }
 
 // Fields are used to represents providers.json

@@ -18,7 +18,6 @@ package builder
 
 import (
 	"errors"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -29,23 +28,20 @@ import (
 )
 
 func TestBuild(t *testing.T) {
-	tmpDir := os.TempDir()
 	workspacePath := filepath.Join(tmpDir, "ritchie-formulas-test")
 	formulaPath := filepath.Join(tmpDir, "ritchie-formulas-test", "testing", "formula")
-	ritHome := filepath.Join(tmpDir, ".my-rit")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	defaultTreeManager := tree.NewGenerator(dirManager, fileManager)
 
-	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
-	_ = dirManager.Create(ritHome)
 	_ = dirManager.Create(workspacePath)
 
 	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, workspacePath)
 
 	type in struct {
+		formulaPath string
 		fileManager stream.FileWriteReadExister
 		dirManager  stream.DirCreateListCopyRemover
 		tree        formula.TreeGenerator
@@ -59,6 +55,17 @@ func TestBuild(t *testing.T) {
 		{
 			name: "success",
 			in: in{
+				formulaPath: formulaPath,
+				fileManager: fileManager,
+				dirManager:  dirManager,
+				tree:        defaultTreeManager,
+			},
+			want: nil,
+		},
+		{
+			name: "success build without build.sh",
+			in: in{
+				formulaPath: filepath.Join(tmpDir, "ritchie-formulas-test", "testing", "without-build-sh"),
 				fileManager: fileManager,
 				dirManager:  dirManager,
 				tree:        defaultTreeManager,
@@ -68,6 +75,7 @@ func TestBuild(t *testing.T) {
 		{
 			name: "create dir error",
 			in: in{
+				formulaPath: formulaPath,
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{createErr: errors.New("error to create dir")},
 				tree:        defaultTreeManager,
@@ -77,6 +85,7 @@ func TestBuild(t *testing.T) {
 		{
 			name: "copy so dir error",
 			in: in{
+				formulaPath: formulaPath,
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{data: []string{"linux"}, copyErr: errors.New("error to copy dir")},
 				tree:        defaultTreeManager,
@@ -86,6 +95,7 @@ func TestBuild(t *testing.T) {
 		{
 			name: "copy commons dir error",
 			in: in{
+				formulaPath: formulaPath,
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{data: []string{"commons"}, copyErr: errors.New("error to copy dir")},
 				tree:        defaultTreeManager,
@@ -95,6 +105,7 @@ func TestBuild(t *testing.T) {
 		{
 			name: "dir remove error",
 			in: in{
+				formulaPath: formulaPath,
 				fileManager: fileManager,
 				dirManager:  dirManagerMock{data: []string{"commons"}, removeErr: errors.New("error to remove dir")},
 				tree:        defaultTreeManager,
@@ -104,6 +115,7 @@ func TestBuild(t *testing.T) {
 		{
 			name: "tree generate error",
 			in: in{
+				formulaPath: formulaPath,
 				fileManager: fileManager,
 				dirManager:  dirManager,
 				tree:        treeGenerateMock{err: errors.New("error to generate tree")},
@@ -113,18 +125,29 @@ func TestBuild(t *testing.T) {
 		{
 			name: "write tree error",
 			in: in{
+				formulaPath: formulaPath,
 				fileManager: fileManagerMock{writeErr: errors.New("error to write tree")},
 				dirManager:  dirManager,
 				tree:        defaultTreeManager,
 			},
 			want: errors.New("error to write tree"),
 		},
+		{
+			name: "chdir error",
+			in: in{
+				formulaPath: "invalid",
+				fileManager: fileManager,
+				dirManager:  dirManager,
+				tree:        defaultTreeManager,
+			},
+			want: errors.New("chdir invalid: no such file or directory"),
+		},
 	}
 
 	for _, tt := range testes {
 		t.Run(tt.name, func(t *testing.T) {
 			builderManager := NewBuildLocal(ritHome, tt.in.dirManager, tt.in.fileManager, tt.in.tree)
-			got := builderManager.Build(workspacePath, formulaPath)
+			got := builderManager.Build(workspacePath, tt.in.formulaPath)
 
 			if (tt.want == nil && got != nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Build(%s) got %v, want %v", tt.name, got, tt.want)

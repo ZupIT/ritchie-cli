@@ -17,6 +17,7 @@
 package creator
 
 import (
+	"io"
 	"os"
 	"path"
 	"testing"
@@ -25,6 +26,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -52,7 +55,22 @@ func TestCreator(t *testing.T) {
 	_ = dirManager.Remove(resultDir)
 	_ = dirManager.Create(resultDir)
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds)
+	var defaultGitRepositoryMock = GitRepositoryMock{
+		latestTag: func(info git.RepoInfo) (git.Tag, error) {
+			return git.Tag{}, nil
+		},
+		tags: func(info git.RepoInfo) (git.Tags, error) {
+			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
+		},
+		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+			return nil, nil
+		},
+	}
+	repoProviders := formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+	isRootCommand := false
+
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds, FileReadExisterMock{}, repoProviders, isRootCommand)
 
 	tplM := template.NewManager("../../../testdata", dirManager)
 
@@ -197,4 +215,32 @@ type repoListerMock struct{}
 
 func (repoListerMock) List() (formula.Repos, error) {
 	return formula.Repos{}, nil
+}
+
+type FileReadExisterMock struct{}
+
+func (m FileReadExisterMock) Read(path string) ([]byte, error) {
+	return []byte("some data"), nil
+}
+
+func (m FileReadExisterMock) Exists(path string) bool {
+	return false
+}
+
+type GitRepositoryMock struct {
+	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
+	tags      func(info git.RepoInfo) (git.Tags, error)
+	latestTag func(info git.RepoInfo) (git.Tag, error)
+}
+
+func (m GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
+	return m.zipball(info, version)
+}
+
+func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
+	return m.tags(info)
+}
+
+func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
+	return m.latestTag(info)
 }

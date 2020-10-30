@@ -17,24 +17,61 @@
 package cmd
 
 import (
-	"os"
+	"errors"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func Test_ListCredentialCmd(t *testing.T) {
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
-	homeDir, _ := os.UserHomeDir()
-	credSettings := credential.NewSettings(fileManager, dirManager, homeDir)
-
-	t.Run("Success case", func(t *testing.T) {
-		o := NewListCredentialCmd(credSettings)
-		if err := o.Execute();err !=nil{
-			t.Errorf("Test_ListCredentialCmd error = %s", err)
-		}
-	})
-
+	type in struct {
+		credFile credential.ReaderWriterPather
+	}
+	var tests = []struct {
+		name    string
+		in      in
+		wantErr bool
+	}{
+		{
+			name: "success run",
+			in: in{credFile: credSettingsCustomMock{
+				ReadCredentialsValueMock: func(path string) ([]credential.ListCredData, error) {
+					credData := credential.ListCredData{
+						Provider:   "",
+						Credential: "",
+						Context:    "",
+					}
+					credDataArr := []credential.ListCredData{credData}
+					return credDataArr, nil
+				},
+			}},
+			wantErr: false,
+		},
+		{
+			name: "success run with no credentials",
+			in: in{credFile: credSettingsCustomMock{
+				ReadCredentialsValueMock: func(path string) ([]credential.ListCredData, error) {
+					return []credential.ListCredData{}, nil
+				},
+			}},
+			wantErr: false,
+		},
+		{
+			name: "fail on read credentials",
+			in: in{credFile: credSettingsCustomMock{
+				ReadCredentialsValueMock: func(path string) ([]credential.ListCredData, error) {
+					return []credential.ListCredData{}, errors.New("errors reading credentials")
+				},
+			}},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := NewListCredentialCmd(tt.in.credFile)
+			if err := cmd.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("list credential command error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

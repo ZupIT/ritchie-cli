@@ -20,11 +20,11 @@ import (
 	"errors"
 	"io"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -46,6 +46,12 @@ type inputTextValidatorMock struct{}
 
 func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
 	return "mocked text", nil
+}
+
+type inputTextValidatorErrorMock struct{}
+
+func (inputTextValidatorErrorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	return "mocked text", errors.New("error on input text")
 }
 
 type inputTextErrorMock struct{}
@@ -83,6 +89,12 @@ func (inputURLMock) URL(name, defaultValue string) (string, error) {
 	return "http://localhost/mocked", nil
 }
 
+type inputURLErrorMock struct{}
+
+func (inputURLErrorMock) URL(name, defaultValue string) (string, error) {
+	return "http://localhost/mocked", errors.New("error on input url")
+}
+
 type inputIntMock struct{}
 
 func (inputIntMock) Int(name string, helper ...string) (int64, error) {
@@ -97,13 +109,13 @@ func (inputIntErrorMock) Int(name string, helper ...string) (int64, error) {
 
 type inputPasswordMock struct{}
 
-func (inputPasswordMock) Password(label string) (string, error) {
+func (inputPasswordMock) Password(label string, helper ...string) (string, error) {
 	return "s3cr3t", nil
 }
 
 type inputPasswordErrorMock struct{}
 
-func (inputPasswordErrorMock) Password(label string) (string, error) {
+func (inputPasswordErrorMock) Password(label string, helper ...string) (string, error) {
 	return "", errors.New("password error")
 }
 
@@ -115,39 +127,39 @@ func (autocompleteGenMock) Generate(s autocomplete.ShellName, cmd *cobra.Command
 
 type inputTrueMock struct{}
 
-func (inputTrueMock) Bool(name string, items []string) (bool, error) {
+func (inputTrueMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return true, nil
 }
 
 type inputFalseMock struct{}
 
-func (inputFalseMock) Bool(name string, items []string) (bool, error) {
+func (inputFalseMock) Bool(name string, items []string, helper ...string) (bool, error) {
 	return false, nil
 }
 
 type inputBoolErrorMock struct{}
 
-func (inputBoolErrorMock) Bool(name string, items []string) (bool, error) {
-	return true, errors.New("some error")
+func (inputBoolErrorMock) Bool(name string, items []string, helper ...string) (bool, error) {
+	return false, errors.New("error on boolean list")
 }
 
 type inputListMock struct{}
 
-func (inputListMock) List(name string, items []string) (string, error) {
+func (inputListMock) List(name string, items []string, helper ...string) (string, error) {
 	return "item-mocked", nil
 }
 
 type inputListCustomMock struct {
-	name string
+	list func(name string, items []string) (string, error)
 }
 
-func (m inputListCustomMock) List(name string, items []string) (string, error) {
-	return m.name, nil
+func (m inputListCustomMock) List(name string, items []string, helper ...string) (string, error) {
+	return m.list(name, items)
 }
 
 type inputListErrorMock struct{}
 
-func (inputListErrorMock) List(name string, items []string) (string, error) {
+func (inputListErrorMock) List(name string, items []string, helper ...string) (string, error) {
 	return "item-mocked", errors.New("some error")
 }
 
@@ -177,6 +189,10 @@ func (formCreator) Build(workspacePath, formulaPath string) error {
 type workspaceForm struct{}
 
 func (workspaceForm) Add(workspace formula.Workspace) error {
+	return nil
+}
+
+func (workspaceForm) Delete(workspace formula.Workspace) error {
 	return nil
 }
 
@@ -327,25 +343,44 @@ func (cscm credSettingsCustomMock) CredentialsPath() string {
 	return ""
 }
 
-type runnerMock struct {
-	error error
-}
-
-func (r runnerMock) Run(def formula.Definition, inputType api.TermInputType, local bool, verbose bool) error {
-	return r.error
-}
-
 type treeMock struct {
 	tree  formula.Tree
 	error error
+	value string
 }
 
 func (t treeMock) Tree() (map[string]formula.Tree, error) {
+	if t.value != "" {
+		return map[string]formula.Tree{t.value: t.tree}, t.error
+	}
 	return map[string]formula.Tree{"test": t.tree}, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
+}
+
+type treeGeneratorMock struct {
+}
+
+func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
+	return formula.Tree{
+		Commands: api.Commands{
+			{
+				Id:     "root_group",
+				Parent: "root",
+				Usage:  "group",
+				Help:   "group for add",
+			},
+			{
+				Id:      "root_group_verb",
+				Parent:  "root_group",
+				Usage:   "verb",
+				Help:    "verb for add",
+				Formula: true,
+			},
+		},
+	}, nil
 }
 
 type GitRepositoryMock struct {
@@ -403,6 +438,92 @@ func (t TutorialFindSetterCustomMock) Set(tutorial string) (rtutorial.TutorialHo
 	return t.set(tutorial)
 }
 
+type TutorialFinderMockReturnDisabled struct{}
+
+func (TutorialFinderMockReturnDisabled) Find() (rtutorial.TutorialHolder, error) {
+	return rtutorial.TutorialHolder{Current: "disabled"}, nil
+}
+
+type DirManagerCustomMock struct {
+	exists func(dir string) bool
+	list   func(dir string, hiddenDir bool) ([]string, error)
+	isDir  func(dir string) bool
+	create func(dir string) error
+}
+
+func (d DirManagerCustomMock) Exists(dir string) bool {
+	return d.exists(dir)
+}
+
+func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error) {
+	return d.list(dir, hiddenDir)
+}
+
+func (d DirManagerCustomMock) IsDir(dir string) bool {
+	return d.isDir(dir)
+}
+
+func (d DirManagerCustomMock) Create(dir string) error {
+	return d.create(dir)
+}
+
+type LocalBuilderMock struct {
+	build func(workspacePath, formulaPath string) error
+}
+
+func (l LocalBuilderMock) Build(workspacePath, formulaPath string) error {
+	return l.build(workspacePath, formulaPath)
+}
+
+type WatcherMock struct {
+	watch func(workspacePath, formulaPath string)
+}
+
+func (w WatcherMock) Watch(workspacePath, formulaPath string) {
+	w.watch(workspacePath, formulaPath)
+}
+
+type WorkspaceAddListerCustomMock struct {
+	add  func(workspace formula.Workspace) error
+	list func() (formula.Workspaces, error)
+}
+
+func (w WorkspaceAddListerCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
+}
+
+func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+type WorkspaceAddListHasherCustomMock struct {
+	add          func(workspace formula.Workspace) error
+	list         func() (formula.Workspaces, error)
+	currentHash  func(path string) (string, error)
+	previousHash func(path string) (string, error)
+	updateHash   func(path, hash string) error
+}
+
+func (w WorkspaceAddListHasherCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
+}
+
+func (w WorkspaceAddListHasherCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+func (w WorkspaceAddListHasherCustomMock) CurrentHash(path string) (string, error) {
+	return w.currentHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) PreviousHash(path string) (string, error) {
+	return w.previousHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) UpdateHash(path string, hash string) error {
+	return w.updateHash(path, hash)
+}
+
 var (
 	defaultRepoAdderMock = repoListerAdderCustomMock{
 		add: func(d formula.Repo) error {
@@ -425,3 +546,38 @@ var (
 		},
 	}
 )
+
+type FormulaExecutorMock struct {
+	err error
+}
+
+func (f FormulaExecutorMock) Execute(exe formula.ExecuteData) error {
+	return f.err
+}
+
+type ConfigRunnerMock struct {
+	runType   formula.RunnerType
+	createErr error
+	findErr   error
+}
+
+func (c ConfigRunnerMock) Create(runType formula.RunnerType) error {
+	return c.createErr
+}
+
+func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
+	return c.runType, c.findErr
+}
+
+type RepositoryListUpdaterCustomMock struct {
+	list   func() (formula.Repos, error)
+	update func(name formula.RepoName, version formula.RepoVersion) error
+}
+
+func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
+	return m.list()
+}
+
+func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion) error {
+	return m.update(name, version)
+}

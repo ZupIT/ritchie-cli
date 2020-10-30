@@ -33,14 +33,17 @@ import (
 )
 
 const (
-	newWorkspace = "Type new formula workspace?"
-	docsDir      = "docs"
-	srcDir       = "src"
+	newWorkspace                = "Type new formula workspace?"
+	docsDir                     = "docs"
+	srcDir                      = "src"
+	questionSelectFormulaGroup  = "Select a formula or group: "
+	questionAboutFoundedFormula = "We found a formula, which one do you want to run the build: "
+	optionOtherFormula          = "Another formula"
 )
 
 type buildFormulaCmd struct {
 	userHomeDir string
-	workspace   formula.WorkspaceAddListValidator
+	workspace   formula.WorkspaceAddListHasher
 	formula     formula.LocalBuilder
 	watcher     formula.Watcher
 	directory   stream.DirListChecker
@@ -52,7 +55,7 @@ type buildFormulaCmd struct {
 func NewBuildFormulaCmd(
 	userHomeDir string,
 	formula formula.LocalBuilder,
-	workManager formula.WorkspaceAddListValidator,
+	workManager formula.WorkspaceAddListHasher,
 	watcher formula.Watcher,
 	directory stream.DirListChecker,
 	inText prompt.InputText,
@@ -73,9 +76,11 @@ func NewBuildFormulaCmd(
 	cmd := &cobra.Command{
 		Use:   "formula",
 		Short: "Build your formulas locally. Use --watch flag and get real-time updates.",
-		Long: `Use this command to build your formulas locally. To make formulas development easier, you can run 
+		Long: `Use this command to build your formulas locally. To make formulas development easier, you can run
 the command with the --watch flag and get real-time updates.`,
-		RunE: s.runFunc(),
+		RunE:      s.runFunc(),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.Flags().BoolP("watch", "w", false, "Use this flag to watch your developing formulas")
 
@@ -89,27 +94,16 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := filepath.Join(b.userHomeDir, formula.DefaultWorkspaceDir)
-		if b.directory.Exists(defaultWorkspace) {
-			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
-		}
-
 		wspace, err := FormulaWorkspaceInput(workspaces, b.InputList, b.InputText)
 		if err != nil {
 			return err
 		}
 
-		if wspace.Dir != defaultWorkspace {
-			if err := b.workspace.Validate(wspace); err != nil {
-				return err
-			}
-
-			if err := b.workspace.Add(wspace); err != nil {
-				return err
-			}
+		if err := b.workspace.Add(wspace); err != nil {
+			return err
 		}
 
-		formulaPath, err := b.readFormulas(wspace.Dir)
+		formulaPath, err := b.readFormulas(wspace.Dir, "rit")
 		if err != nil {
 			return err
 		}
@@ -141,17 +135,26 @@ func (b buildFormulaCmd) build(workspacePath, formulaPath string) {
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
 
+	// Failures to generate the hash must not prevent the user from build formulas
+	hash, _ := b.workspace.CurrentHash(formulaPath)
+	_ = b.workspace.UpdateHash(formulaPath, hash)
+
 	if err := b.formula.Build(workspacePath, formulaPath); err != nil {
 		errorMsg := prompt.Red(err.Error())
 		s.Error(errors.New(errorMsg))
 		return
 	}
 
-	success := prompt.Green("✔ Build completed!")
+	success := prompt.Green("Build completed!\n")
 	s.Success(success)
+
+	const MessageWatch = `Are you testing your formula? You can use the flag --watch to avoid
+using the rit build formula for every modification. Try it on another window.` + "\n"
+
+	prompt.Info(MessageWatch)
 }
 
-func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
+func (b buildFormulaCmd) readFormulas(dir string, currentFormula string) (string, error) {
 	dirs, err := b.directory.List(dir, false)
 	if err != nil {
 		return "", err
@@ -159,16 +162,33 @@ func (b buildFormulaCmd) readFormulas(dir string) (string, error) {
 
 	dirs = sliceutil.Remove(dirs, docsDir)
 
+	var formulaOptions []string
+	var response string
+
 	if isFormula(dirs) {
-		return dir, nil
+		if !hasFormulaInDir(dirs) {
+			return dir, nil
+		}
+
+		formulaOptions = append(formulaOptions, currentFormula, optionOtherFormula)
+
+		response, err = b.List(questionAboutFoundedFormula, formulaOptions)
+		if err != nil {
+			return "", err
+		}
+		if response == currentFormula {
+			return dir, nil
+		}
+		dirs = sliceutil.Remove(dirs, srcDir)
 	}
 
-	selected, err := b.List("Select a formula or group: ", dirs)
+	selected, err := b.List(questionSelectFormulaGroup, dirs)
 	if err != nil {
 		return "", err
 	}
 
-	dir, err = b.readFormulas(filepath.Join(dir, selected))
+	newFormulaSelected := fmt.Sprintf("%s %s", currentFormula, selected)
+	dir, err = b.readFormulas(filepath.Join(dir, selected), newFormulaSelected)
 	if err != nil {
 		return "", err
 	}
@@ -184,6 +204,13 @@ func isFormula(dirs []string) bool {
 	}
 
 	return false
+}
+
+func hasFormulaInDir(dirs []string) bool {
+	dirs = sliceutil.Remove(dirs, docsDir)
+	dirs = sliceutil.Remove(dirs, srcDir)
+
+	return len(dirs) > 0
 }
 
 func tutorialBuildFormula(tutorialStatus string) {

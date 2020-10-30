@@ -1,11 +1,12 @@
 ---
 name: Improvement
-about: Suggest a improvement for this project
-labels: improvement
+about: Suggest an improvement for this project
+labels: :hammer: improvement
 assignees: ''
+
 ---
 
-<!-- Please only use this template for submitting improvement suggesion-->
+<!-- Please only use this template for submitting improvement suggestion-->
 
 **What would you like to be added**:
 

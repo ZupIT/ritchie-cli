@@ -1,14 +1,16 @@
 ---
 name: Support request
 about: Support request or question relating to Ritchie
-labels: support
+labels: :question: question
 assignees: ''
 
 ---
 
 <!--
     Use this template when requesting support or to ask questions.
+
     Please include useful information for understanding your question.
+
     Thanks!
 -->
 

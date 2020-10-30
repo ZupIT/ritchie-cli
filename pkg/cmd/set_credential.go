@@ -64,10 +64,12 @@ func NewSetCredentialCmd(
 	}
 
 	cmd := &cobra.Command{
-		Use:   "credential",
-		Short: "Set credential",
-		Long:  `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE:  RunFuncE(s.runStdin(), s.runPrompt()),
+		Use:       "credential",
+		Short:     "Set credential",
+		Long:      `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
+		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.LocalFlags()
 	return cmd
@@ -83,7 +85,7 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 		if err := s.Set(cred); err != nil {
 			return err
 		}
-		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
 		prompt.Info("Check your credentials using rit list credential")
 
 		return nil
@@ -200,7 +202,7 @@ func (s setCredentialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success(fmt.Sprintf("✔ %s credential saved!", strings.Title(cred.Service)))
+		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
 		prompt.Info("Check your credentials using rit list credential")
 		return nil
 	}

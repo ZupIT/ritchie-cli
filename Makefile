@@ -1,10 +1,12 @@
-# Go parameters
+SHELL=/bin/bash
+# Go aliases
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build
 GO_CLEAN=$(GO_CMD) clean
 GO_TEST=$(GO_CMD) test
 GO_TOOL_COVER=$(GO_CMD) tool cover
 GO_GET=$(GO_CMD) get
+# Binary related variables, like where to put stuff in bucket, etc
 BINARY_NAME=rit
 CMD_PATH=./cmd/main.go
 BIN=bin
@@ -12,30 +14,35 @@ DIST=dist
 DIST_MAC=$(DIST)/darwin
 DIST_LINUX=$(DIST)/linux
 DIST_WIN=$(DIST)/windows
+# Variables used everywhere
 VERSION=$(RELEASE_VERSION)
 GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
-BUCKET=$(shell VERSION=$(VERSION) ./.circleci/scripts/bucket.sh)
-RITCHIE_ENV=$(shell VERSION=$(VERSION) ./.circleci/scripts/ritchie_env.sh)
+# Routing stuff
 IS_RELEASE=$(shell echo $(VERSION) | egrep "^([0-9]{1,}\.)+[0-9]{1,}$")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
+IS_STG=$(shell echo $(VERSION) | egrep "*stg.*")
 IS_NIGHTLY=$(shell echo $(VERSION) | egrep "*.nightly.*")
-GONNA_RELEASE=$(shell ./.circleci/scripts/gonna_release.sh)
-NEXT_VERSION=$(shell ./.circleci/scripts/next_version.sh)
+BUCKET=$(shell ./.circleci/scripts/routing.sh bucket)
+GONNA_RELEASE=$(shell ./.circleci/scripts/routing.sh gonna_release)
+NEXT_VERSION=$(shell ./.circleci/scripts/routing.sh next_version)
+METRIC_SERVER_URL=$(shell ./.circleci/scripts/routing.sh metric_server)
+# Build Params
+BUILD_ENVS='-X $(MODULE)/pkg/metric.BasicUser=$(METRIC_BASIC_USER) -X $(MODULE)/pkg/metric.BasicPass=$(METRIC_BASIC_PASS) -X $(MODULE)/pkg/metric.ServerRestURL=$(METRIC_SERVER_URL) -X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)'
 
 build-linux:
 	mkdir -p $(DIST_LINUX)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_LINUX)/$(BINARY_NAME) -v $(CMD_PATH)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags $(BUILD_ENVS) -o ./$(DIST_LINUX)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-mac:
 	mkdir -p $(DIST_MAC)
-	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_MAC)/$(BINARY_NAME) -v $(CMD_PATH)
+	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags $(BUILD_ENVS) -o ./$(DIST_MAC)/$(BINARY_NAME) -v $(CMD_PATH)
 
 build-windows:
 	mkdir -p $(DIST_WIN)
-	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags '-X $(MODULE)/pkg/cmd.Version=$(VERSION) -X $(MODULE)/pkg/cmd.BuildDate=$(DATE)' -o ./$(DIST_WIN)/$(BINARY_NAME).exe -v $(CMD_PATH)
+	GOOS=windows GOARCH=amd64 $(GO_BUILD) -ldflags $(BUILD_ENVS) -o ./$(DIST_WIN)/$(BINARY_NAME).exe -v $(CMD_PATH)
 
 build: build-linux build-mac build-windows
 ifneq "$(BUCKET)" ""
@@ -54,6 +61,10 @@ ifneq "$(IS_RELEASE)" ""
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 endif
 ifneq "$(IS_QA)" ""
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+endif
+ifneq "$(IS_STG)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 endif
@@ -101,6 +112,13 @@ ifneq "$(IS_QA)" ""
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
 endif
+ifneq "$(IS_STG)" ""
+	echo -n "$(RELEASE_VERSION)" > stable.txt
+	mkdir latest
+	cp dist/installer/ritchiecli.msi latest/
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+endif
 else
 	echo "NOT GONNA PUBLISH"
 endif
@@ -117,7 +135,7 @@ unit-test:
 
 functional-test:
 	mkdir -p $(BIN)
-	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/... | grep -v vendor/`
+	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/... | grep -v vendor/ | sort -r `
 
 rebase-nightly:
 	git config --global user.email "$(GIT_EMAIL)"

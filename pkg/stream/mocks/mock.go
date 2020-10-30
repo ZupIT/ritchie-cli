@@ -16,6 +16,14 @@
 
 package stream
 
+type FileReaderCustomMock struct {
+	ReadMock   func(path string) ([]byte, error)
+}
+
+func (fmr FileReaderCustomMock) Read(path string) ([]byte, error) {
+	return fmr.ReadMock(path)
+}
+
 type FileReadExisterCustomMock struct {
 	ReadMock   func(path string) ([]byte, error)
 	ExistsMock func(path string) bool
@@ -43,4 +51,36 @@ type FileWriterMock struct{}
 
 func (FileWriterMock) Write(path string, content []byte) error {
 	return nil
+}
+
+type FileWriteReadExisterMock struct{}
+
+func (FileWriteReadExisterMock) Write(path string, content []byte) error {
+	return nil
+}
+
+func (FileWriteReadExisterMock) Read(path string) ([]byte, error) {
+	return []byte(""), nil
+}
+
+func (FileWriteReadExisterMock) Exists(path string) bool {
+	return true
+}
+
+type FileWriteReadExisterCustomMock struct {
+	WriteMock  func(path string, content []byte) error
+	ReadMock   func(path string) ([]byte, error)
+	ExistsMock func(path string) bool
+}
+
+func (f FileWriteReadExisterCustomMock) Read(path string) ([]byte, error) {
+	return f.ReadMock(path)
+}
+
+func (f FileWriteReadExisterCustomMock) Exists(path string) bool {
+	return f.ExistsMock(path)
+}
+
+func (f FileWriteReadExisterCustomMock) Write(path string, content []byte) error {
+	return f.WriteMock(path, content)
 }

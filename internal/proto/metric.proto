@@ -1,0 +1,18 @@
+syntax = "proto3";
+package internal;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service Processor {
+  rpc Process (DatasetRequest) returns (google.protobuf.Empty) {}
+}
+
+message DatasetRequest {
+  string MetricId = 1;
+  string UserId = 2;
+  google.protobuf.Timestamp Timestamp = 3;
+  string So = 4;
+  string RitVersion = 5;
+  bytes Data = 6;
+}

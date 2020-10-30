@@ -41,10 +41,12 @@ func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSette
 	o := tutorialCmd{homePath, il, fs}
 
 	cmd := &cobra.Command{
-		Use:   "tutorial",
-		Short: "Enable or disable the tutorial",
-		Long:  "Enable or disable the tutorial",
-		RunE:  RunFuncE(o.runStdin(), o.runPrompt()),
+		Use:       "tutorial",
+		Short:     "Enable or disable the tutorial",
+		Long:      "Enable or disable the tutorial",
+		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
+		ValidArgs: []string{""},
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	cmd.LocalFlags()
@@ -66,7 +68,7 @@ func (o tutorialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success("Set tutorial successful!")
+		prompt.Success("Tutorial " + obj.Tutorial + "!")
 
 		return nil
 	}
@@ -94,7 +96,7 @@ func (o tutorialCmd) runPrompt() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-		prompt.Success("Set tutorial successful!")
+		prompt.Success("Tutorial " + response + "!")
 		return nil
 	}
 }

@@ -17,8 +17,9 @@
 package cmd
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
 // CommandRunnerFunc represents that runner func for commands

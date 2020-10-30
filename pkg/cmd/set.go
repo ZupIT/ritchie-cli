@@ -23,9 +23,11 @@ import (
 // NewSetCmd creates new cmd instance
 func NewSetCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "set SUBCOMMAND",
-		Short:   "Set contexts, credentials and priorities",
-		Long:    "Set contexts, credentials and priorities for formula repositories.",
-		Example: "rit set context",
+		Use:       "set SUBCOMMAND",
+		Short:     "Set contexts, credentials, repositories priorities and formulas runner defaults.",
+		Long:      "Set contexts, credentials, priorities for formula repositories and formulas runner defaults.",
+		Example:   "rit set context",
+		ValidArgs: []string{"context", "credential", "formula-runner", "repo-priority"},
+		Args:      cobra.OnlyValidArgs,
 	}
 }

@@ -78,9 +78,21 @@ func setUpRitSingleUnix() {
 
 	fmt.Println("Running INIT")
 	initStepRit := Step{Key: "", Value: "init", Action: "rit"}
-	initAddRepo := Step{Key: "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]", Value: "yes", Action: "select"}
+	initAcceptsMetrics := Step{
+		Key:    "and feature use statistics and crash reports?\u001B[0m  \u001B[36m[Use arrows to move, type to filter]\u001B[0m",
+		Value:  "Yes, I agree to contribute with data anonymously",
+		Action: "select"}
+	initAddRepo := Step{
+		Key:    "Would you like to add the community repository? [https://github.com/ZupIT/ritchie-formulas]",
+		Value:  "yes",
+		Action: "select"}
+	initSetRunType := Step{
+		Key:    "Select a default formula run type:",
+		Value:  "local",
+		Action: "select",
+	}
 
-	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepRit, initAddRepo}}
+	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepRit, initAcceptsMetrics, initAddRepo, initSetRunType}}
 
 	err, _ := init.runStepsForUnix()
 	if err != nil {
