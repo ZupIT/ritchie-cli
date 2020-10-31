@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -94,9 +95,10 @@ func TestBuildFormulaCmd(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		fields  fieldsTestBuildFormulaCmd
-		wantErr bool
+		name       string
+		fields     fieldsTestBuildFormulaCmd
+		wantErr    bool
+		inputStdin string
 	}{
 		{
 			name:    "Run with success",
@@ -245,6 +247,66 @@ func TestBuildFormulaCmd(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Run stdin with success",
+			fields: fieldsTestBuildFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						return []string{"formula"}, nil
+					},
+				},
+			},
+			wantErr:    false,
+			inputStdin: "{\"workspacePath\":\"/home/user/dir\", \"formula\": \"formula\"}",
+		},
+		{
+			name: "Run stdin when JSON is incorrect",
+			fields: fieldsTestBuildFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						return []string{"formula"}, nil
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "{\"workspacePath\":\"/home/user/dir\", \"formula\": \"formula\"",
+		},
+		{
+			name: "Run stdin when does not exists dir",
+			fields: fieldsTestBuildFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return false
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						return []string{}, prompt.NewError("dir does not exists")
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "{\"workspacePath\":\"/home/user/dir\", \"formula\": \"formula\"}",
+		},
+		{
+			name: "Run stdin when does not exists formula",
+			fields: fieldsTestBuildFormulaCmd{
+				directory: DirManagerCustomMock{
+					exists: func(dir string) bool {
+						return true
+					},
+					list: func(dir string, hiddenDir bool) ([]string, error) {
+						return []string{"another-formula"}, nil
+					},
+				},
+			},
+			wantErr:    true,
+			inputStdin: "{\"workspacePath\":\"/home/user/dir\", \"formula\": \"formula\"}",
+		},
 	}
 
 	for _, tt := range tests {
@@ -261,7 +323,14 @@ func TestBuildFormulaCmd(t *testing.T) {
 				fields.inList,
 				tutorialFindWithReturnDisabled(),
 			)
-			commandBuildFormula.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+			if len(tt.inputStdin) > 0 {
+				commandBuildFormula.PersistentFlags().Bool("stdin", true, "input by stdin")
+				newReader := strings.NewReader(tt.inputStdin)
+				commandBuildFormula.SetIn(newReader)
+			} else {
+				commandBuildFormula.PersistentFlags().Bool("stdin", false, "input by stdin")
+			}
 
 			if commandBuildFormula == nil {
 				t.Errorf("commandBuildFormula got %v", commandBuildFormula)

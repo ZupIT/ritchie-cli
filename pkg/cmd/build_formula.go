@@ -29,6 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -50,6 +51,11 @@ type buildFormulaCmd struct {
 	prompt.InputText
 	prompt.InputList
 	rt rtutorial.Finder
+}
+
+type buildFormulaStdin struct {
+	WorkspacePath string `json:"workspacePath"`
+	Formula       string `json:"formula"`
 }
 
 func NewBuildFormulaCmd(
@@ -78,7 +84,7 @@ func NewBuildFormulaCmd(
 		Short: "Build your formulas locally. Use --watch flag and get real-time updates.",
 		Long: `Use this command to build your formulas locally. To make formulas development easier, you can run
 the command with the --watch flag and get real-time updates.`,
-		RunE:      s.runFunc(),
+		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -87,7 +93,7 @@ the command with the --watch flag and get real-time updates.`,
 	return cmd
 }
 
-func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
+func (b buildFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		workspaces, err := b.workspace.List()
 		if err != nil {
@@ -129,6 +135,35 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 		tutorialBuildFormula(tutorialHolder.Current)
+
+		return nil
+	}
+}
+
+func (b buildFormulaCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		buildFormulaStdin := buildFormulaStdin{}
+
+		if err := stdin.ReadJson(cmd.InOrStdin(), &buildFormulaStdin); err != nil {
+			return err
+		}
+
+		if err := buildCommandValidator(b, buildFormulaStdin); err != nil {
+			return err
+		}
+
+		formulaPath := filepath.Join(buildFormulaStdin.WorkspacePath, buildFormulaStdin.Formula)
+
+		wspace := formula.Workspace{
+			Name: buildFormulaStdin.Formula,
+			Dir:  formulaPath,
+		}
+
+		info := formula.BuildInfo{
+			FormulaPath: formulaPath,
+			Workspace:   wspace,
+		}
+		b.build(info)
 
 		return nil
 	}
@@ -215,6 +250,22 @@ func hasFormulaInDir(dirs []string) bool {
 	dirs = sliceutil.Remove(dirs, srcDir)
 
 	return len(dirs) > 0
+}
+
+func buildCommandValidator(b buildFormulaCmd, buildFormulaStdin buildFormulaStdin) error {
+	dirs, err := b.directory.List(buildFormulaStdin.WorkspacePath, false)
+
+	if err != nil {
+		return prompt.NewError("dir does not exists")
+	}
+
+	for _, dir := range dirs {
+		if dir == buildFormulaStdin.Formula {
+			return nil
+		}
+	}
+
+	return prompt.NewError("formula does not exists")
 }
 
 func tutorialBuildFormula(tutorialStatus string) {
