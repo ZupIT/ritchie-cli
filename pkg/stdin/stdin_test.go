@@ -26,7 +26,7 @@ import (
 
 const msg = "read stdin test"
 
-type TestStdin struct {
+type TestReader struct {
 	Test string `json:"test"`
 }
 
@@ -38,7 +38,7 @@ type StdinFile struct {
 func TestReadJson(t *testing.T) {
 
 	// Convert interface to Json for test
-	i := TestStdin{Test: msg}
+	i := TestReader{Test: msg}
 	jsonData, _ := json.Marshal(i)
 
 	// Insert Json inside a new Reader (simulating os.Stdin)
@@ -46,7 +46,7 @@ func TestReadJson(t *testing.T) {
 	stdin.Write(jsonData)
 	reader := bufio.NewReader(&stdin)
 
-	tr := TestStdin{}
+	tr := TestReader{}
 
 	// ReadJson through Reader and convert to chosen interface
 
