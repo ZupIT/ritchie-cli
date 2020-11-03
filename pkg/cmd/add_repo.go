@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -42,7 +43,8 @@ type addRepoCmd struct {
 	prompt.InputList
 	prompt.InputBool
 	prompt.InputInt
-	rt rtutorial.Finder
+	rt          rtutorial.Finder
+	treeChecker tree.CheckerManager
 }
 
 func NewAddRepoCmd(
@@ -55,6 +57,7 @@ func NewAddRepoCmd(
 	inBool prompt.InputBool,
 	inInt prompt.InputInt,
 	rtf rtutorial.Finder,
+	treeChecker tree.CheckerManager,
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
@@ -66,6 +69,7 @@ func NewAddRepoCmd(
 		InputInt:           inInt,
 		InputPassword:      inPass,
 		rt:                 rtf,
+		treeChecker:        treeChecker,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
