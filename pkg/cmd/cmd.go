@@ -17,6 +17,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -37,6 +39,9 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 		}
 
 		if s || exitsSdinEntry {
+			if s {
+				fmt.Println("The flag --stdin is deprecated.\nIt's no longer needed for input via stdin.")
+			}
 			return stdinFunc(cmd, args)
 		}
 		return promptFunc(cmd, args)
