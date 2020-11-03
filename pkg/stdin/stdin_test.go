@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"os"
 	"testing"
 )
 
@@ -27,6 +28,11 @@ const msg = "read stdin test"
 
 type TestStdin struct {
 	Test string `json:"test"`
+}
+
+type StdinFile struct {
+	stdin       *os.File
+	stdinWriter *os.File
 }
 
 func TestReadJson(t *testing.T) {
@@ -54,35 +60,71 @@ func TestReadJson(t *testing.T) {
 	}
 }
 
-// func TestExistsEntry(t *testing.T) {
-// 	var tests = []struct {
-// 		name           string
-// 		expectedResult bool
-// 		inputMsg       interface{}
-// 	}{
-// 		{
-// 			name:           "return true when json data inputed",
-// 			expectedResult: true,
-// 			inputMsg:       TestStdin{Test: msg},
-// 		},
-// 		{
-// 			name:           "return false when json data not inputed",
-// 			expectedResult: false,
-// 			inputMsg:       nil,
-// 		},
-// 	}
+func TestExistsEntry(t *testing.T) {
+	var tests = []struct {
+		name           string
+		expectedResult bool
+		inputMsg       string
+	}{
+		{
+			name:           "return true when json data inputed",
+			expectedResult: true,
+			inputMsg:       "{\"sendMetrics\": true, \"runType\": \"invalid\"}\n",
+		},
+		{
+			name:           "return false when json data not inputed",
+			expectedResult: false,
+			inputMsg:       "",
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			jsonData, _ := json.Marshal(tt.inputMsg)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &StdinFile{}
+			isTestWithStdin := len(tt.inputMsg) > 0
 
-// 			var stdin bytes.Buffer
-// 			stdin.Write(jsonData)
-// 			reader := bufio.NewReader(&stdin)
+			if !StdinIsClean() {
+				t.Errorf("Expects stdin to be clean before the test, but it is not.")
+			}
 
-// 			if result := ExistsEntry(reader); result != tt.expectedResult {
-// 				t.Errorf("Got: %v expected: %v", result, tt.expectedResult)
-// 			}
-// 		})
-// 	}
-// }
+			if isTestWithStdin {
+				addEntryToSdin(s, tt.inputMsg)
+			}
+
+			input := ExistsEntry()
+
+			if input != tt.expectedResult {
+				t.Errorf("Wanted: %v, Got: %v", input, tt.expectedResult)
+			}
+
+			if isTestWithStdin {
+				resetStdin(s)
+			}
+
+			if !StdinIsClean() {
+				t.Errorf("Expects stdin to be clean after the test, but it is not")
+			}
+		})
+	}
+}
+
+func StdinIsClean() bool {
+	return !ExistsEntry()
+}
+
+func addEntryToSdin(s *StdinFile, entry string) {
+	r, w, _ := os.Pipe()
+
+	s.stdinWriter = w
+	s.stdin = os.Stdin
+	os.Stdin = r
+	_, _ = s.stdinWriter.Write([]byte(entry))
+}
+
+func resetStdin(s *StdinFile) {
+	s.stdinWriter.Close()
+	os.Stdin = s.stdin
+
+	s.stdinWriter = nil
+	s.stdin = nil
+}
