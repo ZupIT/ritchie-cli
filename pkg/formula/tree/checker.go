@@ -22,8 +22,8 @@ func NewChecker(dir stream.DirLister, file stream.FileReader) CheckerManager {
 }
 
 // CheckCommands is used to warn the user about conflicting
-// formula commands on different repos. This function don't
-// return err because print an error because of a unsuccessful
+// formula commands on different repos. This function doesn't
+// return an error because printing an error from a unsuccessful
 // warning attempt can be confusing to the user.
 func (cm CheckerManager) CheckCommands() {
 	trees := cm.readCommands()
@@ -80,7 +80,7 @@ func (cm CheckerManager) printConflictingCommandsWarning(conflictingCommands []s
 	lastCommand := conflictingCommands[lastCommandIndex]
 	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
 	lastCommand = strings.ReplaceAll(lastCommand, "_", " ")
-	msg := fmt.Sprintf("The following formula command are conflicting: %s", lastCommand)
+	msg := fmt.Sprintf("The following formula commands are conflicting: %s", lastCommand)
 	msg = prompt.Yellow(msg)
 	fmt.Println(msg)
 }
