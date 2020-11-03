@@ -164,6 +164,15 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 	}
+	checkerManager := tree.NewChecker(
+		DirManagerCustomMock{
+			list: func(dir string, hiddenDir bool) ([]string, error) {
+					return []string{""}, nil
+			},
+		},
+		fileReaderMock{},
+	)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := NewAddRepoCmd(
@@ -176,7 +185,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				tt.fields.InputBool,
 				tt.fields.InputInt,
 				TutorialFinderMock{},
-				tree.CheckerManager{},
+				checkerManager,
 			)
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {

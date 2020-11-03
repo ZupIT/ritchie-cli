@@ -13,12 +13,12 @@ import (
 )
 
 type CheckerManager struct {
-	dir  stream.DirLister
+	Dir  stream.DirLister
 	file stream.FileReader
 }
 
 func NewChecker(dir stream.DirLister, file stream.FileReader) CheckerManager {
-	return CheckerManager{dir: dir, file: file}
+	return CheckerManager{Dir: dir, file: file}
 }
 
 // CheckCommands is used to warn the user about conflicting
@@ -36,7 +36,7 @@ func (cm CheckerManager) CheckCommands() {
 
 func (cm CheckerManager) readCommands() []formula.Tree {
 	repoDir := filepath.Join(api.RitchieHomeDir(), "repos")
-	repos, _ := cm.dir.List(repoDir, false)
+	repos, _ := cm.Dir.List(repoDir, false)
 	tree := formula.Tree{}
 	var treeArr []formula.Tree
 	for _, r := range repos {
