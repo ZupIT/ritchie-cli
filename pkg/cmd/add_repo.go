@@ -189,6 +189,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
+		ad.treeChecker.CheckCommands()
 		return nil
 	}
 }

@@ -29,7 +29,7 @@ func (cm CheckerManager) CheckCommands() {
 	trees := cm.readCommands()
 	commands := cm.filterCommands(trees)
 	conflictingCommands := cm.conflictingCommands(commands)
-	if len(commands) > 0 {
+	if len(conflictingCommands) > 1 {
 		cm.printConflictingCommandsWarning(conflictingCommands)
 	}
 }
