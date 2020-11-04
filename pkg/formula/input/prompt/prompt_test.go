@@ -111,6 +111,7 @@ func TestInputManager_Inputs(t *testing.T) {
 	type in struct {
 		iText          inputMock
 		iTextValidator inputTextValidatorMock
+		iTextDefault   inputTextDefaultMock
 		iList          inputMock
 		iBool          inputMock
 		iPass          inputMock
@@ -228,11 +229,12 @@ func TestInputManager_Inputs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			iText := tt.in.iText
 			iTextValidator := tt.in.iTextValidator
+			iTextDefault := tt.in.iTextDefault
 			iList := tt.in.iList
 			iBool := tt.in.iBool
 			iPass := tt.in.iPass
 
-			inputManager := NewInputManager(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
@@ -369,11 +371,12 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 
 			iText := inputMock{text: DefaultCacheNewLabel}
 			iTextValidator := inputTextValidatorMock{}
+			iTextDefault := inputTextDefaultMock{}
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 
-			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 
@@ -391,6 +394,7 @@ func TestInputManager_RegexType(t *testing.T) {
 		inputJson      string
 		inText         inputMock
 		iTextValidator inputTextValidatorMock
+		iTextDefault   inputTextDefaultMock
 	}
 
 	tests := []struct {
@@ -472,11 +476,12 @@ func TestInputManager_RegexType(t *testing.T) {
 
 			iText := tt.in.inText
 			iTextValidator := tt.in.iTextValidator
+			iTextDefault := tt.in.iTextDefault
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 
-			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 
@@ -498,6 +503,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 		inputJson      string
 		inText         inputMock
 		iTextValidator inputTextValidatorMock
+		iTextDefault   inputTextDefaultMock
 	}
 
 	tests := []struct {
@@ -598,11 +604,12 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 
 			iText := tt.in.inText
 			iTextValidator := tt.in.iTextValidator
+			iTextDefault := tt.in.iTextDefault
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 
-			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
+			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
 
 			cmd := &exec.Cmd{}
 
@@ -646,6 +653,15 @@ func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 }
 
 func (i inputMock) Password(string, ...string) (string, error) {
+	return i.text, i.err
+}
+
+type inputTextDefaultMock struct {
+	text string
+	err  error
+}
+
+func (i inputTextDefaultMock) Text(formula.Input) (string, error) {
 	return i.text, i.err
 }
 

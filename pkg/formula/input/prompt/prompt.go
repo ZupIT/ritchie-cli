@@ -51,6 +51,7 @@ type InputManager struct {
 	file         stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
+	input.InputTextDefault
 	prompt.InputTextValidator
 	prompt.InputBool
 	prompt.InputPassword
@@ -62,6 +63,7 @@ func NewInputManager(
 	inList prompt.InputList,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
+	inDefValue input.InputTextDefault,
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 ) formula.InputRunner {
@@ -71,6 +73,7 @@ func NewInputManager(
 		InputList:          inList,
 		InputText:          inText,
 		InputTextValidator: inTextValidator,
+		InputTextDefault:   inDefValue,
 		InputBool:          inBool,
 		InputPassword:      inPass,
 	}
@@ -132,11 +135,11 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 	return nil
 }
 
-func checkForSameEnv(envKey string){
+func checkForSameEnv(envKey string) {
 	envKey = strings.ToUpper(envKey)
 	if _, exist := os.LookupEnv(envKey); exist {
 		warnMsg := fmt.Sprintf(
-			"The input param %s has the same name of a machine variable." +
+			"The input param %s has the same name of a machine variable."+
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}
@@ -218,6 +221,7 @@ func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]str
 	}
 }
 
+// Devo substituir o tipo de input aqui e não lá em cima
 func (in InputManager) textValidator(i formula.Input) (string, error) {
 	required := input.IsRequired(i)
 	var inputVal string
@@ -226,11 +230,7 @@ func (in InputManager) textValidator(i formula.Input) (string, error) {
 	if input.HasRegex(i) {
 		inputVal, err = in.textRegexValidator(i, required)
 	} else {
-		inputVal, err = in.InputText.Text(i.Label, required, i.Tutorial)
-	}
-
-	if inputVal == "" {
-		inputVal = i.Default
+		inputVal, err = in.InputTextDefault.Text(i)
 	}
 
 	return inputVal, err
