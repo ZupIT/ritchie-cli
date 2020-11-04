@@ -32,5 +32,5 @@ type TreeGenerator interface {
 }
 
 type TreeChecker interface {
-	CheckCommands()
+	Check()
 }

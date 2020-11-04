@@ -1,57 +1,41 @@
 package tree
 
 import (
-	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type CheckerManager struct {
-	Dir  stream.DirLister
-	file stream.FileReader
+	tree formula.TreeManager
 }
 
-func NewChecker(dir stream.DirLister, file stream.FileReader) CheckerManager {
-	return CheckerManager{Dir: dir, file: file}
+func NewChecker(
+	tree formula.TreeManager,
+) CheckerManager {
+	return CheckerManager{
+		tree: tree,
+	}
 }
 
 // CheckCommands is used to warn the user about conflicting
 // formula commands on different repos. This function doesn't
 // return an error because printing an error from a unsuccessful
 // warning attempt can be confusing to the user.
-func (cm CheckerManager) CheckCommands() {
-	trees := cm.readCommands()
-	commands := cm.filterCommands(trees)
+func (cm CheckerManager) Check() {
+	commands := cm.filterCommands()
 	conflictingCommands := cm.conflictingCommands(commands)
 	if len(conflictingCommands) > 1 {
 		cm.printConflictingCommandsWarning(conflictingCommands)
 	}
 }
 
-func (cm CheckerManager) readCommands() []formula.Tree {
-	repoDir := filepath.Join(api.RitchieHomeDir(), "repos")
-	repos, _ := cm.Dir.List(repoDir, false)
-	tree := formula.Tree{}
-	var treeArr []formula.Tree
-	for _, r := range repos {
-		path := fmt.Sprintf(treeRepoCmdPattern, api.RitchieHomeDir(), r)
-		bytes, _ := cm.file.Read(path)
-		_ = json.Unmarshal(bytes, &tree)
-		treeArr = append(treeArr, tree)
-		tree = formula.Tree{}
-	}
-
-	return treeArr
-}
-
-func (cm CheckerManager) filterCommands(tree []formula.Tree) []string {
+func (cm CheckerManager) filterCommands() []string {
 	allCommands := []string{""}
+	tree, _ := cm.tree.Tree()
+
 	for _, t := range tree {
 		for _, c := range t.Commands {
 			allCommands = append(allCommands, c.Id)
@@ -80,7 +64,7 @@ func (cm CheckerManager) printConflictingCommandsWarning(conflictingCommands []s
 	lastCommand := conflictingCommands[lastCommandIndex]
 	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
 	lastCommand = strings.ReplaceAll(lastCommand, "_", " ")
-	msg := fmt.Sprintf("The following formula commands are conflicting: %s", lastCommand)
+	msg := fmt.Sprintf("The following formula command are conflicting: %s", lastCommand)
 	msg = prompt.Yellow(msg)
 	fmt.Println(msg)
 }

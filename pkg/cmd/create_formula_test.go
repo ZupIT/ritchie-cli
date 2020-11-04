@@ -31,7 +31,7 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tplM := template.NewManager("../../testdata", dirManager)
-	tChecker := tree.NewChecker(dirManager, fileManager)
+	tChecker := tree.NewChecker(treeMock{})
 	cmd := NewCreateFormulaCmd(
 		os.TempDir(),
 		formCreator{},

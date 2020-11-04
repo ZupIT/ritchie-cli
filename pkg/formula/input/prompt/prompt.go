@@ -76,7 +76,7 @@ func NewInputManager(
 	}
 }
 
-func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagSet) error {
+func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, e *pflag.FlagSet) error {
 	config := setup.Config
 	for _, i := range config.Inputs {
 		var inputVal string
@@ -92,6 +92,8 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 		if !conditionPass {
 			continue
 		}
+
+		// fmt.Println(e.Lookup("--default"))
 
 		switch iType := i.Type; iType {
 		case input.TextType:
@@ -125,18 +127,18 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 
 		if len(inputVal) != 0 {
 			in.persistCache(setup.FormulaPath, inputVal, i, items)
-			checkForSameEnv(i.Name)
+			in.checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
 		}
 	}
 	return nil
 }
 
-func checkForSameEnv(envKey string){
+func (in InputManager) checkForSameEnv(envKey string) {
 	envKey = strings.ToUpper(envKey)
 	if _, exist := os.LookupEnv(envKey); exist {
 		warnMsg := fmt.Sprintf(
-			"The input param %s has the same name of a machine variable." +
+			"The input param %s has the same name of a machine variable."+
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}

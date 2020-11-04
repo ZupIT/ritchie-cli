@@ -121,7 +121,7 @@ func Build() *cobra.Command {
 	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
 	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
-	treeChecker := tree.NewChecker(dirManager, fileManager)
+	treeChecker := tree.NewChecker(treeManager)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder, credSetter, inputPassword)

@@ -134,7 +134,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			WorkspacePath: wspace.Dir,
 			FormulaPath:   formulaPath,
 		}
-		c.treeChecker.CheckCommands()
+		c.treeChecker.Check()
 		c.create(cf, wspace.Dir, formulaPath)
 		return nil
 	}

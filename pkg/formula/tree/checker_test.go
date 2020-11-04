@@ -3,79 +3,64 @@ package tree
 import (
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-func TestChecker(t *testing.T) {
-	treeJson := `{
-					"commands": [
-						{
-							"id": "root_aws_create_bucket",
-							"parent": "root_aws_create",
-							"usage": "bucket",
-							"help": "short help placeholder for bucket",
-							"longHelp": "long help placeholder for bucket used by index page and -h",
-							"formula": true
-						},
-						{
-							"id": "root_aws_create_bucket",
-							"parent": "root_aws_create",
-							"usage": "bucket",
-							"help": "short help placeholder for bucket",
-							"longHelp": "long help placeholder for bucket used by index page and -h",
-							"formula": true
-						}
-					]
-				}
-`
 
-	tests := []struct{
-		name string
-		file stream.FileReader
-		dir DirManagerCustomMock
-	}{
-		{
-			name: "Should success run",
-			file : sMocks.FileReaderCustomMock{
-				ReadMock: func(path string) ([]byte, error) {
-					return []byte(treeJson), nil
+
+func TestChecker(t *testing.T) {
+	treeMock := treeMock{
+		tree: formula.Tree{
+			Commands: api.Commands{
+				{
+					Id:     "root_mock",
+					Parent: "root",
+					Usage:  "mock",
+					Help:   "mock for add",
 				},
-			},
-			dir: DirManagerCustomMock{
-				list: func(dir string, hiddenDir bool) ([]string, error) {
-					return []string{"commons"}, nil
+				{
+					Id:      "root_mock",
+					Parent:  "root_mock",
+					Usage:   "test",
+					Help:    "test for add",
+					Formula: true,
 				},
 			},
 		},
 	}
+
+	tests := []struct{
+		name string
+	}{
+		{
+			name: "Should success run",
+
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			treeChecker := NewChecker(tt.dir, tt.file)
-			treeChecker.CheckCommands()
+
+			treeChecker := NewChecker(treeMock)
+			treeChecker.Check()
 		})
 	}
 
 }
-type DirManagerCustomMock struct {
-	exists func(dir string) bool
-	list   func(dir string, hiddenDir bool) ([]string, error)
-	isDir  func(dir string) bool
-	create func(dir string) error
+
+type treeMock struct {
+	tree  formula.Tree
+	error error
+	value string
 }
 
-func (d DirManagerCustomMock) Exists(dir string) bool {
-	return d.exists(dir)
+func (t treeMock) Tree() (map[string]formula.Tree, error) {
+	if t.value != "" {
+		return map[string]formula.Tree{t.value: t.tree}, t.error
+	}
+	return map[string]formula.Tree{"test": t.tree}, t.error
 }
 
-func (d DirManagerCustomMock) List(dir string, hiddenDir bool) ([]string, error) {
-	return d.list(dir, hiddenDir)
-}
-
-func (d DirManagerCustomMock) IsDir(dir string) bool {
-	return d.isDir(dir)
-}
-
-func (d DirManagerCustomMock) Create(dir string) error {
-	return d.create(dir)
+func (t treeMock) MergedTree(bool) formula.Tree {
+	return t.tree
 }
