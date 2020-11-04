@@ -54,7 +54,7 @@ func TestRun(t *testing.T) {
 	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, dockerBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	pInputRunner := prompt.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputMock{}, inputMock{})
+	pInputRunner := prompt.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{})
 	sInputRunner := stdin.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
 	fInputRunner := flag.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
 
@@ -250,6 +250,15 @@ func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 }
 
 func (i inputMock) Password(string, ...string) (string, error) {
+	return i.text, i.err
+}
+
+type inputTextDefaultMock struct {
+	text string
+	err  error
+}
+
+func (i inputTextDefaultMock) Text(formula.Input) (string, error) {
 	return i.text, i.err
 }
 
