@@ -28,7 +28,6 @@ func NewSurveyDefault() SurveyDefault {
 	return SurveyDefault{}
 }
 
-// As validações devem ficar aqui
 func (SurveyDefault) Text(i formula.Input) (string, error) {
 	var value string
 
