@@ -179,7 +179,6 @@ func execRit(args []string) (*exec.Cmd, io.WriteCloser, io.Reader, error) {
 		log.Panic(err)
 	}
 	fmt.Println(" -- cmd.Path:", cmd.Path)
-	os.Stdin.Close()
 	return cmd, stdin, out, err
 }
 
