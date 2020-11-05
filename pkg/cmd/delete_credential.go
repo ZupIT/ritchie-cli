@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -160,6 +159,6 @@ func (d deleteCredentialCmd) getCurrentContext() (string, error) {
 }
 
 func successMessage() {
-	prompt.Success(fmt.Sprintf("Delete credential successful!"))
+	prompt.Success("Delete credential successful!")
 	prompt.Info("Check your credentials using rit list credential")
 }
