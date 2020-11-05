@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -248,9 +247,4 @@ func serverMock() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
-}
-
-func createJSONEntry(v interface{}) string {
-	s, _ := json.Marshal(v)
-	return string(s)
 }

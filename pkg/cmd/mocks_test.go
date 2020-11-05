@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 
@@ -214,6 +215,14 @@ type ctxFinderMock struct{}
 
 func (ctxFinderMock) Find() (rcontext.ContextHolder, error) {
 	return rcontext.ContextHolder{}, nil
+}
+
+type ctxFinderCustomMock struct {
+	findMock func() (rcontext.ContextHolder, error)
+}
+
+func (cfcm ctxFinderCustomMock) Find() (rcontext.ContextHolder, error) {
+	return cfcm.findMock()
 }
 
 type ctxFindRemoverMock struct{}
@@ -484,8 +493,8 @@ func (w WatcherMock) Watch(workspacePath, formulaPath string) {
 }
 
 type WorkspaceAddListerCustomMock struct {
-	add      func(workspace formula.Workspace) error
-	list     func() (formula.Workspaces, error)
+	add  func(workspace formula.Workspace) error
+	list func() (formula.Workspaces, error)
 }
 
 func (w WorkspaceAddListerCustomMock) Add(workspace formula.Workspace) error {
@@ -552,4 +561,9 @@ func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
 
 func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion) error {
 	return m.update(name, version)
+}
+
+func createJSONEntry(v interface{}) string {
+	s, _ := json.Marshal(v)
+	return string(s)
 }

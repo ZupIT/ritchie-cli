@@ -126,12 +126,13 @@ func buildCommands() *cobra.Command {
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
 	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
+	credDelete := credential.NewCredDelete(ritchieHomeDir, ctxFinder, fileManager)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
-	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder, credSetter, inputPassword)
 	envResolvers := make(env.Resolvers)
 	envResolvers[env.Credential] = credResolver
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
+	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
@@ -189,6 +190,12 @@ func buildCommands() *cobra.Command {
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
 	// level 2
+	deleteCredentialCmd := cmd.NewDeleteCredentialCmd(
+		credDelete,
+		credSettings,
+		ctxFinder,
+		inputBool,
+		inputList)
 	setCredentialCmd := cmd.NewSetCredentialCmd(
 		credSetter,
 		credSettings,
@@ -224,7 +231,7 @@ func buildCommands() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd)
+	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	listCmd.AddCommand(listWorkspaceCmd)
