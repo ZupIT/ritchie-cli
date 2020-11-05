@@ -32,6 +32,7 @@ type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
 func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		exitsSdinEntry := stdin.ExistsEntry()
+		fmt.Println(" -- exitsSdinEntry: ", exitsSdinEntry)
 
 		s, err := cmd.Flags().GetBool(api.Stdin.ToLower())
 		if err != nil {

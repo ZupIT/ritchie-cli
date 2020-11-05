@@ -30,9 +30,11 @@ import (
 )
 
 func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
+	fmt.Println(" -- runStdinForUnix")
 	echo := strings.Fields(scenario.Steps[0].Value)
 	rit := strings.Fields(scenario.Steps[1].Value)
 
+	fmt.Println(" -- echo: ", echo)
 	commandEcho := exec.Command("echo", echo...)
 	commandRit := exec.Command("rit", rit...)
 
@@ -74,6 +76,7 @@ func (scenario *Scenario) runStdinForUnix() (bytes.Buffer, error) {
 }
 
 func setUpRitSingleUnix() {
+	fmt.Println(" -- setUpRitSingleUnix")
 	fmt.Println("Running Setup for Unix..")
 
 	fmt.Println("Running INIT")
@@ -112,6 +115,7 @@ func setUpClearSetupUnix() {
 }
 
 func (scenario *Scenario) runStepsForUnix() (error, string) {
+	fmt.Println(" -- runStepsForUnix")
 	args := strings.Fields(scenario.Steps[0].Value)
 	cmd, stdin, out, err := execRit(args)
 	if err == nil {
@@ -167,11 +171,15 @@ func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, out io.Reader, err erro
 }
 
 func execRit(args []string) (*exec.Cmd, io.WriteCloser, io.Reader, error) {
+	fmt.Println(" -- execRit")
+	fmt.Println(" -- args:", args)
 	cmd := exec.Command(rit, args...)
 	stdin, out, err := commandInit(cmd)
 	if err != nil {
 		log.Panic(err)
 	}
+	fmt.Println(" -- cmd.Path:", cmd.Path)
+	os.Stdin.Close()
 	return cmd, stdin, out, err
 }
 

@@ -19,6 +19,7 @@ package stdin
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 )
@@ -37,5 +38,8 @@ func ReadJson(reader io.Reader, v interface{}) error {
 func ExistsEntry() bool {
 	stat, _ := os.Stdin.Stat()
 
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		fmt.Println(" -- stat.size: ", stat.Size())
+	}
 	return (stat.Mode() & os.ModeCharDevice) == 0
 }
