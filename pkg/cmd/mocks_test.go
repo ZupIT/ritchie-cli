@@ -505,6 +505,34 @@ func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
 	return w.list()
 }
 
+type WorkspaceAddListHasherCustomMock struct {
+	add          func(workspace formula.Workspace) error
+	list         func() (formula.Workspaces, error)
+	currentHash  func(path string) (string, error)
+	previousHash func(path string) (string, error)
+	updateHash   func(path, hash string) error
+}
+
+func (w WorkspaceAddListHasherCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
+}
+
+func (w WorkspaceAddListHasherCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+func (w WorkspaceAddListHasherCustomMock) CurrentHash(path string) (string, error) {
+	return w.currentHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) PreviousHash(path string) (string, error) {
+	return w.previousHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) UpdateHash(path string, hash string) error {
+	return w.updateHash(path, hash)
+}
+
 var (
 	defaultRepoAdderMock = repoListerAdderCustomMock{
 		add: func(d formula.Repo) error {

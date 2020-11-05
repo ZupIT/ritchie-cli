@@ -20,6 +20,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/radovskyb/watcher v1.0.7
 	github.com/spf13/cobra v1.0.0
+	golang.org/x/mod v0.3.0
 	golang.org/x/sys v0.0.0-20200806125547-5acd03effb82 // indirect
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.25.0

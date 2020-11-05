@@ -64,6 +64,11 @@ type FileMover interface {
 	Move(oldPath, newPath string, files []string) error
 }
 
+type FileReadWriter interface {
+	FileReader
+	FileWriter
+}
+
 type FileReadExister interface {
 	FileReader
 	FileExister

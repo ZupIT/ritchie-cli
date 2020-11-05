@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-package main
+package runner
 
 import (
-	"fmt"
-	"os"
-	"time"
-
-	"github.com/ZupIT/ritchie-cli/pkg/commands"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-func main() {
-	startTime := time.Now()
-	rootCmd := commands.Build()
-	err := rootCmd.Execute()
-	if err != nil {
-		commands.SendMetric(commands.ExecutionTime(startTime), err.Error())
-		errFmt := fmt.Sprintf("%+v", err)
-		errFmt = prompt.Red(errFmt)
-		_, _ = fmt.Fprintf(os.Stderr, "Error: %s\n", errFmt)
-		os.Exit(1)
+var ErrInputNotRecognized = prompt.NewError("terminal input not recognized")
+
+var _ formula.InputResolver = Resolver{}
+
+type Resolver struct {
+	types formula.TermInputTypes
+}
+
+func NewInputResolver(types formula.TermInputTypes) Resolver {
+	return Resolver{types: types}
+}
+
+func (r Resolver) Resolve(inType api.TermInputType) (formula.InputRunner, error) {
+	inputRunner := r.types[inType]
+	if inputRunner == nil {
+		return nil, ErrInputNotRecognized
 	}
-	commands.SendMetric(commands.ExecutionTime(startTime))
+
+	return inputRunner, nil
 }
