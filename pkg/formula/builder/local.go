@@ -37,6 +37,7 @@ type LocalManager struct {
 	dir     stream.DirCreateListCopyRemover
 	file    stream.FileWriteReadExister
 	tree    formula.TreeGenerator
+	repo    formula.RepositoryAdder
 }
 
 func NewBuildLocal(
@@ -44,13 +45,24 @@ func NewBuildLocal(
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileWriteReadExister,
 	tree formula.TreeGenerator,
+	repo formula.RepositoryAdder,
 ) LocalManager {
-	return LocalManager{ritHome: ritHome, dir: dir, file: file, tree: tree}
+	return LocalManager{ritHome: ritHome, dir: dir, file: file, tree: tree, repo: repo}
 }
 
 func (m LocalManager) Build(info formula.BuildInfo) error {
+	repoName := fmt.Sprintf("%s-local", info.Workspace.Name)
+	repoName = strings.ToLower(repoName)
+	repo := formula.Repo{
+		Provider: "Local",
+		Name:     formula.RepoName(repoName),
+		Version:  "0.0.0",
+		Url:      "local repository",
+		Priority: 0,
+		IsLocal:  true,
+	}
 
-	dest := filepath.Join(m.ritHome, "repos", "local")
+	dest := filepath.Join(m.ritHome, "repos", repoName)
 
 	if err := m.dir.Create(dest); err != nil {
 		return err
@@ -60,13 +72,17 @@ func (m LocalManager) Build(info formula.BuildInfo) error {
 		return err
 	}
 
-	if err := m.generateTree(dest); err != nil {
+	if err := m.repo.Add(repo); err != nil {
 		return err
 	}
 
-	if err := m.buildFormulaBin(info.Workspace.Dir, info.FormulaPath, dest); err != nil {
+	/*if err := m.generateTree(dest); err != nil {
 		return err
-	}
+	}*/
+
+	/*if err := m.buildFormulaBin(info.Workspace.Dir, info.FormulaPath, dest); err != nil {
+		return err
+	}*/
 
 	return nil
 }

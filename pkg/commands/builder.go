@@ -134,7 +134,7 @@ func Build() *cobra.Command {
 	formBuildSh := builder.NewBuildShell()
 	formBuildBat := builder.NewBuildBat(fileManager)
 	formBuildDocker := builder.NewBuildDocker(fileManager)
-	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
+	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen, repoAdder)
 
 	builders := formula.Builders{
 		Make:   formBuildMake,

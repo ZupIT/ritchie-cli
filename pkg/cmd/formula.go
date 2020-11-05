@@ -129,7 +129,11 @@ func (f FormulaCommand) Add(root *cobra.Command) error {
 func newSubCmd(cmd api.Command) *cobra.Command {
 	var group string
 	if cmd.Parent == rootCmdName {
-		group = fmt.Sprintf("%s repo commands:", cmd.Repo)
+		var newVersion string
+		if cmd.NewVersion != "" {
+			newVersion = prompt.Yellow("(new version " + cmd.NewVersion + ")")
+		}
+		group = fmt.Sprintf("%s repo commands: %s", cmd.Repo, newVersion)
 	}
 
 	c := &cobra.Command{

@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"path/filepath"
-	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -57,15 +56,7 @@ func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int
 		return err
 	}
 
-	for i := range repos {
-		if repoName == repos[i].Name {
-			repos[i].Priority = priority
-		} else if repos[i].Priority >= priority {
-			repos[i].Priority++
-		}
-	}
-
-	sort.Sort(repos)
+	repos = movePosition(repos, repoName, priority)
 
 	bytes, err := json.MarshalIndent(repos, "", "\t")
 	if err != nil {
@@ -77,4 +68,47 @@ func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int
 	}
 
 	return nil
+}
+
+func movePosition(repos formula.Repos, repoName formula.RepoName, priority int) formula.Repos {
+	priority = isValidPriority(priority, repos)
+	index := 0
+	var repo formula.Repo
+	for i := range repos {
+		if repoName == repos[i].Name {
+			repo = repos[i]
+			index = i
+			break
+		}
+	}
+
+	var i int
+	for i = index; i > priority; i-- { // Move repos to back
+		r := repos[i-1]
+		r.Priority = i
+		repos[i] = r
+	}
+
+	for i = index; i < priority; i++ { // Move repos to front
+		r := repos[i+1]
+		r.Priority = i
+		repos[i] = r
+	}
+
+	repo.Priority = priority
+	repos[priority] = repo
+
+	return repos
+}
+
+func isValidPriority(priority int, repos formula.Repos) int {
+	if priority >= repos.Len() {
+		return repos.Len() - 1
+	}
+
+	if priority < 0 {
+		return 0
+	}
+
+	return priority
 }

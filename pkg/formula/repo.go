@@ -27,6 +27,7 @@ type Repo struct {
 	Url      string       `json:"url"`
 	Token    string       `json:"token,omitempty"`
 	Priority int          `json:"priority"`
+	IsLocal  bool         `json:"isLocal"`
 }
 
 type Repos []Repo

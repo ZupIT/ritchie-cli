@@ -19,7 +19,6 @@ package repo
 import (
 	"encoding/json"
 	"path/filepath"
-	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -55,8 +54,10 @@ func NewAdder(
 }
 
 func (ad AddManager) Add(repo formula.Repo) error {
-	if err := ad.repo.Create(repo); err != nil {
-		return err
+	if !repo.IsLocal {
+		if err := ad.repo.Create(repo); err != nil {
+			return err
+		}
 	}
 
 	repos := formula.Repos{}
@@ -132,14 +133,7 @@ func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
 		repos = append(repos, repo)
 	}
 
-	for i := range repos {
-		r := repos[i]
-		if repo.Name != r.Name && r.Priority >= repo.Priority {
-			repos[i].Priority++
-		}
-	}
-
-	sort.Sort(repos)
+	repos = movePosition(repos, repo.Name, repo.Priority)
 
 	return repos
 }

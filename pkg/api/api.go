@@ -70,13 +70,14 @@ var (
 
 // Command type
 type Command struct {
-	Id       string `json:"id"`
-	Parent   string `json:"parent"`
-	Usage    string `json:"usage"`
-	Help     string `json:"help"`
-	LongHelp string `json:"longHelp"`
-	Formula  bool   `json:"formula,omitempty"`
-	Repo     string `json:"Repo,omitempty"`
+	Id         string `json:"id"`
+	Parent     string `json:"parent"`
+	Usage      string `json:"usage"`
+	Help       string `json:"help"`
+	LongHelp   string `json:"longHelp"`
+	Formula    bool   `json:"formula,omitempty"`
+	Repo       string `json:"Repo,omitempty"`
+	NewVersion string `json:"-"`
 }
 
 type Commands []Command

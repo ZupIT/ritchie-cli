@@ -22,7 +22,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -50,11 +49,11 @@ func (d Manager) Tree() (map[string]formula.Tree, error) {
 	trees := make(map[string]formula.Tree)
 	trees[core] = formula.Tree{Commands: d.coreCmds}
 
-	treeLocal, err := d.localTree()
+	/*treeLocal, err := d.localTree()
 	if err != nil {
 		return nil, err
 	}
-	trees[local] = treeLocal
+	trees[local] = treeLocal*/
 
 	rr, err := d.repoLister.List()
 	if err != nil {
@@ -82,19 +81,6 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		key := v.Parent + "_" + v.Usage
 		trees[key] = v
 	}
-	treeLocal, err := d.localTree()
-	if err == nil {
-		var cc []api.Command
-		for _, v := range treeLocal.Commands {
-			key := v.Parent + "_" + v.Usage
-			if trees[key].Usage == "" {
-				v.Repo = "local"
-				trees[key] = v
-				cc = append(cc, v)
-			}
-		}
-		treeMain.Commands = append(treeMain.Commands, cc...)
-	}
 
 	rr, _ := d.repoLister.List()
 	for _, r := range rr {
@@ -102,10 +88,11 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		if err != nil {
 			continue
 		}
+
 		noticeNewVersion := ""
-		if d.isRootCommand {
+		if d.isRootCommand && !r.IsLocal  {
 			if latestTag := d.getLatestTag(r); latestTag != r.Version.String() && latestTag != "" {
-				noticeNewVersion = prompt.Bold("(new version " + latestTag + ")")
+				noticeNewVersion = latestTag
 			}
 		}
 
@@ -115,7 +102,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 			if trees[key].Usage == "" {
 				c.Repo = r.Name.String()
 				if noticeNewVersion != "" {
-					c.Repo = noticeNewVersion + " " + c.Repo
+					c.NewVersion = noticeNewVersion
 				}
 				trees[key] = c
 				cc = append(cc, c)
