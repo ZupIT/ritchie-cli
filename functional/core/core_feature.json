@@ -53,27 +53,6 @@
         "result": "Delete context successful!"
     },
     {
-        "entry": "Delete credential",
-        "steps": [
-            {
-                "key": "",
-                "value": "delete credential",
-                "action": "main"
-            },
-            {
-                "key": "All:",
-                "value": "Leonidas",
-                "action": "select"
-            },
-            {
-                "key": "Are you sure want to delete this credential?",
-                "value": "yes",
-                "action": "select"
-            }
-        ],
-        "result": "Delete credential successful!"
-    },
-    {
         "entry": "Add",
         "steps": [
             {
