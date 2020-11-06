@@ -130,6 +130,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:          inputMock{text: ""},
 				iTextValidator: inputTextValidatorMock{},
+				iTextDefault:   inputTextDefaultMock{"test", nil},
 				iList:          inputMock{text: "Type new value?"},
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
@@ -144,6 +145,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:          inputMock{text: DefaultCacheNewLabel},
 				iTextValidator: inputTextValidatorMock{},
+				iTextDefault:   inputTextDefaultMock{"test", nil},
 				iList:          inputMock{text: "test"},
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
@@ -158,6 +160,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:          inputMock{text: DefaultCacheNewLabel},
 				iTextValidator: inputTextValidatorMock{},
+				iTextDefault:   inputTextDefaultMock{"test", nil},
 				iList:          inputMock{text: "test"},
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
@@ -172,6 +175,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:          inputMock{text: DefaultCacheNewLabel},
 				iTextValidator: inputTextValidatorMock{},
+				iTextDefault:   inputTextDefaultMock{"test", nil},
 				iList:          inputMock{text: "test"},
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
@@ -186,6 +190,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:          inputMock{text: DefaultCacheNewLabel},
 				iTextValidator: inputTextValidatorMock{},
+				iTextDefault:   inputTextDefaultMock{"test", nil},
 				iList:          inputMock{text: "test"},
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
@@ -200,6 +205,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:          inputMock{text: DefaultCacheNewLabel},
 				iTextValidator: inputTextValidatorMock{},
+				iTextDefault:   inputTextDefaultMock{"test", nil},
 				iList:          inputMock{text: "test"},
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
@@ -214,6 +220,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			in: in{
 				iText:          inputMock{text: DefaultCacheNewLabel},
 				iTextValidator: inputTextValidatorMock{},
+				iTextDefault:   inputTextDefaultMock{"test", nil},
 				iList:          inputMock{text: "test"},
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
@@ -503,7 +510,6 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 		inputJson      string
 		inText         inputMock
 		iTextValidator inputTextValidatorMock
-		iTextDefault   inputTextDefaultMock
 	}
 
 	tests := []struct {
@@ -604,7 +610,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 
 			iText := tt.in.inText
 			iTextValidator := tt.in.iTextValidator
-			iTextDefault := tt.in.iTextDefault
+			iTextDefault := inputTextDefaultMock{}
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
