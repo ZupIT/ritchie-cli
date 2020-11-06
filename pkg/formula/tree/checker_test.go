@@ -1,13 +1,14 @@
 package tree
 
 import (
+	"io/ioutil"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
-
-
 
 func TestChecker(t *testing.T) {
 	treeMock := treeMock{
@@ -30,22 +31,37 @@ func TestChecker(t *testing.T) {
 		},
 	}
 
-	tests := []struct{
+	tests := []struct {
 		name string
 	}{
 		{
-			name: "Should success run",
-
+			name: "Should warn conflicting commands",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			out := captureCheckerStdout(treeMock)
+			if !strings.Contains(out, "rit mock") {
+				t.Error("Wrong output on tree checker function")
+			}
 
-			treeChecker := NewChecker(treeMock)
-			treeChecker.Check()
 		})
 	}
+}
 
+func captureCheckerStdout(tree formula.TreeManager) string {
+	treeChecker := NewChecker(tree)
+
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	treeChecker.Check()
+
+	_ = w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+	return string(out)
 }
 
 type treeMock struct {
