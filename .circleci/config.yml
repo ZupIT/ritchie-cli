@@ -42,6 +42,7 @@ references:
       only:
         - /^pull\/.*$/
         - /^feature.*/
+        - /^improvement.*/
         - master
 
 executors:
