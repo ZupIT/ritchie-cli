@@ -45,8 +45,8 @@ type createFormulaCmd struct {
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
 	tplM            template.Manager
-	rt              rtutorial.Finder
-	treeChecker     tree.CheckerManager
+	tutorial        rtutorial.Finder
+	tree            tree.CheckerManager
 }
 
 // CreateFormulaCmd creates a new cmd instance
@@ -69,8 +69,8 @@ func NewCreateFormulaCmd(
 		inTextValidator: inTextValidator,
 		inList:          inList,
 		tplM:            tplM,
-		rt:              rtf,
-		treeChecker:     treeChecker,
+		tutorial:        rtf,
+		tree:            treeChecker,
 	}
 
 	cmd := &cobra.Command{
@@ -134,7 +134,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			WorkspacePath: wspace.Dir,
 			FormulaPath:   formulaPath,
 		}
-		c.treeChecker.Check()
+		c.tree.Check()
 		c.create(cf, wspace.Dir, formulaPath)
 		return nil
 	}
@@ -175,7 +175,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	tutorialHolder, err := c.rt.Find()
+	tutorialHolder, err := c.tutorial.Find()
 	if err != nil {
 		s.Error(err)
 		return

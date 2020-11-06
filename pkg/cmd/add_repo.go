@@ -43,8 +43,8 @@ type addRepoCmd struct {
 	prompt.InputList
 	prompt.InputBool
 	prompt.InputInt
-	rt          rtutorial.Finder
-	treeChecker tree.CheckerManager
+	tutorial rtutorial.Finder
+	tree     tree.CheckerManager
 }
 
 func NewAddRepoCmd(
@@ -68,8 +68,8 @@ func NewAddRepoCmd(
 		InputBool:          inBool,
 		InputInt:           inInt,
 		InputPassword:      inPass,
-		rt:                 rtf,
-		treeChecker:        treeChecker,
+		tutorial:           rtf,
+		tree:               treeChecker,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -184,12 +184,12 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", repository.Name)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.rt.Find()
+		tutorialHolder, err := ad.tutorial.Find()
 		if err != nil {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
-		ad.treeChecker.Check()
+		ad.tree.Check()
 		return nil
 	}
 }
@@ -211,7 +211,7 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", r.Name)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.rt.Find()
+		tutorialHolder, err := ad.tutorial.Find()
 		if err != nil {
 			return err
 		}

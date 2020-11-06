@@ -33,12 +33,14 @@ func (cm CheckerManager) Check() {
 }
 
 func (cm CheckerManager) filterCommands() []string {
-	allCommands := []string{""}
+	var allCommands []string
 	tree, _ := cm.tree.Tree()
 
 	for _, t := range tree {
 		for _, c := range t.Commands {
-			allCommands = append(allCommands, c.Id)
+			if c.Formula {
+				allCommands = append(allCommands, c.Id)
+			}
 		}
 	}
 	return allCommands
@@ -46,14 +48,14 @@ func (cm CheckerManager) filterCommands() []string {
 
 func (cm CheckerManager) conflictingCommands(commands []string) []string {
 	duplicateFrequency := make(map[string]int)
-	duplicatedCommands := []string{""}
-	for _, item := range commands {
-		_, exist := duplicateFrequency[item]
+	var duplicatedCommands []string
+	for _, command := range commands {
+		_, exist := duplicateFrequency[command]
 		if exist {
-			duplicateFrequency[item] += 1
-			duplicatedCommands = append(duplicatedCommands, item)
+			duplicateFrequency[command] += 1
+			duplicatedCommands = append(duplicatedCommands, command)
 		} else {
-			duplicateFrequency[item] = 1
+			duplicateFrequency[command] = 1
 		}
 	}
 	return duplicatedCommands
