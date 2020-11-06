@@ -76,7 +76,7 @@ func NewInputManager(
 	}
 }
 
-func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, e *pflag.FlagSet) error {
+func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagSet) error {
 	config := setup.Config
 	for _, i := range config.Inputs {
 		var inputVal string
