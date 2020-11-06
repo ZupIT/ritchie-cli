@@ -221,7 +221,6 @@ func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]str
 	}
 }
 
-// Devo substituir o tipo de input aqui e não lá em cima
 func (in InputManager) textValidator(i formula.Input) (string, error) {
 	required := input.IsRequired(i)
 	var inputVal string
