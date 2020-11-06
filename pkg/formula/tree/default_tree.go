@@ -129,6 +129,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	return treeMain
 }
 
+//nolint
 func (d Manager) getLatestTag(repo formula.Repo) string {
 	formulaGit := d.repoProviders.Resolve(repo.Provider)
 
