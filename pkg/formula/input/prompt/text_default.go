@@ -31,20 +31,16 @@ func NewSurveyDefault() SurveyDefault {
 func (SurveyDefault) Text(i formula.Input) (string, error) {
 	var value string
 
-	input := &survey.Input{Message: i.Label}
+	input := &survey.Input{
+		Message: i.Label,
+		Help:    i.Tutorial,
+		Default: i.Default,
+	}
 	validationQs := []*survey.Question{
 		{
 			Name:   "name",
 			Prompt: input,
 		},
-	}
-
-	if len(i.Tutorial) > 0 {
-		input.Help = i.Tutorial
-	}
-
-	if len(i.Default) > 0 {
-		input.Default = i.Default
 	}
 
 	if finput.IsRequired(i) {
