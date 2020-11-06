@@ -50,10 +50,10 @@ func (cm CheckerManager) conflictingCommands(commands []string) []string {
 	for _, item := range commands {
 		_, exist := duplicateFrequency[item]
 		if exist {
-			duplicateFrequency[item] += 1 // increase counter by 1 if already in the map
+			duplicateFrequency[item] += 1
 			duplicatedCommands = append(duplicatedCommands, item)
 		} else {
-			duplicateFrequency[item] = 1 // else start counting from 1
+			duplicateFrequency[item] = 1
 		}
 	}
 	return duplicatedCommands
