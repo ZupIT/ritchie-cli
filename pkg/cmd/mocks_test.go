@@ -303,6 +303,10 @@ func (s credSettingsMock) ReadCredentialsValue(path string) ([]credential.ListCr
 	return []credential.ListCredData{}, nil
 }
 
+func (s credSettingsMock) ReadCredentialsValueInContext(path string, context string) ([]credential.ListCredData, error) {
+	return []credential.ListCredData{}, nil
+}
+
 func (s credSettingsMock) WriteDefaultCredentialsFields(path string) error {
 	return nil
 }
@@ -321,6 +325,7 @@ func (s credSettingsMock) CredentialsPath() string {
 
 type credSettingsCustomMock struct {
 	ReadCredentialsValueMock          func(path string) ([]credential.ListCredData, error)
+	ReadCredentialsValueInContextMock func(path string, context string) ([]credential.ListCredData, error)
 	ReadCredentialsFieldsMock         func(path string) (credential.Fields, error)
 	WriteDefaultCredentialsFieldsMock func(path string) error
 	WriteCredentialsFieldsMock        func(fields credential.Fields, path string) error
@@ -334,6 +339,10 @@ func (cscm credSettingsCustomMock) ReadCredentialsFields(path string) (credentia
 
 func (cscm credSettingsCustomMock) ReadCredentialsValue(path string) ([]credential.ListCredData, error) {
 	return cscm.ReadCredentialsValueMock(path)
+}
+
+func (cscm credSettingsCustomMock) ReadCredentialsValueInContext(path string, context string) ([]credential.ListCredData, error) {
+	return cscm.ReadCredentialsValueInContextMock(path, context)
 }
 
 func (cscm credSettingsCustomMock) WriteDefaultCredentialsFields(path string) error {

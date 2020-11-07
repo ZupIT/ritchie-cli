@@ -65,6 +65,7 @@ type CredDelete interface {
 type Reader interface {
 	ReadCredentialsFields(path string) (Fields, error)
 	ReadCredentialsValue(path string) ([]ListCredData, error)
+	ReadCredentialsValueInContext(path string, context string) ([]ListCredData, error)
 }
 
 type Writer interface {

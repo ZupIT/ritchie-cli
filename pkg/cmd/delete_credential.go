@@ -60,21 +60,19 @@ func (d deleteCredentialCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		data, err := d.ReadCredentialsValue(d.CredentialsPath())
+		data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
 		if err != nil {
 			return err
 		}
 
-		var providers []string
-		for _, c := range data {
-			if c.Context == context {
-				providers = append(providers, c.Provider)
-			}
-		}
-
-		if len(providers) <= 0 {
+		if len(data) <= 0 {
 			prompt.Error("You have no defined credentials in this context")
 			return nil
+		}
+
+		var providers []string
+		for _, c := range data {
+			providers = append(providers, c.Provider)
 		}
 
 		cred, err := d.List("Credentials: ", providers)
@@ -104,20 +102,19 @@ func (d deleteCredentialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		var mustDelete = false
-
 		context, err := d.getCurrentContext()
 		if err != nil {
 			return err
 		}
 
-		data, err := d.ReadCredentialsValue(d.CredentialsPath())
+		data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
 		if err != nil {
 			return err
 		}
 
+		mustDelete := false
 		for _, c := range data {
-			if c.Context == context && c.Provider == dc.Service {
+			if c.Provider == dc.Service {
 				mustDelete = true
 			}
 		}

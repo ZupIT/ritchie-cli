@@ -73,6 +73,25 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 	return creds, nil
 }
 
+func (s Settings) ReadCredentialsValueInContext(path string, context string) ([]ListCredData, error) {
+	var creds []ListCredData
+	var cred ListCredData
+	var detail Detail
+	providers, _ := s.file.List(filepath.Join(path, context))
+	for _, p := range providers {
+		cBytes, _ := s.file.Read(filepath.Join(path, context, p))
+		if err := json.Unmarshal(cBytes, &detail); err != nil {
+			return creds, err
+		}
+		cred.Credential = formatCredential(string(cBytes))
+		cred.Provider = detail.Service
+		cred.Context = context
+		creds = append(creds, cred)
+		detail = Detail{}
+	}
+	return creds, nil
+}
+
 func formatCredential(credential string) string {
 	credArr := strings.Split(credential, "credential")
 	credArr = strings.Split(credArr[1], "service")
