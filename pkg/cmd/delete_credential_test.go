@@ -247,29 +247,6 @@ func TestDeleteCredential(t *testing.T) {
 			},
 			inputStdin: createJSONEntry(stdinTest),
 		},
-		// {
-		// 	name:    "error different context",
-		// 	wantErr: false,
-		// 	fields: fieldsTestDeleteCredentialCmd{
-		// 		credDelete: credDeleteMock{},
-		// 		reader: credSettingsCustomMock{
-		// 			CredentialsPathMock: func() string {
-		// 				return ""
-		// 			},
-		// 			ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-		// 				return []credential.ListCredData{{Provider: "github", Context: "ritchie", Credential: "{}"}}, nil
-		// 			},
-		// 		},
-		// 		ctxFinder: ctxFinderCustomMock{
-		// 			findMock: func() (rcontext.ContextHolder, error) {
-		// 				return rcontext.ContextHolder{Current: ""}, nil
-		// 			},
-		// 		},
-		// 		inputBool: inputTrueMock{},
-		// 		inputList: inputListMock{},
-		// 	},
-		// 	inputStdin: createJSONEntry(stdinTest),
-		// },
 	}
 
 	for _, tt := range tests {
