@@ -20,6 +20,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 
 	"github.com/radovskyb/watcher"
@@ -58,7 +59,7 @@ func TestWatch(t *testing.T) {
 		watchManager.watcher.Wait()
 		watchManager.watcher.TriggerEvent(watcher.Create, nil)
 		watchManager.watcher.Error <- errors.New("error to watch formula")
-		watchManager.watcher.Close()
+		_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 	}()
 
 	watchManager.Watch(workspacePath, formulaPath)
@@ -85,4 +86,5 @@ func TestWatch(t *testing.T) {
 	if !hasConfigFile {
 		t.Error("Watch build did not copy formula config")
 	}
+
 }

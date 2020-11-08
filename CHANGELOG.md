@@ -1,14 +1,38 @@
 # Changelog
 
-## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
+## [2.2.0](https://github.com/zupit/ritchie-cli/tree/2.2.0) (2020-10-20)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.1.0...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.1.0...2.2.0)
 
 **Closed issues:**
 
+- Can not create a formula with an uppercase letter and run with docker [\#611](https://github.com/ZupIT/ritchie-cli/issues/611)
 - Github Authentication [\#492](https://github.com/ZupIT/ritchie-cli/issues/492)
 - Wrong error message when the organization is not right [\#491](https://github.com/ZupIT/ritchie-cli/issues/491)
 - Mock Credential on console.log [\#490](https://github.com/ZupIT/ritchie-cli/issues/490)
+- Collect the execution time of the --watch flag [\#573](https://github.com/ZupIT/ritchie-cli/issues/573)
+- Developer Guide [\#566](https://github.com/ZupIT/ritchie-cli/issues/566)
+- no timeout on functional tests step [\#564](https://github.com/ZupIT/ritchie-cli/issues/564)
+- The stable.txt doesn't increase version when generating a new release [\#545](https://github.com/ZupIT/ritchie-cli/issues/545)
+- Create new command rit list workspace [\#470](https://github.com/ZupIT/ritchie-cli/issues/470)
+- Detect new formula repositories releases [\#431](https://github.com/ZupIT/ritchie-cli/issues/431)
+
+**Merged pull requests:**
+
+- Update feature\_request.md [\#620](https://github.com/ZupIT/ritchie-cli/pull/620) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Update ritchie-bot-config.yml [\#619](https://github.com/ZupIT/ritchie-cli/pull/619) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- \[Fix\] - Lower case containerId string [\#610](https://github.com/ZupIT/ritchie-cli/pull/610) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+- Feature/dynamic list [\#605](https://github.com/ZupIT/ritchie-cli/pull/605) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Adding developer guide [\#604](https://github.com/ZupIT/ritchie-cli/pull/604) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Fix significant typos and grammar in CONTRIBUTING.md [\#603](https://github.com/ZupIT/ritchie-cli/pull/603) ([Bharat123rox](https://github.com/Bharat123rox))
+- Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
+- Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+- Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
+- Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
+- List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- refactor: add timeout to the functional testing job [\#596](https://github.com/ZupIT/ritchie-cli/pull/596) ([DittrichLucas](https://github.com/DittrichLucas))
+- stable version was not updating when generate release [\#595](https://github.com/ZupIT/ritchie-cli/pull/595) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Update README file [\#593](https://github.com/ZupIT/ritchie-cli/pull/593) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
 ## [2.1.0](https://github.com/zupit/ritchie-cli/tree/2.1.0) (2020-10-05)
 

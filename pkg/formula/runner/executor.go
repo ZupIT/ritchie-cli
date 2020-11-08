@@ -23,14 +23,16 @@ import (
 var _ formula.Executor = ExecutorManager{}
 
 type ExecutorManager struct {
-	runners formula.Runners
-	config  formula.ConfigRunner
+	runners       formula.Runners
+	preRunBuilder formula.PreRunBuilder
+	config        formula.ConfigRunner
 }
 
-func NewExecutor(runners formula.Runners, config formula.ConfigRunner) ExecutorManager {
+func NewExecutor(runners formula.Runners, preRunBuilder formula.PreRunBuilder, config formula.ConfigRunner) ExecutorManager {
 	return ExecutorManager{
-		runners: runners,
-		config:  config,
+		runners:       runners,
+		preRunBuilder: preRunBuilder,
+		config:        config,
 	}
 }
 
@@ -47,7 +49,11 @@ func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
 		runner = ex.runners[configType]
 	}
 
-	if err := runner.Run(exe.Def, exe.InType, exe.Verbose); err != nil {
+	if exe.Def.RepoName == "local" {
+		ex.preRunBuilder.Build(exe.Def.Path)
+	}
+
+	if err := runner.Run(exe.Def, exe.InType, exe.Verbose, exe.Flags); err != nil {
 		return err
 	}
 

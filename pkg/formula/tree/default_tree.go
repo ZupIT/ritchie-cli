@@ -22,7 +22,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -102,21 +101,24 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		if err != nil {
 			continue
 		}
-		noticeNewVersion := ""
+
+		// TODO: Create a cache for the version of the repositories,
+		//  it is locking the terminal of users with slow internet
+		/*noticeNewVersion := ""
 		if d.isRootCommand {
 			if latestTag := d.getLatestTag(r); latestTag != r.Version.String() && latestTag != "" {
 				noticeNewVersion = prompt.Bold("(new version " + latestTag + ")")
 			}
-		}
+		}*/
 
 		var cc []api.Command
 		for _, c := range treeRepo.Commands {
 			key := c.Parent + "_" + c.Usage
 			if trees[key].Usage == "" {
 				c.Repo = r.Name.String()
-				if noticeNewVersion != "" {
+				/*if noticeNewVersion != "" {
 					c.Repo = noticeNewVersion + " " + c.Repo
-				}
+				}*/
 				trees[key] = c
 				cc = append(cc, c)
 			}
@@ -127,6 +129,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	return treeMain
 }
 
+//nolint
 func (d Manager) getLatestTag(repo formula.Repo) string {
 	formulaGit := d.repoProviders.Resolve(repo.Provider)
 

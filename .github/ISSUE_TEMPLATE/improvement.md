@@ -1,7 +1,7 @@
 ---
 name: Improvement
 about: Suggest an improvement for this project
-labels: improvement
+labels: :hammer: improvement
 assignees: ''
 
 ---
