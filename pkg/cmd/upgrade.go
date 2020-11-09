@@ -88,8 +88,8 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 			return prompt.NewError(err.Error() + "\n")
 		}
 
-		upgradeUrl := u.Url(runtime.GOOS)
-		if err := u.Run(upgradeUrl); err != nil {
+		upgradeURL := u.Url(runtime.GOOS)
+		if err := u.Run(upgradeURL); err != nil {
 			return prompt.NewError(err.Error() + "\n")
 		}
 

@@ -221,7 +221,7 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 
 func addReservedFlags(flags *pflag.FlagSet) {
 	for _, flag := range reservedFlags {
-		switch flag.kind {
+		switch flag.kind { //nolint:exhaustive
 		case reflect.String:
 			flags.StringP(flag.name, flag.shortName, flag.defValue.(string), flag.description)
 		case reflect.Bool:

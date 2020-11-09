@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	msgWorkspaceIsNotValid = "The workspace informed is not valid"
-	msgEmptyWorkspaces     = "There are no workspaces to delete"
+	msgWorkspaceIsNotValid = "the workspace informed is not valid"
+	msgEmptyWorkspaces     = "there are no workspaces to delete"
 )
 
 var (
@@ -130,7 +130,7 @@ func WorkspaceListInput(
 	workspaces formula.Workspaces,
 	inList prompt.InputList,
 ) (formula.Workspace, error) {
-	var items []string
+	items := make([]string, 0, len(workspaces))
 	for k, v := range workspaces {
 		kv := fmt.Sprintf("%s (%s)", k, v)
 		items = append(items, kv)

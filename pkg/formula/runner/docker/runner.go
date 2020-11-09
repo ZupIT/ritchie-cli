@@ -96,11 +96,37 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir)
 	var args []string
 	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
-		args = []string{"run", "--rm", "-it", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{
+			"run",
+			"--rm",
+			"-it",
+			"--env-file",
+			envFile,
+			"-v",
+			volume,
+			"-v",
+			homeDirVolume,
+			"--name",
+			setup.ContainerId,
+			setup.ContainerId,
+		}
 	} else {
-		args = []string{"run", "--rm", "--env-file", envFile, "-v", volume, "-v", homeDirVolume, "--name", setup.ContainerId, setup.ContainerId}
+		args = []string{
+			"run",
+			"--rm",
+			"--env-file",
+			envFile,
+			"-v",
+			volume,
+			"-v",
+			homeDirVolume,
+			"--name",
+			setup.ContainerId,
+			setup.ContainerId,
+		}
 	}
 
+	//nolint:gosec,lll
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

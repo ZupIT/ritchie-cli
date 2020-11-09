@@ -94,7 +94,7 @@ func setUpRitSingleUnix() {
 
 	init := Scenario{Entry: "Running Init", Result: "", Steps: []Step{initStepRit, initAcceptsMetrics, initAddRepo, initSetRunType}}
 
-	err, _ := init.runStepsForUnix()
+	_, err := init.runStepsForUnix()
 	if err != nil {
 		log.Printf("Error when do init: %q", err)
 	}
@@ -111,7 +111,7 @@ func setUpClearSetupUnix() {
 	}
 }
 
-func (scenario *Scenario) runStepsForUnix() (error, string) {
+func (scenario *Scenario) runStepsForUnix() (string, error) {
 	args := strings.Fields(scenario.Steps[0].Value)
 	cmd, stdin, out, err := execRit(args)
 	if err == nil {
@@ -147,7 +147,7 @@ func (scenario *Scenario) runStepsForUnix() (error, string) {
 
 	fmt.Println(resp)
 	fmt.Println("--------")
-	return err, resp
+	return resp, err
 }
 
 func commandInit(cmdIn *exec.Cmd) (stdin io.WriteCloser, out io.Reader, err error) {

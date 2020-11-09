@@ -24,12 +24,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const defaultRepoUrl = "https://github.com/ZupIT/ritchie-formulas"
+const defaultRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 
@@ -42,7 +43,8 @@ type addRepoCmd struct {
 	prompt.InputList
 	prompt.InputBool
 	prompt.InputInt
-	rt rtutorial.Finder
+	tutorial rtutorial.Finder
+	tree     tree.CheckerManager
 }
 
 func NewAddRepoCmd(
@@ -50,22 +52,24 @@ func NewAddRepoCmd(
 	repoProviders formula.RepoProviders,
 	inText prompt.InputTextValidator,
 	inPass prompt.InputPassword,
-	inUrl prompt.InputURL,
+	inURL prompt.InputURL,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
 	inInt prompt.InputInt,
 	rtf rtutorial.Finder,
+	treeChecker tree.CheckerManager,
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
 		repoProviders:      repoProviders,
 		InputTextValidator: inText,
-		InputURL:           inUrl,
+		InputURL:           inURL,
 		InputList:          inList,
 		InputBool:          inBool,
 		InputInt:           inInt,
 		InputPassword:      inPass,
-		rt:                 rtf,
+		tutorial:           rtf,
+		tree:               treeChecker,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -119,7 +123,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		url, err := ad.URL("Repository URL:", defaultRepoUrl)
+		url, err := ad.URL("Repository URL:", defaultRepoURL)
 		if err != nil {
 			return err
 		}
@@ -177,14 +181,18 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", repository.Name)
+		successMsg := fmt.Sprintf(
+			"The %q repository was added with success, now you can use your formulas with the Ritchie!",
+			repository.Name,
+		)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.rt.Find()
+		tutorialHolder, err := ad.tutorial.Find()
 		if err != nil {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
+		ad.tree.Check()
 		return nil
 	}
 }
@@ -203,10 +211,13 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", r.Name)
+		successMsg := fmt.Sprintf(
+			"The %q repository was added with success, now you can use your formulas with the Ritchie!",
+			r.Name,
+		)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.rt.Find()
+		tutorialHolder, err := ad.tutorial.Find()
 		if err != nil {
 			return err
 		}

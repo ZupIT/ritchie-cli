@@ -49,7 +49,7 @@ func (sh ShellManager) Build(info formula.BuildInfo) error {
 	}
 	var stderr bytes.Buffer
 	execFile := filepath.Join(info.FormulaPath, buildSh)
-	cmd := exec.Command(execFile)
+	cmd := exec.Command(execFile) //nolint:gosec
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf(errMsgFmt, ErrBuildFormulaShell, stderr.String())

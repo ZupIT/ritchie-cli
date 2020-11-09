@@ -29,7 +29,6 @@ func Unzip(src string, dest string) error {
 	if err != nil {
 		return err
 	}
-
 	defer reader.Close()
 
 	for _, file := range reader.Reader.File {

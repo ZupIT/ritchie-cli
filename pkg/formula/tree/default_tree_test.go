@@ -31,7 +31,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 var (
@@ -81,12 +80,12 @@ func TestMergedTree(t *testing.T) {
 			{
 				Parent: "root",
 				Usage:  "pokemon-list",
-				Repo:   prompt.Bold("(new version 2.0.0)") + " someRepo",
+				Repo:   "someRepo",
 			},
 			{
 				Parent: "root_pokemon-list",
 				Usage:  "add",
-				Repo:   prompt.Bold("(new version 2.0.0)") + " someRepo",
+				Repo:   "someRepo",
 			},
 		},
 	}
@@ -97,7 +96,7 @@ func TestMergedTree(t *testing.T) {
 		Version:  formula.RepoVersion("1.0.0"),
 		Token:    "token",
 		Url:      "https://github.com/owner/someRepo",
-		Priority: int(5),
+		Priority: 5,
 	}
 	otherRepo := formula.Repo{
 		Provider: formula.RepoProvider("Github"),
@@ -105,7 +104,7 @@ func TestMergedTree(t *testing.T) {
 		Version:  formula.RepoVersion("1.0.0"),
 		Token:    "token",
 		Url:      "https://github.com/owner/otherRepo",
-		Priority: int(5),
+		Priority: 5,
 	}
 
 	repoLister := repositoryListerCustomMock{
@@ -213,7 +212,7 @@ func TestTree(t *testing.T) {
 		expectedTree map[string]formula.Tree
 	}{
 		{
-			name: "run in sucess",
+			name: "run in success",
 			in: in{
 				repo: repositoryListerCustomMock{
 					list: func() (formula.Repos, error) {
