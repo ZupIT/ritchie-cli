@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"os"
 )
 
 var ErrInvalidInput = errors.New("the STDIN inputs weren't informed correctly. Check the JSON used to execute the command")
@@ -31,4 +32,10 @@ func ReadJson(reader io.Reader, v interface{}) error {
 	}
 
 	return nil
+}
+
+func ExistsEntry() bool {
+	stat, _ := os.Stdin.Stat()
+
+	return (stat.Mode() & os.ModeCharDevice) == 0
 }
