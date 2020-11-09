@@ -17,6 +17,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -37,8 +38,8 @@ func NewRepoManager(client *http.Client) RepoManager {
 }
 
 func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
-	zipUrl := info.ZipUrl(version)
-	req, err := http.NewRequest(http.MethodGet, zipUrl, nil)
+	zipURL := info.ZipUrl(version)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, zipURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 	}
 
 	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	resp, err := re.client.Do(req)
+	resp, err := re.client.Do(req) //nolint:bodyclose
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +59,8 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 }
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
-	apiUrl := info.TagsUrl()
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	apiURL := info.TagsUrl()
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiURL, nil)
 	if err != nil {
 		return git.Tags{}, err
 	}
@@ -78,7 +79,8 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		errorMessage := fmt.Sprintf("There was an error adding the repository, status: %d - %s.", res.StatusCode, http.StatusText(res.StatusCode))
+		errorMessage := fmt.Sprintf("There was an error adding the repository,"+
+			" status: %d - %s.", res.StatusCode, http.StatusText(res.StatusCode))
 		return git.Tags{}, errors.New(errorMessage)
 	}
 
@@ -91,8 +93,8 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 }
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
-	apiUrl := info.LatestTagUrl()
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	apiURL := info.LatestTagUrl()
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiURL, nil)
 	if err != nil {
 		return git.Tag{}, err
 	}

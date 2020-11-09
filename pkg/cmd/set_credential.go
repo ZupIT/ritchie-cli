@@ -32,7 +32,7 @@ import (
 var inputTypes = []string{"plain text", "secret"}
 var inputWay = []string{"type", "file"}
 
-// setCredentialCmd type for set credential command
+// setCredentialCmd type for set credential command.
 type setCredentialCmd struct {
 	credential.Setter
 	credential.ReaderWriterPather
@@ -43,7 +43,7 @@ type setCredentialCmd struct {
 	prompt.InputPassword
 }
 
-// NewSetCredentialCmd creates a new cmd instance
+// NewSetCredentialCmd creates a new cmd instance.
 func NewSetCredentialCmd(
 	credSetter credential.Setter,
 	credFile credential.ReaderWriterPather,

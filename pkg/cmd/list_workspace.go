@@ -95,4 +95,3 @@ func tutorialListWorkspaces(tutorialStatus string) {
 		fmt.Println(MessageBody)
 	}
 }
-

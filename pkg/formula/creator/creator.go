@@ -81,7 +81,13 @@ func (c CreateManager) isValidCmd(fPath string) error {
 	return nil
 }
 
-func (c CreateManager) generateFormulaFiles(fPath, lang, fCmdName, workSpcPath string, modifiers []modifier.Modifier) error {
+func (c CreateManager) generateFormulaFiles(
+	fPath,
+	lang,
+	fCmdName,
+	workSpcPath string,
+	modifiers []modifier.Modifier,
+) error {
 
 	if err := c.dir.Create(fPath); err != nil {
 		return err

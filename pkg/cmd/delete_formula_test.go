@@ -161,7 +161,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Run with sucess when the selected formula is deeper in the tree",
+			name: "Run with success when the selected formula is deeper in the tree",
 			fields: fieldsTestDeleteFormulaCmd{
 				directory: DirManagerCustomMock{
 					exists: func(dir string) bool {
@@ -195,7 +195,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Run with sucess when selected formula is less deep in the tree",
+			name: "Run with success when selected formula is less deep in the tree",
 			fields: fieldsTestDeleteFormulaCmd{
 				directory: DirManagerCustomMock{
 					exists: func(dir string) bool {
