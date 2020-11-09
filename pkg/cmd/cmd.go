@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -31,20 +32,28 @@ type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
 // RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc.
 func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		exitsSdinEntry := stdin.ExistsEntry()
-
-		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
+		s, err := cmd.Flags().GetBool(api.Stdin.ToLower())
 		if err != nil {
 			return err
 		}
 
-		if stdin || exitsSdinEntry {
-			if stdin {
+		exitsSdinEntry := stdin.ExistsEntry()
+
+		inputStdinHasData := false
+		if exitsSdinEntry {
+			other := cmd.InOrStdin()
+			inputStdinHasData = json.NewDecoder(other).More()
+		}
+
+		if s || inputStdinHasData {
+			if s {
 				fmt.Println("The flag --stdin is deprecated.\nIt's no longer needed for input via stdin.")
 			}
+			fmt.Println("s: ", s, "inputStdinHasData: ", inputStdinHasData)
 
 			return stdinFunc(cmd, args)
 		}
+		fmt.Println(" -- prompt")
 		return promptFunc(cmd, args)
 	}
 }

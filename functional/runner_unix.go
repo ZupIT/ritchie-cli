@@ -117,11 +117,13 @@ func (scenario *Scenario) runStepsForUnix() (string, error) {
 	if err == nil {
 		for _, step := range scenario.Steps {
 			if step.Action == "sendkey" {
+				fmt.Println(1)
 				err = sendKeys(step, out, stdin)
 				if err != nil {
 					break
 				}
 			} else if step.Action == "select" {
+				fmt.Println(2)
 				err = selectOption(step, out, stdin)
 				if err != nil {
 					break
@@ -179,7 +181,9 @@ func selectOption(step Step, out io.Reader, stdin io.WriteCloser) error {
 	scanner := scannerTerminal(out)
 	startKey := false
 	optionNumber := 0
+	fmt.Println(3)
 	for scanner.Scan() {
+		fmt.Println(4)
 		m := scanner.Text()
 		fmt.Println(m)
 		if strings.Contains(m, step.Key) {
