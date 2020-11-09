@@ -57,7 +57,6 @@ func (cm CheckerManager) conflictingCommands(commands []string) []string {
 			duplicateFrequency[command] = 1
 		}
 	}
-	fmt.Println(duplicatedCommands)
 	return duplicatedCommands
 }
 
