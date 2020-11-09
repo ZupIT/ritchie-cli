@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/ZupIT/ritchie-cli/pkg/version/version.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">/*
+ * Copyright 2020 ZUP IT SERVICOS EM TECNOLOGIA E INOVACAO SA
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package version
+
+import (
+        "encoding/json"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "path/filepath"
+        "strings"
+        "time"
+
+        "github.com/ZupIT/ritchie-cli/pkg/api"
+        "github.com/ZupIT/ritchie-cli/pkg/stream"
+)
+
+const (
+        // MsgUpgrade error message to inform user to upgrade rit version
+        MsgRitUpgrade = "\nWarning: Rit has a new stable version.\nPlease run: rit upgrade"
+        // stableVersionFileCache is the file name to cache stableVersion
+        stableVersionFileCache = "stable-version-cache.json"
+
+        StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+)
+
+type Manager struct {
+        stableUrl string
+        file      stream.FileWriteReadExister
+}
+
+var _ Resolver = Manager{}
+
+func NewManager(
+        stableVersionUrl string,
+        file stream.FileWriteReadExister,
+) Manager <span class="cov8" title="1">{
+        return Manager{
+                stableUrl: stableVersionUrl,
+                file:      file,
+        }
+}</span>
+
+type stableVersionCache struct {
+        Stable    string `json:"stableVersion"`
+        ExpiresAt int64  `json:"expiresAt"`
+}
+
+func (m Manager) StableVersion() (string, error) <span class="cov8" title="1">{
+        cachePath := filepath.Join(
+                api.RitchieHomeDir(),
+                stableVersionFileCache)
+
+        shouldRequestAndSave := false
+        cache := &amp;stableVersionCache{}
+
+        if !m.file.Exists(cachePath) </span><span class="cov8" title="1">{
+                shouldRequestAndSave = true
+        }</span> else<span class="cov8" title="1"> {
+                cacheData, err := m.file.Read(cachePath)
+                if err != nil </span><span class="cov8" title="1">{
+                        return "", err
+                }</span>
+
+                <span class="cov8" title="1">if err = json.Unmarshal(cacheData, cache); err != nil </span><span class="cov8" title="1">{
+                        return "", err
+                }</span>
+
+                <span class="cov8" title="1">if cache.ExpiresAt &lt;= time.Now().Unix() </span><span class="cov8" title="1">{
+                        shouldRequestAndSave = true
+                }</span>
+        }
+
+        <span class="cov8" title="1">if shouldRequestAndSave </span><span class="cov8" title="1">{
+                stableVersion, err := requestStableVersion(m.stableUrl)
+                if err != nil </span><span class="cov8" title="1">{
+                        return "", err
+                }</span>
+                <span class="cov8" title="1">if err := saveCache(stableVersion, cachePath, m.file); err != nil </span><span class="cov8" title="1">{
+                        return "", err
+                }</span>
+
+                <span class="cov8" title="1">return stableVersion, nil</span>
+        }
+
+        <span class="cov8" title="1">return cache.Stable, nil</span>
+}
+
+func (m Manager) VerifyNewVersion(current, installed string) string <span class="cov8" title="1">{
+        if current != installed &amp;&amp; current != "" </span><span class="cov8" title="1">{
+                return MsgRitUpgrade
+        }</span>
+        <span class="cov8" title="1">return ""</span>
+}
+
+func (m Manager) UpdateCache() error <span class="cov8" title="1">{
+        cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
+
+        stableVersion, err := requestStableVersion(m.stableUrl)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err = saveCache(stableVersion, cachePath, m.file); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func requestStableVersion(stableVersionUrl string) (string, error) <span class="cov8" title="1">{
+        response, err := http.Get(stableVersionUrl)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">if response.StatusCode != http.StatusOK </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("response status is not %d", http.StatusOK)
+        }</span>
+
+        <span class="cov8" title="1">stableVersionBytes, err := ioutil.ReadAll(response.Body)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">stableVersion := string(stableVersionBytes)
+        stableVersion = strings.ReplaceAll(stableVersion, "\n", "")
+        return stableVersion, nil</span>
+}
+
+func saveCache(
+        stableVersion string,
+        cachePath string,
+        file stream.FileWriteReadExister,
+) error <span class="cov8" title="1">{
+        newCache := stableVersionCache{
+                Stable:    stableVersion,
+                ExpiresAt: time.Now().Add(time.Hour * 10).Unix(),
+        }
+
+        newCacheJson, _ := json.Marshal(newCache)
+
+        if err := file.Write(cachePath, newCacheJson); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
