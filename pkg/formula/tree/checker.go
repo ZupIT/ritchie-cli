@@ -27,7 +27,7 @@ func NewChecker(
 func (cm CheckerManager) Check() {
 	commands := cm.filterCommands()
 	conflictingCommands := cm.conflictingCommands(commands)
-	if len(conflictingCommands) > 1 {
+	if len(conflictingCommands) >= 1 {
 		cm.printConflictingCommandsWarning(conflictingCommands)
 	}
 }
@@ -35,7 +35,6 @@ func (cm CheckerManager) Check() {
 func (cm CheckerManager) filterCommands() []string {
 	var allCommands []string
 	tree, _ := cm.tree.Tree()
-
 	for _, t := range tree {
 		for _, c := range t.Commands {
 			if c.Formula {
@@ -58,6 +57,7 @@ func (cm CheckerManager) conflictingCommands(commands []string) []string {
 			duplicateFrequency[command] = 1
 		}
 	}
+	fmt.Println(duplicatedCommands)
 	return duplicatedCommands
 }
 

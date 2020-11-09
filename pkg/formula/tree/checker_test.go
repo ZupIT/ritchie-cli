@@ -19,6 +19,7 @@ func TestChecker(t *testing.T) {
 					Parent: "root",
 					Usage:  "mock",
 					Help:   "mock for add",
+					Formula: true,
 				},
 				{
 					Id:      "root_mock",
@@ -44,7 +45,6 @@ func TestChecker(t *testing.T) {
 			if !strings.Contains(out, "rit mock") {
 				t.Error("Wrong output on tree checker function")
 			}
-
 		})
 	}
 }
