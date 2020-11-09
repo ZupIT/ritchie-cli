@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -42,7 +43,8 @@ type addRepoCmd struct {
 	prompt.InputList
 	prompt.InputBool
 	prompt.InputInt
-	rt rtutorial.Finder
+	tutorial rtutorial.Finder
+	tree     tree.CheckerManager
 }
 
 func NewAddRepoCmd(
@@ -55,6 +57,7 @@ func NewAddRepoCmd(
 	inBool prompt.InputBool,
 	inInt prompt.InputInt,
 	rtf rtutorial.Finder,
+	treeChecker tree.CheckerManager,
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
@@ -65,7 +68,8 @@ func NewAddRepoCmd(
 		InputBool:          inBool,
 		InputInt:           inInt,
 		InputPassword:      inPass,
-		rt:                 rtf,
+		tutorial:           rtf,
+		tree:               treeChecker,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -183,11 +187,12 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 		)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.rt.Find()
+		tutorialHolder, err := ad.tutorial.Find()
 		if err != nil {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
+		ad.tree.Check()
 		return nil
 	}
 }
@@ -212,7 +217,7 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.rt.Find()
+		tutorialHolder, err := ad.tutorial.Find()
 		if err != nil {
 			return err
 		}

@@ -20,10 +20,10 @@ import (
 	"errors"
 	"io"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
-
-	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
