@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewSetCmd creates new cmd instance
+// NewSetCmd creates new cmd instance.
 func NewSetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:       "set SUBCOMMAND",

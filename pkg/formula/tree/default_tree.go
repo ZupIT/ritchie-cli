@@ -41,8 +41,22 @@ type Manager struct {
 	isRootCommand bool
 }
 
-func NewTreeManager(ritchieHome string, rl formula.RepositoryLister, coreCmds []api.Command, file stream.FileReadExister, rp formula.RepoProviders, isRootCommand bool) Manager {
-	return Manager{ritchieHome: ritchieHome, repoLister: rl, coreCmds: coreCmds, file: file, repoProviders: rp, isRootCommand: isRootCommand}
+func NewTreeManager(
+	ritchieHome string,
+	rl formula.RepositoryLister,
+	coreCmds []api.Command,
+	file stream.FileReadExister,
+	rp formula.RepoProviders,
+	isRootCommand bool,
+) Manager {
+	return Manager{
+		ritchieHome:   ritchieHome,
+		repoLister:    rl,
+		coreCmds:      coreCmds,
+		file:          file,
+		repoProviders: rp,
+		isRootCommand: isRootCommand,
+	}
 }
 
 func (d Manager) Tree() (map[string]formula.Tree, error) {

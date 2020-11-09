@@ -35,7 +35,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-// createFormulaCmd type for add formula command
+// createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
 	formula         formula.CreateBuilder
@@ -47,7 +47,7 @@ type createFormulaCmd struct {
 	rt              rtutorial.Finder
 }
 
-// CreateFormulaCmd creates a new cmd instance
+// CreateFormulaCmd creates a new cmd instance.
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
@@ -190,7 +190,7 @@ func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 	prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
 
 	if tutorialStatus == tutorialStatusEnabled {
-		tutorialCreateFormula(tutorialStatus, formulaCmd)
+		tutorialCreateFormula(formulaCmd)
 	} else {
 		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
 	}
@@ -265,7 +265,7 @@ func FormulaWorkspaceInput(
 	inList prompt.InputList,
 	inText prompt.InputText,
 ) (formula.Workspace, error) {
-	var items []string
+	items := make([]string, 0, len(workspaces))
 	for k, v := range workspaces {
 		kv := fmt.Sprintf("%s (%s)", k, v)
 		items = append(items, kv)
@@ -307,7 +307,7 @@ func FormulaWorkspaceInput(
 	return wspace, nil
 }
 
-func tutorialCreateFormula(tutorialStatus string, formulaCmd string) {
+func tutorialCreateFormula(formulaCmd string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const messageTitle = "In order to test your new formula:"
 	const messageBody = ` ∙ Run %q

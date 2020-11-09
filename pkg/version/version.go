@@ -35,22 +35,22 @@ const (
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
 
-	StableVersionUrl = "https://commons-repo.ritchiecli.io/stable.txt"
+	StableVersionURL = "https://commons-repo.ritchiecli.io/stable.txt"
 )
 
 type Manager struct {
-	stableUrl string
+	stableURL string
 	file      stream.FileWriteReadExister
 }
 
 var _ Resolver = Manager{}
 
 func NewManager(
-	stableVersionUrl string,
+	stableVersionURL string,
 	file stream.FileWriteReadExister,
 ) Manager {
 	return Manager{
-		stableUrl: stableVersionUrl,
+		stableURL: stableVersionURL,
 		file:      file,
 	}
 }
@@ -86,7 +86,7 @@ func (m Manager) StableVersion() (string, error) {
 	}
 
 	if shouldRequestAndSave {
-		stableVersion, err := requestStableVersion(m.stableUrl)
+		stableVersion, err := requestStableVersion(m.stableURL)
 		if err != nil {
 			return "", err
 		}
@@ -110,7 +110,7 @@ func (m Manager) VerifyNewVersion(current, installed string) string {
 func (m Manager) UpdateCache() error {
 	cachePath := filepath.Join(api.RitchieHomeDir(), stableVersionFileCache)
 
-	stableVersion, err := requestStableVersion(m.stableUrl)
+	stableVersion, err := requestStableVersion(m.stableURL)
 	if err != nil {
 		return err
 	}
@@ -121,11 +121,12 @@ func (m Manager) UpdateCache() error {
 	return nil
 }
 
-func requestStableVersion(stableVersionUrl string) (string, error) {
-	response, err := http.Get(stableVersionUrl)
+func requestStableVersion(stableVersionURL string) (string, error) {
+	response, err := http.Get(stableVersionURL)
 	if err != nil {
 		return "", err
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("response status is not %d", http.StatusOK)
@@ -151,9 +152,12 @@ func saveCache(
 		ExpiresAt: time.Now().Add(time.Hour * 10).Unix(),
 	}
 
-	newCacheJson, _ := json.Marshal(newCache)
+	newCacheJSON, err := json.Marshal(newCache)
+	if err != nil {
+		return err
+	}
 
-	if err := file.Write(cachePath, newCacheJson); err != nil {
+	if err := file.Write(cachePath, newCacheJSON); err != nil {
 		return err
 	}
 	return nil

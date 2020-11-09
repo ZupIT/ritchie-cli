@@ -37,7 +37,7 @@ func (u stubUpdater) Apply(reader io.Reader, opts update.Options) error {
 func TestDefaultManager_Run(t *testing.T) {
 	type in struct {
 		updater    updater
-		upgradeUrl string
+		upgradeURL string
 	}
 	type args struct {
 	}
@@ -51,7 +51,7 @@ func TestDefaultManager_Run(t *testing.T) {
 			name: "Run with success",
 			in: in{
 				updater:    NewDefaultUpdater(),
-				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
+				upgradeURL: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
 			},
 			wantErr: false,
 		},
@@ -61,7 +61,7 @@ func TestDefaultManager_Run(t *testing.T) {
 				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
 					return nil
 				}},
-				upgradeUrl: "",
+				upgradeURL: "",
 			},
 			wantErr: true,
 		},
@@ -71,7 +71,7 @@ func TestDefaultManager_Run(t *testing.T) {
 				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
 					return nil
 				}},
-				upgradeUrl: "some url",
+				upgradeURL: "some url",
 			},
 			wantErr: true,
 		},
@@ -81,7 +81,7 @@ func TestDefaultManager_Run(t *testing.T) {
 				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
 					return nil
 				}},
-				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				upgradeURL: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(404)
 				})).URL,
 			},
@@ -93,7 +93,7 @@ func TestDefaultManager_Run(t *testing.T) {
 				updater: stubUpdater{apply: func(reader io.Reader, opts update.Options) error {
 					return errors.New("some error")
 				}},
-				upgradeUrl: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
+				upgradeURL: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).URL,
 			},
 			wantErr: true,
 		},
@@ -101,7 +101,7 @@ func TestDefaultManager_Run(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := NewDefaultManager(tt.in.updater)
-			if err := m.Run(tt.in.upgradeUrl); (err != nil) != tt.wantErr {
+			if err := m.Run(tt.in.upgradeURL); (err != nil) != tt.wantErr {
 				t.Errorf("Run() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

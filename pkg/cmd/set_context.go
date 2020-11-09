@@ -28,14 +28,14 @@ import (
 
 const newCtx = "Type new context?"
 
-// setContextCmd type for clean repo command
+// setContextCmd type for clean repo command.
 type setContextCmd struct {
 	rcontext.FindSetter
 	prompt.InputText
 	prompt.InputList
 }
 
-// setContext type for stdin json decoder
+// setContext type for stdin json decoder.
 type setContext struct {
 	Context string `json:"context"`
 }

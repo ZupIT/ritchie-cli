@@ -24,7 +24,7 @@ This command consists of multiple subcommands to interact with ritchie.
 It can be used to list repositories, credentials, or workspaces.
 `
 
-// NewListCmd create a new list instance
+// NewListCmd create a new list instance.
 func NewListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:       "list SUBCOMMAND",

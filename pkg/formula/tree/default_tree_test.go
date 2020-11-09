@@ -212,7 +212,7 @@ func TestTree(t *testing.T) {
 		expectedTree map[string]formula.Tree
 	}{
 		{
-			name: "run in sucess",
+			name: "run in success",
 			in: in{
 				repo: repositoryListerCustomMock{
 					list: func() (formula.Repos, error) {

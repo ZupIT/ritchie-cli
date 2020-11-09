@@ -51,7 +51,7 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 			name: "Setting priority test success",
 			fields: fields{
 				ritHome: func() string {
-					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo-sucess")
+					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo-success")
 					_ = dirManager.Remove(ritHomePath)
 					_ = dirManager.Create(ritHomePath)
 					_ = dirManager.Create(filepath.Join(ritHomePath, "repos"))

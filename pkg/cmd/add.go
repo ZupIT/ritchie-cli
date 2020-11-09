@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewAddCmd create a new add instance
+// NewAddCmd create a new add instance.
 func NewAddCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:       "add SUBCOMMAND",

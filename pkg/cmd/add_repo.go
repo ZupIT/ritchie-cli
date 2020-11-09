@@ -29,7 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const defaultRepoUrl = "https://github.com/ZupIT/ritchie-formulas"
+const defaultRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 
@@ -50,7 +50,7 @@ func NewAddRepoCmd(
 	repoProviders formula.RepoProviders,
 	inText prompt.InputTextValidator,
 	inPass prompt.InputPassword,
-	inUrl prompt.InputURL,
+	inURL prompt.InputURL,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
 	inInt prompt.InputInt,
@@ -60,7 +60,7 @@ func NewAddRepoCmd(
 		repo:               repo,
 		repoProviders:      repoProviders,
 		InputTextValidator: inText,
-		InputURL:           inUrl,
+		InputURL:           inURL,
 		InputList:          inList,
 		InputBool:          inBool,
 		InputInt:           inInt,
@@ -119,7 +119,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			}
 		}
 
-		url, err := ad.URL("Repository URL:", defaultRepoUrl)
+		url, err := ad.URL("Repository URL:", defaultRepoURL)
 		if err != nil {
 			return err
 		}
@@ -177,7 +177,10 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", repository.Name)
+		successMsg := fmt.Sprintf(
+			"The %q repository was added with success, now you can use your formulas with the Ritchie!",
+			repository.Name,
+		)
 		prompt.Success(successMsg)
 
 		tutorialHolder, err := ad.rt.Find()
@@ -203,7 +206,10 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		successMsg := fmt.Sprintf("The %q repository was added with success, now you can use your formulas with the Ritchie!", r.Name)
+		successMsg := fmt.Sprintf(
+			"The %q repository was added with success, now you can use your formulas with the Ritchie!",
+			r.Name,
+		)
 		prompt.Success(successMsg)
 
 		tutorialHolder, err := ad.rt.Find()
