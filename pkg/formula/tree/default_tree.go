@@ -116,15 +116,6 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 			continue
 		}
 
-		// TODO: Create a cache for the version of the repositories,
-		//  it is locking the terminal of users with slow internet
-		/*noticeNewVersion := ""
-		if d.isRootCommand {
-			if latestTag := d.getLatestTag(r); latestTag != r.Version.String() && latestTag != "" {
-				noticeNewVersion = prompt.Bold("(new version " + latestTag + ")")
-			}
-		}*/
-
 		var cc []api.Command
 		for _, c := range treeRepo.Commands {
 			key := c.Parent + "_" + c.Usage
