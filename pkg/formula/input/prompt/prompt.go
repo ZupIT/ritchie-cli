@@ -92,14 +92,9 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 		if !conditionPass {
 			continue
 		}
-		defaultFlag := false
-		if f != nil {
-			defaultFlag, _ = f.GetBool("default")
-		}
-		if defaultFlag && i.Default != "" {
-			inputVal = i.Default
-			prompt.Info("Added input by default:" + inputVal)
-		} else {
+
+		inputVal, defaultFlagSet := in.defaultFlag(f, i)
+		if !defaultFlagSet {
 			switch iType := i.Type; iType {
 			case input.TextType:
 				if items != nil {
@@ -148,6 +143,20 @@ func checkForSameEnv(envKey string) {
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}
+}
+
+func (in InputManager) defaultFlag(f *pflag.FlagSet, input formula.Input) (string, bool) {
+	if f == nil {
+		return "", false
+	}
+
+	defaultFlag, _ := f.GetBool("default")
+	if defaultFlag && input.Default != "" {
+		msg := fmt.Sprintf("Added %s by default: %s", input.Name, input.Default)
+		prompt.Info(msg)
+		return input.Default, true
+	}
+	return "", false
 }
 
 func (in InputManager) persistCache(formulaPath, inputVal string, input formula.Input, items []string) {

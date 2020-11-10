@@ -380,8 +380,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
-			flags := pflag.NewFlagSet("test", 0)
-			got := inputManager.Inputs(cmd, setup, flags)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
