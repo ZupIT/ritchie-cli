@@ -92,9 +92,10 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 		if !conditionPass {
 			continue
 		}
-
-		defaultFlag, _ := f.GetBool("default")
-		fmt.Println(defaultFlag)
+		defaultFlag := false
+		if f != nil {
+			defaultFlag, _ = f.GetBool("default")
+		}
 		if defaultFlag && i.Default != "" {
 			inputVal = i.Default
 			prompt.Info("Added input by default:" + inputVal)

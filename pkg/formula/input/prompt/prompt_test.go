@@ -380,8 +380,8 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
-
-			got := inputManager.Inputs(cmd, setup, nil)
+			flags := pflag.NewFlagSet("test", 0)
+			got := inputManager.Inputs(cmd, setup, flags)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
@@ -483,7 +483,6 @@ func TestInputManager_RegexType(t *testing.T) {
 			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
-
 			got := inputManager.Inputs(cmd, setup, nil)
 
 			if tt.want != nil && got == nil {
@@ -609,7 +608,6 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
-
 			got := inputManager.Inputs(cmd, setup, nil)
 
 			if tt.want != nil && got == nil {
