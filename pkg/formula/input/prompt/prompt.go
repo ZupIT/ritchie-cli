@@ -76,7 +76,7 @@ func NewInputManager(
 	}
 }
 
-func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagSet) error {
+func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagSet) error {
 	config := setup.Config
 	for _, i := range config.Inputs {
 		var inputVal string
@@ -93,36 +93,43 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 			continue
 		}
 
-		switch iType := i.Type; iType {
-		case input.TextType:
-			if items != nil {
-				inputVal, err = in.loadInputValList(items, i)
-			} else {
-				inputVal, err = in.textValidator(i)
+		defaultFlag, _ := f.GetBool("default")
+		fmt.Println(defaultFlag)
+		if defaultFlag && i.Default != "" {
+			inputVal = i.Default
+			prompt.Info("Added input by default:" + inputVal)
+		} else {
+			switch iType := i.Type; iType {
+			case input.TextType:
+				if items != nil {
+					inputVal, err = in.loadInputValList(items, i)
+				} else {
+					inputVal, err = in.textValidator(i)
+				}
+			case input.BoolType:
+				valBool, err = in.Bool(i.Label, items, i.Tutorial)
+				inputVal = strconv.FormatBool(valBool)
+			case input.PassType:
+				inputVal, err = in.Password(i.Label, i.Tutorial)
+			case input.DynamicType:
+				dl, err := in.dynamicList(i.RequestInfo)
+				if err != nil {
+					return err
+				}
+
+				inputVal, err = in.List(i.Label, dl, i.Tutorial)
+				if err != nil {
+					return err
+				}
+			default:
+				inputVal, err = input.ResolveIfReserved(in.envResolvers, i)
 			}
-		case input.BoolType:
-			valBool, err = in.Bool(i.Label, items, i.Tutorial)
-			inputVal = strconv.FormatBool(valBool)
-		case input.PassType:
-			inputVal, err = in.Password(i.Label, i.Tutorial)
-		case input.DynamicType:
-			dl, err := in.dynamicList(i.RequestInfo)
+
 			if err != nil {
 				return err
 			}
 
-			inputVal, err = in.List(i.Label, dl, i.Tutorial)
-			if err != nil {
-				return err
-			}
-		default:
-			inputVal, err = input.ResolveIfReserved(in.envResolvers, i)
 		}
-
-		if err != nil {
-			return err
-		}
-
 		if len(inputVal) != 0 {
 			in.persistCache(setup.FormulaPath, inputVal, i, items)
 			checkForSameEnv(i.Name)

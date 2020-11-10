@@ -24,6 +24,8 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/spf13/pflag"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -235,7 +237,9 @@ func TestInputManager_Inputs(t *testing.T) {
 			inputManager := NewInputManager(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
-			got := inputManager.Inputs(cmd, setup, nil)
+			flags := pflag.NewFlagSet("default", 0)
+			flags.Bool("default", true, "default")
+			got := inputManager.Inputs(cmd, setup, flags)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
@@ -434,7 +438,7 @@ func TestInputManager_RegexType(t *testing.T) {
 				inText:         inputMock{text: "a"},
 				iTextValidator: inputTextValidatorMock{str: "a"},
 			},
-			want: errors.New("Regex error, mismatch"),
+			want: errors.New("regex error, mismatch"),
 		},
 		{
 			name: "Success regex test",
