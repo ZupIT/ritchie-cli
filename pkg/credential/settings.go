@@ -74,10 +74,10 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 }
 
 func (s Settings) ReadCredentialsValueInContext(path string, context string) ([]ListCredData, error) {
-	var creds []ListCredData
 	var cred ListCredData
 	var detail Detail
 	providers, _ := s.file.List(filepath.Join(path, context))
+	creds := make([]ListCredData, 0, len(providers))
 	for _, p := range providers {
 		cBytes, _ := s.file.Read(filepath.Join(path, context, p))
 		if err := json.Unmarshal(cBytes, &detail); err != nil {
