@@ -16,7 +16,7 @@
 
 package credential
 
-// Info represents a credential information of the user.
+// Detail represents a credential information of the user.
 type Detail struct {
 	Username   string     `json:"username"`
 	Credential Credential `json:"credential"`

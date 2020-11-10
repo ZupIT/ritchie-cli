@@ -23,7 +23,10 @@ type ListUpdateManager struct {
 	formula.RepositoryUpdater
 }
 
-func NewListUpdater(repoList formula.RepositoryLister, repoUpdate formula.RepositoryUpdater) formula.RepositoryListUpdater {
+func NewListUpdater(
+	repoList formula.RepositoryLister,
+	repoUpdate formula.RepositoryUpdater,
+) formula.RepositoryListUpdater {
 	return ListUpdateManager{
 		RepositoryLister:  repoList,
 		RepositoryUpdater: repoUpdate,

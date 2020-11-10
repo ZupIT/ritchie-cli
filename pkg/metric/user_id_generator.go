@@ -30,7 +30,7 @@ type UserIdManager struct {
 	hash hash.Hash
 }
 
-func NewUserIdGenerator() UserIdManager {
+func NewUserIdGenerator() UserIdManager { //nolint:stylecheck
 	return UserIdManager{hash: sha256.New()}
 }
 
@@ -45,7 +45,7 @@ func (us UserIdManager) Generate() (UserId, error) {
 		return "", err
 	}
 
-	userId := hex.EncodeToString(us.hash.Sum(nil))
+	userID := hex.EncodeToString(us.hash.Sum(nil))
 
-	return UserId(userId), nil
+	return UserId(userID), nil
 }

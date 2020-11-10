@@ -23,31 +23,30 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )
 
-type UrlFinder interface {
+type UrlFinder interface { //nolint:stylecheck
 	Url(os string) string
 }
 
-type DefaultUrlFinder struct {
+type DefaultUrlFinder struct { //nolint:stylecheck
 	version version.Resolver
 }
 
-func NewDefaultUrlFinder(version version.Resolver) DefaultUrlFinder {
+func NewDefaultUrlFinder(version version.Resolver) DefaultUrlFinder { //nolint:stylecheck
 	return DefaultUrlFinder{version: version}
 }
 
-func (duf DefaultUrlFinder) Url(os string) string {
-	//stableVersion, err := resolver.StableVersion()
+func (duf DefaultUrlFinder) Url(os string) string { //nolint:stylecheck
 	stableVersion, err := duf.version.StableVersion()
 
 	if err != nil {
 		return ""
 	}
 
-	upgradeUrl := fmt.Sprintf(upgradeUrlFormat, stableVersion, os)
+	upgradeURL := fmt.Sprintf(upgradeURLFormat, stableVersion, os)
 
 	if os == osutil.Windows {
-		upgradeUrl += ".exe"
+		upgradeURL += ".exe"
 	}
 
-	return upgradeUrl
+	return upgradeURL
 }

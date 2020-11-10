@@ -1,0 +1,104 @@
+run:
+  timeout: 10m
+  issues-exit-code: 1
+  tests: true
+  skip-dirs:
+    - vendor
+  modules-download-mode: vendor
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+    exclude: ./errcheck_excludes.txt
+  golint:
+    min-confidence: 0.8
+  maligned:
+    suggest-new: true
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - asciicheck
+    - bodyclose
+    - depguard
+    - dogsled
+    - dupl
+    - exhaustive
+    - exportloopref
+    - gochecknoinits
+    - gocyclo
+    - godox
+    - gofmt
+    - goheader
+    - goimports
+    - gomodguard
+    - goprintffuncname
+    - misspell
+    - nakedret
+    - nolintlint
+    - prealloc
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - unparam
+  presets:
+  fast: false
+
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - errcheck
+        - gocritic
+        - gocyclo
+        - gosec
+        - lll
+        - goconst
+        - unparam
+        - unused
+        - sqlclosecheck
+        - stylecheck
+
+    - linters:
+        - lll
+      source: "^//go:generate "
+
+    # error strings should not be capitalized
+    - linters:
+        - stylecheck
+      text: "ST1005:"
+
+    # at least one file in a package should have a package comment
+    - linters:
+        - stylecheck
+      text: "ST1000:"
+
+    # comment on exported method Name should be of the form "Name ..."
+    - linters:
+        - stylecheck
+      text: "ST1020:"
+
+    - linters:
+        - gocritic
+      text: "sloppyLen:"
+
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0

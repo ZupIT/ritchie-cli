@@ -16,6 +16,7 @@
 package gitlab
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -37,7 +38,7 @@ func NewRepoManager(client *http.Client) RepoManager {
 
 func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	zipUrl := info.ZipUrl(version)
-	req, err := http.NewRequest(http.MethodGet, zipUrl, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, zipUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +66,7 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiUrl := info.TagsUrl()
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
 	if err != nil {
 		return git.Tags{}, err
 	}
@@ -97,7 +98,7 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	apiUrl := info.LatestTagUrl()
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
 	if err != nil {
 		return git.Tag{}, err
 	}

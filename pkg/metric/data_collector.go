@@ -53,7 +53,11 @@ func NewDataCollector(
 	}
 }
 
-func (d DataCollectorManager) Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error) {
+func (d DataCollectorManager) Collect(
+	commandExecutionTime float64,
+	ritVersion string,
+	commandError ...string,
+) (APIData, error) {
 	userId, err := d.userId.Generate()
 	if err != nil {
 		return APIData{}, err
