@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -39,21 +38,13 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 
 		exitsSdinEntry := stdin.ExistsEntry()
 
-		inputStdinHasData := false
-		if exitsSdinEntry {
-			other := cmd.InOrStdin()
-			inputStdinHasData = json.NewDecoder(other).More()
-		}
-
-		if s || inputStdinHasData {
+		if s || exitsSdinEntry {
 			if s {
 				fmt.Println("The flag --stdin is deprecated.\nIt's no longer needed for input via stdin.")
 			}
-			fmt.Println("s: ", s, "inputStdinHasData: ", inputStdinHasData)
 
 			return stdinFunc(cmd, args)
 		}
-		fmt.Println(" -- prompt")
 		return promptFunc(cmd, args)
 	}
 }
