@@ -140,14 +140,6 @@ func Build() *cobra.Command {
 	formBuildDocker := builder.NewBuildDocker(fileManager)
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 
-	builders := formula.Builders{
-		Make:   formBuildMake,
-		Shell:  formBuildSh,
-		Bat:    formBuildBat,
-		Docker: formBuildDocker,
-		Local:  formBuildLocal,
-	}
-
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 
 	promptInManager := fprompt.NewInputManager(envResolvers, fileManager, inputList, inputText, inputTextValidator, inputBool, inputPassword)
@@ -175,12 +167,12 @@ func Build() *cobra.Command {
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager)
 
-	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, builders.Local, inputBool)
+	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal, inputBool)
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
-	watchManager := watcher.New(builders.Local, dirManager, SendMetric)
-	createBuilder := formula.NewCreateBuilder(formulaCreator, builders.Local)
+	watchManager := watcher.New(formBuildLocal, dirManager, SendMetric)
+	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
 
 	versionManager := version.NewManager(
 		version.StableVersionURL,
@@ -234,7 +226,7 @@ func Build() *cobra.Command {
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder, treeChecker)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, builders.Local, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formBuildLocal, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 

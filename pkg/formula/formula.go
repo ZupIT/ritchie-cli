@@ -128,14 +128,6 @@ type BuildInfo struct {
 	Workspace   Workspace
 }
 
-type Builders struct {
-	Make   Builder
-	Shell  Builder
-	Bat    Builder
-	Docker Builder
-	Local  Builder
-}
-
 type Creator interface {
 	Create(cf Create) error
 }

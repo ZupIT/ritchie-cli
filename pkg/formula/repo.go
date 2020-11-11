@@ -134,11 +134,6 @@ type RepositoryListWriteCreator interface {
 	RepositoryCreator
 }
 
-type RepositoryDelLister interface {
-	RepositoryDeleter
-	RepositoryLister
-}
-
 type RepositoryListUpdater interface {
 	RepositoryLister
 	RepositoryUpdater
