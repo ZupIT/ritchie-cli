@@ -37,5 +37,5 @@ func ReadJson(reader io.Reader, v interface{}) error {
 func ExistsEntry() bool {
 	stat, _ := os.Stdin.Stat()
 
-	return (stat.Mode() & os.ModeCharDevice) == 0
+	return ((stat.Mode() & os.ModeCharDevice) == 0) || stat.Size() > 0
 }
