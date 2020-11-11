@@ -48,7 +48,7 @@ func TestAdd(t *testing.T) {
 			name: "Run with success, when repository json not exist",
 			in: in{
 				ritHome: func() string {
-					ritHomePath := filepath.Join(t.TempDir(), "test-adder-test-success")
+					ritHomePath := filepath.Join(os.TempDir(), "test-adder-test-success")
 					_ = dirManager.Remove(ritHomePath)
 					_ = dirManager.Create(ritHomePath)
 					_ = dirManager.Remove(filepath.Join(ritHomePath, "repos", "some_repo_name"))

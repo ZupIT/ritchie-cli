@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -24,7 +25,7 @@ func TestWrite(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				ritHome: t.TempDir(),
+				ritHome: os.TempDir(),
 				file: fileWriteMock{
 					write: func(path string, byte []byte) error {
 						return nil
@@ -44,7 +45,7 @@ func TestWrite(t *testing.T) {
 		{
 			name: "error",
 			in: in{
-				ritHome: t.TempDir(),
+				ritHome: os.TempDir(),
 				file: fileWriteMock{
 					write: func(path string, byte []byte) error {
 						return errors.New("error to write file")
