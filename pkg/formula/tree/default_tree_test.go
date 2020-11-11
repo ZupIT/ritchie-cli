@@ -19,7 +19,6 @@ package tree
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -36,7 +35,7 @@ import (
 var (
 	tmpDir           = os.TempDir()
 	ritHome          = filepath.Join(tmpDir, ".rit-tree")
-	pathTreeSomeRepo = fmt.Sprintf(treeRepoCmdPattern, ritHome, "someRepo")
+	pathTreeSomeRepo = filepath.Join(ritHome, reposDirName, "someRepo", treeFileName)
 
 	coreCmds = []api.Command{
 		{Parent: "root", Usage: "add"},
@@ -59,8 +58,8 @@ func TestMergedTree(t *testing.T) {
 		{Parent: "root_jedi-list", Usage: "add"},
 	}}
 
-	pathTreeLocalRepo := fmt.Sprintf(treeLocalCmdPattern, ritHome)
-	pathTreeOtherRepo := fmt.Sprintf(treeRepoCmdPattern, ritHome, "otherRepo")
+	pathTreeLocalRepo := filepath.Join(ritHome, reposDirName, "repo-local", treeFileName)
+	pathTreeOtherRepo := filepath.Join(ritHome, reposDirName, "otherRepo", treeFileName)
 
 	expectedTreeComplete := formula.Tree{
 		Commands: api.Commands{
@@ -70,12 +69,12 @@ func TestMergedTree(t *testing.T) {
 			{
 				Parent: "root",
 				Usage:  "jedi-list",
-				Repo:   "local",
+				Repo:   "repo-local",
 			},
 			{
 				Parent: "root_jedi-list",
 				Usage:  "add",
-				Repo:   "local",
+				Repo:   "repo-local",
 			},
 			{
 				Parent: "root",
@@ -106,10 +105,18 @@ func TestMergedTree(t *testing.T) {
 		Url:      "https://github.com/owner/otherRepo",
 		Priority: 5,
 	}
+	localRepo := formula.Repo{
+		Provider: formula.RepoProvider("Local"),
+		Name:     formula.RepoName("repo-local"),
+		Version:  formula.RepoVersion("0.0.0"),
+		Priority: 2,
+		IsLocal:  true,
+	}
 
 	repoLister := repositoryListerCustomMock{
 		list: func() (formula.Repos, error) {
 			return formula.Repos{
+				localRepo,
 				someRepo,
 				otherRepo,
 			}, nil
@@ -166,9 +173,7 @@ func TestMergedTree(t *testing.T) {
 	repoProviders = formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
-	isRootCommand := true
-
-	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager, repoProviders, isRootCommand)
+	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager, repoProviders, true)
 	mergedTree := newTree.MergedTree(true)
 
 	if !isSameFormulaTree(mergedTree, expectedTreeComplete) {
@@ -188,9 +193,6 @@ func TestTree(t *testing.T) {
 				coreCmds[1],
 				coreCmds[2],
 			},
-		},
-		"LOCAL": {
-			Commands: api.Commands{},
 		},
 		"someRepo": {
 			Commands: api.Commands{
@@ -348,10 +350,9 @@ func TestTree(t *testing.T) {
 			}
 			repoProviders := formula.NewRepoProviders()
 			repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
-			isRootCommand := false
 
 			in := tt.in
-			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file, repoProviders, isRootCommand)
+			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file, repoProviders, false)
 
 			tree, err := newTree.Tree()
 

@@ -17,37 +17,26 @@
 package builder
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type LocalManager struct {
 	ritHome string
 	dir     stream.DirCreateListCopyRemover
-	file    stream.FileWriteReadExister
-	tree    formula.TreeGenerator
 	repo    formula.RepositoryAdder
 }
 
 func NewBuildLocal(
 	ritHome string,
 	dir stream.DirCreateListCopyRemover,
-	file stream.FileWriteReadExister,
-	tree formula.TreeGenerator,
 	repo formula.RepositoryAdder,
 ) LocalManager {
-	return LocalManager{ritHome: ritHome, dir: dir, file: file, tree: tree, repo: repo}
+	return LocalManager{ritHome: ritHome, dir: dir, repo: repo}
 }
 
 func (m LocalManager) Build(info formula.BuildInfo) error {
@@ -76,76 +65,12 @@ func (m LocalManager) Build(info formula.BuildInfo) error {
 		return err
 	}
 
-	/*if err := m.generateTree(dest); err != nil {
-		return err
-	}*/
-
-	/*if err := m.buildFormulaBin(info.Workspace.Dir, info.FormulaPath, dest); err != nil {
-		return err
-	}*/
-
-	return nil
-}
-
-func (m LocalManager) buildFormulaBin(workspacePath, formulaPath, dest string) error {
-	formulaSrc := strings.ReplaceAll(formulaPath, workspacePath, dest)
+	formulaSrc := strings.ReplaceAll(info.FormulaPath, info.Workspace.Dir, dest)
 	formulaBin := filepath.Join(formulaSrc, "bin")
-
 	if err := m.dir.Remove(formulaBin); err != nil {
 		return err
 	}
 
-	if err := os.Chdir(formulaSrc); err != nil {
-		return err
-	}
-
-	so := runtime.GOOS
-	var cmd *exec.Cmd
-	switch so {
-	case osutil.Windows:
-		winBuild := filepath.Join(formulaPath, "build.bat")
-		if !m.file.Exists(winBuild) {
-			return ErrBuildOnWindows
-		}
-		cmd = exec.Command(winBuild)
-	default:
-		shBuild := filepath.Join(formulaPath, "build.sh")
-		if m.file.Exists(shBuild) {
-			cmd = exec.Command(shBuild)
-			break
-		}
-		cmd = exec.Command("make", "build")
-	}
-
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		if stderr.Bytes() != nil {
-			errMsg := fmt.Sprintf("Build error: \n%s \n%s", stderr.String(), err)
-			return errors.New(errMsg)
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-func (m LocalManager) generateTree(dest string) error {
-	tree, err := m.tree.Generate(dest)
-	if err != nil {
-		return err
-	}
-
-	treeFilePath := filepath.Join(dest, "tree.json")
-	treeIndented, err := json.MarshalIndent(tree, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	if err := m.file.Write(treeFilePath, treeIndented); err != nil {
-		return err
-	}
 	return nil
 }
 

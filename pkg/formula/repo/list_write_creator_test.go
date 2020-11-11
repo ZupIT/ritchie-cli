@@ -43,30 +43,35 @@ func TestNewListCreator(t *testing.T) {
 	}
 	repoCreator := NewCreator(ritHome, repoProviders, dirManager, fileManager)
 
+	repoWrite := NewWriter(ritHome, fileManager)
+
 	type in struct {
 		repoList   formula.RepositoryLister
 		repoCreate formula.RepositoryCreator
+		repoWrite  formula.RepositoryWriter
 	}
 	tests := []struct {
 		name string
 		in   in
-		want formula.RepositoryListCreator
+		want formula.RepositoryListWriteCreator
 	}{
 		{
 			name: "Build with success",
 			in: in{
 				repoList:   repoList,
 				repoCreate: repoCreator,
+				repoWrite:  repoWrite,
 			},
-			want: ListCreateManager{
+			want: ListWriteCreateManager{
 				RepositoryLister:  repoList,
 				RepositoryCreator: repoCreator,
+				RepositoryWriter:  repoWrite,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewListCreator(tt.in.repoList, tt.in.repoCreate); !reflect.DeepEqual(got, tt.want) {
+			if got := NewListWriteCreator(tt.in.repoList, tt.in.repoCreate, tt.in.repoWrite); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewListCreator() = %v, want %v", got, tt.want)
 			}
 		})

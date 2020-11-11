@@ -145,7 +145,7 @@ type Builder interface {
 }
 
 type Watcher interface {
-	Watch(workspacePath, formulaPath string)
+	Watch(formulaPath string, workspace Workspace)
 }
 
 type CreateBuilder interface {

@@ -17,53 +17,34 @@
 package repo
 
 import (
-	"encoding/json"
 	"errors"
-	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	repositoryDoNotExistError = "there is no repositories yet"
-)
+const repositoryDoNotExistError = "there is no repositories yet"
 
 type SetPriorityManager struct {
-	ritHome string
-	file    stream.FileWriteReadExister
+	repo formula.RepositoryListWriter
 }
 
-func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister) SetPriorityManager {
-	return SetPriorityManager{
-		ritHome: ritHome,
-		file:    file,
-	}
+func NewPrioritySetter(repo formula.RepositoryListWriter) SetPriorityManager {
+	return SetPriorityManager{repo: repo}
 }
 
 func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int) error {
-	var repos formula.Repos
-	repoPath := filepath.Join(sm.ritHome, reposDirName, reposFileName)
-	if !sm.file.Exists(repoPath) {
-		return errors.New(repositoryDoNotExistError)
-	}
-	read, err := sm.file.Read(repoPath)
+	repos, err := sm.repo.List()
 	if err != nil {
 		return err
 	}
 
-	if err := json.Unmarshal(read, &repos); err != nil {
-		return err
+	if repos.Len() <= 0 {
+		return errors.New(repositoryDoNotExistError)
 	}
 
 	repos = movePosition(repos, repoName, priority)
 
-	bytes, err := json.MarshalIndent(repos, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	if err := sm.file.Write(repoPath, bytes); err != nil {
+	if err := sm.repo.Write(repos); err != nil {
 		return err
 	}
 

@@ -25,7 +25,9 @@ import (
 
 	"github.com/radovskyb/watcher"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
@@ -40,13 +42,20 @@ func TestWatch(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
 
+	repoProviders := formula.NewRepoProviders()
+	repoCreator := repo.NewCreator(ritHome, repoProviders, dirManager, fileManager)
+	repoLister := repo.NewLister(ritHome, fileManager)
+	repoWriter := repo.NewWriter(ritHome, fileManager)
+	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
+	repoAdder := repo.NewAdder(ritHome, repoListWriteCreator, treeGenerator, fileManager)
+
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(workspacePath)
 	_ = dirManager.Create(workspacePath)
 	zipFile := filepath.Join("..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, workspacePath)
 
-	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, treeGenerator)
+	builderManager := builder.NewBuildLocal(ritHome, dirManager, repoAdder)
 	sendMetric := func(commandExecutionTime float64, err ...string) {}
 
 	watchManager := New(
@@ -62,26 +71,30 @@ func TestWatch(t *testing.T) {
 		_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 	}()
 
-	watchManager.Watch(workspacePath, formulaPath)
+	workspace := formula.Workspace{
+		Name: "repo-1",
+		Dir:  workspacePath,
+	}
+	watchManager.Watch(formulaPath, workspace)
 
 	hasRitchieHome := dirManager.Exists(ritHome)
 	if !hasRitchieHome {
 		t.Error("Watch build did not create the Ritchie home directory")
 	}
 
-	treeLocalFile := filepath.Join(ritHome, "repos", "local", "tree.json")
+	treeLocalFile := filepath.Join(ritHome, "repos", "repo-1-local", "tree.json")
 	hasTreeLocalFile := fileManager.Exists(treeLocalFile)
 	if !hasTreeLocalFile {
 		t.Error("Watch build did not copy the tree local file")
 	}
 
-	formulaFiles := filepath.Join(ritHome, "repos", "local", "testing", "formula", "bin")
+	formulaFiles := filepath.Join(ritHome, "repos", "repo-1-local", "testing", "formula", "bin")
 	files, err := fileManager.List(formulaFiles)
 	if err == nil && len(files) != 4 {
 		t.Error("Watch build did not generate formulas files")
 	}
 
-	configFile := filepath.Join(ritHome, "repos", "local", "testing", "formula", "config.json")
+	configFile := filepath.Join(ritHome, "repos", "repo-1-local", "testing", "formula", "config.json")
 	hasConfigFile := fileManager.Exists(configFile)
 	if !hasConfigFile {
 		t.Error("Watch build did not copy formula config")

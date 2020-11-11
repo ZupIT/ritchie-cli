@@ -24,31 +24,23 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	reposDirName  = "repos"
-	reposFileName = "repositories.json"
-)
-
 type AddManager struct {
 	ritHome string
-	repo    formula.RepositoryCreator
+	repo    formula.RepositoryListWriteCreator
 	tree    formula.TreeGenerator
-	dir     stream.DirCreateListCopyRemover
-	file    stream.FileWriteCreatorReadExistRemover
+	file    stream.FileWriter
 }
 
 func NewAdder(
 	ritHome string,
-	repo formula.RepositoryCreator,
+	repo formula.RepositoryListWriteCreator,
 	tree formula.TreeGenerator,
-	dir stream.DirCreateListCopyRemover,
-	file stream.FileWriteCreatorReadExistRemover,
+	file stream.FileWriter,
 ) AddManager {
 	return AddManager{
 		ritHome: ritHome,
 		repo:    repo,
 		tree:    tree,
-		dir:     dir,
 		file:    file,
 	}
 }
@@ -60,27 +52,26 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		}
 	}
 
-	repos := formula.Repos{}
-	repoPath := filepath.Join(ad.ritHome, reposDirName, reposFileName)
-	if ad.file.Exists(repoPath) {
-		read, err := ad.file.Read(repoPath)
-		if err != nil {
-			return err
-		}
-
-		if err := json.Unmarshal(read, &repos); err != nil {
-			return err
-		}
+	repos, err := ad.repo.List()
+	if err != nil {
+		return err
 	}
 
 	repos = setPriority(repo, repos)
 
-	if err := ad.saveRepo(repoPath, repos); err != nil {
+	if err := ad.repo.Write(repos); err != nil {
 		return err
 	}
 
-	newRepoPath := filepath.Join(ad.ritHome, reposDirName, repo.Name.String())
+	if err := ad.treeGenerate(repo); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (ad AddManager) treeGenerate(repo formula.Repo) error {
+	newRepoPath := filepath.Join(ad.ritHome, reposDirName, repo.Name.String())
 	tree, err := ad.tree.Generate(newRepoPath)
 	if err != nil {
 		return err
@@ -93,24 +84,6 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	}
 
 	if err := ad.file.Write(treeFilePath, bytes); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (ad AddManager) saveRepo(repoPath string, repos formula.Repos) error {
-	bytes, err := json.MarshalIndent(repos, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	dirPath := filepath.Dir(repoPath)
-	if err := ad.dir.Create(dirPath); err != nil {
-		return err
-	}
-
-	if err := ad.file.Write(repoPath, bytes); err != nil {
 		return err
 	}
 

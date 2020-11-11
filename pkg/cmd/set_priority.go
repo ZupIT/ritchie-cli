@@ -101,10 +101,13 @@ func (s setPriorityCmd) runFunc() CommandRunnerFunc {
 			return err
 		}
 
-
 		successMsg := fmt.Sprintf(newRepositoryPriority, repoName, priority)
 		if int(priority) > repositories.Len() {
 			successMsg = fmt.Sprintf("Now %q repository has the least priority", repoName)
+		}
+
+		if int(priority) <= 0 {
+			successMsg = fmt.Sprintf("Now %q repository has the highest priority", repoName)
 		}
 
 		prompt.Success(successMsg)

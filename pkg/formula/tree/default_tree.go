@@ -18,7 +18,7 @@ package tree
 
 import (
 	"encoding/json"
-	"fmt"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -26,10 +26,9 @@ import (
 )
 
 const (
-	treeLocalCmdPattern = "%s/repos/local/tree.json"
-	treeRepoCmdPattern  = "%s/repos/%s/tree.json"
-	core                = "CORE"
-	local               = "LOCAL"
+	reposDirName = "repos"
+	treeFileName = "tree.json"
+	core         = "CORE"
 )
 
 type Manager struct {
@@ -62,12 +61,6 @@ func NewTreeManager(
 func (d Manager) Tree() (map[string]formula.Tree, error) {
 	trees := make(map[string]formula.Tree)
 	trees[core] = formula.Tree{Commands: d.coreCmds}
-
-	/*treeLocal, err := d.localTree()
-	if err != nil {
-		return nil, err
-	}
-	trees[local] = treeLocal*/
 
 	rr, err := d.repoLister.List()
 	if err != nil {
@@ -118,7 +111,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	return treeMain
 }
 
-//nolint
+// nolint
 func (d Manager) getLatestTag(repo formula.Repo) string {
 	formulaGit := d.repoProviders.Resolve(repo.Provider)
 
@@ -131,13 +124,8 @@ func (d Manager) getLatestTag(repo formula.Repo) string {
 	return tag.Name
 }
 
-func (d Manager) localTree() (formula.Tree, error) {
-	treeCmdFile := fmt.Sprintf(treeLocalCmdPattern, d.ritchieHome)
-	return d.loadTree(treeCmdFile)
-}
-
 func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {
-	treeCmdFile := fmt.Sprintf(treeRepoCmdPattern, d.ritchieHome, repoName)
+	treeCmdFile := filepath.Join(d.ritchieHome, reposDirName, repoName.String(), treeFileName)
 	return d.loadTree(treeCmdFile)
 }
 

@@ -114,19 +114,29 @@ type RepositoryCreator interface {
 	Create(repo Repo) error
 }
 
+type RepositoryWriter interface {
+	Write(repos Repos) error
+}
+
 type RepositoryAddLister interface {
 	RepositoryAdder
 	RepositoryLister
 }
 
+type RepositoryListWriter interface {
+	RepositoryLister
+	RepositoryWriter
+}
+
+type RepositoryListWriteCreator interface {
+	RepositoryLister
+	RepositoryWriter
+	RepositoryCreator
+}
+
 type RepositoryDelLister interface {
 	RepositoryDeleter
 	RepositoryLister
-}
-
-type RepositoryListCreator interface {
-	RepositoryLister
-	RepositoryCreator
 }
 
 type RepositoryListUpdater interface {

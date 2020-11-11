@@ -137,7 +137,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 
 		c.tree.Check()
 		c.create(cf)
-		
+
 		return nil
 	}
 }
