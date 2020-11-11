@@ -20,8 +20,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/spf13/pflag"
@@ -237,9 +239,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			inputManager := NewInputManager(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iBool, iPass)
 
 			cmd := &exec.Cmd{}
-			flags := pflag.NewFlagSet("default", 0)
-			flags.Bool("default", true, "default")
-			got := inputManager.Inputs(cmd, setup, flags)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
@@ -616,6 +616,84 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			if tt.want == nil && got != nil {
 				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, got, nil)
 			}
+		})
+	}
+}
+
+func TestInputManager_DefaultFlag(t *testing.T) {
+	inputJson := `[
+ 	{
+        "name": "sample_text",
+        "type": "text",
+        "label": "Type : ",
+		"default": "test"
+    }
+]`
+	var inputs []formula.Input
+	_ = json.Unmarshal([]byte(inputJson), &inputs)
+
+	setup := formula.Setup{
+		Config: formula.Config{
+			Inputs: inputs,
+		},
+		FormulaPath: os.TempDir(),
+	}
+	fileManager := stream.NewFileManager()
+
+	type in struct {
+		inType      api.TermInputType
+		creResolver env.Resolvers
+		file        stream.FileWriteReadExister
+	}
+
+	tests := []struct {
+		name string
+		in   in
+	}{
+		{
+			name: "success prompt",
+			in: in{
+				inType:      api.Prompt,
+				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				file:        fileManager,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			inputManager := NewInputManager(
+				tt.in.creResolver,
+				tt.in.file,
+				inputMock{},
+				inputMock{},
+				inputTextValidatorMock{},
+				inputMock{},
+				inputMock{},
+			)
+
+			cmd := &exec.Cmd{}
+			flags := pflag.NewFlagSet("default", 0)
+			flags.Bool("default", true, "default")
+
+			rescueStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			err := inputManager.Inputs(cmd, setup, flags)
+
+			_ = w.Close()
+			out, _ := ioutil.ReadAll(r)
+			os.Stdout = rescueStdout
+
+			if err != nil {
+				t.Error("error executing prompt with default flag")
+			}
+
+			if !strings.Contains(string(out), "Added sample_text by default: test") {
+				t.Error("unexpected output on prompt with default flag")
+			}
+
 		})
 	}
 }

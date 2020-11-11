@@ -118,8 +118,7 @@ type (
 		InType  api.TermInputType
 		RunType RunnerType
 		Verbose bool
-
-		Flags *pflag.FlagSet
+		Flags   *pflag.FlagSet
 	}
 )
 
