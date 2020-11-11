@@ -114,49 +114,30 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 }
 
 func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (string, error) {
-	var (
-		err      error
-		inputVal string
-	)
 	switch i.Type {
 	case input.PassType:
-		inputVal, err = in.Password(i.Label, i.Tutorial)
-		if err != nil {
-			return "", err
-		}
+		return in.Password(i.Label, i.Tutorial)
 	case input.BoolType:
 		valBool, err := in.Bool(i.Label, items, i.Tutorial)
 		if err != nil {
 			return "", err
 		}
-		inputVal = strconv.FormatBool(valBool)
+		return strconv.FormatBool(valBool), nil
 	case input.TextType:
 		if items != nil {
-			inputVal, err = in.loadInputValList(items, i)
+			return in.loadInputValList(items, i)
 		} else {
-			inputVal, err = in.textValidator(i)
-		}
-		if err != nil {
-			return "", err
+			return in.textValidator(i)
 		}
 	case input.DynamicType:
 		dl, err := in.dynamicList(i.RequestInfo)
 		if err != nil {
 			return "", err
 		}
-
-		inputVal, err = in.List(i.Label, dl, i.Tutorial)
-		if err != nil {
-			return "", err
-		}
+		return in.List(i.Label, dl, i.Tutorial)
 	default:
-		inputVal, err = input.ResolveIfReserved(in.envResolvers, i)
-		if err != nil {
-			return "", err
-		}
+		return input.ResolveIfReserved(in.envResolvers, i)
 	}
-
-	return inputVal, nil
 }
 
 func checkForSameEnv(envKey string) {
