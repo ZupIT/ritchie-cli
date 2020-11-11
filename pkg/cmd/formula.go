@@ -70,7 +70,7 @@ var (
 			name:        "default",
 			kind:        reflect.Bool,
 			defValue:    false,
-			description: "Verbose mode (All). Indicate to a formula that it should show log messages in more detail",
+			description: "Use to automatically fill inputs with default value provided on config.json",
 		},
 	}
 )

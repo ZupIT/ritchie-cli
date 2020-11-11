@@ -228,7 +228,6 @@ func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]str
 			if err = in.file.Write(cachePath, itemsBytes); err != nil {
 				return nil, err
 			}
-			fmt.Println(input.Default)
 			return input.Items, nil
 		}
 	} else {

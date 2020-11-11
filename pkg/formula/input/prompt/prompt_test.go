@@ -693,7 +693,6 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 			if !strings.Contains(string(out), "Added sample_text by default: test") {
 				t.Error("unexpected output on prompt with default flag")
 			}
-
 		})
 	}
 }
