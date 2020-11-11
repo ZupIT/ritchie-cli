@@ -28,7 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestNewListCreator(t *testing.T) {
+func TestNewListWriteCreator(t *testing.T) {
 
 	ritHome := os.TempDir()
 	fileManager := stream.NewFileManager()
@@ -72,7 +72,7 @@ func TestNewListCreator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := NewListWriteCreator(tt.in.repoList, tt.in.repoCreate, tt.in.repoWrite); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewListCreator() = %v, want %v", got, tt.want)
+				t.Errorf("NewListWriteCreator() = %v, want %v", got, tt.want)
 			}
 		})
 	}
