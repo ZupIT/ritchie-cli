@@ -139,51 +139,6 @@ func TestSetPriorityManager_SetPriority(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Setting negative repo priority",
-			fields: fields{
-				repo: func() formula.RepositoryListWriter {
-					ritHomePath := filepath.Join(os.TempDir(), "test-priority-setter-repo-success")
-					_ = dirManager.Remove(ritHomePath)
-					_ = dirManager.Create(ritHomePath)
-					_ = dirManager.Create(filepath.Join(ritHomePath, "repos"))
-
-					repositoryFile := filepath.Join(ritHomePath, "repos", "repositories.json")
-
-					data := `
-						[
-							{
-								"name": "commons",
-								"version": "v2.0.0",
-								"url": "https://github.com/kaduartur/ritchie-formulas",
-								"priority": 0
-							},
-							{
-								"name": "repo-1-local",
-								"version": "0.0.0",
-								"priority": 1,
-								"isLocal": true
-							},
-							{
-								"name": "repo-2-local",
-								"version": "0.0.0",
-								"priority": 2,
-								"isLocal": true
-							}
-						]`
-
-					_ = fileManager.Write(repositoryFile, []byte(data))
-
-					lister := NewLister(ritHomePath, fileManager)
-					writer := NewWriter(ritHomePath, fileManager)
-					return NewListWriter(lister, writer)
-				}(),
-			},
-			args: args{
-				repoName: "repo-2-local",
-				priority: -1,
-			},
-			wantErr: false,
-		}, {
 			name: "Setting max repo priority",
 			fields: fields{
 				repo: func() formula.RepositoryListWriter {

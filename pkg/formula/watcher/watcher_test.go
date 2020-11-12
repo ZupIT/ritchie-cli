@@ -82,19 +82,19 @@ func TestWatch(t *testing.T) {
 		t.Error("Watch build did not create the Ritchie home directory")
 	}
 
-	treeLocalFile := filepath.Join(ritHome, "repos", "repo-1-local", "tree.json")
+	treeLocalFile := filepath.Join(ritHome, "repos", "local-repo-1", "tree.json")
 	hasTreeLocalFile := fileManager.Exists(treeLocalFile)
 	if !hasTreeLocalFile {
 		t.Error("Watch build did not copy the tree local file")
 	}
 
-	formulaFiles := filepath.Join(ritHome, "repos", "repo-1-local", "testing", "formula", "bin")
+	formulaFiles := filepath.Join(ritHome, "repos", "local-repo-1", "testing", "formula", "bin")
 	files, err := fileManager.List(formulaFiles)
 	if err == nil && len(files) != 4 {
 		t.Error("Watch build did not generate formulas files")
 	}
 
-	configFile := filepath.Join(ritHome, "repos", "repo-1-local", "testing", "formula", "config.json")
+	configFile := filepath.Join(ritHome, "repos", "local-repo-1", "testing", "formula", "config.json")
 	hasConfigFile := fileManager.Exists(configFile)
 	if !hasConfigFile {
 		t.Error("Watch build did not copy formula config")

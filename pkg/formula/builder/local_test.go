@@ -131,19 +131,19 @@ func TestBuild(t *testing.T) {
 					t.Errorf("Build(%s) did not create the Ritchie home directory", tt.name)
 				}
 
-				treeLocalFile := filepath.Join(ritHome, "repos", "repo-local", "tree.json")
+				treeLocalFile := filepath.Join(ritHome, "repos", "local-repo", "tree.json")
 				hasTreeLocalFile := fileManager.Exists(treeLocalFile)
 				if !hasTreeLocalFile {
 					t.Errorf("Build(%s) did not copy the tree local file", tt.name)
 				}
 
-				formulaFiles := filepath.Join(ritHome, "repos", "repo-local", "testing", "formula", "bin")
+				formulaFiles := filepath.Join(ritHome, "repos", "local-repo", "testing", "formula", "bin")
 				files, err := fileManager.List(formulaFiles)
 				if err == nil && len(files) != 4 {
 					t.Errorf("Build(%s) did not generate bin files", tt.name)
 				}
 
-				configFile := filepath.Join(ritHome, "repos", "repo-local", "testing", "formula", "config.json")
+				configFile := filepath.Join(ritHome, "repos", "local-repo", "testing", "formula", "config.json")
 				hasConfigFile := fileManager.Exists(configFile)
 				if !hasConfigFile {
 					t.Errorf("Build(%s) did not copy formula config", tt.name)

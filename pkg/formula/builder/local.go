@@ -25,6 +25,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+const localPrefix = "local-%s"
+
 type LocalManager struct {
 	ritHome string
 	dir     stream.DirCreateListCopyRemover
@@ -40,7 +42,7 @@ func NewBuildLocal(
 }
 
 func (m LocalManager) Build(info formula.BuildInfo) error {
-	repoName := fmt.Sprintf("%s-local", info.Workspace.Name)
+	repoName := fmt.Sprintf(localPrefix, info.Workspace.Name)
 	repoName = strings.ToLower(repoName)
 	repo := formula.Repo{
 		Provider: "Local",
