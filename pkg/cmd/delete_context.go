@@ -27,14 +27,14 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-// deleteContextCmd type for clean repo command
+// deleteContextCmd type for clean repo command.
 type deleteContextCmd struct {
 	rcontext.FindRemover
 	prompt.InputBool
 	prompt.InputList
 }
 
-// deleteContext type for stdin json decoder
+// deleteContext type for stdin json decoder.
 type deleteContext struct {
 	Context string `json:"context"`
 }

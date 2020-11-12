@@ -22,36 +22,47 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
+	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 )
 
 const (
-	ReposDir      = "repos"
-	TmpDir        = "tmp"
-	DefaultConfig = "config.json"
-	PwdEnv        = "CURRENT_PWD"
-	CtxEnv        = "CONTEXT"
-	VerboseEnv    = "VERBOSE_MODE"
-	BinUnix       = "run.sh"
-	BinWindows    = "run.bat"
-	BinDir        = "bin"
-	EnvPattern    = "%s=%s"
+	ReposDir           = "repos"
+	TmpDir             = "tmp"
+	DefaultConfig      = "config.json"
+	PwdEnv             = "CURRENT_PWD"
+	CtxEnv             = "CONTEXT"
+	VerboseEnv         = "VERBOSE_MODE"
+	DockerExecutionEnv = "DOCKER_EXECUTION"
+	BinUnix            = "run.sh"
+	BinWindows         = "run.bat"
+	BinDir             = "bin"
+	EnvPattern         = "%s=%s"
 )
 
 type (
 	Input struct {
-		Name      string    `json:"name"`
-		Type      string    `json:"type"`
-		Default   string    `json:"default"`
-		Label     string    `json:"label"`
-		Items     []string  `json:"items"`
-		Cache     Cache     `json:"cache"`
-		Condition Condition `json:"condition"`
-		Pattern   Pattern   `json:"pattern"`
-		Tutorial  string    `json:"tutorial"`
-		Required  *bool     `json:"required"`
+		Name        string      `json:"name"`
+		Type        string      `json:"type"`
+		Default     string      `json:"default"`
+		Label       string      `json:"label"`
+		Items       Items       `json:"items"`
+		Cache       Cache       `json:"cache"`
+		Condition   Condition   `json:"condition"`
+		Pattern     Pattern     `json:"pattern"`
+		RequestInfo RequestInfo `json:"requestInfo"`
+		Tutorial    string      `json:"tutorial"`
+		Required    *bool       `json:"required"`
+	}
+
+	Items []string
+
+	RequestInfo struct {
+		Url      string `json:"url"`
+		JsonPath string `json:"jsonPath"`
 	}
 
 	Pattern struct {
@@ -75,9 +86,11 @@ type (
 		FormulaPath   string `json:"formulaPath"`
 	}
 
+	Inputs []Input
+
 	Config struct {
-		DockerIB string  `json:"dockerImageBuilder"`
-		Inputs   []Input `json:"inputs"`
+		DockerIB string `json:"dockerImageBuilder"`
+		Inputs   Inputs `json:"inputs"`
 	}
 
 	// Definition type that represents a Formula
@@ -105,8 +118,13 @@ type (
 		InType  api.TermInputType
 		RunType RunnerType
 		Verbose bool
+		Flags   *pflag.FlagSet
 	}
 )
+
+func (ii Items) Contains(item string) bool {
+	return sliceutil.Contains(ii, item)
+}
 
 type Creator interface {
 	Create(cf Create) error
@@ -151,6 +169,10 @@ func (d *Definition) FormulaPath(home string) string {
 func (d *Definition) TmpWorkDirPath(home string) string {
 	u := uuid.New().String()
 	return filepath.Join(home, TmpDir, u)
+}
+
+func (d *Definition) UnixBinFilePath(fPath string) string {
+	return filepath.Join(fPath, BinDir, BinUnix)
 }
 
 // BinFilePath builds the bin file path from formula path

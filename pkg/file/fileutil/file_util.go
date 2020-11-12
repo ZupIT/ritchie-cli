@@ -78,8 +78,12 @@ func readFilesDir(path string) ([]os.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
+
 	fl, err := f.Readdir(-1)
-	f.Close()
+	if err != nil {
+		return nil, err
+	}
 	return fl, err
 }
 

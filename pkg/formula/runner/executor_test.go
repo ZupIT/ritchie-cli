@@ -20,6 +20,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/spf13/pflag"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
@@ -125,7 +127,7 @@ func TestExecute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			executorManager := NewExecutor(tt.in.runners, tt.in.config)
+			executorManager := NewExecutor(tt.in.runners, preRunBuilderMock{}, tt.in.config)
 			got := executorManager.Execute(tt.in.exe)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
@@ -139,7 +141,7 @@ type localRunnerMock struct {
 	err error
 }
 
-func (l localRunnerMock) Run(formula.Definition, api.TermInputType, bool) error {
+func (l localRunnerMock) Run(def formula.Definition, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) error {
 	return l.err
 }
 
@@ -147,7 +149,7 @@ type dockerRunnerMock struct {
 	err error
 }
 
-func (d dockerRunnerMock) Run(formula.Definition, api.TermInputType, bool) error {
+func (d dockerRunnerMock) Run(def formula.Definition, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) error {
 	return d.err
 }
 
@@ -164,3 +166,7 @@ func (c configRunnerMock) Create(runType formula.RunnerType) error {
 func (c configRunnerMock) Find() (formula.RunnerType, error) {
 	return c.runType, c.findErr
 }
+
+type preRunBuilderMock struct{}
+
+func (bm preRunBuilderMock) Build(string) {}

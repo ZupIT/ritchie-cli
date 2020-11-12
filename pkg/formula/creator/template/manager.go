@@ -107,7 +107,7 @@ func readDirRecursive(dir string) ([]File, error) {
 	if err != nil {
 		return nil, err
 	}
-	var fileNames []File
+	var fileNames []File //nolint:prealloc
 	for _, f := range files {
 		if f.IsDir() {
 			dirFiles, err := readDirRecursive(filepath.Join(dir, f.Name()))

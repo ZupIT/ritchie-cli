@@ -6,7 +6,7 @@ RUN apk update && apk add \
     alpine-sdk \
     gettext \
     curl \
-    python \
+    python3 \
     py-pip \
     jq \
     git \

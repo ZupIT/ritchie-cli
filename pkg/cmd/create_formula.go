@@ -30,33 +30,36 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-// createFormulaCmd type for add formula command
+// createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
 	formula         formula.CreateBuilder
-	workspace       formula.WorkspaceAddListValidator
+	workspace       formula.WorkspaceAddLister
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
 	tplM            template.Manager
-	rt              rtutorial.Finder
+	tutorial        rtutorial.Finder
+	tree            tree.CheckerManager
 }
 
-// CreateFormulaCmd creates a new cmd instance
+// CreateFormulaCmd creates a new cmd instance.
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
 	tplM template.Manager,
-	workspace formula.WorkspaceAddListValidator,
+	workspace formula.WorkspaceAddLister,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 	rtf rtutorial.Finder,
+	treeChecker tree.CheckerManager,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,
@@ -66,7 +69,8 @@ func NewCreateFormulaCmd(
 		inTextValidator: inTextValidator,
 		inList:          inList,
 		tplM:            tplM,
-		rt:              rtf,
+		tutorial:        rtf,
+		tree:            treeChecker,
 	}
 
 	cmd := &cobra.Command{
@@ -113,18 +117,13 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		defaultWorkspace := filepath.Join(c.homeDir, formula.DefaultWorkspaceDir)
-		workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
-
 		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText)
 		if err != nil {
 			return err
 		}
 
-		if wspace.Dir != defaultWorkspace {
-			if err := c.workspace.Add(wspace); err != nil {
-				return err
-			}
+		if err := c.workspace.Add(wspace); err != nil {
+			return err
 		}
 
 		formulaPath := formulaPath(wspace.Dir, formulaCmd)
@@ -135,7 +134,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			WorkspacePath: wspace.Dir,
 			FormulaPath:   formulaPath,
 		}
-
+		c.tree.Check()
 		c.create(cf, wspace.Dir, formulaPath)
 		return nil
 	}
@@ -176,7 +175,7 @@ func (c createFormulaCmd) create(cf formula.Create, workspacePath, formulaPath s
 		return
 	}
 
-	tutorialHolder, err := c.rt.Find()
+	tutorialHolder, err := c.tutorial.Find()
 	if err != nil {
 		s.Error(err)
 		return
@@ -195,7 +194,7 @@ func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 	prompt.Info(fmt.Sprintf("Formula path is %s", formulaPath))
 
 	if tutorialStatus == tutorialStatusEnabled {
-		tutorialCreateFormula(tutorialStatus, formulaCmd)
+		tutorialCreateFormula(formulaCmd)
 	} else {
 		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
 	}
@@ -270,7 +269,7 @@ func FormulaWorkspaceInput(
 	inList prompt.InputList,
 	inText prompt.InputText,
 ) (formula.Workspace, error) {
-	var items []string
+	items := make([]string, 0, len(workspaces))
 	for k, v := range workspaces {
 		kv := fmt.Sprintf("%s (%s)", k, v)
 		items = append(items, kv)
@@ -312,7 +311,7 @@ func FormulaWorkspaceInput(
 	return wspace, nil
 }
 
-func tutorialCreateFormula(tutorialStatus string, formulaCmd string) {
+func tutorialCreateFormula(formulaCmd string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const messageTitle = "In order to test your new formula:"
 	const messageBody = ` ∙ Run %q

@@ -1,14 +1,76 @@
 # Changelog
 
-## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
+## [2.3.0](https://github.com/zupit/ritchie-cli/tree/2.3.0) (2020-11-09)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.1.0...HEAD)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.2.0...2.3.0)
 
 **Closed issues:**
 
+- ERROR: unsatisfiable constraints when build a dockerfile. [\#650](https://github.com/ZupIT/ritchie-cli/issues/650)
+- Improve circleci pipeline [\#607](https://github.com/ZupIT/ritchie-cli/issues/607)
+- Suggest a build when the formula is used and we notice that a modification was made in the files [\#559](https://github.com/ZupIT/ritchie-cli/issues/559)
+- Add all available flags in the ritchie options listing. [\#522](https://github.com/ZupIT/ritchie-cli/issues/522)
+- Improves code quality related to linters and tests [\#510](https://github.com/ZupIT/ritchie-cli/issues/510)
+- Autocomplete when typing workspace on input [\#459](https://github.com/ZupIT/ritchie-cli/issues/459)
+- Warn machine env variables if they have the same name as input params [\#625](https://github.com/ZupIT/ritchie-cli/issues/625)
+- Add current context for formula execution [\#588](https://github.com/ZupIT/ritchie-cli/issues/588)
+- Allow for inputs to be added via flag params [\#579](https://github.com/ZupIT/ritchie-cli/issues/579)
+- List options dynamically [\#389](https://github.com/ZupIT/ritchie-cli/issues/389)
+
+**Merged pull requests:**
+
+- fix linter [\#659](https://github.com/ZupIT/ritchie-cli/pull/659) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- modifying ritchie metrics endpoint [\#658](https://github.com/ZupIT/ritchie-cli/pull/658) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Change apk add from python to python3. [\#651](https://github.com/ZupIT/ritchie-cli/pull/651) ([afonsoaugusto](https://github.com/afonsoaugusto))
+- JS Lint [\#644](https://github.com/ZupIT/ritchie-cli/pull/644) ([RxDx](https://github.com/RxDx))
+- Update CODEOWNERS [\#643](https://github.com/ZupIT/ritchie-cli/pull/643) ([kaduartur](https://github.com/kaduartur))
+- Feature/pipeline [\#639](https://github.com/ZupIT/ritchie-cli/pull/639) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- warning when formulas commands conflicts  [\#638](https://github.com/ZupIT/ritchie-cli/pull/638) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- added warning on same env name [\#633](https://github.com/ZupIT/ritchie-cli/pull/633) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- added context printing [\#632](https://github.com/ZupIT/ritchie-cli/pull/632) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- More linters [\#631](https://github.com/ZupIT/ritchie-cli/pull/631) ([lcd1232](https://github.com/lcd1232))
+- Decoupling build commands from main [\#630](https://github.com/ZupIT/ritchie-cli/pull/630) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Remove codecov/project step [\#629](https://github.com/ZupIT/ritchie-cli/pull/629) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Release 2.2.0 merge [\#622](https://github.com/ZupIT/ritchie-cli/pull/622) ([zup-ci](https://github.com/zup-ci))
+- Formula inputs by flags [\#617](https://github.com/ZupIT/ritchie-cli/pull/617) ([kaduartur](https://github.com/kaduartur))
+- Improvement pipeline [\#614](https://github.com/ZupIT/ritchie-cli/pull/614) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- \[Fix\] - Searching only for run.sh on docker pre run [\#598](https://github.com/ZupIT/ritchie-cli/pull/598) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+- Prompt to auto rebuild formula on source modifications [\#578](https://github.com/ZupIT/ritchie-cli/pull/578) ([gabriel-pinheiro](https://github.com/gabriel-pinheiro))
+- Remove repository version check [\#656](https://github.com/ZupIT/ritchie-cli/pull/656) ([kaduartur](https://github.com/kaduartur))
+
+## [2.2.0](https://github.com/zupit/ritchie-cli/tree/2.2.0) (2020-10-20)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.1.0...2.2.0)
+
+**Closed issues:**
+
+- Can not create a formula with an uppercase letter and run with docker [\#611](https://github.com/ZupIT/ritchie-cli/issues/611)
 - Github Authentication [\#492](https://github.com/ZupIT/ritchie-cli/issues/492)
 - Wrong error message when the organization is not right [\#491](https://github.com/ZupIT/ritchie-cli/issues/491)
 - Mock Credential on console.log [\#490](https://github.com/ZupIT/ritchie-cli/issues/490)
+- Collect the execution time of the --watch flag [\#573](https://github.com/ZupIT/ritchie-cli/issues/573)
+- Developer Guide [\#566](https://github.com/ZupIT/ritchie-cli/issues/566)
+- no timeout on functional tests step [\#564](https://github.com/ZupIT/ritchie-cli/issues/564)
+- The stable.txt doesn't increase version when generating a new release [\#545](https://github.com/ZupIT/ritchie-cli/issues/545)
+- Create new command rit list workspace [\#470](https://github.com/ZupIT/ritchie-cli/issues/470)
+- Detect new formula repositories releases [\#431](https://github.com/ZupIT/ritchie-cli/issues/431)
+
+**Merged pull requests:**
+
+- Update feature\_request.md [\#620](https://github.com/ZupIT/ritchie-cli/pull/620) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Update ritchie-bot-config.yml [\#619](https://github.com/ZupIT/ritchie-cli/pull/619) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- \[Fix\] - Lower case containerId string [\#610](https://github.com/ZupIT/ritchie-cli/pull/610) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+- Feature/dynamic list [\#605](https://github.com/ZupIT/ritchie-cli/pull/605) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Adding developer guide [\#604](https://github.com/ZupIT/ritchie-cli/pull/604) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Fix significant typos and grammar in CONTRIBUTING.md [\#603](https://github.com/ZupIT/ritchie-cli/pull/603) ([Bharat123rox](https://github.com/Bharat123rox))
+- Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
+- Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+- Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
+- Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
+- List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- refactor: add timeout to the functional testing job [\#596](https://github.com/ZupIT/ritchie-cli/pull/596) ([DittrichLucas](https://github.com/DittrichLucas))
+- stable version was not updating when generate release [\#595](https://github.com/ZupIT/ritchie-cli/pull/595) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Update README file [\#593](https://github.com/ZupIT/ritchie-cli/pull/593) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
 ## [2.1.0](https://github.com/zupit/ritchie-cli/tree/2.1.0) (2020-10-05)
 

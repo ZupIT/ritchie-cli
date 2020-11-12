@@ -20,10 +20,10 @@ import (
 	"errors"
 	"io"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
-
-	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
@@ -525,22 +525,45 @@ func (w WatcherMock) Watch(workspacePath, formulaPath string) {
 	w.watch(workspacePath, formulaPath)
 }
 
-type WorkspaceAddListValidatorCustomMock struct {
-	add      func(workspace formula.Workspace) error
-	list     func() (formula.Workspaces, error)
-	validate func(workspace formula.Workspace) error
+type WorkspaceAddListerCustomMock struct {
+	add  func(workspace formula.Workspace) error
+	list func() (formula.Workspaces, error)
 }
 
-func (w WorkspaceAddListValidatorCustomMock) Add(workspace formula.Workspace) error {
+func (w WorkspaceAddListerCustomMock) Add(workspace formula.Workspace) error {
 	return w.add(workspace)
 }
 
-func (w WorkspaceAddListValidatorCustomMock) List() (formula.Workspaces, error) {
+func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
 	return w.list()
 }
 
-func (w WorkspaceAddListValidatorCustomMock) Validate(workspace formula.Workspace) error {
-	return w.validate(workspace)
+type WorkspaceAddListHasherCustomMock struct {
+	add          func(workspace formula.Workspace) error
+	list         func() (formula.Workspaces, error)
+	currentHash  func(path string) (string, error)
+	previousHash func(path string) (string, error)
+	updateHash   func(path, hash string) error
+}
+
+func (w WorkspaceAddListHasherCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
+}
+
+func (w WorkspaceAddListHasherCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+func (w WorkspaceAddListHasherCustomMock) CurrentHash(path string) (string, error) {
+	return w.currentHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) PreviousHash(path string) (string, error) {
+	return w.previousHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) UpdateHash(path string, hash string) error {
+	return w.updateHash(path, hash)
 }
 
 var (

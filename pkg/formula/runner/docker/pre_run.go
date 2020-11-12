@@ -42,9 +42,15 @@ Config file path not found: %s`
 )
 
 var (
-	ErrDockerNotInstalled  = errors.New("you must have the docker installed to run formulas inside it, check how to install it at: [https://docs.docker.com/get-docker]")
-	ErrDockerImageNotFound = errors.New("config.json does not contain the \"dockerImageBuilder\" field, to run this formula with docker add a docker image name to it")
-	ErrDockerfileNotFound  = errors.New("the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker")
+	ErrDockerNotInstalled = errors.New(
+		"you must have the docker installed to run formulas inside it, check how to install it at: [https://docs.docker.com/get-docker]",
+	)
+	ErrDockerImageNotFound = errors.New(
+		"config.json does not contain the \"dockerImageBuilder\" field, to run this formula with docker add a docker image name to it",
+	)
+	ErrDockerfileNotFound = errors.New(
+		"the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker",
+	)
 )
 
 var _ formula.PreRunner = PreRunManager{}
@@ -79,7 +85,7 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		return formula.Setup{}, err
 	}
 
-	binFilePath := def.BinFilePath(formulaPath)
+	binFilePath := def.UnixBinFilePath(formulaPath)
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
 		time.Sleep(2 * time.Second)
@@ -183,7 +189,9 @@ func buildRunImg(def formula.Definition) (string, error) {
 
 	metric.RepoName = def.RepoName
 
+	containerId = strings.ToLower(containerId)
 	args := []string{"build", "-t", containerId, "."}
+	//nolint:gosec
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

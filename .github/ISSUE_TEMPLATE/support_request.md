@@ -1,7 +1,7 @@
 ---
 name: Support request
 about: Support request or question relating to Ritchie
-labels: support
+labels: :question: question
 assignees: ''
 
 ---

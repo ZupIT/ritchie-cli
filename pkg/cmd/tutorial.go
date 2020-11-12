@@ -36,7 +36,7 @@ const (
 	tutorialStatusDisabled = "disabled"
 )
 
-// NewTutorialCmd creates tutorial command
+// NewTutorialCmd creates tutorial command.
 func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSetter) *cobra.Command {
 	o := tutorialCmd{homePath, il, fs}
 
