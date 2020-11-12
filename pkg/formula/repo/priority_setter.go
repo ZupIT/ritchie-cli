@@ -64,13 +64,13 @@ func movePosition(repos formula.Repos, repoName formula.RepoName, priority int) 
 	}
 
 	var i int
-	for i = index; i > priority; i-- { // Move repos to back
+	for i = index; i > priority; i-- { // Move repos to tail
 		r := repos[i-1]
 		r.Priority = i
 		repos[i] = r
 	}
 
-	for i = index; i < priority; i++ { // Move repos to front
+	for i = index; i < priority; i++ { // Move repos to head
 		r := repos[i+1]
 		r.Priority = i
 		repos[i] = r

@@ -27,6 +27,7 @@ import (
 
 const (
 	newRepositoryPriority = "Now %q repository has priority %v"
+	lowestRepoPriority    = "The %q repository now has priority %v, this is the lowest priority according to its number of repositories"
 )
 
 type setPriorityCmd struct {
@@ -103,7 +104,7 @@ func (s setPriorityCmd) runFunc() CommandRunnerFunc {
 
 		successMsg := fmt.Sprintf(newRepositoryPriority, repoName, priority)
 		if int(priority) > repositories.Len() {
-			successMsg = fmt.Sprintf("Now %q repository has the least priority", repoName)
+			successMsg = fmt.Sprintf(lowestRepoPriority, repoName, repositories.Len()-1)
 		}
 
 		if int(priority) <= 0 {
