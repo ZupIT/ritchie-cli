@@ -126,9 +126,9 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 	case input.TextType:
 		if items != nil {
 			return in.loadInputValList(items, i)
-		} else {
-			return in.textValidator(i)
 		}
+		return in.textValidator(i)
+
 	case input.DynamicType:
 		dl, err := in.dynamicList(i.RequestInfo)
 		if err != nil {
