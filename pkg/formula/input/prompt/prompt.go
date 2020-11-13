@@ -51,6 +51,7 @@ type InputManager struct {
 	file         stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
+	input.InputTextDefault
 	prompt.InputTextValidator
 	prompt.InputBool
 	prompt.InputPassword
@@ -62,6 +63,7 @@ func NewInputManager(
 	inList prompt.InputList,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
+	inDefValue input.InputTextDefault,
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 ) formula.InputRunner {
@@ -71,6 +73,7 @@ func NewInputManager(
 		InputList:          inList,
 		InputText:          inText,
 		InputTextValidator: inTextValidator,
+		InputTextDefault:   inDefValue,
 		InputBool:          inBool,
 		InputPassword:      inPass,
 	}
@@ -243,11 +246,7 @@ func (in InputManager) textValidator(i formula.Input) (string, error) {
 	if input.HasRegex(i) {
 		inputVal, err = in.textRegexValidator(i, required)
 	} else {
-		inputVal, err = in.InputText.Text(i.Label, required, i.Tutorial)
-	}
-
-	if inputVal == "" {
-		inputVal = i.Default
+		inputVal, err = in.InputTextDefault.Text(i)
 	}
 
 	return inputVal, err
