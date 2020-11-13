@@ -681,6 +681,7 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 				inputMock{},
 				inputMock{},
 				inputTextValidatorMock{},
+				inputTextDefaultMock{},
 				inputMock{},
 				inputMock{},
 			)

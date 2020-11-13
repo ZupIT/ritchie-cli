@@ -130,7 +130,9 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 				return err
 			}
 
-			if err := up.repo.Update(formula.RepoName(currRepo.Name), formula.RepoVersion(version)); err != nil {
+			currRepoName := string(currRepo.Name)
+
+			if err := up.repo.Update(formula.RepoName(currRepoName), formula.RepoVersion(version)); err != nil {
 				return err
 			}
 
