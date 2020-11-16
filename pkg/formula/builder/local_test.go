@@ -82,7 +82,6 @@ func TestBuild(t *testing.T) {
 			in: in{
 				formulaPath: formulaPath,
 				dirManager:  dirManagerMock{createErr: errors.New("error to create dir")},
-				repo:        repoAdder,
 			},
 			want: errors.New("error to create dir"),
 		},
@@ -91,7 +90,6 @@ func TestBuild(t *testing.T) {
 			in: in{
 				formulaPath: formulaPath,
 				dirManager:  dirManagerMock{data: []string{"linux"}, copyErr: errors.New("error to copy dir")},
-				repo:        repoAdder,
 			},
 			want: errors.New("error to copy dir"),
 		},
