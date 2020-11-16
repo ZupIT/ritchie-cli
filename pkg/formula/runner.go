@@ -31,11 +31,12 @@ type Runners map[RunnerType]Runner
 type TermInputTypes map[api.TermInputType]InputRunner
 
 type Executor interface {
-	Execute(exe ExecuteData) error
+	Execute(exe ExecuteData, forceBuild bool) error
 }
 
 type PreRunBuilder interface {
 	Build(string)
+	ForceBuild(string)
 }
 
 type PreRunner interface {

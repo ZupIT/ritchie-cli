@@ -22,34 +22,57 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 )
 
 const (
-	messageBuilding     = "Building formula..."
-	messageBuildSuccess = "Build completed!\n"
-	messageChangeError  = "Failed to detect formula changes, executing the last build"
-	messageBuildError   = "Failed to build formula"
-	messageChangePrompt = "This formula has changed since the last run, would you like to rebuild?"
-	messageYes          = "yes"
-	messageNo           = "no"
+	messageBuilding      = "Building formula..."
+	messageBuildSuccess  = "Build completed!\n"
+	messageChangeError   = "Failed to detect formula changes, executing the last build"
+	messageListError     = "Failed to load workspaces, ignoring the --force-build"
+	messageNoLocalSource = "The sources don't exist locally, ignoring the --force-build"
+	messageBuildError    = "Failed to build formula"
+	messageChangePrompt  = "This formula has changed since the last run, would you like to rebuild?"
+	messageYes           = "yes"
+	messageNo            = "no"
 )
 
 type PreRunBuilderManager struct {
 	workspace formula.WorkspaceListHasher
 	builder   formula.LocalBuilder
+	dir       stream.DirChecker
 	inBool    prompt.InputBool
 }
 
 func NewPreRunBuilder(
 	workspace formula.WorkspaceListHasher,
 	builder formula.LocalBuilder,
+	dir stream.DirChecker,
 	inBool prompt.InputBool,
 ) PreRunBuilderManager {
 	return PreRunBuilderManager{
 		workspace: workspace,
 		builder:   builder,
+		dir:       dir,
 		inBool:    inBool,
+	}
+}
+
+func (b PreRunBuilderManager) ForceBuild(relativePath string) {
+	workspace, err := b.anyWorkspace(relativePath)
+	if err != nil {
+		fmt.Println(prompt.Yellow(messageListError))
+		return
+	}
+	if workspace == nil {
+		fmt.Println(prompt.Yellow(messageNoLocalSource))
+		return
+	}
+
+	if err = b.buildOnWorkspace(*workspace, relativePath); err != nil {
+		fmt.Println(prompt.Red(messageBuildError))
+		return
 	}
 }
 
@@ -89,6 +112,26 @@ func (b PreRunBuilderManager) modifiedWorkspace(relativePath string) (*formula.W
 			return nil, err
 		}
 		if hasChanged {
+			return &formula.Workspace{
+				Name: workspaceName,
+				Dir:  workspacePath,
+			}, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (b PreRunBuilderManager) anyWorkspace(relativePath string) (*formula.Workspace, error) {
+	workspaces, err := b.workspace.List()
+	if err != nil {
+		return nil, err
+	}
+
+	for workspaceName, workspacePath := range workspaces {
+		formulaAbsolutePath := filepath.Join(workspacePath, relativePath)
+
+		if b.dir.Exists(formulaAbsolutePath) {
 			return &formula.Workspace{
 				Name: workspaceName,
 				Dir:  workspacePath,

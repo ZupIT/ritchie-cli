@@ -551,7 +551,7 @@ type FormulaExecutorMock struct {
 	err error
 }
 
-func (f FormulaExecutorMock) Execute(exe formula.ExecuteData) error {
+func (f FormulaExecutorMock) Execute(exe formula.ExecuteData, forceBuild bool) error {
 	return f.err
 }
 

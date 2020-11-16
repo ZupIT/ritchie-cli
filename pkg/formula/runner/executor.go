@@ -36,7 +36,7 @@ func NewExecutor(runners formula.Runners, preRunBuilder formula.PreRunBuilder, c
 	}
 }
 
-func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
+func (ex ExecutorManager) Execute(exe formula.ExecuteData, forceBuild bool) error {
 	runType := exe.RunType
 	runner := ex.runners[runType]
 
@@ -49,7 +49,9 @@ func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
 		runner = ex.runners[configType]
 	}
 
-	if exe.Def.RepoName == "local" {
+	if forceBuild {
+		ex.preRunBuilder.ForceBuild(exe.Def.Path)
+	} else if exe.Def.RepoName == "local" {
 		ex.preRunBuilder.Build(exe.Def.Path)
 	}
 

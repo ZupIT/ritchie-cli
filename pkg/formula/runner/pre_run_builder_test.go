@@ -27,6 +27,8 @@ type preRunBuilderTest struct {
 	name string
 
 	workspaces          formula.Workspaces
+	forceBuild          bool
+	existsInWorkspace   bool
 	rebuildPromptAnswer bool
 	currentHash         string
 	previousHash        string
@@ -44,6 +46,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should not prompt for rebuild when hash is the same",
 
 		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: false,
 		currentHash:         "hash",
 		previousHash:        "hash",
@@ -59,6 +63,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should rebuild when user chooses to",
 
 		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: true,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
@@ -74,6 +80,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should not rebuild when user chooses not to",
 
 		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: false,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
@@ -89,6 +97,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should not prompt for rebuild when hash fails to save",
 
 		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: false,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
@@ -104,6 +114,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should not prompt to rebuild nor fail when no workspaces are returned",
 
 		workspaces:          map[string]string{},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: true,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
@@ -119,6 +131,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should not build when user Ctrl+C's on prompt",
 
 		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: true,
 		currentHash:         "hash",
 		previousHash:        "anotherhash",
@@ -134,6 +148,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should not prompt to build when the formula doesn't exist on any workspace",
 
 		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: true,
 		currentHash:         "",
 		previousHash:        "hash",
@@ -149,11 +165,47 @@ var preRunBuilderTests = []preRunBuilderTest{
 		name: "should not prompt to build when no previous hash exists",
 
 		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          false,
+		existsInWorkspace:   true,
 		rebuildPromptAnswer: true,
 		currentHash:         "hash",
 		previousHash:        "",
 		currentHashError:    nil,
 		previousHashError:   fmt.Errorf("No previous hash"),
+		writeHashError:      nil,
+		promptError:         nil,
+
+		mustBuild:         false,
+		mustPromptRebuild: false,
+	},
+	{
+		name: "should build without prompting on --force-build",
+
+		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          true,
+		existsInWorkspace:   true,
+		rebuildPromptAnswer: false,
+		currentHash:         "hash",
+		previousHash:        "hash",
+		currentHashError:    nil,
+		previousHashError:   nil,
+		writeHashError:      nil,
+		promptError:         nil,
+
+		mustBuild:         true,
+		mustPromptRebuild: false,
+	},
+	{
+		name: "should not build on --force-build when formula doesn't exist in any workspace",
+
+		workspaces:          map[string]string{"default": "/pathtodefault"},
+		forceBuild:          true,
+		existsInWorkspace:   false,
+		rebuildPromptAnswer: true,
+		currentHash:         "hash",
+		previousHash:        "",
+		currentHashError:    nil,
+		previousHashError:   nil,
 		writeHashError:      nil,
 		promptError:         nil,
 
@@ -166,11 +218,18 @@ func TestPreRunBuilder(t *testing.T) {
 	for _, test := range preRunBuilderTests {
 		t.Run(test.name, func(t *testing.T) {
 			builderMock := newBuilderMock()
+			dirMock := dirCheckerMock{test.existsInWorkspace}
 			inputBoolMock := newInputBoolMock(test.rebuildPromptAnswer, test.promptError)
+			path := "/testing/formula"
 
 			preRunBuilder := NewPreRunBuilder(workspaceListHasherMock{test.workspaces, test.currentHash, test.currentHashError, test.previousHash,
-				test.previousHashError, test.writeHashError}, builderMock, inputBoolMock)
-			preRunBuilder.Build("/testing/formula")
+				test.previousHashError, test.writeHashError}, builderMock, dirMock, inputBoolMock)
+
+			if test.forceBuild {
+				preRunBuilder.ForceBuild(path)
+			} else {
+				preRunBuilder.Build(path)
+			}
 
 			gotBuilt := builderMock.HasBuilt()
 			if gotBuilt != test.mustBuild {
@@ -201,6 +260,17 @@ func (in inputBoolMock) Bool(string, []string, ...string) (bool, error) {
 }
 func (in inputBoolMock) HasBeenCalled() bool {
 	return *in.hasBeenCalled
+}
+
+type dirCheckerMock struct {
+	result bool
+}
+
+func (d dirCheckerMock) Exists(string) bool {
+	return d.result
+}
+func (d dirCheckerMock) IsDir(string) bool {
+	return d.result
 }
 
 type builderMock struct {

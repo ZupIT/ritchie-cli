@@ -128,7 +128,7 @@ func TestExecute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			executorManager := NewExecutor(tt.in.runners, preRunBuilderMock{}, tt.in.config)
-			got := executorManager.Execute(tt.in.exe)
+			got := executorManager.Execute(tt.in.exe, false)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Execute(%s) got %v, want %v", tt.name, got, tt.want)
@@ -169,4 +169,5 @@ func (c configRunnerMock) Find() (formula.RunnerType, error) {
 
 type preRunBuilderMock struct{}
 
-func (bm preRunBuilderMock) Build(string) {}
+func (bm preRunBuilderMock) Build(string)      {}
+func (bm preRunBuilderMock) ForceBuild(string) {}

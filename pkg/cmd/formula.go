@@ -37,10 +37,11 @@ import (
 )
 
 const (
-	subCommand  = " SUBCOMMAND"
-	Group       = "group"
-	verboseFlag = "verbose"
-	rootCmdName = "root"
+	subCommand     = " SUBCOMMAND"
+	Group          = "group"
+	verboseFlag    = "verbose"
+	rootCmdName    = "root"
+	forceBuildFlag = "force-build"
 )
 
 var (
@@ -71,6 +72,13 @@ var (
 			kind:        reflect.Bool,
 			defValue:    false,
 			description: "Use to automatically fill inputs with default value provided on config.json",
+		},
+		{
+			name:        "force-build",
+			shortName:   "b",
+			kind:        reflect.Bool,
+			defValue:    false,
+			description: "Use to build the formula regardless of changes",
 		},
 	}
 )
@@ -187,6 +195,11 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			return err
 		}
 
+		forceBuild, err := flags.GetBool(forceBuildFlag)
+		if err != nil {
+			return err
+		}
+
 		if docker && local {
 			return ErrRunFormulaWithTwoFlag
 		}
@@ -213,7 +226,7 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			Flags:   flags,
 		}
 
-		if err := f.formula.Execute(exe); err != nil {
+		if err := f.formula.Execute(exe, forceBuild); err != nil {
 			return err
 		}
 
