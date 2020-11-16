@@ -42,21 +42,34 @@ func (u UserId) String() string {
 	return string(u)
 }
 
-type APIData struct {
-	Id         Id          `json:"metricId"`
-	UserId     UserId      `json:"userId"`
-	Timestamp  time.Time   `json:"timestamp"`
-	Os         string      `json:"os"`
-	RitVersion string      `json:"ritVersion"`
-	Data       interface{} `json:"data"`
+type Command struct {
+	Id                string    `json:"id"`
+	UserID            string    `json:"userId"`
+	Timestamp         time.Time `json:"timestamp"`
+	Command           string    `json:"command"`
+	ExecutionTime     float64   `json:"executionTime"`
+	Error             string    `json:"error,omitempty"`
+	CommonsRepoAdded  string    `json:"commonsRepoAdded,omitempty"`
+	MetricsAcceptance string    `json:"metricsAcceptance,omitempty"`
 }
 
-type Data struct {
-	CommandError         string       `json:"commandError,omitempty"`
-	CommonsRepoAdded     string       `json:"commonsRepoAdded,omitempty"`
-	CommandExecutionTime float64      `json:"commandExecutionTime"`
-	MetricsAcceptance    string       `json:"metricsAcceptance,omitempty"`
-	FormulaRepo          formula.Repo `json:"repo,omitempty"`
+type User struct {
+	Id            string `json:"userId"`
+	Os            string `json:"os"`
+	Version       string `json:"version"`
+	DefaultRunner string `json:"defaultRunner"`
+	Repo          Repo   `json:"repo"`
+}
+
+type Repo struct {
+	Private bool   `json:"private"`
+	URL     string `json:"url"`
+	Name    string `json:"name"`
+}
+
+type Metadata struct {
+	Id   string      `json:"id"`
+	Data interface{} `json:"data"`
 }
 
 type Sender interface {
