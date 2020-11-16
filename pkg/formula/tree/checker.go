@@ -24,7 +24,8 @@ func NewChecker(
 // formula commands on different repos. This function doesn't
 // return an error because printing an error from a unsuccessful
 // warning attempt can be confusing to the user.
-func (cm CheckerManager) Check() {
+func (cm CheckerManager) Check() { // TODO: Improve check function
+
 	commands := cm.filterCommands()
 	conflictingCommands := cm.conflictingCommands(commands)
 	if len(conflictingCommands) >= 1 {
@@ -36,9 +37,9 @@ func (cm CheckerManager) filterCommands() []string {
 	var allCommands []string
 	tree, _ := cm.tree.Tree()
 	for _, t := range tree {
-		for _, c := range t.Commands {
+		for id, c := range t.Commands {
 			if c.Formula {
-				allCommands = append(allCommands, c.Id)
+				allCommands = append(allCommands, id.String())
 			}
 		}
 	}

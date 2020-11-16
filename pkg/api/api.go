@@ -29,57 +29,61 @@ const (
 )
 
 var (
-	CoreCmds = []Command{
-		{Parent: "root", Usage: "add"},
-		{Parent: "root_add", Usage: "repo"},
-		{Parent: "root", Usage: "completion"},
-		{Parent: "root_completion", Usage: "bash"},
-		{Parent: "root_completion", Usage: "zsh"},
-		{Parent: "root_completion", Usage: "fish"},
-		{Parent: "root_completion", Usage: "powershell"},
-		{Parent: "root", Usage: "delete"},
-		{Parent: "root_delete", Usage: "context"},
-		{Parent: "root_delete", Usage: "repo"},
-		{Parent: "root_delete", Usage: "workspace"},
-		{Parent: "root_delete", Usage: "formula"},
-		{Parent: "root", Usage: "help"},
-		{Parent: "root", Usage: "init"},
-		{Parent: "root", Usage: "list"},
-		{Parent: "root_list", Usage: "repo"},
-		{Parent: "root_list", Usage: "credential"},
-		{Parent: "root_list", Usage: "workspace"},
-		{Parent: "root", Usage: "set"},
-		{Parent: "root_set", Usage: "context"},
-		{Parent: "root_set", Usage: "credential"},
-		{Parent: "root_set", Usage: "repo-priority"},
-		{Parent: "root_set", Usage: "formula-runner"},
-		{Parent: "root", Usage: "show"},
-		{Parent: "root_show", Usage: "context"},
-		{Parent: "root_show", Usage: "formula-runner"},
-		{Parent: "root", Usage: "create"},
-		{Parent: "root_create", Usage: "formula"},
-		{Parent: "root", Usage: "update"},
-		{Parent: "root_update", Usage: "repo"},
-		{Parent: "root", Usage: "build"},
-		{Parent: "root_build", Usage: "formula"},
-		{Parent: "root", Usage: "upgrade"},
-		{Parent: "root", Usage: "tutorial"},
-		{Parent: "root", Usage: "metrics"},
+	CoreCmds = Commands{
+		"root_add":                   {Parent: "root", Usage: "add"},
+		"root_add_repo":              {Parent: "root_add", Usage: "repo"},
+		"root_completion":            {Parent: "root", Usage: "completion"},
+		"root_completion_bash":       {Parent: "root_completion", Usage: "bash"},
+		"root_completion_zsh":        {Parent: "root_completion", Usage: "zsh"},
+		"root_completion_fish":       {Parent: "root_completion", Usage: "fish"},
+		"root_completion_powershell": {Parent: "root_completion", Usage: "powershell"},
+		"root_delete":                {Parent: "root", Usage: "delete"},
+		"root_delete_context":        {Parent: "root_delete", Usage: "context"},
+		"root_delete_repo":           {Parent: "root_delete", Usage: "repo"},
+		"root_delete_workspace":      {Parent: "root_delete", Usage: "workspace"},
+		"root_delete_formula":        {Parent: "root_delete", Usage: "formula"},
+		"root_help":                  {Parent: "root", Usage: "help"},
+		"root_init":                  {Parent: "root", Usage: "init"},
+		"root_list":                  {Parent: "root", Usage: "list"},
+		"root_list_repo":             {Parent: "root_list", Usage: "repo"},
+		"root_list_credential":       {Parent: "root_list", Usage: "credential"},
+		"root_list_workspace":        {Parent: "root_list", Usage: "workspace"},
+		"root_set":                   {Parent: "root", Usage: "set"},
+		"root_set_context":           {Parent: "root_set", Usage: "context"},
+		"root_set_credential":        {Parent: "root_set", Usage: "credential"},
+		"root_set_repo-priority":     {Parent: "root_set", Usage: "repo-priority"},
+		"root_set_formula-runner":    {Parent: "root_set", Usage: "formula-runner"},
+		"root_show":                  {Parent: "root", Usage: "show"},
+		"root_show_context":          {Parent: "root_show", Usage: "context"},
+		"root_show_formula-runner":   {Parent: "root_show", Usage: "formula-runner"},
+		"root_create":                {Parent: "root", Usage: "create"},
+		"root_create_formula":        {Parent: "root_create", Usage: "formula"},
+		"root_update":                {Parent: "root", Usage: "update"},
+		"root_update_repo":           {Parent: "root_update", Usage: "repo"},
+		"root_build":                 {Parent: "root", Usage: "build"},
+		"root_build_formula":         {Parent: "root_build", Usage: "formula"},
+		"root_upgrade":               {Parent: "root", Usage: "upgrade"},
+		"root_tutorial":              {Parent: "root", Usage: "tutorial"},
+		"root_metrics":               {Parent: "root", Usage: "metrics"},
 	}
 )
 
-// Command type
-type Command struct {
-	Id       string `json:"id"`
-	Parent   string `json:"parent"`
-	Usage    string `json:"usage"`
-	Help     string `json:"help"`
-	LongHelp string `json:"longHelp"`
-	Formula  bool   `json:"formula,omitempty"`
-	Repo     string `json:"Repo,omitempty"`
+type CommandID string
+
+func (id CommandID) String() string {
+	return string(id)
 }
 
-type Commands []Command
+// Command type
+type Command struct {
+	Parent   string `json:"parent"`
+	Usage    string `json:"usage"`
+	Help     string `json:"help,omitempty"`
+	LongHelp string `json:"longHelp,omitempty"`
+	Formula  bool   `json:"formula,omitempty"`
+}
+
+type Commands map[CommandID]Command
 
 // TermInputType represents the source of the inputs will be read
 type TermInputType int

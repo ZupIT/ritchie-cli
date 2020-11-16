@@ -18,8 +18,8 @@ package tree
 
 import (
 	"encoding/json"
-	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -29,17 +29,22 @@ import (
 
 const (
 	root        = "root"
-	rootPattern = "root_%s"
 	configFile  = "config.json"
+	treeVersion = "v2"
 )
 
 type GeneratorManager struct {
-	dir  stream.DirLister
-	file stream.FileReadExister
+	dir        stream.DirLister
+	file       stream.FileReadExister
+	strBuilder strings.Builder
 }
 
 func NewGenerator(dir stream.DirLister, file stream.FileReadExister) GeneratorManager {
-	return GeneratorManager{dir: dir, file: file}
+	return GeneratorManager{
+		dir:        dir,
+		file:       file,
+		strBuilder: strings.Builder{},
+	}
 }
 
 func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
@@ -48,7 +53,7 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 		return formula.Tree{}, err
 	}
 
-	commands := api.Commands{}
+	commands := make(api.Commands)
 	for _, dir := range dirs { // Generate root commands
 		formulaPath := filepath.Join(repoPath, dir)
 		helpFilePath := filepath.Join(formulaPath, template.HelpFileName)
@@ -60,35 +65,40 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 		if err != nil {
 			return formula.Tree{}, err
 		}
+
 		help := formula.Help{}
-		err = json.Unmarshal(helpFile, &help)
-		if err != nil {
+		if err = json.Unmarshal(helpFile, &help); err != nil {
 			return formula.Tree{}, err
 		}
 
 		cmd := api.Command{
-			Id:       fmt.Sprintf(rootPattern, dir),
 			Parent:   root,
 			Usage:    dir,
 			Help:     help.Short,
 			LongHelp: help.Long,
 		}
 
-		commands = append(commands, cmd)
+		// Build formula command ID e.g."root_aws"
+		ge.strBuilder.Reset()
+		ge.strBuilder.WriteString(root)
+		ge.strBuilder.WriteString("_")
+		ge.strBuilder.WriteString(dir)
 
-		commands, err = ge.subCommands(formulaPath, cmd, commands)
+		formulaID := api.CommandID(ge.strBuilder.String())
+		commands[formulaID] = cmd
+		commands, err = ge.subCommands(formulaPath, formulaID, commands)
 		if err != nil {
 			return formula.Tree{}, err
 		}
 	}
 
-	return formula.Tree{Commands: commands}, nil
+	return formula.Tree{Version: treeVersion, Commands: commands}, nil
 }
 
 // subCommands generates the sub-commands for the tree.
 // if success returns an api.Commands and a nil error
 // if error returns an empty api.Commands and an error not empty
-func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api.Commands) (api.Commands, error) {
+func (ge GeneratorManager) subCommands(dirPath string, parentID api.CommandID, cmds api.Commands) (api.Commands, error) {
 	dirs, err := ge.dir.List(dirPath, false)
 	if err != nil {
 		return cmds, err
@@ -106,21 +116,11 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 		formulaPath := filepath.Join(dirPath, dir)
 		helpFilePath := filepath.Join(formulaPath, template.HelpFileName)
 		help := formula.Help{}
-		if ge.file.Exists(helpFilePath) { // Check if help.txt exist
-			helpFile, err := ge.file.Read(helpFilePath)
-			if err != nil {
-				return nil, err
-			}
-			err = json.Unmarshal(helpFile, &help)
-			if err != nil {
-				return nil, err
-			}
-
-		}
+		helpFile, _ := ge.file.Read(helpFilePath)
+		_ = json.Unmarshal(helpFile, &help)
 
 		cmd := api.Command{
-			Id:       fmt.Sprintf("%s_%s", cmd.Id, dir),
-			Parent:   cmd.Id,
+			Parent:   parentID.String(),
 			Usage:    dir,
 			Help:     help.Short,
 			LongHelp: help.Long,
@@ -131,9 +131,14 @@ func (ge GeneratorManager) subCommands(dirPath string, cmd api.Command, cmds api
 			cmd.Formula = true
 		}
 
-		cmds = append(cmds, cmd)
+		ge.strBuilder.Reset()
+		ge.strBuilder.WriteString(parentID.String())
+		ge.strBuilder.WriteString("_")
+		ge.strBuilder.WriteString(dir)
 
-		cmds, err = ge.subCommands(formulaPath, cmd, cmds)
+		commandID := api.CommandID(ge.strBuilder.String())
+		cmds[commandID] = cmd
+		cmds, err = ge.subCommands(formulaPath, commandID, cmds)
 		if err != nil {
 			return nil, err
 		}

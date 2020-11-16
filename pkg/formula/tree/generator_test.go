@@ -17,7 +17,6 @@
 package tree
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -45,10 +44,33 @@ func TestGenerate(t *testing.T) {
 		t.Error(err)
 	}
 
-	bytes, err := json.MarshalIndent(tree, "", "\t")
-	if err != nil {
-		t.Error(err)
+	if tree.Version != treeVersion {
+		t.Fatalf("Generate(valid tree version) = %s; want %s", tree.Version, treeVersion)
 	}
 
-	fmt.Println(string(bytes))
+	const cmdSize = 6
+	if len(tree.Commands) != cmdSize {
+		t.Fatalf("Generate(valid tree commands size) = %d; want %d", len(tree.Commands), cmdSize)
+	}
+}
+
+func BenchmarkGenerator(b *testing.B) {
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	generator := NewGenerator(dirManager, fileManager)
+
+	tmpDir := os.TempDir()
+	workspacePath := fmt.Sprintf("%s/ritchie-formulas-test", tmpDir)
+	ritHome := fmt.Sprintf("%s/.my-rit", os.TempDir())
+
+	_ = dirManager.Remove(ritHome)
+	_ = dirManager.Remove(workspacePath)
+	_ = dirManager.Create(workspacePath)
+	_ = streams.Unzip("../../../testdata/ritchie-formulas-test.zip", workspacePath)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_, _ = generator.Generate(workspacePath)
+	}
 }

@@ -14,18 +14,10 @@ func TestChecker(t *testing.T) {
 	treeMock := treeMock{
 		tree: formula.Tree{
 			Commands: api.Commands{
-				{
-					Id:      "root_mock",
+				"root_mock": {
 					Parent:  "root",
 					Usage:   "mock",
 					Help:    "mock for add",
-					Formula: true,
-				},
-				{
-					Id:      "root_mock",
-					Parent:  "root_mock",
-					Usage:   "test",
-					Help:    "test for add",
 					Formula: true,
 				},
 			},
