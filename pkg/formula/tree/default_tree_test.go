@@ -297,6 +297,38 @@ func TestTree(t *testing.T) {
 	}
 }
 
+func BenchmarkMergedTree(b *testing.B) {
+	fileManager := stream.NewFileManager()
+	providers := formula.NewRepoProviders()
+
+	tree1, _ := json.Marshal(tree1)
+	tree2, _ := json.Marshal(tree2)
+	repo1Path := filepath.Join(ritHome, "repos", strings.ToLower(repo1.Name.String()), "tree.json")
+	repo2Path := filepath.Join(ritHome, "repos", strings.ToLower(repo2.Name.String()), "tree.json")
+	repo3Path := filepath.Join(ritHome, "repos", "invalid", "tree.json")
+
+	_ = os.MkdirAll(filepath.Dir(repo1Path), os.ModePerm)
+	_ = os.MkdirAll(filepath.Dir(repo2Path), os.ModePerm)
+	_ = os.MkdirAll(filepath.Dir(repo3Path), os.ModePerm)
+
+	_ = fileManager.Write(repo1Path, tree1)
+	_ = fileManager.Write(repo2Path, tree2)
+	_ = fileManager.Write(repo3Path, []byte("invalid"))
+
+	repoMock := repositoryListerCustomMock{
+		list: func() (formula.Repos, error) {
+			return formula.Repos{repo1, repo2}, nil
+		},
+	}
+
+	tree := NewTreeManager(ritHome, repoMock, coreCmds, fileManager, providers)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tree.MergedTree(false)
+	}
+}
+
 var (
 	tmpDir  = os.TempDir()
 	ritHome = filepath.Join(tmpDir, ".rit-tree")
@@ -436,11 +468,6 @@ var (
 		},
 	}
 )
-
-func getStringOfTree(formula formula.Tree) string {
-	bytes, _ := json.MarshalIndent(formula, "", "\t")
-	return string(bytes)
-}
 
 type repositoryListerCustomMock struct {
 	list func() (formula.Repos, error)
