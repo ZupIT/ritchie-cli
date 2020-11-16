@@ -31,6 +31,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
+const (
+	questionAVersion  = "Select your new version for \"someRepo1\":"
+	questionAVersion2 = "Select your new version for \"someRepo2\":"
+)
+
 func TestUpdateRepoRun(t *testing.T) {
 	someError := errors.New("some error")
 
@@ -41,6 +46,15 @@ func TestUpdateRepoRun(t *testing.T) {
 		Url:      "https://github.com/owner/repo",
 		Token:    "token",
 		Priority: 2,
+	}
+
+	repoTest2 := &formula.Repo{
+		Provider: "Github",
+		Name:     "someRepo2",
+		Version:  "1.0.0",
+		Url:      "https://github.com/owner/repo",
+		Token:    "token",
+		Priority: 1,
 	}
 
 	type in struct {
@@ -55,11 +69,11 @@ func TestUpdateRepoRun(t *testing.T) {
 		inputStdin string
 	}{
 		{
-			name: "success case",
+			name: "success case update someRepo1",
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
-						return formula.Repos{*repoTest}, nil
+						return formula.Repos{*repoTest, *repoTest2}, nil
 					},
 					update: func(name formula.RepoName, version formula.RepoVersion) error {
 						return nil
@@ -80,6 +94,36 @@ func TestUpdateRepoRun(t *testing.T) {
 			},
 			wantErr:    false,
 			inputStdin: createJSONEntry(repoTest),
+		},
+		{
+			name: "success case update ALL",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest, *repoTest2}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == questionSelectARepo {
+							return "ALL", nil
+						}
+						if name == questionAVersion {
+							return "1.0.0", nil
+						}
+						if name == questionAVersion2 {
+							return "1.0.0", nil
+						}
+						return "any", nil
+					},
+				},
+				Repos: defaultGitRepositoryMock,
+			},
+			wantErr:    false,
+			inputStdin: "",
 		},
 		{
 			name: "fails when repo list returns an error",
