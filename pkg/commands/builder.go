@@ -105,13 +105,16 @@ func Build() *cobra.Command {
 
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, repoCreator, treeGen, dirManager, fileManager)
-	repoListCreator := repo.NewListCreator(repoLister, repoCreator)
-	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListCreator, treeGen, fileManager)
+	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
+	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen, fileManager)
+	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListWriteCreator, treeGen, fileManager)
 	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
 	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
-	repoDeleter := repo.NewDeleter(ritchieHomeDir, fileManager, dirManager)
-	repoPrioritySetter := repo.NewPrioritySetter(ritchieHomeDir, fileManager)
+
+	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
+	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
+	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
 
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
@@ -136,24 +139,7 @@ func Build() *cobra.Command {
 	formBuildSh := builder.NewBuildShell()
 	formBuildBat := builder.NewBuildBat(fileManager)
 	formBuildDocker := builder.NewBuildDocker(fileManager)
-	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, fileManager, treeGen)
-
-	builders := formula.Builders{
-		Make:   formBuildMake,
-		Shell:  formBuildSh,
-		Bat:    formBuildBat,
-		Docker: formBuildDocker,
-		Local:  formBuildLocal,
-	}
-
-	// TODO: implement for all builders
-	_ = formula.Builders{
-		Make:   formBuildMake,
-		Shell:  formBuildSh,
-		Bat:    formBuildBat,
-		Docker: formBuildDocker,
-		Local:  nil,
-	}
+	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 
@@ -182,12 +168,12 @@ func Build() *cobra.Command {
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager)
 
-	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, builders.Local, inputBool)
+	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal, inputBool)
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
-	watchManager := watcher.New(builders.Local, dirManager, SendMetric)
-	createBuilder := formula.NewCreateBuilder(formulaCreator, builders.Local)
+	watchManager := watcher.New(formBuildLocal, dirManager, SendMetric)
+	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
 
 	versionManager := version.NewManager(
 		version.StableVersionURL,
@@ -241,7 +227,7 @@ func Build() *cobra.Command {
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder, treeChecker)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, builders.Local, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formBuildLocal, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 

@@ -114,7 +114,7 @@ func (b buildFormulaCmd) runFunc() CommandRunnerFunc {
 		}
 
 		if watch {
-			b.watcher.Watch(wspace.Dir, formulaPath)
+			b.watcher.Watch(formulaPath, wspace)
 			return nil
 		}
 

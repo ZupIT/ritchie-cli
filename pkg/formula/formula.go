@@ -128,14 +128,6 @@ type BuildInfo struct {
 	Workspace   Workspace
 }
 
-type Builders struct {
-	Make   Builder
-	Shell  Builder
-	Bat    Builder
-	Docker Builder
-	Local  Builder
-}
-
 type Creator interface {
 	Create(cf Create) error
 }
@@ -145,7 +137,7 @@ type Builder interface {
 }
 
 type Watcher interface {
-	Watch(workspacePath, formulaPath string)
+	Watch(formulaPath string, workspace Workspace)
 }
 
 type CreateBuilder interface {

@@ -30,12 +30,9 @@ import (
 )
 
 func TestNewListAdder(t *testing.T) {
-
 	ritHome := os.TempDir()
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-
-	repoList := NewLister(ritHome, fileManager)
 
 	repoProviders := formula.RepoProviders{
 		"Github": formula.Git{
@@ -45,8 +42,11 @@ func TestNewListAdder(t *testing.T) {
 	}
 
 	repoCreator := NewCreator(ritHome, repoProviders, dirManager, fileManager)
+	repoLister := NewLister(ritHome, fileManager)
+	repoWriter := NewWriter(ritHome, fileManager)
+	repoListWriteCreator := NewListWriteCreator(repoLister, repoCreator, repoWriter)
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
-	repoAdd := NewAdder(ritHome, repoCreator, treeGenerator, dirManager, fileManager)
+	repoAdd := NewAdder(ritHome, repoListWriteCreator, treeGenerator, fileManager)
 
 	type in struct {
 		repoList formula.RepositoryLister
@@ -60,12 +60,12 @@ func TestNewListAdder(t *testing.T) {
 		{
 			name: "Build with success",
 			in: in{
-				repoList: repoList,
+				repoList: repoLister,
 				repoAdd:  repoAdd,
 			},
 			want: ListAddManager{
 				RepositoryAdder:  repoAdd,
-				RepositoryLister: repoList,
+				RepositoryLister: repoLister,
 			},
 		},
 	}
