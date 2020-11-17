@@ -17,7 +17,6 @@
 package repo
 
 import (
-	"encoding/json"
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -26,14 +25,18 @@ import (
 
 type DeleteManager struct {
 	ritHome string
-	file    stream.FileWriteReadExister
+	repo    formula.RepositoryListWriter
 	dir     stream.DirRemover
 }
 
-func NewDeleter(ritHome string, file stream.FileWriteReadExister, dir stream.DirRemover) DeleteManager {
+func NewDeleter(
+	ritHome string,
+	repo formula.RepositoryListWriter,
+	dir stream.DirRemover,
+) DeleteManager {
 	return DeleteManager{
 		ritHome: ritHome,
-		file:    file,
+		repo:    repo,
 		dir:     dir,
 	}
 }
@@ -57,15 +60,8 @@ func (dm DeleteManager) deleteRepoDir(repoName formula.RepoName) error {
 }
 
 func (dm DeleteManager) deleteFromReposFile(repoName formula.RepoName) error {
-	repos := formula.Repos{}
-
-	repoFilePath := filepath.Join(dm.ritHome, reposDirName, reposFileName)
-	file, err := dm.file.Read(repoFilePath)
+	repos, err := dm.repo.List()
 	if err != nil {
-		return err
-	}
-
-	if err = json.Unmarshal(file, &repos); err != nil {
 		return err
 	}
 
@@ -76,14 +72,13 @@ func (dm DeleteManager) deleteFromReposFile(repoName formula.RepoName) error {
 			break
 		}
 	}
-	repos = append(repos[:idx], repos[idx+1:]...)
 
-	newFile, err := json.MarshalIndent(repos, "", "\t")
-	if err != nil {
-		return err
+	repos = append(repos[:idx], repos[idx+1:]...)
+	for i := 0; i < repos.Len(); i++ {
+		repos[i].Priority = i
 	}
 
-	if err = dm.file.Write(repoFilePath, newFile); err != nil {
+	if err := dm.repo.Write(repos); err != nil {
 		return err
 	}
 

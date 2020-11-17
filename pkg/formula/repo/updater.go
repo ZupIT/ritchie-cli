@@ -18,6 +18,7 @@ package repo
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -25,15 +26,18 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+var ErrLocalRepo = errors.New("local repository cannot be updated")
+
 type UpdateManager struct {
 	ritHome string
-	repo    formula.RepositoryListCreator
+	repo    formula.RepositoryListWriteCreator
 	tree    formula.TreeGenerator
 	file    stream.FileWriter
 }
 
-func NewUpdater(ritHome string,
-	repo formula.RepositoryListCreator,
+func NewUpdater(
+	ritHome string,
+	repo formula.RepositoryListWriteCreator,
 	tree formula.TreeGenerator,
 	file stream.FileWriter,
 ) UpdateManager {
@@ -63,14 +67,17 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 		return fmt.Errorf("repository name %q was not found", name)
 	}
 
+	if repo.IsLocal {
+		return ErrLocalRepo
+	}
+
 	repo.Version = version
 
 	if err := up.repo.Create(*repo); err != nil {
 		return err
 	}
 
-	repoFilePath := filepath.Join(up.ritHome, reposDirName, reposFileName)
-	if err := up.saveRepo(repoFilePath, repos); err != nil {
+	if err := up.repo.Write(repos); err != nil {
 		return err
 	}
 
@@ -87,19 +94,6 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 	}
 
 	if err := up.file.Write(treeFilePath, bytes); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (up UpdateManager) saveRepo(repoPath string, repos formula.Repos) error {
-	bytes, err := json.MarshalIndent(repos, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	if err := up.file.Write(repoPath, bytes); err != nil {
 		return err
 	}
 
