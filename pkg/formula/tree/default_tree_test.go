@@ -95,7 +95,7 @@ func TestMergedTree(t *testing.T) {
 		Name:     formula.RepoName("someRepo"),
 		Version:  formula.RepoVersion("1.0.0"),
 		Token:    "token",
-		Url:      "https://github.com/owner/someRepo",
+		URL:      "https://github.com/owner/someRepo",
 		Priority: 5,
 	}
 	otherRepo := formula.Repo{
@@ -103,7 +103,7 @@ func TestMergedTree(t *testing.T) {
 		Name:     formula.RepoName("otherRepo"),
 		Version:  formula.RepoVersion("1.0.0"),
 		Token:    "token",
-		Url:      "https://github.com/owner/otherRepo",
+		URL:      "https://github.com/owner/otherRepo",
 		Priority: 5,
 	}
 
@@ -220,7 +220,7 @@ func TestTree(t *testing.T) {
 							{
 								Name:     "someRepo",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
+								URL:      "https://github.com/owner/repo",
 								Token:    "token",
 							},
 						}, nil
@@ -311,7 +311,7 @@ func TestTree(t *testing.T) {
 							{
 								Name:     "someRepo",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
+								URL:      "https://github.com/owner/repo",
 							}}, nil
 					},
 				},

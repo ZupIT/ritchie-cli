@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 var (
@@ -54,12 +53,14 @@ type Command struct {
 }
 
 type User struct {
-	Id            string `json:"userId"`
+	Id            UserId `json:"userId"`
 	Os            string `json:"os"`
 	Version       string `json:"version"`
 	DefaultRunner string `json:"defaultRunner"`
-	Repo          Repo   `json:"repo"`
+	Repos         Repos  `json:"repos"`
 }
+
+type Repos []Repo
 
 type Repo struct {
 	Private bool   `json:"private"`

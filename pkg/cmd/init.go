@@ -166,14 +166,14 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 			repo := formula.Repo{
 				Provider: "Github",
 				Name:     "commons",
-				Url:      CommonsRepoURL,
+				URL:      CommonsRepoURL,
 				Priority: 0,
 			}
 
 			s := spinner.StartNew("Adding the commons repository...")
 			time.Sleep(time.Second * 2)
 
-			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+			repoInfo := github.NewRepoInfo(repo.URL, repo.Token)
 
 			tag, err := in.git.LatestTag(repoInfo)
 			if err != nil {
@@ -307,14 +307,14 @@ func (in initCmd) addCommonsRepo() error {
 	repo := formula.Repo{
 		Provider: "Github",
 		Name:     "commons",
-		Url:      CommonsRepoURL,
+		URL:      CommonsRepoURL,
 		Priority: 0,
 	}
 
 	s := spinner.StartNew("Adding the commons repository...")
 	time.Sleep(time.Second * 2)
 
-	repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+	repoInfo := github.NewRepoInfo(repo.URL, repo.Token)
 
 	tag, err := in.git.LatestTag(repoInfo)
 	if err != nil {

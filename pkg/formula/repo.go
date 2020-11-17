@@ -24,7 +24,7 @@ type Repo struct {
 	Provider RepoProvider `json:"provider"`
 	Name     RepoName     `json:"name"`
 	Version  RepoVersion  `json:"version"`
-	Url      string       `json:"url"`
+	URL      string       `json:"url"`
 	Token    string       `json:"token,omitempty"`
 	Priority int          `json:"priority"`
 }

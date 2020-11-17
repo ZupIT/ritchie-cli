@@ -47,7 +47,7 @@ func TestListRepoRunFunc(t *testing.T) {
 							{
 								Name:     "someRepo1",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
+								URL:      "https://github.com/owner/repo",
 								Token:    "token",
 							},
 						}, nil
@@ -67,13 +67,13 @@ func TestListRepoRunFunc(t *testing.T) {
 							{
 								Name:     "someRepo1",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo1",
+								URL:      "https://github.com/owner/repo1",
 								Token:    "token",
 							},
 							{
 								Name:     "someRepo2",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo2",
+								URL:      "https://github.com/owner/repo2",
 								Token:    "token",
 							},
 						}, nil
@@ -93,7 +93,7 @@ func TestListRepoRunFunc(t *testing.T) {
 							{
 								Name:     "someRepo1",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
+								URL:      "https://github.com/owner/repo",
 								Token:    "token",
 							},
 						}, nil
@@ -126,7 +126,7 @@ func TestListRepoRunFunc(t *testing.T) {
 							{
 								Name:     "someRepo1",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
+								URL:      "https://github.com/owner/repo",
 								Token:    "token",
 							},
 						}, nil
@@ -150,7 +150,7 @@ func TestListRepoRunFunc(t *testing.T) {
 							{
 								Name:     "someRepo1",
 								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
+								URL:      "https://github.com/owner/repo",
 								Token:    "token",
 							},
 						}, nil

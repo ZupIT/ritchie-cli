@@ -81,7 +81,7 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 	for _, repo := range repos {
 		latestTag := lr.getLatestTag(repo)
 
-		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, latestTag)
+		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.URL, latestTag)
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
@@ -92,7 +92,7 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 func (lr listRepoCmd) getLatestTag(repo formula.Repo) string {
 	formulaGit := lr.repoProviders.Resolve(repo.Provider)
 
-	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	repoInfo := formulaGit.NewRepoInfo(repo.URL, repo.Token)
 	tag, err := formulaGit.Repos.LatestTag(repoInfo)
 	if err != nil {
 		return "Couldn't get that information"

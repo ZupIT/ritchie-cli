@@ -38,7 +38,7 @@ func TestUpdateRepoRun(t *testing.T) {
 		Provider: "Github",
 		Name:     "someRepo1",
 		Version:  "1.0.0",
-		Url:      "https://github.com/owner/repo",
+		URL:      "https://github.com/owner/repo",
 		Token:    "token",
 		Priority: 2,
 	}

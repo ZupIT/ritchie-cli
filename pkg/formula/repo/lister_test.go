@@ -72,7 +72,7 @@ func TestListManager_List(t *testing.T) {
 				{
 					Name:     "commons",
 					Version:  "v2.0.0",
-					Url:      "https://github.com/kaduartur/ritchie-formulas",
+					URL:      "https://github.com/kaduartur/ritchie-formulas",
 					Token:    "",
 					Priority: 0,
 				},

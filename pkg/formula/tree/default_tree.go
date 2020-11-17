@@ -138,7 +138,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 func (d Manager) getLatestTag(repo formula.Repo) string {
 	formulaGit := d.repoProviders.Resolve(repo.Provider)
 
-	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	repoInfo := formulaGit.NewRepoInfo(repo.URL, repo.Token)
 	tag, err := formulaGit.Repos.LatestTag(repoInfo)
 	if err != nil {
 		return ""

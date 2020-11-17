@@ -48,7 +48,7 @@ func NewCreator(
 
 func (cr CreateManager) Create(repo formula.Repo) error {
 	git := cr.repoProviders.Resolve(repo.Provider)
-	repoInfo := git.NewRepoInfo(repo.Url, repo.Token)
+	repoInfo := git.NewRepoInfo(repo.URL, repo.Token)
 	zipball, err := git.Repos.Zipball(repoInfo, repo.Version.String()) // Download zip repository from github
 	if err != nil {
 		return err

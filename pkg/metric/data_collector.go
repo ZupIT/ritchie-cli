@@ -69,7 +69,7 @@ func (d DataCollectorManager) Collect(
 		CommandError:         strings.Join(commandError, " "),
 		CommonsRepoAdded:     CommonsRepoAdded,
 		CommandExecutionTime: commandExecutionTime,
-		FormulaRepo:          d.repoData(),
+		FormulaRepo:          d.commandRepo(),
 	}
 
 	metric := APIData{
@@ -83,19 +83,68 @@ func (d DataCollectorManager) Collect(
 	return metric, nil
 }
 
-func (d DataCollectorManager) repoData() formula.Repo {
+func (d DataCollectorManager) CollectUserState(ritVersion string) User {
+	userId, _ := d.userId.Generate()
+	user := User{
+		Id:            userId,
+		Os:            runtime.GOOS,
+		Version:       ritVersion,
+		DefaultRunner: d.defaultRunner(),
+		Repos:         d.userRepos(),
+	}
+
+	return user
+}
+
+func (d DataCollectorManager) defaultRunner() string {
+	runnerBytes, _ := d.file.Read(
+		filepath.Join(d.ritchieHomeDir, "default-formula-runner"),
+	)
+	if string(runnerBytes) == "0" {
+		return "local"
+	}
+	return "docker"
+}
+
+func (d DataCollectorManager) userRepos() Repos {
 	repoBytes, _ := d.file.Read(
 		filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"),
 	)
 	repos := formula.Repos{}
+	metricsRepo := Repo{}
+	metricsRepos := Repos{}
 	_ = json.Unmarshal(repoBytes, &repos)
 
+	for _, r := range repos {
+		metricsRepo.URL = r.URL
+		metricsRepo.Name = string(r.Name)
+		metricsRepo.Private = true
+		if r.Token == "" {
+			metricsRepo.Private = false
+		}
+		metricsRepos = append(metricsRepos, metricsRepo)
+	}
+	return metricsRepos
+}
+
+func (d DataCollectorManager) commandRepo() formula.Repo {
+	repos := d.readRepos()
 	for _, r := range repos {
 		if string(r.Name) == RepoName && r.Token == "" {
 			return r
 		}
 	}
 	return formula.Repo{}
+}
+
+func (d DataCollectorManager) readRepos() formula.Repos {
+	repoBytes, _ := d.file.Read(
+		filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"),
+	)
+	repos := formula.Repos{}
+	_ = json.Unmarshal(repoBytes, &repos)
+
+	return repos
 }
 
 func metricID() string {

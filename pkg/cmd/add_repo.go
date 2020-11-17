@@ -173,7 +173,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			Name:     formula.RepoName(name),
 			Version:  formula.RepoVersion(version),
 			Token:    token,
-			Url:      url,
+			URL:      url,
 			Priority: int(priority),
 		}
 
