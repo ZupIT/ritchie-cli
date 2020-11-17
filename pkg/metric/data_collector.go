@@ -25,6 +25,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -33,6 +35,7 @@ var (
 	_                Collector = DataCollectorManager{}
 	CommonsRepoAdded           = ""
 	RepoName                   = ""
+	Acceptance                 = ""
 )
 
 type DataCollectorManager struct {
@@ -53,40 +56,29 @@ func NewDataCollector(
 	}
 }
 
-func (d DataCollectorManager) Collect(
+func (d DataCollectorManager) CollectCommandData(
 	commandExecutionTime float64,
-	ritVersion string,
 	commandError ...string,
-) (APIData, error) {
-	userId, err := d.userId.Generate()
-	if err != nil {
-		return APIData{}, err
-	}
-
+) Command {
 	commandExecutionTime = math.Round(commandExecutionTime*100) / 100
+	d.userId.Generate()
 
-	data := Data{
-		CommandError:         strings.Join(commandError, " "),
-		CommonsRepoAdded:     CommonsRepoAdded,
-		CommandExecutionTime: commandExecutionTime,
-		FormulaRepo:          d.commandRepo(),
+	cmdData := Command{
+		Id:                uuid.New().String(),
+		UserID:            d.userId.Generate(),
+		Timestamp:         time.Now(),
+		Command:           d.command(),
+		ExecutionTime:     commandExecutionTime,
+		Error:             strings.Join(commandError, " "),
+		CommonsRepoAdded:  CommonsRepoAdded,
+		MetricsAcceptance: Acceptance,
 	}
-
-	metric := APIData{
-		Id:         Id(metricID()),
-		UserId:     userId,
-		Os:         runtime.GOOS,
-		RitVersion: ritVersion,
-		Timestamp:  time.Now(),
-		Data:       data,
-	}
-	return metric, nil
+	return cmdData
 }
 
 func (d DataCollectorManager) CollectUserState(ritVersion string) User {
-	userId, _ := d.userId.Generate()
 	user := User{
-		Id:            userId,
+		Id:            d.userId.Generate(),
 		Os:            runtime.GOOS,
 		Version:       ritVersion,
 		DefaultRunner: d.defaultRunner(),
@@ -107,20 +99,15 @@ func (d DataCollectorManager) defaultRunner() string {
 }
 
 func (d DataCollectorManager) userRepos() Repos {
-	repoBytes, _ := d.file.Read(
-		filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"),
-	)
-	repos := formula.Repos{}
+	repos := d.readRepos()
 	metricsRepo := Repo{}
 	metricsRepos := Repos{}
-	_ = json.Unmarshal(repoBytes, &repos)
-
 	for _, r := range repos {
-		metricsRepo.URL = r.URL
-		metricsRepo.Name = string(r.Name)
 		metricsRepo.Private = true
 		if r.Token == "" {
 			metricsRepo.Private = false
+			metricsRepo.URL = r.URL
+			metricsRepo.Name = string(r.Name)
 		}
 		metricsRepos = append(metricsRepos, metricsRepo)
 	}
@@ -147,7 +134,7 @@ func (d DataCollectorManager) readRepos() formula.Repos {
 	return repos
 }
 
-func metricID() string {
+func (d DataCollectorManager) command() string {
 	args := os.Args
 	args[0] = "rit"
 	return strings.Join(args, "_")

@@ -43,7 +43,7 @@ func (u UserId) String() string {
 
 type Command struct {
 	Id                string    `json:"id"`
-	UserID            string    `json:"userId"`
+	UserID            UserId    `json:"userId"`
 	Timestamp         time.Time `json:"timestamp"`
 	Command           string    `json:"command"`
 	ExecutionTime     float64   `json:"executionTime"`
@@ -64,8 +64,8 @@ type Repos []Repo
 
 type Repo struct {
 	Private bool   `json:"private"`
-	URL     string `json:"url"`
-	Name    string `json:"name"`
+	URL     string `json:"url,omitempty"`
+	Name    string `json:"name,omitempty"`
 }
 
 type Metadata struct {
@@ -78,7 +78,7 @@ type Sender interface {
 }
 
 type UserIdGenerator interface {
-	Generate() (UserId, error)
+	Generate() UserId
 }
 
 type Checker interface {

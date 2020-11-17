@@ -243,14 +243,14 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	}
 	fmt.Println(footer)
 
-	responseToWrite := "yes"
+	metric.Acceptance = "yes"
 	if choose == DoNotAcceptMetrics {
-		responseToWrite = "no"
+		metric.Acceptance = "no"
 		in.metricSender.Send(metric.APIData{
 			Id:        "rit_init",
 			Timestamp: time.Now(),
 			Data: metric.Data{
-				MetricsAcceptance: responseToWrite,
+				MetricsAcceptance: metric.Acceptance,
 			},
 		})
 	}
