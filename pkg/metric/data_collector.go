@@ -60,15 +60,12 @@ func (d DataCollectorManager) CollectCommandData(
 	commandExecutionTime float64,
 	commandError ...string,
 ) Command {
-	commandExecutionTime = math.Round(commandExecutionTime*100) / 100
-	d.userId.Generate()
-
 	cmdData := Command{
 		Id:                uuid.New().String(),
 		UserID:            d.userId.Generate(),
 		Timestamp:         time.Now(),
 		Command:           d.command(),
-		ExecutionTime:     commandExecutionTime,
+		ExecutionTime:     math.Round(commandExecutionTime*100) / 100,
 		Error:             strings.Join(commandError, " "),
 		CommonsRepoAdded:  CommonsRepoAdded,
 		MetricsAcceptance: Acceptance,
@@ -84,7 +81,6 @@ func (d DataCollectorManager) CollectUserState(ritVersion string) User {
 		DefaultRunner: d.defaultRunner(),
 		Repos:         d.userRepos(),
 	}
-
 	return user
 }
 

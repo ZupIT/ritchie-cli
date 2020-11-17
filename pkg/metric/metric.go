@@ -25,7 +25,6 @@ import (
 
 var (
 	ServerRestURL = ""
-	ServerGrpcURL = ""
 	FilePath      = filepath.Join(api.RitchieHomeDir(), "metrics")
 )
 

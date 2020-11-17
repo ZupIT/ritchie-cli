@@ -42,7 +42,32 @@ func NewHttpSender(url string, client *http.Client) SendManagerHttp {
 	}
 }
 
-func (sm SendManagerHttp) Send(APIData APIData) {
+func (sm SendManagerHttp) SendUserState(APIData APIData) {
+	reqBody, err := json.Marshal(&APIData)
+	if err != nil {
+		return
+	}
+
+	req, err := http.NewRequestWithContext(
+		context.TODO(),
+		http.MethodPost,
+		sm.URL,
+		bytes.NewBuffer(reqBody),
+	)
+	if err != nil {
+		return
+	}
+
+	req.SetBasicAuth(BasicUser, BasicPass)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := sm.client.Do(req)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+}
+
+func (sm SendManagerHttp) SendCommandData(APIData APIData) {
 	reqBody, err := json.Marshal(&APIData)
 	if err != nil {
 		return
