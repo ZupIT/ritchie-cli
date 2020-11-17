@@ -42,8 +42,8 @@ func NewHttpSender(url string, client *http.Client) SendManagerHttp {
 	}
 }
 
-func (sm SendManagerHttp) SendUserState(APIData APIData) {
-	reqBody, err := json.Marshal(&APIData)
+func (sm SendManagerHttp) SendUserState(user User) {
+	reqBody, err := json.Marshal(&user)
 	if err != nil {
 		return
 	}
@@ -51,6 +51,7 @@ func (sm SendManagerHttp) SendUserState(APIData APIData) {
 	req, err := http.NewRequestWithContext(
 		context.TODO(),
 		http.MethodPost,
+		// TODO endpoint for each send type
 		sm.URL,
 		bytes.NewBuffer(reqBody),
 	)
@@ -67,8 +68,8 @@ func (sm SendManagerHttp) SendUserState(APIData APIData) {
 	defer resp.Body.Close()
 }
 
-func (sm SendManagerHttp) SendCommandData(APIData APIData) {
-	reqBody, err := json.Marshal(&APIData)
+func (sm SendManagerHttp) SendCommandData(command Command) {
+	reqBody, err := json.Marshal(&command)
 	if err != nil {
 		return
 	}

@@ -85,5 +85,6 @@ type Checker interface {
 }
 
 type Collector interface {
-	Collect(commandExecutionTime float64, ritVersion string, commandError ...string) (APIData, error)
+	CollectCommandData(commandExecutionTime float64, commandError ...string) Command
+	CollectUserState(ritVersion string) User
 }
