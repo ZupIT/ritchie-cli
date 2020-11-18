@@ -30,7 +30,7 @@ import (
 )
 
 type fieldsTestBuildFormulaCmd struct {
-	localBuilder     formula.LocalBuilder
+	localBuilder     formula.Builder
 	workspaceManager formula.WorkspaceAddListHasher
 	directory        stream.DirListChecker
 	inList           prompt.InputList

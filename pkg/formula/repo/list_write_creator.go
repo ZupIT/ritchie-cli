@@ -18,17 +18,20 @@ package repo
 
 import "github.com/ZupIT/ritchie-cli/pkg/formula"
 
-type ListCreateManager struct {
+type ListWriteCreateManager struct {
 	formula.RepositoryLister
 	formula.RepositoryCreator
+	formula.RepositoryWriter
 }
 
-func NewListCreator(
+func NewListWriteCreator(
 	repoList formula.RepositoryLister,
 	repoCreate formula.RepositoryCreator,
-) formula.RepositoryListCreator {
-	return ListCreateManager{
+	repoWrite formula.RepositoryWriter,
+) formula.RepositoryListWriteCreator {
+	return ListWriteCreateManager{
 		RepositoryLister:  repoList,
 		RepositoryCreator: repoCreate,
+		RepositoryWriter:  repoWrite,
 	}
 }

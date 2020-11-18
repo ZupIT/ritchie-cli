@@ -90,10 +90,13 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 		var reposName []string
 		reposName = append(reposName, updateOptionAll)
 		for i := range repos {
-			reposName = append(reposName, repos[i].Name.String())
+			if !repos[i].IsLocal {
+				reposName = append(reposName, repos[i].Name.String())
+			}
 		}
 
-		name, err := up.List(questionSelectARepo, reposName)
+		helper := "Select a repository to update your version. P.S. Local repositories cannot be updated."
+		name, err := up.List(questionSelectARepo, reposName, helper)
 		if err != nil {
 			return err
 		}

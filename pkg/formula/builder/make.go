@@ -30,14 +30,16 @@ const msgMakeBuildErr = "failed building formula with Makefile, verify your repo
 
 var ErrBuildFormulaMakefile = errors.New(msgMakeBuildErr)
 
+var _ formula.Builder = MakeManager{}
+
 type MakeManager struct{}
 
-func NewBuildMake() formula.MakeBuilder {
+func NewBuildMake() MakeManager {
 	return MakeManager{}
 }
 
-func (ma MakeManager) Build(formulaPath string) error {
-	if err := os.Chdir(formulaPath); err != nil {
+func (ma MakeManager) Build(info formula.BuildInfo) error {
+	if err := os.Chdir(info.FormulaPath); err != nil {
 		return err
 	}
 	var stderr bytes.Buffer
