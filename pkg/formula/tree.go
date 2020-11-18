@@ -19,12 +19,13 @@ package formula
 import "github.com/ZupIT/ritchie-cli/pkg/api"
 
 type Tree struct {
-	Version  string       `json:"version"`
-	Commands api.Commands `json:"commands"`
+	Version    string          `json:"version"`
+	Commands   api.Commands    `json:"commands"`
+	CommandsID []api.CommandID `json:"-"`
 }
 
 type TreeManager interface {
-	Tree() (map[string]Tree, error)
+	Tree() (map[RepoName]Tree, error)
 	MergedTree(core bool) Tree
 }
 

@@ -103,24 +103,27 @@ func NewFormulaCommand(
 }
 
 func (f FormulaCommand) Add(root *cobra.Command) error {
-	treeRep := f.treeManager.MergedTree(false)
+	tree := f.treeManager.MergedTree(false)
 	commands := make(map[string]*cobra.Command)
 	commands[rootCmdName] = root
 
-	for _, cmd := range treeRep.Commands {
-		cmdPath := api.Command{Id: cmd.Id, Parent: cmd.Parent, Usage: cmd.Usage}
-		if !sliceutil.ContainsCmd(f.coreCmds, cmdPath) {
-			var newCmd *cobra.Command
-			if cmd.Formula {
-				newCmd = f.newFormulaCmd(cmd)
-			} else {
-				newCmd = newSubCmd(cmd)
-			}
+	for _, id := range tree.CommandsID {
+		cmd := tree.Commands[id]
 
-			parentCmd := commands[cmd.Parent]
-			parentCmd.AddCommand(newCmd)
-			commands[cmdPath.Id] = newCmd
+		if sliceutil.ContainsCmd(f.coreCmds, cmd) {
+			continue
 		}
+
+		var newCmd *cobra.Command
+		if cmd.Formula {
+			newCmd = f.newFormulaCmd(cmd)
+		} else {
+			newCmd = newSubCmd(cmd)
+		}
+
+		parentCmd := commands[cmd.Parent]
+		parentCmd.AddCommand(newCmd)
+		commands[id.String()] = newCmd
 	}
 
 	return nil

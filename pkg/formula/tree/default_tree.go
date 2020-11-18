@@ -19,6 +19,7 @@ package tree
 import (
 	"encoding/json"
 	"path/filepath"
+	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -51,7 +52,7 @@ func NewTreeManager(
 	}
 }
 
-func (d Manager) Tree() (treeByRepo map[formula.RepoName]formula.Tree, err error) {
+func (d Manager) Tree() (map[formula.RepoName]formula.Tree, error) {
 	trees := make(map[formula.RepoName]formula.Tree)
 	trees[core] = formula.Tree{Commands: d.coreCmds}
 
@@ -71,6 +72,20 @@ func (d Manager) Tree() (treeByRepo map[formula.RepoName]formula.Tree, err error
 	return trees, nil
 }
 
+type ByLen []api.CommandID
+
+func (a ByLen) Len() int {
+	return len(a)
+}
+
+func (a ByLen) Less(i, j int) bool {
+	return len(a[i]) < len(a[j])
+}
+
+func (a ByLen) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
 func (d Manager) MergedTree(core bool) formula.Tree {
 	mergedCommands := make(api.Commands)
 	rr, _ := d.repo.List()
@@ -82,9 +97,17 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		}
 
 		for k, v := range tree.Commands {
+			v.Repo = rr[i].Name.String()
 			mergedCommands[k] = v
 		}
 	}
+
+	var ids []api.CommandID
+	for id := range mergedCommands {
+		ids = append(ids, id)
+	}
+
+	sort.Sort(ByLen(ids))
 
 	if core {
 		for k, v := range d.coreCmds {
@@ -92,7 +115,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		}
 	}
 
-	treeMain := formula.Tree{Version: treeVersion, Commands: mergedCommands}
+	treeMain := formula.Tree{Version: treeVersion, Commands: mergedCommands, CommandsID: ids}
 
 	return treeMain
 }

@@ -62,11 +62,12 @@ type treeMock struct {
 	value string
 }
 
-func (t treeMock) Tree() (map[string]formula.Tree, error) {
+func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
 	if t.value != "" {
-		return map[string]formula.Tree{t.value: t.tree}, t.error
+		v := formula.RepoName(t.value)
+		return map[formula.RepoName]formula.Tree{v: t.tree}, t.error
 	}
-	return map[string]formula.Tree{"test": t.tree}, t.error
+	return map[formula.RepoName]formula.Tree{"test": t.tree}, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {

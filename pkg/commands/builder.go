@@ -18,7 +18,6 @@ package commands
 
 import (
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -75,7 +74,6 @@ func SendMetric(commandExecutionTime float64, err ...string) {
 func Build() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
-	isRootCommand := len(os.Args[1:]) == 0
 
 	// prompt
 	inputText := prompt.NewSurveyText()
@@ -120,7 +118,7 @@ func Build() *cobra.Command {
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
 	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders)
 	treeChecker := tree.NewChecker(treeManager)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
