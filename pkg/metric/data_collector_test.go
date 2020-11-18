@@ -59,16 +59,6 @@ func Test_Collector(t *testing.T) {
 			},
 		},
 		{
-			name:    "fails when generator returns an error",
-			wantErr: true,
-			in: in{
-				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() UserId {
-						return ""
-					}},
-			},
-		},
-		{
 			name:    "return empty repo when fails on read",
 			wantErr: false,
 			in: in{

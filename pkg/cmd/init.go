@@ -81,7 +81,7 @@ type initCmd struct {
 	file     stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputBool
-	metricSender metric.SendManagerHttp
+	metricSender metric.Sender
 }
 
 func NewInitCmd(
@@ -92,7 +92,7 @@ func NewInitCmd(
 	file stream.FileWriteReadExister,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
-	metricSender metric.SendManagerHttp,
+	metricSender metric.Sender,
 ) *cobra.Command {
 	o := initCmd{
 		repo:         repo,

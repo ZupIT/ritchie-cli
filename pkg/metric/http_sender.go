@@ -64,6 +64,9 @@ func (sm SendManagerHttp) SendUserState(ritVersion string) {
 }
 
 func (sm SendManagerHttp) SendCommandData(cmd SendCommandDataParams) {
+	if !sm.checker.Check() {
+		return
+	}
 	command := sm.collector.CollectCommandData(cmd.ExecutionTime, cmd.Error)
 	reqBody, err := json.Marshal(&command)
 	if err != nil {

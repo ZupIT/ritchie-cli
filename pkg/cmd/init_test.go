@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"errors"
-	"net/http"
 	"strings"
 	"testing"
 
@@ -361,7 +360,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			field := tt.fields
 
-			metricSender := metric.NewHttpSender("", http.DefaultClient)
+			metricSender := SenderMock{}
 
 			initPrompt := NewInitCmd(
 				field.repo,
@@ -399,4 +398,17 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			}
 		})
 	}
+}
+
+type SenderMock struct {
+	SendUserStateMock   func()
+	SendCommandDataMock func()
+}
+
+func (s SenderMock) SendUserState(ritVersion string) {
+	s.SendUserStateMock()
+}
+
+func (s SenderMock) SendCommandData(cmd metric.SendCommandDataParams) {
+	s.SendCommandDataMock()
 }

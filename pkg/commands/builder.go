@@ -60,14 +60,10 @@ func ExecutionTime(startTime time.Time) float64 {
 	return endTime.Sub(startTime).Seconds()
 }
 
-var Data metric.DataCollectorManager
-var MetricSender = metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
+var MetricSender metric.SendManagerHttp
 
 func SendMetric(cmd metric.SendCommandDataParams) {
-	metricEnable := metric.NewChecker(stream.NewFileManager())
-	if metricEnable.Check() {
-		MetricSender.SendCommandData(cmd)
-	}
+	MetricSender.SendCommandData(cmd)
 }
 
 func Build() *cobra.Command {
@@ -98,7 +94,9 @@ func Build() *cobra.Command {
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
 	userIdManager := metric.NewUserIdGenerator()
-	Data = metric.NewDataCollector(userIdManager, ritchieHomeDir, fileManager)
+	collector := metric.NewDataCollector(userIdManager, ritchieHomeDir, fileManager)
+	checker := metric.NewChecker(fileManager)
+	MetricSender = metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient, collector, checker)
 
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)

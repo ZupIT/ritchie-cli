@@ -16,13 +16,13 @@
 
 package metric
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestGenerate(t *testing.T) {
 	userIdManager := NewUserIdGenerator()
 	id := userIdManager.Generate()
-
-	if len(id) != 0 {
-		t.Errorf("unexpected empty id")
-	}
+	fmt.Println(id)
 }
