@@ -80,10 +80,10 @@ type (
 		Value    string `json:"value"`
 	}
 	Create struct {
-		FormulaCmd    string `json:"formulaCmd"`
-		Lang          string `json:"lang"`
-		WorkspacePath string `json:"workspacePath"`
-		FormulaPath   string `json:"formulaPath"`
+		FormulaCmd  string    `json:"formulaCmd"`
+		Lang        string    `json:"lang"`
+		Workspace   Workspace `json:"workspace"`
+		FormulaPath string    `json:"formulaPath"`
 	}
 
 	Inputs []Input
@@ -122,41 +122,27 @@ type (
 	}
 )
 
-func (ii Items) Contains(item string) bool {
-	return sliceutil.Contains(ii, item)
+type BuildInfo struct {
+	FormulaPath string
+	DockerImg   string
+	Workspace   Workspace
 }
 
 type Creator interface {
 	Create(cf Create) error
 }
 
-type MakeBuilder interface {
-	Build(formulaPath string) error
-}
-
-type ShellBuilder interface {
-	Build(formulaPath string) error
-}
-
-type BatBuilder interface {
-	Build(formulaPath string) error
-}
-
-type DockerBuilder interface {
-	Build(formulaPath, dockerImg string) error
-}
-
-type LocalBuilder interface {
-	Build(workspacePath, formulaPath string) error
+type Builder interface {
+	Build(info BuildInfo) error
 }
 
 type Watcher interface {
-	Watch(workspacePath, formulaPath string)
+	Watch(formulaPath string, workspace Workspace)
 }
 
 type CreateBuilder interface {
 	Creator
-	LocalBuilder
+	Builder
 }
 
 // FormulaPath builds the formula path from ritchie home
@@ -207,4 +193,8 @@ func (c Create) FormulaCmdName() string {
 func (c Create) PkgName() string {
 	d := strings.Split(c.FormulaCmd, " ")
 	return d[len(d)-1]
+}
+
+func (ii Items) Contains(item string) bool {
+	return sliceutil.Contains(ii, item)
 }

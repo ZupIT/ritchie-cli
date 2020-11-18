@@ -79,7 +79,10 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 	table := uitable.New()
 	table.AddRow("PROVIDER", "NAME", "CURRENT VERSION", "PRIORITY", "URL", "LATEST VERSION")
 	for _, repo := range repos {
-		latestTag := lr.getLatestTag(repo)
+		latestTag := "0.0.0"
+		if !repo.IsLocal {
+			latestTag = lr.getLatestTag(repo)
+		}
 
 		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.Url, latestTag)
 	}

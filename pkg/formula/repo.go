@@ -27,6 +27,7 @@ type Repo struct {
 	Url      string       `json:"url"`
 	Token    string       `json:"token,omitempty"`
 	Priority int          `json:"priority"`
+	IsLocal  bool         `json:"isLocal"`
 }
 
 type Repos []Repo
@@ -121,18 +122,23 @@ type RepositoryCreator interface {
 	Create(repo Repo) error
 }
 
+type RepositoryWriter interface {
+	Write(repos Repos) error
+}
+
 type RepositoryAddLister interface {
 	RepositoryAdder
 	RepositoryLister
 }
 
-type RepositoryDelLister interface {
-	RepositoryDeleter
+type RepositoryListWriter interface {
 	RepositoryLister
+	RepositoryWriter
 }
 
-type RepositoryListCreator interface {
+type RepositoryListWriteCreator interface {
 	RepositoryLister
+	RepositoryWriter
 	RepositoryCreator
 }
 

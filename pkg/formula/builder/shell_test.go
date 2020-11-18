@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -83,7 +84,8 @@ func TestBuildShell(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := buildShell.Build(tt.in.formPath)
+			info := formula.BuildInfo{FormulaPath: tt.in.formPath}
+			got := buildShell.Build(info)
 
 			if got != nil && !tt.out.wantErr {
 				t.Errorf("Run(%s) got %v, want not nil error", tt.name, got)
