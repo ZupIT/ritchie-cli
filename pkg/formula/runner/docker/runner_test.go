@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
@@ -54,9 +53,9 @@ func TestRun(t *testing.T) {
 	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, dockerBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	pInputRunner := prompt.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{})
-	sInputRunner := stdin.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
-	fInputRunner := flag.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
+	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{})
+	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
+	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
 
 	types := formula.TermInputTypes{
 		api.Prompt: pInputRunner,
