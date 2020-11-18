@@ -20,9 +20,9 @@ import "testing"
 
 func TestGenerate(t *testing.T) {
 	userIdManager := NewUserIdGenerator()
-	_, err := userIdManager.Generate()
+	id := userIdManager.Generate()
 
-	if err != nil {
-		t.Errorf("Generate wait error equal to null")
+	if len(id) != 0 {
+		t.Errorf("unexpected empty id")
 	}
 }

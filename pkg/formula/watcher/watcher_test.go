@@ -27,6 +27,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -47,7 +48,7 @@ func TestWatch(t *testing.T) {
 	_ = streams.Unzip(zipFile, workspacePath)
 
 	builderManager := builder.NewBuildLocal(ritHome, dirManager, fileManager, treeGenerator)
-	sendMetric := func(commandExecutionTime float64, err ...string) {}
+	sendMetric := func(cmd metric.SendCommandDataParams) {}
 
 	watchManager := New(
 		builderManager,

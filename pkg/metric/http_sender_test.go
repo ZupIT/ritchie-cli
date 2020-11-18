@@ -19,14 +19,11 @@ package metric
 import (
 	"net/http"
 	"net/http/httptest"
-	"runtime"
 	"testing"
-	"time"
 )
 
 func TestSendManagerHttp_Send(t *testing.T) {
 	type in struct {
-		APIData APIData
 	}
 	tests := []struct {
 		name string
@@ -34,25 +31,28 @@ func TestSendManagerHttp_Send(t *testing.T) {
 	}{
 		{
 			name: "success",
-			in: in{
-				APIData: APIData{
-					Id:         "metric-id",
-					UserId:     "user-id",
-					Timestamp:  time.Now(),
-					Os:         runtime.GOOS,
-					RitVersion: "2.0.0",
-					Data:       nil,
-				},
-			},
+			in:   in{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			server := server()
 			defer server.Close()
-
-			httpSender := NewHttpSender(server.URL, server.Client())
-			httpSender.Send(tt.in.APIData)
+			data := DataCollectorMock{
+				CollectCommandDataMock: func() Command {
+					return Command{}
+				},
+				CollectUserStateMock: func() User {
+					return User{}
+				},
+			}
+			checker := CheckerMock{
+				func() bool {
+					return true
+				},
+			}
+			httpSender := NewHttpSender(server.URL, server.Client(), data, checker)
+			httpSender.SendUserState("tt.in.APIData")
 		})
 	}
 }
@@ -61,4 +61,25 @@ func server() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
+}
+
+type DataCollectorMock struct {
+	CollectCommandDataMock func() Command
+	CollectUserStateMock   func() User
+}
+
+func (dc DataCollectorMock) CollectCommandData(commandExecutionTime float64, commandError ...string) Command {
+	return dc.CollectCommandDataMock()
+}
+
+func (dc DataCollectorMock) CollectUserState(ritVersion string) User {
+	return dc.CollectUserStateMock()
+}
+
+type CheckerMock struct {
+	CheckMock func() bool
+}
+
+func (c CheckerMock) Check() bool {
+	return true
 }

@@ -33,17 +33,28 @@ var (
 type SendManagerHttp struct {
 	URL       string
 	client    *http.Client
-	collector DataCollectorManager
+	collector Collector
+	checker   Checker
 }
 
-func NewHttpSender(url string, client *http.Client) SendManagerHttp {
+func NewHttpSender(
+	url string,
+	client *http.Client,
+	collector Collector,
+	checker Checker,
+) SendManagerHttp {
 	return SendManagerHttp{
-		URL:    url,
-		client: client,
+		URL:       url,
+		client:    client,
+		checker:   checker,
+		collector: collector,
 	}
 }
 
 func (sm SendManagerHttp) SendUserState(ritVersion string) {
+	if !sm.checker.Check() {
+		return
+	}
 	userState := sm.collector.CollectUserState(ritVersion)
 	reqBody, err := json.Marshal(&userState)
 	if err != nil {

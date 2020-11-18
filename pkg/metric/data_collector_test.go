@@ -18,6 +18,7 @@ package metric
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -48,8 +49,8 @@ func Test_Collector(t *testing.T) {
 			wantErr: false,
 			in: in{
 				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() (UserId, error) {
-						return "", nil
+					GenerateMock: func() UserId {
+						return ""
 					}},
 				file: sMocks.FileReaderCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
@@ -62,8 +63,8 @@ func Test_Collector(t *testing.T) {
 			wantErr: true,
 			in: in{
 				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() (UserId, error) {
-						return "", errors.New("error generating id")
+					GenerateMock: func() UserId {
+						return ""
 					}},
 			},
 		},
@@ -72,8 +73,8 @@ func Test_Collector(t *testing.T) {
 			wantErr: false,
 			in: in{
 				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() (UserId, error) {
-						return "", nil
+					GenerateMock: func() UserId {
+						return ""
 					}},
 				file: sMocks.FileReaderCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
@@ -85,20 +86,21 @@ func Test_Collector(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			collector := NewDataCollector(tt.in.userIdGen, "", tt.in.file)
-			_, err := collector.Collect(1, "2.0.0")
-			if (err != nil) != tt.wantErr {
-				t.Errorf("execution test failed: %s\nwant error: %t | got: %s", tt.name, tt.wantErr, err)
-			}
+			collector := NewDataCollector(UserIdGeneratorMock{
+				GenerateMock: func() UserId {
+					return ""
+				}}, "", tt.in.file)
+			user := collector.CollectUserState("2.0.0")
+			fmt.Println(user)
 		})
 	}
 
 }
 
 type UserIdGeneratorMock struct {
-	GenerateMock func() (UserId, error)
+	GenerateMock func() UserId
 }
 
-func (us UserIdGeneratorMock) Generate() (UserId, error) {
+func (us UserIdGeneratorMock) Generate() UserId {
 	return us.GenerateMock()
 }
