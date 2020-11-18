@@ -33,12 +33,12 @@ func main() {
 	err := rootCmd.Execute()
 	if err != nil {
 		params.Error, params.ExecutionTime = err.Error(), commands.ExecutionTime(startTime)
-		commands.SendMetric(params)
+		commands.MetricSender.SendCommandData(params)
 		errFmt := fmt.Sprintf("%+v", err)
 		errFmt = prompt.Red(errFmt)
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %s\n", errFmt)
 		os.Exit(1)
 	}
 	params.ExecutionTime = commands.ExecutionTime(startTime)
-	commands.SendMetric(params)
+	commands.MetricSender.SendCommandData(params)
 }

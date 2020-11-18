@@ -37,7 +37,7 @@ func NewUserIdGenerator() UserIdManager { //nolint:stylecheck
 func (us UserIdManager) Generate() UserId {
 	id, _ := machineid.ID()
 	us.hash.Reset()
-	us.hash.Write([]byte(id))
+	_, _ = us.hash.Write([]byte(id))
 	userID := hex.EncodeToString(us.hash.Sum(nil))
 	return UserId(userID)
 }

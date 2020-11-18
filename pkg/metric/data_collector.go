@@ -108,16 +108,6 @@ func (d DataCollectorManager) userRepos() Repos {
 	return reposData
 }
 
-func (d DataCollectorManager) commandRepo() formula.Repo {
-	repos := d.readRepos()
-	for _, r := range repos {
-		if string(r.Name) == RepoName && r.Token == "" {
-			return r
-		}
-	}
-	return formula.Repo{}
-}
-
 func (d DataCollectorManager) readRepos() formula.Repos {
 	repoBytes, _ := d.file.Read(
 		filepath.Join(d.ritchieHomeDir, formula.ReposDir, "repositories.json"),

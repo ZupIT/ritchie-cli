@@ -62,10 +62,6 @@ func ExecutionTime(startTime time.Time) float64 {
 
 var MetricSender metric.SendManagerHttp
 
-func SendMetric(cmd metric.SendCommandDataParams) {
-	MetricSender.SendCommandData(cmd)
-}
-
 func Build() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
@@ -163,7 +159,7 @@ func Build() *cobra.Command {
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
-	watchManager := watcher.New(formulaLocalBuilder, dirManager, SendMetric)
+	watchManager := watcher.New(formulaLocalBuilder, dirManager, MetricSender.SendCommandData)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formulaLocalBuilder)
 
 	versionManager := version.NewManager(
