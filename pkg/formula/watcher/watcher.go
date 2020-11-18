@@ -30,6 +30,7 @@ import (
 	"github.com/radovskyb/watcher"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -40,13 +41,13 @@ type WatchManager struct {
 	watcher    *watcher.Watcher
 	formula    formula.LocalBuilder
 	dir        stream.DirListChecker
-	sendMetric func(commandExecutionTime float64, err ...string)
+	sendMetric func(cmd metric.SendCommandDataParams)
 }
 
 func New(
 	formula formula.LocalBuilder,
 	dir stream.DirListChecker,
-	sendMetric func(commandExecutionTime float64, err ...string),
+	sendMetric func(cmd metric.SendCommandDataParams),
 ) *WatchManager {
 
 	w := watcher.New()

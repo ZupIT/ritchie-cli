@@ -41,14 +41,13 @@ func (u UserId) String() string {
 }
 
 type Command struct {
-	Id                string    `json:"id"`
-	UserID            UserId    `json:"userId"`
-	Timestamp         time.Time `json:"timestamp"`
-	Command           string    `json:"command"`
-	ExecutionTime     float64   `json:"executionTime"`
-	Error             string    `json:"error,omitempty"`
-	CommonsRepoAdded  string    `json:"commonsRepoAdded,omitempty"`
-	MetricsAcceptance string    `json:"metricsAcceptance,omitempty"`
+	Id               string    `json:"id"`
+	UserID           UserId    `json:"userId"`
+	Timestamp        time.Time `json:"timestamp"`
+	Command          string    `json:"command"`
+	ExecutionTime    float64   `json:"executionTime"`
+	Error            string    `json:"error,omitempty"`
+	CommonsRepoAdded string    `json:"commonsRepoAdded,omitempty"`
 }
 
 type User struct {
@@ -72,8 +71,14 @@ type Metadata struct {
 	Data interface{} `json:"data"`
 }
 
+type SendCommandDataParams struct {
+	ExecutionTime float64
+	Error         string
+}
+
 type Sender interface {
-	Send(metric APIData)
+	SendUserState(ritVersion string)
+	SendCommandData(cmd SendCommandDataParams)
 }
 
 type UserIdGenerator interface {

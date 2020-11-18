@@ -22,19 +22,23 @@ import (
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/commands"
+	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 func main() {
 	startTime := time.Now()
 	rootCmd := commands.Build()
+	params := metric.SendCommandDataParams{}
 	err := rootCmd.Execute()
 	if err != nil {
-		commands.SendMetric(commands.ExecutionTime(startTime), err.Error())
+		params.Error, params.ExecutionTime = err.Error(), commands.ExecutionTime(startTime)
+		commands.SendMetric(params)
 		errFmt := fmt.Sprintf("%+v", err)
 		errFmt = prompt.Red(errFmt)
 		_, _ = fmt.Fprintf(os.Stderr, "Error: %s\n", errFmt)
 		os.Exit(1)
 	}
-	commands.SendMetric(commands.ExecutionTime(startTime))
+	params.ExecutionTime = commands.ExecutionTime(startTime)
+	commands.SendMetric(params)
 }

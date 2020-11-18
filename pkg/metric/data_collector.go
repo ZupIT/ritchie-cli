@@ -35,7 +35,6 @@ var (
 	_                Collector = DataCollectorManager{}
 	CommonsRepoAdded           = ""
 	RepoName                   = ""
-	Acceptance                 = ""
 )
 
 type DataCollectorManager struct {
@@ -61,14 +60,13 @@ func (d DataCollectorManager) CollectCommandData(
 	commandError ...string,
 ) Command {
 	cmdData := Command{
-		Id:                uuid.New().String(),
-		UserID:            d.userId.Generate(),
-		Timestamp:         time.Now(),
-		Command:           d.command(),
-		ExecutionTime:     math.Round(commandExecutionTime*100) / 100,
-		Error:             strings.Join(commandError, " "),
-		CommonsRepoAdded:  CommonsRepoAdded,
-		MetricsAcceptance: Acceptance,
+		Id:               uuid.New().String(),
+		UserID:           d.userId.Generate(),
+		Timestamp:        time.Now(),
+		Command:          d.command(),
+		ExecutionTime:    math.Round(commandExecutionTime*100) / 100,
+		Error:            strings.Join(commandError, " "),
+		CommonsRepoAdded: CommonsRepoAdded,
 	}
 	return cmdData
 }
@@ -95,19 +93,19 @@ func (d DataCollectorManager) defaultRunner() string {
 }
 
 func (d DataCollectorManager) userRepos() Repos {
-	repos := d.readRepos()
-	metricsRepo := Repo{}
-	metricsRepos := Repos{}
-	for _, r := range repos {
-		metricsRepo.Private = true
+	fullRepos := d.readRepos()
+	repo := Repo{}
+	reposData := Repos{}
+	for _, r := range fullRepos {
+		repo.Private = true
 		if r.Token == "" {
-			metricsRepo.Private = false
-			metricsRepo.URL = r.URL
-			metricsRepo.Name = string(r.Name)
+			repo.Private = false
+			repo.URL = r.URL
+			repo.Name = string(r.Name)
 		}
-		metricsRepos = append(metricsRepos, metricsRepo)
+		reposData = append(reposData, repo)
 	}
-	return metricsRepos
+	return reposData
 }
 
 func (d DataCollectorManager) commandRepo() formula.Repo {

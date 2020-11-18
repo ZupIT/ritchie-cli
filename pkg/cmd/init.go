@@ -243,19 +243,12 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	}
 	fmt.Println(footer)
 
-	metric.Acceptance = "yes"
+	acceptance := "yes"
 	if choose == DoNotAcceptMetrics {
-		metric.Acceptance = "no"
-		in.metricSender.Send(metric.APIData{
-			Id:        "rit_init",
-			Timestamp: time.Now(),
-			Data: metric.Data{
-				MetricsAcceptance: metric.Acceptance,
-			},
-		})
+		acceptance = "no"
 	}
 
-	if err = in.file.Write(metric.FilePath, []byte(responseToWrite)); err != nil {
+	if err = in.file.Write(metric.FilePath, []byte(acceptance)); err != nil {
 		return err
 	}
 

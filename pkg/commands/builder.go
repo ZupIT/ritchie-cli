@@ -63,12 +63,10 @@ func ExecutionTime(startTime time.Time) float64 {
 var Data metric.DataCollectorManager
 var MetricSender = metric.NewHttpSender(metric.ServerRestURL, http.DefaultClient)
 
-func SendMetric(commandExecutionTime float64, err ...string) {
+func SendMetric(cmd metric.SendCommandDataParams) {
 	metricEnable := metric.NewChecker(stream.NewFileManager())
 	if metricEnable.Check() {
-		var collectData metric.APIData
-		collectData, _ = Data.Collect(commandExecutionTime, cmd.Version, err...)
-		MetricSender.Send(collectData)
+		MetricSender.SendCommandData(cmd)
 	}
 }
 

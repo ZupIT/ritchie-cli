@@ -31,8 +31,9 @@ var (
 )
 
 type SendManagerHttp struct {
-	URL    string
-	client *http.Client
+	URL       string
+	client    *http.Client
+	collector DataCollectorManager
 }
 
 func NewHttpSender(url string, client *http.Client) SendManagerHttp {
@@ -42,17 +43,29 @@ func NewHttpSender(url string, client *http.Client) SendManagerHttp {
 	}
 }
 
-func (sm SendManagerHttp) SendUserState(user User) {
-	reqBody, err := json.Marshal(&user)
+func (sm SendManagerHttp) SendUserState(ritVersion string) {
+	userState := sm.collector.CollectUserState(ritVersion)
+	reqBody, err := json.Marshal(&userState)
 	if err != nil {
 		return
 	}
+	sm.doRequest(reqBody, sm.URL)
+}
 
+func (sm SendManagerHttp) SendCommandData(cmd SendCommandDataParams) {
+	command := sm.collector.CollectCommandData(cmd.ExecutionTime, cmd.Error)
+	reqBody, err := json.Marshal(&command)
+	if err != nil {
+		return
+	}
+	sm.doRequest(reqBody, sm.URL)
+}
+
+func (sm SendManagerHttp) doRequest(reqBody []byte, URL string) {
 	req, err := http.NewRequestWithContext(
 		context.TODO(),
 		http.MethodPost,
-		// TODO endpoint for each send type
-		sm.URL,
+		URL,
 		bytes.NewBuffer(reqBody),
 	)
 	if err != nil {
@@ -66,26 +79,4 @@ func (sm SendManagerHttp) SendUserState(user User) {
 		return
 	}
 	defer resp.Body.Close()
-}
-
-func (sm SendManagerHttp) SendCommandData(command Command) {
-	reqBody, err := json.Marshal(&command)
-	if err != nil {
-		return
-	}
-
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodPost, sm.URL, bytes.NewBuffer(reqBody))
-	if err != nil {
-		return
-	}
-
-	req.SetBasicAuth(BasicUser, BasicPass)
-	req.Header.Add("Content-Type", "application/json")
-	resp, err := sm.client.Do(req)
-	if err != nil {
-		return
-	}
-	if err := resp.Body.Close(); err != nil {
-		return
-	}
 }
