@@ -26,7 +26,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const core = "CORE"
+const (
+	reposDirName = "repos"
+	treeFileName = "tree.json"
+	core         = "CORE"
+)
 
 type Manager struct {
 	ritchieHome   string
@@ -116,7 +120,6 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	}
 
 	treeMain := formula.Tree{Version: treeVersion, Commands: mergedCommands, CommandsID: ids}
-
 	return treeMain
 }
 

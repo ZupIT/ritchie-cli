@@ -14,40 +14,38 @@
  * limitations under the License.
  */
 
-package builder
+package prompt
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-	"os"
-	"os/exec"
-
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	finput "github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
 
-const msgMakeBuildErr = "failed building formula with Makefile, verify your repository"
+type SurveyDefault struct{}
 
-var ErrBuildFormulaMakefile = errors.New(msgMakeBuildErr)
-
-var _ formula.Builder = MakeManager{}
-
-type MakeManager struct{}
-
-func NewBuildMake() MakeManager {
-	return MakeManager{}
+func NewSurveyDefault() SurveyDefault {
+	return SurveyDefault{}
 }
 
-func (ma MakeManager) Build(info formula.BuildInfo) error {
-	if err := os.Chdir(info.FormulaPath); err != nil {
-		return err
+func (SurveyDefault) Text(i formula.Input) (string, error) {
+	var value string
+
+	input := &survey.Input{
+		Message: i.Label,
+		Help:    i.Tutorial,
+		Default: i.Default,
 	}
-	var stderr bytes.Buffer
-	cmd := exec.Command("make", "build")
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf(errMsgFmt, ErrBuildFormulaMakefile, stderr.String())
+	validationQs := []*survey.Question{
+		{
+			Name:   "name",
+			Prompt: input,
+		},
 	}
 
-	return nil
+	if finput.IsRequired(i) {
+		validationQs[0].Validate = survey.Required
+	}
+
+	return value, survey.Ask(validationQs, &value)
 }

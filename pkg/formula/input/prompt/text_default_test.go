@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package formula
+package prompt
 
-type CreateBuilderManager struct {
-	Creator
-	Builder
-}
+import (
+	"testing"
 
-func NewCreateBuilder(creator Creator, builder Builder) CreateBuilder {
-	return CreateBuilderManager{creator, builder}
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+)
+
+func TestInputTextDefault(t *testing.T) {
+	input := formula.Input{}
+	NewSurveyDefault().Text(input)
 }

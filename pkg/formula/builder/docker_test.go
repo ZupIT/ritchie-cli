@@ -4,11 +4,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestDockerBuild(t *testing.T) {
-	const dockerImg = "cimg/go:1.14"
+	const dockerImg = "ritclizup/rit-go-runner"
 	fileManager := stream.NewFileManager()
 	buildDocker := NewBuildDocker(fileManager)
 
@@ -43,7 +44,8 @@ func TestDockerBuild(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := buildDocker.Build(tt.in.formPath, dockerImg)
+			info := formula.BuildInfo{FormulaPath: tt.in.formPath, DockerImg: dockerImg}
+			got := buildDocker.Build(info)
 
 			if tt.out.wantErr && got == nil {
 				t.Errorf("Run(%s) got %v, want not nil error", tt.name, got)

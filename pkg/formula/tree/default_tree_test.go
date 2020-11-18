@@ -50,7 +50,6 @@ func TestMergedTree(t *testing.T) {
 	_ = fileManager.Write(repo1Path, tree1)
 	_ = fileManager.Write(repo2Path, tree2)
 	_ = fileManager.Write(repo3Path, []byte("invalid"))
-
 	// End setup
 
 	type in struct {
