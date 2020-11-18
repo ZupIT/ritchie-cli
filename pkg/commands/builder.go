@@ -105,7 +105,7 @@ func Build() *cobra.Command {
 
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
-  repoListerLocal := repo.NewListerLocal(ritchieHomeDir)
+	repoListerLocal := repo.NewListerLocal(ritchieHomeDir)
 	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
 	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
 	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen, fileManager)
@@ -115,7 +115,7 @@ func Build() *cobra.Command {
 
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
-  repoLocalDeleter := repo.NewLocalDeleter(ritchieHomeDir, dirManager)
+	repoLocalDeleter := repo.NewLocalDeleter(ritchieHomeDir, dirManager)
 	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
 
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
