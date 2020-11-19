@@ -22,18 +22,18 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 type InputManager struct {
-	envResolvers env.Resolvers
+	cred credential.Resolver
 }
 
-func NewInputManager(env env.Resolvers) formula.InputRunner {
-	return InputManager{envResolvers: env}
+func NewInputManager(cred credential.Resolver) formula.InputRunner {
+	return InputManager{cred: cred}
 }
 
 func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagSet) error {
@@ -50,7 +50,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 		case input.TextType, input.BoolType, input.PassType:
 			inputVal = fmt.Sprintf("%v", data[i.Name])
 		default:
-			inputVal, err = input.ResolveIfReserved(in.envResolvers, i)
+			inputVal, err = in.cred.Resolve(i.Type)
 			if err != nil {
 				return err
 			}
