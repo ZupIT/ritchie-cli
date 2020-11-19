@@ -17,12 +17,12 @@
 package cmd
 
 import (
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
@@ -30,7 +30,7 @@ const newCtx = "Type new context?"
 
 // setContextCmd type for clean repo command.
 type setContextCmd struct {
-	rcontext.FindSetter
+	env.FindSetter
 	prompt.InputText
 	prompt.InputList
 }
@@ -41,7 +41,7 @@ type setContext struct {
 }
 
 func NewSetContextCmd(
-	fs rcontext.FindSetter,
+	fs env.FindSetter,
 	it prompt.InputText,
 	il prompt.InputList) *cobra.Command {
 	s := setContextCmd{fs, it, il}
@@ -67,7 +67,7 @@ func (s setContextCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		ctxHolder.All = append(ctxHolder.All, rcontext.DefaultCtx)
+		ctxHolder.All = append(ctxHolder.All, env.DefaultEnv)
 		ctxHolder.All = append(ctxHolder.All, newCtx)
 		ctx, err := s.List("All:", ctxHolder.All)
 		if err != nil {

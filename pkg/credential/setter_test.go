@@ -17,10 +17,10 @@
 package credential
 
 import (
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	stream "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
@@ -34,7 +34,7 @@ var (
 			return true
 		},
 	}
-	ctxFinder = rcontext.FindManager{CtxFile: "", File: streamMock}
+	ctxFinder = env.FindManager{filePath: "", file: streamMock}
 )
 
 func TestSet(t *testing.T) {

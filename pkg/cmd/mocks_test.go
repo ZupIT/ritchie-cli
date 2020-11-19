@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -28,7 +29,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
@@ -206,35 +206,35 @@ func (workspaceForm) Validate(workspace formula.Workspace) error {
 
 type ctxSetterMock struct{}
 
-func (ctxSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
-	return rcontext.ContextHolder{}, nil
+func (ctxSetterMock) Set(ctx string) (env.Holder, error) {
+	return env.Holder{}, nil
 }
 
 type ctxFinderMock struct{}
 
-func (ctxFinderMock) Find() (rcontext.ContextHolder, error) {
-	return rcontext.ContextHolder{}, nil
+func (ctxFinderMock) Find() (env.Holder, error) {
+	return env.Holder{}, nil
 }
 
 type ctxFindRemoverMock struct{}
 
-func (ctxFindRemoverMock) Find() (rcontext.ContextHolder, error) {
+func (ctxFindRemoverMock) Find() (env.Holder, error) {
 	f := ctxFinderMock{}
 	return f.Find()
 }
 
-func (ctxFindRemoverMock) Remove(ctx string) (rcontext.ContextHolder, error) {
-	return rcontext.ContextHolder{}, nil
+func (ctxFindRemoverMock) Remove(ctx string) (env.Holder, error) {
+	return env.Holder{}, nil
 }
 
 type ctxFindSetterMock struct{}
 
-func (ctxFindSetterMock) Find() (rcontext.ContextHolder, error) {
+func (ctxFindSetterMock) Find() (env.Holder, error) {
 	f := ctxFinderMock{}
 	return f.Find()
 }
 
-func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
+func (ctxFindSetterMock) Set(ctx string) (env.Holder, error) {
 	s := ctxSetterMock{}
 	return s.Set(ctx)
 }

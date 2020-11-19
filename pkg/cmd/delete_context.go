@@ -18,18 +18,18 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 // deleteContextCmd type for clean repo command.
 type deleteContextCmd struct {
-	rcontext.FindRemover
+	env.FindRemover
 	prompt.InputBool
 	prompt.InputList
 }
@@ -40,7 +40,7 @@ type deleteContext struct {
 }
 
 func NewDeleteContextCmd(
-	fr rcontext.FindRemover,
+	fr env.FindRemover,
 	ib prompt.InputBool,
 	il prompt.InputList) *cobra.Command {
 	d := deleteContextCmd{fr, ib, il}
@@ -73,7 +73,7 @@ func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 
 		for i := range ctxHolder.All {
 			if ctxHolder.All[i] == ctxHolder.Current {
-				ctxHolder.All[i] = fmt.Sprintf("%s%s", rcontext.CurrentCtx, ctxHolder.Current)
+				ctxHolder.All[i] = fmt.Sprintf("%s%s", env.CurrentEnv, ctxHolder.Current)
 			}
 		}
 

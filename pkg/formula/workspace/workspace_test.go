@@ -391,8 +391,8 @@ func TestPreviousHash(t *testing.T) {
 		},
 		{
 			name: "shoud fail when file doesn't exist",
-			in:   in{"/path/to/formula", nil, fmt.Errorf("File doesn't exist")},
-			out:  out{"", "/path/to/rit/hashes/-path-to-formula.txt", fmt.Errorf("File doesn't exist")},
+			in:   in{"/path/to/formula", nil, fmt.Errorf("file doesn't exist")},
+			out:  out{"", "/path/to/rit/hashes/-path-to-formula.txt", fmt.Errorf("file doesn't exist")},
 		},
 	}
 
