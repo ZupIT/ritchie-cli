@@ -24,12 +24,8 @@ type DetailManager struct {
 	repoProviders formula.RepoProviders
 }
 
-func NewDetail(
-	repoProviders formula.RepoProviders,
-) DetailManager {
-	return DetailManager{
-		repoProviders: repoProviders,
-	}
+func NewDetail(repoProviders formula.RepoProviders) DetailManager {
+	return DetailManager{repoProviders}
 }
 
 func (dm DetailManager) LatestTag(repo formula.Repo) string {

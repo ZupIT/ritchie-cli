@@ -29,9 +29,6 @@ import (
 func TestNewDetailLatestTag(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	defaultGitRepositoryMock := GitRepositoryMock{
-		latestTag: func(info git.RepoInfo) (git.Tag, error) {
-			return git.Tag{}, nil
-		},
 		tags: func(info git.RepoInfo) (git.Tags, error) {
 			return git.Tags{git.Tag{}}, nil
 		},
@@ -69,7 +66,7 @@ func TestNewDetailLatestTag(t *testing.T) {
 			want: "1.0.0",
 		},
 		{
-			name: "Return version",
+			name: "Return version nill when get latest returns error",
 			fields: fields{
 				repoProviders: repoProviders,
 				repo: formula.Repo{
@@ -84,7 +81,7 @@ func TestNewDetailLatestTag(t *testing.T) {
 					return git.Tag{}, errors.New("some error")
 				},
 			},
-			want: "1.0.0",
+			want: "",
 		},
 	}
 
