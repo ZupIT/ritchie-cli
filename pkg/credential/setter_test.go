@@ -18,47 +18,81 @@ package credential
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/mock"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	stream "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+	"github.com/stretchr/testify/suite"
 )
 
-var (
-	githubCred = Detail{Service: "github"}
-	streamMock = stream.FileReadExisterCustomMock{
-		ReadMock: func(path string) ([]byte, error) {
-			return []byte("{\"current_context\":\"default\"}"), nil
-		},
-		ExistsMock: func(path string) bool {
-			return true
-		},
-	}
-	ctxFinder = rcontext.FindManager{CtxFile: "", File: streamMock}
-)
+type SetterTestSuite struct {
+	suite.Suite
 
-func TestSet(t *testing.T) {
+	HomePath          string
+	TestContextFinder *mock.ContextFinderMock
 
-	tmp := os.TempDir()
-	setter := NewSetter(tmp, ctxFinder)
-	tests := []struct {
-		name string
-		in   Detail
-		out  error
-	}{
-		{
-			name: "github credential",
-			in:   githubCred,
-			out:  nil,
-		},
+	contextHolderNil     *rcontext.ContextHolder
+	contextHolderDefault *rcontext.ContextHolder
+	contextHolderProd    *rcontext.ContextHolder
+
+	DetailCredentialInfo *Detail
+}
+
+func (suite *SetterTestSuite) SetupSuite() {
+	nameSuite := "SetterTestSuite"
+	tempDir := os.TempDir()
+	detailExample := &Detail{
+		Service:    "github",
+		Username:   "ritchie",
+		Credential: Credential{"token": "123", "username": "hackerman"},
+		Type:       "",
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := setter.Set(tt.in)
-			if got != tt.out {
-				t.Errorf("Set(%s) got %v, want %v", tt.name, got, tt.out)
-			}
-		})
-	}
+	suite.HomePath = filepath.Join(tempDir, nameSuite)
+	suite.TestContextFinder = new(mock.ContextFinderMock)
+	suite.contextHolderNil = &rcontext.ContextHolder{Current: ""}
+	suite.contextHolderDefault = &rcontext.ContextHolder{Current: "default"}
+	suite.contextHolderProd = &rcontext.ContextHolder{Current: "prod", All: []string{"defauld", "prod"}}
+	suite.DetailCredentialInfo = detailExample
+}
+
+func (suite *SetterTestSuite) SetupTest() {
+	os.RemoveAll(suite.HomePath)
+}
+
+func (suite *SetterTestSuite) AfterTest(suiteName, testName string) {
+	os.RemoveAll(suite.HomePath)
+}
+
+func (suite *SetterTestSuite) TestSetCredentialToContextDefault() {
+	filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
+
+	suite.TestContextFinder.On("Find").Return(*suite.contextHolderDefault, nil)
+	setter := NewSetter(suite.HomePath, suite.TestContextFinder)
+
+	suite.NoFileExists(filePathExpectedCreated)
+
+	response := setter.Set(*suite.DetailCredentialInfo)
+
+	suite.Nil(response)
+	suite.FileExists(filePathExpectedCreated)
+}
+
+func (suite *SetterTestSuite) TestSetCredentialToContextDefaultWhenContextNotInformed() {
+	filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
+
+	suite.TestContextFinder.On("Find").Return(*suite.contextHolderNil, nil)
+	setter := NewSetter(suite.HomePath, suite.TestContextFinder)
+
+	suite.NoFileExists(filePathExpectedCreated)
+
+	response := setter.Set(*suite.DetailCredentialInfo)
+
+	suite.Nil(response)
+	suite.FileExists(filePathExpectedCreated)
+}
+
+func TestSetterTestSuite(t *testing.T) {
+	suite.Run(t, new(SetterTestSuite))
 }
