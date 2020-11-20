@@ -18,9 +18,10 @@ package credential
 
 import (
 	"errors"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"

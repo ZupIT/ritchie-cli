@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"

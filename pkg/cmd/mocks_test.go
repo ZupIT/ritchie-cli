@@ -18,8 +18,9 @@ package cmd
 
 import (
 	"errors"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"io"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/spf13/cobra"
 

@@ -17,8 +17,9 @@
 package cmd
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/spf13/cobra"
 

@@ -49,8 +49,8 @@ func (r RemoveManager) Remove(env string) (Holder, error) {
 		envHolder.Current = ""
 	}
 
-	for i, env := range envHolder.All {
-		if env == env {
+	for i, e := range envHolder.All {
+		if e == env {
 			envHolder.All = append(envHolder.All[:i], envHolder.All[i+1:]...)
 			break
 		}

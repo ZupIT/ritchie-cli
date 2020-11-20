@@ -18,10 +18,11 @@ package docker
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/pflag"

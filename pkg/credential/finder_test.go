@@ -19,10 +19,11 @@ package credential
 import (
 	"errors"
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"

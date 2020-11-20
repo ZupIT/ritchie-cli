@@ -18,11 +18,12 @@ package local
 
 import (
 	"fmt"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/spf13/pflag"
 

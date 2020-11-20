@@ -18,6 +18,7 @@ package credential
 
 import (
 	"encoding/json"
+
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
