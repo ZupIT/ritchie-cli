@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/mock"
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/stretchr/testify/suite"
@@ -72,7 +72,7 @@ func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
 		{"Context not informed", *suite.contextHolderNil},
 	} {
 		suite.Run(t.testName, func() {
-			contextFinderMock := new(mock.ContextFinderMock)
+			contextFinderMock := new(mocks.ContextFinderMock)
 			filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
 			contextFinderMock.On("Find").Return(t.context, nil)

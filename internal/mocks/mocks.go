@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mock
+package mocks
 
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
