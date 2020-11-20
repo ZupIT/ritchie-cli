@@ -16,20 +16,20 @@
         "result": "Initialization successful!"
     },
     {
-        "entry": "Set context STDIN",
+        "entry": "Set env STDIN",
         "steps": [
             {
                 "key": "",
-                "value": "{\"context\":\"Leonidas\"}",
+                "value": "{\"env\":\"Leonidas\"}",
                 "action": "echo"
             },
             {
                 "key": "",
-                "value": "set context --stdin",
+                "value": "set env --stdin",
                 "action": "main"
             }
         ],
-        "result": "Set context successful!"
+        "result": "Set env successful!"
     },
     {
         "entry": "Delete context STDIN",

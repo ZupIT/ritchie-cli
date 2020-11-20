@@ -46,7 +46,7 @@ var _ = Describe("RitSingleInit", func() {
 		},
 
 		Entry("Show context", scenariosCore[0]),
-		Entry("Set context", scenariosCore[1]),
+		Entry("Set env", scenariosCore[1]),
 		Entry("Delete context", scenariosCore[2]),
 		Entry("List repo", scenariosCore[3]),
 		Entry("Delete repo", scenariosCore[4]),

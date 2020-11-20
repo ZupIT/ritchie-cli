@@ -228,14 +228,14 @@ func (ctxFindRemoverMock) Remove(ctx string) (env.Holder, error) {
 	return env.Holder{}, nil
 }
 
-type ctxFindSetterMock struct{}
+type envFindSetterMock struct{}
 
-func (ctxFindSetterMock) Find() (env.Holder, error) {
+func (envFindSetterMock) Find() (env.Holder, error) {
 	f := ctxFinderMock{}
 	return f.Find()
 }
 
-func (ctxFindSetterMock) Set(ctx string) (env.Holder, error) {
+func (envFindSetterMock) Set(ctx string) (env.Holder, error) {
 	s := ctxSetterMock{}
 	return s.Set(ctx)
 }

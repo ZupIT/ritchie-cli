@@ -27,30 +27,34 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const newCtx = "Type new context?"
+const (
+	newEnv     = "Type the new env?"
+	successMsg = "Set env successful!"
+)
 
-// setContextCmd type for clean repo command.
-type setContextCmd struct {
-	env.FindSetter
+// setEnvCmd type for clean repo command.
+type setEnvCmd struct {
+	env env.FindSetter
 	prompt.InputText
 	prompt.InputList
 }
 
-// setContext type for stdin json decoder.
-type setContext struct {
-	Context string `json:"context"`
+// setEnv type for stdin json decoder.
+type setEnv struct {
+	Env string `json:"env"`
 }
 
-func NewSetContextCmd(
+func NewSetEnvCmd(
 	fs env.FindSetter,
 	it prompt.InputText,
-	il prompt.InputList) *cobra.Command {
-	s := setContextCmd{fs, it, il}
+	il prompt.InputList,
+) *cobra.Command {
+	s := setEnvCmd{fs, it, il}
 
 	cmd := &cobra.Command{
-		Use:       "context",
-		Short:     "Set context",
-		Example:   "rit set context",
+		Use:       "env",
+		Short:     "Set env",
+		Example:   "rit set env",
 		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
@@ -61,52 +65,52 @@ func NewSetContextCmd(
 	return cmd
 }
 
-func (s setContextCmd) runPrompt() CommandRunnerFunc {
+func (s setEnvCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		ctxHolder, err := s.Find()
+		envHolder, err := s.env.Find()
 		if err != nil {
 			return err
 		}
 
-		ctxHolder.All = append(ctxHolder.All, env.DefaultEnv)
-		ctxHolder.All = append(ctxHolder.All, newCtx)
-		ctx, err := s.List("All:", ctxHolder.All)
+		envHolder.All = append(envHolder.All, env.DefaultEnv)
+		envHolder.All = append(envHolder.All, newEnv)
+		ctx, err := s.List("All:", envHolder.All)
 		if err != nil {
 			return err
 		}
 
-		if ctx == newCtx {
-			ctx, err = s.Text("New context: ", true)
+		if ctx == newEnv {
+			ctx, err = s.Text("New env: ", true)
 			if err != nil {
 				return err
 			}
 		}
 
-		if _, err := s.Set(ctx); err != nil {
+		if _, err := s.env.Set(ctx); err != nil {
 			return err
 		}
 
-		prompt.Success("Set context successful!")
+		prompt.Success(successMsg)
 		return nil
 	}
 
 }
 
-func (s setContextCmd) runStdin() CommandRunnerFunc {
+func (s setEnvCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		sc := setContext{}
+		sc := setEnv{}
 
 		err := stdin.ReadJson(os.Stdin, &sc)
 		if err != nil {
 			return err
 		}
 
-		if _, err := s.Set(sc.Context); err != nil {
+		if _, err := s.env.Set(sc.Env); err != nil {
 			return err
 		}
 
-		prompt.Success("Set context successful!")
+		prompt.Success(successMsg)
 		return nil
 	}
 }

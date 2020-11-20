@@ -49,7 +49,7 @@ var (
 		{Parent: "root_list", Usage: "credential"},
 		{Parent: "root_list", Usage: "workspace"},
 		{Parent: "root", Usage: "set"},
-		{Parent: "root_set", Usage: "context"},
+		{Parent: "root_set", Usage: "env"},
 		{Parent: "root_set", Usage: "credential"},
 		{Parent: "root_set", Usage: "repo-priority"},
 		{Parent: "root_set", Usage: "formula-runner"},

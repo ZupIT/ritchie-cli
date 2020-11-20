@@ -11,11 +11,11 @@
         "result":"Current context: default"
     },
     {
-        "entry":"Set context",
+        "entry":"Set env",
         "steps":[
             {
                 "key":"",
-                "value":"set context",
+                "value":"set env",
                 "action":"main"
             },
             {
@@ -24,7 +24,7 @@
                 "action": "select"
             }
         ],
-        "result":"Set context successful!"
+        "result":"Set env successful!"
     },
     {
         "entry":"Delete context",

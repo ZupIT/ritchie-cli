@@ -39,3 +39,11 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 		return promptFunc(cmd, args)
 	}
 }
+
+func DeprecateCmd(parentCmd *cobra.Command, deprecatedCmd, deprecatedMsg string) {
+	command := &cobra.Command{
+		Use:        deprecatedCmd,
+		Deprecated: deprecatedMsg,
+	}
+	parentCmd.AddCommand(command)
+}
