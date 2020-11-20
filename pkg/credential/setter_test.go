@@ -29,8 +29,7 @@ import (
 type SetterTestSuite struct {
 	suite.Suite
 
-	HomePath          string
-	TestContextFinder *mock.ContextFinderMock
+	HomePath string
 
 	contextHolderNil     *rcontext.ContextHolder
 	contextHolderDefault *rcontext.ContextHolder
@@ -50,7 +49,6 @@ func (suite *SetterTestSuite) SetupSuite() {
 	}
 
 	suite.HomePath = filepath.Join(tempDir, nameSuite)
-	suite.TestContextFinder = new(mock.ContextFinderMock)
 	suite.contextHolderNil = &rcontext.ContextHolder{Current: ""}
 	suite.contextHolderDefault = &rcontext.ContextHolder{Current: "default"}
 	suite.contextHolderProd = &rcontext.ContextHolder{Current: "prod", All: []string{"defauld", "prod"}}
@@ -65,32 +63,30 @@ func (suite *SetterTestSuite) AfterTest(suiteName, testName string) {
 	os.RemoveAll(suite.HomePath)
 }
 
-func (suite *SetterTestSuite) TestSetCredentialToContextDefault() {
-	filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
+func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
+	for _, t := range []struct {
+		testName string
+		context  rcontext.ContextHolder
+	}{
+		{"Context informed", *suite.contextHolderDefault},
+		{"Context not informed", *suite.contextHolderNil},
+	} {
+		suite.Run(t.testName, func() {
+			contextFinderMock := new(mock.ContextFinderMock)
+			filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
-	suite.TestContextFinder.On("Find").Return(*suite.contextHolderDefault, nil)
-	setter := NewSetter(suite.HomePath, suite.TestContextFinder)
+			contextFinderMock.On("Find").Return(t.context, nil)
+			setter := NewSetter(suite.HomePath, contextFinderMock)
 
-	suite.NoFileExists(filePathExpectedCreated)
+			suite.NoFileExists(filePathExpectedCreated)
 
-	response := setter.Set(*suite.DetailCredentialInfo)
+			response := setter.Set(*suite.DetailCredentialInfo)
 
-	suite.Nil(response)
-	suite.FileExists(filePathExpectedCreated)
-}
-
-func (suite *SetterTestSuite) TestSetCredentialToContextDefaultWhenContextNotInformed() {
-	filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
-
-	suite.TestContextFinder.On("Find").Return(*suite.contextHolderNil, nil)
-	setter := NewSetter(suite.HomePath, suite.TestContextFinder)
-
-	suite.NoFileExists(filePathExpectedCreated)
-
-	response := setter.Set(*suite.DetailCredentialInfo)
-
-	suite.Nil(response)
-	suite.FileExists(filePathExpectedCreated)
+			suite.Nil(response)
+			suite.FileExists(filePathExpectedCreated)
+			os.RemoveAll(suite.HomePath)
+		})
+	}
 }
 
 func TestSetterTestSuite(t *testing.T) {
