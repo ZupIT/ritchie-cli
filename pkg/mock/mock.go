@@ -26,8 +26,7 @@ type ContextFinderMock struct {
 }
 
 func (cf *ContextFinderMock) Find() (rcontext.ContextHolder, error) {
-
 	args := cf.Called()
-	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
 
+	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
 }
