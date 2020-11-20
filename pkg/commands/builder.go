@@ -28,6 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
@@ -46,7 +47,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
@@ -115,11 +115,11 @@ func Build() *cobra.Command {
 	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
 
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
-	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
-	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
-	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
-	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
-	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
+	ctxFinder := env.NewFinder(ritchieHomeDir, fileManager)
+	ctxSetter := env.NewSetter(ritchieHomeDir, ctxFinder, fileManager)
+	ctxRemover := env.NewRemover(ritchieHomeDir, ctxFinder, fileManager)
+	ctxFindSetter := env.NewFindSetter(ctxFinder, ctxSetter)
+	ctxFindRemover := env.NewFindRemover(ctxFinder, ctxRemover)
 	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
 	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)

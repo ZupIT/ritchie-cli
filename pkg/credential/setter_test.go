@@ -20,7 +20,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	stream "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
@@ -34,7 +35,7 @@ var (
 			return true
 		},
 	}
-	ctxFinder = rcontext.FindManager{CtxFile: "", File: streamMock}
+	ctxFinder = env.NewFinder("", streamMock)
 )
 
 func TestSet(t *testing.T) {

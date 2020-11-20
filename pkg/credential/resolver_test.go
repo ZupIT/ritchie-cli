@@ -21,15 +21,16 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestCredentialResolver(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	tempDirectory := os.TempDir()
-	contextFinder := rcontext.NewFinder(tempDirectory, fileManager)
+	contextFinder := env.NewFinder(tempDirectory, fileManager)
 	credentialSetter := NewSetter(tempDirectory, contextFinder)
 	credentialFinder := NewFinder(tempDirectory, contextFinder, fileManager)
 

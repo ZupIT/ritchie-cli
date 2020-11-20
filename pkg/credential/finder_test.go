@@ -23,8 +23,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -42,7 +43,7 @@ func TestFind(t *testing.T) {
 
 	type in struct {
 		homePath  string
-		ctxFinder rcontext.Finder
+		ctxFinder env.Finder
 		file      stream.FileReader
 		provider  string
 	}

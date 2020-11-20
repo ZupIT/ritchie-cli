@@ -22,13 +22,14 @@ import (
 	"os/exec"
 	"strconv"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -44,7 +45,7 @@ type RunManager struct {
 	formula.InputResolver
 	formula.PreRunner
 	file    stream.FileWriteExistAppender
-	ctx     rcontext.Finder
+	ctx     env.Finder
 	homeDir string
 }
 
@@ -53,7 +54,7 @@ func NewRunner(
 	input formula.InputResolver,
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
-	ctx rcontext.Finder,
+	ctx env.Finder,
 	homeDir string,
 ) formula.Runner {
 	return RunManager{

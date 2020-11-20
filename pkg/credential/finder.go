@@ -21,8 +21,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -34,11 +35,11 @@ Try again after use:
 
 type Finder struct {
 	homePath  string
-	ctxFinder rcontext.Finder
+	ctxFinder env.Finder
 	file      stream.FileReader
 }
 
-func NewFinder(homePath string, cf rcontext.Finder, file stream.FileReader) Finder {
+func NewFinder(homePath string, cf env.Finder, file stream.FileReader) Finder {
 	return Finder{
 		homePath:  homePath,
 		ctxFinder: cf,
@@ -53,7 +54,7 @@ func (f Finder) Find(provider string) (Detail, error) {
 		return Detail{}, err
 	}
 	if ctx.Current == "" {
-		ctx.Current = rcontext.DefaultCtx
+		ctx.Current = env.DefaultEnv
 	}
 
 	cb, err := f.file.Read(File(f.homePath, ctx.Current, provider))

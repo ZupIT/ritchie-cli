@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package rcontext
+package env
 
 const (
-	ContextPath = "%s/contexts"
-	CurrentCtx  = "Current -> "
-	DefaultCtx  = "default"
+	FileName   = "envs"
+	CurrentEnv = "Current -> "
+	DefaultEnv = "default"
 )
 
-type ContextHolder struct {
-	Current string   `json:"current_context"`
-	All     []string `json:"contexts"`
+type Holder struct {
+	Current string   `json:"current_env"`
+	All     []string `json:"envs"`
 }
 
 type Setter interface {
-	Set(ctx string) (ContextHolder, error)
+	Set(env string) (Holder, error)
 }
 
 type Finder interface {
-	Find() (ContextHolder, error)
+	Find() (Holder, error)
 }
 
 type Remover interface {
-	Remove(ctx string) (ContextHolder, error)
+	Remove(env string) (Holder, error)
 }
 
 type FindRemover interface {

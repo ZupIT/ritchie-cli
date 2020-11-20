@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package rcontext
+package env
 
 import (
 	"errors"
@@ -30,13 +30,13 @@ func TestFind(t *testing.T) {
 	tmp := os.TempDir()
 
 	type in struct {
-		holder          ContextHolder
+		holder          Holder
 		FileReadExister stream.FileReadExister
 	}
 
 	type out struct {
 		err  error
-		want ContextHolder
+		want Holder
 	}
 
 	tests := []struct {
@@ -45,12 +45,12 @@ func TestFind(t *testing.T) {
 		out  *out
 	}{
 		{
-			name: "default context and existing ctx file",
+			name: "default env and existing env file",
 			in: &in{
-				holder: ContextHolder{Current: ""},
+				holder: Holder{Current: ""},
 				FileReadExister: sMock.FileReadExisterCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
-						return []byte("{\"current_context\":\"default\"}"), nil
+						return []byte("{\"current_env\":\"default\"}"), nil
 					},
 					ExistsMock: func(path string) bool {
 						return true
@@ -58,17 +58,17 @@ func TestFind(t *testing.T) {
 				},
 			},
 			out: &out{
-				want: ContextHolder{Current: "default"},
+				want: Holder{Current: "default"},
 				err:  nil,
 			},
 		},
 		{
-			name: "default context and missing ctx file",
+			name: "default env and missing env file",
 			in: &in{
-				holder: ContextHolder{Current: ""},
+				holder: Holder{Current: ""},
 				FileReadExister: sMock.FileReadExisterCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
-						return []byte("{\"current_context\":\"default\"}"), nil
+						return []byte("{\"current_env\":\"default\"}"), nil
 					},
 					ExistsMock: func(path string) bool {
 						return false
@@ -76,14 +76,13 @@ func TestFind(t *testing.T) {
 				},
 			},
 			out: &out{
-				want: ContextHolder{Current: ""},
-				err:  nil,
+				want: Holder{Current: ""},
 			},
 		},
 		{
-			name: "default context and error on read file",
+			name: "default env and error on read file",
 			in: &in{
-				holder: ContextHolder{Current: ""},
+				holder: Holder{Current: ""},
 				FileReadExister: sMock.FileReadExisterCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
 						return []byte(""), errors.New("error reading file")
@@ -94,14 +93,14 @@ func TestFind(t *testing.T) {
 				},
 			},
 			out: &out{
-				want: ContextHolder{Current: ""},
+				want: Holder{Current: ""},
 				err:  errors.New("error reading file"),
 			},
 		},
 		{
-			name: "default context and incorrect json",
+			name: "default env and incorrect json",
 			in: &in{
-				holder: ContextHolder{Current: "default"},
+				holder: Holder{Current: "default"},
 				FileReadExister: sMock.FileReadExisterCustomMock{
 					ReadMock: func(path string) ([]byte, error) {
 						return []byte(""), nil
@@ -112,7 +111,7 @@ func TestFind(t *testing.T) {
 				},
 			},
 			out: &out{
-				want: ContextHolder{Current: ""},
+				want: Holder{Current: ""},
 				err:  errors.New("unexpected end of JSON input"),
 			},
 		},
@@ -123,7 +122,7 @@ func TestFind(t *testing.T) {
 			finder := NewFinder(tmp, tt.in.FileReadExister)
 			out := tt.out
 			got, err := finder.Find()
-			if err != nil && err.Error() != out.err.Error() {
+			if out.err != nil && out.err.Error() != err.Error() {
 				t.Errorf("Find(%s) - Execution error - got %v, want %v", tt.name, err, out.err)
 			}
 			if !reflect.DeepEqual(out.want, got) {
@@ -131,4 +130,13 @@ func TestFind(t *testing.T) {
 			}
 		})
 	}
+}
+
+type findEnvMock struct {
+	data Holder
+	err  error
+}
+
+func (f findEnvMock) Find() (Holder, error) {
+	return f.data, f.err
 }

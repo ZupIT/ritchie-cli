@@ -19,16 +19,17 @@ package credential
 import (
 	"encoding/json"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
 type SetManager struct {
 	homePath string
-	ctx      rcontext.Finder
+	ctx      env.Finder
 }
 
-func NewSetter(homePath string, cf rcontext.Finder) SetManager {
+func NewSetter(homePath string, cf env.Finder) SetManager {
 	return SetManager{
 		homePath: homePath,
 		ctx:      cf,
@@ -41,7 +42,7 @@ func (s SetManager) Set(cred Detail) error {
 		return err
 	}
 	if ctx.Current == "" {
-		ctx.Current = rcontext.DefaultCtx
+		ctx.Current = env.DefaultEnv
 	}
 
 	cb, err := json.Marshal(cred)
