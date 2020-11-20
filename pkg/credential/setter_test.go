@@ -17,12 +17,14 @@
 package credential
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/mock"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -55,12 +57,10 @@ func (suite *SetterTestSuite) SetupSuite() {
 	suite.DetailCredentialInfo = detailExample
 }
 
-func (suite *SetterTestSuite) SetupTest() {
-	os.RemoveAll(suite.HomePath)
-}
-
-func (suite *SetterTestSuite) AfterTest(suiteName, testName string) {
-	os.RemoveAll(suite.HomePath)
+func (suite *SetterTestSuite) fileInfo(path string) (string, error) {
+	fileManager := stream.NewFileManager()
+	b, err := fileManager.Read(path)
+	return string(b), err
 }
 
 func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
@@ -84,7 +84,12 @@ func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
 
 			suite.Nil(response)
 			suite.FileExists(filePathExpectedCreated)
-			os.RemoveAll(suite.HomePath)
+
+			nameExpected := fmt.Sprintf("\"username\":\"%s\"", suite.DetailCredentialInfo.Username)
+			data, err := suite.fileInfo(filePathExpectedCreated)
+			suite.Nil(err)
+			suite.Contains(data, nameExpected)
+			defer os.RemoveAll(suite.HomePath)
 		})
 	}
 }
