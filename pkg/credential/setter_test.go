@@ -34,7 +34,7 @@ var (
 			return true
 		},
 	}
-	ctxFinder = env.FindManager{filePath: "", file: streamMock}
+	ctxFinder = env.NewFinder("", streamMock)
 )
 
 func TestSet(t *testing.T) {
