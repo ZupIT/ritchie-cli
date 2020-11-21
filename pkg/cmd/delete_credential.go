@@ -22,7 +22,7 @@ type deleteCredentialCmd struct {
 
 // deleteCredential type for stdin json decoder
 type deleteCredential struct {
-	Service string `json:"service"`
+	Provider string `json:"provider"`
 }
 
 // NewDeleteCredentialCmd creates a new cmd instance
@@ -114,7 +114,7 @@ func (d deleteCredentialCmd) runStdin() CommandRunnerFunc {
 
 		mustDelete := false
 		for _, c := range data {
-			if c.Provider == dc.Service {
+			if c.Provider == dc.Provider {
 				mustDelete = true
 			}
 		}
@@ -124,7 +124,7 @@ func (d deleteCredentialCmd) runStdin() CommandRunnerFunc {
 			return nil
 		}
 
-		if err := d.Delete(dc.Service); err != nil {
+		if err := d.Delete(dc.Provider); err != nil {
 			return err
 		}
 

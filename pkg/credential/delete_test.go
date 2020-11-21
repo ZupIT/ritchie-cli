@@ -81,7 +81,7 @@ func TestCredDelete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewCredDelete(tt.fields.homePath, tt.fields.cf, tt.fields.fm)
 			if err := got.Delete(tt.fields.service); (err != nil) != tt.wantErr {
-				t.Errorf("Find(%s) got %v, wantErr %v", tt.name, err, tt.wantErr)
+				t.Errorf("Delete(%s) got %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
 		})
 	}

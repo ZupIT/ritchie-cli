@@ -28,7 +28,7 @@ type fieldsTestDeleteCredentialCmd struct {
 
 func TestDeleteCredential(t *testing.T) {
 	stdinTest := &deleteCredential{
-		Service: "github",
+		Provider: "github",
 	}
 
 	deleteSuccess := credDeleteMock{
