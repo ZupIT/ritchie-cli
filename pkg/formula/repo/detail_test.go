@@ -60,7 +60,7 @@ func TestNewDetailLatestTag(t *testing.T) {
 					Priority: 0,
 				},
 				funcLatestTag: func(info git.RepoInfo) (git.Tag, error) {
-					return git.Tag{"1.0.0"}, nil
+					return git.Tag{Name: "1.0.0"}, nil
 				},
 			},
 			want: "1.0.0",
