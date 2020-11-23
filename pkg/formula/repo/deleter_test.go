@@ -135,7 +135,7 @@ func TestDeleteWhenErr(t *testing.T) {
 						{
 							Name:     formula.RepoName("commons"),
 							Version:  formula.RepoVersion("v2.0.0"),
-							Url:      "https://github.com/kaduartur/ritchie-formulas",
+							URL:      "https://github.com/kaduartur/ritchie-formulas",
 							Priority: 0,
 						},
 					},
