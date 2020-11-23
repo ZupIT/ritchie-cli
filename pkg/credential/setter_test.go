@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/stretchr/testify/suite"
 )
@@ -33,9 +33,9 @@ type SetterTestSuite struct {
 
 	HomePath string
 
-	contextHolderNil     *rcontext.ContextHolder
-	contextHolderDefault *rcontext.ContextHolder
-	contextHolderProd    *rcontext.ContextHolder
+	envHolderNil     *env.Holder
+	envHolderDefault *env.Holder
+	envHolderProd    *env.Holder
 
 	DetailCredentialInfo *Detail
 }
@@ -51,9 +51,9 @@ func (suite *SetterTestSuite) SetupSuite() {
 	}
 
 	suite.HomePath = filepath.Join(tempDir, nameSuite)
-	suite.contextHolderNil = &rcontext.ContextHolder{Current: ""}
-	suite.contextHolderDefault = &rcontext.ContextHolder{Current: "default"}
-	suite.contextHolderProd = &rcontext.ContextHolder{Current: "prod", All: []string{"defauld", "prod"}}
+	suite.envHolderNil = &env.Holder{Current: ""}
+	suite.envHolderDefault = &env.Holder{Current: "default"}
+	suite.envHolderProd = &env.Holder{Current: "prod", All: []string{"defauld", "prod"}}
 	suite.DetailCredentialInfo = detailExample
 }
 
@@ -66,14 +66,14 @@ func (suite *SetterTestSuite) fileInfo(path string) (string, error) {
 func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
 	for _, t := range []struct {
 		testName string
-		context  rcontext.ContextHolder
+		context  env.Holder
 	}{
-		{"Context informed", *suite.contextHolderDefault},
-		{"Context not informed", *suite.contextHolderNil},
+		{"Context informed", *suite.envHolderDefault},
+		{"Context not informed", *suite.envHolderNil},
 	} {
 		suite.Run(t.testName, func() {
 			contextFinderMock := new(mocks.ContextFinderMock)
-			filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
+			filePathExpectedCreated := File(suite.HomePath, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
 			contextFinderMock.On("Find").Return(t.context, nil)
 			setter := NewSetter(suite.HomePath, contextFinderMock)

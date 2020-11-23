@@ -14,27 +14,13 @@
  * limitations under the License.
  */
 
-package rcontext
+package env
 
-import (
-	"fmt"
-	"os"
-	"testing"
-
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
-)
-
-const (
-	dev = "dev"
-	qa  = "qa"
-)
-
-func TestMain(m *testing.M) {
-	cleanCtx()
-	e := m.Run()
-	os.Exit(e)
+type FindSetterManager struct {
+	Finder
+	Setter
 }
 
-func cleanCtx() {
-	_ = fileutil.RemoveDir(fmt.Sprintf(ContextPath, os.TempDir()))
+func NewFindSetter(f Finder, s Setter) FindSetterManager {
+	return FindSetterManager{f, s}
 }

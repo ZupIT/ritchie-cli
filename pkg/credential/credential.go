@@ -73,6 +73,10 @@ type Pather interface {
 	CredentialsPath() string
 }
 
+type Resolver interface {
+	Resolve(name string) (string, error)
+}
+
 type ReaderWriterPather interface {
 	Reader
 	Writer

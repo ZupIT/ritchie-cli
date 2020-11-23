@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package rcontext
+package env
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	sMock "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 func TestRemove(t *testing.T) {
 	tmp := os.TempDir()
 	file := stream.NewFileManager()
 	finder := NewFinder(tmp, file)
-	setter := NewSetter(tmp, finder)
-	remover := NewRemover(tmp, finder)
+	setter := NewSetter(tmp, finder, file)
 
 	_, err := setter.Set(dev)
 	if err != nil {
@@ -43,42 +44,82 @@ func TestRemove(t *testing.T) {
 		return
 	}
 
+	type in struct {
+		file      stream.FileWriter
+		envFinder Finder
+		env       string
+	}
+
 	type out struct {
-		want ContextHolder
+		want Holder
 		err  error
 	}
 
 	tests := []struct {
 		name string
-		in   string
+		in   in
 		out  *out
 	}{
 		{
-			name: "dev context",
-			in:   dev,
+			name: "dev env",
+			in: in{
+				file:      file,
+				envFinder: finder,
+				env:       dev,
+			},
 			out: &out{
-				want: ContextHolder{Current: qa, All: []string{qa}},
+				want: Holder{Current: qa, All: []string{qa}},
 				err:  nil,
 			},
 		},
 		{
-			name: "current context",
-			in:   CurrentCtx + qa,
+			name: "current env",
+			in: in{
+				file:      file,
+				envFinder: finder,
+				env:       CurrentEnv + qa,
+			},
 			out: &out{
-				want: ContextHolder{All: []string{}},
+				want: Holder{All: []string{}},
 				err:  nil,
+			},
+		},
+		{
+			name: "find env error",
+			in: in{
+				file:      file,
+				envFinder: findEnvMock{err: errors.New("error to find env")},
+				env:       qa,
+			},
+			out: &out{
+				err: errors.New("error to find env"),
+			},
+		},
+		{
+			name: "write env error",
+			in: in{
+				file: sMock.FileWriterCustomMock{
+					WriteMock: func(path string, content []byte) error {
+						return errors.New("error to write envs file")
+					},
+				},
+				envFinder: finder,
+				env:       qa,
+			},
+			out: &out{
+				err: errors.New("error to write envs file"),
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			in := tt.in
 			out := tt.out
 
-			got, err := remover.Remove(in)
-			if err != nil {
+			remover := NewRemover(tmp, in.envFinder, in.file)
+			got, err := remover.Remove(in.env)
+			if out.err != nil && out.err.Error() != err.Error() {
 				t.Errorf("Remove(%s) got %v, want %v", tt.name, err, out.err)
 			}
 			if !reflect.DeepEqual(out.want, got) {

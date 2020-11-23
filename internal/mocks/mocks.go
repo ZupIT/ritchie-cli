@@ -17,16 +17,17 @@
 package mocks
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 )
 
 type ContextFinderMock struct {
 	mock.Mock
 }
 
-func (cf *ContextFinderMock) Find() (rcontext.ContextHolder, error) {
+func (cf *ContextFinderMock) Find() (env.Holder, error) {
 	args := cf.Called()
 
-	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
+	return args.Get(0).(env.Holder), args.Error(1)
 }

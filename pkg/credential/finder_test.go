@@ -23,8 +23,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	sMock "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -34,13 +35,14 @@ var (
 	githubCred = Detail{Service: "github"}
 	streamMock = sMock.FileReadExisterCustomMock{
 		ReadMock: func(path string) ([]byte, error) {
-			return []byte("{\"current_context\":\"default\"}"), nil
+			return []byte("{\"current_env\":\"default\"}"), nil
 		},
 		ExistsMock: func(path string) bool {
 			return true
 		},
 	}
-	ctxFinder = rcontext.FindManager{CtxFile: "", File: streamMock}
+
+	ctxFinder = env.NewFinder("", streamMock)
 )
 
 func TestFind(t *testing.T) {
@@ -57,7 +59,7 @@ func TestFind(t *testing.T) {
 
 	type in struct {
 		homePath  string
-		ctxFinder rcontext.Finder
+		ctxFinder env.Finder
 		file      stream.FileReader
 		provider  string
 	}

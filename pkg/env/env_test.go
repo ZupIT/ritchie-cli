@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package rcontext
+package env
 
-import "fmt"
+import (
+	"os"
+	"path/filepath"
+	"testing"
 
-type FindSetterManager struct {
-	ctxFile string
-	Finder
-	Setter
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+)
+
+const (
+	dev = "dev"
+	qa  = "qa"
+)
+
+func TestMain(m *testing.M) {
+	cleanEnv()
+	e := m.Run()
+	os.Exit(e)
 }
 
-func NewFindSetter(homePath string, f Finder, s Setter) FindSetterManager {
-	return FindSetterManager{fmt.Sprintf(ContextPath, homePath), f, s}
+func cleanEnv() {
+	file := stream.NewFileManager()
+	_ = file.Remove(filepath.Join(os.TempDir(), FileName))
 }

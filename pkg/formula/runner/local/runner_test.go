@@ -30,7 +30,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -53,12 +52,12 @@ func TestRun(t *testing.T) {
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 
-	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
+	ctxFinder := env.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	pInputRunner := prompt.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{})
-	sInputRunner := stdin.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
-	fInputRunner := flag.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
+	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{})
+	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
+	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
 
 	types := formula.TermInputTypes{
 		api.Prompt: pInputRunner,
@@ -73,7 +72,7 @@ func TestRun(t *testing.T) {
 		postRun       formula.PostRunner
 		inputResolver formula.InputResolver
 		fileManager   stream.FileWriteExistAppender
-		context       rcontext.Finder
+		context       env.Finder
 	}
 
 	type out struct {
@@ -163,7 +162,7 @@ func TestRun(t *testing.T) {
 				postRun:       postRunner,
 				inputResolver: inputResolver,
 				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				context: ctxFinderMock{ctx: rcontext.ContextHolder{
+				context: ctxFinderMock{ctx: env.Holder{
 					Current: "prod",
 				}},
 			},
@@ -251,11 +250,11 @@ func (i inputTextDefaultMock) Text(formula.Input) (string, error) {
 }
 
 type ctxFinderMock struct {
-	ctx rcontext.ContextHolder
+	ctx env.Holder
 	err error
 }
 
-func (c ctxFinderMock) Find() (rcontext.ContextHolder, error) {
+func (c ctxFinderMock) Find() (env.Holder, error) {
 	return c.ctx, c.err
 }
 

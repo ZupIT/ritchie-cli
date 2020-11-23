@@ -19,17 +19,18 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
 type showContextCmd struct {
-	rcontext.Finder
+	env.Finder
 }
 
-func NewShowContextCmd(f rcontext.Finder) *cobra.Command {
+func NewShowContextCmd(f env.Finder) *cobra.Command {
 	s := showContextCmd{f}
 
 	return &cobra.Command{
@@ -50,7 +51,7 @@ func (s showContextCmd) runFunc() CommandRunnerFunc {
 		}
 
 		if ctx.Current == "" {
-			ctx.Current = rcontext.DefaultCtx
+			ctx.Current = env.DefaultEnv
 		}
 
 		prompt.Info(fmt.Sprintf("Current context: %s \n", ctx.Current))
