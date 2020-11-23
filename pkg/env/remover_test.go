@@ -77,7 +77,7 @@ func TestRemove(t *testing.T) {
 			in: in{
 				file:      file,
 				envFinder: finder,
-				env:       CurrentEnv + qa,
+				env:       Current + qa,
 			},
 			out: &out{
 				want: Holder{All: []string{}},

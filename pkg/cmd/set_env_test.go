@@ -20,11 +20,11 @@ import (
 	"testing"
 )
 
-func TestNewSetContextCmd(t *testing.T) {
-	cmd := NewSetContextCmd(ctxFindSetterMock{}, inputTextMock{}, inputListMock{})
+func TestNewSetEnvCmd(t *testing.T) {
+	cmd := NewSetEnvCmd(envFindSetterMock{}, inputTextMock{}, inputListMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
-		t.Errorf("NewSetContextCmd got %v", cmd)
+		t.Errorf("NewSetEnvCmd got %v", cmd)
 	}
 
 	if err := cmd.Execute(); err != nil {

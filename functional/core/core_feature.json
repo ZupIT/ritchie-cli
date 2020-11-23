@@ -11,25 +11,25 @@
         "result": "Current context:"
     },
     {
-        "entry": "Set context",
+        "entry": "Set env",
         "steps": [
             {
                 "key": "",
-                "value": "set context",
+                "value": "set env",
                 "action": "main"
             },
             {
                 "key": "All:",
-                "value": "Type new context?",
+                "value": "Type the new env?",
                 "action": "select"
             },
             {
-                "key": "New context:",
+                "key": "New env:",
                 "value": "Leonidas",
                 "action": "sendkey"
             }
         ],
-        "result": "Set context successful!"
+        "result": "Set env successful!"
     },
     {
         "entry": "Delete context",
@@ -193,7 +193,7 @@
                 "action": "main"
             }
         ],
-        "result": "Set contexts, credentials, priorities for formula repositories and formulas runner defaults."
+        "result": "Set envs, credentials, priorities for formula repositories and formulas runner defaults."
     },
     {
         "entry": "Update",

@@ -44,7 +44,7 @@ func (r RemoveManager) Remove(env string) (Holder, error) {
 		return Holder{}, err
 	}
 
-	env = strings.ReplaceAll(env, CurrentEnv, "")
+	env = strings.ReplaceAll(env, Current, "")
 	if envHolder.Current == env {
 		envHolder.Current = ""
 	}

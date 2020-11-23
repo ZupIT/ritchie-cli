@@ -42,7 +42,7 @@ func (s SetManager) Set(cred Detail) error {
 		return err
 	}
 	if ctx.Current == "" {
-		ctx.Current = env.DefaultEnv
+		ctx.Current = env.Default
 	}
 
 	cb, err := json.Marshal(cred)

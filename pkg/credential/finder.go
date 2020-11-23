@@ -54,7 +54,7 @@ func (f Finder) Find(provider string) (Detail, error) {
 		return Detail{}, err
 	}
 	if ctx.Current == "" {
-		ctx.Current = env.DefaultEnv
+		ctx.Current = env.Default
 	}
 
 	cb, err := f.file.Read(File(f.homePath, ctx.Current, provider))
