@@ -18,9 +18,9 @@ package formula
 
 type CreateBuilderManager struct {
 	Creator
-	LocalBuilder
+	Builder
 }
 
-func NewCreateBuilder(creator Creator, builder LocalBuilder) CreateBuilder {
+func NewCreateBuilder(creator Creator, builder Builder) CreateBuilder {
 	return CreateBuilderManager{creator, builder}
 }

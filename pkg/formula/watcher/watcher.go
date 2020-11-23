@@ -39,13 +39,13 @@ const stoppedText = "Press CTRL+C to stop"
 
 type WatchManager struct {
 	watcher    *watcher.Watcher
-	formula    formula.LocalBuilder
+	formula    formula.Builder
 	dir        stream.DirListChecker
 	sendMetric func(cmd metric.SendCommandDataParams)
 }
 
 func New(
-	formula formula.LocalBuilder,
+	formula formula.Builder,
 	dir stream.DirListChecker,
 	sendMetric func(cmd metric.SendCommandDataParams),
 ) *WatchManager {
@@ -67,7 +67,7 @@ func (w *WatchManager) closeWatch() {
 	w.watcher.Close()
 }
 
-func (w *WatchManager) Watch(workspacePath, formulaPath string) {
+func (w *WatchManager) Watch(formulaPath string, workspace formula.Workspace) {
 	w.watcher.FilterOps(watcher.Write)
 	sigs := make(chan os.Signal, 1)
 
@@ -78,7 +78,7 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 			select {
 			case event := <-w.watcher.Event:
 				if !event.IsDir() && !strings.Contains(event.Path, "/dist") {
-					w.build(workspacePath, formulaPath)
+					w.build(formulaPath, workspace)
 					fmt.Println(prompt.Bold("Waiting for changes...") + "\n" + stoppedText + "\n")
 				}
 			case err := <-w.watcher.Error:
@@ -95,7 +95,7 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 		log.Fatalln(err)
 	}
 
-	w.build(workspacePath, formulaPath)
+	w.build(formulaPath, workspace)
 
 	watchText := fmt.Sprintf("Watching dir %s", formulaPath)
 	fmt.Println(prompt.Bold(watchText) + "\n" + stoppedText + "\n")
@@ -105,12 +105,13 @@ func (w *WatchManager) Watch(workspacePath, formulaPath string) {
 	}
 }
 
-func (w WatchManager) build(workspacePath, formulaPath string) {
+func (w WatchManager) build(formulaPath string, workspace formula.Workspace) {
 	buildInfo := prompt.Bold("Building formula...")
 	s := spinner.StartNew(buildInfo)
 	time.Sleep(2 * time.Second)
 
-	if err := w.formula.Build(workspacePath, formulaPath); err != nil {
+	info := formula.BuildInfo{FormulaPath: formulaPath, Workspace: workspace}
+	if err := w.formula.Build(info); err != nil {
 		errorMsg := prompt.Red(err.Error())
 		s.Error(errors.New(errorMsg))
 		return

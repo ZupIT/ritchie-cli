@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package repo
+package mocks
 
-import "github.com/ZupIT/ritchie-cli/pkg/formula"
+import (
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/stretchr/testify/mock"
+)
 
-type ListCreateManager struct {
-	formula.RepositoryLister
-	formula.RepositoryCreator
+type ContextFinderMock struct {
+	mock.Mock
 }
 
-func NewListCreator(
-	repoList formula.RepositoryLister,
-	repoCreate formula.RepositoryCreator,
-) formula.RepositoryListCreator {
-	return ListCreateManager{
-		RepositoryLister:  repoList,
-		RepositoryCreator: repoCreate,
-	}
+func (cf *ContextFinderMock) Find() (rcontext.ContextHolder, error) {
+	args := cf.Called()
+
+	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
 }

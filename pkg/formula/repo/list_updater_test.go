@@ -44,7 +44,8 @@ func TestNewListUpdater(t *testing.T) {
 
 	repoList := NewLister(ritHome, fileManager)
 	repoCreator := NewCreator(ritHome, repoProviders, dirManager, fileManager)
-	repoListCreator := NewListCreator(repoList, repoCreator)
+	repoWriter := NewWriter(ritHome, fileManager)
+	repoListCreator := NewListWriteCreator(repoList, repoCreator, repoWriter)
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
 	repoUpdate := NewUpdater(ritHome, repoListCreator, treeGenerator, fileManager)
 

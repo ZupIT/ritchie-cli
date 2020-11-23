@@ -9,6 +9,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
+type InputTextDefault interface {
+	Text(input formula.Input) (string, error)
+}
+
 const (
 	TextType    = "text"
 	BoolType    = "bool"
