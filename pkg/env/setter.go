@@ -45,8 +45,8 @@ func (s SetterManager) Set(env string) (Holder, error) {
 		return Holder{}, err
 	}
 
-	envHolder.Current = strings.ReplaceAll(env, DefaultEnv, "")
-	if env != DefaultEnv {
+	envHolder.Current = strings.ReplaceAll(env, Default, "")
+	if env != Default {
 		if envHolder.All == nil {
 			envHolder.All = make([]string, 0)
 		}

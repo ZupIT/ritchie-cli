@@ -51,7 +51,7 @@ func (s showContextCmd) runFunc() CommandRunnerFunc {
 		}
 
 		if ctx.Current == "" {
-			ctx.Current = env.DefaultEnv
+			ctx.Current = env.Default
 		}
 
 		prompt.Info(fmt.Sprintf("Current context: %s \n", ctx.Current))

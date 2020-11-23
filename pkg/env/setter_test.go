@@ -88,7 +88,7 @@ func TestSet(t *testing.T) {
 			in: in{
 				file:      file,
 				envFinder: finder,
-				env:       DefaultEnv,
+				env:       Default,
 			},
 			out: &out{
 				want: Holder{Current: "", All: []string{dev, qa}},

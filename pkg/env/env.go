@@ -17,9 +17,9 @@
 package env
 
 const (
-	FileName   = "envs"
-	CurrentEnv = "Current -> "
-	DefaultEnv = "default"
+	FileName = "envs"
+	Current  = "Current -> "
+	Default  = "default"
 )
 
 type Holder struct {

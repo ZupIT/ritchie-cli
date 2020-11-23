@@ -74,7 +74,7 @@ func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
 
 		for i := range ctxHolder.All {
 			if ctxHolder.All[i] == ctxHolder.Current {
-				ctxHolder.All[i] = fmt.Sprintf("%s%s", env.CurrentEnv, ctxHolder.Current)
+				ctxHolder.All[i] = fmt.Sprintf("%s%s", env.Current, ctxHolder.Current)
 			}
 		}
 

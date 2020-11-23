@@ -19,7 +19,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
+	renv "github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/spf13/cobra"
 
@@ -34,7 +34,7 @@ const (
 
 // setEnvCmd type for clean repo command.
 type setEnvCmd struct {
-	env env.FindSetter
+	env renv.FindSetter
 	prompt.InputText
 	prompt.InputList
 }
@@ -45,7 +45,7 @@ type setEnv struct {
 }
 
 func NewSetEnvCmd(
-	fs env.FindSetter,
+	fs renv.FindSetter,
 	it prompt.InputText,
 	il prompt.InputList,
 ) *cobra.Command {
@@ -72,21 +72,21 @@ func (s setEnvCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		envHolder.All = append(envHolder.All, env.DefaultEnv)
+		envHolder.All = append(envHolder.All, renv.Default)
 		envHolder.All = append(envHolder.All, newEnv)
-		ctx, err := s.List("All:", envHolder.All)
+		env, err := s.List("All:", envHolder.All)
 		if err != nil {
 			return err
 		}
 
-		if ctx == newEnv {
-			ctx, err = s.Text("New env: ", true)
+		if env == newEnv {
+			env, err = s.Text("New env: ", true)
 			if err != nil {
 				return err
 			}
 		}
 
-		if _, err := s.env.Set(ctx); err != nil {
+		if _, err := s.env.Set(env); err != nil {
 			return err
 		}
 
