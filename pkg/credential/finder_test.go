@@ -27,6 +27,22 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+
+	sMock "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+)
+
+var (
+	githubCred = Detail{Service: "github"}
+	streamMock = sMock.FileReadExisterCustomMock{
+		ReadMock: func(path string) ([]byte, error) {
+			return []byte("{\"current_env\":\"default\"}"), nil
+		},
+		ExistsMock: func(path string) bool {
+			return true
+		},
+	}
+
+	ctxFinder = env.NewFinder("", streamMock)
 )
 
 func TestFind(t *testing.T) {
