@@ -45,6 +45,7 @@ type addRepoCmd struct {
 	prompt.InputInt
 	tutorial rtutorial.Finder
 	tree     tree.CheckerManager
+	detail   formula.RepositoryDetail
 }
 
 func NewAddRepoCmd(
@@ -58,6 +59,7 @@ func NewAddRepoCmd(
 	inInt prompt.InputInt,
 	rtf rtutorial.Finder,
 	treeChecker tree.CheckerManager,
+	rd formula.RepositoryDetail,
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
@@ -70,6 +72,7 @@ func NewAddRepoCmd(
 		InputPassword:      inPass,
 		tutorial:           rtf,
 		tree:               treeChecker,
+		detail:             rd,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -205,6 +208,11 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		err := stdin.ReadJson(os.Stdin, &r)
 		if err != nil {
 			return err
+		}
+
+		if r.Version.String() == "" {
+			latestTag := ad.detail.LatestTag(r)
+			r.Version = formula.RepoVersion(latestTag)
 		}
 
 		if err := ad.repo.Add(r); err != nil {

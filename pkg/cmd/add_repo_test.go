@@ -20,6 +20,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
@@ -168,6 +169,9 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			detailMock := new(mocks.DetailManagerMock)
+			detailMock.On("LatestTag").Return("")
+
 			o := NewAddRepoCmd(
 				tt.fields.repo,
 				tt.fields.repoProviders,
@@ -179,6 +183,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				tt.fields.InputInt,
 				TutorialFinderMock{},
 				checkerManager,
+				detailMock,
 			)
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {
