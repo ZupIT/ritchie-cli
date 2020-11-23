@@ -156,8 +156,8 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 		tPath := filepath.Join(workSpacePath, filepath.Join(d...))
 		helpPath := filepath.Join(tPath, template.HelpFileName)
 		if !c.file.Exists(helpPath) {
-			folderName := filepath.Base(tPath)
-			tpl := strings.ReplaceAll(template.HelpJson, "{{folderName}}", folderName)
+			//	folderName := filepath.Base(tPath)
+			tpl := strings.ReplaceAll(template.HelpJson, "{{command}}", formulaCmdName)
 			help := formula.Help{}
 
 			err := json.Unmarshal([]byte(tpl), &help)
