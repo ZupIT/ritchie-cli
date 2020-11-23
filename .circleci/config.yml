@@ -114,7 +114,7 @@ jobs:
       - run:
           name: Horus Security Analysis
           command: |
-            curl -fsSL https://horusec.io/bin/install.sh | bash -s v1-3-0
+            curl -fsSL https://horusec.io/bin/install.sh | bash -s v1-5-0
             horusec start -p ./ -i testdata,vendor
 
   unit_test:
