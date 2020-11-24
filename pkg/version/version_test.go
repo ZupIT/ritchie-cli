@@ -55,9 +55,9 @@ func TestManager_StableVersion(t *testing.T) {
 	notExpiredCache := time.Now().Add(time.Hour).Unix()
 
 	type in struct {
-		StableVersionUrl string
+		StableVersionURL string
 		file             stream.FileWriteReadExister
-		HttpClient       *http.Client
+		HTTPClient       *http.Client
 	}
 	tests := []struct {
 		name    string
@@ -68,7 +68,7 @@ func TestManager_StableVersion(t *testing.T) {
 		{
 			name: "success get stableVersion from cache",
 			in: in{
-				StableVersionUrl: "any value",
+				StableVersionURL: "any value",
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
@@ -84,7 +84,7 @@ func TestManager_StableVersion(t *testing.T) {
 		{
 			name: "error reading from cache",
 			in: in{
-				StableVersionUrl: "any value",
+				StableVersionURL: "any value",
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
@@ -99,7 +99,7 @@ func TestManager_StableVersion(t *testing.T) {
 		{
 			name: "error on unmarshal cache data",
 			in: in{
-				StableVersionUrl: "any value",
+				StableVersionURL: "any value",
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
@@ -114,7 +114,7 @@ func TestManager_StableVersion(t *testing.T) {
 		{
 			name: "error on request stable version with no url",
 			in: in{
-				StableVersionUrl: "",
+				StableVersionURL: "",
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
@@ -123,14 +123,14 @@ func TestManager_StableVersion(t *testing.T) {
 						return buildStableBody(1), nil
 					},
 				},
-				HttpClient: okStub.Client(),
+				HTTPClient: okStub.Client(),
 			},
 			wantErr: true,
 		},
 		{
 			name: "error on request stable status not 200",
 			in: in{
-				StableVersionUrl: internalErrorStub.URL,
+				StableVersionURL: internalErrorStub.URL,
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return false
@@ -145,7 +145,7 @@ func TestManager_StableVersion(t *testing.T) {
 		{
 			name: "error on saving cache",
 			in: in{
-				StableVersionUrl: okStub.URL,
+				StableVersionURL: okStub.URL,
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return true
@@ -163,7 +163,7 @@ func TestManager_StableVersion(t *testing.T) {
 		{
 			name: "error reading bytes from response body",
 			in: in{
-				StableVersionUrl: wrongContentLengthStub.URL,
+				StableVersionURL: wrongContentLengthStub.URL,
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return false
@@ -181,7 +181,7 @@ func TestManager_StableVersion(t *testing.T) {
 		{
 			name: "success case when cache expired",
 			in: in{
-				StableVersionUrl: okStub.URL,
+				StableVersionURL: okStub.URL,
 				file: sMocks.FileWriteReadExisterCustomMock{
 					ExistsMock: func(path string) bool {
 						return false
@@ -200,7 +200,7 @@ func TestManager_StableVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := NewManager(tt.in.StableVersionUrl, tt.in.file)
+			r := NewManager(tt.in.StableVersionURL, tt.in.file)
 			got, err := r.StableVersion()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("StableVersion() error = %v, wantErr %v", err, tt.wantErr)
@@ -214,9 +214,9 @@ func TestManager_StableVersion(t *testing.T) {
 
 func TestManager_UpdateCache(t *testing.T) {
 	type in struct {
-		StableVersionUrl string
+		StableVersionURL string
 		file             stream.FileWriteReadExister
-		HttpClient       *http.Client
+		HTTPClient       *http.Client
 	}
 	tests := []struct {
 		name    string
@@ -226,39 +226,39 @@ func TestManager_UpdateCache(t *testing.T) {
 		{
 			name: "success get update cache",
 			in: in{
-				StableVersionUrl: okStub.URL,
+				StableVersionURL: okStub.URL,
 				file: sMocks.FileWriteReadExisterCustomMock{
 					WriteMock: func(path string, content []byte) error {
 						return nil
 					},
 				},
-				HttpClient: okStub.Client(),
+				HTTPClient: okStub.Client(),
 			},
 			wantErr: false,
 		},
 		{
 			name: "error on request during update cache",
 			in: in{
-				StableVersionUrl: internalErrorStub.URL,
+				StableVersionURL: internalErrorStub.URL,
 				file: sMocks.FileWriteReadExisterCustomMock{
 					WriteMock: func(path string, content []byte) error {
 						return nil
 					},
 				},
-				HttpClient: internalErrorStub.Client(),
+				HTTPClient: internalErrorStub.Client(),
 			},
 			wantErr: true,
 		},
 		{
 			name: "error on writing file",
 			in: in{
-				StableVersionUrl: okStub.URL,
+				StableVersionURL: okStub.URL,
 				file: sMocks.FileWriteReadExisterCustomMock{
 					WriteMock: func(path string, content []byte) error {
 						return errors.New("writing file error")
 					},
 				},
-				HttpClient: internalErrorStub.Client(),
+				HTTPClient: internalErrorStub.Client(),
 			},
 			wantErr: true,
 		},
@@ -266,7 +266,7 @@ func TestManager_UpdateCache(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := NewManager(tt.in.StableVersionUrl, tt.in.file)
+			r := NewManager(tt.in.StableVersionURL, tt.in.file)
 			err := r.UpdateCache()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateCache() error = %v, wantErr %v", err, tt.wantErr)

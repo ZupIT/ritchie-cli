@@ -17,14 +17,15 @@
 package cmd
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 )
 
-// CommandRunnerFunc represents that runner func for commands
+// CommandRunnerFunc represents that runner func for commands.
 type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
 
-// RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc
+// RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc.
 func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())

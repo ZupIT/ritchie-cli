@@ -54,14 +54,17 @@ if you don't want to install choose to run the formulas inside the docker.
  but you will need to provide a git repo with the formulas templates and add them with
  rit add repo command, naming this repository obligatorily as "commons".
 
- See how to do this on the example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]` + "\n"
+ See how to do this on the example: 
+[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]` + "\n"
 	CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 )
 
 var (
-	errMsg             = prompt.Yellow("It was not possible to add the commons repository at this time, please try again later.")
+	errMsg = prompt.Yellow("It was not possible to add the commons" +
+		" repository at this time, please try again later.")
 	ErrInitCommonsRepo = errors.New(errMsg)
-	ErrInvalidRunType  = fmt.Errorf("invalid formula run type, these run types are enabled [%v]", strings.Join(formula.RunnerTypes, ", "))
+	ErrInvalidRunType  = fmt.Errorf("invalid formula run type, these run types are enabled [%v]",
+		strings.Join(formula.RunnerTypes, ", "))
 )
 
 type initStdin struct {
@@ -343,7 +346,8 @@ func (in initCmd) tutorialInit() error {
 	const MessageTitle = "How to create new formulas:"
 	const MessageBody = ` ∙ Run "rit create formula"
  ∙ Open the project with your favorite text editor.` + "\n"
-	const MessageCommons = "Take a look at the formulas you can run and test to see what you can with Ritchie using \"rit\"\n"
+	const MessageCommons = "Take a look at the formulas you can run and" +
+		" test to see what you can with Ritchie using \"rit\"\n"
 
 	if tutorialHolder.Current == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)

@@ -34,12 +34,12 @@ const (
 
 var supportedShell = []string{zsh.String(), bash.String(), fish.String(), powerShell.String()}
 
-// autocompleteCmd type for set autocomplete command
+// autocompleteCmd type for set autocomplete command.
 type autocompleteCmd struct {
 	autocomplete.Generator
 }
 
-// NewAutocompleteCmd creates a new cmd instance
+// NewAutocompleteCmd creates a new cmd instance.
 func NewAutocompleteCmd() *cobra.Command {
 	shells := strings.Join(supportedShell, ", ")
 
@@ -53,7 +53,7 @@ func NewAutocompleteCmd() *cobra.Command {
 	}
 }
 
-// NewAutocompleteZsh creates a new cmd instance zsh
+// NewAutocompleteZsh creates a new cmd instance zsh.
 func NewAutocompleteZsh(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 
@@ -79,7 +79,7 @@ To install run:
 	}
 }
 
-// NewAutocompleteBash creates a new cmd instance zsh
+// NewAutocompleteBash creates a new cmd instance zsh.
 func NewAutocompleteBash(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 
@@ -105,7 +105,7 @@ To install run:
 	}
 }
 
-// NewAutocompleteFish creates a new cmd instance fish
+// NewAutocompleteFish creates a new cmd instance fish.
 func NewAutocompleteFish(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 
@@ -130,7 +130,7 @@ To install run:
 	}
 }
 
-// NewAutocompletePowerShell creates a new cmd instance PowerShell
+// NewAutocompletePowerShell creates a new cmd instance PowerShell.
 func NewAutocompletePowerShell(g autocomplete.Generator) *cobra.Command {
 	a := &autocompleteCmd{g}
 

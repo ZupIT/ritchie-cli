@@ -54,7 +54,7 @@ func (scenario *Scenario) RunSteps() (string, error) {
 		ginkgo.Skip("Scenarios with multi steps for windows doesnt work")
 		return "", nil
 	} else {
-		err, resp := scenario.runStepsForUnix()
+		resp, err := scenario.runStepsForUnix()
 		return resp, err
 	}
 }
@@ -101,7 +101,7 @@ func LoadScenarios(file string) []Scenario {
 	if err != nil {
 		log.Fatal("Error reading scenarios json:", err)
 	}
-	err = json.Unmarshal([]byte(b), &res)
+	err = json.Unmarshal(b, &res)
 	if err != nil {
 		log.Fatal("Error unmarshal json:", err)
 	}

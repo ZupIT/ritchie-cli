@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
@@ -163,6 +164,8 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 			wantErr: true,
 		},
 	}
+	checkerManager := tree.NewChecker(treeMock{})
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			o := NewAddRepoCmd(
@@ -175,6 +178,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				tt.fields.InputBool,
 				tt.fields.InputInt,
 				TutorialFinderMock{},
+				checkerManager,
 			)
 			o.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := o.Execute(); (err != nil) != tt.wantErr {

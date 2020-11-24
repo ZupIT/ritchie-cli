@@ -55,7 +55,11 @@ func TestDeleteWithSuccess(t *testing.T) {
 	_ = fileManager.Remove(repoFilePath)
 	_ = fileManager.Write(repoFilePath, repoData)
 
-	deleter := NewDeleter(ritHomePath, fileManager, dirManager)
+	lister := NewLister(ritHomePath, fileManager)
+	writer := NewWriter(ritHomePath, fileManager)
+	listWriter := NewListWriter(lister, writer)
+
+	deleter := NewDeleter(ritHomePath, listWriter, dirManager)
 	err := deleter.Delete(formula.RepoName(repoName))
 	if err != nil {
 		t.Errorf("Delete return err %v", err)
@@ -85,8 +89,8 @@ func TestDeleteWithSuccess(t *testing.T) {
 func TestDeleteWhenErr(t *testing.T) {
 	type in struct {
 		ritHome  string
-		file     stream.FileWriteReadExister
 		dir      stream.DirRemover
+		repo     formula.RepositoryListWriter
 		repoName formula.RepoName
 	}
 	tests := []struct {
@@ -102,6 +106,7 @@ func TestDeleteWhenErr(t *testing.T) {
 						return errors.New("some error")
 					},
 				},
+				repo: repoListWriteMock{},
 			},
 			wantErr: true,
 		},
@@ -113,27 +118,7 @@ func TestDeleteWhenErr(t *testing.T) {
 						return nil
 					},
 				},
-				file: FileWriteCreatorReadExistRemover{
-					read: func(path string) ([]byte, error) {
-						return nil, errors.New("some error")
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Return err when fail to parse json",
-			in: in{
-				dir: DirCreateListCopyRemoverCustomMock{
-					remove: func(dir string) error {
-						return nil
-					},
-				},
-				file: FileWriteCreatorReadExistRemover{
-					read: func(path string) ([]byte, error) {
-						return []byte("not a json data"), nil
-					},
-				},
+				repo: repoListWriteMock{errList: errors.New("some error")},
 			},
 			wantErr: true,
 		},
@@ -145,23 +130,16 @@ func TestDeleteWhenErr(t *testing.T) {
 						return nil
 					},
 				},
-				file: FileWriteCreatorReadExistRemover{
-					read: func(path string) ([]byte, error) {
-						data := `
-						[
-								{
-									"name": "commons",
-									"version": "v2.0.0",
-									"url": "https://github.com/kaduartur/ritchie-formulas",
-									"priority": 0
-								}
-						]
-						`
-						return []byte(data), nil
+				repo: repoListWriteMock{
+					repos: formula.Repos{
+						{
+							Name:     formula.RepoName("commons"),
+							Version:  formula.RepoVersion("v2.0.0"),
+							Url:      "https://github.com/kaduartur/ritchie-formulas",
+							Priority: 0,
+						},
 					},
-					write: func(path string, content []byte) error {
-						return errors.New("some error")
-					},
+					errWrite: errors.New("some error"),
 				},
 			},
 			wantErr: true,
@@ -169,14 +147,24 @@ func TestDeleteWhenErr(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dm := DeleteManager{
-				ritHome: tt.in.ritHome,
-				file:    tt.in.file,
-				dir:     tt.in.dir,
-			}
+			dm := NewDeleter(tt.in.ritHome, tt.in.repo, tt.in.dir)
 			if err := dm.Delete(tt.in.repoName); (err != nil) != tt.wantErr {
 				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
+}
+
+type repoListWriteMock struct {
+	repos    formula.Repos
+	errList  error
+	errWrite error
+}
+
+func (r repoListWriteMock) List() (formula.Repos, error) {
+	return r.repos, r.errList
+}
+
+func (r repoListWriteMock) Write(repos formula.Repos) error {
+	return r.errWrite
 }

@@ -34,22 +34,22 @@ const (
 
 var ErrBuildFormulaShell = errors.New(msgShellBuildErr)
 
-var _ formula.ShellBuilder = ShellManager{}
+var _ formula.Builder = ShellManager{}
 
 type ShellManager struct {
 }
 
-func NewBuildShell() formula.ShellBuilder {
+func NewBuildShell() ShellManager {
 	return ShellManager{}
 }
 
-func (sh ShellManager) Build(formulaPath string) error {
-	if err := os.Chdir(formulaPath); err != nil {
+func (sh ShellManager) Build(info formula.BuildInfo) error {
+	if err := os.Chdir(info.FormulaPath); err != nil {
 		return err
 	}
 	var stderr bytes.Buffer
-	execFile := filepath.Join(formulaPath, buildSh)
-	cmd := exec.Command(execFile)
+	execFile := filepath.Join(info.FormulaPath, buildSh)
+	cmd := exec.Command(execFile) //nolint:gosec
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf(errMsgFmt, ErrBuildFormulaShell, stderr.String())

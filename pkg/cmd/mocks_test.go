@@ -20,10 +20,10 @@ import (
 	"errors"
 	"io"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
-
-	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
@@ -182,7 +182,7 @@ func (formCreator) Create(cf formula.Create) error {
 	return nil
 }
 
-func (formCreator) Build(workspacePath, formulaPath string) error {
+func (formCreator) Build(info formula.BuildInfo) error {
 	return nil
 }
 
@@ -471,21 +471,21 @@ type LocalBuilderMock struct {
 	build func(workspacePath, formulaPath string) error
 }
 
-func (l LocalBuilderMock) Build(workspacePath, formulaPath string) error {
-	return l.build(workspacePath, formulaPath)
+func (l LocalBuilderMock) Build(info formula.BuildInfo) error {
+	return l.build(info.Workspace.Dir, info.FormulaPath)
 }
 
 type WatcherMock struct {
-	watch func(workspacePath, formulaPath string)
+	watch func(formulaPath string, wspace formula.Workspace)
 }
 
-func (w WatcherMock) Watch(workspacePath, formulaPath string) {
-	w.watch(workspacePath, formulaPath)
+func (w WatcherMock) Watch(formulaPath string, wspace formula.Workspace) {
+	w.watch(formulaPath, wspace)
 }
 
 type WorkspaceAddListerCustomMock struct {
-	add      func(workspace formula.Workspace) error
-	list     func() (formula.Workspaces, error)
+	add  func(workspace formula.Workspace) error
+	list func() (formula.Workspaces, error)
 }
 
 func (w WorkspaceAddListerCustomMock) Add(workspace formula.Workspace) error {
@@ -494,6 +494,34 @@ func (w WorkspaceAddListerCustomMock) Add(workspace formula.Workspace) error {
 
 func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
 	return w.list()
+}
+
+type WorkspaceAddListHasherCustomMock struct {
+	add          func(workspace formula.Workspace) error
+	list         func() (formula.Workspaces, error)
+	currentHash  func(path string) (string, error)
+	previousHash func(path string) (string, error)
+	updateHash   func(path, hash string) error
+}
+
+func (w WorkspaceAddListHasherCustomMock) Add(workspace formula.Workspace) error {
+	return w.add(workspace)
+}
+
+func (w WorkspaceAddListHasherCustomMock) List() (formula.Workspaces, error) {
+	return w.list()
+}
+
+func (w WorkspaceAddListHasherCustomMock) CurrentHash(path string) (string, error) {
+	return w.currentHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) PreviousHash(path string) (string, error) {
+	return w.previousHash(path)
+}
+
+func (w WorkspaceAddListHasherCustomMock) UpdateHash(path string, hash string) error {
+	return w.updateHash(path, hash)
 }
 
 var (

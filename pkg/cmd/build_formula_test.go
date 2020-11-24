@@ -30,8 +30,8 @@ import (
 )
 
 type fieldsTestBuildFormulaCmd struct {
-	localBuilder     formula.LocalBuilder
-	workspaceManager formula.WorkspaceAddLister
+	localBuilder     formula.Builder
+	workspaceManager formula.WorkspaceAddListHasher
 	directory        stream.DirListChecker
 	inList           prompt.InputList
 }
@@ -47,13 +47,22 @@ func TestBuildFormulaCmd(t *testing.T) {
 				return nil
 			},
 		},
-		workspaceManager: WorkspaceAddListerCustomMock{
+		workspaceManager: WorkspaceAddListHasherCustomMock{
 			list: func() (formula.Workspaces, error) {
 				return formula.Workspaces{
 					"Default": defaultWorkspace,
 				}, nil
 			},
 			add: func(workspace formula.Workspace) error {
+				return nil
+			},
+			currentHash: func(string) (string, error) {
+				return "hash", nil
+			},
+			previousHash: func(string) (string, error) {
+				return "hash", nil
+			},
+			updateHash: func(string, string) error {
 				return nil
 			},
 		},
@@ -97,9 +106,18 @@ func TestBuildFormulaCmd(t *testing.T) {
 		{
 			name: "Run with error when workspace list returns err",
 			fields: fieldsTestBuildFormulaCmd{
-				workspaceManager: WorkspaceAddListerCustomMock{
+				workspaceManager: WorkspaceAddListHasherCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{}, someError
+					},
+					currentHash: func(string) (string, error) {
+						return "hash", nil
+					},
+					previousHash: func(string) (string, error) {
+						return "hash", nil
+					},
+					updateHash: func(string, string) error {
+						return nil
 					},
 				},
 			},
@@ -139,7 +157,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Run with sucess when the selected formula is deeper in the tree",
+			name: "Run with success when the selected formula is deeper in the tree",
 			fields: fieldsTestBuildFormulaCmd{
 				directory: DirManagerCustomMock{
 					exists: func(dir string) bool {
@@ -173,7 +191,7 @@ func TestBuildFormulaCmd(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Run with sucess when selected formula is less deep in the tree",
+			name: "Run with success when selected formula is less deep in the tree",
 			fields: fieldsTestBuildFormulaCmd{
 				directory: DirManagerCustomMock{
 					exists: func(dir string) bool {

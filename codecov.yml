@@ -1,0 +1,7 @@
+coverage:
+  status:
+    project: off
+github_checks:
+  annotations: false
+ignore:
+  - "vendor/**/*"

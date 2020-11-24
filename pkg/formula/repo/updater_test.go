@@ -29,7 +29,7 @@ func TestUpdateManager_Update(t *testing.T) {
 
 	type in struct {
 		ritHome string
-		repo    formula.RepositoryListCreator
+		repo    formula.RepositoryListWriteCreator
 		tree    formula.TreeGenerator
 		file    stream.FileWriter
 		name    formula.RepoName
@@ -44,7 +44,7 @@ func TestUpdateManager_Update(t *testing.T) {
 			name: "Return err when listRepos fail",
 			in: in{
 				ritHome: "",
-				repo: repositoryListCreatorCustomMock{
+				repo: repoListWriteCreatorMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{}, errors.New("some error")
 					},
@@ -60,7 +60,7 @@ func TestUpdateManager_Update(t *testing.T) {
 			name: "Return err when listRepos is empty",
 			in: in{
 				ritHome: "",
-				repo: repositoryListCreatorCustomMock{
+				repo: repoListWriteCreatorMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
@@ -80,7 +80,7 @@ func TestUpdateManager_Update(t *testing.T) {
 			name: "Return err when Create fail",
 			in: in{
 				ritHome: "",
-				repo: repositoryListCreatorCustomMock{
+				repo: repoListWriteCreatorMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
@@ -100,10 +100,10 @@ func TestUpdateManager_Update(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Return err when write fail",
+			name: "Return err when write repo fail",
 			in: in{
 				ritHome: "",
-				repo: repositoryListCreatorCustomMock{
+				repo: repoListWriteCreatorMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
@@ -114,8 +114,68 @@ func TestUpdateManager_Update(t *testing.T) {
 					create: func(repo formula.Repo) error {
 						return nil
 					},
+					write: func(repos formula.Repos) error {
+						return errors.New("some error")
+					},
 				},
-				tree: treeGeneratorCustomMock{},
+				tree: treeGeneratorCustomMock{
+					generate: func(repoPath string) (formula.Tree, error) {
+						return formula.Tree{}, nil
+					},
+				},
+				file: FileWriteCreatorReadExistRemover{
+					write: func(path string, content []byte) error {
+						return nil
+					},
+				},
+				name:    "any_repo",
+				version: "any_version",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return err when try update a local repo",
+			in: in{
+				ritHome: "",
+				repo: repoListWriteCreatorMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name:    "any_repo",
+								IsLocal: true,
+							},
+						}, nil
+					},
+				},
+				name:    "any_repo",
+				version: "any_version",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return err when write fail",
+			in: in{
+				ritHome: "",
+				repo: repoListWriteCreatorMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{
+							{
+								Name: "any_repo",
+							},
+						}, nil
+					},
+					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
+						return nil
+					},
+				},
+				tree: treeGeneratorCustomMock{
+					generate: func(repoPath string) (formula.Tree, error) {
+						return formula.Tree{}, nil
+					},
+				},
 				file: FileWriteCreatorReadExistRemover{
 					write: func(path string, content []byte) error {
 						return errors.New("some error")
@@ -130,7 +190,7 @@ func TestUpdateManager_Update(t *testing.T) {
 			name: "Return err when generate fail",
 			in: in{
 				ritHome: "",
-				repo: repositoryListCreatorCustomMock{
+				repo: repoListWriteCreatorMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
@@ -139,6 +199,9 @@ func TestUpdateManager_Update(t *testing.T) {
 						}, nil
 					},
 					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
 						return nil
 					},
 				},
@@ -161,7 +224,7 @@ func TestUpdateManager_Update(t *testing.T) {
 			name: "Return err when fail to write tree",
 			in: in{
 				ritHome: "",
-				repo: repositoryListCreatorCustomMock{
+				repo: repoListWriteCreatorMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
@@ -170,6 +233,9 @@ func TestUpdateManager_Update(t *testing.T) {
 						}, nil
 					},
 					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
 						return nil
 					},
 				},
@@ -195,7 +261,7 @@ func TestUpdateManager_Update(t *testing.T) {
 			name: "Run with success",
 			in: in{
 				ritHome: "",
-				repo: repositoryListCreatorCustomMock{
+				repo: repoListWriteCreatorMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{
 							{
@@ -204,6 +270,9 @@ func TestUpdateManager_Update(t *testing.T) {
 						}, nil
 					},
 					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
 						return nil
 					},
 				},
@@ -238,15 +307,20 @@ func TestUpdateManager_Update(t *testing.T) {
 	}
 }
 
-type repositoryListCreatorCustomMock struct {
+type repoListWriteCreatorMock struct {
 	create func(repo formula.Repo) error
 	list   func() (formula.Repos, error)
+	write  func(repos formula.Repos) error
 }
 
-func (m repositoryListCreatorCustomMock) Create(repo formula.Repo) error {
+func (m repoListWriteCreatorMock) Create(repo formula.Repo) error {
 	return m.create(repo)
 }
 
-func (m repositoryListCreatorCustomMock) List() (formula.Repos, error) {
+func (m repoListWriteCreatorMock) List() (formula.Repos, error) {
 	return m.list()
+}
+
+func (m repoListWriteCreatorMock) Write(repos formula.Repos) error {
+	return m.write(repos)
 }

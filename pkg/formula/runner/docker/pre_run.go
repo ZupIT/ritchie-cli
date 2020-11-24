@@ -42,23 +42,29 @@ Config file path not found: %s`
 )
 
 var (
-	ErrDockerNotInstalled  = errors.New("you must have the docker installed to run formulas inside it, check how to install it at: [https://docs.docker.com/get-docker]")
-	ErrDockerImageNotFound = errors.New("config.json does not contain the \"dockerImageBuilder\" field, to run this formula with docker add a docker image name to it")
-	ErrDockerfileNotFound  = errors.New("the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker")
+	ErrDockerNotInstalled = errors.New(
+		"you must have the docker installed to run formulas inside it, check how to install it at: [https://docs.docker.com/get-docker]",
+	)
+	ErrDockerImageNotFound = errors.New(
+		"config.json does not contain the \"dockerImageBuilder\" field, to run this formula with docker add a docker image name to it",
+	)
+	ErrDockerfileNotFound = errors.New(
+		"the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker",
+	)
 )
 
 var _ formula.PreRunner = PreRunManager{}
 
 type PreRunManager struct {
 	ritchieHome string
-	docker      formula.DockerBuilder
+	docker      formula.Builder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
 }
 
 func NewPreRun(
 	ritchieHome string,
-	docker formula.DockerBuilder,
+	docker formula.Builder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
 ) PreRunManager {
@@ -134,7 +140,8 @@ func (pr PreRunManager) buildFormula(formulaPath, dockerImg string) error {
 		return err
 	}
 
-	if err := pr.docker.Build(formulaPath, dockerImg); err != nil {
+	info := formula.BuildInfo{FormulaPath: formulaPath, DockerImg: dockerImg}
+	if err := pr.docker.Build(info); err != nil {
 		return err
 	}
 
@@ -185,6 +192,7 @@ func buildRunImg(def formula.Definition) (string, error) {
 
 	containerId = strings.ToLower(containerId)
 	args := []string{"build", "-t", containerId, "."}
+	//nolint:gosec
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

@@ -1,5 +1,64 @@
 # Changelog
 
+## [2.4.0](https://github.com/zupit/ritchie-cli/tree/2.4.0) (2020-11-13)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.3.0...2.4.0)
+
+**Closed issues:**
+
+- Update all formulas repositories at once [\#594](https://github.com/ZupIT/ritchie-cli/issues/594)
+- \[Feature\] Add support for flag --default [\#627](https://github.com/ZupIT/ritchie-cli/issues/627)
+- Add default field visualization to survey inputs [\#565](https://github.com/ZupIT/ritchie-cli/issues/565)
+
+**Merged pull requests:**
+
+- Fix/issue\_templates [\#669](https://github.com/ZupIT/ritchie-cli/pull/669) ([kaduartur](https://github.com/kaduartur))
+- fix lint [\#662](https://github.com/ZupIT/ritchie-cli/pull/662) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Release 2.3.0 merge [\#661](https://github.com/ZupIT/ritchie-cli/pull/661) ([zup-ci](https://github.com/zup-ci))
+- add default flag [\#635](https://github.com/ZupIT/ritchie-cli/pull/635) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Added update All for repo [\#602](https://github.com/ZupIT/ritchie-cli/pull/602) ([Harirai](https://github.com/Harirai))
+- fix: fix lint [\#672](https://github.com/ZupIT/ritchie-cli/pull/672) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- feat: add default text input to formula [\#654](https://github.com/ZupIT/ritchie-cli/pull/654) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+
+## [2.3.0](https://github.com/zupit/ritchie-cli/tree/2.3.0) (2020-11-09)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.2.0...2.3.0)
+
+**Closed issues:**
+
+- ERROR: unsatisfiable constraints when build a dockerfile. [\#650](https://github.com/ZupIT/ritchie-cli/issues/650)
+- Improve circleci pipeline [\#607](https://github.com/ZupIT/ritchie-cli/issues/607)
+- Suggest a build when the formula is used and we notice that a modification was made in the files [\#559](https://github.com/ZupIT/ritchie-cli/issues/559)
+- Add all available flags in the ritchie options listing. [\#522](https://github.com/ZupIT/ritchie-cli/issues/522)
+- Improves code quality related to linters and tests [\#510](https://github.com/ZupIT/ritchie-cli/issues/510)
+- Autocomplete when typing workspace on input [\#459](https://github.com/ZupIT/ritchie-cli/issues/459)
+- Warn machine env variables if they have the same name as input params [\#625](https://github.com/ZupIT/ritchie-cli/issues/625)
+- Add current context for formula execution [\#588](https://github.com/ZupIT/ritchie-cli/issues/588)
+- Allow for inputs to be added via flag params [\#579](https://github.com/ZupIT/ritchie-cli/issues/579)
+- Notify the user of conflicting formula on the current tree [\#473](https://github.com/ZupIT/ritchie-cli/issues/473)
+- List options dynamically [\#389](https://github.com/ZupIT/ritchie-cli/issues/389)
+
+**Merged pull requests:**
+
+- fix linter [\#659](https://github.com/ZupIT/ritchie-cli/pull/659) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- modifying ritchie metrics endpoint [\#658](https://github.com/ZupIT/ritchie-cli/pull/658) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Change apk add from python to python3. [\#651](https://github.com/ZupIT/ritchie-cli/pull/651) ([afonsoaugusto](https://github.com/afonsoaugusto))
+- JS Lint [\#644](https://github.com/ZupIT/ritchie-cli/pull/644) ([RxDx](https://github.com/RxDx))
+- Update CODEOWNERS [\#643](https://github.com/ZupIT/ritchie-cli/pull/643) ([kaduartur](https://github.com/kaduartur))
+- Feature/pipeline [\#639](https://github.com/ZupIT/ritchie-cli/pull/639) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- warning when formulas commands conflicts  [\#638](https://github.com/ZupIT/ritchie-cli/pull/638) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- added warning on same env name [\#633](https://github.com/ZupIT/ritchie-cli/pull/633) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- added context printing [\#632](https://github.com/ZupIT/ritchie-cli/pull/632) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- More linters [\#631](https://github.com/ZupIT/ritchie-cli/pull/631) ([lcd1232](https://github.com/lcd1232))
+- Decoupling build commands from main [\#630](https://github.com/ZupIT/ritchie-cli/pull/630) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Remove codecov/project step [\#629](https://github.com/ZupIT/ritchie-cli/pull/629) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Release 2.2.0 merge [\#622](https://github.com/ZupIT/ritchie-cli/pull/622) ([zup-ci](https://github.com/zup-ci))
+- Formula inputs by flags [\#617](https://github.com/ZupIT/ritchie-cli/pull/617) ([kaduartur](https://github.com/kaduartur))
+- Improvement pipeline [\#614](https://github.com/ZupIT/ritchie-cli/pull/614) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- \[Fix\] - Searching only for run.sh on docker pre run [\#598](https://github.com/ZupIT/ritchie-cli/pull/598) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+- Prompt to auto rebuild formula on source modifications [\#578](https://github.com/ZupIT/ritchie-cli/pull/578) ([gabriel-pinheiro](https://github.com/gabriel-pinheiro))
+- Remove repository version check [\#656](https://github.com/ZupIT/ritchie-cli/pull/656) ([kaduartur](https://github.com/kaduartur))
+
 ## [2.2.0](https://github.com/zupit/ritchie-cli/tree/2.2.0) (2020-10-20)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.1.0...2.2.0)

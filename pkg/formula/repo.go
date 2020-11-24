@@ -27,6 +27,7 @@ type Repo struct {
 	Url      string       `json:"url"`
 	Token    string       `json:"token,omitempty"`
 	Priority int          `json:"priority"`
+	IsLocal  bool         `json:"isLocal"`
 }
 
 type Repos []Repo
@@ -81,7 +82,7 @@ func (re RepoProviders) Resolve(provider RepoProvider) Git {
 }
 
 func (re RepoProviders) List() []string {
-	var providers []string
+	providers := make([]string, 0, len(re))
 	for provider := range re {
 		providers = append(providers, provider.String())
 	}
@@ -113,18 +114,23 @@ type RepositoryCreator interface {
 	Create(repo Repo) error
 }
 
+type RepositoryWriter interface {
+	Write(repos Repos) error
+}
+
 type RepositoryAddLister interface {
 	RepositoryAdder
 	RepositoryLister
 }
 
-type RepositoryDelLister interface {
-	RepositoryDeleter
+type RepositoryListWriter interface {
 	RepositoryLister
+	RepositoryWriter
 }
 
-type RepositoryListCreator interface {
+type RepositoryListWriteCreator interface {
 	RepositoryLister
+	RepositoryWriter
 	RepositoryCreator
 }
 

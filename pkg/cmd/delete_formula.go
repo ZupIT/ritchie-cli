@@ -35,9 +35,9 @@ import (
 )
 
 const (
-	msgFormulaNotFound      = "Could not find formula"
-	msgIncorrectFormulaName = "Formula name is incorrect"
-	foundFormulaQuestion    = "We found a formula, which one do you want to delete: "
+	msgFormulaNotFound      = "could not find formula"
+	msgIncorrectFormulaName = "formula name is incorrect"
+	foundFormulaQuestion    = "we found a formula, which one do you want to delete: "
 )
 
 var (
@@ -144,7 +144,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 				return err
 			}
 
-			if err := d.recreateTreeJson(ritchieLocalWorkspace); err != nil {
+			if err := d.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
 				return err
 			}
 		}
@@ -181,7 +181,7 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 				return err
 			}
 
-			if err := d.recreateTreeJson(ritchieLocalWorkspace); err != nil {
+			if err := d.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
 				return err
 			}
 		}
@@ -298,15 +298,15 @@ func (d deleteFormulaCmd) safeRemoveFormula(path string) error {
 	return nil
 }
 
-func (d deleteFormulaCmd) recreateTreeJson(workspace string) error {
+func (d deleteFormulaCmd) recreateTreeJSON(workspace string) error {
 	localTree, err := d.treeGen.Generate(workspace)
 	if err != nil {
 		return err
 	}
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	pathLocalTreeJson := filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json")
-	if err = d.fileManager.Write(pathLocalTreeJson, jsonString); err != nil {
+	pathLocalTreeJSON := filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json")
+	if err = d.fileManager.Write(pathLocalTreeJSON, jsonString); err != nil {
 		return err
 	}
 
