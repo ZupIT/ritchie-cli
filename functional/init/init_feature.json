@@ -27,15 +27,15 @@
         "result":"Set env successful!"
     },
     {
-        "entry":"Delete context",
+        "entry":"Delete env",
         "steps":[
             {
                 "key":"",
-                "value":"delete context",
+                "value":"delete env",
                 "action":"main"
             }
         ],
-        "result":"You have no defined contexts"
+        "result":"You have no defined envs"
     },
     {
         "entry":"List repo",

@@ -18,13 +18,19 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 )
 
 func TestNewDeleteContextCmd(t *testing.T) {
-	cmd := NewDeleteContextCmd(ctxFindRemoverMock{}, inputTrueMock{}, inputListMock{})
+	findRemoverMock := envFindRemoverMock{holder: env.Holder{
+		Current: "",
+		All:     []string{"prod", "qa"},
+	}}
+	cmd := NewDeleteEnvCmd(findRemoverMock, inputTrueMock{}, inputListMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
-		t.Errorf("NewDeleteContextCmd got %v", cmd)
+		t.Errorf("NewDeleteEnvCmd got %v", cmd)
 
 	}
 

@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -28,28 +29,34 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-// deleteContextCmd type for clean repo command.
-type deleteContextCmd struct {
-	env.FindRemover
+var (
+	ErrNoDefinedEnv     = errors.New(prompt.Red("You have no defined envs"))
+	DeleteEnvSuccessMsg = "Delete env successful!"
+)
+
+// deleteEnvCmd type for clean repo command.
+type deleteEnvCmd struct {
+	env env.FindRemover
 	prompt.InputBool
 	prompt.InputList
 }
 
-// deleteContext type for stdin json decoder.
-type deleteContext struct {
-	Context string `json:"context"`
+// deleteEnv type for stdin json decoder.
+type deleteEnv struct {
+	Env string `json:"env"`
 }
 
-func NewDeleteContextCmd(
+func NewDeleteEnvCmd(
 	fr env.FindRemover,
 	ib prompt.InputBool,
-	il prompt.InputList) *cobra.Command {
-	d := deleteContextCmd{fr, ib, il}
+	il prompt.InputList,
+) *cobra.Command {
+	d := deleteEnvCmd{fr, ib, il}
 
 	cmd := &cobra.Command{
-		Use:       "context",
-		Short:     "Delete context for credentials",
-		Example:   "rit delete context",
+		Use:       "env",
+		Short:     "Delete env for credentials",
+		Example:   "rit delete env",
 		RunE:      RunFuncE(d.runStdin(), d.runPrompt()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
@@ -60,68 +67,67 @@ func NewDeleteContextCmd(
 	return cmd
 }
 
-func (d deleteContextCmd) runPrompt() CommandRunnerFunc {
+func (d deleteEnvCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		ctxHolder, err := d.Find()
+		envHolder, err := d.env.Find()
 		if err != nil {
 			return err
 		}
 
-		if len(ctxHolder.All) <= 0 {
-			prompt.Error("You have no defined contexts")
-			return nil
+		if len(envHolder.All) <= 0 {
+			return ErrNoDefinedEnv
 		}
 
-		for i := range ctxHolder.All {
-			if ctxHolder.All[i] == ctxHolder.Current {
-				ctxHolder.All[i] = fmt.Sprintf("%s%s", env.Current, ctxHolder.Current)
+		for i := range envHolder.All {
+			if envHolder.All[i] == envHolder.Current {
+				envHolder.All[i] = fmt.Sprintf("%s%s", env.Current, envHolder.Current)
 			}
 		}
 
-		ctx, err := d.List("Contexts:", ctxHolder.All)
+		envName, err := d.List("Envs:", envHolder.All)
 		if err != nil {
 			return err
 		}
 
-		if b, err := d.Bool("Are you sure want to delete this context?", []string{"yes", "no"}); err != nil {
+		proceed, err := d.Bool("Are you sure want to delete this env?", []string{"yes", "no"})
+		if err != nil {
 			return err
-		} else if !b {
+		}
+
+		if !proceed {
 			return nil
 		}
 
-		if _, err := d.Remove(ctx); err != nil {
+		if _, err := d.env.Remove(envName); err != nil {
 			return err
 		}
 
-		prompt.Success("Delete context successful!")
+		prompt.Success(DeleteEnvSuccessMsg)
 		return nil
 	}
 }
 
-func (d deleteContextCmd) runStdin() CommandRunnerFunc {
+func (d deleteEnvCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		ctxHolder, err := d.Find()
+		envHolder, err := d.env.Find()
 		if err != nil {
 			return err
 		}
 
-		if len(ctxHolder.All) <= 0 {
-			prompt.Error("You have no defined contexts")
-			return nil
+		if len(envHolder.All) <= 0 {
+			return ErrNoDefinedEnv
 		}
 
-		dc := deleteContext{}
-
-		err = stdin.ReadJson(os.Stdin, &dc)
-		if err != nil {
+		dc := deleteEnv{}
+		if err = stdin.ReadJson(os.Stdin, &dc); err != nil {
 			return err
 		}
 
-		if _, err := d.Remove(dc.Context); err != nil {
+		if _, err := d.env.Remove(dc.Env); err != nil {
 			return err
 		}
 
-		prompt.Success("Delete context successful!")
+		prompt.Success(DeleteEnvSuccessMsg)
 		return nil
 	}
 }

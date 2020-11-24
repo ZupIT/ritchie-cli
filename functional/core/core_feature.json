@@ -32,11 +32,11 @@
         "result": "Set env successful!"
     },
     {
-        "entry": "Delete context",
+        "entry": "Delete env",
         "steps": [
             {
                 "key": "",
-                "value": "delete context",
+                "value": "delete env",
                 "action": "main"
             },
             {
@@ -45,12 +45,12 @@
                 "action": "select"
             },
             {
-                "key": "Are you sure want to delete this context?",
+                "key": "Are you sure want to delete this env?",
                 "value": "yes",
                 "action": "select"
             }
         ],
-        "result": "Delete context successful!"
+        "result": "Delete env successful!"
     },
     {
         "entry": "Add",
@@ -292,7 +292,7 @@
                 "action": "main"
             }
         ],
-        "result": "Delete contexts, repositories, formulas and workspaces"
+        "result": "Delete env, repositories, formulas and workspaces"
     },
     {
         "entry": "Show",

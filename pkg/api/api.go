@@ -38,7 +38,7 @@ var (
 		{Parent: "root_completion", Usage: "fish"},
 		{Parent: "root_completion", Usage: "powershell"},
 		{Parent: "root", Usage: "delete"},
-		{Parent: "root_delete", Usage: "context"},
+		{Parent: "root_delete", Usage: "env"},
 		{Parent: "root_delete", Usage: "repo"},
 		{Parent: "root_delete", Usage: "workspace"},
 		{Parent: "root_delete", Usage: "formula"},

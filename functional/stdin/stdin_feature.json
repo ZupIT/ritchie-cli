@@ -32,20 +32,20 @@
         "result": "Set env successful!"
     },
     {
-        "entry": "Delete context STDIN",
+        "entry": "Delete env STDIN",
         "steps": [
             {
                 "key": "",
-                "value": "{\"context\":\"Leonidas\"}",
+                "value": "{\"env\":\"Leonidas\"}",
                 "action": "echo"
             },
             {
                 "key": "",
-                "value": "delete context --stdin",
+                "value": "delete env --stdin",
                 "action": "main"
             }
         ],
-        "result": "Delete context successful!"
+        "result": "Delete env successful!"
     },
     {
         "entry": "Add new repo STDIN",
