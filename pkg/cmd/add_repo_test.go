@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
@@ -42,6 +43,7 @@ func TestAddRepoCmd(t *testing.T) {
 		InputBool          prompt.InputBool
 		InputInt           prompt.InputInt
 		stdin              string
+		detailLatestTag    string
 	}
 	tests := []struct {
 		name    string
@@ -181,7 +183,27 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
-				stdin: "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}",
+				stdin: "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success when input is stdin and version is not informed",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				detailLatestTag: "1.0.0",
 			},
 			wantErr: false,
 		},
@@ -191,7 +213,7 @@ func TestAddRepoCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			detailMock := new(mocks.DetailManagerMock)
-			detailMock.On("LatestTag", mock.Anything).Return("")
+			detailMock.On("LatestTag", mock.Anything).Return(tt.fields.detailLatestTag)
 
 			cmd := NewAddRepoCmd(
 				tt.fields.repo,
@@ -213,6 +235,8 @@ func TestAddRepoCmd(t *testing.T) {
 					t.Errorf("NewAddRepoCmd runPrompt error = %v, wantErr %v", err, tt.wantErr)
 				}
 			} else {
+				newReader := strings.NewReader(tt.fields.stdin)
+				cmd.SetIn(newReader)
 				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 
 				if err := cmd.Execute(); (err != nil) != tt.wantErr {
