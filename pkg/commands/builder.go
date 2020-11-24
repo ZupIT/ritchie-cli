@@ -120,7 +120,7 @@ func Build() *cobra.Command {
 	ctxRemover := env.NewRemover(ritchieHomeDir, ctxFinder, fileManager)
 	ctxFindSetter := env.NewFindSetter(ctxFinder, ctxSetter)
 	ctxFindRemover := env.NewFindRemover(ctxFinder, ctxRemover)
-	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
+	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder, dirManager, fileManager)
 	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
 	treeChecker := tree.NewChecker(treeManager)
@@ -208,7 +208,7 @@ func Build() *cobra.Command {
 
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetEnvCmd(ctxFindSetter, inputText, inputList)
-	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
+	showCtxCmd := cmd.NewShowEnvCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder)

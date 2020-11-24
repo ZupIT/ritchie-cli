@@ -41,7 +41,7 @@ type RunManager struct {
 	formula.InputResolver
 	formula.PreRunner
 	file    stream.FileWriteExistAppender
-	ctx     env.Finder
+	env     env.Finder
 	homeDir string
 }
 
@@ -50,7 +50,7 @@ func NewRunner(
 	input formula.InputResolver,
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
-	ctx env.Finder,
+	env env.Finder,
 	homeDir string,
 ) formula.Runner {
 	return RunManager{
@@ -58,7 +58,7 @@ func NewRunner(
 		InputResolver: input,
 		PreRunner:     preRun,
 		file:          file,
-		ctx:           ctx,
+		env:           env,
 		homeDir:       homeDir,
 	}
 }
@@ -105,21 +105,21 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 }
 
 func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
-	ctx, err := ru.ctx.Find()
+	envHolder, err := ru.env.Find()
 	if err != nil {
 		return err
 	}
 
-	if ctx.Current != "" {
+	if envHolder.Current != "" {
 		prompt.Info(
-			fmt.Sprintf("Formula running on context: %s\n", prompt.Cyan(ctx.Current)),
+			fmt.Sprintf("Formula running on context: %s\n", prompt.Cyan(envHolder.Current)),
 		)
 	}
 
 	cmd.Env = os.Environ()
 	dockerEnv := fmt.Sprintf(formula.EnvPattern, formula.DockerExecutionEnv, "false")
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, pwd)
-	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, ctx.Current)
+	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, envHolder.Current)
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
 	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv)
 

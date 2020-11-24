@@ -21,9 +21,9 @@ import (
 )
 
 func TestNewShowContextCmd(t *testing.T) {
-	cmd := NewShowContextCmd(ctxFinderMock{})
+	cmd := NewShowEnvCmd(envFinderMock{})
 	if cmd == nil {
-		t.Errorf("NewShowContextCmd got %v", cmd)
+		t.Errorf("NewShowEnvCmd got %v", cmd)
 
 	}
 

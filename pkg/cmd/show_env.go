@@ -26,35 +26,35 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-type showContextCmd struct {
-	env.Finder
+type showEnvCmd struct {
+	env env.Finder
 }
 
-func NewShowContextCmd(f env.Finder) *cobra.Command {
-	s := showContextCmd{f}
+func NewShowEnvCmd(f env.Finder) *cobra.Command {
+	s := showEnvCmd{f}
 
 	return &cobra.Command{
-		Use:       "context",
-		Short:     "Show current context",
-		Example:   "rit show context",
+		Use:       "env",
+		Short:     "Show current env",
+		Example:   "rit show env",
 		RunE:      s.runFunc(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
 }
 
-func (s showContextCmd) runFunc() CommandRunnerFunc {
+func (s showEnvCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		ctx, err := s.Find()
+		envHolder, err := s.env.Find()
 		if err != nil {
 			return err
 		}
 
-		if ctx.Current == "" {
-			ctx.Current = env.Default
+		if envHolder.Current == "" {
+			envHolder.Current = env.Default
 		}
 
-		prompt.Info(fmt.Sprintf("Current context: %s \n", ctx.Current))
+		fmt.Printf("Current env: %v\n", prompt.Bold(envHolder.Current))
 		return nil
 	}
 }

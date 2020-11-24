@@ -16,15 +16,31 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
 
 func NewShowCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:       "show SUB_COMMAND",
-		Short:     "Show context and formula-runnner default",
-		Long:      "Show current context and formula-runnner default",
-		Example:   "rit show context",
-		ValidArgs: []string{"context", "formula-runner"},
+		Short:     "Show env and formula-runner default",
+		Long:      "Show current env and formula-runner default",
+		Example:   "rit show env",
+		ValidArgs: []string{"env", "formula-runner"},
 		Args:      cobra.OnlyValidArgs,
 	}
+
+	deprecatedMsg := fmt.Sprintf(
+		`you can now use the "%v" command for the same purpose as the "%v" command.`,
+		prompt.Bold("rit show env"),
+		prompt.Bold("rit show context"),
+	)
+
+	DeprecateCmd(cmd, "context", deprecatedMsg)
+
+	return cmd
 }

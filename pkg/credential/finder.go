@@ -34,30 +34,30 @@ Try again after use:
 `
 
 type Finder struct {
-	homePath  string
-	ctxFinder env.Finder
-	file      stream.FileReader
+	homePath string
+	env      env.Finder
+	file     stream.FileReader
 }
 
-func NewFinder(homePath string, cf env.Finder, file stream.FileReader) Finder {
+func NewFinder(homePath string, env env.Finder, file stream.FileReader) Finder {
 	return Finder{
-		homePath:  homePath,
-		ctxFinder: cf,
-		file:      file,
+		homePath: homePath,
+		env:      env,
+		file:     file,
 	}
 }
 
 func (f Finder) Find(provider string) (Detail, error) {
-	ctx, err := f.ctxFinder.Find()
+	envHolder, err := f.env.Find()
 
 	if err != nil {
 		return Detail{}, err
 	}
-	if ctx.Current == "" {
-		ctx.Current = env.Default
+	if envHolder.Current == "" {
+		envHolder.Current = env.Default
 	}
 
-	cb, err := f.file.Read(File(f.homePath, ctx.Current, provider))
+	cb, err := f.file.Read(File(f.homePath, envHolder.Current, provider))
 	if err != nil {
 		errMsg := fmt.Sprintf(errNotFoundTemplate, provider)
 		return Detail{Credential: Credential{}}, errors.New(prompt.Red(errMsg))

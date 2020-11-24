@@ -20,29 +20,37 @@ import (
 	"encoding/json"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
-
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type SetManager struct {
 	homePath string
-	ctx      env.Finder
+	env      env.Finder
+	dir      stream.DirCreater
+	file     stream.FileWriter
 }
 
-func NewSetter(homePath string, cf env.Finder) SetManager {
+func NewSetter(
+	homePath string,
+	env env.Finder,
+	dir stream.DirCreater,
+	file stream.FileWriter,
+) SetManager {
 	return SetManager{
 		homePath: homePath,
-		ctx:      cf,
+		env:      env,
+		dir:      dir,
+		file:     file,
 	}
 }
 
 func (s SetManager) Set(cred Detail) error {
-	ctx, err := s.ctx.Find()
+	envHolder, err := s.env.Find()
 	if err != nil {
 		return err
 	}
-	if ctx.Current == "" {
-		ctx.Current = env.Default
+	if envHolder.Current == "" {
+		envHolder.Current = env.Default
 	}
 
 	cb, err := json.Marshal(cred)
@@ -50,13 +58,13 @@ func (s SetManager) Set(cred Detail) error {
 		return err
 	}
 
-	dir := Dir(s.homePath, ctx.Current)
-	if err := fileutil.CreateDirIfNotExists(dir, 0700); err != nil {
+	dir := Dir(s.homePath, envHolder.Current)
+	if err := s.dir.Create(dir); err != nil {
 		return err
 	}
 
-	credFile := File(s.homePath, ctx.Current, cred.Service)
-	if err := fileutil.WriteFilePerm(credFile, cb, 0600); err != nil {
+	credFile := File(s.homePath, envHolder.Current, cred.Service)
+	if err := s.file.Write(credFile, cb); err != nil {
 		return err
 	}
 
