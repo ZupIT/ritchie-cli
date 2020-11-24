@@ -47,7 +47,7 @@ var _ = Describe("RitSingleInit", func() {
 
 		Entry("Show env", scenariosCore[0]),
 		Entry("Set env", scenariosCore[1]),
-		Entry("Delete context", scenariosCore[2]),
+		Entry("Delete env", scenariosCore[2]),
 		Entry("List repo", scenariosCore[3]),
 		Entry("Delete repo", scenariosCore[4]),
 		Entry("Create formula", scenariosCore[5]),
