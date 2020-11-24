@@ -18,6 +18,7 @@ package creator
 
 import (
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -157,27 +158,30 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 		d := dirs[0 : i+1]
 		tPath := filepath.Join(workSpacePath, filepath.Join(d...))
 		helpPath := filepath.Join(tPath, template.HelpFileName)
-		if !c.file.Exists(helpPath) {
-			folderName := filepath.Base(tPath)
-			commands += folderName + " "
-			tpl := strings.ReplaceAll(template.HelpJson, "{{command}}", commands)
-			if i == dirsLen-1 {
-				tpl = strings.ReplaceAll(template.FormulaHelpJson, "{{command}}", commands)
-			}
 
-			help := formula.Help{}
-			if err := json.Unmarshal([]byte(tpl), &help); err != nil {
-				return err
-			}
+		if c.file.Exists(helpPath) {
+			return nil
+		}
 
-			b, err := json.MarshalIndent(help, "", "\t")
-			if err != nil {
-				return err
-			}
-			err = c.file.Write(helpPath, b)
-			if err != nil {
-				return err
-			}
+		folderName := filepath.Base(tPath)
+		commands += folderName + " "
+		complement := "commands"
+		if i == dirsLen-1 {
+			complement = "formula"
+		}
+		tpl := fmt.Sprintf(template.HelpJson, commands, complement, commands, complement)
+		help := formula.Help{}
+		if err := json.Unmarshal([]byte(tpl), &help); err != nil {
+			return err
+		}
+
+		b, err := json.MarshalIndent(help, "", "\t")
+		if err != nil {
+			return err
+		}
+		err = c.file.Write(helpPath, b)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

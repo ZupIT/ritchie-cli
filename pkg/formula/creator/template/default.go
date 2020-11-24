@@ -19,13 +19,8 @@ package template
 const (
 	HelpJson = `
 {
-    "short": "{{command}}commands",
-    "long": "{{command}}commands"
-}`
-	FormulaHelpJson = `
-{
-    "short": "{{command}}formula",
-    "long": "{{command}}formula"
+    "short": "%s %s",
+    "long": "%s %s"
 }`
 	HelpFileName = "help.json"
 )
