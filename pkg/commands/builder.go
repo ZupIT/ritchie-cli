@@ -201,7 +201,6 @@ func Build() *cobra.Command {
 		inputList,
 		inputPassword)
 	listCredentialCmd := cmd.NewListCredentialCmd(credSettings)
-
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
