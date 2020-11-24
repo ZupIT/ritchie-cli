@@ -35,8 +35,7 @@ type preRunBuilderTest struct {
 	writeHashError      error
 	promptError         error
 
-	mustBuild         bool
-	mustPromptRebuild bool
+	mustBuild bool
 }
 
 var preRunBuilderTests = []preRunBuilderTest{
@@ -52,38 +51,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		writeHashError:      nil,
 		promptError:         nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
-	},
-	{
-		name: "should rebuild when user chooses to",
-
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
-
-		mustBuild:         true,
-		mustPromptRebuild: true,
-	},
-	{
-		name: "should not rebuild when user chooses not to",
-
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: false,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
-
-		mustBuild:         false,
-		mustPromptRebuild: true,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt for rebuild when hash fails to save",
@@ -97,8 +65,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		writeHashError:      fmt.Errorf("Failed to save hash"),
 		promptError:         nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt to rebuild nor fail when no workspaces are returned",
@@ -112,8 +79,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		writeHashError:      nil,
 		promptError:         nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
+		mustBuild: false,
 	},
 	{
 		name: "should not build when user Ctrl+C's on prompt",
@@ -127,8 +93,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		writeHashError:      nil,
 		promptError:         fmt.Errorf("Ctrl+C on survey"),
 
-		mustBuild:         false,
-		mustPromptRebuild: true,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt to build when the formula doesn't exist on any workspace",
@@ -142,8 +107,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		writeHashError:      nil,
 		promptError:         nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt to build when no previous hash exists",
@@ -157,8 +121,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		writeHashError:      nil,
 		promptError:         nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
+		mustBuild: false,
 	},
 }
 
@@ -166,41 +129,17 @@ func TestPreRunBuilder(t *testing.T) {
 	for _, test := range preRunBuilderTests {
 		t.Run(test.name, func(t *testing.T) {
 			builderMock := newBuilderMock()
-			inputBoolMock := newInputBoolMock(test.rebuildPromptAnswer, test.promptError)
 
 			preRunBuilder := NewPreRunBuilder(workspaceListHasherMock{test.workspaces, test.currentHash, test.currentHashError, test.previousHash,
-				test.previousHashError, test.writeHashError}, builderMock, inputBoolMock)
+				test.previousHashError, test.writeHashError}, builderMock)
 			preRunBuilder.Build("/testing/formula")
 
 			gotBuilt := builderMock.HasBuilt()
 			if gotBuilt != test.mustBuild {
 				t.Errorf("Got build %v, wanted %v", gotBuilt, test.mustBuild)
 			}
-
-			gotPrompted := inputBoolMock.HasBeenCalled()
-			if gotPrompted != test.mustPromptRebuild {
-				t.Errorf("Got rebuild prompt %v, wanted %v", gotBuilt, test.mustBuild)
-			}
 		})
 	}
-}
-
-type inputBoolMock struct {
-	hasBeenCalled *bool
-	answer        bool
-	err           error
-}
-
-func newInputBoolMock(answer bool, err error) inputBoolMock {
-	hasBeenCalled := false
-	return inputBoolMock{&hasBeenCalled, answer, err}
-}
-func (in inputBoolMock) Bool(string, []string, ...string) (bool, error) {
-	*in.hasBeenCalled = true
-	return in.answer, in.err
-}
-func (in inputBoolMock) HasBeenCalled() bool {
-	return *in.hasBeenCalled
 }
 
 type builderMock struct {

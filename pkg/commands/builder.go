@@ -42,7 +42,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/docker"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/local"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/watcher"
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
@@ -168,11 +167,10 @@ func Build() *cobra.Command {
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager)
 
-	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal, inputBool)
+	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal)
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
-	watchManager := watcher.New(formBuildLocal, dirManager, SendMetric)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
 
 	versionManager := version.NewManager(
@@ -227,7 +225,7 @@ func Build() *cobra.Command {
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder, treeChecker)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formBuildLocal, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 

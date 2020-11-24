@@ -36,6 +36,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+const newWorkspace = "Type new formula workspace?"
+
 // createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string

@@ -35,9 +35,13 @@ import (
 )
 
 const (
-	msgFormulaNotFound      = "could not find formula"
-	msgIncorrectFormulaName = "formula name is incorrect"
-	foundFormulaQuestion    = "we found a formula, which one do you want to delete: "
+	msgFormulaNotFound         = "could not find formula"
+	msgIncorrectFormulaName    = "formula name is incorrect"
+	foundFormulaQuestion       = "we found a formula, which one do you want to delete: "
+	docsDir                    = "docs"
+	srcDir                     = "src"
+	questionSelectFormulaGroup = "Select a formula or group: "
+	optionOtherFormula         = "Another formula"
 )
 
 var (
@@ -359,4 +363,21 @@ func getGroupsFromFormulaName(formulaName string) ([]string, error) {
 	}
 
 	return nil, ErrIncorrectFormulaName
+}
+
+func isFormula(dirs []string) bool {
+	for _, dir := range dirs {
+		if dir == srcDir {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasFormulaInDir(dirs []string) bool {
+	dirs = sliceutil.Remove(dirs, docsDir)
+	dirs = sliceutil.Remove(dirs, srcDir)
+
+	return len(dirs) > 0
 }
