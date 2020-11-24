@@ -25,9 +25,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/stretchr/testify/mock"
 )
 
-func Test_addRepoCmd_runPrompt(t *testing.T) {
+func TestAddRepoCmd(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
@@ -40,6 +41,7 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 		InputList          prompt.InputList
 		InputBool          prompt.InputBool
 		InputInt           prompt.InputInt
+		stdin              string
 	}
 	tests := []struct {
 		name    string
@@ -164,15 +166,34 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Run with success when input is stdin",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				stdin: "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}",
+			},
+			wantErr: false,
+		},
 	}
 	checkerManager := tree.NewChecker(treeMock{})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			detailMock := new(mocks.DetailManagerMock)
-			detailMock.On("LatestTag").Return("")
+			detailMock.On("LatestTag", mock.Anything).Return("")
 
-			o := NewAddRepoCmd(
+			cmd := NewAddRepoCmd(
 				tt.fields.repo,
 				tt.fields.repoProviders,
 				tt.fields.InputTextValidator,
@@ -185,9 +206,18 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				checkerManager,
 				detailMock,
 			)
-			o.PersistentFlags().Bool("stdin", false, "input by stdin")
-			if err := o.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.fields.stdin == "" {
+				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+
+				if err := cmd.Execute(); (err != nil) != tt.wantErr {
+					t.Errorf("NewAddRepoCmd runPrompt error = %v, wantErr %v", err, tt.wantErr)
+				}
+			} else {
+				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
+
+				if err := cmd.Execute(); (err != nil) != tt.wantErr {
+					t.Errorf("NewAddRepoCmd runStdin error = %v, wantErr %v", err, tt.wantErr)
+				}
 			}
 		})
 	}
