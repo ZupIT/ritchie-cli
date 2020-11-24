@@ -42,14 +42,15 @@ var (
 		},
 	}
 
-	ctxFinder = env.NewFinder("", streamMock)
+	envFinder = env.NewFinder("", streamMock)
 )
 
 func TestFind(t *testing.T) {
 
 	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, ctxFinder)
+	setter := NewSetter(tmp, envFinder, dirManager, fileManager)
 	_ = setter.Set(githubCred)
 
 	type out struct {
@@ -59,7 +60,7 @@ func TestFind(t *testing.T) {
 
 	type in struct {
 		homePath  string
-		ctxFinder env.Finder
+		envFinder env.Finder
 		file      stream.FileReader
 		provider  string
 	}
@@ -73,7 +74,7 @@ func TestFind(t *testing.T) {
 			name: "Run with success",
 			in: in{
 				homePath:  tmp,
-				ctxFinder: ctxFinder,
+				envFinder: envFinder,
 				file:      fileManager,
 				provider:  githubCred.Service,
 			},
@@ -86,7 +87,7 @@ func TestFind(t *testing.T) {
 			name: "Return err when file not exist",
 			in: in{
 				homePath:  tmp,
-				ctxFinder: ctxFinder,
+				envFinder: envFinder,
 				file:      fileManager,
 				provider:  "aws",
 			},
@@ -100,7 +101,7 @@ func TestFind(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := tt.out
-			finder := NewFinder(tt.in.homePath, tt.in.ctxFinder, tt.in.file)
+			finder := NewFinder(tt.in.homePath, tt.in.envFinder, tt.in.file)
 			got, err := finder.Find(tt.in.provider)
 			if err != nil && err.Error() != out.err.Error() {
 				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)

@@ -45,7 +45,7 @@ type RunManager struct {
 	formula.InputResolver
 	formula.PreRunner
 	file    stream.FileWriteExistAppender
-	ctx     env.Finder
+	env     env.Finder
 	homeDir string
 }
 
@@ -54,7 +54,7 @@ func NewRunner(
 	input formula.InputResolver,
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
-	ctx env.Finder,
+	env env.Finder,
 	homeDir string,
 ) formula.Runner {
 	return RunManager{
@@ -62,7 +62,7 @@ func NewRunner(
 		InputResolver: input,
 		PreRunner:     preRun,
 		file:          file,
-		ctx:           ctx,
+		env:           env,
 		homeDir:       homeDir,
 	}
 }
@@ -150,18 +150,18 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 }
 
 func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
-	ctx, err := ru.ctx.Find()
+	envHolder, err := ru.env.Find()
 	if err != nil {
 		return err
 	}
 
 	dockerEnv := fmt.Sprintf(formula.EnvPattern, formula.DockerExecutionEnv, "true")
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, pwd)
-	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, ctx.Current)
+	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, envHolder.Current)
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
 	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv)
 
-	for _, e := range cmd.Env { // Create a file named .env and add the environment variable inName=inValue
+	for _, e := range cmd.Env { // Create a file named .envHolder and add the environment variable inName=inValue
 		if !ru.file.Exists(envFile) {
 			if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
 				return err

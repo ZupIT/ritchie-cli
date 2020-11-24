@@ -22,10 +22,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/stretchr/testify/suite"
 )
 
 type SetterTestSuite struct {
@@ -63,7 +64,7 @@ func (suite *SetterTestSuite) fileInfo(path string) (string, error) {
 	return string(b), err
 }
 
-func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
+func (suite *SetterTestSuite) TestSetCredentialToDefault() {
 	for _, t := range []struct {
 		testName string
 		context  env.Holder
@@ -76,7 +77,7 @@ func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
 			filePathExpectedCreated := File(suite.HomePath, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
 			contextFinderMock.On("Find").Return(t.context, nil)
-			setter := NewSetter(suite.HomePath, contextFinderMock)
+			setter := NewSetter(suite.HomePath, contextFinderMock, dirManager, fileManager)
 
 			suite.NoFileExists(filePathExpectedCreated)
 

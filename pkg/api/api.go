@@ -54,7 +54,7 @@ var (
 		{Parent: "root_set", Usage: "repo-priority"},
 		{Parent: "root_set", Usage: "formula-runner"},
 		{Parent: "root", Usage: "show"},
-		{Parent: "root_show", Usage: "context"},
+		{Parent: "root_show", Usage: "env"},
 		{Parent: "root_show", Usage: "formula-runner"},
 		{Parent: "root", Usage: "create"},
 		{Parent: "root_create", Usage: "formula"},

@@ -1,14 +1,14 @@
 [
     {
-        "entry": "Show context",
+        "entry": "Show env",
         "steps": [
             {
                 "key": "",
-                "value": "show context",
+                "value": "show env",
                 "action": "main"
             }
         ],
-        "result": "Current context:"
+        "result": "Current env:"
     },
     {
         "entry": "Set env",
@@ -303,7 +303,7 @@
                 "action": "main"
             }
         ],
-        "result": "Show current context and formula-runnner default"
+        "result": "Show current env and formula-runner default"
     },
     {
         "entry": "Create",

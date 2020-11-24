@@ -1,14 +1,14 @@
 [
     {
-        "entry":"Show context",
+        "entry":"Show env",
         "steps":[
             {
                 "key":"",
-                "value":"show context",
+                "value":"show env",
                 "action":"main"
             }
         ],
-        "result":"Current context: default"
+        "result":"Current env: default"
     },
     {
         "entry":"Set env",
