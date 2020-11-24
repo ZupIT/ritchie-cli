@@ -151,8 +151,9 @@ func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string
 
 func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) error {
 	dirs := strings.Split(formulaCmdName, " ")
+	dirsLen := len(dirs)
 	var commands string
-	for i := 0; i < len(dirs); i++ {
+	for i := 0; i < dirsLen; i++ {
 		d := dirs[0 : i+1]
 		tPath := filepath.Join(workSpacePath, filepath.Join(d...))
 		helpPath := filepath.Join(tPath, template.HelpFileName)
@@ -160,10 +161,12 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 			folderName := filepath.Base(tPath)
 			commands += folderName + " "
 			tpl := strings.ReplaceAll(template.HelpJson, "{{command}}", commands)
-			help := formula.Help{}
+			if i == dirsLen-1 {
+				tpl = strings.ReplaceAll(template.FormulaHelpJson, "{{command}}", commands)
+			}
 
-			err := json.Unmarshal([]byte(tpl), &help)
-			if err != nil {
+			help := formula.Help{}
+			if err := json.Unmarshal([]byte(tpl), &help); err != nil {
 				return err
 			}
 

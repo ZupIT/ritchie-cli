@@ -22,5 +22,10 @@ const (
     "short": "{{command}}commands",
     "long": "{{command}}commands"
 }`
+	FormulaHelpJson = `
+{
+    "short": "{{command}}formula",
+    "long": "{{command}}formula"
+}`
 	HelpFileName = "help.json"
 )
