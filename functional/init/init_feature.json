@@ -8,7 +8,7 @@
                 "action":"main"
             }
         ],
-        "result":"Current env: \u001B[1mdefault\u001B[0m"
+        "result":"Current env: \"default\""
     },
     {
         "entry":"Set env",

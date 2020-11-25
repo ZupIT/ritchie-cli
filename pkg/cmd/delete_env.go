@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -30,7 +29,7 @@ import (
 )
 
 var (
-	ErrNoDefinedEnv     = errors.New(prompt.Red("You have no defined envs"))
+	NoDefinedEnvsMsg    = "You have no defined envs"
 	DeleteEnvSuccessMsg = "Delete env successful!"
 )
 
@@ -75,7 +74,8 @@ func (d deleteEnvCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		if len(envHolder.All) <= 0 {
-			return ErrNoDefinedEnv
+			prompt.Error(NoDefinedEnvsMsg)
+			return nil
 		}
 
 		for i := range envHolder.All {
@@ -115,7 +115,8 @@ func (d deleteEnvCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if len(envHolder.All) <= 0 {
-			return ErrNoDefinedEnv
+			prompt.Error(NoDefinedEnvsMsg)
+			return nil
 		}
 
 		dc := deleteEnv{}
