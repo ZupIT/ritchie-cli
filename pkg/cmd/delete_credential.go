@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -59,6 +60,7 @@ func (d deleteCredentialCmd) runPrompt() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
+		prompt.Info(fmt.Sprintf("Current context: %s", context))
 
 		data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
 		if err != nil {
