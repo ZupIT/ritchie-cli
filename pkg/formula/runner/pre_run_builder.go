@@ -20,10 +20,11 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 )
 
 const (
@@ -40,7 +41,7 @@ const (
 
 type PreRunBuilderManager struct {
 	workspace formula.WorkspaceListHasher
-	builder   formula.LocalBuilder
+	builder   formula.Builder
 	dir       stream.DirRemoveChecker
 	inBool    prompt.InputBool
 	ritHome   string
@@ -48,7 +49,7 @@ type PreRunBuilderManager struct {
 
 func NewPreRunBuilder(
 	workspace formula.WorkspaceListHasher,
-	builder formula.LocalBuilder,
+	builder formula.Builder,
 	dir stream.DirRemoveChecker,
 	inBool prompt.InputBool,
 	ritHome string,
@@ -181,7 +182,8 @@ func (b PreRunBuilderManager) hasFormulaChanged(path string) (bool, error) {
 func (b PreRunBuilderManager) buildOnWorkspace(workspace formula.Workspace, relativePath string) error {
 	formulaAbsolutePath := filepath.Join(workspace.Dir, relativePath)
 	s := spinner.StartNew(messageBuilding)
-	if err := b.builder.Build(workspace.Dir, formulaAbsolutePath); err != nil {
+	info := formula.BuildInfo{FormulaPath: formulaAbsolutePath, Workspace: workspace}
+	if err := b.builder.Build(info); err != nil {
 		s.Error(err)
 		return err
 	}

@@ -287,7 +287,7 @@ func newBuilderMock() builderMock {
 	hasBuilt := false
 	return builderMock{&hasBuilt}
 }
-func (bm builderMock) Build(string, string) error {
+func (bm builderMock) Build(info formula.BuildInfo) error {
 	*bm.hasBuilt = true
 	return nil
 }

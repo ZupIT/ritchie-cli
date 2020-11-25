@@ -57,14 +57,14 @@ var _ formula.PreRunner = PreRunManager{}
 
 type PreRunManager struct {
 	ritchieHome string
-	docker      formula.DockerBuilder
+	docker      formula.Builder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
 }
 
 func NewPreRun(
 	ritchieHome string,
-	docker formula.DockerBuilder,
+	docker formula.Builder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
 ) PreRunManager {
@@ -140,7 +140,8 @@ func (pr PreRunManager) buildFormula(formulaPath, dockerImg string) error {
 		return err
 	}
 
-	if err := pr.docker.Build(formulaPath, dockerImg); err != nil {
+	info := formula.BuildInfo{FormulaPath: formulaPath, DockerImg: dockerImg}
+	if err := pr.docker.Build(info); err != nil {
 		return err
 	}
 
