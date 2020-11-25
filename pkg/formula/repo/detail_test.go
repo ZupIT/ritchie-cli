@@ -24,6 +24,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewDetailLatestTag(t *testing.T) {
@@ -66,7 +67,7 @@ func TestNewDetailLatestTag(t *testing.T) {
 			want: "1.0.0",
 		},
 		{
-			name: "Return version nill when get latest returns error",
+			name: "Return version nil when get latest returns error",
 			fields: fields{
 				repoProviders: repoProviders,
 				repo: formula.Repo{
@@ -93,9 +94,7 @@ func TestNewDetailLatestTag(t *testing.T) {
 
 			tag := dm.LatestTag(tt.fields.repo)
 
-			if tag != tt.want {
-				t.Errorf("TestNewDetailLatestTag() receive = %v, expected %v", tag, tt.want)
-			}
+			assert.Equal(t, tt.want, tag)
 		})
 	}
 }

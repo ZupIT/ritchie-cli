@@ -17,6 +17,8 @@
 package prompt
 
 import (
+	"fmt"
+
 	"github.com/AlecAivazis/survey/v2"
 )
 
@@ -40,6 +42,7 @@ func (SurveyTextValidator) Text(name string, validate func(interface{}) error, h
 	} else {
 		validationQs[0].Prompt = &survey.Input{Message: name}
 	}
+	fmt.Println("text_validador: ", 1)
 
 	return value, survey.Ask(validationQs, &value)
 }
