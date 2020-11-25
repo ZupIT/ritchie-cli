@@ -206,7 +206,7 @@ func Build() *cobra.Command {
 		inputPassword)
 	listCredentialCmd := cmd.NewListCredentialCmd(credSettings)
 
-	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
+	deleteCtxCmd := cmd.NewDeleteEnvCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetEnvCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowEnvCmd(ctxFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker)

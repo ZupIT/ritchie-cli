@@ -22,8 +22,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/spf13/cobra"
-
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 type showEnvCmd struct {
@@ -54,7 +52,7 @@ func (s showEnvCmd) runFunc() CommandRunnerFunc {
 			envHolder.Current = env.Default
 		}
 
-		fmt.Printf("Current env: %v\n", prompt.Bold(envHolder.Current))
+		fmt.Printf("Current env: %q\n", envHolder.Current)
 		return nil
 	}
 }

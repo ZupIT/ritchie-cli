@@ -112,7 +112,7 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 
 	if envHolder.Current != "" {
 		prompt.Info(
-			fmt.Sprintf("Formula running on context: %s\n", prompt.Cyan(envHolder.Current)),
+			fmt.Sprintf("Formula running on env: %s\n", prompt.Cyan(envHolder.Current)),
 		)
 	}
 

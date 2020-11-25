@@ -217,14 +217,16 @@ func (envFinderMock) Find() (env.Holder, error) {
 	return env.Holder{}, nil
 }
 
-type ctxFindRemoverMock struct{}
-
-func (ctxFindRemoverMock) Find() (env.Holder, error) {
-	f := envFinderMock{}
-	return f.Find()
+type envFindRemoverMock struct {
+	holder env.Holder
+	err    error
 }
 
-func (ctxFindRemoverMock) Remove(ctx string) (env.Holder, error) {
+func (e envFindRemoverMock) Find() (env.Holder, error) {
+	return e.holder, e.err
+}
+
+func (envFindRemoverMock) Remove(ctx string) (env.Holder, error) {
 	return env.Holder{}, nil
 }
 
