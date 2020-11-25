@@ -50,7 +50,7 @@ func (ex ExecutorManager) Execute(exe formula.ExecuteData, forceBuild bool) erro
 	}
 
 	if forceBuild {
-		ex.preRunBuilder.ForceBuild(exe.Def.Path)
+		ex.preRunBuilder.ForceBuild(exe.Def)
 	} else if exe.Def.RepoName == "local" {
 		ex.preRunBuilder.Build(exe.Def.Path)
 	}

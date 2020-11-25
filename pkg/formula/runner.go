@@ -36,7 +36,7 @@ type Executor interface {
 
 type PreRunBuilder interface {
 	Build(string)
-	ForceBuild(string)
+	ForceBuild(Definition)
 }
 
 type PreRunner interface {

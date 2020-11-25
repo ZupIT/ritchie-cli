@@ -218,15 +218,18 @@ func TestPreRunBuilder(t *testing.T) {
 	for _, test := range preRunBuilderTests {
 		t.Run(test.name, func(t *testing.T) {
 			builderMock := newBuilderMock()
-			dirMock := dirCheckerMock{test.existsInWorkspace}
+			dirMock := dirRemoveCheckerMock{test.existsInWorkspace}
 			inputBoolMock := newInputBoolMock(test.rebuildPromptAnswer, test.promptError)
 			path := "/testing/formula"
 
 			preRunBuilder := NewPreRunBuilder(workspaceListHasherMock{test.workspaces, test.currentHash, test.currentHashError, test.previousHash,
-				test.previousHashError, test.writeHashError}, builderMock, dirMock, inputBoolMock)
+				test.previousHashError, test.writeHashError}, builderMock, dirMock, inputBoolMock, "")
 
 			if test.forceBuild {
-				preRunBuilder.ForceBuild(path)
+				preRunBuilder.ForceBuild(formula.Definition{
+					Path:     path,
+					RepoName: "local",
+				})
 			} else {
 				preRunBuilder.Build(path)
 			}
@@ -262,14 +265,17 @@ func (in inputBoolMock) HasBeenCalled() bool {
 	return *in.hasBeenCalled
 }
 
-type dirCheckerMock struct {
+type dirRemoveCheckerMock struct {
 	result bool
 }
 
-func (d dirCheckerMock) Exists(string) bool {
+func (d dirRemoveCheckerMock) Remove(string) error {
+	return nil
+}
+func (d dirRemoveCheckerMock) Exists(string) bool {
 	return d.result
 }
-func (d dirCheckerMock) IsDir(string) bool {
+func (d dirRemoveCheckerMock) IsDir(string) bool {
 	return d.result
 }
 

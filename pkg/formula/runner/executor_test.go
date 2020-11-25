@@ -169,5 +169,5 @@ func (c configRunnerMock) Find() (formula.RunnerType, error) {
 
 type preRunBuilderMock struct{}
 
-func (bm preRunBuilderMock) Build(string)      {}
-func (bm preRunBuilderMock) ForceBuild(string) {}
+func (bm preRunBuilderMock) Build(string)                  {}
+func (bm preRunBuilderMock) ForceBuild(formula.Definition) {}

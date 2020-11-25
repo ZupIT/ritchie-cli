@@ -79,6 +79,11 @@ type DirCreateHasher interface {
 	DirHasher
 }
 
+type DirRemoveChecker interface {
+	DirRemover
+	DirChecker
+}
+
 type DirManager struct {
 	file FileCopier
 }

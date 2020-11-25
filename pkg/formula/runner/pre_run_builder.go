@@ -27,50 +27,62 @@ import (
 )
 
 const (
-	messageBuilding      = "Building formula..."
-	messageBuildSuccess  = "Build completed!\n"
-	messageChangeError   = "Failed to detect formula changes, executing the last build"
-	messageListError     = "Failed to load workspaces, ignoring the --force-build"
-	messageNoLocalSource = "The sources don't exist locally, ignoring the --force-build"
-	messageBuildError    = "Failed to build formula"
-	messageChangePrompt  = "This formula has changed since the last run, would you like to rebuild?"
-	messageYes           = "yes"
-	messageNo            = "no"
+	messageBuilding        = "Building formula..."
+	messageBuildSuccess    = "Build completed!\n"
+	messageChangeError     = "Failed to detect formula changes, executing the last build"
+	messageListError       = "Failed to load workspaces, ignoring the --force-build"
+	messageForceBuildError = "Failed to build formula, ignoring the --force-build"
+	messageBuildError      = "Failed to build formula"
+	messageChangePrompt    = "This formula has changed since the last run, would you like to rebuild?"
+	messageYes             = "yes"
+	messageNo              = "no"
 )
 
 type PreRunBuilderManager struct {
 	workspace formula.WorkspaceListHasher
 	builder   formula.LocalBuilder
-	dir       stream.DirChecker
+	dir       stream.DirRemoveChecker
 	inBool    prompt.InputBool
+	ritHome   string
 }
 
 func NewPreRunBuilder(
 	workspace formula.WorkspaceListHasher,
 	builder formula.LocalBuilder,
-	dir stream.DirChecker,
+	dir stream.DirRemoveChecker,
 	inBool prompt.InputBool,
+	ritHome string,
 ) PreRunBuilderManager {
 	return PreRunBuilderManager{
 		workspace: workspace,
 		builder:   builder,
 		dir:       dir,
 		inBool:    inBool,
+		ritHome:   ritHome,
 	}
 }
 
-func (b PreRunBuilderManager) ForceBuild(relativePath string) {
-	workspace, err := b.anyWorkspace(relativePath)
+func (b PreRunBuilderManager) ForceBuild(def formula.Definition) {
+	workspace, err := b.anyWorkspace(def.Path)
 	if err != nil {
 		fmt.Println(prompt.Yellow(messageListError))
 		return
 	}
+
+	// None of the workspaces have this formula, deleting
+	// the bin to rebuild what's already on .rit
 	if workspace == nil {
-		fmt.Println(prompt.Yellow(messageNoLocalSource))
+		formulaPath := def.FormulaPath(b.ritHome)
+		binPath := def.BinPath(formulaPath)
+		err = b.dir.Remove(binPath)
+		if err != nil {
+			fmt.Println(prompt.Yellow(messageForceBuildError))
+		}
 		return
 	}
 
-	if err = b.buildOnWorkspace(*workspace, relativePath); err != nil {
+	// One or more workspaces have this formula, building from there
+	if err = b.buildOnWorkspace(*workspace, def.Path); err != nil {
 		fmt.Println(prompt.Red(messageBuildError))
 		return
 	}
