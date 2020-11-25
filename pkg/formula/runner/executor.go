@@ -22,6 +22,8 @@ import (
 
 var _ formula.Executor = ExecutorManager{}
 
+const forceBuildFlag = "force-build"
+
 type ExecutorManager struct {
 	runners       formula.Runners
 	preRunBuilder formula.PreRunBuilder
@@ -36,9 +38,13 @@ func NewExecutor(runners formula.Runners, preRunBuilder formula.PreRunBuilder, c
 	}
 }
 
-func (ex ExecutorManager) Execute(exe formula.ExecuteData, forceBuild bool) error {
+func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
 	runType := exe.RunType
 	runner := ex.runners[runType]
+	forceBuild, err := exe.Flags.GetBool(forceBuildFlag)
+	if err == nil {
+		return err
+	}
 
 	if runner == nil {
 		configType, err := ex.config.Find()

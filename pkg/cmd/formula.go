@@ -37,11 +37,10 @@ import (
 )
 
 const (
-	subCommand     = " SUBCOMMAND"
-	Group          = "group"
-	verboseFlag    = "verbose"
-	rootCmdName    = "root"
-	forceBuildFlag = "force-build"
+	subCommand  = " SUBCOMMAND"
+	Group       = "group"
+	verboseFlag = "verbose"
+	rootCmdName = "root"
 )
 
 var (
@@ -195,11 +194,6 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			return err
 		}
 
-		forceBuild, err := flags.GetBool(forceBuildFlag)
-		if err != nil {
-			return err
-		}
-
 		if docker && local {
 			return ErrRunFormulaWithTwoFlag
 		}
@@ -226,7 +220,7 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 			Flags:   flags,
 		}
 
-		if err := f.formula.Execute(exe, forceBuild); err != nil {
+		if err := f.formula.Execute(exe); err != nil {
 			return err
 		}
 

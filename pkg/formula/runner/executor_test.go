@@ -51,6 +51,7 @@ func TestExecute(t *testing.T) {
 					InType:  0,
 					RunType: formula.LocalRun,
 					Verbose: false,
+					Flags:   pflag.NewFlagSet("", 0),
 				},
 			},
 			want: nil,
@@ -68,6 +69,7 @@ func TestExecute(t *testing.T) {
 					InType:  0,
 					RunType: formula.DockerRun,
 					Verbose: false,
+					Flags:   pflag.NewFlagSet("", 0),
 				},
 			},
 			want: nil,
@@ -85,6 +87,7 @@ func TestExecute(t *testing.T) {
 					InType:  0,
 					RunType: formula.DefaultRun,
 					Verbose: false,
+					Flags:   pflag.NewFlagSet("", 0),
 				},
 			},
 			want: nil,
@@ -102,6 +105,7 @@ func TestExecute(t *testing.T) {
 					InType:  0,
 					RunType: formula.DefaultRun,
 					Verbose: false,
+					Flags:   pflag.NewFlagSet("", 0),
 				},
 			},
 			want: ErrConfigNotFound,
@@ -119,6 +123,7 @@ func TestExecute(t *testing.T) {
 					InType:  0,
 					RunType: formula.DefaultRun,
 					Verbose: false,
+					Flags:   pflag.NewFlagSet("", 0),
 				},
 			},
 			want: errors.New("error to run formula"),
@@ -128,7 +133,7 @@ func TestExecute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			executorManager := NewExecutor(tt.in.runners, preRunBuilderMock{}, tt.in.config)
-			got := executorManager.Execute(tt.in.exe, false)
+			got := executorManager.Execute(tt.in.exe)
 
 			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
 				t.Errorf("Execute(%s) got %v, want %v", tt.name, got, tt.want)
