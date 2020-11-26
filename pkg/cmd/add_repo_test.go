@@ -26,6 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -214,7 +215,6 @@ func TestAddRepoCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			detailMock := new(mocks.DetailManagerMock)
 			detailMock.On("LatestTag", mock.Anything).Return(tt.fields.detailLatestTag)
-
 			cmd := NewAddRepoCmd(
 				tt.fields.repo,
 				tt.fields.repoProviders,
@@ -228,21 +228,18 @@ func TestAddRepoCmd(t *testing.T) {
 				checkerManager,
 				detailMock,
 			)
-			if tt.fields.stdin == "" {
-				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 
-				if err := cmd.Execute(); (err != nil) != tt.wantErr {
-					t.Errorf("NewAddRepoCmd runPrompt error = %v, wantErr %v", err, tt.wantErr)
-				}
-			} else {
+			if tt.fields.stdin != "" {
 				newReader := strings.NewReader(tt.fields.stdin)
 				cmd.SetIn(newReader)
 				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
-
-				if err := cmd.Execute(); (err != nil) != tt.wantErr {
-					t.Errorf("NewAddRepoCmd runStdin error = %v, wantErr %v", err, tt.wantErr)
-				}
+			} else {
+				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			}
+
+			err := cmd.Execute()
+
+			assert.Equal(t, tt.wantErr, (err != nil))
 		})
 	}
 }

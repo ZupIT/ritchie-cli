@@ -56,8 +56,8 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial: TutorialFinderMockReturnDisabled{},
-				Repos:    defaultGitRepositoryMock,
+				Tutorial:        TutorialFinderMockReturnDisabled{},
+				Repos:           defaultGitRepositoryMock,
 				detailLatestTag: "2.0.0",
 			},
 			wantErr: false,
@@ -83,10 +83,10 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial: TutorialFinderMockReturnDisabled{},
-				Repos:    defaultGitRepositoryMock,
+				Tutorial:        TutorialFinderMockReturnDisabled{},
+				Repos:           defaultGitRepositoryMock,
 				detailLatestTag: "2.0.0",
-				},
+			},
 			wantErr: false,
 		},
 		{
@@ -104,10 +104,10 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial: TutorialFinderMock{},
-				Repos:    defaultGitRepositoryMock,
+				Tutorial:        TutorialFinderMock{},
+				Repos:           defaultGitRepositoryMock,
 				detailLatestTag: "2.0.0",
-				},
+			},
 			wantErr: false,
 		},
 		{
@@ -145,7 +145,7 @@ func TestListRepoRunFunc(t *testing.T) {
 					},
 				},
 				detailLatestTag: "",
-				},
+			},
 			wantErr: false,
 		},
 		{
@@ -168,7 +168,7 @@ func TestListRepoRunFunc(t *testing.T) {
 						return rtutorial.TutorialHolder{}, someError
 					},
 				},
-				Repos: defaultGitRepositoryMock,
+				Repos:           defaultGitRepositoryMock,
 				detailLatestTag: "",
 			},
 			wantErr: true,
