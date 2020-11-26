@@ -20,10 +20,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestListRepoRunFunc(t *testing.T) {
@@ -32,7 +34,7 @@ func TestListRepoRunFunc(t *testing.T) {
 		RepositoryLister formula.RepositoryLister
 		Repos            git.Repositories
 		Tutorial         rtutorial.Finder
-		Detail           formula.RepositoryDetail
+		detailLatestTag  string
 	}
 	tests := []struct {
 		name    string
@@ -56,11 +58,7 @@ func TestListRepoRunFunc(t *testing.T) {
 				},
 				Tutorial: TutorialFinderMockReturnDisabled{},
 				Repos:    defaultGitRepositoryMock,
-				Detail: DetailManagerCustomMock{
-					latestTag: func(repo formula.Repo) string {
-						return "2.0.0"
-					},
-				},
+				detailLatestTag: "2.0.0",
 			},
 			wantErr: false,
 		},
@@ -87,12 +85,8 @@ func TestListRepoRunFunc(t *testing.T) {
 				},
 				Tutorial: TutorialFinderMockReturnDisabled{},
 				Repos:    defaultGitRepositoryMock,
-				Detail: DetailManagerCustomMock{
-					latestTag: func(repo formula.Repo) string {
-						return "2.0.0"
-					},
+				detailLatestTag: "2.0.0",
 				},
-			},
 			wantErr: false,
 		},
 		{
@@ -112,12 +106,8 @@ func TestListRepoRunFunc(t *testing.T) {
 				},
 				Tutorial: TutorialFinderMock{},
 				Repos:    defaultGitRepositoryMock,
-				Detail: DetailManagerCustomMock{
-					latestTag: func(repo formula.Repo) string {
-						return "2.0.0"
-					},
+				detailLatestTag: "2.0.0",
 				},
-			},
 			wantErr: false,
 		},
 		{
@@ -154,12 +144,8 @@ func TestListRepoRunFunc(t *testing.T) {
 						return git.Tag{}, someError
 					},
 				},
-				Detail: DetailManagerCustomMock{
-					latestTag: func(repo formula.Repo) string {
-						return ""
-					},
+				detailLatestTag: "",
 				},
-			},
 			wantErr: false,
 		},
 		{
@@ -183,21 +169,20 @@ func TestListRepoRunFunc(t *testing.T) {
 					},
 				},
 				Repos: defaultGitRepositoryMock,
-				Detail: DetailManagerCustomMock{
-					latestTag: func(repo formula.Repo) string {
-						return ""
-					},
-				},
+				detailLatestTag: "",
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			detailMock := new(mocks.DetailManagerMock)
+			detailMock.On("LatestTag", mock.Anything).Return(tt.in.detailLatestTag)
+
 			repoProviders := formula.NewRepoProviders()
 			repoProviders.Add("Github", formula.Git{Repos: tt.in.Repos, NewRepoInfo: github.NewRepoInfo})
 
-			lr := NewListRepoCmd(tt.in.RepositoryLister, repoProviders, tt.in.Tutorial, tt.in.Detail)
+			lr := NewListRepoCmd(tt.in.RepositoryLister, repoProviders, tt.in.Tutorial, detailMock)
 			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := lr.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
@@ -212,12 +197,4 @@ type RepositoryListerCustomMock struct {
 
 func (m RepositoryListerCustomMock) List() (formula.Repos, error) {
 	return m.list()
-}
-
-type DetailManagerCustomMock struct {
-	latestTag func(repo formula.Repo) string
-}
-
-func (d DetailManagerCustomMock) LatestTag(repo formula.Repo) string {
-	return d.latestTag(repo)
 }
