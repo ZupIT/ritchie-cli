@@ -25,10 +25,8 @@ import (
 )
 
 const (
-	messageBuilding     = "Building formula..."
-	messageBuildSuccess = "Build completed!\n"
-	messageChangeError  = "Failed to detect formula changes, executing the last build"
-	messageBuildError   = "Failed to build formula"
+	messageChangeError = "Failed to detect formula changes, executing the last build"
+	messageBuildError  = "Failed to build formula"
 )
 
 type PreRunBuilderManager struct {
