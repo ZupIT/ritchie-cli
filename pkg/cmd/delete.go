@@ -22,10 +22,10 @@ import "github.com/spf13/cobra"
 func NewDeleteCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:       "delete SUBCOMMAND",
-		Short:     "Delete contexts, repositories, formulas and workspaces",
-		Long:      "Delete contexts, repositories, formulas and workspaces",
+		Short:     "Delete contexts, repositories, formulas, workspaces and credentials",
+		Long:      "Delete contexts, repositories, formulas, workspaces and credentials",
 		Example:   "rit delete context",
-		ValidArgs: []string{"context", "formula", "repo", "workspace"},
+		ValidArgs: []string{"context", "formula", "repo", "workspace", "credential"},
 		Args:      cobra.OnlyValidArgs,
 	}
 }

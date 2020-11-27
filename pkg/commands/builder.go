@@ -124,9 +124,10 @@ func Build() *cobra.Command {
 	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
 	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
 	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
+	credDeleter := credential.NewCredDelete(ritchieHomeDir, ctxFinder, fileManager)
+	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
 	treeChecker := tree.NewChecker(treeManager)
-	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := envcredential.NewResolver(credFinder, credSetter, inputPassword)
 	envResolvers := make(env.Resolvers)
@@ -209,6 +210,12 @@ func Build() *cobra.Command {
 		inputList,
 		inputPassword)
 	listCredentialCmd := cmd.NewListCredentialCmd(credSettings)
+	deleteCredentialCmd := cmd.NewDeleteCredentialCmd(
+		credDeleter,
+		credSettings,
+		ctxFinder,
+		inputBool,
+		inputList)
 
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
@@ -235,7 +242,7 @@ func Build() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd)
+	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	listCmd.AddCommand(listWorkspaceCmd)
