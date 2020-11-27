@@ -26,14 +26,12 @@ import (
 type preRunBuilderTest struct {
 	name string
 
-	workspaces          formula.Workspaces
-	rebuildPromptAnswer bool
-	currentHash         string
-	previousHash        string
-	currentHashError    error
-	previousHashError   error
-	writeHashError      error
-	promptError         error
+	workspaces        formula.Workspaces
+	currentHash       string
+	previousHash      string
+	currentHashError  error
+	previousHashError error
+	writeHashError    error
 
 	mustBuild bool
 }
@@ -42,84 +40,72 @@ var preRunBuilderTests = []preRunBuilderTest{
 	{
 		name: "should not prompt for rebuild when hash is the same",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: false,
-		currentHash:         "hash",
-		previousHash:        "hash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hash",
+		previousHash:      "hash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    nil,
 
 		mustBuild: false,
 	},
 	{
 		name: "should not prompt for rebuild when hash fails to save",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: false,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      fmt.Errorf("Failed to save hash"),
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hash",
+		previousHash:      "anotherhash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    fmt.Errorf("Failed to save hash"),
 
 		mustBuild: false,
 	},
 	{
 		name: "should not prompt to rebuild nor fail when no workspaces are returned",
 
-		workspaces:          map[string]string{},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{},
+		currentHash:       "hash",
+		previousHash:      "anotherhash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    nil,
 
 		mustBuild: false,
 	},
 	{
 		name: "should not build when user Ctrl+C's on prompt",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         fmt.Errorf("Ctrl+C on survey"),
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hash",
+		previousHash:      "anotherhash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    nil,
 
 		mustBuild: false,
 	},
 	{
 		name: "should not prompt to build when the formula doesn't exist on any workspace",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "",
-		previousHash:        "hash",
-		currentHashError:    fmt.Errorf("Formula doesn't exist here"),
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "",
+		previousHash:      "hash",
+		currentHashError:  fmt.Errorf("Formula doesn't exist here"),
+		previousHashError: nil,
+		writeHashError:    nil,
 
 		mustBuild: false,
 	},
 	{
 		name: "should not prompt to build when no previous hash exists",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "",
-		currentHashError:    nil,
-		previousHashError:   fmt.Errorf("No previous hash"),
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hash",
+		previousHash:      "",
+		currentHashError:  nil,
+		previousHashError: fmt.Errorf("No previous hash"),
+		writeHashError:    nil,
 
 		mustBuild: false,
 	},
