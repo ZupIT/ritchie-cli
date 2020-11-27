@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -71,6 +73,7 @@ var (
 type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
+	file        stream.FileWriteReadExistRemover
 	rt          rtutorial.Finder
 	vm          version.Manager
 }
@@ -78,12 +81,14 @@ type rootCmd struct {
 func NewRootCmd(
 	ritchieHome string,
 	dir stream.DirCreateChecker,
+	file stream.FileWriteReadExistRemover,
 	rtf rtutorial.Finder,
 	vm version.Manager,
 ) *cobra.Command {
 	o := &rootCmd{
 		ritchieHome: ritchieHome,
 		dir:         dir,
+		file:        file,
 		rt:          rtf,
 		vm:          vm,
 	}
@@ -119,6 +124,11 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
+
+		if err := ro.convertContextsFileToEnvsFile(); err != nil {
+			return err
+		}
+
 		return nil
 	}
 }
@@ -184,6 +194,48 @@ func tutorialRit(tutorialStatus string) {
 		prompt.Info(MessageTitle)
 		fmt.Print(MessageBody)
 	}
+}
+
+func (ro *rootCmd) convertContextsFileToEnvsFile() error {
+	ctx := struct {
+		Current string   `json:"current_context"`
+		All     []string `json:"contexts"`
+	}{}
+
+	contextsPath := filepath.Join(ro.ritchieHome, "contexts")
+	if !ro.file.Exists(contextsPath) {
+		return nil
+	}
+
+	bytes, err := ro.file.Read(contextsPath)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(bytes, &ctx); err != nil {
+		return err
+	}
+
+	envsPath := filepath.Join(ro.ritchieHome, "envs")
+	envHolder := env.Holder{
+		Current: ctx.Current,
+		All:     ctx.All,
+	}
+
+	envs, err := json.Marshal(envHolder)
+	if err != nil {
+		return err
+	}
+
+	if err := ro.file.Write(envsPath, envs); err != nil {
+		return err
+	}
+
+	if err := ro.file.Remove(contextsPath); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (ro *rootCmd) ritchieIsInitialized() bool {
