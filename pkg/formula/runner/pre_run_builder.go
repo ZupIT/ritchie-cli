@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
@@ -115,13 +113,10 @@ func (b PreRunBuilderManager) hasFormulaChanged(path string) (bool, error) {
 
 func (b PreRunBuilderManager) buildOnWorkspace(workspace formula.Workspace, relativePath string) error {
 	formulaAbsolutePath := filepath.Join(workspace.Dir, relativePath)
-	s := spinner.StartNew(messageBuilding)
 	info := formula.BuildInfo{FormulaPath: formulaAbsolutePath, Workspace: workspace}
 	if err := b.builder.Build(info); err != nil {
-		s.Error(err)
 		return err
 	}
 
-	s.Success(prompt.Green(messageBuildSuccess))
 	return nil
 }
