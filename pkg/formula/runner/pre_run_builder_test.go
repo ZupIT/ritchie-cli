@@ -74,18 +74,6 @@ var preRunBuilderTests = []preRunBuilderTest{
 		mustBuild: false,
 	},
 	{
-		name: "should not build when user Ctrl+C's on prompt",
-
-		workspaces:        map[string]string{"default": "/pathtodefault"},
-		currentHash:       "hash",
-		previousHash:      "anotherhash",
-		currentHashError:  nil,
-		previousHashError: nil,
-		writeHashError:    nil,
-
-		mustBuild: false,
-	},
-	{
 		name: "should not prompt to build when the formula doesn't exist on any workspace",
 
 		workspaces:        map[string]string{"default": "/pathtodefault"},
