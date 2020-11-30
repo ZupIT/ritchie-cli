@@ -116,6 +116,8 @@ func Build() *cobra.Command {
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
 	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
 
+	detailRepo := repo.NewDetail(repoProviders)
+
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
@@ -220,9 +222,9 @@ func Build() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, detailRepo)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder, detailRepo)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	listWorkspaceCmd := cmd.NewListWorkspaceCmd(formulaWorkspace, tutorialFinder)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)

@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package mocks
+package repo
 
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/stretchr/testify/mock"
 )
 
-type ContextFinderMock struct {
-	mock.Mock
+type DetailManager struct {
+	repoProviders formula.RepoProviders
 }
 
-func (cf *ContextFinderMock) Find() (rcontext.ContextHolder, error) {
-	args := cf.Called()
-
-	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
+func NewDetail(repoProviders formula.RepoProviders) DetailManager {
+	return DetailManager{repoProviders}
 }
 
-type DetailManagerMock struct {
-	mock.Mock
-}
+func (dm DetailManager) LatestTag(repo formula.Repo) string {
+	formulaGit := dm.repoProviders.Resolve(repo.Provider)
 
-func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
-	args := d.Called(repo)
+	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	tag, err := formulaGit.Repos.LatestTag(repoInfo)
+	if err != nil {
+		return ""
+	}
 
-	return args.String(0)
+	return tag.Name
 }

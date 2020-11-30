@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -45,6 +44,7 @@ type addRepoCmd struct {
 	prompt.InputInt
 	tutorial rtutorial.Finder
 	tree     tree.CheckerManager
+	detail   formula.RepositoryDetail
 }
 
 func NewAddRepoCmd(
@@ -58,6 +58,7 @@ func NewAddRepoCmd(
 	inInt prompt.InputInt,
 	rtf rtutorial.Finder,
 	treeChecker tree.CheckerManager,
+	rd formula.RepositoryDetail,
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
@@ -70,6 +71,7 @@ func NewAddRepoCmd(
 		InputPassword:      inPass,
 		tutorial:           rtf,
 		tree:               treeChecker,
+		detail:             rd,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -199,12 +201,16 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 
 func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
 		r := formula.Repo{}
 
-		err := stdin.ReadJson(os.Stdin, &r)
+		err := stdin.ReadJson(cmd.InOrStdin(), &r)
 		if err != nil {
 			return err
+		}
+
+		if r.Version.String() == "" {
+			latestTag := ad.detail.LatestTag(r)
+			r.Version = formula.RepoVersion(latestTag)
 		}
 
 		if err := ad.repo.Add(r); err != nil {
