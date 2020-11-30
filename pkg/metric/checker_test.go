@@ -20,6 +20,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
@@ -97,9 +99,12 @@ func Test_Check(t *testing.T) {
 			checker := NewChecker(tt.in.file)
 			result := checker.Check()
 
-			if result != tt.expectedResult {
-				t.Errorf("behavior test failed: %s\nwant: %t | got: %t", tt.name, tt.expectedResult, result)
-			}
+			assert.Equal(
+				t,
+				tt.expectedResult,
+				result,
+				"got a different result then expected",
+			)
 		})
 	}
 }

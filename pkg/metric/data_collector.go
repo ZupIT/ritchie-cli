@@ -114,7 +114,6 @@ func (d DataCollectorManager) readRepos() formula.Repos {
 	)
 	repos := formula.Repos{}
 	_ = json.Unmarshal(repoBytes, &repos)
-
 	return repos
 }
 

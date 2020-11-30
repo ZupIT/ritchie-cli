@@ -18,8 +18,9 @@ package metric
 
 import (
 	"errors"
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -49,7 +50,7 @@ func Test_Collector(t *testing.T) {
 			wantErr: false,
 			in: in{
 				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() UserId {
+					GenerateMock: func() UserID {
 						return ""
 					}},
 				file: sMocks.FileReaderCustomMock{
@@ -63,7 +64,7 @@ func Test_Collector(t *testing.T) {
 			wantErr: false,
 			in: in{
 				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() UserId {
+					GenerateMock: func() UserID {
 						return ""
 					}},
 				file: sMocks.FileReaderCustomMock{
@@ -77,20 +78,22 @@ func Test_Collector(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			collector := NewDataCollector(UserIdGeneratorMock{
-				GenerateMock: func() UserId {
+				GenerateMock: func() UserID {
 					return ""
 				}}, "", tt.in.file)
 			user := collector.CollectUserState("2.0.0")
-			fmt.Println(user)
+			assert.NotEmpty(t, user, "user state should not be empty")
+
+			command := collector.CollectCommandData(1)
+			assert.NotEmpty(t, command, "command data should not be empty")
 		})
 	}
-
 }
 
 type UserIdGeneratorMock struct {
-	GenerateMock func() UserId
+	GenerateMock func() UserID
 }
 
-func (us UserIdGeneratorMock) Generate() UserId {
+func (us UserIdGeneratorMock) Generate() UserID {
 	return us.GenerateMock()
 }

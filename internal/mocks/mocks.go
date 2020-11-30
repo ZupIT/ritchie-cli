@@ -17,8 +17,9 @@
 package mocks
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
 type ContextFinderMock struct {

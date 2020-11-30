@@ -34,10 +34,13 @@ func NewUserIdGenerator() UserIdManager { //nolint:stylecheck
 	return UserIdManager{hash: sha256.New()}
 }
 
-func (us UserIdManager) Generate() UserId {
+func (us UserIdManager) Generate() UserID {
 	id, _ := machineid.ID()
 	us.hash.Reset()
-	_, _ = us.hash.Write([]byte(id))
+	if _, err := us.hash.Write([]byte(id)); err != nil {
+		return ""
+	}
+
 	userID := hex.EncodeToString(us.hash.Sum(nil))
-	return UserId(userID)
+	return UserID(userID)
 }

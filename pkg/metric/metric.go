@@ -34,15 +34,15 @@ func (i Id) String() string {
 	return string(i)
 }
 
-type UserId string
+type UserID string
 
-func (u UserId) String() string {
+func (u UserID) String() string {
 	return string(u)
 }
 
 type Command struct {
 	Id               string    `json:"id"`
-	UserID           UserId    `json:"userId"`
+	UserID           UserID    `json:"userId"`
 	Timestamp        time.Time `json:"timestamp"`
 	Command          string    `json:"command"`
 	ExecutionTime    float64   `json:"executionTime"`
@@ -51,7 +51,7 @@ type Command struct {
 }
 
 type User struct {
-	Id            UserId `json:"userId"`
+	Id            UserID `json:"userId"`
 	Os            string `json:"os"`
 	Version       string `json:"version"`
 	DefaultRunner string `json:"defaultRunner"`
@@ -82,7 +82,7 @@ type Sender interface {
 }
 
 type UserIdGenerator interface {
-	Generate() UserId
+	Generate() UserID
 }
 
 type Checker interface {

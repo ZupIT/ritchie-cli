@@ -24,14 +24,21 @@ import (
 
 func TestSendManagerHttp_Send(t *testing.T) {
 	type in struct {
+		checker CheckerMock
 	}
 	tests := []struct {
 		name string
 		in   in
 	}{
 		{
-			name: "success",
-			in:   in{},
+			name: "success run",
+			in: in{
+				checker: CheckerMock{
+					func() bool {
+						return true
+					},
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -46,13 +53,9 @@ func TestSendManagerHttp_Send(t *testing.T) {
 					return User{}
 				},
 			}
-			checker := CheckerMock{
-				func() bool {
-					return true
-				},
-			}
-			httpSender := NewHttpSender(server.URL, server.Client(), data, checker)
+			httpSender := NewHttpSender(server.URL, server.Client(), data, tt.in.checker)
 			httpSender.SendUserState("tt.in.APIData")
+			httpSender.SendCommandData(SendCommandDataParams{})
 		})
 	}
 }
