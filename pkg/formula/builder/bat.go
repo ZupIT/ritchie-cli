@@ -41,16 +41,18 @@ var (
 	ErrBuildOnWindows       = errors.New(msgBuildOnWindows)
 )
 
+var _ formula.Builder = BatManager{}
+
 type BatManager struct {
 	file stream.FileExister
 }
 
-func NewBuildBat(file stream.FileExister) formula.BatBuilder {
+func NewBuildBat(file stream.FileExister) BatManager {
 	return BatManager{file: file}
 }
 
-func (ba BatManager) Build(formulaPath string) error {
-	if err := os.Chdir(formulaPath); err != nil {
+func (ba BatManager) Build(info formula.BuildInfo) error {
+	if err := os.Chdir(info.FormulaPath); err != nil {
 		return err
 	}
 

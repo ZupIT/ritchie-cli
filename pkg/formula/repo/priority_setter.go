@@ -17,64 +17,79 @@
 package repo
 
 import (
-	"encoding/json"
 	"errors"
-	"path/filepath"
-	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	repositoryDoNotExistError = "there is no repositories yet"
-)
+const repositoryDoNotExistError = "there is no repositories yet"
 
 type SetPriorityManager struct {
-	ritHome string
-	file    stream.FileWriteReadExister
+	repo formula.RepositoryListWriter
 }
 
-func NewPrioritySetter(ritHome string, file stream.FileWriteReadExister) SetPriorityManager {
-	return SetPriorityManager{
-		ritHome: ritHome,
-		file:    file,
-	}
+func NewPrioritySetter(repo formula.RepositoryListWriter) SetPriorityManager {
+	return SetPriorityManager{repo: repo}
 }
 
 func (sm SetPriorityManager) SetPriority(repoName formula.RepoName, priority int) error {
-	var repos formula.Repos
-	repoPath := filepath.Join(sm.ritHome, reposDirName, reposFileName)
-	if !sm.file.Exists(repoPath) {
+	repos, err := sm.repo.List()
+	if err != nil {
+		return err
+	}
+
+	if repos.Len() <= 0 {
 		return errors.New(repositoryDoNotExistError)
 	}
-	read, err := sm.file.Read(repoPath)
-	if err != nil {
-		return err
-	}
 
-	if err := json.Unmarshal(read, &repos); err != nil {
-		return err
-	}
+	repos = movePosition(repos, repoName, priority)
 
-	for i := range repos {
-		if repoName == repos[i].Name {
-			repos[i].Priority = priority
-		} else if repos[i].Priority >= priority {
-			repos[i].Priority++
-		}
-	}
-
-	sort.Sort(repos)
-
-	bytes, err := json.MarshalIndent(repos, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	if err := sm.file.Write(repoPath, bytes); err != nil {
+	if err := sm.repo.Write(repos); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func movePosition(repos formula.Repos, repoName formula.RepoName, priority int) formula.Repos {
+	priority = isValidPriority(priority, repos)
+	index := 0
+	var repo formula.Repo
+	for i := range repos {
+		if repoName == repos[i].Name {
+			repo = repos[i]
+			index = i
+			break
+		}
+	}
+
+	var i int
+	for i = index; i > priority; i-- { // Move repos to tail
+		r := repos[i-1]
+		r.Priority = i
+		repos[i] = r
+	}
+
+	for i = index; i < priority; i++ { // Move repos to head
+		r := repos[i+1]
+		r.Priority = i
+		repos[i] = r
+	}
+
+	repo.Priority = priority
+	repos[priority] = repo
+
+	return repos
+}
+
+func isValidPriority(priority int, repos formula.Repos) int {
+	if priority >= repos.Len() {
+		return repos.Len() - 1
+	}
+
+	if priority < 0 {
+		return 0
+	}
+
+	return priority
 }

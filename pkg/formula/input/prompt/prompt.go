@@ -51,6 +51,7 @@ type InputManager struct {
 	file         stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
+	input.InputTextDefault
 	prompt.InputTextValidator
 	prompt.InputBool
 	prompt.InputPassword
@@ -62,6 +63,7 @@ func NewInputManager(
 	inList prompt.InputList,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
+	inDefValue input.InputTextDefault,
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 ) formula.InputRunner {
@@ -71,16 +73,19 @@ func NewInputManager(
 		InputList:          inList,
 		InputText:          inText,
 		InputTextValidator: inTextValidator,
+		InputTextDefault:   inDefValue,
 		InputBool:          inBool,
 		InputPassword:      inPass,
 	}
 }
 
-func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagSet) error {
+func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagSet) error {
 	config := setup.Config
+	defaultFlag := false
+	if f != nil {
+		defaultFlag, _ = f.GetBool("default")
+	}
 	for _, i := range config.Inputs {
-		var inputVal string
-		var valBool bool
 		items, err := in.loadItems(i, setup.FormulaPath)
 		if err != nil {
 			return err
@@ -93,34 +98,13 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 			continue
 		}
 
-		switch iType := i.Type; iType {
-		case input.TextType:
-			if items != nil {
-				inputVal, err = in.loadInputValList(items, i)
-			} else {
-				inputVal, err = in.textValidator(i)
-			}
-		case input.BoolType:
-			valBool, err = in.Bool(i.Label, items, i.Tutorial)
-			inputVal = strconv.FormatBool(valBool)
-		case input.PassType:
-			inputVal, err = in.Password(i.Label, i.Tutorial)
-		case input.DynamicType:
-			dl, err := in.dynamicList(i.RequestInfo)
+		inputVal, defaultFlagSet := in.defaultFlag(i, defaultFlag)
+
+		if !defaultFlagSet {
+			inputVal, err = in.inputTypeToPrompt(items, i)
 			if err != nil {
 				return err
 			}
-
-			inputVal, err = in.List(i.Label, dl, i.Tutorial)
-			if err != nil {
-				return err
-			}
-		default:
-			inputVal, err = input.ResolveIfReserved(in.envResolvers, i)
-		}
-
-		if err != nil {
-			return err
 		}
 
 		if len(inputVal) != 0 {
@@ -132,6 +116,33 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, _ *pflag.FlagS
 	return nil
 }
 
+func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (string, error) {
+	switch i.Type {
+	case input.PassType:
+		return in.Password(i.Label, i.Tutorial)
+	case input.BoolType:
+		valBool, err := in.Bool(i.Label, items, i.Tutorial)
+		if err != nil {
+			return "", err
+		}
+		return strconv.FormatBool(valBool), nil
+	case input.TextType:
+		if items != nil {
+			return in.loadInputValList(items, i)
+		}
+		return in.textValidator(i)
+
+	case input.DynamicType:
+		dl, err := in.dynamicList(i.RequestInfo)
+		if err != nil {
+			return "", err
+		}
+		return in.List(i.Label, dl, i.Tutorial)
+	default:
+		return input.ResolveIfReserved(in.envResolvers, i)
+	}
+}
+
 func checkForSameEnv(envKey string) {
 	envKey = strings.ToUpper(envKey)
 	if _, exist := os.LookupEnv(envKey); exist {
@@ -140,6 +151,15 @@ func checkForSameEnv(envKey string) {
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}
+}
+
+func (in InputManager) defaultFlag(input formula.Input, defaultFlag bool) (string, bool) {
+	if defaultFlag && input.Default != "" {
+		msg := fmt.Sprintf("Added %s by default: %s", input.Name, input.Default)
+		prompt.Info(msg)
+		return input.Default, true
+	}
+	return "", false
 }
 
 func (in InputManager) persistCache(formulaPath, inputVal string, input formula.Input, items []string) {
@@ -226,11 +246,7 @@ func (in InputManager) textValidator(i formula.Input) (string, error) {
 	if input.HasRegex(i) {
 		inputVal, err = in.textRegexValidator(i, required)
 	} else {
-		inputVal, err = in.InputText.Text(i.Label, required, i.Tutorial)
-	}
-
-	if inputVal == "" {
-		inputVal = i.Default
+		inputVal, err = in.InputTextDefault.Text(i)
 	}
 
 	return inputVal, err

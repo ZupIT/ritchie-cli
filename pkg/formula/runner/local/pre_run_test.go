@@ -50,9 +50,9 @@ func TestPreRun(t *testing.T) {
 
 	type in struct {
 		def        formula.Definition
-		makeBuild  formula.MakeBuilder
-		batBuild   formula.BatBuilder
-		shellBuild formula.ShellBuilder
+		makeBuild  formula.Builder
+		batBuild   formula.Builder
+		shellBuild formula.Builder
 		file       stream.FileReadExister
 		dir        stream.DirCreateListCopyRemover
 	}
@@ -293,24 +293,24 @@ type makeBuildMock struct {
 	build func(formulaPath string) error
 }
 
-func (ma makeBuildMock) Build(formulaPath string) error {
-	return ma.build(formulaPath)
+func (ma makeBuildMock) Build(info formula.BuildInfo) error {
+	return ma.build(info.FormulaPath)
 }
 
 type batBuildMock struct {
 	build func(formulaPath string) error
 }
 
-func (ba batBuildMock) Build(formulaPath string) error {
-	return ba.build(formulaPath)
+func (ba batBuildMock) Build(info formula.BuildInfo) error {
+	return ba.build(info.FormulaPath)
 }
 
 type shellBuildMock struct {
 	build func(formulaPath string) error
 }
 
-func (sh shellBuildMock) Build(formulaPath string) error {
-	return sh.build(formulaPath)
+func (sh shellBuildMock) Build(info formula.BuildInfo) error {
+	return sh.build(info.FormulaPath)
 }
 
 type dirManagerMock struct {

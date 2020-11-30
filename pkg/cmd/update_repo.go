@@ -29,7 +29,7 @@ import (
 
 const (
 	questionSelectARepo = "Select a repository to update: "
-	questionAVersion    = "Select your new version: "
+	updateOptionAll     = "ALL"
 )
 
 type updateRepoCmd struct {
@@ -88,42 +88,60 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		var reposName []string
+		reposName = append(reposName, updateOptionAll)
 		for i := range repos {
-			reposName = append(reposName, repos[i].Name.String())
-		}
-
-		name, err := up.List(questionSelectARepo, reposName)
-		if err != nil {
-			return err
-		}
-
-		var repo formula.Repo
-		for i := range repos {
-			if repos[i].Name == formula.RepoName(name) {
-				repo = repos[i]
-				break
+			if !repos[i].IsLocal {
+				reposName = append(reposName, repos[i].Name.String())
 			}
 		}
 
-		git := up.repoProviders.Resolve(repo.Provider)
-
-		repoInfo := git.NewRepoInfo(repo.Url, repo.Token)
-		tags, err := git.Repos.Tags(repoInfo)
+		helper := "Select a repository to update your version. P.S. Local repositories cannot be updated."
+		name, err := up.List(questionSelectARepo, reposName, helper)
 		if err != nil {
 			return err
 		}
 
-		version, err := up.List(questionAVersion, tags.Names())
-		if err != nil {
-			return err
+		flagAll := (name == updateOptionAll)
+
+		var repoToUpdate []formula.Repo
+
+		if flagAll {
+			repoToUpdate = repos
+		} else {
+			for i := range repos {
+				if repos[i].Name == formula.RepoName(name) {
+					repoToUpdate = append(repoToUpdate, repos[i])
+					break
+				}
+			}
 		}
 
-		if err := up.repo.Update(formula.RepoName(name), formula.RepoVersion(version)); err != nil {
-			return err
-		}
+		for _, currRepo := range repoToUpdate {
 
-		successMsg := fmt.Sprintf("The %q repository was updated with success to version %q", name, version)
-		prompt.Success(successMsg)
+			git := up.repoProviders.Resolve(currRepo.Provider)
+
+			repoInfo := git.NewRepoInfo(currRepo.Url, currRepo.Token)
+			tags, err := git.Repos.Tags(repoInfo)
+			if err != nil {
+				return err
+			}
+
+			currRepoVersion := fmt.Sprintf("Select your new version for %q:", currRepo.Name.String())
+
+			version, err := up.List(currRepoVersion, tags.Names())
+			if err != nil {
+				return err
+			}
+
+			currRepoName := string(currRepo.Name)
+
+			if err := up.repo.Update(formula.RepoName(currRepoName), formula.RepoVersion(version)); err != nil {
+				return err
+			}
+
+			successMsg := fmt.Sprintf("The %q repository was updated with success to version %q\n", currRepo.Name, version)
+			prompt.Success(successMsg)
+		}
 
 		return nil
 	}

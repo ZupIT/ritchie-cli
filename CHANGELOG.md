@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.4.0](https://github.com/zupit/ritchie-cli/tree/2.4.0) (2020-11-13)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.3.0...2.4.0)
+
+**Closed issues:**
+
+- Update all formulas repositories at once [\#594](https://github.com/ZupIT/ritchie-cli/issues/594)
+- \[Feature\] Add support for flag --default [\#627](https://github.com/ZupIT/ritchie-cli/issues/627)
+- Add default field visualization to survey inputs [\#565](https://github.com/ZupIT/ritchie-cli/issues/565)
+
+**Merged pull requests:**
+
+- Fix/issue\_templates [\#669](https://github.com/ZupIT/ritchie-cli/pull/669) ([kaduartur](https://github.com/kaduartur))
+- fix lint [\#662](https://github.com/ZupIT/ritchie-cli/pull/662) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Release 2.3.0 merge [\#661](https://github.com/ZupIT/ritchie-cli/pull/661) ([zup-ci](https://github.com/zup-ci))
+- add default flag [\#635](https://github.com/ZupIT/ritchie-cli/pull/635) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Added update All for repo [\#602](https://github.com/ZupIT/ritchie-cli/pull/602) ([Harirai](https://github.com/Harirai))
+- fix: fix lint [\#672](https://github.com/ZupIT/ritchie-cli/pull/672) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- feat: add default text input to formula [\#654](https://github.com/ZupIT/ritchie-cli/pull/654) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+
 ## [2.3.0](https://github.com/zupit/ritchie-cli/tree/2.3.0) (2020-11-09)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.2.0...2.3.0)
@@ -15,6 +35,7 @@
 - Warn machine env variables if they have the same name as input params [\#625](https://github.com/ZupIT/ritchie-cli/issues/625)
 - Add current context for formula execution [\#588](https://github.com/ZupIT/ritchie-cli/issues/588)
 - Allow for inputs to be added via flag params [\#579](https://github.com/ZupIT/ritchie-cli/issues/579)
+- Notify the user of conflicting formula on the current tree [\#473](https://github.com/ZupIT/ritchie-cli/issues/473)
 - List options dynamically [\#389](https://github.com/ZupIT/ritchie-cli/issues/389)
 
 **Merged pull requests:**
