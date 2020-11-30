@@ -23,7 +23,7 @@ const RepoCommonsName = RepoName("commons")
 type Repo struct {
 	Provider RepoProvider `json:"provider"`
 	Name     RepoName     `json:"name"`
-	Version  RepoVersion  `json:"version"`
+	Version  RepoVersion  `json:"version,omitempty"`
 	Url      string       `json:"url"`
 	Token    string       `json:"token,omitempty"`
 	Priority int          `json:"priority"`
