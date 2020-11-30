@@ -223,7 +223,7 @@ func TestCreator(t *testing.T) {
 				errorMsg := "help.json should not be empty"
 				expected := "scaffold generate test_go formula"
 				require.Equal(t, expected, help.Short, errorMsg)
-				require.Equal(t, expected, help.Short, errorMsg)
+				require.Equal(t, expected, help.Long, errorMsg)
 			}
 		})
 	}
