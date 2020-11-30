@@ -17,10 +17,13 @@
 package creator
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -79,6 +82,7 @@ func TestCreator(t *testing.T) {
 		dir        stream.DirCreateChecker
 		file       stream.FileWriteReadExister
 		tplM       template.Manager
+		helpPath   string
 	}
 
 	type out struct {
@@ -120,9 +124,10 @@ func TestCreator(t *testing.T) {
 					Workspace:   formula.Workspace{Dir: resultDir},
 					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_go"),
 				},
-				dir:  dirManager,
-				file: fileManager,
-				tplM: tplM,
+				dir:      dirManager,
+				file:     fileManager,
+				tplM:     tplM,
+				helpPath: "/tmp/customWorkSpace/scaffold/generate/test_go/help.json",
 			},
 			out: out{
 				err: nil,
@@ -204,8 +209,21 @@ func TestCreator(t *testing.T) {
 			creator := NewCreator(treeMan, tt.in.dir, tt.in.file, tt.in.tplM)
 			out := tt.out
 			got := creator.Create(in.formCreate)
-			if (got != nil && out.err == nil) || got != nil && got.Error() != out.err.Error() || out.err != nil && got == nil {
-				t.Errorf("Create(%s) got %v, want %v", tt.name, got, out.err)
+			if out.err == nil {
+				require.NoError(t, got)
+			} else {
+				require.NotNil(t, out.err)
+				require.Equal(t, out.err.Error(), out.err.Error())
+			}
+
+			if in.helpPath != "" {
+				bytes, _ := fileManager.Read(in.helpPath)
+				help := formula.Help{}
+				_ = json.Unmarshal(bytes, &help)
+				errorMsg := "help.json should not be empty"
+				expected := "scaffold generate test_go formula"
+				require.Equal(t, expected, help.Short, errorMsg)
+				require.Equal(t, expected, help.Long, errorMsg)
 			}
 		})
 	}
