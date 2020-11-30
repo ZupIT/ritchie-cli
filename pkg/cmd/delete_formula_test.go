@@ -185,9 +185,6 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}
-						if name == questionAboutFoundedFormula {
-							return optionOtherFormula, nil
-						}
 						return "Default (/tmp/ritchie-formulas-local)", nil
 					},
 				},
@@ -218,9 +215,6 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
-						}
-						if name == questionAboutFoundedFormula {
-							return "rit group", nil
 						}
 						return "Default (/tmp/ritchie-formulas-local)", nil
 					},
@@ -296,9 +290,6 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
 						}
-						if name == questionAboutFoundedFormula {
-							return optionOtherFormula, nil
-						}
 						return "Default (/tmp/ritchie-formulas-local)", nil
 					},
 				},
@@ -313,9 +304,6 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 					list: func(name string, items []string) (string, error) {
 						if name == questionSelectFormulaGroup {
 							return items[0], nil
-						}
-						if name == questionAboutFoundedFormula {
-							return optionOtherFormula, nil
 						}
 						return "Default (/tmp/ritchie-formulas-local)", nil
 					},

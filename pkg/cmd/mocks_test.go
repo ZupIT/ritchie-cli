@@ -493,14 +493,6 @@ func (l LocalBuilderMock) Build(info formula.BuildInfo) error {
 	return l.build(info.Workspace.Dir, info.FormulaPath)
 }
 
-type WatcherMock struct {
-	watch func(formulaPath string, wspace formula.Workspace)
-}
-
-func (w WatcherMock) Watch(formulaPath string, wspace formula.Workspace) {
-	w.watch(formulaPath, wspace)
-}
-
 type WorkspaceAddListerCustomMock struct {
 	add  func(workspace formula.Workspace) error
 	list func() (formula.Workspaces, error)

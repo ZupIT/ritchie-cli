@@ -26,139 +26,76 @@ import (
 type preRunBuilderTest struct {
 	name string
 
-	workspaces          formula.Workspaces
-	rebuildPromptAnswer bool
-	currentHash         string
-	previousHash        string
-	currentHashError    error
-	previousHashError   error
-	writeHashError      error
-	promptError         error
+	workspaces        formula.Workspaces
+	currentHash       string
+	previousHash      string
+	currentHashError  error
+	previousHashError error
+	writeHashError    error
 
-	mustBuild         bool
-	mustPromptRebuild bool
+	mustBuild bool
 }
 
 var preRunBuilderTests = []preRunBuilderTest{
 	{
 		name: "should not prompt for rebuild when hash is the same",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: false,
-		currentHash:         "hash",
-		previousHash:        "hash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hash",
+		previousHash:      "hash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
-	},
-	{
-		name: "should rebuild when user chooses to",
-
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
-
-		mustBuild:         true,
-		mustPromptRebuild: true,
-	},
-	{
-		name: "should not rebuild when user chooses not to",
-
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: false,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
-
-		mustBuild:         false,
-		mustPromptRebuild: true,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt for rebuild when hash fails to save",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: false,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      fmt.Errorf("Failed to save hash"),
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hash",
+		previousHash:      "anotherhash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    fmt.Errorf("Failed to save hash"),
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt to rebuild nor fail when no workspaces are returned",
 
-		workspaces:          map[string]string{},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{},
+		currentHash:       "hash",
+		previousHash:      "anotherhash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
-	},
-	{
-		name: "should not build when user Ctrl+C's on prompt",
-
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "anotherhash",
-		currentHashError:    nil,
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         fmt.Errorf("Ctrl+C on survey"),
-
-		mustBuild:         false,
-		mustPromptRebuild: true,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt to build when the formula doesn't exist on any workspace",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "",
-		previousHash:        "hash",
-		currentHashError:    fmt.Errorf("Formula doesn't exist here"),
-		previousHashError:   nil,
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "",
+		previousHash:      "hash",
+		currentHashError:  fmt.Errorf("Formula doesn't exist here"),
+		previousHashError: nil,
+		writeHashError:    nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
+		mustBuild: false,
 	},
 	{
 		name: "should not prompt to build when no previous hash exists",
 
-		workspaces:          map[string]string{"default": "/pathtodefault"},
-		rebuildPromptAnswer: true,
-		currentHash:         "hash",
-		previousHash:        "",
-		currentHashError:    nil,
-		previousHashError:   fmt.Errorf("No previous hash"),
-		writeHashError:      nil,
-		promptError:         nil,
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hash",
+		previousHash:      "",
+		currentHashError:  nil,
+		previousHashError: fmt.Errorf("No previous hash"),
+		writeHashError:    nil,
 
-		mustBuild:         false,
-		mustPromptRebuild: false,
+		mustBuild: false,
 	},
 }
 
@@ -166,41 +103,17 @@ func TestPreRunBuilder(t *testing.T) {
 	for _, test := range preRunBuilderTests {
 		t.Run(test.name, func(t *testing.T) {
 			builderMock := newBuilderMock()
-			inputBoolMock := newInputBoolMock(test.rebuildPromptAnswer, test.promptError)
 
 			preRunBuilder := NewPreRunBuilder(workspaceListHasherMock{test.workspaces, test.currentHash, test.currentHashError, test.previousHash,
-				test.previousHashError, test.writeHashError}, builderMock, inputBoolMock)
+				test.previousHashError, test.writeHashError}, builderMock)
 			preRunBuilder.Build("/testing/formula")
 
 			gotBuilt := builderMock.HasBuilt()
 			if gotBuilt != test.mustBuild {
 				t.Errorf("Got build %v, wanted %v", gotBuilt, test.mustBuild)
 			}
-
-			gotPrompted := inputBoolMock.HasBeenCalled()
-			if gotPrompted != test.mustPromptRebuild {
-				t.Errorf("Got rebuild prompt %v, wanted %v", gotBuilt, test.mustBuild)
-			}
 		})
 	}
-}
-
-type inputBoolMock struct {
-	hasBeenCalled *bool
-	answer        bool
-	err           error
-}
-
-func newInputBoolMock(answer bool, err error) inputBoolMock {
-	hasBeenCalled := false
-	return inputBoolMock{&hasBeenCalled, answer, err}
-}
-func (in inputBoolMock) Bool(string, []string, ...string) (bool, error) {
-	*in.hasBeenCalled = true
-	return in.answer, in.err
-}
-func (in inputBoolMock) HasBeenCalled() bool {
-	return *in.hasBeenCalled
 }
 
 type builderMock struct {
