@@ -23,6 +23,8 @@ import (
 	"path"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
@@ -217,9 +219,10 @@ func TestCreator(t *testing.T) {
 				bytes, _ := fileManager.Read(in.helpPath)
 				help := formula.Help{}
 				_ = json.Unmarshal(bytes, &help)
-				if help.Short == "" || help.Long == "" {
-					t.Error("help.json should not be empty")
-				}
+				errorMsg := "help.json should not be empty"
+				expected := "scaffold generate test_go formula"
+				assert.Equal(t, expected, help.Short, errorMsg)
+				assert.Equal(t, expected, help.Short, errorMsg)
 			}
 		})
 	}
