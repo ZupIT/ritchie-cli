@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-package cmd
+package repo
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+)
 
-// NewDeleteCmd create a new delete instance.
-func NewDeleteCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:       "delete SUBCOMMAND",
-		Short:     "Delete contexts, repositories, formulas, workspaces and credentials",
-		Long:      "Delete contexts, repositories, formulas, workspaces and credentials",
-		Example:   "rit delete context",
-		ValidArgs: []string{"context", "formula", "repo", "workspace", "credential"},
-		Args:      cobra.OnlyValidArgs,
+type DetailManager struct {
+	repoProviders formula.RepoProviders
+}
+
+func NewDetail(repoProviders formula.RepoProviders) DetailManager {
+	return DetailManager{repoProviders}
+}
+
+func (dm DetailManager) LatestTag(repo formula.Repo) string {
+	formulaGit := dm.repoProviders.Resolve(repo.Provider)
+
+	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	tag, err := formulaGit.Repos.LatestTag(repoInfo)
+	if err != nil {
+		return ""
 	}
+
+	return tag.Name
 }
