@@ -166,11 +166,9 @@ func (c CreateManager) createHelpFiles(formulaCmdName, workSpacePath string) err
 		if i == dirsLen-1 {
 			complement = "formula"
 		}
-		tpl := fmt.Sprintf(template.HelpJson, commands, complement, commands, complement)
 		help := formula.Help{}
-		if err := json.Unmarshal([]byte(tpl), &help); err != nil {
-			return err
-		}
+		help.Short = fmt.Sprintf("%s %s", commands, complement)
+		help.Long = fmt.Sprintf("%s %s", commands, complement)
 
 		b, err := json.MarshalIndent(help, "", "\t")
 		if err != nil {
