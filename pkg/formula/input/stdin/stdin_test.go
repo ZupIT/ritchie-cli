@@ -26,7 +26,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -135,7 +134,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				stdin:       `"sample_text"`,
 				file:        fileManager,
 			},
-			want: stdin.ErrInvalidInput,
+			want: errors.New("json: cannot unmarshal string into Go value of type map[string]interface {}"),
 		},
 		{
 			name: "error env resolver stdin",
