@@ -17,12 +17,13 @@
 package metric
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenerate(t *testing.T) {
 	userIdManager := NewUserIdGenerator()
-	id := userIdManager.Generate()
-	fmt.Println(id)
+	ID := userIdManager.Generate()
+	require.NotNil(t, ID, "ID should not be empty")
 }
