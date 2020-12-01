@@ -89,49 +89,8 @@ rit_identify_os () {
   fi
 }
 
-rit_install_jq () {
-  echo "Installing jq to work with json files..."
-  if [ $OPERATIONAL_SYSTEM = "linux" ]; then
-      curl https://stedolan.github.io/jq/download/linux64/jq > /usr/local/bin/jq && sudo chmod +x /usr/local/bin/jq
-  elif [ $OPERATIONAL_SYSTEM = "darwin" ]; then
-      brew install jq
-  else
-    echo "Unable to install jq"
-    exit 1
-  fi
-
-
-}
-
-rit_rename_contexts_to_envs () {
-  echo "Converting context file to envs file..."
-
-  CURRENT_ENV=$(jq .current_context < "$HOME"/.rit/contexts)
-  ENVS=$(jq .contexts < "$HOME"/.rit/contexts)
-
-  echo "{\"current_env\": $CURRENT_ENV, \"envs\": $ENVS}" > ~/.rit/envs
-}
-
-rit_remove_contexts_file () {
-  echo "Removing contexts file..."
-  rm -rf ~/.rit/contexts
-}
-
-rit_compatibility_script () {
-  if [ -f ~/.rit/contexts ]; then
-    echo "Running compatibility script..."
-    rit_install_jq
-    rit_rename_contexts_to_envs
-    rit_remove_contexts_file
-  fi
-}
-
 rit_identify_os
 
 rit_identify_shell
 
 rit_install
-
-rit_compatibility_script
-
-
