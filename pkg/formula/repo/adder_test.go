@@ -23,11 +23,13 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestAdd(t *testing.T) {
+	treeWithOneCommand := formula.Tree{Commands: []api.Command{{Id: "", Parent: "", Usage: "", Help: "", LongHelp: "", Formula: false, Repo: ""}}}
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
@@ -68,7 +70,7 @@ func TestAdd(t *testing.T) {
 				},
 				tree: treeGeneratorCustomMock{
 					func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
+						return treeWithOneCommand, nil
 					},
 				},
 				file: fileManager,
@@ -125,7 +127,7 @@ func TestAdd(t *testing.T) {
 				},
 				tree: treeGeneratorCustomMock{
 					func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
+						return treeWithOneCommand, nil
 					},
 				},
 				file: fileManager,
@@ -231,6 +233,28 @@ func TestAdd(t *testing.T) {
 				file: FileWriteCreatorReadExistRemover{
 					write: func(path string, content []byte) error {
 						return errors.New("some error")
+					},
+				},
+				tree: treeGeneratorCustomMock{
+					func(repoPath string) (formula.Tree, error) {
+						return treeWithOneCommand, nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return err when tree.json has no commands",
+			in: in{
+				repoMock: repoListWriteCreatorMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
+						return nil
 					},
 				},
 				tree: treeGeneratorCustomMock{

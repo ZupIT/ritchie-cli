@@ -36,6 +36,7 @@ var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empt
 type addRepoCmd struct {
 	repo          formula.RepositoryAddLister
 	repoProviders formula.RepoProviders
+	repoDeleter   formula.RepositoryDeleter
 	prompt.InputTextValidator
 	prompt.InputPassword
 	prompt.InputURL
@@ -50,6 +51,7 @@ type addRepoCmd struct {
 func NewAddRepoCmd(
 	repo formula.RepositoryAddLister,
 	repoProviders formula.RepoProviders,
+	repoDeleter formula.RepositoryDeleter,
 	inText prompt.InputTextValidator,
 	inPass prompt.InputPassword,
 	inURL prompt.InputURL,
@@ -72,6 +74,7 @@ func NewAddRepoCmd(
 		tutorial:           rtf,
 		tree:               treeChecker,
 		detail:             rd,
+		repoDeleter:        repoDeleter,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -180,6 +183,9 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		if err := ad.repo.Add(repository); err != nil {
+			if err := ad.repoDeleter.Delete(repository.Name); err != nil {
+				return err
+			}
 			return err
 		}
 
@@ -214,6 +220,9 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if err := ad.repo.Add(r); err != nil {
+			if err := ad.repoDeleter.Delete(r.Name); err != nil {
+				return err
+			}
 			return err
 		}
 

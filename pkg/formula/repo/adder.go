@@ -18,6 +18,7 @@ package repo
 
 import (
 	"encoding/json"
+	"errors"
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -75,6 +76,10 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 	tree, err := ad.tree.Generate(newRepoPath)
 	if err != nil {
 		return err
+	}
+
+	if len(tree.Commands) == 0 {
+		return errors.New("the selected repository has no formulas")
 	}
 
 	treeFilePath := filepath.Join(newRepoPath, "tree.json")

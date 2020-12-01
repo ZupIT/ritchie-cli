@@ -21,13 +21,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestAddRepoCmd(t *testing.T) {
@@ -37,6 +38,7 @@ func TestAddRepoCmd(t *testing.T) {
 	type fields struct {
 		repo               formula.RepositoryAddLister
 		repoProviders      formula.RepoProviders
+		repoDeleter        formula.RepositoryDeleter
 		InputTextValidator prompt.InputTextValidator
 		InputPassword      prompt.InputPassword
 		InputURL           prompt.InputURL
@@ -56,6 +58,7 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -70,10 +73,71 @@ func TestAddRepoCmd(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Fail when repo.Add return err",
+			fields: fields{
+				repo: repoListerAdderCustomMock{
+					add: func(d formula.Repo) error {
+						return errors.New("")
+					},
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+				},
+				repoProviders: repoProviders,
+				repoDeleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return nil
+					},
+				},
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Fail when repo.Add and repoDeleter.Delete return err",
+			fields: fields{
+				repo: repoListerAdderCustomMock{
+					add: func(d formula.Repo) error {
+						return errors.New("")
+					},
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+				},
+				repoProviders: repoProviders,
+				repoDeleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return errors.New("")
+					},
+				},
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "input bool error",
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -92,6 +156,7 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordErrorMock{},
 				InputURL:           inputURLMock{},
@@ -110,6 +175,7 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -124,6 +190,7 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorErrorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -138,6 +205,7 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLErrorMock{},
@@ -156,6 +224,7 @@ func TestAddRepoCmd(t *testing.T) {
 					},
 				},
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -174,6 +243,7 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -193,6 +263,7 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
+				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -208,6 +279,64 @@ func TestAddRepoCmd(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Fail when repo.Add return err Stdin",
+			fields: fields{
+				repo: repoListerAdderCustomMock{
+					add: func(d formula.Repo) error {
+						return errors.New("")
+					},
+				},
+				repoProviders: repoProviders,
+				repoDeleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return nil
+					},
+				},
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				detailLatestTag: "1.0.0",
+			},
+			wantErr: true,
+		},
+		{
+			name: "Fail when repo.Add and repoDeleter.Delete return err stdin",
+			fields: fields{
+				repo: repoListerAdderCustomMock{
+					add: func(d formula.Repo) error {
+						return errors.New("error to add")
+					},
+				},
+				repoProviders: repoProviders,
+				repoDeleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return errors.New("error to delete")
+					},
+				},
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				detailLatestTag: "1.0.0",
+			},
+			wantErr: true,
+		},
 	}
 	checkerManager := tree.NewChecker(treeMock{})
 
@@ -218,6 +347,7 @@ func TestAddRepoCmd(t *testing.T) {
 			cmd := NewAddRepoCmd(
 				tt.fields.repo,
 				tt.fields.repoProviders,
+				tt.fields.repoDeleter,
 				tt.fields.InputTextValidator,
 				tt.fields.InputPassword,
 				tt.fields.InputURL,
