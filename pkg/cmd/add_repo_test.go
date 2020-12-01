@@ -34,6 +34,23 @@ func TestAddRepoCmd(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
+	repoTest := &formula.Repo{
+		Provider: "Github",
+		Name:     "someRepo1",
+		Version:  "1.0.0",
+		Url:      "https://github.com/owner/repo",
+		Token:    "token",
+		Priority: 2,
+	}
+	repoListerPopulated := repoListerAdderCustomMock{
+		add: func(d formula.Repo) error {
+			return nil
+		},
+		list: func() (formula.Repos, error) {
+			return formula.Repos{*repoTest}, nil
+		},
+	}
+
 	type fields struct {
 		repo               formula.RepositoryAddLister
 		repoProviders      formula.RepoProviders
@@ -205,6 +222,24 @@ func TestAddRepoCmd(t *testing.T) {
 				},
 				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 				detailLatestTag: "1.0.0",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Return error when user add a repo existent",
+			fields: fields{
+				repo:               repoListerPopulated,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
 			},
 			wantErr: false,
 		},
