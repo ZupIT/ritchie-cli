@@ -25,8 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -60,7 +58,6 @@ func (d DataCollectorManager) CollectCommandData(
 	commandError ...string,
 ) Command {
 	cmdData := Command{
-		Id:               uuid.New().String(),
 		UserID:           d.userId.Generate(),
 		Timestamp:        time.Now(),
 		Command:          d.command(),

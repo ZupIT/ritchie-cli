@@ -28,12 +28,6 @@ var (
 	FilePath      = filepath.Join(api.RitchieHomeDir(), "metrics")
 )
 
-type Id string
-
-func (i Id) String() string {
-	return string(i)
-}
-
 type UserID string
 
 func (u UserID) String() string {
@@ -41,7 +35,6 @@ func (u UserID) String() string {
 }
 
 type Command struct {
-	Id               string    `json:"id"`
 	UserID           UserID    `json:"userId"`
 	Timestamp        time.Time `json:"timestamp"`
 	Command          string    `json:"command"`
