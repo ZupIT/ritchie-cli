@@ -28,8 +28,8 @@ import (
 func NewDeleteCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:       "delete SUBCOMMAND",
-		Short:     "Delete env, repositories, formulas and workspaces",
-		Long:      "Delete env, repositories, formulas and workspaces",
+		Short:     "Delete env, repositories, formulas, workspaces and credentials",
+		Long:      "Delete env, repositories, formulas, workspaces and credentials",
 		Example:   "rit delete env",
 		ValidArgs: []string{"env", "formula", "repo", "workspace", "credential"},
 		Args:      cobra.OnlyValidArgs,
