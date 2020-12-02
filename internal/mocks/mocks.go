@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 type ContextFinderMock struct {
@@ -30,4 +31,14 @@ func (cf *ContextFinderMock) Find() (env.Holder, error) {
 	args := cf.Called()
 
 	return args.Get(0).(env.Holder), args.Error(1)
+}
+
+type DetailManagerMock struct {
+	mock.Mock
+}
+
+func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
+	args := d.Called(repo)
+
+	return args.String(0)
 }

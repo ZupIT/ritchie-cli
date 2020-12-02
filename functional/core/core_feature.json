@@ -292,7 +292,7 @@
                 "action": "main"
             }
         ],
-        "result": "Delete env, repositories, formulas and workspaces"
+        "result": "Delete env, repositories, formulas, workspaces and credentials"
     },
     {
         "entry": "Show",

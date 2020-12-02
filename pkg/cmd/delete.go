@@ -31,7 +31,7 @@ func NewDeleteCmd() *cobra.Command {
 		Short:     "Delete env, repositories, formulas and workspaces",
 		Long:      "Delete env, repositories, formulas and workspaces",
 		Example:   "rit delete env",
-		ValidArgs: []string{"env", "formula", "repo", "workspace"},
+		ValidArgs: []string{"env", "formula", "repo", "workspace", "credential"},
 		Args:      cobra.OnlyValidArgs,
 	}
 

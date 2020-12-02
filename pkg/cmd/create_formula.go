@@ -36,6 +36,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+const newWorkspace = "Type new formula workspace?"
+
 // createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
@@ -317,9 +319,7 @@ func FormulaWorkspaceInput(
 func tutorialCreateFormula(formulaCmd string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const messageTitle = "In order to test your new formula:"
-	const messageBody = ` ∙ Run %q
- ∙ Run "rit build formula" to update your changes
- ∙ Run "rit build formula --watch" to have automatic updates` + "\n"
+	const messageBody = ` ∙ Simply edit the formula files and run %q again` + "\n"
 
 	prompt.Info(tagTutorial)
 	prompt.Info(messageTitle)

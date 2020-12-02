@@ -58,9 +58,14 @@ type CredFinder interface {
 	Find(service string) (Detail, error)
 }
 
+type CredDelete interface {
+	Delete(service string) error
+}
+
 type Reader interface {
 	ReadCredentialsFields(path string) (Fields, error)
 	ReadCredentialsValue(path string) ([]ListCredData, error)
+	ReadCredentialsValueInContext(path string, context string) ([]ListCredData, error)
 }
 
 type Writer interface {
@@ -80,5 +85,10 @@ type Resolver interface {
 type ReaderWriterPather interface {
 	Reader
 	Writer
+	Pather
+}
+
+type ReaderPather interface {
+	Reader
 	Pather
 }

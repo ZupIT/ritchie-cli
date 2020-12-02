@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -55,6 +54,7 @@ func TestUpdateRepoRun(t *testing.T) {
 		Url:      "https://github.com/owner/repo",
 		Token:    "token",
 		Priority: 1,
+		IsLocal:  true,
 	}
 
 	type in struct {
@@ -292,9 +292,4 @@ func serverMock() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
-}
-
-func createJSONEntry(v interface{}) string {
-	s, _ := json.Marshal(v)
-	return string(s)
 }

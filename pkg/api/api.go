@@ -42,6 +42,7 @@ var (
 		{Parent: "root_delete", Usage: "repo"},
 		{Parent: "root_delete", Usage: "workspace"},
 		{Parent: "root_delete", Usage: "formula"},
+		{Parent: "root_delete", Usage: "credential"},
 		{Parent: "root", Usage: "help"},
 		{Parent: "root", Usage: "init"},
 		{Parent: "root", Usage: "list"},
