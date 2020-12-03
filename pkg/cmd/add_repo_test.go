@@ -56,7 +56,8 @@ func TestAddRepoCmd(t *testing.T) {
 		repoProviders      formula.RepoProviders
 		InputTextValidator prompt.InputTextValidator
 		InputPassword      prompt.InputPassword
-		InputURL           prompt.InputURL
+		InputURLText       string
+		InputURLErr        error
 		InputList          prompt.InputList
 		InputBool          prompt.InputBool
 		InputInt           prompt.InputInt
@@ -75,7 +76,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
@@ -93,7 +95,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputBoolErrorMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
@@ -111,7 +114,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordErrorMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
@@ -129,7 +133,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList:          inputListErrorMock{},
@@ -143,7 +148,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorErrorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList:          inputListMock{},
@@ -151,13 +157,14 @@ func TestAddRepoCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "input text error",
+			name: "input url error",
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLErrorMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        errors.New("error on input url"),
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList:          inputListMock{},
@@ -175,7 +182,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
@@ -193,7 +201,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
@@ -212,7 +221,8 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       "http://localhost/mocked",
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
@@ -232,11 +242,15 @@ func TestAddRepoCmd(t *testing.T) {
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
+				InputURLText:       repoTest.Url,
+				InputURLErr:        nil,
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
+						if name == "Select a tag version:" {
+							return "1.0.0", nil
+						}
 						return "Github", nil
 					},
 				},
@@ -250,12 +264,15 @@ func TestAddRepoCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			detailMock := new(mocks.DetailManagerMock)
 			detailMock.On("LatestTag", mock.Anything).Return(tt.fields.detailLatestTag)
+			inputURLMock := new(mocks.InputURLMock)
+			inputURLMock.On("URL", "Repository URL:", "https://github.com/ZupIT/ritchie-formulas").Return(tt.fields.InputURLText, tt.fields.InputURLErr)
+
 			cmd := NewAddRepoCmd(
 				tt.fields.repo,
 				tt.fields.repoProviders,
 				tt.fields.InputTextValidator,
 				tt.fields.InputPassword,
-				tt.fields.InputURL,
+				inputURLMock,
 				tt.fields.InputList,
 				tt.fields.InputBool,
 				tt.fields.InputInt,

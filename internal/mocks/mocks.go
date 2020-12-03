@@ -41,3 +41,13 @@ func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
 
 	return args.String(0)
 }
+
+type InputURLMock struct {
+	mock.Mock
+}
+
+func (i *InputURLMock) URL(name, defaultValue string) (string, error) {
+	args := i.Called(name, defaultValue)
+
+	return args.String(0), args.Error(1)
+}
