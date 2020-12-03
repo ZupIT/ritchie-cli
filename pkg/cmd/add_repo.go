@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -203,13 +204,11 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func printConflictingCommandsWarning(conflictingCommands map[api.CommandID]string) {
-	var lastCommand string
-	for k, _ := range conflictingCommands {
-		lastCommand = conflictingCommands[k]
-		break
-	}
-
+func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
+	lastCommandIndex := len(conflictingCommands) - 1
+	lastCommand := conflictingCommands[lastCommandIndex].String()
+	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
+	lastCommand = strings.ReplaceAll(lastCommand, "_", " ")
 	msg := fmt.Sprintf("There's a total of %d formula conflicting commands, like:\n %s", len(conflictingCommands), lastCommand)
 	msg = prompt.Yellow(msg)
 	fmt.Println(msg)

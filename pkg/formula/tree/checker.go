@@ -17,10 +17,10 @@ func NewChecker(
 	}
 }
 
-// Check is used to warn the user about conflicting
-// formula commands on different repos. This function doesn't
-// return an error because printing an error from a unsuccessful
-// warning attempt can be confusing to the user.
+// Check returns an api.CommandID slice if it finds
+// any commands that are in conflict in different
+// repositories or an api.CommandID empty slice
+// if no conflicts are found.
 func (cm CheckerManager) Check() []api.CommandID {
 	hashTable := make(map[api.CommandID]bool)
 	var conflicts []api.CommandID
