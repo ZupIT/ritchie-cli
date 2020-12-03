@@ -42,7 +42,6 @@ linters:
     - exportloopref
     - gochecknoinits
     - gocyclo
-    - godox
     - gofmt
     - goheader
     - goimports

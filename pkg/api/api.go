@@ -42,6 +42,7 @@ var (
 		"root_delete_repo":           {Parent: "root_delete", Usage: "repo"},
 		"root_delete_workspace":      {Parent: "root_delete", Usage: "workspace"},
 		"root_delete_formula":        {Parent: "root_delete", Usage: "formula"},
+		"root_delete_credential":     {Parent: "root_delete", Usage: "credential"},
 		"root_help":                  {Parent: "root", Usage: "help"},
 		"root_init":                  {Parent: "root", Usage: "init"},
 		"root_list":                  {Parent: "root", Usage: "list"},
@@ -72,6 +73,20 @@ type CommandID string
 
 func (id CommandID) String() string {
 	return string(id)
+}
+
+type ByLen []CommandID
+
+func (a ByLen) Len() int {
+	return len(a)
+}
+
+func (a ByLen) Less(i, j int) bool {
+	return len(a[i]) < len(a[j])
+}
+
+func (a ByLen) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
 }
 
 // Command type

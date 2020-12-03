@@ -26,11 +26,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	reposDirName = "repos"
-	treeFileName = "tree.json"
-	core         = "CORE"
-)
+const core = "CORE"
 
 type Manager struct {
 	ritchieHome   string
@@ -76,20 +72,6 @@ func (d Manager) Tree() (map[formula.RepoName]formula.Tree, error) {
 	return trees, nil
 }
 
-type ByLen []api.CommandID
-
-func (a ByLen) Len() int {
-	return len(a)
-}
-
-func (a ByLen) Less(i, j int) bool {
-	return len(a[i]) < len(a[j])
-}
-
-func (a ByLen) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
-
 func (d Manager) MergedTree(core bool) formula.Tree {
 	mergedCommands := make(api.Commands)
 	rr, _ := d.repo.List()
@@ -111,7 +93,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		ids = append(ids, id)
 	}
 
-	sort.Sort(ByLen(ids))
+	sort.Sort(api.ByLen(ids))
 
 	if core {
 		for k, v := range d.coreCmds {
@@ -119,8 +101,11 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		}
 	}
 
-	treeMain := formula.Tree{Version: treeVersion, Commands: mergedCommands, CommandsID: ids}
-	return treeMain
+	return formula.Tree{
+		Version:    treeVersion,
+		Commands:   mergedCommands,
+		CommandsID: ids,
+	}
 }
 
 func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {

@@ -20,37 +20,27 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
-	messageBuilding     = "Building formula..."
-	messageBuildSuccess = "Build completed!\n"
-	messageChangeError  = "Failed to detect formula changes, executing the last build"
-	messageBuildError   = "Failed to build formula"
-	messageChangePrompt = "This formula has changed since the last run, would you like to rebuild?"
-	messageYes          = "yes"
-	messageNo           = "no"
+	messageChangeError = "Failed to detect formula changes, executing the last build"
+	messageBuildError  = "Failed to build formula"
 )
 
 type PreRunBuilderManager struct {
 	workspace formula.WorkspaceListHasher
 	builder   formula.Builder
-	inBool    prompt.InputBool
 }
 
 func NewPreRunBuilder(
 	workspace formula.WorkspaceListHasher,
 	builder formula.Builder,
-	inBool prompt.InputBool,
 ) PreRunBuilderManager {
 	return PreRunBuilderManager{
 		workspace: workspace,
 		builder:   builder,
-		inBool:    inBool,
 	}
 }
 
@@ -63,11 +53,6 @@ func (b PreRunBuilderManager) Build(relativePath string) {
 
 	// No modifications on any workspace, skip
 	if workspace == nil {
-		return
-	}
-
-	// User chose not to rebuild
-	if !b.mustBuild() {
 		return
 	}
 
@@ -126,22 +111,10 @@ func (b PreRunBuilderManager) hasFormulaChanged(path string) (bool, error) {
 
 func (b PreRunBuilderManager) buildOnWorkspace(workspace formula.Workspace, relativePath string) error {
 	formulaAbsolutePath := filepath.Join(workspace.Dir, relativePath)
-	s := spinner.StartNew(messageBuilding)
 	info := formula.BuildInfo{FormulaPath: formulaAbsolutePath, Workspace: workspace}
 	if err := b.builder.Build(info); err != nil {
-		s.Error(err)
 		return err
 	}
 
-	s.Success(prompt.Green(messageBuildSuccess))
 	return nil
-}
-
-func (b PreRunBuilderManager) mustBuild() bool {
-	ans, err := b.inBool.Bool(messageChangePrompt, []string{messageYes, messageNo})
-	if err != nil {
-		return false // Don't rebuild when Ctrl+C on question
-	}
-
-	return ans
 }

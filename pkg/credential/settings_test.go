@@ -50,13 +50,67 @@ func TestSettings_ReadCredentialsFields(t *testing.T) {
 }
 
 func TestSettings_ReadCredentialsValue(t *testing.T) {
-	credentials, err := credSettings.ReadCredentialsValue("../../testdata/.rit/credentials/")
-	if err != nil {
-		t.Errorf("Error reading credentials: %s", err)
+	tests := []struct {
+		name    string
+		path    string
+		wantErr bool
+	}{
+		{
+			name:    "run with success",
+			path:    "../../testdata/.rit/credentials/",
+			wantErr: false,
+		},
+		{
+			name:    "error on json unmarshal",
+			path:    "../../testdata/.rit/credentialserr/",
+			wantErr: true,
+		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			credentials, err := credSettings.ReadCredentialsValue(tt.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Read credentials value error = %s, wantErr %v", err, tt.wantErr)
+			}
 
-	if credentials == nil || len(credentials) <= 0 {
-		t.Errorf("Error reading credentials, cannot be empty or null")
+			if (credentials == nil || len(credentials) <= 0) != tt.wantErr {
+				t.Errorf("Error reading credentials, cannot be empty or null %v", len(credentials))
+			}
+		})
+	}
+}
+
+func TestSettings_ReadCredentialsValueInContext(t *testing.T) {
+	tests := []struct {
+		name    string
+		path    string
+		context string
+		wantErr bool
+	}{
+		{
+			name:    "run with success",
+			path:    "../../testdata/.rit/credentials/",
+			context: "default",
+			wantErr: false,
+		},
+		{
+			name:    "error on json unmarshal",
+			path:    "../../testdata/.rit/credentialserr/",
+			context: "error",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			credentials, err := credSettings.ReadCredentialsValueInContext(tt.path, tt.context)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Read credentials value in context error = %s, wantErr %v", err, tt.wantErr)
+			}
+
+			if (credentials == nil || len(credentials) <= 0) != tt.wantErr {
+				t.Errorf("Error reading credentials, cannot be empty or null")
+			}
+		})
 	}
 }
 

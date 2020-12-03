@@ -1,9 +1,7 @@
 package tree
 
 import (
-	"io/ioutil"
-	"os"
-	"strings"
+	"reflect"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -11,63 +9,59 @@ import (
 )
 
 func TestChecker(t *testing.T) {
-	treeMock := treeMock{
-		tree: formula.Tree{
+	tests := []struct {
+		name string
+		want map[api.CommandID]string
+	}{
+		{
+			name: "should return conflicting commands",
+			want: map[api.CommandID]string{
+				"root_aws_create_bucket": "rit aws create bucket",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			checker := NewChecker(treeMock{})
+			got := checker.Check()
+
+			if !reflect.DeepEqual(tt.want, got) {
+				t.Fatalf("Check(%s) got = %v, but want = %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
+type treeMock struct {
+	tree  formula.Tree
+	error error
+}
+
+func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
+	m := map[formula.RepoName]formula.Tree{
+		"repo1": {
 			Commands: api.Commands{
-				"root_mock": {
+				"root_aws_create_bucket": {
 					Parent:  "root",
-					Usage:   "mock",
-					Help:    "mock for add",
+					Usage:   "bucket",
+					Help:    "create bucket for aws",
+					Formula: true,
+				},
+			},
+		},
+		"repo2": {
+			Commands: api.Commands{
+				"root_aws_create_bucket": {
+					Parent:  "root",
+					Usage:   "bucket",
+					Help:    "create bucket for aws",
 					Formula: true,
 				},
 			},
 		},
 	}
 
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "Should warn conflicting commands",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			out := captureCheckerStdout(treeMock)
-			if !strings.Contains(out, "rit mock") {
-				t.Error("Wrong output on tree checker function")
-			}
-		})
-	}
-}
-
-func captureCheckerStdout(tree formula.TreeManager) string {
-	treeChecker := NewChecker(tree)
-
-	rescueStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	treeChecker.Check()
-
-	_ = w.Close()
-	out, _ := ioutil.ReadAll(r)
-	os.Stdout = rescueStdout
-	return string(out)
-}
-
-type treeMock struct {
-	tree  formula.Tree
-	error error
-	value string
-}
-
-func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
-	if t.value != "" {
-		v := formula.RepoName(t.value)
-		return map[formula.RepoName]formula.Tree{v: t.tree}, t.error
-	}
-	return map[formula.RepoName]formula.Tree{"test": t.tree}, t.error
+	return m, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {

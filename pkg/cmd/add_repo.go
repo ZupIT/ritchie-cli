@@ -19,10 +19,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -45,6 +45,7 @@ type addRepoCmd struct {
 	prompt.InputInt
 	tutorial rtutorial.Finder
 	tree     tree.CheckerManager
+	detail   formula.RepositoryDetail
 }
 
 func NewAddRepoCmd(
@@ -58,6 +59,7 @@ func NewAddRepoCmd(
 	inInt prompt.InputInt,
 	rtf rtutorial.Finder,
 	treeChecker tree.CheckerManager,
+	rd formula.RepositoryDetail,
 ) *cobra.Command {
 	addRepo := addRepoCmd{
 		repo:               repo,
@@ -70,6 +72,7 @@ func NewAddRepoCmd(
 		InputPassword:      inPass,
 		tutorial:           rtf,
 		tree:               treeChecker,
+		detail:             rd,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -192,19 +195,38 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
-		ad.tree.Check()
+		conflictCmds := ad.tree.Check()
+
+		printConflictingCommandsWarning(conflictCmds)
+
 		return nil
 	}
 }
 
+func printConflictingCommandsWarning(conflictingCommands map[api.CommandID]string) {
+	var lastCommand string
+	for k, _ := range conflictingCommands {
+		lastCommand = conflictingCommands[k]
+		break
+	}
+
+	msg := fmt.Sprintf("There's a total of %d formula conflicting commands, like:\n %s", len(conflictingCommands), lastCommand)
+	msg = prompt.Yellow(msg)
+	fmt.Println(msg)
+}
+
 func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
 		r := formula.Repo{}
 
-		err := stdin.ReadJson(os.Stdin, &r)
+		err := stdin.ReadJson(cmd.InOrStdin(), &r)
 		if err != nil {
 			return err
+		}
+
+		if r.Version.String() == "" {
+			latestTag := ad.detail.LatestTag(r)
+			r.Version = formula.RepoVersion(latestTag)
 		}
 
 		if err := ad.repo.Add(r); err != nil {
