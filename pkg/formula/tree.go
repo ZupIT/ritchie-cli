@@ -34,5 +34,5 @@ type TreeGenerator interface {
 }
 
 type TreeChecker interface {
-	Check() map[api.CommandID]string
+	Check() []api.CommandID
 }
