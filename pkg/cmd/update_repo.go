@@ -88,9 +88,11 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		var reposName []string
+		var externalRepos formula.Repos
 		reposName = append(reposName, updateOptionAll)
 		for i := range repos {
 			if !repos[i].IsLocal {
+				externalRepos = append(externalRepos, repos[i])
 				reposName = append(reposName, repos[i].Name.String())
 			}
 		}
@@ -106,9 +108,9 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 		var repoToUpdate []formula.Repo
 
 		if flagAll {
-			repoToUpdate = repos
+			repoToUpdate = externalRepos
 		} else {
-			for i := range repos {
+			for i := range externalRepos {
 				if repos[i].Name == formula.RepoName(name) {
 					repoToUpdate = append(repoToUpdate, repos[i])
 					break
