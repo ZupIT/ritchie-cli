@@ -42,14 +42,10 @@ func TestAddRepoCmd(t *testing.T) {
 		Token:    "token",
 		Priority: 2,
 	}
-	repoListerPopulated := repoListerAdderCustomMock{
-		add: func(d formula.Repo) error {
-			return nil
-		},
-		list: func() (formula.Repos, error) {
-			return formula.Repos{*repoTest}, nil
-		},
-	}
+
+	repoListerPopulated := new(mocks.RepoListerAdderMock)
+	repoListerPopulated.On("Add", mock.Anything).Return(nil)
+	repoListerPopulated.On("List").Return(formula.Repos{*repoTest}, nil)
 
 	type fields struct {
 		repo               formula.RepositoryAddLister

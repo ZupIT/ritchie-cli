@@ -51,3 +51,19 @@ func (i *InputURLMock) URL(name, defaultValue string) (string, error) {
 
 	return args.String(0), args.Error(1)
 }
+
+type RepoListerAdderMock struct {
+	mock.Mock
+}
+
+func (r *RepoListerAdderMock) List() (formula.Repos, error) {
+	args := r.Called()
+
+	return args.Get(0).(formula.Repos), args.Error(1)
+}
+
+func (r *RepoListerAdderMock) Add(repo formula.Repo) error {
+	args := r.Called(repo)
+
+	return args.Error(1)
+}
