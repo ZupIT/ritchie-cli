@@ -31,6 +31,7 @@ import (
 )
 
 func TestAddRepoCmd(t *testing.T) {
+	someError := errors.New("some error")
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
@@ -47,6 +48,11 @@ func TestAddRepoCmd(t *testing.T) {
 	repoListerPopulated.On("Add", mock.Anything).Return(nil)
 	repoListerPopulated.On("List").Return(formula.Repos{*repoTest}, nil)
 
+	type returnOffInputBool struct {
+		bool
+		error
+	}
+
 	type fields struct {
 		repo               formula.RepositoryAddLister
 		repoProviders      formula.RepoProviders
@@ -55,7 +61,7 @@ func TestAddRepoCmd(t *testing.T) {
 		InputURLText       string
 		InputURLErr        error
 		InputList          prompt.InputList
-		InputBool          prompt.InputBool
+		InputBool          returnOffInputBool
 		InputInt           prompt.InputInt
 		stdin              string
 		detailLatestTag    string
@@ -74,7 +80,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -93,7 +99,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputBoolErrorMock{},
+				InputBool:          returnOffInputBool{false, someError},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -112,7 +118,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordErrorMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -131,7 +137,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList:          inputListErrorMock{},
 			},
@@ -146,7 +152,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList:          inputListMock{},
 			},
@@ -161,7 +167,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        errors.New("error on input url"),
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList:          inputListMock{},
 			},
@@ -180,7 +186,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -199,7 +205,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -219,7 +225,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -240,7 +246,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputPassword:      inputPasswordMock{},
 				InputURLText:       repoTest.Url,
 				InputURLErr:        nil,
-				InputBool:          inputTrueMock{},
+				InputBool:          returnOffInputBool{true, nil},
 				InputInt:           inputIntMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -261,7 +267,9 @@ func TestAddRepoCmd(t *testing.T) {
 			detailMock := new(mocks.DetailManagerMock)
 			detailMock.On("LatestTag", mock.Anything).Return(tt.fields.detailLatestTag)
 			inputURLMock := new(mocks.InputURLMock)
-			inputURLMock.On("URL", "Repository URL:", "https://github.com/ZupIT/ritchie-formulas").Return(tt.fields.InputURLText, tt.fields.InputURLErr)
+			inputURLMock.On("URL", mock.Anything, mock.Anything).Return(tt.fields.InputURLText, tt.fields.InputURLErr)
+			inputBoolMock := new(mocks.InputBoolMock)
+			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.fields.InputBool.bool, tt.fields.InputBool.error)
 
 			cmd := NewAddRepoCmd(
 				tt.fields.repo,
@@ -270,7 +278,7 @@ func TestAddRepoCmd(t *testing.T) {
 				tt.fields.InputPassword,
 				inputURLMock,
 				tt.fields.InputList,
-				tt.fields.InputBool,
+				inputBoolMock,
 				tt.fields.InputInt,
 				TutorialFinderMock{},
 				checkerManager,

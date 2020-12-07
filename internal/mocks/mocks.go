@@ -42,16 +42,6 @@ func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
 	return args.String(0)
 }
 
-type InputURLMock struct {
-	mock.Mock
-}
-
-func (i *InputURLMock) URL(name, defaultValue string) (string, error) {
-	args := i.Called(name, defaultValue)
-
-	return args.String(0), args.Error(1)
-}
-
 type RepoListerAdderMock struct {
 	mock.Mock
 }
@@ -66,4 +56,24 @@ func (r *RepoListerAdderMock) Add(repo formula.Repo) error {
 	args := r.Called(repo)
 
 	return args.Error(1)
+}
+
+type InputURLMock struct {
+	mock.Mock
+}
+
+func (i *InputURLMock) URL(name, defaultValue string) (string, error) {
+	args := i.Called(name, defaultValue)
+
+	return args.String(0), args.Error(1)
+}
+
+type InputBoolMock struct {
+	mock.Mock
+}
+
+func (i *InputBoolMock) Bool(name string, items []string, helper ...string) (bool, error) {
+	args := i.Called(name, items, helper)
+
+	return args.Bool(0), args.Error(1)
 }
