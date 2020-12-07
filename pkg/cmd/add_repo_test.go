@@ -24,6 +24,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/stretchr/testify/assert"
@@ -33,8 +34,13 @@ import (
 func TestAddRepoCmd(t *testing.T) {
 	someError := errors.New("some error")
 
+	gitRepo := new(mocks.GitRepositoryMock)
+	gitRepo.On("Zipball", mock.Anything, mock.Anything).Return(nil, nil)
+	gitRepo.On("Tags", mock.Anything).Return(git.Tags{git.Tag{Name: "1.0.0"}}, nil)
+	gitRepo.On("LatestTag", mock.Anything).Return(git.Tag{}, nil)
+
 	repoProviders := formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("Github", formula.Git{Repos: gitRepo, NewRepoInfo: github.NewRepoInfo})
 
 	repoTest := &formula.Repo{
 		Provider: "Github",
@@ -85,7 +91,6 @@ func TestAddRepoCmd(t *testing.T) {
 
 	type fields struct {
 		repo               returnOffRepoListerAdder
-		repoProviders      formula.RepoProviders
 		InputTextValidator returnOfInputTextValidator
 		InputPassword      returnOfInputPassword
 		InputURL           returnOfInputURL
@@ -103,7 +108,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "Run with success",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -116,7 +120,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input bool error",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -129,7 +132,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input password error",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"", someError},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -142,7 +144,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input list error",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -155,7 +156,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input text error",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", someError},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -168,7 +168,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input url error",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", someError},
@@ -181,7 +180,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "Fail when repo.List return err",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: nil, errList: someError},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -194,7 +192,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "Run with success when input is stdin",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -208,7 +205,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "Run with success when input is stdin and version is not informed",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
@@ -223,7 +219,6 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "Return error when user add a repo existent",
 			fields: fields{
 				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{*repoTest}, errList: nil},
-				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{repoTest.Url, nil},
@@ -263,7 +258,7 @@ func TestAddRepoCmd(t *testing.T) {
 
 			cmd := NewAddRepoCmd(
 				repoListerAdderMock,
-				fields.repoProviders,
+				repoProviders,
 				inputTextValidatorMock,
 				inputPasswordMock,
 				inputURLMock,

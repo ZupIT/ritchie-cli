@@ -17,7 +17,10 @@
 package mocks
 
 import (
+	"io"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/stretchr/testify/mock"
@@ -73,6 +76,28 @@ func (t *TutorialFindSetterMock) Set(tutorial string) (rtutorial.TutorialHolder,
 	args := t.Called(tutorial)
 
 	return args.Get(0).(rtutorial.TutorialHolder), args.Error(1)
+}
+
+type GitRepositoryMock struct {
+	mock.Mock
+}
+
+func (g *GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
+	args := g.Called(info, version)
+
+	return args.Get(0).(io.ReadCloser), args.Error(1)
+}
+
+func (g *GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
+	args := g.Called(info)
+
+	return args.Get(0).(git.Tags), args.Error(1)
+}
+
+func (g *GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
+	args := g.Called(info)
+
+	return args.Get(0).(git.Tag), args.Error(1)
 }
 
 type InputURLMock struct {
