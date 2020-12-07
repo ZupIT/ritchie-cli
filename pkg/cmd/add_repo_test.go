@@ -51,32 +51,27 @@ func TestAddRepoCmd(t *testing.T) {
 		Priority: 2,
 	}
 
-	type returnOfInputURL struct {
+	type returnWithStringErr struct {
 		string
 		error
 	}
-	type returnOfInputPassword struct {
-		string
-		error
-	}
-	type returnOfInputTextValidator struct {
-		string
-		error
-	}
+
 	type returnOfInputBool struct {
 		bool
 		error
 	}
-	type returnOffInputList struct {
+
+	type returnOfInputList struct {
 		question, response string
 		err                error
 	}
-	type returnOffRepoListerAdder struct {
+
+	type returnOfRepoListerAdder struct {
 		errAdd, errList error
 		reposList       formula.Repos
 	}
 
-	addInputList := func(input []returnOffInputList) *mocks.InputListMock {
+	addInputList := func(input []returnOfInputList) *mocks.InputListMock {
 		inputListMock := new(mocks.InputListMock)
 
 		for _, input := range input {
@@ -90,11 +85,11 @@ func TestAddRepoCmd(t *testing.T) {
 	}
 
 	type fields struct {
-		repo               returnOffRepoListerAdder
-		InputTextValidator returnOfInputTextValidator
-		InputPassword      returnOfInputPassword
-		InputURL           returnOfInputURL
-		InputList          []returnOffInputList
+		repo               returnOfRepoListerAdder
+		InputTextValidator returnWithStringErr
+		InputPassword      returnWithStringErr
+		InputURL           returnWithStringErr
+		InputList          []returnOfInputList
 		InputBool          returnOfInputBool
 		stdin              string
 		detailLatestTag    string
@@ -107,96 +102,96 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Run with success",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "Github", err: nil}},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 			},
 			wantErr: false,
 		},
 		{
 			name: "input bool error",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{false, someError},
-				InputList:          []returnOffInputList{{response: "Github", err: nil}},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "input password error",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"", someError},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"", someError},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "Github", err: nil}},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "input list error",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "item", err: someError}},
+				InputList:          []returnOfInputList{{response: "item", err: someError}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "input text error",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", someError},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", someError},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "item", err: nil}},
+				InputList:          []returnOfInputList{{response: "item", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "input url error",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", someError},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", someError},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "item", err: nil}},
+				InputList:          []returnOfInputList{{response: "item", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "Fail when repo.List return err",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: nil, errList: someError},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: nil, errList: someError},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "Github", err: nil}},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "Run with success when input is stdin",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "Github", err: nil}},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 				stdin:              "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 			},
 			wantErr: false,
@@ -204,12 +199,12 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Run with success when input is stdin and version is not informed",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList:          []returnOffInputList{{response: "Github", err: nil}},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 				stdin:              "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 				detailLatestTag:    "1.0.0",
 			},
@@ -218,12 +213,12 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Return error when user add a repo existent",
 			fields: fields{
-				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{*repoTest}, errList: nil},
-				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
-				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
-				InputURL:           returnOfInputURL{repoTest.Url, nil},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{*repoTest}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{repoTest.Url, nil},
 				InputBool:          returnOfInputBool{true, nil},
-				InputList: []returnOffInputList{
+				InputList: []returnOfInputList{
 					{question: "Select a tag version:", response: "1.0.0", err: nil},
 					{question: "", response: "Github", err: nil},
 				},
