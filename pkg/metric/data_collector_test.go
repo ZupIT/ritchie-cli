@@ -82,10 +82,10 @@ func Test_Collector(t *testing.T) {
 					return ""
 				}}, "", tt.in.file)
 			user := collector.CollectUserState("2.0.0")
-			assert.NotEmpty(t, user, "user state should not be empty")
+			assert.NotEmpty(t, user)
 
 			command := collector.CollectCommandData(1)
-			assert.NotEmpty(t, command, "command data should not be empty")
+			assert.NotEmpty(t, command)
 		})
 	}
 }

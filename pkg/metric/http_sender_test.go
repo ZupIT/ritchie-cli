@@ -54,7 +54,7 @@ func TestSendManagerHttp_Send(t *testing.T) {
 				},
 			}
 			httpSender := NewHttpSender(server.URL, server.Client(), data, tt.in.checker)
-			httpSender.SendUserState("tt.in.APIData")
+			httpSender.SendUserState("2.0.1")
 			httpSender.SendCommandData(SendCommandDataParams{})
 		})
 	}

@@ -25,5 +25,5 @@ import (
 func TestGenerate(t *testing.T) {
 	userIdManager := NewUserIdGenerator()
 	ID := userIdManager.Generate()
-	require.NotNil(t, ID, "ID should not be empty")
+	require.NotNil(t, ID)
 }

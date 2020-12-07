@@ -103,7 +103,6 @@ func Test_Check(t *testing.T) {
 				t,
 				tt.expectedResult,
 				result,
-				"got a different result then expected",
 			)
 		})
 	}
