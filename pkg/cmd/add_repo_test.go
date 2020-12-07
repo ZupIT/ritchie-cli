@@ -38,7 +38,6 @@ func TestAddRepoCmd(t *testing.T) {
 	type fields struct {
 		repo               formula.RepositoryAddLister
 		repoProviders      formula.RepoProviders
-		repoDeleter        formula.RepositoryDeleter
 		InputTextValidator prompt.InputTextValidator
 		InputPassword      prompt.InputPassword
 		InputURL           prompt.InputURL
@@ -58,7 +57,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -84,11 +82,6 @@ func TestAddRepoCmd(t *testing.T) {
 					},
 				},
 				repoProviders: repoProviders,
-				repoDeleter: repositoryDeleterMock{
-					deleteMock: func(repoName formula.RepoName) error {
-						return nil
-					},
-				},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -114,11 +107,6 @@ func TestAddRepoCmd(t *testing.T) {
 					},
 				},
 				repoProviders: repoProviders,
-				repoDeleter: repositoryDeleterMock{
-					deleteMock: func(repoName formula.RepoName) error {
-						return errors.New("")
-					},
-				},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -137,7 +125,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -156,7 +143,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordErrorMock{},
 				InputURL:           inputURLMock{},
@@ -175,7 +161,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -190,7 +175,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorErrorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -205,7 +189,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLErrorMock{},
@@ -224,7 +207,6 @@ func TestAddRepoCmd(t *testing.T) {
 					},
 				},
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -243,7 +225,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -263,7 +244,6 @@ func TestAddRepoCmd(t *testing.T) {
 			fields: fields{
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
-				repoDeleter:        repositoryDeleterMock{},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -288,11 +268,6 @@ func TestAddRepoCmd(t *testing.T) {
 					},
 				},
 				repoProviders: repoProviders,
-				repoDeleter: repositoryDeleterMock{
-					deleteMock: func(repoName formula.RepoName) error {
-						return nil
-					},
-				},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -317,11 +292,6 @@ func TestAddRepoCmd(t *testing.T) {
 					},
 				},
 				repoProviders: repoProviders,
-				repoDeleter: repositoryDeleterMock{
-					deleteMock: func(repoName formula.RepoName) error {
-						return errors.New("error to delete")
-					},
-				},
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -347,7 +317,6 @@ func TestAddRepoCmd(t *testing.T) {
 			cmd := NewAddRepoCmd(
 				tt.fields.repo,
 				tt.fields.repoProviders,
-				tt.fields.repoDeleter,
 				tt.fields.InputTextValidator,
 				tt.fields.InputPassword,
 				tt.fields.InputURL,

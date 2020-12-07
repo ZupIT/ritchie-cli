@@ -40,7 +40,8 @@ func TestBuild(t *testing.T) {
 	repoLister := repo.NewLister(ritHome, fileManager)
 	repoWriter := repo.NewWriter(ritHome, fileManager)
 	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
-	repoAdder := repo.NewAdder(ritHome, repoListWriteCreator, defaultTreeManager, fileManager)
+	repoDeleter := repo.NewDeleter(ritHome, repoListWriteCreator, dirManager)
+	repoAdder := repo.NewAdder(ritHome, repoListWriteCreator, repoDeleter, defaultTreeManager, fileManager)
 
 	_ = dirManager.Remove(workspacePath)
 	_ = dirManager.Create(workspacePath)

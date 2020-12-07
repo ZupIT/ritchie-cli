@@ -37,6 +37,7 @@ func TestAdd(t *testing.T) {
 	type in struct {
 		ritHome  string
 		repoMock formula.RepositoryListWriteCreator
+		deleter  formula.RepositoryDeleter
 		tree     formula.TreeGenerator
 		file     stream.FileWriteCreatorReadExistRemover
 		repo     formula.Repo
@@ -262,6 +263,11 @@ func TestAdd(t *testing.T) {
 						return formula.Tree{}, nil
 					},
 				},
+				deleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return nil
+					},
+				},
 			},
 			wantErr: true,
 		},
@@ -271,6 +277,7 @@ func TestAdd(t *testing.T) {
 			ad := NewAdder(
 				tt.in.ritHome,
 				tt.in.repoMock,
+				tt.in.deleter,
 				tt.in.tree,
 				tt.in.file,
 			)
@@ -338,4 +345,12 @@ func (m DirCreateListCopyRemoverCustomMock) Copy(src, dst string) error {
 
 func (m DirCreateListCopyRemoverCustomMock) Remove(dir string) error {
 	return m.remove(dir)
+}
+
+type repositoryDeleterMock struct {
+	deleteMock func(repoName formula.RepoName) error
+}
+
+func (c repositoryDeleterMock) Delete(repoName formula.RepoName) error {
+	return c.deleteMock(repoName)
 }

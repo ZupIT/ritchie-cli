@@ -28,6 +28,7 @@ import (
 type AddManager struct {
 	ritHome string
 	repo    formula.RepositoryListWriteCreator
+	deleter formula.RepositoryDeleter
 	tree    formula.TreeGenerator
 	file    stream.FileWriter
 }
@@ -35,12 +36,14 @@ type AddManager struct {
 func NewAdder(
 	ritHome string,
 	repo formula.RepositoryListWriteCreator,
+	deleter formula.RepositoryDeleter,
 	tree formula.TreeGenerator,
 	file stream.FileWriter,
 ) AddManager {
 	return AddManager{
 		ritHome: ritHome,
 		repo:    repo,
+		deleter: deleter,
 		tree:    tree,
 		file:    file,
 	}
@@ -79,6 +82,7 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 	}
 
 	if len(tree.Commands) == 0 {
+		_ = ad.deleter.Delete(repo.Name)
 		return errors.New("the selected repository has no formulas")
 	}
 
