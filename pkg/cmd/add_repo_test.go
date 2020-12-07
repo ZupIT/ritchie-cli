@@ -52,6 +52,10 @@ func TestAddRepoCmd(t *testing.T) {
 		string
 		error
 	}
+	type returnOfInputPassword struct {
+		string
+		error
+	}
 	type returnOfInputBool struct {
 		bool
 		error
@@ -79,7 +83,7 @@ func TestAddRepoCmd(t *testing.T) {
 		repo               formula.RepositoryAddLister
 		repoProviders      formula.RepoProviders
 		InputTextValidator prompt.InputTextValidator
-		InputPassword      prompt.InputPassword
+		InputPassword      returnOfInputPassword
 		InputURL           returnOfInputURL
 		InputList          []returnOffInputList
 		InputBool          returnOfInputBool
@@ -97,7 +101,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "Github", err: nil}},
@@ -110,7 +114,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{false, someError},
 				InputList:          []returnOffInputList{{response: "Github", err: nil}},
@@ -123,7 +127,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordErrorMock{},
+				InputPassword:      returnOfInputPassword{"", someError},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "Github", err: nil}},
@@ -136,7 +140,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "item", err: someError}},
@@ -149,7 +153,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorErrorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "item", err: nil}},
@@ -162,7 +166,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", someError},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "item", err: nil}},
@@ -179,7 +183,7 @@ func TestAddRepoCmd(t *testing.T) {
 				},
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "Github", err: nil}},
@@ -192,7 +196,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "Github", err: nil}},
@@ -206,7 +210,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               defaultRepoAdderMock,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOffInputList{{response: "Github", err: nil}},
@@ -221,7 +225,7 @@ func TestAddRepoCmd(t *testing.T) {
 				repo:               repoListerPopulated,
 				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
+				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
 				InputURL:           returnOfInputURL{repoTest.Url, nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList: []returnOffInputList{
@@ -236,21 +240,25 @@ func TestAddRepoCmd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			fields := tt.fields
+
 			detailMock := new(mocks.DetailManagerMock)
-			detailMock.On("LatestTag", mock.Anything).Return(tt.fields.detailLatestTag)
+			detailMock.On("LatestTag", mock.Anything).Return(fields.detailLatestTag)
 			inputURLMock := new(mocks.InputURLMock)
-			inputURLMock.On("URL", mock.Anything, mock.Anything).Return(tt.fields.InputURL.string, tt.fields.InputURL.error)
+			inputURLMock.On("URL", mock.Anything, mock.Anything).Return(fields.InputURL.string, fields.InputURL.error)
 			inputBoolMock := new(mocks.InputBoolMock)
-			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.fields.InputBool.bool, tt.fields.InputBool.error)
-			inputListMock := addInputList(tt.fields.InputList)
+			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(fields.InputBool.bool, fields.InputBool.error)
+			inputListMock := addInputList(fields.InputList)
 			inputIntMock := new(mocks.InputIntMock)
 			inputIntMock.On("Int", mock.Anything, mock.Anything).Return(int64(0), nil)
+			inputPasswordMock := new(mocks.InputPasswordMock)
+			inputPasswordMock.On("Password", mock.Anything, mock.Anything).Return(fields.InputPassword.string, fields.InputPassword.error)
 
 			cmd := NewAddRepoCmd(
-				tt.fields.repo,
-				tt.fields.repoProviders,
-				tt.fields.InputTextValidator,
-				tt.fields.InputPassword,
+				fields.repo,
+				fields.repoProviders,
+				fields.InputTextValidator,
+				inputPasswordMock,
 				inputURLMock,
 				inputListMock,
 				inputBoolMock,
@@ -260,8 +268,8 @@ func TestAddRepoCmd(t *testing.T) {
 				detailMock,
 			)
 
-			if tt.fields.stdin != "" {
-				newReader := strings.NewReader(tt.fields.stdin)
+			if fields.stdin != "" {
+				newReader := strings.NewReader(fields.stdin)
 				cmd.SetIn(newReader)
 				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 			} else {

@@ -97,3 +97,13 @@ func (i *InputIntMock) Int(name string, helper ...string) (int64, error) {
 
 	return args.Get(0).(int64), args.Error(1)
 }
+
+type InputPasswordMock struct {
+	mock.Mock
+}
+
+func (i *InputPasswordMock) Password(label string, helper ...string) (string, error) {
+	args := i.Called(label, helper)
+
+	return args.String(0), args.Error(1)
+}
