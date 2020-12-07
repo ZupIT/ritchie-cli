@@ -25,6 +25,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -258,6 +259,8 @@ func TestAddRepoCmd(t *testing.T) {
 			inputPasswordMock.On("Password", mock.Anything, mock.Anything).Return(fields.InputPassword.string, fields.InputPassword.error)
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
 			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
+			tutorialFindMock := new(mocks.TutorialFindSetterMock)
+			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: "disabled"}, nil)
 
 			cmd := NewAddRepoCmd(
 				fields.repo,
@@ -268,7 +271,7 @@ func TestAddRepoCmd(t *testing.T) {
 				inputListMock,
 				inputBoolMock,
 				inputIntMock,
-				TutorialFinderMock{},
+				tutorialFindMock,
 				checkerManager,
 				detailMock,
 			)

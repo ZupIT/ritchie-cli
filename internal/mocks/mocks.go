@@ -19,6 +19,7 @@ package mocks
 import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -56,6 +57,22 @@ func (r *RepoListerAdderMock) Add(repo formula.Repo) error {
 	args := r.Called(repo)
 
 	return args.Error(1)
+}
+
+type TutorialFindSetterMock struct {
+	mock.Mock
+}
+
+func (t *TutorialFindSetterMock) Find() (rtutorial.TutorialHolder, error) {
+	args := t.Called()
+
+	return args.Get(0).(rtutorial.TutorialHolder), args.Error(1)
+}
+
+func (t *TutorialFindSetterMock) Set(tutorial string) (rtutorial.TutorialHolder, error) {
+	args := t.Called(tutorial)
+
+	return args.Get(0).(rtutorial.TutorialHolder), args.Error(1)
 }
 
 type InputURLMock struct {
