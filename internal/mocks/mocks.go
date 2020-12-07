@@ -77,3 +77,13 @@ func (i *InputBoolMock) Bool(name string, items []string, helper ...string) (boo
 
 	return args.Bool(0), args.Error(1)
 }
+
+type InputListMock struct {
+	mock.Mock
+}
+
+func (i *InputListMock) List(name string, items []string, helper ...string) (string, error) {
+	args := i.Called(name, items, helper)
+
+	return args.String(0), args.Error(1)
+}
