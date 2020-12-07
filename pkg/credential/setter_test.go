@@ -67,17 +67,17 @@ func (suite *SetterTestSuite) fileInfo(path string) (string, error) {
 func (suite *SetterTestSuite) TestSetCredentialToDefault() {
 	for _, t := range []struct {
 		testName string
-		context  env.Holder
+		env      env.Holder
 	}{
-		{"Context informed", *suite.envHolderDefault},
-		{"Context not informed", *suite.envHolderNil},
+		{"env informed", *suite.envHolderDefault},
+		{"env not informed", *suite.envHolderNil},
 	} {
 		suite.Run(t.testName, func() {
-			contextFinderMock := new(mocks.ContextFinderMock)
+			envFinderMock := new(mocks.EnvFinderMock)
 			filePathExpectedCreated := File(suite.HomePath, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
-			contextFinderMock.On("Find").Return(t.context, nil)
-			setter := NewSetter(suite.HomePath, contextFinderMock, dirManager, fileManager)
+			envFinderMock.On("Find").Return(t.env, nil)
+			setter := NewSetter(suite.HomePath, envFinderMock, dirManager, fileManager)
 
 			suite.NoFileExists(filePathExpectedCreated)
 

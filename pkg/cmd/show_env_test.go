@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-func TestNewShowContextCmd(t *testing.T) {
+func TestNewShowEnvCmd(t *testing.T) {
 	cmd := NewShowEnvCmd(envFinderMock{})
 	if cmd == nil {
 		t.Errorf("NewShowEnvCmd got %v", cmd)

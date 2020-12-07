@@ -80,31 +80,31 @@ func TestSettings_ReadCredentialsValue(t *testing.T) {
 	}
 }
 
-func TestSettings_ReadCredentialsValueInContext(t *testing.T) {
+func TestSettings_ReadCredentialsValueInEnv(t *testing.T) {
 	tests := []struct {
 		name    string
 		path    string
-		context string
+		env     string
 		wantErr bool
 	}{
 		{
 			name:    "run with success",
 			path:    "../../testdata/.rit/credentials/",
-			context: "default",
+			env:     "default",
 			wantErr: false,
 		},
 		{
 			name:    "error on json unmarshal",
 			path:    "../../testdata/.rit/credentialserr/",
-			context: "error",
+			env:     "error",
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			credentials, err := credSettings.ReadCredentialsValueInContext(tt.path, tt.context)
+			credentials, err := credSettings.ReadCredentialsValueInEnv(tt.path, tt.env)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Read credentials value in context error = %s, wantErr %v", err, tt.wantErr)
+				t.Errorf("Read credentials value in env error = %s, wantErr %v", err, tt.wantErr)
 			}
 
 			if (credentials == nil || len(credentials) <= 0) != tt.wantErr {
