@@ -52,13 +52,13 @@ func TestAddRepoCmd(t *testing.T) {
 		bool
 		error
 	}
-	type returnOfInputList struct {
+	type returnOffInputList struct {
 		question string
 		response string
 		err      error
 	}
 
-	addInputList := func(input []returnOfInputList) *mocks.InputListMock {
+	addInputList := func(input []returnOffInputList) *mocks.InputListMock {
 		inputListMock := new(mocks.InputListMock)
 
 		for _, input := range input {
@@ -78,9 +78,8 @@ func TestAddRepoCmd(t *testing.T) {
 		InputPassword      prompt.InputPassword
 		InputURLText       string
 		InputURLErr        error
-		InputList          []returnOfInputList
+		InputList          []returnOffInputList
 		InputBool          returnOfInputBool
-		InputInt           prompt.InputInt
 		stdin              string
 		detailLatestTag    string
 	}
@@ -99,8 +98,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				InputList:          []returnOffInputList{{response: "Github", err: nil}},
 			},
 			wantErr: false,
 		},
@@ -114,8 +112,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{false, someError},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				InputList:          []returnOffInputList{{response: "Github", err: nil}},
 			},
 			wantErr: true,
 		},
@@ -129,8 +126,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				InputList:          []returnOffInputList{{response: "Github", err: nil}},
 			},
 			wantErr: true,
 		},
@@ -144,8 +140,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "item", err: someError}},
+				InputList:          []returnOffInputList{{response: "item", err: someError}},
 			},
 			wantErr: true,
 		},
@@ -159,8 +154,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "item", err: nil}},
+				InputList:          []returnOffInputList{{response: "item", err: nil}},
 			},
 			wantErr: true,
 		},
@@ -174,8 +168,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        errors.New("error on input url"),
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "item", err: nil}},
+				InputList:          []returnOffInputList{{response: "item", err: nil}},
 			},
 			wantErr: true,
 		},
@@ -193,8 +186,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				InputList:          []returnOffInputList{{response: "Github", err: nil}},
 			},
 			wantErr: true,
 		},
@@ -208,8 +200,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				InputList:          []returnOffInputList{{response: "Github", err: nil}},
 				stdin:              "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 			},
 			wantErr: false,
@@ -224,8 +215,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       "http://localhost/mocked",
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				InputList:          []returnOffInputList{{response: "Github", err: nil}},
 				stdin:              "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 				detailLatestTag:    "1.0.0",
 			},
@@ -241,8 +231,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURLText:       repoTest.Url,
 				InputURLErr:        nil,
 				InputBool:          returnOfInputBool{true, nil},
-				InputInt:           inputIntMock{},
-				InputList: []returnOfInputList{
+				InputList: []returnOffInputList{
 					{question: "Select a tag version:", response: "1.0.0", err: nil},
 					{question: "", response: "Github", err: nil},
 				},
@@ -261,6 +250,8 @@ func TestAddRepoCmd(t *testing.T) {
 			inputBoolMock := new(mocks.InputBoolMock)
 			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.fields.InputBool.bool, tt.fields.InputBool.error)
 			inputListMock := addInputList(tt.fields.InputList)
+			inputIntMock := new(mocks.InputIntMock)
+			inputIntMock.On("Int", mock.Anything, mock.Anything).Return(int64(0), nil)
 
 			cmd := NewAddRepoCmd(
 				tt.fields.repo,
@@ -270,7 +261,7 @@ func TestAddRepoCmd(t *testing.T) {
 				inputURLMock,
 				inputListMock,
 				inputBoolMock,
-				tt.fields.InputInt,
+				inputIntMock,
 				TutorialFinderMock{},
 				checkerManager,
 				detailMock,

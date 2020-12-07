@@ -87,3 +87,13 @@ func (i *InputListMock) List(name string, items []string, helper ...string) (str
 
 	return args.String(0), args.Error(1)
 }
+
+type InputIntMock struct {
+	mock.Mock
+}
+
+func (i *InputIntMock) Int(name string, helper ...string) (int64, error) {
+	args := i.Called(name, helper)
+
+	return args.Get(0).(int64), args.Error(1)
+}
