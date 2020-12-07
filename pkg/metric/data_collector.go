@@ -92,17 +92,18 @@ func (d DataCollectorManager) defaultRunner() string {
 func (d DataCollectorManager) userRepos() Repos {
 	fullRepos := d.readRepos()
 	repo := Repo{}
-	reposData := Repos{}
+	repos := Repos{}
 	for _, r := range fullRepos {
 		repo.Private = true
+		repo.URL = r.URL
+		repo.Name = string(r.Name)
 		if r.Token == "" {
 			repo.Private = false
-			repo.URL = r.URL
-			repo.Name = string(r.Name)
 		}
-		reposData = append(reposData, repo)
+		repos = append(repos, repo)
 	}
-	return reposData
+
+	return repos
 }
 
 func (d DataCollectorManager) readRepos() formula.Repos {

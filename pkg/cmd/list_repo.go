@@ -96,18 +96,6 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 
 }
 
-func (lr listRepoCmd) getLatestTag(repo formula.Repo) string {
-	formulaGit := lr.repoProviders.Resolve(repo.Provider)
-
-	repoInfo := formulaGit.NewRepoInfo(repo.URL, repo.Token)
-	tag, err := formulaGit.Repos.LatestTag(repoInfo)
-	if err != nil {
-		return "Couldn't get that information"
-	}
-
-	return tag.Name
-}
-
 func tutorialListRepo(tutorialStatus string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const MessageTitle = "To update all repositories or delete an repository:"

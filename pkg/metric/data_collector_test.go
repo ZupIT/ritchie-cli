@@ -33,6 +33,13 @@ func Test_Collector(t *testing.T) {
 		"version": "2.6.0",
 		"url": "https://github.com/ZupIT/ritchie-formulas",
 		"priority": 0
+	},
+{
+		"provider": "Github",
+		"name": "",
+		"version": "2.6.0",
+		"url": "https://github.com/ZupIT/asd-formulas",
+		"priority": 0
 	}]
 `
 	type in struct {

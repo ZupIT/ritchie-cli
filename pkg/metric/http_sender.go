@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -29,6 +28,11 @@ var _ Sender = SendManagerHttp{}
 var (
 	BasicUser = ""
 	BasicPass = ""
+)
+
+const (
+	commandsURL  = "/commands"
+	userStateURL = "/user"
 )
 
 type SendManagerHttp struct {
@@ -61,7 +65,7 @@ func (sm SendManagerHttp) SendUserState(ritVersion string) {
 	if err != nil {
 		return
 	}
-	sm.doRequest(reqBody, sm.URL)
+	sm.doRequest(reqBody, userStateURL)
 }
 
 func (sm SendManagerHttp) SendCommandData(cmd SendCommandDataParams) {
@@ -73,15 +77,14 @@ func (sm SendManagerHttp) SendCommandData(cmd SendCommandDataParams) {
 	if err != nil {
 		return
 	}
-	fmt.Print(string(reqBody))
-	sm.doRequest(reqBody, sm.URL)
+	sm.doRequest(reqBody, commandsURL)
 }
 
-func (sm SendManagerHttp) doRequest(reqBody []byte, URL string) {
+func (sm SendManagerHttp) doRequest(reqBody []byte, URLsuffix string) {
 	req, err := http.NewRequestWithContext(
 		context.TODO(),
 		http.MethodPost,
-		URL,
+		sm.URL+URLsuffix,
 		bytes.NewBuffer(reqBody),
 	)
 	if err != nil {
