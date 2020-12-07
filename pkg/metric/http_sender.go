@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -72,6 +73,7 @@ func (sm SendManagerHttp) SendCommandData(cmd SendCommandDataParams) {
 	if err != nil {
 		return
 	}
+	fmt.Print(string(reqBody))
 	sm.doRequest(reqBody, sm.URL)
 }
 

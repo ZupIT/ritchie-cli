@@ -19,6 +19,7 @@ package mocks
 import (
 	"github.com/stretchr/testify/mock"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 )
 
@@ -30,4 +31,14 @@ func (cf *ContextFinderMock) Find() (rcontext.ContextHolder, error) {
 	args := cf.Called()
 
 	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
+}
+
+type DetailManagerMock struct {
+	mock.Mock
+}
+
+func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
+	args := d.Called(repo)
+
+	return args.String(0)
 }

@@ -118,6 +118,10 @@ type RepositoryWriter interface {
 	Write(repos Repos) error
 }
 
+type RepositoryDetail interface {
+	LatestTag(repo Repo) string
+}
+
 type RepositoryAddLister interface {
 	RepositoryAdder
 	RepositoryLister

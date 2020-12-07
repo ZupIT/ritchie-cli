@@ -136,10 +136,6 @@ type Builder interface {
 	Build(info BuildInfo) error
 }
 
-type Watcher interface {
-	Watch(formulaPath string, workspace Workspace)
-}
-
 type CreateBuilder interface {
 	Creator
 	Builder

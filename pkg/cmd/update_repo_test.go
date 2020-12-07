@@ -54,6 +54,7 @@ func TestUpdateRepoRun(t *testing.T) {
 		URL:      "https://github.com/owner/repo",
 		Token:    "token",
 		Priority: 1,
+		IsLocal:  true,
 	}
 
 	type in struct {

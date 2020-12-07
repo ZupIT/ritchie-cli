@@ -42,7 +42,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/docker"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/local"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/watcher"
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
@@ -108,6 +107,8 @@ func Build() *cobra.Command {
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
 	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
 
+	detailRepo := repo.NewDetail(repoProviders)
+
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
 	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
 	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
@@ -159,13 +160,12 @@ func Build() *cobra.Command {
 	}
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager, formBuildLocal)
 
-	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal, inputBool)
+	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal)
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
-	watchManager := watcher.New(formBuildLocal, dirManager, MetricSender.SendCommandData)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
 
 	versionManager := version.NewManager(
@@ -212,9 +212,9 @@ func Build() *cobra.Command {
 	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
 	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
 	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, detailRepo)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder, detailRepo)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	listWorkspaceCmd := cmd.NewListWorkspaceCmd(formulaWorkspace, tutorialFinder)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
@@ -226,7 +226,7 @@ func Build() *cobra.Command {
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder, treeChecker)
-	buildFormulaCmd := cmd.NewBuildFormulaCmd(userHomeDir, formBuildLocal, formulaWorkspace, watchManager, dirManager, inputText, inputList, tutorialFinder)
+	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 

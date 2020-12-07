@@ -27,6 +27,10 @@ import (
 
 const localPrefix = "local-%s"
 
+type Initializer interface {
+	Init(workspaceDir string, repoName string) (string, error)
+}
+
 type LocalManager struct {
 	ritHome string
 	dir     stream.DirCreateListCopyRemover
@@ -42,28 +46,8 @@ func NewBuildLocal(
 }
 
 func (m LocalManager) Build(info formula.BuildInfo) error {
-	repoName := fmt.Sprintf(localPrefix, info.Workspace.Name)
-	repoName = strings.ToLower(repoName)
-	repo := formula.Repo{
-		Provider: "Local",
-		Name:     formula.RepoName(repoName),
-		Version:  "0.0.0",
-		URL:      "local repository",
-		Priority: 0,
-		IsLocal:  true,
-	}
-
-	dest := filepath.Join(m.ritHome, "repos", repoName)
-
-	if err := m.dir.Create(dest); err != nil {
-		return err
-	}
-
-	if err := m.copyWorkSpace(info.Workspace.Dir, dest); err != nil {
-		return err
-	}
-
-	if err := m.repo.Add(repo); err != nil {
+	dest, err := m.Init(info.Workspace.Dir, info.Workspace.Name)
+	if err != nil {
 		return err
 	}
 
@@ -74,6 +58,35 @@ func (m LocalManager) Build(info formula.BuildInfo) error {
 	}
 
 	return nil
+}
+
+func (m LocalManager) Init(workspaceDir string, repoName string) (string, error) {
+	repoNameStandard := strings.ToLower(fmt.Sprintf(localPrefix, repoName))
+
+	dest := filepath.Join(m.ritHome, "repos", repoNameStandard)
+
+	repo := formula.Repo{
+		Provider: "Local",
+		Name:     formula.RepoName(repoNameStandard),
+		Version:  "0.0.0",
+		URL:      "local repository",
+		Priority: 0,
+		IsLocal:  true,
+	}
+
+	if err := m.dir.Create(dest); err != nil {
+		return "", err
+	}
+
+	if err := m.copyWorkSpace(workspaceDir, dest); err != nil {
+		return "", err
+	}
+
+	if err := m.repo.Add(repo); err != nil {
+		return "", err
+	}
+
+	return dest, nil
 }
 
 func (m LocalManager) copyWorkSpace(workspacePath string, dest string) error {

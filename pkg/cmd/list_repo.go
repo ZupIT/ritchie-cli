@@ -36,10 +36,11 @@ type listRepoCmd struct {
 	formula.RepositoryLister
 	repoProviders formula.RepoProviders
 	rt            rtutorial.Finder
+	detail        formula.RepositoryDetail
 }
 
-func NewListRepoCmd(rl formula.RepositoryLister, rp formula.RepoProviders, rtf rtutorial.Finder) *cobra.Command {
-	lr := listRepoCmd{rl, rp, rtf}
+func NewListRepoCmd(rl formula.RepositoryLister, rp formula.RepoProviders, rtf rtutorial.Finder, rd formula.RepositoryDetail) *cobra.Command {
+	lr := listRepoCmd{rl, rp, rtf, rd}
 	cmd := &cobra.Command{
 		Use:       "repo",
 		Short:     "Show a list with all your available repositories",
@@ -81,7 +82,10 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 	for _, repo := range repos {
 		latestTag := "0.0.0"
 		if !repo.IsLocal {
-			latestTag = lr.getLatestTag(repo)
+			latestTag = lr.detail.LatestTag(repo)
+			if len(latestTag) == 0 {
+				latestTag = "Couldn't get that information"
+			}
 		}
 
 		table.AddRow(repo.Provider, repo.Name, repo.Version, repo.Priority, repo.URL, latestTag)
@@ -92,6 +96,7 @@ func (lr listRepoCmd) printRepos(repos formula.Repos) {
 
 }
 
+<<<<<<< HEAD
 func (lr listRepoCmd) getLatestTag(repo formula.Repo) string {
 	formulaGit := lr.repoProviders.Resolve(repo.Provider)
 
@@ -104,6 +109,8 @@ func (lr listRepoCmd) getLatestTag(repo formula.Repo) string {
 	return tag.Name
 }
 
+=======
+>>>>>>> upstream/master
 func tutorialListRepo(tutorialStatus string) {
 	const tagTutorial = "\n[TUTORIAL]"
 	const MessageTitle = "To update all repositories or delete an repository:"
