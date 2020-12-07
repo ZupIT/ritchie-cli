@@ -111,6 +111,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	return treeMain
 }
 
+<<<<<<< HEAD
 // nolint
 func (d Manager) getLatestTag(repo formula.Repo) string {
 	formulaGit := d.repoProviders.Resolve(repo.Provider)
@@ -124,6 +125,8 @@ func (d Manager) getLatestTag(repo formula.Repo) string {
 	return tag.Name
 }
 
+=======
+>>>>>>> upstream/master
 func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {
 	treeCmdFile := filepath.Join(d.ritchieHome, reposDirName, repoName.String(), treeFileName)
 	return d.loadTree(treeCmdFile)
