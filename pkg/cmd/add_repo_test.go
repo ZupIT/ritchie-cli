@@ -81,7 +81,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return formula.Repos{}, nil
 					},
 				},
-				repoProviders: repoProviders,
+				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -106,7 +106,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return formula.Repos{}, nil
 					},
 				},
-				repoProviders: repoProviders,
+				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -267,7 +267,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return errors.New("")
 					},
 				},
-				repoProviders: repoProviders,
+				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
@@ -291,7 +291,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return errors.New("error to add")
 					},
 				},
-				repoProviders: repoProviders,
+				repoProviders:      repoProviders,
 				InputTextValidator: inputTextValidatorMock{},
 				InputPassword:      inputPasswordMock{},
 				InputURL:           inputURLMock{},
