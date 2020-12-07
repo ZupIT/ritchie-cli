@@ -18,15 +18,19 @@ package cmd
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func Test_addRepoCmd_runPrompt(t *testing.T) {
+func TestAddRepoCmd(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
@@ -39,6 +43,8 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 		InputList          prompt.InputList
 		InputBool          prompt.InputBool
 		InputInt           prompt.InputInt
+		stdin              string
+		detailLatestTag    string
 	}
 	tests := []struct {
 		name    string
@@ -163,12 +169,53 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Run with success when input is stdin",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				stdin: "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success when input is stdin and version is not informed",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				detailLatestTag: "1.0.0",
+			},
+			wantErr: false,
+		},
 	}
 	checkerManager := tree.NewChecker(treeMock{})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			o := NewAddRepoCmd(
+			detailMock := new(mocks.DetailManagerMock)
+			detailMock.On("LatestTag", mock.Anything).Return(tt.fields.detailLatestTag)
+			cmd := NewAddRepoCmd(
 				tt.fields.repo,
 				tt.fields.repoProviders,
 				tt.fields.InputTextValidator,
@@ -179,11 +226,20 @@ func Test_addRepoCmd_runPrompt(t *testing.T) {
 				tt.fields.InputInt,
 				TutorialFinderMock{},
 				checkerManager,
+				detailMock,
 			)
-			o.PersistentFlags().Bool("stdin", false, "input by stdin")
-			if err := o.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("init_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
+
+			if tt.fields.stdin != "" {
+				newReader := strings.NewReader(tt.fields.stdin)
+				cmd.SetIn(newReader)
+				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
+			} else {
+				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			}
+
+			err := cmd.Execute()
+
+			assert.Equal(t, tt.wantErr, (err != nil))
 		})
 	}
 }

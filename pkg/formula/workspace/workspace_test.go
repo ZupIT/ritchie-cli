@@ -125,7 +125,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
 			got := workspace.Add(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -203,7 +203,7 @@ func TestManagerDelete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
 			got := workspace.Delete(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -289,7 +289,7 @@ func TestManagerList(t *testing.T) {
 				_ = fileManager.Write(workspaceFile, content)
 			}
 
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
 			got, err := workspace.List()
 
 			if err != nil && err.Error() != out.error.Error() {
@@ -353,7 +353,7 @@ func TestValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager)
+			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
 			got := workspace.Add(in.workspace)
 
 			if got != nil && got.Error() != tt.out.Error() {
@@ -411,7 +411,7 @@ func TestPreviousHash(t *testing.T) {
 					return tt.in.hashFileContent, tt.in.hashFileError
 				},
 			}
-			workspace := New(ritHome, ritHome, dirManager, fileManager)
+			workspace := New(ritHome, ritHome, dirManager, fileManager, buildInitializerMock{})
 			hash, err := workspace.PreviousHash(tt.in.formulaPath)
 
 			if hashPath != tt.out.path {
@@ -510,7 +510,7 @@ func TestUpdateHash(t *testing.T) {
 					return []byte{}, nil
 				},
 			}
-			workspace := New(ritHome, ritHome, dirManager, fileManager)
+			workspace := New(ritHome, ritHome, dirManager, fileManager, buildInitializerMock{})
 			err := workspace.UpdateHash(tt.in.formulaPath, tt.in.hash)
 
 			if hashPath != tt.out.path {
@@ -566,9 +566,17 @@ type dirHashManagerMock struct {
 func (di dirHashManagerMock) Create(dir string) error {
 	return di.createErr
 }
+
 func (di dirHashManagerMock) Remove(dir string) error {
 	return di.removeErr
 }
+
 func (di dirHashManagerMock) Hash(dir string) (string, error) {
 	return di.hash, di.hashErr
+}
+
+type buildInitializerMock struct{}
+
+func (bi buildInitializerMock) Init(workspaceDir string, repoName string) (string, error) {
+	return "", nil
 }

@@ -10,7 +10,7 @@
 
 This repository contains the CLI core, which can execute **formulas** stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas) or [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo)
 
-In Ritchie's context, **a formula is a script** that can be executed automatically or interactively through a command line. 
+In Ritchie's context, **a formula is a script** that can be executed automatically or interactively through a command line.
 
 Adapting an existing script to Ritchie structure allows you to run it **locally** or through **Docker**, and to share it on a **Github** or **Gitlab** repository.
 
@@ -47,7 +47,7 @@ rit init
 To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you'll need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally. To do so, you can use the `rit add repo` command, or execute the command line below:
 
 ```bash
-echo '{"provider":"Github", "name":"demo", "version":"2.0.0", "url":"https://github.com/ZupIT/ritchie-formulas-demo", "token": null, "priority":1}' | rit add repo --stdin
+echo '{"provider":"Github", "name":"demo", "url":"https://github.com/ZupIT/ritchie-formulas-demo", "priority":1}' | rit add repo --stdin
 ```
 
 Then, you'll be able to execute the "hello-world" formula through the command line below:

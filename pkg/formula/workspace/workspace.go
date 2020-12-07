@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -40,6 +41,7 @@ type Manager struct {
 	defaultWorkspaceDir string
 	dir                 stream.DirCreateHasher
 	file                stream.FileWriteReadExister
+	local               builder.Initializer
 }
 
 func New(
@@ -47,6 +49,7 @@ func New(
 	userHome string,
 	dirManager stream.DirCreateHasher,
 	fileManager stream.FileWriteReadExister,
+	local builder.Initializer,
 ) Manager {
 	workspaceFile := filepath.Join(ritchieHome, formula.WorkspacesFile)
 	workspaceHome := filepath.Join(userHome, formula.DefaultWorkspaceDir)
@@ -56,6 +59,7 @@ func New(
 		defaultWorkspaceDir: workspaceHome,
 		dir:                 dirManager,
 		file:                fileManager,
+		local:               local,
 	}
 }
 
@@ -77,6 +81,14 @@ func (m Manager) Add(workspace formula.Workspace) error {
 		if err := json.Unmarshal(file, &workspaces); err != nil {
 			return err
 		}
+	}
+
+	if _, ok := workspaces[workspace.Name]; ok {
+		return nil
+	}
+
+	if _, err := m.local.Init(workspace.Dir, workspace.Name); err != nil {
+		return err
 	}
 
 	workspaces[workspace.Name] = workspace.Dir

@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package prompt
+package repo
 
 import (
-	"testing"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-func TestInputTextDefault(t *testing.T) {
-	input := formula.Input{}
-	NewSurveyDefault().Text(input)
+type DetailManager struct {
+	repoProviders formula.RepoProviders
+}
+
+func NewDetail(repoProviders formula.RepoProviders) DetailManager {
+	return DetailManager{repoProviders}
+}
+
+func (dm DetailManager) LatestTag(repo formula.Repo) string {
+	formulaGit := dm.repoProviders.Resolve(repo.Provider)
+
+	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	tag, err := formulaGit.Repos.LatestTag(repoInfo)
+	if err != nil {
+		return ""
+	}
+
+	return tag.Name
 }

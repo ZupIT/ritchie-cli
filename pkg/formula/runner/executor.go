@@ -17,6 +17,8 @@
 package runner
 
 import (
+	"strings"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
@@ -49,7 +51,7 @@ func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
 		runner = ex.runners[configType]
 	}
 
-	if exe.Def.RepoName == "local" {
+	if strings.HasPrefix(exe.Def.RepoName, "local-") {
 		ex.preRunBuilder.Build(exe.Def.Path)
 	}
 
