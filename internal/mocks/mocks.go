@@ -107,3 +107,13 @@ func (i *InputPasswordMock) Password(label string, helper ...string) (string, er
 
 	return args.String(0), args.Error(1)
 }
+
+type InputTextValidatorMock struct {
+	mock.Mock
+}
+
+func (i *InputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
+	args := i.Called(name, validate)
+
+	return args.String(0), args.Error(1)
+}
