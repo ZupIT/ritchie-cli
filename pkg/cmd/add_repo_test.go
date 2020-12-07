@@ -32,6 +32,7 @@ import (
 
 func TestAddRepoCmd(t *testing.T) {
 	someError := errors.New("some error")
+
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
 
@@ -43,10 +44,6 @@ func TestAddRepoCmd(t *testing.T) {
 		Token:    "token",
 		Priority: 2,
 	}
-
-	repoListerPopulated := new(mocks.RepoListerAdderMock)
-	repoListerPopulated.On("Add", mock.Anything).Return(nil)
-	repoListerPopulated.On("List").Return(formula.Repos{*repoTest}, nil)
 
 	type returnOfInputURL struct {
 		string
@@ -65,9 +62,12 @@ func TestAddRepoCmd(t *testing.T) {
 		error
 	}
 	type returnOffInputList struct {
-		question string
-		response string
-		err      error
+		question, response string
+		err                error
+	}
+	type returnOffRepoListerAdder struct {
+		errAdd, errList error
+		reposList       formula.Repos
 	}
 
 	addInputList := func(input []returnOffInputList) *mocks.InputListMock {
@@ -84,7 +84,7 @@ func TestAddRepoCmd(t *testing.T) {
 	}
 
 	type fields struct {
-		repo               formula.RepositoryAddLister
+		repo               returnOffRepoListerAdder
 		repoProviders      formula.RepoProviders
 		InputTextValidator returnOfInputTextValidator
 		InputPassword      returnOfInputPassword
@@ -102,7 +102,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Run with success",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -115,7 +115,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "input bool error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -128,7 +128,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "input password error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"", someError},
@@ -141,7 +141,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "input list error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -154,7 +154,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "input text error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", someError},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -167,7 +167,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "input url error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -180,11 +180,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Fail when repo.List return err",
 			fields: fields{
-				repo: repoListerAdderCustomMock{
-					list: func() (formula.Repos, error) {
-						return nil, errors.New("some error")
-					},
-				},
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: nil, errList: someError},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -197,7 +193,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Run with success when input is stdin",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -211,7 +207,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Run with success when input is stdin and version is not informed",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -226,7 +222,7 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Return error when user add a repo existent",
 			fields: fields{
-				repo:               repoListerPopulated,
+				repo:               returnOffRepoListerAdder{errAdd: nil, reposList: formula.Repos{*repoTest}, errList: nil},
 				repoProviders:      repoProviders,
 				InputTextValidator: returnOfInputTextValidator{"mocked text", nil},
 				InputPassword:      returnOfInputPassword{"s3cr3t", nil},
@@ -261,9 +257,12 @@ func TestAddRepoCmd(t *testing.T) {
 			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
 			tutorialFindMock := new(mocks.TutorialFindSetterMock)
 			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: "disabled"}, nil)
+			repoListerAdderMock := new(mocks.RepoListerAdderMock)
+			repoListerAdderMock.On("Add", mock.Anything).Return(fields.repo.errAdd)
+			repoListerAdderMock.On("List").Return(fields.repo.reposList, fields.repo.errList)
 
 			cmd := NewAddRepoCmd(
-				fields.repo,
+				repoListerAdderMock,
 				fields.repoProviders,
 				inputTextValidatorMock,
 				inputPasswordMock,

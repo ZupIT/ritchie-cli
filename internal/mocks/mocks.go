@@ -56,7 +56,7 @@ func (r *RepoListerAdderMock) List() (formula.Repos, error) {
 func (r *RepoListerAdderMock) Add(repo formula.Repo) error {
 	args := r.Called(repo)
 
-	return args.Error(1)
+	return args.Error(0)
 }
 
 type TutorialFindSetterMock struct {
