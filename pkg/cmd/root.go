@@ -17,14 +17,17 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -71,21 +74,31 @@ var (
 type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
-	rt          rtutorial.Finder
-	vm          version.Manager
+	file        stream.FileWriteRemover
+	tutorial    rtutorial.Finder
+	version     version.Manager
+	tree        formula.TreeGenerator
+	repo        formula.RepositoryListWriter
 }
 
 func NewRootCmd(
 	ritchieHome string,
 	dir stream.DirCreateChecker,
-	rtf rtutorial.Finder,
-	vm version.Manager,
+	file stream.FileWriteRemover,
+	tutorial rtutorial.Finder,
+	version version.Manager,
+	tree formula.TreeGenerator,
+	repo formula.RepositoryListWriter,
+
 ) *cobra.Command {
 	o := &rootCmd{
 		ritchieHome: ritchieHome,
 		dir:         dir,
-		rt:          rtf,
-		vm:          vm,
+		file:        file,
+		tutorial:    tutorial,
+		version:     version,
+		tree:        tree,
+		repo:        repo,
 	}
 
 	cmd := &cobra.Command{
@@ -111,6 +124,8 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
+		ro.newTrees()
+
 		if isUpgradeCommand(allowList, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
@@ -127,7 +142,7 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		printNewVersionMessage(cmd, ro)
 		if !ro.ritchieIsInitialized() && cmd.Use == cmdUse {
-			tutorialHolder, err := ro.rt.Find()
+			tutorialHolder, err := ro.tutorial.Find()
 			if err != nil {
 				return err
 			}
@@ -139,8 +154,8 @@ func (ro *rootCmd) PostRunFunc() CommandRunnerFunc {
 
 func printNewVersionMessage(cmd *cobra.Command, ro *rootCmd) {
 	if isUpgradeCommand(upgradeList, cmd) {
-		currentStable, _ := ro.vm.StableVersion()
-		prompt.Warning(ro.vm.VerifyNewVersion(currentStable, Version))
+		currentStable, _ := ro.version.StableVersion()
+		prompt.Warning(ro.version.VerifyNewVersion(currentStable, Version))
 	}
 }
 
@@ -157,7 +172,7 @@ func isBlockedByCommons(blockList []string, cmd *cobra.Command) bool {
 }
 
 func (ro *rootCmd) versionFlag() string {
-	latestVersion, err := ro.vm.StableVersion()
+	latestVersion, err := ro.version.StableVersion()
 	if err == nil && latestVersion != Version {
 		formattedLatestVersionMsg := prompt.Yellow(fmt.Sprintf(latestVersionMsg, latestVersion))
 		return fmt.Sprintf(
@@ -189,4 +204,48 @@ func tutorialRit(tutorialStatus string) {
 func (ro *rootCmd) ritchieIsInitialized() bool {
 	commonsRepoPath := filepath.Join(ro.ritchieHome, "repos", "commons")
 	return ro.dir.Exists(commonsRepoPath)
+}
+
+func (ro *rootCmd) newTrees() {
+	repos, err := ro.repo.List()
+	if err != nil {
+		return
+	}
+
+	wg := sync.WaitGroup{}
+	for i := range repos {
+		if repos[i].TreeVersion == "v2" {
+			continue
+		}
+
+		wg.Add(1)
+		go ro.gen(repos[i].Name.String(), &wg)
+
+		repos[i].TreeVersion = "v2"
+	}
+	wg.Wait()
+
+	if err := ro.repo.Write(repos); err != nil {
+		return
+	}
+}
+
+func (ro *rootCmd) gen(repo string, wg *sync.WaitGroup) {
+	repoPath := filepath.Join(ro.ritchieHome, "repos", repo)
+	tree, err := ro.tree.Generate(repoPath)
+	if err != nil {
+		return
+	}
+
+	bb, err := json.MarshalIndent(tree, "", "\t")
+	if err != nil {
+		return
+	}
+
+	treeV2 := filepath.Join(repoPath, "tree_v2.json")
+	if err := ro.file.Write(treeV2, bb); err != nil {
+		return
+	}
+
+	wg.Done()
 }
