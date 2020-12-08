@@ -17,7 +17,7 @@
 package env
 
 const (
-	FileName = "envs"
+	FileName = "envs.json"
 	Current  = "Current -> "
 	Default  = "default"
 )

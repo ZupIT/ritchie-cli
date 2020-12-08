@@ -216,7 +216,7 @@ func (ro *rootCmd) convertContextsFileToEnvsFile() error {
 		return err
 	}
 
-	envsPath := filepath.Join(ro.ritchieHome, "envs")
+	envsPath := filepath.Join(ro.ritchieHome, env.FileName)
 	envHolder := env.Holder{
 		Current: ctx.Current,
 		All:     ctx.All,
