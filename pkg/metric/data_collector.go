@@ -70,8 +70,8 @@ func (d DataCollectorManager) CollectCommandData(
 
 func (d DataCollectorManager) CollectUserState(ritVersion string) User {
 	user := User{
-		Id:            d.userId.Generate(),
-		Os:            runtime.GOOS,
+		ID:            d.userId.Generate(),
+		OS:            runtime.GOOS,
 		Version:       ritVersion,
 		DefaultRunner: d.defaultRunner(),
 		Repos:         d.userRepos(),
@@ -84,9 +84,9 @@ func (d DataCollectorManager) defaultRunner() string {
 		filepath.Join(d.ritchieHomeDir, "default-formula-runner"),
 	)
 	if string(runnerBytes) == "0" {
-		return "local"
+		return formula.RunnerTypes[0]
 	}
-	return "docker"
+	return formula.RunnerTypes[1]
 }
 
 func (d DataCollectorManager) userRepos() Repos {

@@ -44,8 +44,8 @@ type Command struct {
 }
 
 type User struct {
-	Id            UserID `json:"userId"`
-	Os            string `json:"os"`
+	ID            UserID `json:"userId"`
+	OS            string `json:"os"`
 	Version       string `json:"version"`
 	DefaultRunner string `json:"defaultRunner"`
 	Repos         Repos  `json:"repos"`
@@ -60,7 +60,7 @@ type Repo struct {
 }
 
 type Metadata struct {
-	Id   string      `json:"id"`
+	ID   string      `json:"id"`
 	Data interface{} `json:"data"`
 }
 
