@@ -19,21 +19,22 @@ package mocks
 import (
 	"io"
 
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-type ContextFinderMock struct {
+type EnvFinderMock struct {
 	mock.Mock
 }
 
-func (cf *ContextFinderMock) Find() (rcontext.ContextHolder, error) {
-	args := cf.Called()
+func (e *EnvFinderMock) Find() (env.Holder, error) {
+	args := e.Called()
 
-	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
+	return args.Get(0).(env.Holder), args.Error(1)
 }
 
 type DetailManagerMock struct {
