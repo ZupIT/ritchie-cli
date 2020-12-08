@@ -31,7 +31,7 @@ func NewDetail(repoProviders formula.RepoProviders) DetailManager {
 func (dm DetailManager) LatestTag(repo formula.Repo) string {
 	formulaGit := dm.repoProviders.Resolve(repo.Provider)
 
-	repoInfo := formulaGit.NewRepoInfo(repo.Url, repo.Token)
+	repoInfo := formulaGit.NewRepoInfo(repo.URL, repo.Token)
 	tag, err := formulaGit.Repos.LatestTag(repoInfo)
 	if err != nil {
 		return ""

@@ -20,40 +20,40 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 )
 
 func TestSendManagerHttp_Send(t *testing.T) {
 	type in struct {
-		checker CheckerMock
+		checkerReturn bool
 	}
+
 	tests := []struct {
 		name string
 		in   in
 	}{
 		{
 			name: "success run",
-			in: in{
-				checker: CheckerMock{
-					func() bool {
-						return true
-					},
-				},
-			},
+			in:   in{checkerReturn: true},
+		},
+		{
+			name: "success run with false checker",
+			in:   in{checkerReturn: false},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			server := server()
 			defer server.Close()
-			data := DataCollectorMock{
-				CollectCommandDataMock: func() Command {
-					return Command{}
-				},
-				CollectUserStateMock: func() User {
-					return User{}
-				},
-			}
-			httpSender := NewHttpSender(server.URL, server.Client(), data, tt.in.checker)
+			checkerMock := &CheckerMock{}
+			checkerMock.On("Check").Return(tt.in.checkerReturn)
+
+			m := &DataCollectorMock{}
+			m.On("CollectUserState", mock.Anything).Return(User{})
+			m.On("CollectCommandData", mock.Anything, mock.Anything).Return(Command{})
+
+			httpSender := NewHttpSender(server.URL, server.Client(), m, checkerMock)
 			httpSender.SendUserState("2.0.1")
 			httpSender.SendCommandData(SendCommandDataParams{})
 		})
@@ -67,22 +67,26 @@ func server() *httptest.Server {
 }
 
 type DataCollectorMock struct {
-	CollectCommandDataMock func() Command
-	CollectUserStateMock   func() User
+	mock.Mock
 }
 
-func (dc DataCollectorMock) CollectCommandData(commandExecutionTime float64, commandError ...string) Command {
-	return dc.CollectCommandDataMock()
+func (dc *DataCollectorMock) CollectCommandData(
+	commandExecutionTime float64,
+	commandError ...string,
+) Command {
+	args := dc.Called(commandExecutionTime, commandError)
+	return args.Get(0).(Command)
 }
 
-func (dc DataCollectorMock) CollectUserState(ritVersion string) User {
-	return dc.CollectUserStateMock()
+func (dc *DataCollectorMock) CollectUserState(ritVersion string) User {
+	args := dc.Called(ritVersion)
+	return args.Get(0).(User)
 }
 
 type CheckerMock struct {
-	CheckMock func() bool
+	mock.Mock
 }
 
-func (c CheckerMock) Check() bool {
-	return true
+func (c *CheckerMock) Check() bool {
+	return c.Called().Get(0).(bool)
 }

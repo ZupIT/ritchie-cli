@@ -21,9 +21,9 @@ import (
 	"strings"
 	"testing"
 
+	internal "github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -360,7 +360,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			field := tt.fields
 
-			metricSender := SenderMock{}
+			metricSender := &internal.SenderMock{}
 
 			initPrompt := NewInitCmd(
 				field.repo,
@@ -398,17 +398,4 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			}
 		})
 	}
-}
-
-type SenderMock struct {
-	SendUserStateMock   func()
-	SendCommandDataMock func()
-}
-
-func (s SenderMock) SendUserState(ritVersion string) {
-	s.SendUserStateMock()
-}
-
-func (s SenderMock) SendCommandData(cmd metric.SendCommandDataParams) {
-	s.SendCommandDataMock()
 }
