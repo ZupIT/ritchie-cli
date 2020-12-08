@@ -82,7 +82,9 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 	}
 
 	if len(tree.Commands) == 0 {
-		_ = ad.deleter.Delete(repo.Name)
+		if err := ad.deleter.Delete(repo.Name); err != nil {
+			return err
+		}
 		return errors.New("the selected repository has no formulas")
 	}
 

@@ -96,31 +96,6 @@ func TestAddRepoCmd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Fail when repo.Add and repoDeleter.Delete return err",
-			fields: fields{
-				repo: repoListerAdderCustomMock{
-					add: func(d formula.Repo) error {
-						return errors.New("")
-					},
-					list: func() (formula.Repos, error) {
-						return formula.Repos{}, nil
-					},
-				},
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
 			name: "input bool error",
 			fields: fields{
 				repo:               defaultRepoAdderMock,
@@ -265,30 +240,6 @@ func TestAddRepoCmd(t *testing.T) {
 				repo: repoListerAdderCustomMock{
 					add: func(d formula.Repo) error {
 						return errors.New("")
-					},
-				},
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
-				detailLatestTag: "1.0.0",
-			},
-			wantErr: true,
-		},
-		{
-			name: "Fail when repo.Add and repoDeleter.Delete return err stdin",
-			fields: fields{
-				repo: repoListerAdderCustomMock{
-					add: func(d formula.Repo) error {
-						return errors.New("error to add")
 					},
 				},
 				repoProviders:      repoProviders,

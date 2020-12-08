@@ -271,6 +271,33 @@ func TestAdd(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "Return err when Delete fail",
+			in: in{
+				repoMock: repoListWriteCreatorMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
+						return nil
+					},
+				},
+				tree: treeGeneratorCustomMock{
+					func(repoPath string) (formula.Tree, error) {
+						return formula.Tree{}, nil
+					},
+				},
+				deleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return errors.New("any error on Delete")
+					},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
