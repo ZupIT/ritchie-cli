@@ -22,7 +22,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 )
 
-func TestNewDeleteContextCmd(t *testing.T) {
+func TestNewDeleteEnvCmd(t *testing.T) {
 	findRemoverMock := envFindRemoverMock{holder: env.Holder{
 		Current: "",
 		All:     []string{"prod", "qa"},

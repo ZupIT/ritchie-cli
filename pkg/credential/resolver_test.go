@@ -31,9 +31,9 @@ func TestCredentialResolver(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tempDirectory := os.TempDir()
-	contextFinder := env.NewFinder(tempDirectory, fileManager)
-	credentialSetter := NewSetter(tempDirectory, contextFinder, dirManager, fileManager)
-	credentialFinder := NewFinder(tempDirectory, contextFinder, fileManager)
+	envFinder := env.NewFinder(tempDirectory, fileManager)
+	credentialSetter := NewSetter(tempDirectory, envFinder, dirManager, fileManager)
+	credentialFinder := NewFinder(tempDirectory, envFinder, fileManager)
 
 	defer os.RemoveAll(File(tempDirectory, "", ""))
 

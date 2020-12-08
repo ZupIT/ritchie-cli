@@ -52,8 +52,8 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
 				envFinder: envFinderCustomMock{
@@ -67,14 +67,14 @@ func TestDeleteCredential(t *testing.T) {
 			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
-			name:    "error on find context",
+			name:    "error on find env",
 			wantErr: true,
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader:     credSettingsMock{},
 				envFinder: envFinderCustomMock{
 					find: func() (env.Holder, error) {
-						return env.Holder{}, errors.New("some error on find Context")
+						return env.Holder{}, errors.New("some error on find env")
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -91,7 +91,7 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
 						return []credential.ListCredData{}, errors.New("ReadCredentialsValue error")
 					},
 				},
@@ -106,7 +106,7 @@ func TestDeleteCredential(t *testing.T) {
 			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
-			name:    "error when there are no credentials in the context",
+			name:    "error when there are no credentials in the env",
 			wantErr: false,
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
@@ -114,7 +114,7 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
 						return []credential.ListCredData{}, nil
 					},
 				},
@@ -137,8 +137,8 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
 				envFinder: envFinderCustomMock{
@@ -160,8 +160,8 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
 				envFinder: envFinderCustomMock{
@@ -183,8 +183,8 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
 				envFinder: envFinderCustomMock{
@@ -210,8 +210,8 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
 				envFinder: envFinderCustomMock{
@@ -233,8 +233,8 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "gitlab", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "gitlab", Env: "default", Credential: "{}"}}, nil
 					},
 				},
 				envFinder: envFinderCustomMock{

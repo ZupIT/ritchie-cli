@@ -45,7 +45,7 @@ func NewDeleteCredentialCmd(
 	cmd := &cobra.Command{
 		Use:       "credential",
 		Short:     "Delete credential",
-		Long:      `Delete credential from current context`,
+		Long:      `Delete credential from current env`,
 		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
@@ -56,19 +56,19 @@ func NewDeleteCredentialCmd(
 
 func (d deleteCredentialCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		context, err := d.currentEnv()
+		env, err := d.currentEnv()
 		if err != nil {
 			return err
 		}
-		prompt.Info(fmt.Sprintf("Current context: %s", context))
+		prompt.Info(fmt.Sprintf("Current env: %s", env))
 
-		data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
+		data, err := d.ReadCredentialsValueInEnv(d.CredentialsPath(), env)
 		if err != nil {
 			return err
 		}
 
 		if len(data) <= 0 {
-			prompt.Error("You have no defined credentials in this context")
+			prompt.Error("You have no defined credentials in this env")
 			return nil
 		}
 
@@ -104,12 +104,12 @@ func (d deleteCredentialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		context, err := d.currentEnv()
+		env, err := d.currentEnv()
 		if err != nil {
 			return err
 		}
 
-		data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
+		data, err := d.ReadCredentialsValueInEnv(d.CredentialsPath(), env)
 		if err != nil {
 			return err
 		}
