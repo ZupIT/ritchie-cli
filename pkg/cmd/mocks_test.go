@@ -431,6 +431,12 @@ func (TutorialFinderMock) Find() (rtutorial.TutorialHolder, error) {
 	return rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial}, nil
 }
 
+type TutorialFinderErrorMock struct{}
+
+func (TutorialFinderErrorMock) Find() (rtutorial.TutorialHolder, error) {
+	return rtutorial.TutorialHolder{}, errors.New("tutorial finder error")
+}
+
 type TutorialFindSetterMock struct{}
 
 func (TutorialFindSetterMock) Find() (rtutorial.TutorialHolder, error) {
@@ -550,6 +556,30 @@ var (
 		},
 		tags: func(info git.RepoInfo) (git.Tags, error) {
 			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
+		},
+		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+			return nil, nil
+		},
+	}
+
+	gitRepositoryWithoutTagsMock = GitRepositoryMock{
+		latestTag: func(info git.RepoInfo) (git.Tag, error) {
+			return git.Tag{}, nil
+		},
+		tags: func(info git.RepoInfo) (git.Tags, error) {
+			return git.Tags{}, nil
+		},
+		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
+			return nil, nil
+		},
+	}
+
+	gitRepositoryErrorsMock = GitRepositoryMock{
+		latestTag: func(info git.RepoInfo) (git.Tag, error) {
+			return git.Tag{}, errors.New("latest tag error")
+		},
+		tags: func(info git.RepoInfo) (git.Tags, error) {
+			return git.Tags{}, errors.New("tag error")
 		},
 		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
 			return nil, nil

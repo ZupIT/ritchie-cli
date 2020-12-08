@@ -29,11 +29,14 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
 func TestAddRepoCmd(t *testing.T) {
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("GitLab", formula.Git{Repos: gitRepositoryWithoutTagsMock, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
 
 	type fields struct {
 		repo               formula.RepositoryAddLister
@@ -44,6 +47,7 @@ func TestAddRepoCmd(t *testing.T) {
 		InputList          prompt.InputList
 		InputBool          prompt.InputBool
 		InputInt           prompt.InputInt
+		tutorial           rtutorial.Finder
 		stdin              string
 		detailLatestTag    string
 	}
@@ -67,8 +71,47 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
+				tutorial: TutorialFinderMock{},
 			},
 			wantErr: false,
+		},
+		{
+			name: "return error when len of tags is 0",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "GitLab", nil
+					},
+				},
+				tutorial: TutorialFinderMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "return error when Repos.Tag fail",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Bitbucket", nil
+					},
+				},
+				tutorial: TutorialFinderMock{},
+			},
+			wantErr: true,
 		},
 		{
 			name: "Fail when repo.Add return err",
@@ -92,6 +135,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
+				tutorial: TutorialFinderMock{},
 			},
 			wantErr: true,
 		},
@@ -110,6 +154,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
+				tutorial: TutorialFinderMock{},
 			},
 			wantErr: true,
 		},
@@ -128,6 +173,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
+				tutorial: TutorialFinderMock{},
 			},
 			wantErr: true,
 		},
@@ -142,6 +188,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList:          inputListErrorMock{},
+				tutorial:           TutorialFinderMock{},
 			},
 			wantErr: true,
 		},
@@ -156,6 +203,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList:          inputListMock{},
+				tutorial:           TutorialFinderMock{},
 			},
 			wantErr: true,
 		},
@@ -170,6 +218,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputBool:          inputTrueMock{},
 				InputInt:           inputIntMock{},
 				InputList:          inputListMock{},
+				tutorial:           TutorialFinderMock{},
 			},
 			wantErr: true,
 		},
@@ -192,6 +241,26 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
+				tutorial: TutorialFinderMock{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "return error when tutorial.Find fail",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				tutorial: TutorialFinderErrorMock{},
 			},
 			wantErr: true,
 		},
@@ -210,7 +279,8 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
-				stdin: "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				tutorial: TutorialFinderMock{},
+				stdin:    "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 			},
 			wantErr: false,
 		},
@@ -229,6 +299,7 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
+				tutorial:        TutorialFinderMock{},
 				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 				detailLatestTag: "1.0.0",
 			},
@@ -253,6 +324,28 @@ func TestAddRepoCmd(t *testing.T) {
 						return "Github", nil
 					},
 				},
+				tutorial:        TutorialFinderMock{},
+				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				detailLatestTag: "1.0.0",
+			},
+			wantErr: true,
+		},
+		{
+			name: "return error when tutorial.Find fail stdin",
+			fields: fields{
+				repo:               defaultRepoAdderMock,
+				repoProviders:      repoProviders,
+				InputTextValidator: inputTextValidatorMock{},
+				InputPassword:      inputPasswordMock{},
+				InputURL:           inputURLMock{},
+				InputBool:          inputTrueMock{},
+				InputInt:           inputIntMock{},
+				InputList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						return "Github", nil
+					},
+				},
+				tutorial:        TutorialFinderErrorMock{},
 				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 				detailLatestTag: "1.0.0",
 			},
@@ -274,7 +367,7 @@ func TestAddRepoCmd(t *testing.T) {
 				tt.fields.InputList,
 				tt.fields.InputBool,
 				tt.fields.InputInt,
-				TutorialFinderMock{},
+				tt.fields.tutorial,
 				checkerManager,
 				detailMock,
 			)
