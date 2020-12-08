@@ -4,16 +4,16 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-type ctxFinderCustomMock struct {
-	findMock func() (rcontext.ContextHolder, error)
+type envFinderCustomMock struct {
+	find func() (env.Holder, error)
 }
 
-func (cfcm ctxFinderCustomMock) Find() (rcontext.ContextHolder, error) {
-	return cfcm.findMock()
+func (e envFinderCustomMock) Find() (env.Holder, error) {
+	return e.find()
 }
 
 type fileRemoverErrorMock struct{}
@@ -25,7 +25,7 @@ func (fileRemoverErrorMock) Remove(path string) error {
 func TestCredDelete(t *testing.T) {
 	type args struct {
 		homePath string
-		cf       rcontext.Finder
+		env      env.Finder
 		fm       stream.FileRemover
 		service  string
 	}
@@ -40,9 +40,9 @@ func TestCredDelete(t *testing.T) {
 			fields: args{
 				homePath: "",
 				service:  "",
-				cf: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				env: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				fm: fileManager,
@@ -54,9 +54,9 @@ func TestCredDelete(t *testing.T) {
 			fields: args{
 				homePath: "",
 				service:  "",
-				cf: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, errors.New("ReadCredentialsValue error")
+				env: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, errors.New("ReadCredentialsValue error")
 					},
 				},
 				fm: fileManager,
@@ -68,9 +68,9 @@ func TestCredDelete(t *testing.T) {
 			fields: args{
 				homePath: "",
 				service:  "",
-				cf: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				env: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				fm: fileRemoverErrorMock{},
@@ -79,7 +79,7 @@ func TestCredDelete(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewCredDelete(tt.fields.homePath, tt.fields.cf, tt.fields.fm)
+			got := NewCredDelete(tt.fields.homePath, tt.fields.env, tt.fields.fm)
 			if err := got.Delete(tt.fields.service); (err != nil) != tt.wantErr {
 				t.Errorf("Delete(%s) got %v, wantErr %v", tt.name, err, tt.wantErr)
 			}

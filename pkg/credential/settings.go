@@ -55,17 +55,17 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 	var creds []ListCredData
 	var cred ListCredData
 	var detail Detail
-	ctx, _ := s.dir.List(path, true)
-	for _, c := range ctx {
-		providers, _ := s.file.List(filepath.Join(path, c))
+	envs, _ := s.dir.List(path, true)
+	for _, env := range envs {
+		providers, _ := s.file.List(filepath.Join(path, env))
 		for _, p := range providers {
-			cBytes, _ := s.file.Read(filepath.Join(path, c, p))
+			cBytes, _ := s.file.Read(filepath.Join(path, env, p))
 			if err := json.Unmarshal(cBytes, &detail); err != nil {
 				return creds, err
 			}
 			cred.Credential = formatCredential(string(cBytes))
 			cred.Provider = detail.Service
-			cred.Context = c
+			cred.Env = env
 			creds = append(creds, cred)
 			detail = Detail{}
 		}
@@ -73,19 +73,19 @@ func (s Settings) ReadCredentialsValue(path string) ([]ListCredData, error) {
 	return creds, nil
 }
 
-func (s Settings) ReadCredentialsValueInContext(path string, context string) ([]ListCredData, error) {
+func (s Settings) ReadCredentialsValueInEnv(path string, env string) ([]ListCredData, error) {
 	var cred ListCredData
 	var detail Detail
-	providers, _ := s.file.List(filepath.Join(path, context))
+	providers, _ := s.file.List(filepath.Join(path, env))
 	creds := make([]ListCredData, 0, len(providers))
 	for _, p := range providers {
-		cBytes, _ := s.file.Read(filepath.Join(path, context, p))
+		cBytes, _ := s.file.Read(filepath.Join(path, env, p))
 		if err := json.Unmarshal(cBytes, &detail); err != nil {
 			return creds, err
 		}
 		cred.Credential = formatCredential(string(cBytes))
 		cred.Provider = detail.Service
-		cred.Context = context
+		cred.Env = env
 		creds = append(creds, cred)
 		detail = Detail{}
 	}
