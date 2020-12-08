@@ -93,6 +93,7 @@ func TestAddRepoCmd(t *testing.T) {
 		InputBool          returnOfInputBool
 		stdin              string
 		detailLatestTag    string
+		tutorialStatus     string
 	}
 	tests := []struct {
 		name    string
@@ -108,6 +109,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				tutorialStatus:     "disabled",
 			},
 			wantErr: false,
 		},
@@ -120,6 +122,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{false, someError},
 				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				tutorialStatus:     "disabled",
 			},
 			wantErr: true,
 		},
@@ -132,11 +135,12 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				tutorialStatus:     "disabled",
 			},
 			wantErr: true,
 		},
 		{
-			name: "input list error",
+			name: "input list select provider return error",
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 				InputTextValidator: returnWithStringErr{"mocked text", nil},
@@ -144,6 +148,23 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOfInputList{{response: "item", err: someError}},
+				tutorialStatus:     "disabled",
+			},
+			wantErr: true,
+		},
+		{
+			name: "input list select version return error",
+			fields: fields{
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
+				InputBool:          returnOfInputBool{true, nil},
+				InputList: []returnOfInputList{
+					{question: "Select a tag version:", response: "", err: someError},
+					{question: "", response: "Github", err: nil},
+				},
+				tutorialStatus: "disabled",
 			},
 			wantErr: true,
 		},
@@ -156,6 +177,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOfInputList{{response: "item", err: nil}},
+				tutorialStatus:     "disabled",
 			},
 			wantErr: true,
 		},
@@ -168,8 +190,22 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURL:           returnWithStringErr{"http://localhost/mocked", someError},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOfInputList{{response: "item", err: nil}},
+				tutorialStatus:     "disabled",
 			},
 			wantErr: true,
+		},
+		{
+			name: "Tutorial status enabled",
+			fields: fields{
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+				InputTextValidator: returnWithStringErr{"mocked text", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
+				InputBool:          returnOfInputBool{true, nil},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				tutorialStatus:     "enabled",
+			},
+			wantErr: false,
 		},
 		{
 			name: "Fail when repo.List return err",
@@ -180,6 +216,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				tutorialStatus:     "disabled",
 			},
 			wantErr: true,
 		},
@@ -193,6 +230,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputBool:          returnOfInputBool{true, nil},
 				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 				stdin:              "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				tutorialStatus:     "disabled",
 			},
 			wantErr: false,
 		},
@@ -207,6 +245,7 @@ func TestAddRepoCmd(t *testing.T) {
 				InputList:          []returnOfInputList{{response: "Github", err: nil}},
 				stdin:              "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
 				detailLatestTag:    "1.0.0",
+				tutorialStatus:     "disabled",
 			},
 			wantErr: false,
 		},
@@ -222,6 +261,7 @@ func TestAddRepoCmd(t *testing.T) {
 					{question: "Select a tag version:", response: "1.0.0", err: nil},
 					{question: "", response: "Github", err: nil},
 				},
+				tutorialStatus: "disabled",
 			},
 			wantErr: false,
 		},
@@ -246,7 +286,7 @@ func TestAddRepoCmd(t *testing.T) {
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
 			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
 			tutorialFindMock := new(mocks.TutorialFindSetterMock)
-			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: "disabled"}, nil)
+			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: fields.tutorialStatus}, nil)
 			repoListerAdderMock := new(mocks.RepoListerAdderMock)
 			repoListerAdderMock.On("Add", mock.Anything).Return(fields.repo.errAdd)
 			repoListerAdderMock.On("List").Return(fields.repo.reposList, fields.repo.errList)
