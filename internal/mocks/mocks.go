@@ -27,8 +27,8 @@ type EnvFinderMock struct {
 	mock.Mock
 }
 
-func (cf *EnvFinderMock) Find() (env.Holder, error) {
-	args := cf.Called()
+func (e *EnvFinderMock) Find() (env.Holder, error) {
+	args := e.Called()
 
 	return args.Get(0).(env.Holder), args.Error(1)
 }

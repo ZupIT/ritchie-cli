@@ -25,7 +25,7 @@ func (fileRemoverErrorMock) Remove(path string) error {
 func TestCredDelete(t *testing.T) {
 	type args struct {
 		homePath string
-		cf       env.Finder
+		env      env.Finder
 		fm       stream.FileRemover
 		service  string
 	}
@@ -40,7 +40,7 @@ func TestCredDelete(t *testing.T) {
 			fields: args{
 				homePath: "",
 				service:  "",
-				cf: envFinderCustomMock{
+				env: envFinderCustomMock{
 					find: func() (env.Holder, error) {
 						return env.Holder{Current: ""}, nil
 					},
@@ -54,7 +54,7 @@ func TestCredDelete(t *testing.T) {
 			fields: args{
 				homePath: "",
 				service:  "",
-				cf: envFinderCustomMock{
+				env: envFinderCustomMock{
 					find: func() (env.Holder, error) {
 						return env.Holder{Current: ""}, errors.New("ReadCredentialsValue error")
 					},
@@ -68,7 +68,7 @@ func TestCredDelete(t *testing.T) {
 			fields: args{
 				homePath: "",
 				service:  "",
-				cf: envFinderCustomMock{
+				env: envFinderCustomMock{
 					find: func() (env.Holder, error) {
 						return env.Holder{Current: ""}, nil
 					},
@@ -79,7 +79,7 @@ func TestCredDelete(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewCredDelete(tt.fields.homePath, tt.fields.cf, tt.fields.fm)
+			got := NewCredDelete(tt.fields.homePath, tt.fields.env, tt.fields.fm)
 			if err := got.Delete(tt.fields.service); (err != nil) != tt.wantErr {
 				t.Errorf("Delete(%s) got %v, wantErr %v", tt.name, err, tt.wantErr)
 			}
