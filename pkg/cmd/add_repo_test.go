@@ -140,6 +140,32 @@ func TestAddRepoCmd(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Return nil when user add a new commons incorrectly",
+			fields: fields{
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: formula.RepoCommonsName}}, errList: nil},
+				InputTextValidator: returnWithStringErr{formula.RepoCommonsName.String(), nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
+				InputBool:          returnOfInputBool{false, nil},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				tutorialStatus:     "disabled",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Return nil success when user add a repo exitent incorrectly",
+			fields: fields{
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: "name-repo"}}, errList: nil},
+				InputTextValidator: returnWithStringErr{"name-repo", nil},
+				InputPassword:      returnWithStringErr{"s3cr3t", nil},
+				InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
+				InputBool:          returnOfInputBool{false, nil},
+				InputList:          []returnOfInputList{{response: "Github", err: nil}},
+				tutorialStatus:     "disabled",
+			},
+			wantErr: false,
+		},
+		{
 			name: "input bool error",
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
