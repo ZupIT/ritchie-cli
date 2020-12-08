@@ -16,6 +16,10 @@
 
 package prompt
 
+import (
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+)
+
 type InputText interface {
 	Text(name string, required bool, helper ...string) (string, error)
 }
@@ -50,4 +54,8 @@ type InputEmail interface {
 
 type InputURL interface {
 	URL(name, defaultValue string) (string, error)
+}
+
+type InputMultiselect interface {
+	Multiselect(input formula.Input) ([]string, error)
 }

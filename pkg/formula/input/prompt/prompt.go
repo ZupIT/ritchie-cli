@@ -55,6 +55,7 @@ type InputManager struct {
 	prompt.InputTextValidator
 	prompt.InputBool
 	prompt.InputPassword
+	prompt.InputMultiselect
 }
 
 func NewInputManager(
@@ -66,6 +67,7 @@ func NewInputManager(
 	inDefValue input.InputTextDefault,
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
+	inMultiselect prompt.InputMultiselect,
 ) formula.InputRunner {
 	return InputManager{
 		envResolvers:       env,
@@ -76,6 +78,7 @@ func NewInputManager(
 		InputTextDefault:   inDefValue,
 		InputBool:          inBool,
 		InputPassword:      inPass,
+		InputMultiselect:   inMultiselect,
 	}
 }
 
@@ -118,14 +121,17 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 
 func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (string, error) {
 	switch i.Type {
+
 	case input.PassType:
 		return in.Password(i.Label, i.Tutorial)
+
 	case input.BoolType:
 		valBool, err := in.Bool(i.Label, items, i.Tutorial)
 		if err != nil {
 			return "", err
 		}
 		return strconv.FormatBool(valBool), nil
+
 	case input.TextType:
 		if items != nil {
 			return in.loadInputValList(items, i)
@@ -138,6 +144,17 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
+	case input.Multiselect:
+		emptyItems := fmt.Sprintf("no items were provided. Please insert a list of items for the input %s in the config.json file of your formula", i.Name)
+		if len(items) > 0 {
+			sl, err := in.Multiselect(i)
+			if err != nil {
+				return "", nil
+			}
+			return strings.Join(sl, ", "), nil
+		}
+		return "", errors.New(emptyItems)
+
 	default:
 		return input.ResolveIfReserved(in.envResolvers, i)
 	}

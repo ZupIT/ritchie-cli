@@ -18,6 +18,7 @@ const (
 	BoolType    = "bool"
 	PassType    = "password"
 	DynamicType = "dynamic"
+	Multiselect = "multiselect"
 )
 
 // addEnv Add environment variable to run formulas.
