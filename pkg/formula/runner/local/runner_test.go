@@ -55,9 +55,9 @@ func TestRun(t *testing.T) {
 	envFinder := env.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	pInputRunner := prompt.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{})
-	sInputRunner := stdin.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
-	fInputRunner := flag.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
+	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{})
+	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
+	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
 
 	types := formula.TermInputTypes{
 		api.Prompt: pInputRunner,
