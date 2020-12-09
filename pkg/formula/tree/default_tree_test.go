@@ -103,7 +103,7 @@ func TestMergedTree(t *testing.T) {
 				providers: providers,
 				core:      false,
 			},
-			want: formula.Tree{Version: treeVersion, Commands: api.Commands{}},
+			want: formula.Tree{Version: Version, Commands: api.Commands{}},
 		},
 		{
 			name: "empty tree when tree.json does not exist",
@@ -121,7 +121,7 @@ func TestMergedTree(t *testing.T) {
 				providers: providers,
 				core:      false,
 			},
-			want: formula.Tree{Version: treeVersion, Commands: api.Commands{}},
+			want: formula.Tree{Version: Version, Commands: api.Commands{}},
 		},
 		{
 			name: "read tree.json error",
@@ -142,7 +142,7 @@ func TestMergedTree(t *testing.T) {
 				providers: providers,
 				core:      false,
 			},
-			want: formula.Tree{Version: treeVersion, Commands: api.Commands{}},
+			want: formula.Tree{Version: Version, Commands: api.Commands{}},
 		},
 	}
 
@@ -352,7 +352,7 @@ var (
 	}
 
 	tree1 = formula.Tree{
-		Version: treeVersion,
+		Version: Version,
 		Commands: api.Commands{
 			"root_pokemon": api.Command{
 				Parent:   "root",
@@ -372,7 +372,7 @@ var (
 	}
 
 	tree2 = formula.Tree{
-		Version: treeVersion,
+		Version: Version,
 		Commands: api.Commands{
 			"root_star_wars": api.Command{
 				Parent:   "root",
@@ -392,7 +392,7 @@ var (
 	}
 
 	expectedTree = formula.Tree{
-		Version: treeVersion,
+		Version: Version,
 		Commands: api.Commands{
 			"root_pokemon": api.Command{
 				Parent:   "root",
@@ -426,7 +426,7 @@ var (
 	}
 
 	expectedTreeWithCoreCmds = formula.Tree{
-		Version: treeVersion,
+		Version: Version,
 		Commands: api.Commands{
 			"root_pokemon": api.Command{
 				Parent:   "root",

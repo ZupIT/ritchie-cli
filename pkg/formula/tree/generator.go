@@ -28,9 +28,9 @@ import (
 )
 
 const (
-	root        = "root"
-	configFile  = "config.json"
-	treeVersion = "v2"
+	root       = "root"
+	configFile = "config.json"
+	Version    = "v2"
 )
 
 type GeneratorManager struct {
@@ -92,7 +92,7 @@ func (ge GeneratorManager) Generate(repoPath string) (formula.Tree, error) {
 		}
 	}
 
-	return formula.Tree{Version: treeVersion, Commands: commands}, nil
+	return formula.Tree{Version: Version, Commands: commands}, nil
 }
 
 // subCommands generates the sub-commands for the tree.

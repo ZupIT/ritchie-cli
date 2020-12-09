@@ -102,7 +102,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	}
 
 	return formula.Tree{
-		Version:    treeVersion,
+		Version:    Version,
 		Commands:   mergedCommands,
 		CommandsID: ids,
 	}

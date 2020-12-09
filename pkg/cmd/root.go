@@ -28,6 +28,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
@@ -124,7 +125,7 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		ro.newTrees()
+		ro.convertTree()
 
 		if isUpgradeCommand(allowList, cmd) || isCompleteCmd(cmd) {
 			return nil
@@ -206,24 +207,30 @@ func (ro *rootCmd) ritchieIsInitialized() bool {
 	return ro.dir.Exists(commonsRepoPath)
 }
 
-func (ro *rootCmd) newTrees() {
+func (ro *rootCmd) convertTree() {
 	repos, err := ro.repo.List()
 	if err != nil {
 		return
 	}
 
+	var hasUpdate bool
 	wg := sync.WaitGroup{}
 	for i := range repos {
-		if repos[i].TreeVersion == "v2" {
+		if repos[i].TreeVersion == tree.Version {
 			continue
 		}
 
 		wg.Add(1)
 		go ro.gen(repos[i].Name.String(), &wg)
 
-		repos[i].TreeVersion = "v2"
+		repos[i].TreeVersion = tree.Version
+		hasUpdate = true
 	}
 	wg.Wait()
+
+	if !hasUpdate {
+		return
+	}
 
 	if err := ro.repo.Write(repos); err != nil {
 		return
@@ -242,7 +249,7 @@ func (ro *rootCmd) gen(repo string, wg *sync.WaitGroup) {
 		return
 	}
 
-	treeV2 := filepath.Join(repoPath, "tree_v2.json")
+	treeV2 := filepath.Join(repoPath, "tree.json")
 	if err := ro.file.Write(treeV2, bb); err != nil {
 		return
 	}

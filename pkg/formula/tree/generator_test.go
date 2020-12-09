@@ -44,8 +44,8 @@ func TestGenerate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if tree.Version != treeVersion {
-		t.Fatalf("Generate(valid tree version) = %s; want %s", tree.Version, treeVersion)
+	if tree.Version != Version {
+		t.Fatalf("Generate(valid tree version) = %s; want %s", tree.Version, Version)
 	}
 
 	const cmdSize = 6
