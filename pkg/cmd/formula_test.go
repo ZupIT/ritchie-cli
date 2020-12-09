@@ -30,19 +30,21 @@ func TestFormulaCommand_Add(t *testing.T) {
 	treeMock := treeMock{
 		tree: formula.Tree{
 			Commands: api.Commands{
-				{
-					Id:     "root_mock",
+				"root_mock": {
 					Parent: "root",
 					Usage:  "mock",
 					Help:   "mock for add",
 				},
-				{
-					Id:      "root_mock_test",
+				"root_mock_test": {
 					Parent:  "root_mock",
 					Usage:   "test",
 					Help:    "test for add",
 					Formula: true,
 				},
+			},
+			CommandsID: []api.CommandID{
+				"root_mock",
+				"root_mock_test",
 			},
 		},
 	}

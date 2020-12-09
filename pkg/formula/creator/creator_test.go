@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -71,9 +72,8 @@ func TestCreator(t *testing.T) {
 	}
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
-	isRootCommand := false
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds, FileReadExisterMock{}, repoProviders, isRootCommand)
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds, FileReadExisterMock{}, repoProviders)
 
 	tplM := template.NewManager("../../../testdata", dirManager)
 
@@ -127,7 +127,7 @@ func TestCreator(t *testing.T) {
 				dir:      dirManager,
 				file:     fileManager,
 				tplM:     tplM,
-				helpPath: "/tmp/customWorkSpace/scaffold/generate/test_go/help.json",
+				helpPath: filepath.Join(resultDir, "/scaffold/generate/test_go/help.json"),
 			},
 			out: out{
 				err: nil,

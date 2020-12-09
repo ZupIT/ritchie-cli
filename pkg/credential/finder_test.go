@@ -23,8 +23,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	sMock "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -34,20 +35,22 @@ var (
 	githubCred = Detail{Service: "github"}
 	streamMock = sMock.FileReadExisterCustomMock{
 		ReadMock: func(path string) ([]byte, error) {
-			return []byte("{\"current_context\":\"default\"}"), nil
+			return []byte("{\"current_env\":\"default\"}"), nil
 		},
 		ExistsMock: func(path string) bool {
 			return true
 		},
 	}
-	ctxFinder = rcontext.FindManager{CtxFile: "", File: streamMock}
+
+	envFinder = env.NewFinder("", streamMock)
 )
 
 func TestFind(t *testing.T) {
 
 	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, ctxFinder)
+	setter := NewSetter(tmp, envFinder, dirManager, fileManager)
 	_ = setter.Set(githubCred)
 
 	type out struct {
@@ -57,7 +60,7 @@ func TestFind(t *testing.T) {
 
 	type in struct {
 		homePath  string
-		ctxFinder rcontext.Finder
+		envFinder env.Finder
 		file      stream.FileReader
 		provider  string
 	}
@@ -71,7 +74,7 @@ func TestFind(t *testing.T) {
 			name: "Run with success",
 			in: in{
 				homePath:  tmp,
-				ctxFinder: ctxFinder,
+				envFinder: envFinder,
 				file:      fileManager,
 				provider:  githubCred.Service,
 			},
@@ -84,7 +87,7 @@ func TestFind(t *testing.T) {
 			name: "Return err when file not exist",
 			in: in{
 				homePath:  tmp,
-				ctxFinder: ctxFinder,
+				envFinder: envFinder,
 				file:      fileManager,
 				provider:  "aws",
 			},
@@ -98,7 +101,7 @@ func TestFind(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := tt.out
-			finder := NewFinder(tt.in.homePath, tt.in.ctxFinder, tt.in.file)
+			finder := NewFinder(tt.in.homePath, tt.in.envFinder, tt.in.file)
 			got, err := finder.Find(tt.in.provider)
 			if err != nil && err.Error() != out.err.Error() {
 				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)

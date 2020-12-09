@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package rcontext
+package cmd
 
 import (
-	"fmt"
-	"os"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 )
 
-const (
-	dev = "dev"
-	qa  = "qa"
-)
+func TestNewDeleteEnvCmd(t *testing.T) {
+	findRemoverMock := envFindRemoverMock{holder: env.Holder{
+		Current: "",
+		All:     []string{"prod", "qa"},
+	}}
+	cmd := NewDeleteEnvCmd(findRemoverMock, inputTrueMock{}, inputListMock{})
+	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+	if cmd == nil {
+		t.Errorf("NewDeleteEnvCmd got %v", cmd)
 
-func TestMain(m *testing.M) {
-	cleanCtx()
-	e := m.Run()
-	os.Exit(e)
-}
+	}
 
-func cleanCtx() {
-	_ = fileutil.RemoveDir(fmt.Sprintf(ContextPath, os.TempDir()))
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
 }

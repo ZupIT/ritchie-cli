@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package rcontext
+package cmd
 
-import "fmt"
+import (
+	"testing"
+)
 
-type FindSetterManager struct {
-	ctxFile string
-	Finder
-	Setter
-}
+func TestNewShowEnvCmd(t *testing.T) {
+	cmd := NewShowEnvCmd(envFinderMock{})
+	if cmd == nil {
+		t.Errorf("NewShowEnvCmd got %v", cmd)
 
-func NewFindSetter(homePath string, f Finder, s Setter) FindSetterManager {
-	return FindSetterManager{fmt.Sprintf(ContextPath, homePath), f, s}
+	}
+
+	if err := cmd.Execute(); err != nil {
+		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
 }

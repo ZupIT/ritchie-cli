@@ -26,6 +26,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
@@ -152,9 +154,7 @@ func TestMergedTree(t *testing.T) {
 
 			got := tree.MergedTree(tt.in.core)
 
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MergedTree(%s) = %v; want %v", tt.name, got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -393,6 +393,12 @@ var (
 
 	expectedTree = formula.Tree{
 		Version: Version,
+		CommandsID: []api.CommandID{
+			"root_pokemon",
+			"root_star_wars",
+			"root_pokemon_add",
+			"root_star_wars_list-jedis",
+		},
 		Commands: api.Commands{
 			"root_pokemon": api.Command{
 				Parent:   "root",
@@ -400,6 +406,7 @@ var (
 				Help:     "pokemon help",
 				LongHelp: "pokemon help long",
 				Formula:  false,
+				Repo:     "repo1",
 			},
 			"root_pokemon_add": api.Command{
 				Parent:   "root_pokemon",
@@ -407,6 +414,7 @@ var (
 				Help:     "pokemon add-new-pokemon help",
 				LongHelp: "pokemon add-new-pokemon help long",
 				Formula:  true,
+				Repo:     "repo1",
 			},
 			"root_star_wars": api.Command{
 				Parent:   "root",
@@ -414,6 +422,7 @@ var (
 				Help:     "star wars help",
 				LongHelp: "star wars help long",
 				Formula:  false,
+				Repo:     "repo2",
 			},
 			"root_star_wars_list-jedis": api.Command{
 				Parent:   "root_star_wars",
@@ -421,12 +430,19 @@ var (
 				Help:     "star wars list-jedis help",
 				LongHelp: "star wars list-jedis help long",
 				Formula:  true,
+				Repo:     "repo2",
 			},
 		},
 	}
 
 	expectedTreeWithCoreCmds = formula.Tree{
 		Version: Version,
+		CommandsID: []api.CommandID{
+			"root_pokemon",
+			"root_star_wars",
+			"root_pokemon_add",
+			"root_star_wars_list-jedis",
+		},
 		Commands: api.Commands{
 			"root_pokemon": api.Command{
 				Parent:   "root",
@@ -434,6 +450,7 @@ var (
 				Help:     "pokemon help",
 				LongHelp: "pokemon help long",
 				Formula:  false,
+				Repo:     "repo1",
 			},
 			"root_pokemon_add": api.Command{
 				Parent:   "root_pokemon",
@@ -441,6 +458,7 @@ var (
 				Help:     "pokemon add-new-pokemon help",
 				LongHelp: "pokemon add-new-pokemon help long",
 				Formula:  true,
+				Repo:     "repo1",
 			},
 			"root_star_wars": api.Command{
 				Parent:   "root",
@@ -448,6 +466,7 @@ var (
 				Help:     "star wars help",
 				LongHelp: "star wars help long",
 				Formula:  false,
+				Repo:     "repo2",
 			},
 			"root_star_wars_list-jedis": api.Command{
 				Parent:   "root_star_wars",
@@ -455,6 +474,7 @@ var (
 				Help:     "star wars list-jedis help",
 				LongHelp: "star wars list-jedis help long",
 				Formula:  true,
+				Repo:     "repo2",
 			},
 			"root_add": {
 				Parent: "root",

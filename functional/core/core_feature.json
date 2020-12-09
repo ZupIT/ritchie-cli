@@ -1,42 +1,42 @@
 [
     {
-        "entry": "Show context",
+        "entry": "Show env",
         "steps": [
             {
                 "key": "",
-                "value": "show context",
+                "value": "show env",
                 "action": "main"
             }
         ],
-        "result": "Current context:"
+        "result": "Current env:"
     },
     {
-        "entry": "Set context",
+        "entry": "Set env",
         "steps": [
             {
                 "key": "",
-                "value": "set context",
+                "value": "set env",
                 "action": "main"
             },
             {
                 "key": "All:",
-                "value": "Type new context?",
+                "value": "Type the new env?",
                 "action": "select"
             },
             {
-                "key": "New context:",
+                "key": "New env:",
                 "value": "Leonidas",
                 "action": "sendkey"
             }
         ],
-        "result": "Set context successful!"
+        "result": "Set env successful!"
     },
     {
-        "entry": "Delete context",
+        "entry": "Delete env",
         "steps": [
             {
                 "key": "",
-                "value": "delete context",
+                "value": "delete env",
                 "action": "main"
             },
             {
@@ -45,12 +45,12 @@
                 "action": "select"
             },
             {
-                "key": "Are you sure want to delete this context?",
+                "key": "Are you sure want to delete this env?",
                 "value": "yes",
                 "action": "select"
             }
         ],
-        "result": "Delete context successful!"
+        "result": "Delete env successful!"
     },
     {
         "entry": "Add",
@@ -193,7 +193,7 @@
                 "action": "main"
             }
         ],
-        "result": "Set contexts, credentials, priorities for formula repositories and formulas runner defaults."
+        "result": "Set envs, credentials, priorities for formula repositories and formulas runner defaults."
     },
     {
         "entry": "Update",
@@ -292,7 +292,7 @@
                 "action": "main"
             }
         ],
-        "result": "Delete contexts, repositories, formulas, workspaces and credentials"
+        "result": "Delete env, repositories, formulas, workspaces and credentials"
     },
     {
         "entry": "Show",
@@ -303,7 +303,7 @@
                 "action": "main"
             }
         ],
-        "result": "Show current context and formula-runnner default"
+        "result": "Show current env and formula-runner default"
     },
     {
         "entry": "Create",

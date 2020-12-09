@@ -27,6 +27,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -75,7 +76,7 @@ var (
 type rootCmd struct {
 	ritchieHome string
 	dir         stream.DirCreateChecker
-	file        stream.FileWriteRemover
+	file        stream.FileWriteReadExistRemover
 	tutorial    rtutorial.Finder
 	version     version.Manager
 	tree        formula.TreeGenerator
@@ -85,12 +86,11 @@ type rootCmd struct {
 func NewRootCmd(
 	ritchieHome string,
 	dir stream.DirCreateChecker,
-	file stream.FileWriteRemover,
+	file stream.FileWriteReadExistRemover,
 	tutorial rtutorial.Finder,
 	version version.Manager,
 	tree formula.TreeGenerator,
 	repo formula.RepositoryListWriter,
-
 ) *cobra.Command {
 	o := &rootCmd{
 		ritchieHome: ritchieHome,
@@ -125,8 +125,6 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			return err
 		}
 
-		ro.convertTree()
-
 		if isUpgradeCommand(allowList, cmd) || isCompleteCmd(cmd) {
 			return nil
 		}
@@ -135,6 +133,13 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			fmt.Println(MsgInit)
 			os.Exit(0)
 		}
+
+		ro.convertTree()
+
+		if err := ro.convertContextsFileToEnvsFile(); err != nil {
+			return err
+		}
+
 		return nil
 	}
 }
@@ -202,6 +207,48 @@ func tutorialRit(tutorialStatus string) {
 	}
 }
 
+func (ro *rootCmd) convertContextsFileToEnvsFile() error {
+	ctx := struct {
+		Current string   `json:"current_context"`
+		All     []string `json:"contexts"`
+	}{}
+
+	contextsPath := filepath.Join(ro.ritchieHome, "contexts")
+	if !ro.file.Exists(contextsPath) {
+		return nil
+	}
+
+	bytes, err := ro.file.Read(contextsPath)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(bytes, &ctx); err != nil {
+		return err
+	}
+
+	envsPath := filepath.Join(ro.ritchieHome, env.FileName)
+	envHolder := env.Holder{
+		Current: ctx.Current,
+		All:     ctx.All,
+	}
+
+	envs, err := json.Marshal(envHolder)
+	if err != nil {
+		return err
+	}
+
+	if err := ro.file.Write(envsPath, envs); err != nil {
+		return err
+	}
+
+	if err := ro.file.Remove(contextsPath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ro *rootCmd) ritchieIsInitialized() bool {
 	commonsRepoPath := filepath.Join(ro.ritchieHome, "repos", "commons")
 	return ro.dir.Exists(commonsRepoPath)
@@ -221,7 +268,7 @@ func (ro *rootCmd) convertTree() {
 		}
 
 		wg.Add(1)
-		go ro.gen(repos[i].Name.String(), &wg)
+		go ro.generateTree(repos[i].Name.String(), &wg)
 
 		repos[i].TreeVersion = tree.Version
 		hasUpdate = true
@@ -237,7 +284,7 @@ func (ro *rootCmd) convertTree() {
 	}
 }
 
-func (ro *rootCmd) gen(repo string, wg *sync.WaitGroup) {
+func (ro *rootCmd) generateTree(repo string, wg *sync.WaitGroup) {
 	repoPath := filepath.Join(ro.ritchieHome, "repos", repo)
 	tree, err := ro.tree.Generate(repoPath)
 	if err != nil {
@@ -249,8 +296,8 @@ func (ro *rootCmd) gen(repo string, wg *sync.WaitGroup) {
 		return
 	}
 
-	treeV2 := filepath.Join(repoPath, "tree.json")
-	if err := ro.file.Write(treeV2, bb); err != nil {
+	treePath := filepath.Join(repoPath, "tree.json")
+	if err := ro.file.Write(treePath, bb); err != nil {
 		return
 	}
 

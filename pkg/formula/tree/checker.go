@@ -23,7 +23,7 @@ func NewChecker(
 // if no conflicts are found.
 func (cm CheckerManager) Check() []api.CommandID {
 	hashTable := make(map[api.CommandID]bool)
-	var conflicts []api.CommandID
+	conflicts := make([]api.CommandID, 0)
 	tree, _ := cm.tree.Tree()
 	for k, t := range tree {
 		if k == core {

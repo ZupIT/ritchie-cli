@@ -21,13 +21,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestAddRepoCmd(t *testing.T) {
@@ -239,7 +240,7 @@ func TestAddRepoCmd(t *testing.T) {
 
 			err := cmd.Execute()
 
-			assert.Equal(t, tt.wantErr, (err != nil))
+			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
 }

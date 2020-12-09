@@ -1,8 +1,9 @@
 package tree
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -31,10 +32,10 @@ func TestChecker(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			checker := NewChecker(treeMock{tree: tt.in})
 			got := checker.Check()
-
-			if !reflect.DeepEqual(tt.want, got) {
+			assert.Equal(t, tt.want, got)
+			/*	if !reflect.DeepEqual(tt.want, got) {
 				t.Fatalf("Check(%s) got = %v, but want = %v", tt.name, got, tt.want)
-			}
+			}*/
 		})
 	}
 }

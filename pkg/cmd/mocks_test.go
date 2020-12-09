@@ -21,6 +21,8 @@ import (
 	"errors"
 	"io"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -29,7 +31,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
@@ -205,47 +206,49 @@ func (workspaceForm) Validate(workspace formula.Workspace) error {
 	return nil
 }
 
-type ctxSetterMock struct{}
+type envSetterMock struct{}
 
-func (ctxSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
-	return rcontext.ContextHolder{}, nil
+func (envSetterMock) Set(_ string) (env.Holder, error) {
+	return env.Holder{}, nil
 }
 
-type ctxFinderMock struct{}
-
-func (ctxFinderMock) Find() (rcontext.ContextHolder, error) {
-	return rcontext.ContextHolder{}, nil
+type envFinderCustomMock struct {
+	find func() (env.Holder, error)
 }
 
-type ctxFinderCustomMock struct {
-	findMock func() (rcontext.ContextHolder, error)
+func (e envFinderCustomMock) Find() (env.Holder, error) {
+	return e.find()
 }
 
-func (cfcm ctxFinderCustomMock) Find() (rcontext.ContextHolder, error) {
-	return cfcm.findMock()
+type envFinderMock struct{}
+
+func (envFinderMock) Find() (env.Holder, error) {
+	return env.Holder{}, nil
 }
 
-type ctxFindRemoverMock struct{}
+type envFindRemoverMock struct {
+	holder env.Holder
+	err    error
+}
 
-func (ctxFindRemoverMock) Find() (rcontext.ContextHolder, error) {
-	f := ctxFinderMock{}
+func (e envFindRemoverMock) Find() (env.Holder, error) {
+	return e.holder, e.err
+}
+
+func (envFindRemoverMock) Remove(_ string) (env.Holder, error) {
+	return env.Holder{}, nil
+}
+
+type envFindSetterMock struct{}
+
+func (envFindSetterMock) Find() (env.Holder, error) {
+	f := envFinderMock{}
 	return f.Find()
 }
 
-func (ctxFindRemoverMock) Remove(ctx string) (rcontext.ContextHolder, error) {
-	return rcontext.ContextHolder{}, nil
-}
-
-type ctxFindSetterMock struct{}
-
-func (ctxFindSetterMock) Find() (rcontext.ContextHolder, error) {
-	f := ctxFinderMock{}
-	return f.Find()
-}
-
-func (ctxFindSetterMock) Set(ctx string) (rcontext.ContextHolder, error) {
-	s := ctxSetterMock{}
-	return s.Set(ctx)
+func (envFindSetterMock) Set(env string) (env.Holder, error) {
+	s := envSetterMock{}
+	return s.Set(env)
 }
 
 type repoListerMock struct{}
@@ -303,7 +306,7 @@ func (s credSettingsMock) ReadCredentialsValue(path string) ([]credential.ListCr
 	return []credential.ListCredData{}, nil
 }
 
-func (s credSettingsMock) ReadCredentialsValueInContext(path string, context string) ([]credential.ListCredData, error) {
+func (s credSettingsMock) ReadCredentialsValueInEnv(path string, env string) ([]credential.ListCredData, error) {
 	return []credential.ListCredData{}, nil
 }
 
@@ -325,7 +328,7 @@ func (s credSettingsMock) CredentialsPath() string {
 
 type credSettingsCustomMock struct {
 	ReadCredentialsValueMock          func(path string) ([]credential.ListCredData, error)
-	ReadCredentialsValueInContextMock func(path string, context string) ([]credential.ListCredData, error)
+	ReadCredentialsValueInEnvMock     func(path string, env string) ([]credential.ListCredData, error)
 	ReadCredentialsFieldsMock         func(path string) (credential.Fields, error)
 	WriteDefaultCredentialsFieldsMock func(path string) error
 	WriteCredentialsFieldsMock        func(fields credential.Fields, path string) error
@@ -341,8 +344,8 @@ func (cscm credSettingsCustomMock) ReadCredentialsValue(path string) ([]credenti
 	return cscm.ReadCredentialsValueMock(path)
 }
 
-func (cscm credSettingsCustomMock) ReadCredentialsValueInContext(path string, context string) ([]credential.ListCredData, error) {
-	return cscm.ReadCredentialsValueInContextMock(path, context)
+func (cscm credSettingsCustomMock) ReadCredentialsValueInEnv(path string, env string) ([]credential.ListCredData, error) {
+	return cscm.ReadCredentialsValueInEnvMock(path, env)
 }
 
 func (cscm credSettingsCustomMock) WriteDefaultCredentialsFields(path string) error {
@@ -367,11 +370,11 @@ type treeMock struct {
 	value string
 }
 
-func (t treeMock) Tree() (map[string]formula.Tree, error) {
+func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
 	if t.value != "" {
-		return map[string]formula.Tree{t.value: t.tree}, t.error
+		return map[formula.RepoName]formula.Tree{formula.RepoName(t.value): t.tree}, t.error
 	}
-	return map[string]formula.Tree{"test": t.tree}, t.error
+	return map[formula.RepoName]formula.Tree{"test": t.tree}, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {
@@ -384,14 +387,12 @@ type treeGeneratorMock struct {
 func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
 	return formula.Tree{
 		Commands: api.Commands{
-			{
-				Id:     "root_group",
+			"root_group": {
 				Parent: "root",
 				Usage:  "group",
 				Help:   "group for add",
 			},
-			{
-				Id:      "root_group_verb",
+			"root_group_verb": {
 				Parent:  "root_group",
 				Usage:   "verb",
 				Help:    "verb for add",

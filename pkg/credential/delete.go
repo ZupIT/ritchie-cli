@@ -1,35 +1,35 @@
 package credential
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	renv "github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type DeleteManager struct {
-	homePath    string
-	ctxFinder   rcontext.Finder
-	fileRemover stream.FileRemover
+	homePath string
+	env      renv.Finder
+	file     stream.FileRemover
 }
 
-func NewCredDelete(homePath string, cf rcontext.Finder, fm stream.FileRemover) DeleteManager {
+func NewCredDelete(homePath string, env renv.Finder, fm stream.FileRemover) DeleteManager {
 	return DeleteManager{
-		homePath:    homePath,
-		ctxFinder:   cf,
-		fileRemover: fm,
+		homePath: homePath,
+		env:      env,
+		file:     fm,
 	}
 }
 
 func (d DeleteManager) Delete(service string) error {
-	ctx, err := d.ctxFinder.Find()
+	env, err := d.env.Find()
 	if err != nil {
 		return err
 	}
 
-	if ctx.Current == "" {
-		ctx.Current = rcontext.DefaultCtx
+	if env.Current == "" {
+		env.Current = renv.Default
 	}
 
-	if err := d.fileRemover.Remove(File(d.homePath, ctx.Current, service)); err != nil {
+	if err := d.file.Remove(File(d.homePath, env.Current, service)); err != nil {
 		return err
 	}
 	return nil

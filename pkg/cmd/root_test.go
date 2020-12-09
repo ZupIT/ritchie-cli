@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"testing"
 	"time"
@@ -27,8 +28,9 @@ func buildStableBodyMock(expiresAt int64) []byte {
 
 func Test_rootCmd(t *testing.T) {
 	type in struct {
-		dir stream.DirCreateChecker
-		vm  version.Manager
+		dir  stream.DirCreateChecker
+		file stream.FileWriteReadExistRemover
+		vm   version.Manager
 	}
 
 	notExpiredCache := time.Now().Add(time.Hour).Unix()
@@ -61,7 +63,8 @@ func Test_rootCmd(t *testing.T) {
 						return nil
 					},
 				},
-				vm: versionManager,
+				file: stream.NewFileManager(),
+				vm:   versionManager,
 			},
 		},
 	}
@@ -69,10 +72,149 @@ func Test_rootCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpDir := os.TempDir()
-			rootCmd := NewRootCmd(tmpDir, tt.in.dir, TutorialFinderMock{}, tt.in.vm)
+			rootCmd := NewRootCmd(tmpDir, tt.in.dir, tt.in.file, TutorialFinderMock{}, tt.in.vm, nil, nil)
 
 			if err := rootCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("root error = %v | error wanted: %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestConvertContextToEnv(t *testing.T) {
+	ctxFile := `{
+  "current_context": "prod",
+  "contexts": [
+    "prod",
+    "qa",
+    "dev"
+  ]
+}`
+
+	type in struct {
+		ritHome string
+		file    stream.FileWriteReadExistRemover
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "success",
+			in: in{
+				ritHome: os.TempDir(),
+				file: sMocks.FileManagerMock{
+					WriteFunc: func(path string, content []byte) error {
+						return nil
+					},
+					ReadFunc: func(path string) ([]byte, error) {
+						return []byte(ctxFile), nil
+					},
+					ExistsFunc: func(path string) bool {
+						return true
+					},
+					RemoveFunc: func(path string) error {
+						return nil
+					},
+				},
+			},
+			want: nil,
+		},
+		{
+			name: "success when contexts file does not exist",
+			in: in{
+				ritHome: os.TempDir(),
+				file: sMocks.FileManagerMock{
+					ExistsFunc: func(path string) bool {
+						return false
+					},
+				},
+			},
+			want: nil,
+		},
+		{
+			name: "read contexts file error",
+			in: in{
+				ritHome: os.TempDir(),
+				file: sMocks.FileManagerMock{
+					ExistsFunc: func(path string) bool {
+						return true
+					},
+					ReadFunc: func(path string) ([]byte, error) {
+						return nil, errors.New("error to read contexts file")
+					},
+				},
+			},
+			want: errors.New("error to read contexts file"),
+		},
+		{
+			name: "unmarshal error",
+			in: in{
+				ritHome: os.TempDir(),
+				file: sMocks.FileManagerMock{
+					ExistsFunc: func(path string) bool {
+						return true
+					},
+					ReadFunc: func(path string) ([]byte, error) {
+						return []byte("invalid"), nil
+					},
+				},
+			},
+			want: errors.New("invalid character 'i' looking for beginning of value"),
+		},
+		{
+			name: "write envs file error",
+			in: in{
+				ritHome: os.TempDir(),
+				file: sMocks.FileManagerMock{
+					WriteFunc: func(path string, content []byte) error {
+						return errors.New("error to write envs file")
+					},
+					ReadFunc: func(path string) ([]byte, error) {
+						return []byte(ctxFile), nil
+					},
+					ExistsFunc: func(path string) bool {
+						return true
+					},
+				},
+			},
+			want: errors.New("error to write envs file"),
+		},
+		{
+			name: "remove contexts file error",
+			in: in{
+				ritHome: os.TempDir(),
+				file: sMocks.FileManagerMock{
+					WriteFunc: func(path string, content []byte) error {
+						return nil
+					},
+					ReadFunc: func(path string) ([]byte, error) {
+						return []byte(ctxFile), nil
+					},
+					ExistsFunc: func(path string) bool {
+						return true
+					},
+					RemoveFunc: func(path string) error {
+						return errors.New("error to remove contexts file")
+					},
+				},
+			},
+			want: errors.New("error to remove contexts file"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := rootCmd{
+				ritchieHome: tt.in.ritHome,
+				file:        tt.in.file,
+			}
+
+			got := cmd.convertContextsFileToEnvsFile()
+			if got != nil && got.Error() != tt.want.Error() {
+				t.Fatalf("convertContextsFileToEnvsFile(%s) got %v, want %v", tt.name, got, tt.want)
 			}
 		})
 	}

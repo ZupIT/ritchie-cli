@@ -205,6 +205,10 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 }
 
 func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
+	if len(conflictingCommands) <= 0 {
+		return
+	}
+
 	lastCommandIndex := len(conflictingCommands) - 1
 	lastCommand := conflictingCommands[lastCommandIndex].String()
 	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
