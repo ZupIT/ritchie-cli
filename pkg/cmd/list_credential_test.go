@@ -39,7 +39,7 @@ func Test_ListCredentialCmd(t *testing.T) {
 					credData := credential.ListCredData{
 						Provider:   "",
 						Credential: "",
-						Context:    "",
+						Env:        "",
 					}
 					credDataArr := []credential.ListCredData{credData}
 					return credDataArr, nil

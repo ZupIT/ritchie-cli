@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -120,7 +120,7 @@ func TestInputManager_Inputs(t *testing.T) {
 		iBool          inputMock
 		iPass          inputMock
 		inType         api.TermInputType
-		creResolver    env.Resolvers
+		creResolver    credential.Resolver
 		file           stream.FileWriteReadExister
 	}
 
@@ -139,7 +139,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver:    envResolverMock{in: "test"},
 				file:           fileManager,
 			},
 			want: nil,
@@ -154,7 +154,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{rErr: errors.New("error to read file"), exist: true},
 			},
 			want: errors.New("error to read file"),
@@ -169,7 +169,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{rBytes: []byte("error"), exist: true},
 			},
 			want: errors.New("invalid character 'e' looking for beginning of value"),
@@ -184,7 +184,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{exist: false},
 			},
 			want: nil,
@@ -199,7 +199,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{wErr: errors.New("error to write file"), exist: false},
 			},
 			want: errors.New("error to write file"),
@@ -214,7 +214,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{wErr: errors.New("error to write file"), rBytes: []byte(`["in_list1","in_list2"]`), exist: true},
 			},
 			want: nil,
@@ -229,7 +229,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool:          inputMock{boolean: false},
 				iPass:          inputMock{text: "******"},
 				inType:         api.Prompt,
-				creResolver:    env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
+				creResolver:    envResolverMock{in: "test", err: errors.New("credential not found")},
 				file:           fileManager,
 			},
 			want: errors.New("credential not found"),
@@ -407,6 +407,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				iPass,
 				iMultiselect,
 			)
+
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
@@ -519,6 +520,7 @@ func TestInputManager_RegexType(t *testing.T) {
 				iPass,
 				iMultiselect,
 			)
+
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
@@ -779,7 +781,7 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 
 	type in struct {
 		inType      api.TermInputType
-		creResolver env.Resolvers
+		creResolver credential.Resolver
 		file        stream.FileWriteReadExister
 	}
 
@@ -791,7 +793,7 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 			name: "success prompt",
 			in: in{
 				inType:      api.Prompt,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver: envResolverMock{in: "test"},
 				file:        fileManager,
 			},
 		},

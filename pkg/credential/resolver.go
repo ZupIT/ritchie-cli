@@ -14,48 +14,46 @@
  * limitations under the License.
  */
 
-package envcredential
+package credential
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-type CredentialResolver struct {
-	credential.Finder
-	credential.Setter
+type ResolverManager struct {
+	CredFinder
+	Setter
 	prompt.InputPassword
 }
 
 // NewResolver creates a credential resolver instance of Resolver interface
-func NewResolver(cf credential.Finder, cs credential.Setter, passwordInput prompt.InputPassword) CredentialResolver {
-	return CredentialResolver{cf, cs, passwordInput}
+func NewResolver(cf CredFinder, cs Setter, passwordInput prompt.InputPassword) ResolverManager {
+	return ResolverManager{cf, cs, passwordInput}
 }
 
-func (c CredentialResolver) Resolve(name string) (string, error) {
+func (c ResolverManager) Resolve(name string) (string, error) {
 	s := strings.Split(strings.ToLower(name), "_")
 	provider := s[1]
 	key := s[2]
 	cred, err := c.Find(provider)
 	if err != nil {
-		// Provider was never set
 		cred.Service = provider
-		return c.PromptCredential(provider, key, cred)
+		return c.promptCredential(provider, key, cred)
 	}
 	credValue, exists := cred.Credential[key]
 	if !exists {
 		// Provider exists but the expected key doesn't
-		return c.PromptCredential(provider, key, cred)
+		return c.promptCredential(provider, key, cred)
 	}
 
 	// Provider and key exist
 	return credValue, nil
 }
 
-func (c CredentialResolver) PromptCredential(provider, key string, credentialDetail credential.Detail) (string, error) {
+func (c ResolverManager) promptCredential(provider, key string, credentialDetail Detail) (string, error) {
 	message := fmt.Sprintf("Provider key not found, please provide a value for %s %s: ", provider, key)
 	inputVal, err := c.Password(message)
 	if err != nil {

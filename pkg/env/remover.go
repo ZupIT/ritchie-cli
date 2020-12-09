@@ -14,60 +14,56 @@
  * limitations under the License.
  */
 
-package credential
+package env
 
 import (
 	"encoding/json"
+	"path/filepath"
+	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-type SetManager struct {
-	homePath string
-	env      env.Finder
-	dir      stream.DirCreater
+type RemoveManager struct {
+	filePath string
+	env      Finder
 	file     stream.FileWriter
 }
 
-func NewSetter(
-	homePath string,
-	env env.Finder,
-	dir stream.DirCreater,
-	file stream.FileWriter,
-) SetManager {
-	return SetManager{
-		homePath: homePath,
+func NewRemover(homePath string, env Finder, file stream.FileWriter) RemoveManager {
+	return RemoveManager{
+		filePath: filepath.Join(homePath, FileName),
 		env:      env,
-		dir:      dir,
 		file:     file,
 	}
 }
 
-func (s SetManager) Set(cred Detail) error {
-	envHolder, err := s.env.Find()
+func (r RemoveManager) Remove(env string) (Holder, error) {
+	envHolder, err := r.env.Find()
 	if err != nil {
-		return err
-	}
-	if envHolder.Current == "" {
-		envHolder.Current = env.Default
+		return Holder{}, err
 	}
 
-	cb, err := json.Marshal(cred)
+	env = strings.ReplaceAll(env, Current, "")
+	if envHolder.Current == env {
+		envHolder.Current = ""
+	}
+
+	for i, e := range envHolder.All {
+		if e == env {
+			envHolder.All = append(envHolder.All[:i], envHolder.All[i+1:]...)
+			break
+		}
+	}
+
+	b, err := json.Marshal(&envHolder)
 	if err != nil {
-		return err
+		return Holder{}, err
 	}
 
-	dir := Dir(s.homePath, envHolder.Current)
-	if err := s.dir.Create(dir); err != nil {
-		return err
+	if err := r.file.Write(r.filePath, b); err != nil {
+		return Holder{}, err
 	}
 
-	credFile := File(s.homePath, envHolder.Current, cred.Service)
-	if err := s.file.Write(credFile, cb); err != nil {
-		return err
-	}
-
-	return nil
-
+	return envHolder, nil
 }

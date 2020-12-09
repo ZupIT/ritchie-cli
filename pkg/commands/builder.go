@@ -29,7 +29,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
-	"github.com/ZupIT/ritchie-cli/pkg/env/envcredential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
@@ -47,7 +46,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/upgrade"
@@ -119,21 +117,19 @@ func Build() *cobra.Command {
 	detailRepo := repo.NewDetail(repoProviders)
 
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
-	ctxFinder := rcontext.NewFinder(ritchieHomeDir, fileManager)
-	ctxSetter := rcontext.NewSetter(ritchieHomeDir, ctxFinder)
-	ctxRemover := rcontext.NewRemover(ritchieHomeDir, ctxFinder)
-	ctxFindSetter := rcontext.NewFindSetter(ritchieHomeDir, ctxFinder, ctxSetter)
-	ctxFindRemover := rcontext.NewFindRemover(ritchieHomeDir, ctxFinder, ctxRemover)
-	credSetter := credential.NewSetter(ritchieHomeDir, ctxFinder)
-	credFinder := credential.NewFinder(ritchieHomeDir, ctxFinder, fileManager)
-	credDeleter := credential.NewCredDelete(ritchieHomeDir, ctxFinder, fileManager)
+	envFinder := env.NewFinder(ritchieHomeDir, fileManager)
+	envSetter := env.NewSetter(ritchieHomeDir, envFinder, fileManager)
+	envRemover := env.NewRemover(ritchieHomeDir, envFinder, fileManager)
+	envFindSetter := env.NewFindSetter(envFinder, envSetter)
+	envFindRemover := env.NewFindRemover(envFinder, envRemover)
+	credSetter := credential.NewSetter(ritchieHomeDir, envFinder, dirManager, fileManager)
+	credFinder := credential.NewFinder(ritchieHomeDir, envFinder, fileManager)
+	credDeleter := credential.NewCredDelete(ritchieHomeDir, envFinder, fileManager)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
 	treeChecker := tree.NewChecker(treeManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
-	credResolver := envcredential.NewResolver(credFinder, credSetter, inputPassword)
-	envResolvers := make(env.Resolvers)
-	envResolvers[env.Credential] = credResolver
+	credResolver := credential.NewResolver(credFinder, credSetter, inputPassword)
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
 	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
@@ -158,10 +154,10 @@ func Build() *cobra.Command {
 	inputResolver := runner.NewInputResolver(termInputTypes)
 
 	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
-	formulaLocalRun := local.NewRunner(postRunner, inputResolver, formulaLocalPreRun, fileManager, ctxFinder, userHomeDir)
+	formulaLocalRun := local.NewRunner(postRunner, inputResolver, formulaLocalPreRun, fileManager, envFinder, userHomeDir)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
-	formulaDockerRun := docker.NewRunner(postRunner, inputResolver, formulaDockerPreRun, fileManager, ctxFinder, userHomeDir)
+	formulaDockerRun := docker.NewRunner(postRunner, inputResolver, formulaDockerPreRun, fileManager, envFinder, userHomeDir)
 
 	runners := formula.Runners{
 		formula.LocalRun:  formulaLocalRun,
@@ -184,7 +180,7 @@ func Build() *cobra.Command {
 	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()
 	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)
 	defaultUrlFinder := upgrade.NewDefaultUrlFinder(versionManager)
-	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, tutorialFinder, versionManager)
+	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -214,14 +210,16 @@ func Build() *cobra.Command {
 	deleteCredentialCmd := cmd.NewDeleteCredentialCmd(
 		credDeleter,
 		credSettings,
-		ctxFinder,
+		envFinder,
 		inputBool,
-		inputList)
+		inputList,
+	)
 
-	deleteCtxCmd := cmd.NewDeleteContextCmd(ctxFindRemover, inputBool, inputList)
-	setCtxCmd := cmd.NewSetContextCmd(ctxFindSetter, inputText, inputList)
-	showCtxCmd := cmd.NewShowContextCmd(ctxFinder)
+	deleteEnvCmd := cmd.NewDeleteEnvCmd(envFindRemover, inputBool, inputList)
+	setEnvCmd := cmd.NewSetEnvCmd(envFindSetter, inputText, inputList)
+	showEnvCmd := cmd.NewShowEnvCmd(envFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, detailRepo)
+
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder, detailRepo)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
@@ -243,12 +241,12 @@ func Build() *cobra.Command {
 	addCmd.AddCommand(addRepoCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
-	deleteCmd.AddCommand(deleteCtxCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)
+	deleteCmd.AddCommand(deleteEnvCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	listCmd.AddCommand(listWorkspaceCmd)
-	setCmd.AddCommand(setCredentialCmd, setCtxCmd, setPriorityCmd, setFormulaRunnerCmd)
-	showCmd.AddCommand(showCtxCmd, showFormulaRunnerCmd)
+	setCmd.AddCommand(setCredentialCmd, setEnvCmd, setPriorityCmd, setFormulaRunnerCmd)
+	showCmd.AddCommand(showEnvCmd, showFormulaRunnerCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaExec, fileManager)

@@ -27,6 +27,8 @@ import (
 	"runtime"
 
 	"github.com/onsi/ginkgo"
+
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
@@ -60,6 +62,8 @@ func (scenario *Scenario) RunSteps() (string, error) {
 }
 
 func (scenario *Scenario) RunStdin() (string, error) {
+	prompt.Warning("stdin commands are deprecated and will no longer be supported, " +
+		"please use flags in the future")
 	fmt.Println("Running STDIN: " + scenario.Entry)
 	if windows {
 		b2, err := scenario.runStdinForWindows()

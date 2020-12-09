@@ -19,41 +19,40 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"github.com/spf13/cobra"
 )
 
-type showContextCmd struct {
-	rcontext.Finder
+type showEnvCmd struct {
+	env env.Finder
 }
 
-func NewShowContextCmd(f rcontext.Finder) *cobra.Command {
-	s := showContextCmd{f}
+func NewShowEnvCmd(f env.Finder) *cobra.Command {
+	s := showEnvCmd{f}
 
 	return &cobra.Command{
-		Use:       "context",
-		Short:     "Show current context",
-		Example:   "rit show context",
+		Use:       "env",
+		Short:     "Show current env",
+		Example:   "rit show env",
 		RunE:      s.runFunc(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
 }
 
-func (s showContextCmd) runFunc() CommandRunnerFunc {
+func (s showEnvCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		ctx, err := s.Find()
+		envHolder, err := s.env.Find()
 		if err != nil {
 			return err
 		}
 
-		if ctx.Current == "" {
-			ctx.Current = rcontext.DefaultCtx
+		if envHolder.Current == "" {
+			envHolder.Current = env.Default
 		}
 
-		prompt.Info(fmt.Sprintf("Current context: %s \n", ctx.Current))
+		fmt.Printf("Current env: %q\n", envHolder.Current)
 		return nil
 	}
 }
