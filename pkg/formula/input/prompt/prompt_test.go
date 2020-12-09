@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
 
 	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -244,15 +244,23 @@ func TestInputManager_Inputs(t *testing.T) {
 			iList := tt.in.iList
 			iBool := tt.in.iBool
 			iPass := tt.in.iPass
+			iMultiselect := inputMock{}
 
-			inputManager := NewInputManager(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
-
+			inputManager := NewInputManager(
+				env.Resolvers{},
+				fileManager,
+				iList,
+				iText,
+				iTextValidator,
+				iTextDefault,
+				iBool,
+				iPass,
+				iMultiselect,
+			)
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
-				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -386,15 +394,23 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
+			iMultiselect := inputMock{}
 
-			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
-
+			inputManager := NewInputManager(
+				env.Resolvers{},
+				fileManager,
+				iList,
+				iText,
+				iTextValidator,
+				iTextDefault,
+				iBool,
+				iPass,
+				iMultiselect,
+			)
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
-				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -448,7 +464,7 @@ func TestInputManager_RegexType(t *testing.T) {
 				inText:         inputMock{text: "a"},
 				iTextValidator: inputTextValidatorMock{str: "a"},
 			},
-			want: errors.New("regex error, mismatch"),
+			want: errors.New("mismatch"),
 		},
 		{
 			name: "Success regex test",
@@ -490,19 +506,23 @@ func TestInputManager_RegexType(t *testing.T) {
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
+			iMultiselect := inputMock{}
 
-			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
-
+			inputManager := NewInputManager(
+				env.Resolvers{},
+				fileManager,
+				iList,
+				iText,
+				iTextValidator,
+				iTextDefault,
+				iBool,
+				iPass,
+				iMultiselect,
+			)
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if tt.want != nil && got == nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, nil, tt.want)
-			}
-
-			if tt.want == nil && got != nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, got, nil)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -555,7 +575,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 				inText:         inputMock{text: "a"},
 				iTextValidator: inputTextValidatorMock{str: "a"},
 			},
-			want: errors.New("dynamic list request was not in 2xx range"),
+			want: errors.New("dynamic list request got http status 404 expecting some 2xx range"),
 		},
 		{
 			name: "fail dynamic input when jsonpath is wrong",
@@ -616,32 +636,136 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			iList := inputMock{text: "in_list1"}
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
+			iMultiselect := inputMock{}
 
-			inputManager := NewInputManager(env.Resolvers{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
+			inputManager := NewInputManager(
+				env.Resolvers{},
+				fileManager,
+				iList,
+				iText,
+				iTextValidator,
+				iTextDefault,
+				iBool,
+				iPass,
+				iMultiselect,
+			)
 
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if tt.want != nil && got == nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, nil, tt.want)
+			if tt.want != nil {
+				assert.NotNil(t, got)
 			}
 
-			if tt.want == nil && got != nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, got, nil)
+			if tt.want == nil {
+				assert.Equal(t, tt.want, got)
 			}
+		})
+	}
+}
+
+func TestInputManager_Multiselect(t *testing.T) {
+	type in struct {
+		inputJSON     string
+		inMultiselect inputMock
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "success multiselect input test",
+			in: in{
+				inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": true,
+						"tutorial": "Select one or more items for this field."
+					}
+				]`,
+				inMultiselect: inputMock{items: []string{"item_1", "item_2"}},
+			},
+			want: nil,
+		},
+		{
+			name: "fail multiselect input test",
+			in: in{
+				inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [],
+						"label": "Choose one or more items: ",
+						"required": true,
+						"tutorial": "Select one or more items for this field."
+					}
+				]`,
+				inMultiselect: inputMock{items: []string{}},
+			},
+			want: fmt.Errorf(EmptyItems, "sample_multiselect"),
+		},
+	}
+
+	fileManager := stream.NewFileManager()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(tt.in.inputJSON), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iText := tt.in.inMultiselect
+			iTextValidator := inputTextValidatorMock{}
+			iTextDefault := inputTextDefaultMock{}
+			iList := inputMock{text: "in_list1"}
+			iBool := inputMock{boolean: false}
+			iPass := inputMock{text: "******"}
+			iMultiselect := inputMock{items: []string{}}
+
+			inputManager := NewInputManager(
+				env.Resolvers{},
+				fileManager,
+				iList,
+				iText,
+				iTextValidator,
+				iTextDefault,
+				iBool,
+				iPass,
+				iMultiselect,
+			)
+
+			cmd := &exec.Cmd{}
+			got := inputManager.Inputs(cmd, setup, nil)
+
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
 func TestInputManager_DefaultFlag(t *testing.T) {
 	inputJson := `[
- 	{
-        "name": "sample_text",
-        "type": "text",
-        "label": "Type : ",
-		"default": "test"
-    }
-]`
+		{
+			"name": "sample_text",
+			"type": "text",
+			"label": "Type : ",
+			"default": "test"
+		}
+	]`
 	var inputs []formula.Input
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 
@@ -684,6 +808,7 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 				inputTextDefaultMock{},
 				inputMock{},
 				inputMock{},
+				inputMock{},
 			)
 
 			cmd := &exec.Cmd{}
@@ -700,13 +825,8 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 			out, _ := ioutil.ReadAll(r)
 			os.Stdout = rescueStdout
 
-			if err != nil {
-				t.Error("error executing prompt with default flag")
-			}
-
-			if !strings.Contains(string(out), "Added sample_text by default: test") {
-				t.Error("unexpected output on prompt with default flag")
-			}
+			assert.Nil(t, err)
+			assert.Contains(t, string(out), "Added sample_text by default: test")
 		})
 	}
 }
@@ -722,6 +842,7 @@ func (i inputTextValidatorMock) Text(name string, validate func(interface{}) err
 type inputMock struct {
 	text    string
 	boolean bool
+	items   []string
 	err     error
 }
 
@@ -739,6 +860,10 @@ func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 
 func (i inputMock) Password(string, ...string) (string, error) {
 	return i.text, i.err
+}
+
+func (i inputMock) Multiselect(formula.Input) ([]string, error) {
+	return i.items, i.err
 }
 
 type inputTextDefaultMock struct {
