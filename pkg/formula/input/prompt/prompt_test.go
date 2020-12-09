@@ -247,8 +247,8 @@ func TestInputManager_Inputs(t *testing.T) {
 			iMultiselect := inputMock{}
 
 			inputManager := NewInputManager(
-				env.Resolvers{},
-				fileManager,
+				tt.in.creResolver,
+				tt.in.file,
 				iList,
 				iText,
 				iTextValidator,
@@ -397,7 +397,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			iMultiselect := inputMock{}
 
 			inputManager := NewInputManager(
-				env.Resolvers{},
+				envResolverMock{},
 				fileManager,
 				iList,
 				iText,
@@ -510,7 +510,7 @@ func TestInputManager_RegexType(t *testing.T) {
 			iMultiselect := inputMock{}
 
 			inputManager := NewInputManager(
-				env.Resolvers{},
+				envResolverMock{},
 				fileManager,
 				iList,
 				iText,
@@ -641,7 +641,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			iMultiselect := inputMock{}
 
 			inputManager := NewInputManager(
-				env.Resolvers{},
+				envResolverMock{},
 				fileManager,
 				iList,
 				iText,
@@ -740,7 +740,7 @@ func TestInputManager_Multiselect(t *testing.T) {
 			iMultiselect := inputMock{items: []string{}}
 
 			inputManager := NewInputManager(
-				env.Resolvers{},
+				envResolverMock{},
 				fileManager,
 				iList,
 				iText,
