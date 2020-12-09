@@ -44,6 +44,7 @@ const (
 	CachePattern         = "%s/.%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
+	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
 )
 
 type InputManager struct {
@@ -145,7 +146,6 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		}
 		return in.List(i.Label, dl, i.Tutorial)
 	case input.Multiselect:
-		emptyItems := fmt.Sprintf("no items were provided. Please insert a list of items for the input %s in the config.json file of your formula", i.Name)
 		if len(items) > 0 {
 			sl, err := in.Multiselect(i)
 			if err != nil {
@@ -153,7 +153,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			}
 			return strings.Join(sl, ", "), nil
 		}
-		return "", errors.New(emptyItems)
+		return "", fmt.Errorf(EmptyItems, i.Name)
 
 	default:
 		return input.ResolveIfReserved(in.envResolvers, i)
