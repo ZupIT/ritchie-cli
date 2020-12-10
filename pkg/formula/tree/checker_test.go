@@ -33,9 +33,6 @@ func TestChecker(t *testing.T) {
 			checker := NewChecker(treeMock{tree: tt.in})
 			got := checker.Check()
 			assert.Equal(t, tt.want, got)
-			/*	if !reflect.DeepEqual(tt.want, got) {
-				t.Fatalf("Check(%s) got = %v, but want = %v", tt.name, got, tt.want)
-			}*/
 		})
 	}
 }

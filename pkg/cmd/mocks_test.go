@@ -382,6 +382,7 @@ func (t treeMock) MergedTree(bool) formula.Tree {
 }
 
 type treeGeneratorMock struct {
+	err error
 }
 
 func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
@@ -399,7 +400,7 @@ func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
 				Formula: true,
 			},
 		},
-	}, nil
+	}, t.err
 }
 
 type GitRepositoryMock struct {

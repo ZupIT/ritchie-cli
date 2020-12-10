@@ -134,7 +134,9 @@ func (ro *rootCmd) PreRunFunc() CommandRunnerFunc {
 			os.Exit(0)
 		}
 
-		ro.convertTree()
+		if err := ro.convertTree(); err != nil {
+			return err
+		}
 
 		if err := ro.convertContextsFileToEnvsFile(); err != nil {
 			return err
@@ -254,10 +256,10 @@ func (ro *rootCmd) ritchieIsInitialized() bool {
 	return ro.dir.Exists(commonsRepoPath)
 }
 
-func (ro *rootCmd) convertTree() {
+func (ro *rootCmd) convertTree() error {
 	repos, err := ro.repo.List()
 	if err != nil {
-		return
+		return err
 	}
 
 	var hasUpdate bool
@@ -276,15 +278,19 @@ func (ro *rootCmd) convertTree() {
 	wg.Wait()
 
 	if !hasUpdate {
-		return
+		return nil
 	}
 
 	if err := ro.repo.Write(repos); err != nil {
-		return
+		return err
 	}
+
+	return nil
 }
 
 func (ro *rootCmd) generateTree(repo string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	repoPath := filepath.Join(ro.ritchieHome, "repos", repo)
 	tree, err := ro.tree.Generate(repoPath)
 	if err != nil {
@@ -300,6 +306,4 @@ func (ro *rootCmd) generateTree(repo string, wg *sync.WaitGroup) {
 	if err := ro.file.Write(treePath, bb); err != nil {
 		return
 	}
-
-	wg.Done()
 }
