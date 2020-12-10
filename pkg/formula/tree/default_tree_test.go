@@ -105,7 +105,11 @@ func TestMergedTree(t *testing.T) {
 				providers: providers,
 				core:      false,
 			},
-			want: formula.Tree{Version: Version, Commands: api.Commands{}},
+			want: formula.Tree{
+				Version:    Version,
+				Commands:   api.Commands{},
+				CommandsID: []api.CommandID{},
+			},
 		},
 		{
 			name: "empty tree when tree.json does not exist",
@@ -123,7 +127,11 @@ func TestMergedTree(t *testing.T) {
 				providers: providers,
 				core:      false,
 			},
-			want: formula.Tree{Version: Version, Commands: api.Commands{}},
+			want: formula.Tree{
+				Version:    Version,
+				Commands:   api.Commands{},
+				CommandsID: []api.CommandID{},
+			},
 		},
 		{
 			name: "read tree.json error",
@@ -144,7 +152,11 @@ func TestMergedTree(t *testing.T) {
 				providers: providers,
 				core:      false,
 			},
-			want: formula.Tree{Version: Version, Commands: api.Commands{}},
+			want: formula.Tree{
+				Version:    Version,
+				Commands:   api.Commands{},
+				CommandsID: []api.CommandID{},
+			},
 		},
 	}
 

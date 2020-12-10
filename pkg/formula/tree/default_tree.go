@@ -88,7 +88,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 		}
 	}
 
-	var ids []api.CommandID
+	ids := make([]api.CommandID, 0)
 	for id := range mergedCommands {
 		ids = append(ids, id)
 	}
