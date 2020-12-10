@@ -122,23 +122,19 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 
 func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (string, error) {
 	switch i.Type {
-
 	case input.PassType:
 		return in.Password(i.Label, i.Tutorial)
-
 	case input.BoolType:
 		valBool, err := in.Bool(i.Label, items, i.Tutorial)
 		if err != nil {
 			return "", err
 		}
 		return strconv.FormatBool(valBool), nil
-
 	case input.TextType:
 		if items != nil {
 			return in.loadInputValList(items, i)
 		}
 		return in.textValidator(i)
-
 	case input.DynamicType:
 		dl, err := in.dynamicList(i.RequestInfo)
 		if err != nil {
@@ -146,15 +142,14 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		}
 		return in.List(i.Label, dl, i.Tutorial)
 	case input.Multiselect:
-		if len(items) > 0 {
-			sl, err := in.Multiselect(i)
-			if err != nil {
-				return "", nil
-			}
-			return strings.Join(sl, ", "), nil
+		if len(items) == 0 {
+			return "", fmt.Errorf(EmptyItems, i.Name)
 		}
-		return "", fmt.Errorf(EmptyItems, i.Name)
-
+		sl, err := in.Multiselect(i)
+		if err != nil {
+			return "", nil
+		}
+		return strings.Join(sl, ", "), nil
 	default:
 		return in.cred.Resolve(i.Type)
 	}
@@ -237,7 +232,7 @@ func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]str
 			var items []string
 			err = json.Unmarshal(fileBytes, &items)
 			if err != nil {
-				return nil, err
+				return nil, errors.New(err.Error())
 			}
 			return items, nil
 		} else {
