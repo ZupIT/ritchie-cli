@@ -51,26 +51,6 @@ func TestAddRepoCmd(t *testing.T) {
 		Priority: 2,
 	}
 
-	type returnWithStringErr struct {
-		string
-		error
-	}
-
-	type returnOfInputBool struct {
-		bool
-		error
-	}
-
-	type returnOfInputList struct {
-		question, response string
-		err                error
-	}
-
-	type returnOfRepoListerAdder struct {
-		errAdd, errList error
-		reposList       formula.Repos
-	}
-
 	addInputList := func(input []returnOfInputList) *mocks.InputListMock {
 		inputListMock := new(mocks.InputListMock)
 
@@ -84,17 +64,6 @@ func TestAddRepoCmd(t *testing.T) {
 		return inputListMock
 	}
 
-	type fields struct {
-		repo               returnOfRepoListerAdder
-		InputTextValidator returnWithStringErr
-		InputPassword      returnWithStringErr
-		InputURL           returnWithStringErr
-		InputList          []returnOfInputList
-		InputBool          returnOfInputBool
-		stdin              string
-		detailLatestTag    string
-		tutorialStatus     string
-	}
 	tests := []struct {
 		name    string
 		fields  fields
@@ -370,4 +339,78 @@ func TestAddRepoCmd(t *testing.T) {
 			assert.Equal(t, tt.wantErr, (err != nil))
 		})
 	}
+}
+
+type returnWithStringErr struct {
+	string
+	error
+}
+
+type returnOfInputBool struct {
+	bool
+	error
+}
+
+type returnOfInputList struct {
+	question, response string
+	err                error
+}
+
+type returnOfRepoListerAdder struct {
+	errAdd, errList error
+	reposList       formula.Repos
+}
+
+type fields struct {
+	repo               returnOfRepoListerAdder
+	InputTextValidator returnWithStringErr
+	InputPassword      returnWithStringErr
+	InputURL           returnWithStringErr
+	InputList          []returnOfInputList
+	InputBool          returnOfInputBool
+	stdin              string
+	detailLatestTag    string
+	tutorialStatus     string
+}
+
+func defaultFields(testFields fields) fields {
+	defaultFields := fields{
+		repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+		InputTextValidator: returnWithStringErr{"mocked text", nil},
+		InputPassword:      returnWithStringErr{"s3cr3t", nil},
+		InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
+		InputBool:          returnOfInputBool{true, nil},
+		InputList:          []returnOfInputList{{response: "Github", err: nil}},
+		tutorialStatus:     "disabled",
+	}
+
+	if testFields.repo != returnOfRepoListerAdder{} {
+		defaultFields.repo = testFields.repo
+	}
+
+	if testFields.InputTextValidator != returnWithStringErr{} {
+		defaultFields.InputTextValidator = testFields.InputTextValidator
+	}
+
+	if testFields.InputPassword != returnWithStringErr{} {
+		defaultFields.InputPassword = testFields.InputPassword
+	}
+
+	if testFields.InputURL != returnWithStringErr{} {
+		defaultFields.InputURL = testFields.InputURL
+	}
+
+	if testFields.InputBool != returnOfInputBool{} {
+		defaultFields.InputBool = testFields.InputBool
+	}
+
+	if testFields.InputList != []returnOfInputList{} {
+		defaultFields.InputList = testFields.InputList
+	}
+
+	if testFields.tutorialStatus != "" {
+		defaultFields.tutorialStatus = testFields.tutorialStatus
+	}
+
+	return defaultFields
 }
