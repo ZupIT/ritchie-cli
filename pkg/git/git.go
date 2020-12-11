@@ -19,6 +19,7 @@ import "io"
 
 type Tag struct {
 	Name string `json:"tag_name"`
+	Body string `json:"body"`
 }
 
 type Tags []Tag

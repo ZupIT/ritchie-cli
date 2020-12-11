@@ -111,7 +111,6 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	}
 
 	defer res.Body.Close()
-
 	if res.StatusCode != http.StatusOK {
 		b, err := ioutil.ReadAll(res.Body)
 		if err != nil {
@@ -124,6 +123,7 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	if err := json.NewDecoder(res.Body).Decode(&tag); err != nil {
 		return git.Tag{}, err
 	}
-
+	b, err := ioutil.ReadAll(res.Body)
+	fmt.Print(string(b))
 	return tag, nil
 }

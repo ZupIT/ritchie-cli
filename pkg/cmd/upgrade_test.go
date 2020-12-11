@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -277,6 +278,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 				tt.in.UrlFinder,
 				tt.in.input,
 				tt.in.file)
+			fmt.Println("aaaaaaaaaaaaaaaaaaa")
 			if err := u.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
 			}

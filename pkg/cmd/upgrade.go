@@ -17,10 +17,13 @@
 package cmd
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -32,8 +35,9 @@ type UpgradeCmd struct {
 	upgrade.Manager
 	resolver version.Resolver
 	upgrade.UrlFinder
-	input prompt.InputList
-	file  stream.FileWriteReadExister
+	input  prompt.InputList
+	file   stream.FileWriteReadExister
+	github git.Repositories
 }
 
 func NewUpgradeCmd(
@@ -42,14 +46,15 @@ func NewUpgradeCmd(
 	uf upgrade.UrlFinder,
 	input prompt.InputList,
 	file stream.FileWriteReadExister,
+	github git.Repositories,
 ) *cobra.Command {
-
 	u := UpgradeCmd{
 		Manager:   m,
 		resolver:  r,
 		UrlFinder: uf,
 		input:     input,
 		file:      file,
+		github:    github,
 	}
 
 	return &cobra.Command{
@@ -94,6 +99,15 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		}
 
 		prompt.Success("Rit upgraded with success")
+		repoInfo := github.NewRepoInfo("https://github.com/ZupIT/ritchie-cli", "")
+		tag, err := u.github.LatestTag(repoInfo)
+		if err != nil {
+			return nil
+		}
+
+		fmt.Println("Release notes:")
+		fmt.Println(tag)
+
 		return nil
 	}
 }
