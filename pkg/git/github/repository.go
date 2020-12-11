@@ -123,7 +123,5 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	if err := json.NewDecoder(res.Body).Decode(&tag); err != nil {
 		return git.Tag{}, err
 	}
-	b, err := ioutil.ReadAll(res.Body)
-	fmt.Print(string(b))
 	return tag, nil
 }

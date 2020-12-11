@@ -18,9 +18,9 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
+	internal "github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -277,8 +277,9 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 				tt.in.Manager,
 				tt.in.UrlFinder,
 				tt.in.input,
-				tt.in.file)
-			fmt.Println("aaaaaaaaaaaaaaaaaaa")
+				tt.in.file,
+				&internal.RepositoriesMock{})
+
 			if err := u.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
 			}
