@@ -21,14 +21,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestAddRepoCmd(t *testing.T) {
@@ -41,6 +42,8 @@ func TestAddRepoCmd(t *testing.T) {
 
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: gitRepo, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("GitLab", formula.Git{Repos: gitRepositoryWithoutTagsMock, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
 
 	repoTest := &formula.Repo{
 		Provider: "Github",
@@ -106,6 +109,28 @@ func TestAddRepoCmd(t *testing.T) {
 				InputBool:          returnOfInputBool{false, nil},
 			},
 			wantErr: false,
+		},
+		{
+			name: "return error when len of tags is 0",
+			fields: fields{
+				InputList: []returnOfInputList{{response: "GitLab", err: nil}},
+			},
+			wantErr: true,
+		},
+		{
+			name: "return error when Repos.Tag fail",
+			fields: fields{
+				InputList: []returnOfInputList{{response: "Bitbucket", err: nil}},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Fail when repo.Add return err",
+			fields: fields{
+				repo:      returnOfRepoListerAdder{errAdd: someError, reposList: formula.Repos{}, errList: nil},
+				InputList: []returnOfInputList{{response: "Github", err: nil}},
+			},
+			wantErr: true,
 		},
 		{
 			name: "input bool error",
