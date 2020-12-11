@@ -20,7 +20,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	internal "github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -272,13 +275,15 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			m := &internal.RepositoriesMock{}
+			m.On("LatestTag", mock.Anything).Return(git.Tag{}, nil)
 			u := NewUpgradeCmd(
 				tt.in.resolver,
 				tt.in.Manager,
 				tt.in.UrlFinder,
 				tt.in.input,
 				tt.in.file,
-				&internal.RepositoriesMock{})
+				m)
 
 			if err := u.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
