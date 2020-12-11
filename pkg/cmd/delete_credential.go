@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -11,6 +12,15 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
+
+const (
+	providerFlagName        = "provider"
+	providerFlagDescription = "Provider name to delete"
+)
+
+type inputConfig struct {
+	provider string
+}
 
 // deleteCredentialCmd type for set credential command
 type deleteCredentialCmd struct {
@@ -46,15 +56,17 @@ func NewDeleteCredentialCmd(
 		Use:       "credential",
 		Short:     "Delete credential",
 		Long:      `Delete credential from current context`,
-		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		RunE:      RunFuncE(s.runStdin(), s.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
-	cmd.LocalFlags()
+	flags := cmd.Flags()
+	flags.String(providerFlagName, "", providerFlagDescription)
+
 	return cmd
 }
 
-func (d deleteCredentialCmd) runPrompt() CommandRunnerFunc {
+func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		context, err := d.getCurrentContext()
 		if err != nil {
@@ -62,33 +74,12 @@ func (d deleteCredentialCmd) runPrompt() CommandRunnerFunc {
 		}
 		prompt.Info(fmt.Sprintf("Current context: %s", context))
 
-		data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
+		inputParams, err := d.resolveInput(cmd, context)
 		if err != nil {
 			return err
 		}
 
-		if len(data) <= 0 {
-			prompt.Error("You have no defined credentials in this context")
-			return nil
-		}
-
-		var providers []string
-		for _, c := range data {
-			providers = append(providers, c.Provider)
-		}
-
-		cred, err := d.List("Credentials: ", providers)
-		if err != nil {
-			return err
-		}
-
-		if b, err := d.Bool("Are you sure want to delete this credential?", []string{"yes", "no"}); err != nil {
-			return err
-		} else if !b {
-			return nil
-		}
-
-		if err := d.Delete(cred); err != nil {
+		if err := d.Delete(inputParams.provider); err != nil {
 			return err
 		}
 
@@ -97,6 +88,73 @@ func (d deleteCredentialCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
+func (d *deleteCredentialCmd) resolveInput(cmd *cobra.Command, context string) (inputConfig, error) {
+	if IsFlagInput(cmd) {
+		return d.resolveFlags(cmd)
+	} else {
+		return d.resolvePrompt(context)
+	}
+}
+
+func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error) {
+	data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
+	if err != nil {
+		return inputConfig{}, err
+	}
+
+	if len(data) == 0 {
+		return inputConfig{}, errors.New("you have no defined credentials in this context")
+	}
+
+	var providers []string
+	for _, c := range data {
+		providers = append(providers, c.Provider)
+	}
+
+	cred, err := d.List("Credentials: ", providers)
+	if err != nil {
+		return inputConfig{}, err
+	}
+
+	if b, err := d.Bool("Are you sure want to delete this credential?", []string{"yes", "no"}); err != nil {
+		return inputConfig{}, err
+	} else if !b {
+		return inputConfig{}, nil
+	}
+	return inputConfig{cred}, nil
+}
+
+func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputConfig, error) {
+	provider, err := cmd.Flags().GetString(providerFlagName)
+	if err != nil {
+		return inputConfig{}, err
+	}
+	return inputConfig{provider}, nil
+}
+
+func (d deleteCredentialCmd) runFlags() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		context, err := d.getCurrentContext()
+		if err != nil {
+			return err
+		}
+		prompt.Info(fmt.Sprintf("Current context: %s", context))
+
+		provider, err := cmd.Flags().GetString(providerFlagName)
+		if err != nil {
+			return err
+		}
+
+		if err := d.Delete(provider); err != nil {
+			return err
+		}
+
+		successMessage()
+		return nil
+	}
+}
+
+// TODO: remove upon stdin deprecation
 func (d deleteCredentialCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		dc, err := d.stdinResolver(cmd.InOrStdin())

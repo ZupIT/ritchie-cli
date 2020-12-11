@@ -39,3 +39,7 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 		return promptFunc(cmd, args)
 	}
 }
+
+func IsFlagInput(cmd *cobra.Command) bool {
+	return cmd.Flags().NFlag() > 0
+}
