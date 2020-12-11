@@ -106,7 +106,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		}
 
 		prompt.Info("Release description:")
-		fmt.Println(tag.ReleaseDescription)
+		fmt.Println(tag.Description)
 
 		return nil
 	}

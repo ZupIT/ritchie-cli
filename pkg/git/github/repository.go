@@ -119,9 +119,18 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 		return git.Tag{}, errors.New(string(b))
 	}
 
-	var tag git.Tag
-	if err := json.NewDecoder(res.Body).Decode(&tag); err != nil {
+	githubTag := struct {
+		Name               string `json:"tag_name"`
+		ReleaseDescription string `json:"body"`
+	}{}
+
+	if err := json.NewDecoder(res.Body).Decode(&githubTag); err != nil {
 		return git.Tag{}, err
+	}
+
+	tag := git.Tag{
+		Name:        githubTag.Name,
+		Description: githubTag.ReleaseDescription,
 	}
 	return tag, nil
 }
