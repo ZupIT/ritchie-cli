@@ -18,6 +18,7 @@ package repo
 
 import (
 	"encoding/json"
+	"errors"
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -27,6 +28,7 @@ import (
 type AddManager struct {
 	ritHome string
 	repo    formula.RepositoryListWriteCreator
+	deleter formula.RepositoryDeleter
 	tree    formula.TreeGenerator
 	file    stream.FileWriter
 }
@@ -34,12 +36,14 @@ type AddManager struct {
 func NewAdder(
 	ritHome string,
 	repo formula.RepositoryListWriteCreator,
+	deleter formula.RepositoryDeleter,
 	tree formula.TreeGenerator,
 	file stream.FileWriter,
 ) AddManager {
 	return AddManager{
 		ritHome: ritHome,
 		repo:    repo,
+		deleter: deleter,
 		tree:    tree,
 		file:    file,
 	}
@@ -75,6 +79,13 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 	tree, err := ad.tree.Generate(newRepoPath)
 	if err != nil {
 		return err
+	}
+
+	if len(tree.Commands) == 0 {
+		if err := ad.deleter.Delete(repo.Name); err != nil {
+			return err
+		}
+		return errors.New("the selected repository has no formulas")
 	}
 
 	treeFilePath := filepath.Join(newRepoPath, "tree.json")

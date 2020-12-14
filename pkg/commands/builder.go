@@ -105,13 +105,13 @@ func Build() *cobra.Command {
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
 	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
 	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
-	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen, fileManager)
 	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListWriteCreator, treeGen, fileManager)
-	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
 	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
 
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, repoDeleter, treeGen, fileManager)
+	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
 	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
 
 	detailRepo := repo.NewDetail(repoProviders)
@@ -193,7 +193,14 @@ func Build() *cobra.Command {
 	showCmd := cmd.NewShowCmd()
 	updateCmd := cmd.NewUpdateCmd()
 	buildCmd := cmd.NewBuildCmd()
-	upgradeCmd := cmd.NewUpgradeCmd(versionManager, upgradeManager, defaultUrlFinder, inputList, fileManager)
+	upgradeCmd := cmd.NewUpgradeCmd(
+		versionManager,
+		upgradeManager,
+		defaultUrlFinder,
+		inputList,
+		fileManager,
+		githubRepo,
+	)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
 
