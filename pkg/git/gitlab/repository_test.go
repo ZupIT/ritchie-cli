@@ -56,8 +56,7 @@ func TestTags(t *testing.T) {
 			},
 			want: git.Tags{
 				{
-					Name:        "v1.0.0",
-					Description: "Test",
+					Name: "v1.0.0",
 				},
 			},
 			wantErr: false,
