@@ -72,6 +72,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		UrlFinder upgrade.UrlFinder
 		input     prompt.InputList
 		file      stream.FileWriteReadExister
+		tag       git.Tag
 	}
 	tests := []struct {
 		name    string
@@ -113,14 +114,15 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		{
 			name: "return nil when error on stable version",
 			in: in{
+				tag: git.Tag{Description: "Any description"},
 				resolver: stubVersionResolver{
-					func() (string, error) {
+					stableVersion: func() (string, error) {
 						return "1.0.0", errors.New("stable version error")
 					},
-					func() error {
+					updateCache: func() error {
 						return nil
 					},
-					func(current, installed string) string {
+					verifyNewVersion: func(current, installed string) string {
 						return ""
 					},
 				},
@@ -209,6 +211,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		{
 			name: "success with no metrics file",
 			in: in{
+				tag: git.Tag{},
 				resolver: stubVersionResolver{
 					stableVersion: func() (string, error) {
 						return "1.0.0", nil
@@ -308,7 +311,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &internal.RepositoriesMock{}
-			m.On("LatestTag", mock.Anything).Return(git.Tag{}, nil)
+			m.On("LatestTag", mock.Anything).Return(tt.in.tag, nil)
 			u := NewUpgradeCmd(
 				tt.in.resolver,
 				tt.in.Manager,
