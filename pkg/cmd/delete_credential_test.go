@@ -36,7 +36,7 @@ type fieldsTestDeleteCredentialCmd struct {
 
 const provider = "github"
 
-// TODO: remove upon stdin deprecation
+// TODO: remove upon stdin deprecation, reduce dependencies
 func TestDeleteCredential(t *testing.T) {
 	stdinTest := &deleteCredential{
 		Provider: "github",
@@ -306,23 +306,32 @@ func TestDeleteCredentialViaPrompt(t *testing.T) {
 	credDeleter := credential.NewCredDelete(ritHomeDir, ctxFinder, fileManager)
 	credSettings := credential.NewSettings(fileManager, dirManager, homeDir)
 
-	listMock := &InputListMock{}
-	listMock.On("List", mock.Anything).Return(provider, nil)
-
-	boolMock := &InputBoolMock{}
-	boolMock.On("Bool", mock.Anything).Return(true, nil)
-
 	tests := []struct {
-		name      string
-		inputBool prompt.InputBool
-		inputList prompt.InputList
-		wantErr   string
+		name            string
+		inputBoolResult bool
+		inputListError  error
+		fileShouldExist bool
+		args            string
+		wantErr         string
 	}{
 		{
-			name:      "execute with success",
-			wantErr:   "",
-			inputList: listMock,
-			inputBool: boolMock,
+			name:            "execute prompt with success",
+			inputBoolResult: true,
+		},
+		{
+			name: "execute flag with success",
+			args: "--provider=github",
+		},
+		{
+			name:            "fail on input list error",
+			wantErr:         "some error",
+			inputListError:  errors.New("some error"),
+			fileShouldExist: true,
+		},
+		{
+			name:            "do nothing on input bool refusal",
+			inputBoolResult: false,
+			fileShouldExist: true,
 		},
 	}
 
@@ -337,20 +346,30 @@ func TestDeleteCredentialViaPrompt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			jsonData, err := json.Marshal(cred)
-			err = ioutil.WriteFile(credentialFile, jsonData, os.ModePerm)
+			jsonData, _ := json.Marshal(cred)
+			err := ioutil.WriteFile(credentialFile, jsonData, os.ModePerm)
 			require.NoError(t, err)
 
-			cmd := NewDeleteCredentialCmd(credDeleter, credSettings, ctxFinder, tt.inputBool, tt.inputList)
-			// TODO: remove stdin flag after deprecation
+			listMock := &InputListMock{}
+			listMock.On("List", mock.Anything).Return(provider, tt.inputListError)
+			boolMock := &InputBoolMock{}
+			boolMock.On("Bool", mock.Anything).Return(tt.inputBoolResult, nil)
+
+			cmd := NewDeleteCredentialCmd(credDeleter, credSettings, ctxFinder, boolMock, listMock)
+			// TODO: remove stdin flag after  deprecation
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			cmd.SetArgs([]string{})
+			cmd.SetArgs([]string{tt.args})
 
 			err = cmd.Execute()
 			if err != nil {
 				require.Equal(t, err.Error(), tt.wantErr)
 			} else {
 				require.Empty(t, tt.wantErr)
+			}
+
+			if tt.fileShouldExist {
+				require.FileExists(t, credentialFile)
+			} else {
 				require.NoFileExists(t, credentialFile)
 			}
 		})
@@ -363,7 +382,7 @@ type InputListMock struct {
 
 func (m *InputListMock) List(string, []string, ...string) (string, error) {
 	args := m.Called()
-	return args.String(0), nil
+	return args.String(0), args.Error(1)
 }
 
 type InputBoolMock struct {

@@ -77,6 +77,8 @@ func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
 		inputParams, err := d.resolveInput(cmd, context)
 		if err != nil {
 			return err
+		} else if inputParams.provider == "" {
+			return nil
 		}
 
 		if err := d.Delete(inputParams.provider); err != nil {
@@ -106,7 +108,7 @@ func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error)
 		return inputConfig{}, errors.New("you have no defined credentials in this context")
 	}
 
-	var providers []string
+	providers := make([]string, len(data))
 	for _, c := range data {
 		providers = append(providers, c.Provider)
 	}
@@ -130,28 +132,6 @@ func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputConfig, err
 		return inputConfig{}, err
 	}
 	return inputConfig{provider}, nil
-}
-
-func (d deleteCredentialCmd) runFlags() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		context, err := d.getCurrentContext()
-		if err != nil {
-			return err
-		}
-		prompt.Info(fmt.Sprintf("Current context: %s", context))
-
-		provider, err := cmd.Flags().GetString(providerFlagName)
-		if err != nil {
-			return err
-		}
-
-		if err := d.Delete(provider); err != nil {
-			return err
-		}
-
-		successMessage()
-		return nil
-	}
 }
 
 // TODO: remove upon stdin deprecation
