@@ -111,6 +111,38 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "return nil when error on stable version",
+			in: in{
+				resolver: stubVersionResolver{
+					func() (string, error) {
+						return "1.0.0", errors.New("stable version error")
+					},
+					func() error {
+						return nil
+					},
+					func(current, installed string) string {
+						return ""
+					},
+				},
+				Manager: stubUpgradeManager{
+					func(upgradeUrl string) error {
+						return nil
+					},
+				},
+				UrlFinder: stubUrlFinder{
+					func() string {
+						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "Should return err on UpdateCache",
 			in: in{
 				resolver: stubVersionResolver{
