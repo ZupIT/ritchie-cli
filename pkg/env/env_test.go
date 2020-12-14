@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-package cmd
+package env
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestNewShowContextCmd(t *testing.T) {
-	cmd := NewShowContextCmd(ctxFinderMock{})
-	if cmd == nil {
-		t.Errorf("NewShowContextCmd got %v", cmd)
+const (
+	dev = "dev"
+	qa  = "qa"
+)
 
-	}
+func TestMain(m *testing.M) {
+	cleanEnv()
+	e := m.Run()
+	os.Exit(e)
+}
 
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-	}
+func cleanEnv() {
+	file := stream.NewFileManager()
+	_ = file.Remove(filepath.Join(os.TempDir(), FileName))
 }

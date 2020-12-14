@@ -17,13 +17,34 @@
 package env
 
 const (
-	// Credential resolver
-	Credential = "CREDENTIAL"
+	FileName = "envs.json"
+	Current  = "Current -> "
+	Default  = "default"
 )
 
-type Resolvers map[string]Resolver
+type Holder struct {
+	Current string   `json:"current_env"`
+	All     []string `json:"envs"`
+}
 
-// Resolver is an interface that we can use to resolve reserved envs
-type Resolver interface {
-	Resolve(name string) (string, error)
+type Setter interface {
+	Set(env string) (Holder, error)
+}
+
+type Finder interface {
+	Find() (Holder, error)
+}
+
+type Remover interface {
+	Remove(env string) (Holder, error)
+}
+
+type FindRemover interface {
+	Finder
+	Remover
+}
+
+type FindSetter interface {
+	Finder
+	Setter
 }

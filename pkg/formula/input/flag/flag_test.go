@@ -26,7 +26,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
@@ -66,7 +66,7 @@ func TestInputs(t *testing.T) {
 		{
 			name: "error env resolver",
 			in: in{
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
+				creResolver: envResolverMock{in: "test", err: errors.New("credential not found")},
 			},
 			want: errors.New("credential not found"),
 		},
@@ -133,7 +133,7 @@ func TestInputs(t *testing.T) {
 }
 
 type in struct {
-	creResolver      env.Resolvers
+	creResolver      credential.Resolver
 	defaultFlagValue string
 	valueForList     string
 	valueForRegex    string
@@ -143,7 +143,7 @@ type in struct {
 
 func defaultFields(testFields in) in {
 	defaultFields := in{
-		creResolver:      env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+		creResolver:      envResolverMock{in: "test"},
 		defaultFlagValue: "text",
 		valueForList:     "in_list2",
 		valueForRegex:    "text_ok",

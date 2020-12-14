@@ -17,18 +17,15 @@
 package credential
 
 import (
-	"fmt"
+	"path/filepath"
 )
 
-const (
-	pathPattern     = "%s/credentials/%s"
-	credFilePattern = "%s/%s"
-)
+const credentialDir = "credentials"
 
-func Dir(homePath, ctx string) string {
-	return fmt.Sprintf(pathPattern, homePath, ctx)
+func Dir(homePath, env string) string {
+	return filepath.Join(homePath, credentialDir, env)
 }
 
-func File(homePath, ctx, provider string) string {
-	return fmt.Sprintf(credFilePattern, Dir(homePath, ctx), provider)
+func File(homePath, env, provider string) string {
+	return filepath.Join(homePath, credentialDir, env, provider)
 }

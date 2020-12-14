@@ -17,19 +17,23 @@
 package mocks
 
 import (
-	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
+	"io"
+
 	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
-type ContextFinderMock struct {
+type EnvFinderMock struct {
 	mock.Mock
 }
 
-func (cf *ContextFinderMock) Find() (rcontext.ContextHolder, error) {
-	args := cf.Called()
+func (e *EnvFinderMock) Find() (env.Holder, error) {
+	args := e.Called()
 
-	return args.Get(0).(rcontext.ContextHolder), args.Error(1)
+	return args.Get(0).(env.Holder), args.Error(1)
 }
 
 type DetailManagerMock struct {
@@ -40,4 +44,26 @@ func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
 	args := d.Called(repo)
 
 	return args.String(0)
+}
+
+type RepositoriesMock struct {
+	mock.Mock
+}
+
+func (m *RepositoriesMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
+	args := m.Called(info, version)
+
+	return args.Get(0).(io.ReadCloser), args.Error(1)
+}
+
+func (m *RepositoriesMock) Tags(info git.RepoInfo) (git.Tags, error) {
+	args := m.Called(info)
+
+	return args.Get(0).(git.Tags), args.Error(1)
+}
+
+func (m *RepositoriesMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
+	args := m.Called(info)
+
+	return args.Get(0).(git.Tag), args.Error(1)
 }

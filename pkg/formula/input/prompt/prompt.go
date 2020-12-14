@@ -32,11 +32,11 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -47,8 +47,8 @@ const (
 )
 
 type InputManager struct {
-	envResolvers env.Resolvers
-	file         stream.FileWriteReadExister
+	cred credential.Resolver
+	file stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
 	input.InputTextDefault
@@ -58,7 +58,7 @@ type InputManager struct {
 }
 
 func NewInputManager(
-	env env.Resolvers,
+	cred credential.Resolver,
 	file stream.FileWriteReadExister,
 	inList prompt.InputList,
 	inText prompt.InputText,
@@ -68,7 +68,7 @@ func NewInputManager(
 	inPass prompt.InputPassword,
 ) formula.InputRunner {
 	return InputManager{
-		envResolvers:       env,
+		cred:               cred,
 		file:               file,
 		InputList:          inList,
 		InputText:          inText,
@@ -139,7 +139,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		}
 		return in.List(i.Label, dl, i.Tutorial)
 	default:
-		return input.ResolveIfReserved(in.envResolvers, i)
+		return in.cred.Resolve(i.Type)
 	}
 }
 

@@ -23,13 +23,14 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+
 	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -40,7 +41,7 @@ type RunManager struct {
 	formula.InputResolver
 	formula.PreRunner
 	file    stream.FileWriteExistAppender
-	ctx     rcontext.Finder
+	env     env.Finder
 	homeDir string
 }
 
@@ -49,7 +50,7 @@ func NewRunner(
 	input formula.InputResolver,
 	preRun formula.PreRunner,
 	file stream.FileWriteExistAppender,
-	ctx rcontext.Finder,
+	env env.Finder,
 	homeDir string,
 ) formula.Runner {
 	return RunManager{
@@ -57,7 +58,7 @@ func NewRunner(
 		InputResolver: input,
 		PreRunner:     preRun,
 		file:          file,
-		ctx:           ctx,
+		env:           env,
 		homeDir:       homeDir,
 	}
 }
@@ -104,23 +105,24 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 }
 
 func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
-	ctx, err := ru.ctx.Find()
+	envHolder, err := ru.env.Find()
 	if err != nil {
 		return err
 	}
 
-	if ctx.Current != "" {
+	if envHolder.Current != "" {
 		prompt.Info(
-			fmt.Sprintf("Formula running on context: %s\n", prompt.Cyan(ctx.Current)),
+			fmt.Sprintf("Formula running on env: %s\n", prompt.Cyan(envHolder.Current)),
 		)
 	}
 
 	cmd.Env = os.Environ()
 	dockerEnv := fmt.Sprintf(formula.EnvPattern, formula.DockerExecutionEnv, "false")
 	pwdEnv := fmt.Sprintf(formula.EnvPattern, formula.PwdEnv, pwd)
-	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, ctx.Current)
+	ctxEnv := fmt.Sprintf(formula.EnvPattern, formula.CtxEnv, envHolder.Current)
+	env := fmt.Sprintf(formula.EnvPattern, formula.Env, envHolder.Current)
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
-	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv)
+	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv, env)
 
 	return nil
 }
