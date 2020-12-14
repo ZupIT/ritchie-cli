@@ -113,7 +113,7 @@ func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error)
 		providers = append(providers, c.Provider)
 	}
 
-	cred, err := d.List("Credentials: ", providers)
+	provider, err := d.List("Credentials: ", providers)
 	if err != nil {
 		return inputConfig{}, err
 	}
@@ -123,7 +123,7 @@ func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error)
 	} else if !b {
 		return inputConfig{}, nil
 	}
-	return inputConfig{cred}, nil
+	return inputConfig{provider}, nil
 }
 
 func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputConfig, error) {
