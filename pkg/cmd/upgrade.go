@@ -101,7 +101,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		prompt.Success("Rit upgraded with success")
 		repoInfo := github.NewRepoInfo(github.RitchieRepoURL, "")
 		tag, err := u.github.LatestTag(repoInfo)
-		if err != nil {
+		if err != nil && tag.Description != "" {
 			return nil
 		}
 
