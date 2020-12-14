@@ -168,7 +168,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		if exitsRepo(url, version, repos) {
+		if existsRepo(url, version, repos) {
 			prompt.Info(messageExisting)
 			return nil
 		}
@@ -222,7 +222,7 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		}
 
 		repos, _ := ad.repo.List()
-		if exitsRepo(r.Url, r.Version.String(), repos) {
+		if existsRepo(r.Url, r.Version.String(), repos) {
 			prompt.Info(messageExisting)
 			return nil
 		}
@@ -255,7 +255,7 @@ func (ad addRepoCmd) repoNameValidator(text interface{}) error {
 	return nil
 }
 
-func exitsRepo(urlToAdd, versionToAdd string, repos formula.Repos) bool {
+func existsRepo(urlToAdd, versionToAdd string, repos formula.Repos) bool {
 	for i := range repos {
 		if repos[i].Url == urlToAdd && repos[i].Version.String() == versionToAdd {
 			return true
