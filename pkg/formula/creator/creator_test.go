@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -127,7 +128,7 @@ func TestCreator(t *testing.T) {
 				dir:      dirManager,
 				file:     fileManager,
 				tplM:     tplM,
-				helpPath: "/tmp/customWorkSpace/scaffold/generate/test_go/help.json",
+				helpPath: filepath.Join(resultDir, "/scaffold/generate/test_go/help.json"),
 			},
 			out: out{
 				err: nil,

@@ -20,7 +20,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
+
+const stdinWarning = "stdin commands are deprecated and will no longer be supported in future versions. Please use" +
+	"flags for programatic formula execution"
 
 // CommandRunnerFunc represents that runner func for commands.
 type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
@@ -34,6 +38,7 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 		}
 
 		if stdin {
+			prompt.Warning(stdinWarning)
 			return stdinFunc(cmd, args)
 		}
 		return promptFunc(cmd, args)
@@ -42,4 +47,12 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 
 func IsFlagInput(cmd *cobra.Command) bool {
 	return cmd.Flags().NFlag() > 0
+}
+
+func DeprecateCmd(parentCmd *cobra.Command, deprecatedCmd, deprecatedMsg string) {
+	command := &cobra.Command{
+		Use:        deprecatedCmd,
+		Deprecated: deprecatedMsg,
+	}
+	parentCmd.AddCommand(command)
 }

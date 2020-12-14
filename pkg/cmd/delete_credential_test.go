@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -29,7 +29,7 @@ func (c credDeleteMock) Delete(s string) error {
 type fieldsTestDeleteCredentialCmd struct {
 	credDelete credential.CredDelete
 	reader     credential.ReaderWriterPather
-	ctxFinder  rcontext.Finder
+	envFinder  env.Finder
 	inputBool  prompt.InputBool
 	inputList  prompt.InputList
 }
@@ -63,13 +63,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -78,14 +78,14 @@ func TestDeleteCredential(t *testing.T) {
 			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
-			name:    "error on find context",
-			wantErr: "some error on find Context",
+			name:    "error on find env",
+			wantErr: "some error on find env",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader:     credSettingsMock{},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{}, errors.New("some error on find Context")
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{}, errors.New("some error on find env")
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -102,13 +102,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
 						return []credential.ListCredData{}, errors.New("ReadCredentialsValue error")
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -117,7 +117,7 @@ func TestDeleteCredential(t *testing.T) {
 			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
-			name:    "error when there are no credentials in the context",
+			name:    "error when there are no credentials in the env",
 			wantErr: "",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
@@ -125,13 +125,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
 						return []credential.ListCredData{}, nil
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -148,13 +148,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -171,13 +171,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputBoolErrorMock{},
@@ -194,13 +194,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputFalseMock{},
@@ -221,13 +221,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "github", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "github", Env: "default", Credential: "{}"}}, nil
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -244,13 +244,13 @@ func TestDeleteCredential(t *testing.T) {
 					CredentialsPathMock: func() string {
 						return ""
 					},
-					ReadCredentialsValueInContextMock: func(path string, context string) ([]credential.ListCredData, error) {
-						return []credential.ListCredData{{Provider: "gitlab", Context: "default", Credential: "{}"}}, nil
+					ReadCredentialsValueInEnvMock: func(path string, env string) ([]credential.ListCredData, error) {
+						return []credential.ListCredData{{Provider: "gitlab", Env: "default", Credential: "{}"}}, nil
 					},
 				},
-				ctxFinder: ctxFinderCustomMock{
-					findMock: func() (rcontext.ContextHolder, error) {
-						return rcontext.ContextHolder{Current: ""}, nil
+				envFinder: envFinderCustomMock{
+					find: func() (env.Holder, error) {
+						return env.Holder{Current: ""}, nil
 					},
 				},
 				inputBool: inputTrueMock{},
@@ -262,8 +262,8 @@ func TestDeleteCredential(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			deleteCredentialCmd := NewDeleteCredentialCmd(tt.fields.credDelete, tt.fields.reader, tt.fields.ctxFinder, tt.fields.inputBool, tt.fields.inputList)
-			deleteCredentialStdin := NewDeleteCredentialCmd(tt.fields.credDelete, tt.fields.reader, tt.fields.ctxFinder, tt.fields.inputBool, tt.fields.inputList)
+			deleteCredentialCmd := NewDeleteCredentialCmd(tt.fields.credDelete, tt.fields.reader, tt.fields.envFinder, tt.fields.inputBool, tt.fields.inputList)
+			deleteCredentialStdin := NewDeleteCredentialCmd(tt.fields.credDelete, tt.fields.reader, tt.fields.envFinder, tt.fields.inputBool, tt.fields.inputList)
 
 			deleteCredentialCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			deleteCredentialStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
@@ -294,7 +294,7 @@ func TestDeleteCredential(t *testing.T) {
 func TestDeleteCredentialViaPrompt(t *testing.T) {
 	homeDir := os.TempDir()
 	ritHomeDir := filepath.Join(homeDir, ".rit")
-	credentialPath := filepath.Join(ritHomeDir, "credentials", rcontext.DefaultCtx)
+	credentialPath := filepath.Join(ritHomeDir, "credentials", env.Default)
 	credentialFile := filepath.Join(credentialPath, provider)
 	_ = os.MkdirAll(credentialPath, os.ModePerm)
 	defer os.RemoveAll(ritHomeDir)
@@ -302,7 +302,7 @@ func TestDeleteCredentialViaPrompt(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
-	ctxFinder := rcontext.NewFinder(ritHomeDir, fileManager)
+	ctxFinder := env.NewFinder(ritHomeDir, fileManager)
 	credDeleter := credential.NewCredDelete(ritHomeDir, ctxFinder, fileManager)
 	credSettings := credential.NewSettings(fileManager, dirManager, homeDir)
 

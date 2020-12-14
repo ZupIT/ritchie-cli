@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
@@ -26,7 +26,7 @@ type inputConfig struct {
 type deleteCredentialCmd struct {
 	credential.CredDelete
 	credential.ReaderPather
-	rcontext.Finder
+	env.Finder
 	prompt.InputBool
 	prompt.InputList
 }
@@ -40,14 +40,14 @@ type deleteCredential struct {
 func NewDeleteCredentialCmd(
 	credDelete credential.CredDelete,
 	credReader credential.ReaderPather,
-	ctxFinder rcontext.Finder,
+	env env.Finder,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
 ) *cobra.Command {
 	s := &deleteCredentialCmd{
 		CredDelete:   credDelete,
 		ReaderPather: credReader,
-		Finder:       ctxFinder,
+		Finder:       env,
 		InputBool:    inBool,
 		InputList:    inList,
 	}
@@ -55,7 +55,7 @@ func NewDeleteCredentialCmd(
 	cmd := &cobra.Command{
 		Use:       "credential",
 		Short:     "Delete credential",
-		Long:      `Delete credential from current context`,
+		Long:      `Delete credential from current env`,
 		RunE:      RunFuncE(s.runStdin(), s.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
@@ -68,13 +68,13 @@ func NewDeleteCredentialCmd(
 
 func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		context, err := d.getCurrentContext()
+		curEnv, err := d.currentEnv()
 		if err != nil {
 			return err
 		}
-		prompt.Info(fmt.Sprintf("Current context: %s", context))
+		prompt.Info(fmt.Sprintf("Current env: %s", curEnv))
 
-		inputParams, err := d.resolveInput(cmd, context)
+		inputParams, err := d.resolveInput(cmd, curEnv)
 		if err != nil {
 			return err
 		} else if inputParams.provider == "" {
@@ -99,13 +99,13 @@ func (d *deleteCredentialCmd) resolveInput(cmd *cobra.Command, context string) (
 }
 
 func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error) {
-	data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
+	data, err := d.ReadCredentialsValueInEnv(d.CredentialsPath(), context)
 	if err != nil {
 		return inputConfig{}, err
 	}
 
 	if len(data) == 0 {
-		return inputConfig{}, errors.New("you have no defined credentials in this context")
+		return inputConfig{}, errors.New("you have no defined credentials in this env")
 	}
 
 	providers := make([]string, len(data))
@@ -142,12 +142,12 @@ func (d deleteCredentialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		context, err := d.getCurrentContext()
+		curEnv, err := d.currentEnv()
 		if err != nil {
 			return err
 		}
 
-		data, err := d.ReadCredentialsValueInContext(d.CredentialsPath(), context)
+		data, err := d.ReadCredentialsValueInEnv(d.CredentialsPath(), curEnv)
 		if err != nil {
 			return err
 		}
@@ -182,17 +182,17 @@ func (d deleteCredentialCmd) stdinResolver(reader io.Reader) (deleteCredential, 
 	return dc, nil
 }
 
-func (d deleteCredentialCmd) getCurrentContext() (string, error) {
-	ctxHolder, err := d.Find()
+func (d deleteCredentialCmd) currentEnv() (string, error) {
+	envHolder, err := d.Find()
 	if err != nil {
 		return "", err
 	}
 
-	if ctxHolder.Current == "" {
-		ctxHolder.Current = rcontext.DefaultCtx
+	if envHolder.Current == "" {
+		envHolder.Current = env.Default
 	}
 
-	return ctxHolder.Current, nil
+	return envHolder.Current, nil
 }
 
 func successMessage() {

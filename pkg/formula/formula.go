@@ -35,6 +35,7 @@ const (
 	DefaultConfig      = "config.json"
 	PwdEnv             = "CURRENT_PWD"
 	CtxEnv             = "CONTEXT"
+	Env                = "ENVIRONMENT"
 	VerboseEnv         = "VERBOSE_MODE"
 	DockerExecutionEnv = "DOCKER_EXECUTION"
 	BinUnix            = "run.sh"
