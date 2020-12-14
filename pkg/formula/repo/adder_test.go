@@ -23,11 +23,13 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestAdd(t *testing.T) {
+	treeWithOneCommand := formula.Tree{Commands: api.Commands{"": {Parent: "", Usage: "", Help: "", LongHelp: "", Formula: false, Repo: ""}}}
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
@@ -35,6 +37,7 @@ func TestAdd(t *testing.T) {
 	type in struct {
 		ritHome  string
 		repoMock formula.RepositoryListWriteCreator
+		deleter  formula.RepositoryDeleter
 		tree     formula.TreeGenerator
 		file     stream.FileWriteCreatorReadExistRemover
 		repo     formula.Repo
@@ -68,7 +71,7 @@ func TestAdd(t *testing.T) {
 				},
 				tree: treeGeneratorCustomMock{
 					func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
+						return treeWithOneCommand, nil
 					},
 				},
 				file: fileManager,
@@ -125,7 +128,7 @@ func TestAdd(t *testing.T) {
 				},
 				tree: treeGeneratorCustomMock{
 					func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
+						return treeWithOneCommand, nil
 					},
 				},
 				file: fileManager,
@@ -235,7 +238,61 @@ func TestAdd(t *testing.T) {
 				},
 				tree: treeGeneratorCustomMock{
 					func(repoPath string) (formula.Tree, error) {
+						return treeWithOneCommand, nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return err when tree.json has no commands",
+			in: in{
+				repoMock: repoListWriteCreatorMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
+						return nil
+					},
+				},
+				tree: treeGeneratorCustomMock{
+					func(repoPath string) (formula.Tree, error) {
 						return formula.Tree{}, nil
+					},
+				},
+				deleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return nil
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return err when Delete fail",
+			in: in{
+				repoMock: repoListWriteCreatorMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+					create: func(repo formula.Repo) error {
+						return nil
+					},
+					write: func(repos formula.Repos) error {
+						return nil
+					},
+				},
+				tree: treeGeneratorCustomMock{
+					func(repoPath string) (formula.Tree, error) {
+						return formula.Tree{}, nil
+					},
+				},
+				deleter: repositoryDeleterMock{
+					deleteMock: func(repoName formula.RepoName) error {
+						return errors.New("any error on Delete")
 					},
 				},
 			},
@@ -247,6 +304,7 @@ func TestAdd(t *testing.T) {
 			ad := NewAdder(
 				tt.in.ritHome,
 				tt.in.repoMock,
+				tt.in.deleter,
 				tt.in.tree,
 				tt.in.file,
 			)
@@ -314,4 +372,12 @@ func (m DirCreateListCopyRemoverCustomMock) Copy(src, dst string) error {
 
 func (m DirCreateListCopyRemoverCustomMock) Remove(dir string) error {
 	return m.remove(dir)
+}
+
+type repositoryDeleterMock struct {
+	deleteMock func(repoName formula.RepoName) error
+}
+
+func (c repositoryDeleterMock) Delete(repoName formula.RepoName) error {
+	return c.deleteMock(repoName)
 }
