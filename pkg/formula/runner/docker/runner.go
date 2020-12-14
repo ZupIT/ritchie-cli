@@ -29,7 +29,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -41,24 +40,21 @@ const (
 var _ formula.Runner = RunManager{}
 
 type RunManager struct {
-	formula.PostRunner
 	formula.InputResolver
 	formula.PreRunner
-	file    stream.FileWriteExistAppender
+	file    stream.FileWriteExistAppendRemover
 	env     env.Finder
 	homeDir string
 }
 
 func NewRunner(
-	postRun formula.PostRunner,
 	input formula.InputResolver,
 	preRun formula.PreRunner,
-	file stream.FileWriteExistAppender,
+	file stream.FileWriteExistAppendRemover,
 	env env.Finder,
 	homeDir string,
 ) formula.Runner {
 	return RunManager{
-		PostRunner:    postRun,
 		InputResolver: input,
 		PreRunner:     preRun,
 		file:          file,
@@ -74,8 +70,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	}
 
 	defer func() {
-		if err := ru.PostRun(setup, true); err != nil {
-			prompt.Error(err.Error())
+		if err := ru.file.Remove(envFile); err != nil {
 			return
 		}
 	}()

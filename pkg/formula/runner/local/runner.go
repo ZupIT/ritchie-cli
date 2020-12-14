@@ -37,24 +37,21 @@ import (
 var _ formula.Runner = RunManager{}
 
 type RunManager struct {
-	formula.PostRunner
 	formula.InputResolver
 	formula.PreRunner
-	file    stream.FileWriteExistAppender
+	file    stream.FileWriteExistAppendRemover
 	env     env.Finder
 	homeDir string
 }
 
 func NewRunner(
-	postRun formula.PostRunner,
 	input formula.InputResolver,
 	preRun formula.PreRunner,
-	file stream.FileWriteExistAppender,
+	file stream.FileWriteExistAppendRemover,
 	env env.Finder,
 	homeDir string,
 ) formula.Runner {
 	return RunManager{
-		PostRunner:    postRun,
 		InputResolver: input,
 		PreRunner:     preRun,
 		file:          file,
@@ -69,14 +66,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
-	defer func() {
-		if err := ru.PostRun(setup, false); err != nil {
-			prompt.Error(err.Error())
-			return
-		}
-	}()
-
-	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
+	formulaRun := filepath.Join(setup.BinPath, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

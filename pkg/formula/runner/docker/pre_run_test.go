@@ -163,32 +163,6 @@ func TestPreRun(t *testing.T) {
 				err:     errors.New("invalid character 'e' looking for beginning of value"),
 			},
 		},
-		{
-			name: "create work dir error",
-			in: in{
-				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				dockerBuild: dockerBuilder,
-				file:        fileManager,
-				dir:         dirManagerMock{createErr: errors.New("error to create dir")},
-			},
-			out: out{
-				wantErr: true,
-				err:     errors.New("error to create dir"),
-			},
-		},
-		{
-			name: "copy work dir error",
-			in: in{
-				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				dockerBuild: dockerBuilder,
-				file:        fileManager,
-				dir:         dirManagerMock{copyErr: errors.New("error to copy dir")},
-			},
-			out: out{
-				wantErr: true,
-				err:     errors.New("error to copy dir"),
-			},
-		},
 	}
 
 	for _, tt := range tests {
@@ -252,6 +226,7 @@ type fileManagerMock struct {
 	rErr   error
 	wErr   error
 	aErr   error
+	reErr  error
 	exist  bool
 }
 
@@ -269,6 +244,10 @@ func (fi fileManagerMock) Exists(string) bool {
 
 func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
+}
+
+func (fi fileManagerMock) Remove(path string) error {
+	return fi.reErr
 }
 
 const (

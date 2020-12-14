@@ -105,7 +105,6 @@ type (
 		FormulaPath string
 		BinName     string
 		BinPath     string
-		TmpDir      string
 		Config      Config
 		ContainerId string
 	}

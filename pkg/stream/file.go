@@ -100,10 +100,11 @@ type FileWriteReadExistLister interface {
 	FileLister
 }
 
-type FileWriteExistAppender interface {
+type FileWriteExistAppendRemover interface {
 	FileWriter
 	FileExister
 	FileAppender
+	FileRemover
 }
 
 type FileWriteReadExistRemover interface {

@@ -139,8 +139,6 @@ func Build() *cobra.Command {
 	formBuildDocker := builder.NewBuildDocker(fileManager)
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 
-	postRunner := runner.NewPostRunner(fileManager, dirManager)
-
 	promptInManager := fprompt.NewInputManager(credResolver, fileManager, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword)
 	stdinInManager := stdin.NewInputManager(credResolver)
 	flagInManager := flag.NewInputManager(credResolver)
@@ -153,10 +151,10 @@ func Build() *cobra.Command {
 	inputResolver := runner.NewInputResolver(termInputTypes)
 
 	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
-	formulaLocalRun := local.NewRunner(postRunner, inputResolver, formulaLocalPreRun, fileManager, envFinder, userHomeDir)
+	formulaLocalRun := local.NewRunner(inputResolver, formulaLocalPreRun, fileManager, envFinder, userHomeDir)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
-	formulaDockerRun := docker.NewRunner(postRunner, inputResolver, formulaDockerPreRun, fileManager, envFinder, userHomeDir)
+	formulaDockerRun := docker.NewRunner(inputResolver, formulaDockerPreRun, fileManager, envFinder, userHomeDir)
 
 	runners := formula.Runners{
 		formula.LocalRun:  formulaLocalRun,
