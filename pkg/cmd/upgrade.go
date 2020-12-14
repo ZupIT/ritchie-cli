@@ -101,11 +101,13 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		prompt.Success("Rit upgraded with success")
 		repoInfo := github.NewRepoInfo(github.RitchieRepoURL, "")
 		tag, err := u.github.LatestTag(repoInfo)
-		if err != nil || tag.Description != "" {
+		stable, err := u.resolver.StableVersion()
+		if err != nil || tag.Description == "" {
 			return nil
 		}
 
-		prompt.Info("Release description:")
+		msg := fmt.Sprintf("Release %s description:", stable)
+		prompt.Info(msg)
 		fmt.Println(tag.Description)
 
 		return nil
