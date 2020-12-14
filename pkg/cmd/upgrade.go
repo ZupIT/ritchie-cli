@@ -99,7 +99,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 		}
 
 		prompt.Success("Rit upgraded with success")
-		repoInfo := github.NewRepoInfo("https://github.com/ZupIT/ritchie-cli", "")
+		repoInfo := github.NewRepoInfo(github.RitchieRepoURL, "")
 		tag, err := u.github.LatestTag(repoInfo)
 		if err != nil {
 			return nil
