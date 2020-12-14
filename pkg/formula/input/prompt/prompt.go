@@ -44,6 +44,7 @@ const (
 	CachePattern         = "%s/.%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
+	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
 )
 
 type InputManager struct {
@@ -55,6 +56,7 @@ type InputManager struct {
 	prompt.InputTextValidator
 	prompt.InputBool
 	prompt.InputPassword
+	prompt.InputMultiselect
 }
 
 func NewInputManager(
@@ -66,6 +68,7 @@ func NewInputManager(
 	inDefValue input.InputTextDefault,
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
+	inMultiselect prompt.InputMultiselect,
 ) formula.InputRunner {
 	return InputManager{
 		cred:               cred,
@@ -76,6 +79,7 @@ func NewInputManager(
 		InputTextDefault:   inDefValue,
 		InputBool:          inBool,
 		InputPassword:      inPass,
+		InputMultiselect:   inMultiselect,
 	}
 }
 
@@ -131,13 +135,21 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return in.loadInputValList(items, i)
 		}
 		return in.textValidator(i)
-
 	case input.DynamicType:
 		dl, err := in.dynamicList(i.RequestInfo)
 		if err != nil {
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
+	case input.Multiselect:
+		if len(items) == 0 {
+			return "", fmt.Errorf(EmptyItems, i.Name)
+		}
+		sl, err := in.Multiselect(i)
+		if err != nil {
+			return "", err
+		}
+		return strings.Join(sl, "|"), nil
 	default:
 		return in.cred.Resolve(i.Type)
 	}
