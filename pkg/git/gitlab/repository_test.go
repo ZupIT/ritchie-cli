@@ -176,7 +176,7 @@ func TestLatestTag(t *testing.T) {
 					token:        "some_token",
 				},
 			},
-			want:    git.Tag{Name: "1.0.1"},
+			want:    git.Tag{Name: "1.0.1", Description: "New golang formula"},
 			wantErr: false,
 		},
 		{
