@@ -27,353 +27,246 @@ import (
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
 func TestAddRepoCmd(t *testing.T) {
+	someError := errors.New("some error")
+
+	gitRepo := new(mocks.GitRepositoryMock)
+	gitRepo.On("Zipball", mock.Anything, mock.Anything).Return(nil, nil)
+	gitRepo.On("Tags", mock.Anything).Return(git.Tags{git.Tag{Name: "1.0.0"}}, nil)
+	gitRepo.On("LatestTag", mock.Anything).Return(git.Tag{}, nil)
+
 	repoProviders := formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("Github", formula.Git{Repos: gitRepo, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("GitLab", formula.Git{Repos: gitRepositoryWithoutTagsMock, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
 
-	type fields struct {
-		repo               formula.RepositoryAddLister
-		repoProviders      formula.RepoProviders
-		InputTextValidator prompt.InputTextValidator
-		InputPassword      prompt.InputPassword
-		InputURL           prompt.InputURL
-		InputList          prompt.InputList
-		InputBool          prompt.InputBool
-		InputInt           prompt.InputInt
-		tutorial           rtutorial.Finder
-		stdin              string
-		detailLatestTag    string
+	repoTest := &formula.Repo{
+		Provider: "Github",
+		Name:     "someRepo1",
+		Version:  "1.0.0",
+		Url:      "https://github.com/owner/repo",
+		Token:    "token",
+		Priority: 2,
 	}
+
+	addInputList := func(input []returnOfInputList) *mocks.InputListMock {
+		inputListMock := new(mocks.InputListMock)
+
+		for _, input := range input {
+			question := input.question
+			if input.question == "" {
+				question = mock.Anything
+			}
+			inputListMock.On("List", question, mock.Anything, mock.Anything).Return(input.response, input.err)
+		}
+		return inputListMock
+	}
+
 	tests := []struct {
 		name    string
 		fields  fields
 		wantErr bool
 	}{
 		{
-			name: "Run with success",
+			name:    "Run with success",
+			wantErr: false,
+		},
+		{
+			name: "Run with success when user add a new commons",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial: TutorialFinderMock{},
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: formula.RepoCommonsName}}, errList: nil},
+				InputTextValidator: returnWithStringErr{formula.RepoCommonsName.String(), nil},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success when user add a repo exitent",
+			fields: fields{
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: "name-repo"}}, errList: nil},
+				InputTextValidator: returnWithStringErr{"name-repo", nil},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Return nil when user add a new commons incorrectly",
+			fields: fields{
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: formula.RepoCommonsName}}, errList: nil},
+				InputTextValidator: returnWithStringErr{formula.RepoCommonsName.String(), nil},
+				InputBool:          returnOfInputBool{false, nil},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Return nil success when user add a repo exitent incorrectly",
+			fields: fields{
+				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: "name-repo"}}, errList: nil},
+				InputTextValidator: returnWithStringErr{"name-repo", nil},
+				InputBool:          returnOfInputBool{false, nil},
 			},
 			wantErr: false,
 		},
 		{
 			name: "return error when len of tags is 0",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "GitLab", nil
-					},
-				},
-				tutorial: TutorialFinderMock{},
+				InputList: []returnOfInputList{{response: "GitLab", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "return error when Repos.Tag fail",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Bitbucket", nil
-					},
-				},
-				tutorial: TutorialFinderMock{},
+				InputList: []returnOfInputList{{response: "Bitbucket", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "Fail when repo.Add return err",
 			fields: fields{
-				repo: repoListerAdderCustomMock{
-					add: func(d formula.Repo) error {
-						return errors.New("")
-					},
-					list: func() (formula.Repos, error) {
-						return formula.Repos{}, nil
-					},
-				},
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial: TutorialFinderMock{},
+				repo:      returnOfRepoListerAdder{errAdd: someError, reposList: formula.Repos{}, errList: nil},
+				InputList: []returnOfInputList{{response: "Github", err: nil}},
 			},
 			wantErr: true,
 		},
 		{
 			name: "input bool error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputBoolErrorMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial: TutorialFinderMock{},
+				InputBool: returnOfInputBool{false, someError},
 			},
 			wantErr: true,
 		},
 		{
 			name: "input password error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordErrorMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
+				InputPassword: returnWithStringErr{"", someError},
+			},
+			wantErr: true,
+		},
+		{
+			name: "input list select provider return error",
+			fields: fields{
+				InputList: []returnOfInputList{{response: "item", err: someError}},
+			},
+			wantErr: true,
+		},
+		{
+			name: "input list select version return error",
+			fields: fields{
+				InputList: []returnOfInputList{
+					{question: "Select a tag version:", response: "", err: someError},
+					{question: "", response: "Github", err: nil},
 				},
-				tutorial: TutorialFinderMock{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "input list error",
-			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList:          inputListErrorMock{},
-				tutorial:           TutorialFinderMock{},
 			},
 			wantErr: true,
 		},
 		{
 			name: "input text error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorErrorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList:          inputListMock{},
-				tutorial:           TutorialFinderMock{},
+				InputTextValidator: returnWithStringErr{"mocked text", someError},
 			},
 			wantErr: true,
 		},
 		{
-			name: "input text error",
+			name: "input url error",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLErrorMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList:          inputListMock{},
-				tutorial:           TutorialFinderMock{},
+				InputURL: returnWithStringErr{"http://localhost/mocked", someError},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Tutorial status enabled",
+			fields: fields{
+				tutorialStatus: returnWithStringErr{"enabled", nil},
+			},
+			wantErr: false,
+		},
+		{
+			name: "return error when tutorial.Find fail",
+			fields: fields{
+				tutorialStatus: returnWithStringErr{"", someError},
 			},
 			wantErr: true,
 		},
 		{
 			name: "Fail when repo.List return err",
 			fields: fields{
-				repo: repoListerAdderCustomMock{
-					list: func() (formula.Repos, error) {
-						return nil, errors.New("some error")
-					},
-				},
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial: TutorialFinderMock{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "return error when tutorial.Find fail",
-			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial: TutorialFinderErrorMock{},
+				repo: returnOfRepoListerAdder{errAdd: nil, reposList: nil, errList: someError},
 			},
 			wantErr: true,
 		},
 		{
 			name: "Run with success when input is stdin",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial: TutorialFinderMock{},
-				stdin:    "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"0.0.0\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				stdin: `{"provider": "github", "name": "repo-name", "version": "0.0.0", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
 			},
 			wantErr: false,
 		},
 		{
 			name: "Run with success when input is stdin and version is not informed",
 			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial:        TutorialFinderMock{},
-				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
+				stdin:           `{"provider": "github", "name": "repo-name", "version": "", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
 				detailLatestTag: "1.0.0",
 			},
 			wantErr: false,
 		},
 		{
-			name: "Fail when repo.Add return err Stdin",
+			name: "Return error when user add a repo existent",
 			fields: fields{
-				repo: repoListerAdderCustomMock{
-					add: func(d formula.Repo) error {
-						return errors.New("")
-					},
+				repo:     returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{*repoTest}, errList: nil},
+				InputURL: returnWithStringErr{repoTest.Url, nil},
+				InputList: []returnOfInputList{
+					{question: "Select a tag version:", response: "1.0.0", err: nil},
+					{question: "", response: "Github", err: nil},
 				},
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial:        TutorialFinderMock{},
-				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
-				detailLatestTag: "1.0.0",
 			},
-			wantErr: true,
-		},
-		{
-			name: "return error when tutorial.Find fail stdin",
-			fields: fields{
-				repo:               defaultRepoAdderMock,
-				repoProviders:      repoProviders,
-				InputTextValidator: inputTextValidatorMock{},
-				InputPassword:      inputPasswordMock{},
-				InputURL:           inputURLMock{},
-				InputBool:          inputTrueMock{},
-				InputInt:           inputIntMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "Github", nil
-					},
-				},
-				tutorial:        TutorialFinderErrorMock{},
-				stdin:           "{\"provider\": \"github\", \"name\": \"repo-name\", \"version\": \"\", \"url\": \"https://url.com/repo\", \"token,omitempty\": \"\", \"priority\": 5, \"isLocal\": false}\n",
-				detailLatestTag: "1.0.0",
-			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	checkerManager := tree.NewChecker(treeMock{})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			fields := getFields(tt.fields)
+
 			detailMock := new(mocks.DetailManagerMock)
-			detailMock.On("LatestTag", mock.Anything).Return(tt.fields.detailLatestTag)
+			detailMock.On("LatestTag", mock.Anything).Return(fields.detailLatestTag)
+			inputURLMock := new(mocks.InputURLMock)
+			inputURLMock.On("URL", mock.Anything, mock.Anything).Return(fields.InputURL.string, fields.InputURL.error)
+			inputBoolMock := new(mocks.InputBoolMock)
+			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(fields.InputBool.bool, fields.InputBool.error)
+			inputListMock := addInputList(fields.InputList)
+			inputIntMock := new(mocks.InputIntMock)
+			inputIntMock.On("Int", mock.Anything, mock.Anything).Return(int64(0), nil)
+			inputPasswordMock := new(mocks.InputPasswordMock)
+			inputPasswordMock.On("Password", mock.Anything, mock.Anything).Return(fields.InputPassword.string, fields.InputPassword.error)
+			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
+			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
+			tutorialFindMock := new(mocks.TutorialFindSetterMock)
+			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: fields.tutorialStatus.string}, fields.tutorialStatus.error)
+			repoListerAdderMock := new(mocks.RepoListerAdderMock)
+			repoListerAdderMock.On("Add", mock.Anything).Return(fields.repo.errAdd)
+			repoListerAdderMock.On("List").Return(fields.repo.reposList, fields.repo.errList)
+
 			cmd := NewAddRepoCmd(
-				tt.fields.repo,
-				tt.fields.repoProviders,
-				tt.fields.InputTextValidator,
-				tt.fields.InputPassword,
-				tt.fields.InputURL,
-				tt.fields.InputList,
-				tt.fields.InputBool,
-				tt.fields.InputInt,
-				tt.fields.tutorial,
+				repoListerAdderMock,
+				repoProviders,
+				inputTextValidatorMock,
+				inputPasswordMock,
+				inputURLMock,
+				inputListMock,
+				inputBoolMock,
+				inputIntMock,
+				tutorialFindMock,
 				checkerManager,
 				detailMock,
 			)
 
-			if tt.fields.stdin != "" {
-				newReader := strings.NewReader(tt.fields.stdin)
+			if fields.stdin != "" {
+				newReader := strings.NewReader(fields.stdin)
 				cmd.SetIn(newReader)
 				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
 			} else {
@@ -385,4 +278,100 @@ func TestAddRepoCmd(t *testing.T) {
 			assert.Equal(t, tt.wantErr, (err != nil))
 		})
 	}
+}
+
+type returnWithStringErr struct {
+	string
+	error
+}
+
+type returnOfInputBool struct {
+	bool
+	error
+}
+
+type returnOfInputList struct {
+	question, response string
+	err                error
+}
+
+type returnOfRepoListerAdder struct {
+	errAdd, errList error
+	reposList       formula.Repos
+}
+
+type fields struct {
+	repo               returnOfRepoListerAdder
+	InputTextValidator returnWithStringErr
+	InputPassword      returnWithStringErr
+	InputURL           returnWithStringErr
+	InputList          []returnOfInputList
+	InputBool          returnOfInputBool
+	stdin              string
+	detailLatestTag    string
+	tutorialStatus     returnWithStringErr
+}
+
+func getFields(testFields fields) fields {
+	fieldsNil := fields{
+		repo:               returnOfRepoListerAdder{},
+		InputTextValidator: returnWithStringErr{},
+		InputPassword:      returnWithStringErr{},
+		InputURL:           returnWithStringErr{},
+		InputBool:          returnOfInputBool{},
+		InputList:          []returnOfInputList{},
+		stdin:              "",
+		detailLatestTag:    "",
+		tutorialStatus:     returnWithStringErr{},
+	}
+
+	fields := fields{
+		repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
+		InputTextValidator: returnWithStringErr{"mocked text", nil},
+		InputPassword:      returnWithStringErr{"s3cr3t", nil},
+		InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
+		InputBool:          returnOfInputBool{true, nil},
+		InputList:          []returnOfInputList{{response: "Github", err: nil}},
+		tutorialStatus:     returnWithStringErr{"disabled", nil},
+		stdin:              "",
+		detailLatestTag:    "",
+	}
+
+	if testFields.repo.reposList.Len() != fieldsNil.repo.reposList.Len() || testFields.repo.errAdd != fieldsNil.repo.errAdd || testFields.repo.errList != fieldsNil.repo.errList {
+		fields.repo = testFields.repo
+	}
+
+	if testFields.InputTextValidator != fieldsNil.InputTextValidator {
+		fields.InputTextValidator = testFields.InputTextValidator
+	}
+
+	if testFields.InputPassword != fieldsNil.InputPassword {
+		fields.InputPassword = testFields.InputPassword
+	}
+
+	if testFields.InputURL != fieldsNil.InputURL {
+		fields.InputURL = testFields.InputURL
+	}
+
+	if testFields.InputBool != fieldsNil.InputBool {
+		fields.InputBool = testFields.InputBool
+	}
+
+	if len(testFields.InputList) != 0 {
+		fields.InputList = testFields.InputList
+	}
+
+	if testFields.tutorialStatus != fieldsNil.tutorialStatus {
+		fields.tutorialStatus = testFields.tutorialStatus
+	}
+
+	if testFields.stdin != fieldsNil.stdin {
+		fields.stdin = testFields.stdin
+	}
+
+	if testFields.detailLatestTag != fieldsNil.detailLatestTag {
+		fields.detailLatestTag = testFields.detailLatestTag
+	}
+
+	return fields
 }

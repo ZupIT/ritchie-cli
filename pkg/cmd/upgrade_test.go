@@ -310,7 +310,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &internal.RepositoriesMock{}
+			m := &internal.GitRepositoryMock{}
 			m.On("LatestTag", mock.Anything).Return(tt.in.tag, nil)
 			u := NewUpgradeCmd(
 				tt.in.resolver,
