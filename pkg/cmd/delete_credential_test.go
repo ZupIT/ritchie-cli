@@ -9,9 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -118,7 +120,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error when there are no credentials in the env",
-			wantErr: "",
+			wantErr: "you have no defined credentials in this env",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader: credSettingsCustomMock{
@@ -267,6 +269,8 @@ func TestDeleteCredential(t *testing.T) {
 
 			deleteCredentialCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			deleteCredentialStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+			deleteCredentialCmd.SetArgs([]string{})
+			deleteCredentialStdin.SetArgs([]string{})
 
 			newReader := strings.NewReader(tt.inputStdin)
 			deleteCredentialStdin.SetIn(newReader)
@@ -348,11 +352,11 @@ func TestDeleteCredentialViaPrompt(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			jsonData, _ := json.Marshal(cred)
 			err := ioutil.WriteFile(credentialFile, jsonData, os.ModePerm)
-			require.NoError(t, err)
+			assert.NoError(t, err)
 
-			listMock := &InputListMock{}
+			listMock := &mocks.InputListMock{}
 			listMock.On("List", mock.Anything).Return(provider, tt.inputListError)
-			boolMock := &InputBoolMock{}
+			boolMock := &mocks.InputBoolMock{}
 			boolMock.On("Bool", mock.Anything).Return(tt.inputBoolResult, nil)
 
 			cmd := NewDeleteCredentialCmd(credDeleter, credSettings, ctxFinder, boolMock, listMock)
@@ -362,34 +366,16 @@ func TestDeleteCredentialViaPrompt(t *testing.T) {
 
 			err = cmd.Execute()
 			if err != nil {
-				require.Equal(t, err.Error(), tt.wantErr)
+				assert.Equal(t, err.Error(), tt.wantErr)
 			} else {
-				require.Empty(t, tt.wantErr)
+				assert.Empty(t, tt.wantErr)
 			}
 
 			if tt.fileShouldExist {
-				require.FileExists(t, credentialFile)
+				assert.FileExists(t, credentialFile)
 			} else {
-				require.NoFileExists(t, credentialFile)
+				assert.NoFileExists(t, credentialFile)
 			}
 		})
 	}
-}
-
-type InputListMock struct {
-	mock.Mock
-}
-
-func (m *InputListMock) List(string, []string, ...string) (string, error) {
-	args := m.Called()
-	return args.String(0), args.Error(1)
-}
-
-type InputBoolMock struct {
-	mock.Mock
-}
-
-func (m *InputBoolMock) Bool(string, []string, ...string) (bool, error) {
-	args := m.Called()
-	return args.Bool(0), nil
 }

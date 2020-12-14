@@ -42,3 +42,21 @@ func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
 
 	return args.String(0)
 }
+
+type InputListMock struct {
+	mock.Mock
+}
+
+func (m *InputListMock) List(string, []string, ...string) (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}
+
+type InputBoolMock struct {
+	mock.Mock
+}
+
+func (m *InputBoolMock) Bool(string, []string, ...string) (bool, error) {
+	args := m.Called()
+	return args.Bool(0), nil
+}
