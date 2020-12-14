@@ -18,7 +18,8 @@ package git
 import "io"
 
 type Tag struct {
-	Name string `json:"tag_name"`
+	Name        string
+	Description string
 }
 
 type Tags []Tag

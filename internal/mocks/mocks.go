@@ -19,12 +19,12 @@ package mocks
 import (
 	"io"
 
-	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
 type EnvFinderMock struct {
