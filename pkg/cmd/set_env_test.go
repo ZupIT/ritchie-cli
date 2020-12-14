@@ -20,12 +20,11 @@ import (
 	"testing"
 )
 
-func TestNewDeleteContextCmd(t *testing.T) {
-	cmd := NewDeleteContextCmd(ctxFindRemoverMock{}, inputTrueMock{}, inputListMock{})
+func TestNewSetEnvCmd(t *testing.T) {
+	cmd := NewSetEnvCmd(envFindSetterMock{}, inputTextMock{}, inputListMock{})
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	if cmd == nil {
-		t.Errorf("NewDeleteContextCmd got %v", cmd)
-
+		t.Errorf("NewSetEnvCmd got %v", cmd)
 	}
 
 	if err := cmd.Execute(); err != nil {

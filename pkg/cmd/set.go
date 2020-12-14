@@ -17,17 +17,31 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 // NewSetCmd creates new cmd instance.
 func NewSetCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:       "set SUBCOMMAND",
-		Short:     "Set contexts, credentials, repositories priorities and formulas runner defaults.",
-		Long:      "Set contexts, credentials, priorities for formula repositories and formulas runner defaults.",
-		Example:   "rit set context",
-		ValidArgs: []string{"context", "credential", "formula-runner", "repo-priority"},
+		Short:     "Set envs, credentials, repositories priorities and formulas runner defaults.",
+		Long:      "Set envs, credentials, priorities for formula repositories and formulas runner defaults.",
+		Example:   "rit set env",
+		ValidArgs: []string{"env", "credential", "formula-runner", "repo-priority"},
 		Args:      cobra.OnlyValidArgs,
 	}
+
+	deprecatedMsg := fmt.Sprintf(
+		`you can now use the "%v" command for the same purpose as the "%v" command.`,
+		prompt.Bold("rit set env"),
+		prompt.Bold("rit set context"),
+	)
+
+	DeprecateCmd(cmd, "context", deprecatedMsg)
+
+	return cmd
 }
