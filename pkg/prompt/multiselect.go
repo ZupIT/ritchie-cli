@@ -29,19 +29,15 @@ func NewSurveyMultiselect() SurveyMultiselect {
 
 func (SurveyMultiselect) Multiselect(input formula.Input) ([]string, error) {
 	value := []string{}
-	helper := input.Tutorial
 	multiselect := &survey.MultiSelect{
 		Message: input.Label,
 		Options: input.Items,
+		Help:    input.Tutorial,
 	}
 	multiQs := []*survey.Question{
 		{
 			Prompt: multiselect,
 		},
-	}
-
-	if len(helper) > 0 {
-		multiselect.Help = helper
 	}
 
 	if *input.Required {

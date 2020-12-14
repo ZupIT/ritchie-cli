@@ -125,9 +125,10 @@ func TestInputManager_Inputs(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name          string
+		in            in
+		want          error
+		expectedError string
 	}{
 		{
 			name: "success prompt",
@@ -142,7 +143,8 @@ func TestInputManager_Inputs(t *testing.T) {
 				creResolver:    envResolverMock{in: "test"},
 				file:           fileManager,
 			},
-			want: nil,
+			want:          nil,
+			expectedError: "",
 		},
 		{
 			name: "error read file load items",
@@ -157,7 +159,8 @@ func TestInputManager_Inputs(t *testing.T) {
 				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{rErr: errors.New("error to read file"), exist: true},
 			},
-			want: errors.New("error to read file"),
+			want:          errors.New(""),
+			expectedError: "error to read file",
 		},
 		{
 			name: "error unmarshal load items",
@@ -172,7 +175,8 @@ func TestInputManager_Inputs(t *testing.T) {
 				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{rBytes: []byte("error"), exist: true},
 			},
-			want: errors.New("invalid character 'e' looking for beginning of value"),
+			want:          errors.New(""),
+			expectedError: "invalid character 'e' looking for beginning of value",
 		},
 		{
 			name: "cache file doesn't exist success",
@@ -187,7 +191,8 @@ func TestInputManager_Inputs(t *testing.T) {
 				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{exist: false},
 			},
-			want: nil,
+			want:          nil,
+			expectedError: "",
 		},
 		{
 			name: "cache file doesn't exist error file write",
@@ -202,7 +207,8 @@ func TestInputManager_Inputs(t *testing.T) {
 				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{wErr: errors.New("error to write file"), exist: false},
 			},
-			want: errors.New("error to write file"),
+			want:          errors.New(""),
+			expectedError: "error to write file",
 		},
 		{
 			name: "persist cache file write error",
@@ -217,7 +223,8 @@ func TestInputManager_Inputs(t *testing.T) {
 				creResolver:    envResolverMock{in: "test"},
 				file:           fileManagerMock{wErr: errors.New("error to write file"), rBytes: []byte(`["in_list1","in_list2"]`), exist: true},
 			},
-			want: nil,
+			want:          nil,
+			expectedError: "",
 		},
 		{
 			name: "error env resolver prompt",
@@ -232,7 +239,8 @@ func TestInputManager_Inputs(t *testing.T) {
 				creResolver:    envResolverMock{in: "test", err: errors.New("credential not found")},
 				file:           fileManager,
 			},
-			want: errors.New("credential not found"),
+			want:          errors.New(""),
+			expectedError: "credential not found",
 		},
 	}
 
@@ -260,7 +268,13 @@ func TestInputManager_Inputs(t *testing.T) {
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			assert.Equal(t, tt.want, got)
+			if tt.expectedError != "" {
+				assert.EqualError(t, got, tt.expectedError)
+			}
+
+			if tt.want == nil {
+				assert.Equal(t, tt.want, got)
+			}
 		})
 	}
 }

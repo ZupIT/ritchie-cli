@@ -147,7 +147,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		}
 		sl, err := in.Multiselect(i)
 		if err != nil {
-			return "", nil
+			return "", err
 		}
 		return strings.Join(sl, ", "), nil
 	default:
@@ -232,7 +232,7 @@ func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]str
 			var items []string
 			err = json.Unmarshal(fileBytes, &items)
 			if err != nil {
-				return nil, errors.New(err.Error())
+				return nil, err
 			}
 			return items, nil
 		} else {
