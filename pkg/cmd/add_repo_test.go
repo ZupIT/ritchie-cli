@@ -180,9 +180,16 @@ func TestAddRepoCmd(t *testing.T) {
 		{
 			name: "Tutorial status enabled",
 			fields: fields{
-				tutorialStatus: "enabled",
+				tutorialStatus: returnWithStringErr{"enabled", nil},
 			},
 			wantErr: false,
+		},
+		{
+			name: "return error when tutorial.Find fail",
+			fields: fields{
+				tutorialStatus: returnWithStringErr{"", someError},
+			},
+			wantErr: true,
 		},
 		{
 			name: "Fail when repo.List return err",
@@ -239,7 +246,7 @@ func TestAddRepoCmd(t *testing.T) {
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
 			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
 			tutorialFindMock := new(mocks.TutorialFindSetterMock)
-			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: fields.tutorialStatus}, nil)
+			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: fields.tutorialStatus.string}, fields.tutorialStatus.error)
 			repoListerAdderMock := new(mocks.RepoListerAdderMock)
 			repoListerAdderMock.On("Add", mock.Anything).Return(fields.repo.errAdd)
 			repoListerAdderMock.On("List").Return(fields.repo.reposList, fields.repo.errList)
@@ -302,7 +309,7 @@ type fields struct {
 	InputBool          returnOfInputBool
 	stdin              string
 	detailLatestTag    string
-	tutorialStatus     string
+	tutorialStatus     returnWithStringErr
 }
 
 func getFields(testFields fields) fields {
@@ -313,7 +320,9 @@ func getFields(testFields fields) fields {
 		InputURL:           returnWithStringErr{},
 		InputBool:          returnOfInputBool{},
 		InputList:          []returnOfInputList{},
-		tutorialStatus:     "disabled",
+		stdin:              "",
+		detailLatestTag:    "",
+		tutorialStatus:     returnWithStringErr{},
 	}
 
 	fields := fields{
@@ -323,10 +332,12 @@ func getFields(testFields fields) fields {
 		InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 		InputBool:          returnOfInputBool{true, nil},
 		InputList:          []returnOfInputList{{response: "Github", err: nil}},
-		tutorialStatus:     "disabled",
+		tutorialStatus:     returnWithStringErr{"disabled", nil},
+		stdin:              "",
+		detailLatestTag:    "",
 	}
 
-	if isSameReturnOfRepoListerAdder(testFields.repo, fieldsNil.repo) {
+	if testFields.repo.reposList.Len() != fieldsNil.repo.reposList.Len() || testFields.repo.errAdd != fieldsNil.repo.errAdd || testFields.repo.errList != fieldsNil.repo.errList {
 		fields.repo = testFields.repo
 	}
 
@@ -354,12 +365,13 @@ func getFields(testFields fields) fields {
 		fields.tutorialStatus = testFields.tutorialStatus
 	}
 
-	return fields
-}
-
-func isSameReturnOfRepoListerAdder(a, b returnOfRepoListerAdder) bool {
-	if a.reposList.Len() != b.reposList.Len() {
-		return false
+	if testFields.stdin != fieldsNil.stdin {
+		fields.stdin = testFields.stdin
 	}
-	return a.errAdd != b.errAdd || a.errList != b.errList
+
+	if testFields.detailLatestTag != fieldsNil.detailLatestTag {
+		fields.detailLatestTag = testFields.detailLatestTag
+	}
+
+	return fields
 }
