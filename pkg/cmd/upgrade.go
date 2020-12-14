@@ -105,12 +105,7 @@ func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 			return nil
 		}
 
-		stable, err := u.resolver.StableVersion()
-		if err != nil {
-			return nil
-		}
-
-		msg := fmt.Sprintf("Release %s description:", stable)
+		msg := fmt.Sprintf("Release %s description:", tag.Name)
 		prompt.Info(msg)
 		fmt.Println(tag.Description)
 
