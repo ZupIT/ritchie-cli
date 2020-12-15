@@ -355,9 +355,9 @@ func TestDeleteCredentialViaPrompt(t *testing.T) {
 			assert.NoError(t, err)
 
 			listMock := &mocks.InputListMock{}
-			listMock.On("List", mock.Anything).Return(provider, tt.inputListError)
+			listMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(provider, tt.inputListError)
 			boolMock := &mocks.InputBoolMock{}
-			boolMock.On("Bool", mock.Anything).Return(tt.inputBoolResult, nil)
+			boolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputBoolResult, nil)
 
 			cmd := NewDeleteCredentialCmd(credDeleter, credSettings, ctxFinder, boolMock, listMock)
 			// TODO: remove stdin flag after  deprecation
