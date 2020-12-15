@@ -128,7 +128,7 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 		return git.Tag{}, err
 	}
 
-	if len(tags) <= 0 {
+	if len(tags) == 0 {
 		return git.Tag{}, errors.New("release not found")
 	}
 

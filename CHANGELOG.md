@@ -1,5 +1,71 @@
 # Changelog
 
+## [2.6.0](https://github.com/zupit/ritchie-cli/tree/2.6.0) (2020-12-14)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.5.0...2.6.0)
+
+**Closed issues:**
+
+- Tests with Testify in Upgrade [\#762](https://github.com/ZupIT/ritchie-cli/issues/762)
+- Tests with Testify in Update [\#761](https://github.com/ZupIT/ritchie-cli/issues/761)
+- Tests with Testify in Update repo [\#760](https://github.com/ZupIT/ritchie-cli/issues/760)
+- Tests with Testify in Tutorial [\#759](https://github.com/ZupIT/ritchie-cli/issues/759)
+- Tests with Testify in Show [\#758](https://github.com/ZupIT/ritchie-cli/issues/758)
+- Tests with Testify in Show formula runner [\#757](https://github.com/ZupIT/ritchie-cli/issues/757)
+- Tests with Testify in Show context [\#756](https://github.com/ZupIT/ritchie-cli/issues/756)
+- Tests with Testify in Set [\#755](https://github.com/ZupIT/ritchie-cli/issues/755)
+- Tests with Testify in Set priority [\#754](https://github.com/ZupIT/ritchie-cli/issues/754)
+- Tests with Testify in Set formula runner [\#753](https://github.com/ZupIT/ritchie-cli/issues/753)
+- Tests with Testify in Set credential [\#752](https://github.com/ZupIT/ritchie-cli/issues/752)
+- Tests with Testify in Set context [\#751](https://github.com/ZupIT/ritchie-cli/issues/751)
+- Tests with Testify in Root [\#750](https://github.com/ZupIT/ritchie-cli/issues/750)
+- Tests with Testify in Metrics [\#749](https://github.com/ZupIT/ritchie-cli/issues/749)
+- Tests with Testify in List workspace [\#748](https://github.com/ZupIT/ritchie-cli/issues/748)
+- Tests with Testify in List [\#747](https://github.com/ZupIT/ritchie-cli/issues/747)
+- Tests with Testify in List repo [\#746](https://github.com/ZupIT/ritchie-cli/issues/746)
+- Tests with Testify in List credential [\#745](https://github.com/ZupIT/ritchie-cli/issues/745)
+- Tests with Testify in Init [\#744](https://github.com/ZupIT/ritchie-cli/issues/744)
+- Tests with Testify in Formula [\#743](https://github.com/ZupIT/ritchie-cli/issues/743)
+- Tests with Testify in Delete workspace [\#742](https://github.com/ZupIT/ritchie-cli/issues/742)
+- Tests with Testify in Delete [\#741](https://github.com/ZupIT/ritchie-cli/issues/741)
+- Tests with Testify in Delete repo [\#740](https://github.com/ZupIT/ritchie-cli/issues/740)
+- Tests with Testify in Delete formula [\#739](https://github.com/ZupIT/ritchie-cli/issues/739)
+- Tests with Testify in Delete credential [\#738](https://github.com/ZupIT/ritchie-cli/issues/738)
+- Tests with Testify in Delete Context [\#737](https://github.com/ZupIT/ritchie-cli/issues/737)
+- Tests with Testify in Create [\#736](https://github.com/ZupIT/ritchie-cli/issues/736)
+- Tests with Testify in Create formula [\#735](https://github.com/ZupIT/ritchie-cli/issues/735)
+- Tests with Testify in Build formula [\#734](https://github.com/ZupIT/ritchie-cli/issues/734)
+- Tests with Testify in Buid [\#733](https://github.com/ZupIT/ritchie-cli/issues/733)
+- Tests with Testify in Autocomplete [\#732](https://github.com/ZupIT/ritchie-cli/issues/732)
+- Tests with Testify in Add [\#731](https://github.com/ZupIT/ritchie-cli/issues/731)
+- Tests with Testify in Autocomplete [\#730](https://github.com/ZupIT/ritchie-cli/issues/730)
+- Tests with Testify in Add [\#729](https://github.com/ZupIT/ritchie-cli/issues/729)
+- Tests with Testify in Add Repo [\#728](https://github.com/ZupIT/ritchie-cli/issues/728)
+- Test [\#724](https://github.com/ZupIT/ritchie-cli/issues/724)
+- nil pointer error with invalid tree.json [\#649](https://github.com/ZupIT/ritchie-cli/issues/649)
+- Allow more languages for the TUTORIAL tips. [\#528](https://github.com/ZupIT/ritchie-cli/issues/528)
+- Deprecate stdin [\#708](https://github.com/ZupIT/ritchie-cli/issues/708)
+- Check repository structure on RIT ADD REPO command [\#698](https://github.com/ZupIT/ritchie-cli/issues/698)
+- Prevent users from adding the same repo again [\#695](https://github.com/ZupIT/ritchie-cli/issues/695)
+- Remove --stdin flag from core commands [\#624](https://github.com/ZupIT/ritchie-cli/issues/624)
+- Add a multiselect input type for formulas [\#600](https://github.com/ZupIT/ritchie-cli/issues/600)
+- Add release notes and feature changelog on upgrades [\#587](https://github.com/ZupIT/ritchie-cli/issues/587)
+- Switch the command context for environment [\#554](https://github.com/ZupIT/ritchie-cli/issues/554)
+
+**Merged pull requests:**
+
+- Fix/struct solution [\#777](https://github.com/ZupIT/ritchie-cli/pull/777) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- Fixing codecov patch at 80% [\#772](https://github.com/ZupIT/ritchie-cli/pull/772) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Feature/release notes on cli [\#771](https://github.com/ZupIT/ritchie-cli/pull/771) ([victorschumacherzup](https://github.com/victorschumacherzup))
+- feat: add multiselect input [\#769](https://github.com/ZupIT/ritchie-cli/pull/769) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- disable add issues to projects with ritchie-bot [\#725](https://github.com/ZupIT/ritchie-cli/pull/725) ([kaduartur](https://github.com/kaduartur))
+- Deprecating stdin [\#709](https://github.com/ZupIT/ritchie-cli/pull/709) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Fix/readme add demo repo [\#707](https://github.com/ZupIT/ritchie-cli/pull/707) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+- Switch context to env command [\#706](https://github.com/ZupIT/ritchie-cli/pull/706) ([kaduartur](https://github.com/kaduartur))
+- Check repository structure [\#705](https://github.com/ZupIT/ritchie-cli/pull/705) ([matheussn](https://github.com/matheussn))
+- Add step to verify repo existence [\#704](https://github.com/ZupIT/ritchie-cli/pull/704) ([brunasilvazup](https://github.com/brunasilvazup))
+- Release 2.5.0 merge [\#702](https://github.com/ZupIT/ritchie-cli/pull/702) ([zup-ci](https://github.com/zup-ci))
+
 ## [2.5.0](https://github.com/zupit/ritchie-cli/tree/2.5.0) (2020-11-30)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.4.0...2.5.0)
@@ -32,6 +98,7 @@
 **Merged pull requests:**
 
 - Fix update repo when all option selected [\#700](https://github.com/ZupIT/ritchie-cli/pull/700) ([brunasilvazup](https://github.com/brunasilvazup))
+- Convert contexts to envs file [\#697](https://github.com/ZupIT/ritchie-cli/pull/697) ([kaduartur](https://github.com/kaduartur))
 - fix: add check for variables with the same name [\#693](https://github.com/ZupIT/ritchie-cli/pull/693) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Kill bill\(d\) [\#692](https://github.com/ZupIT/ritchie-cli/pull/692) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - update horus url [\#690](https://github.com/ZupIT/ritchie-cli/pull/690) ([victorschumacherzup](https://github.com/victorschumacherzup))
@@ -97,6 +164,7 @@
 - Release 2.2.0 merge [\#622](https://github.com/ZupIT/ritchie-cli/pull/622) ([zup-ci](https://github.com/zup-ci))
 - Formula inputs by flags [\#617](https://github.com/ZupIT/ritchie-cli/pull/617) ([kaduartur](https://github.com/kaduartur))
 - Improvement pipeline [\#614](https://github.com/ZupIT/ritchie-cli/pull/614) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- \[Fix\] - Searching only for run.sh on docker pre run [\#598](https://github.com/ZupIT/ritchie-cli/pull/598) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
 - Prompt to auto rebuild formula on source modifications [\#578](https://github.com/ZupIT/ritchie-cli/pull/578) ([gabriel-pinheiro](https://github.com/gabriel-pinheiro))
 - Remove repository version check [\#656](https://github.com/ZupIT/ritchie-cli/pull/656) ([kaduartur](https://github.com/kaduartur))
 
@@ -127,7 +195,6 @@
 - Fix significant typos and grammar in CONTRIBUTING.md [\#603](https://github.com/ZupIT/ritchie-cli/pull/603) ([Bharat123rox](https://github.com/Bharat123rox))
 - Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
 - Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
-- \[Fix\] - Searching only for run.sh on docker pre run [\#598](https://github.com/ZupIT/ritchie-cli/pull/598) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
 - Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
 - Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
@@ -276,7 +343,6 @@
 - Add functional test for tutorial [\#465](https://github.com/ZupIT/ritchie-cli/pull/465) ([DittrichLucas](https://github.com/DittrichLucas))
 - Release 2.0.4 merge [\#461](https://github.com/ZupIT/ritchie-cli/pull/461) ([zup-ci](https://github.com/zup-ci))
 - upgrade when version server don't respond with 200 [\#456](https://github.com/ZupIT/ritchie-cli/pull/456) ([victor-schumacher](https://github.com/victor-schumacher))
-- Add entry via stdin to the init command [\#426](https://github.com/ZupIT/ritchie-cli/pull/426) ([brunats](https://github.com/brunats))
 - Add functional test for completion powershell [\#486](https://github.com/ZupIT/ritchie-cli/pull/486) ([DittrichLucas](https://github.com/DittrichLucas))
 - Add functional test for completion fish [\#479](https://github.com/ZupIT/ritchie-cli/pull/479) ([DittrichLucas](https://github.com/DittrichLucas))
 - Add functional test for upgrade [\#469](https://github.com/ZupIT/ritchie-cli/pull/469) ([DittrichLucas](https://github.com/DittrichLucas))
@@ -316,6 +382,7 @@
 - Add functional test for list credential [\#442](https://github.com/ZupIT/ritchie-cli/pull/442) ([DittrichLucas](https://github.com/DittrichLucas))
 - Updating Horus pipeline job [\#434](https://github.com/ZupIT/ritchie-cli/pull/434) ([nathannascimentozup](https://github.com/nathannascimentozup))
 - Add functional test for list [\#430](https://github.com/ZupIT/ritchie-cli/pull/430) ([DittrichLucas](https://github.com/DittrichLucas))
+- Add entry via stdin to the init command [\#426](https://github.com/ZupIT/ritchie-cli/pull/426) ([brunats](https://github.com/brunats))
 - \[ENHANCEMENT\] Hello world formula command in README [\#401](https://github.com/ZupIT/ritchie-cli/pull/401) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - Improves inputListCustomMock to use a custom function [\#400](https://github.com/ZupIT/ritchie-cli/pull/400) ([brunats](https://github.com/brunats))
 - \[FEATURE\] Add EMAIL to provider variables [\#395](https://github.com/ZupIT/ritchie-cli/pull/395) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
@@ -639,7 +706,6 @@
 - \[FIX\] Adding trapdoor to error while removing branch [\#152](https://github.com/ZupIT/ritchie-cli/pull/152) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - Release 1.0.0-beta.13 merge [\#147](https://github.com/ZupIT/ritchie-cli/pull/147) ([zup-ci](https://github.com/zup-ci))
 - \[Feature\] color messages [\#146](https://github.com/ZupIT/ritchie-cli/pull/146) ([victor-schumacher](https://github.com/victor-schumacher))
-- \[Fix\] Remove special char in prompt [\#137](https://github.com/ZupIT/ritchie-cli/pull/137) ([kaduartur](https://github.com/kaduartur))
 - \[FEATURE\] run formula docker [\#113](https://github.com/ZupIT/ritchie-cli/pull/113) ([kaduartur](https://github.com/kaduartur))
 
 ## [1.0.0-beta.13](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.13) (2020-06-03)
@@ -673,6 +739,7 @@
 **Merged pull requests:**
 
 - \[FIX\] env runner formula [\#138](https://github.com/ZupIT/ritchie-cli/pull/138) ([marcosgmgm](https://github.com/marcosgmgm))
+- \[Fix\] Remove special char in prompt [\#137](https://github.com/ZupIT/ritchie-cli/pull/137) ([kaduartur](https://github.com/kaduartur))
 - \[FEATURE\] update templates [\#136](https://github.com/ZupIT/ritchie-cli/pull/136) ([victor-schumacher](https://github.com/victor-schumacher))
 - \[FIX\] Rename field qtd to qty [\#135](https://github.com/ZupIT/ritchie-cli/pull/135) ([kaduartur](https://github.com/kaduartur))
 - \[fix\] change name Passphrase [\#134](https://github.com/ZupIT/ritchie-cli/pull/134) ([ernelio](https://github.com/ernelio))

@@ -31,7 +31,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const defaultRepoURL = "https://github.com/ZupIT/ritchie-formulas"
+const (
+	defaultRepoURL  = "https://github.com/ZupIT/ritchie-formulas"
+	messageExisting = "This formula repository already exists, check using \"rit list repo\""
+)
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 
@@ -167,6 +170,11 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
+		if existsRepo(url, version, repos) {
+			prompt.Info(messageExisting)
+			return nil
+		}
+
 		priority, err := ad.Int("Set the priority:", "0 is higher priority, the lower higher the priority")
 		if err != nil {
 			return err
@@ -232,6 +240,12 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 			r.Version = formula.RepoVersion(latestTag)
 		}
 
+		repos, _ := ad.repo.List()
+		if existsRepo(r.Url, r.Version.String(), repos) {
+			prompt.Info(messageExisting)
+			return nil
+		}
+
 		if err := ad.repo.Add(r); err != nil {
 			return err
 		}
@@ -258,6 +272,15 @@ func (ad addRepoCmd) repoNameValidator(text interface{}) error {
 	}
 
 	return nil
+}
+
+func existsRepo(urlToAdd, versionToAdd string, repos formula.Repos) bool {
+	for i := range repos {
+		if repos[i].Url == urlToAdd && repos[i].Version.String() == versionToAdd {
+			return true
+		}
+	}
+	return false
 }
 
 func tutorialAddRepo(tutorialStatus string) {
