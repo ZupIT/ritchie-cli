@@ -27,6 +27,7 @@ const (
 	ZipUrlPattern       = "https://api.github.com/repos/%s/%s/zipball/%s"      //nolint:stylecheck
 	TagsUrlPattern      = "https://api.github.com/repos/%s/%s/releases"        //nolint:stylecheck
 	LatestTagUrlPattern = "https://api.github.com/repos/%s/%s/releases/latest" //nolint:stylecheck
+	RitchieRepoURL      = "https://github.com/ZupIT/ritchie-cli"
 )
 
 type DefaultRepoInfo struct {
