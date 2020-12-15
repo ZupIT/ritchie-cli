@@ -2,7 +2,10 @@ package credential
 
 import (
 	"errors"
+	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -23,6 +26,9 @@ func (fileRemoverErrorMock) Remove(path string) error {
 }
 
 func TestCredDelete(t *testing.T) {
+	tmp := os.TempDir()
+	defer os.RemoveAll(tmp)
+
 	type args struct {
 		homePath string
 		env      env.Finder
@@ -30,58 +36,29 @@ func TestCredDelete(t *testing.T) {
 		service  string
 	}
 	tests := []struct {
-		name    string
-		wantErr bool
-		fields  args
+		name string
+		err  error
 	}{
 		{
-			name:    "Run with success",
-			wantErr: false,
-			fields: args{
-				homePath: "",
-				service:  "",
-				env: envFinderCustomMock{
-					find: func() (env.Holder, error) {
-						return env.Holder{Current: ""}, nil
-					},
-				},
-				fm: fileManager,
-			},
+			name: "run with success",
 		},
 		{
-			name:    "error",
-			wantErr: true,
-			fields: args{
-				homePath: "",
-				service:  "",
-				env: envFinderCustomMock{
-					find: func() (env.Holder, error) {
-						return env.Holder{Current: ""}, errors.New("ReadCredentialsValue error")
-					},
-				},
-				fm: fileManager,
-			},
+			name: "error on env finder",
+			err:  errors.New("ReadCredentialsValue error"),
 		},
 		{
-			name:    "error",
-			wantErr: true,
-			fields: args{
-				homePath: "",
-				service:  "",
-				env: envFinderCustomMock{
-					find: func() (env.Holder, error) {
-						return env.Holder{Current: ""}, nil
-					},
-				},
-				fm: fileRemoverErrorMock{},
-			},
+			name: "error on file remover",
+			err:  errors.New("ReadCredentialsValue error"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewCredDelete(tt.fields.homePath, tt.fields.env, tt.fields.fm)
-			if err := got.Delete(tt.fields.service); (err != nil) != tt.wantErr {
-				t.Errorf("Delete(%s) got %v, wantErr %v", tt.name, err, tt.wantErr)
+			deleteCredential := NewCredDelete(tt.fields.homePath, tt.fields.env, fileManager)
+
+			err := deleteCredential.Delete(tt.fields.service)
+			assert.Equal(t, tt.err, err)
+			if err != nil {
+
 			}
 		})
 	}
