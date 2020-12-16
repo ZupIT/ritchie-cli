@@ -46,44 +46,38 @@ func BenchmarkCheck(b *testing.B) {
 }
 
 var (
+	createBucket = api.Command{
+		Parent:  "root",
+		Usage:   "bucket",
+		Help:    "create bucket for aws",
+		Formula: true,
+	}
+
+	createVpc = api.Command{
+		Parent:  "root",
+		Usage:   "vpc",
+		Help:    "create vpc for aws",
+		Formula: true,
+	}
+
 	conflictedTrees = map[formula.RepoName]formula.Tree{
 		core: {
 			Commands: coreCmds,
 		},
 		"repo1": {
 			Commands: api.Commands{
-				"root_aws_create_bucket": {
-					Parent:  "root",
-					Usage:   "bucket",
-					Help:    "create bucket for aws",
-					Formula: true,
-				},
+				"root_aws_create_bucket": createBucket,
 			},
 		},
 		"repo2": {
 			Commands: api.Commands{
-				"root_aws_create_vpc": {
-					Parent:  "root",
-					Usage:   "vpc",
-					Help:    "create vpc for aws",
-					Formula: true,
-				},
-				"root_aws_create_bucket": {
-					Parent:  "root",
-					Usage:   "bucket",
-					Help:    "create bucket for aws",
-					Formula: true,
-				},
+				"root_aws_create_vpc":    createVpc,
+				"root_aws_create_bucket": createBucket,
 			},
 		},
 		"repo3": {
 			Commands: api.Commands{
-				"root_aws_create_bucket": {
-					Parent:  "root",
-					Usage:   "bucket",
-					Help:    "create bucket for aws",
-					Formula: true,
-				},
+				"root_aws_create_bucket": createBucket,
 			},
 		},
 	}
@@ -91,22 +85,12 @@ var (
 	nonConflictTrees = map[formula.RepoName]formula.Tree{
 		"repo1": {
 			Commands: api.Commands{
-				"root_aws_create_bucket": {
-					Parent:  "root",
-					Usage:   "bucket",
-					Help:    "create bucket for aws",
-					Formula: true,
-				},
+				"root_aws_create_bucket": createBucket,
 			},
 		},
 		"repo2": {
 			Commands: api.Commands{
-				"root_aws_create_vpc": {
-					Parent:  "root",
-					Usage:   "vpc",
-					Help:    "create vpc for aws",
-					Formula: true,
-				},
+				"root_aws_create_vpc": createVpc,
 			},
 		},
 	}

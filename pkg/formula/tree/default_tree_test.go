@@ -19,43 +19,32 @@ package tree
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 func TestMergedTree(t *testing.T) {
-	// Setup
+	defaultTreeSetup()
 	fileManager := stream.NewFileManager()
 	providers := formula.NewRepoProviders()
 
-	tree1, _ := json.Marshal(tree1)
-	tree2, _ := json.Marshal(tree2)
-	repo1Path := filepath.Join(ritHome, "repos", strings.ToLower(repo1.Name.String()), "tree.json")
-	repo2Path := filepath.Join(ritHome, "repos", strings.ToLower(repo2.Name.String()), "tree.json")
-	repo3Path := filepath.Join(ritHome, "repos", "invalid", "tree.json")
-
-	_ = os.MkdirAll(filepath.Dir(repo1Path), os.ModePerm)
-	_ = os.MkdirAll(filepath.Dir(repo2Path), os.ModePerm)
-	_ = os.MkdirAll(filepath.Dir(repo3Path), os.ModePerm)
-
-	_ = fileManager.Write(repo1Path, tree1)
-	_ = fileManager.Write(repo2Path, tree2)
-	_ = fileManager.Write(repo3Path, []byte("invalid"))
-	// End setup
+	type repo struct {
+		repos   formula.Repos
+		listErr error
+	}
 
 	type in struct {
-		repo      formula.RepositoryLister
+		repo      repo
 		file      stream.FileReadExister
 		providers formula.RepoProviders
 		core      bool
@@ -69,10 +58,8 @@ func TestMergedTree(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repo1, repo2}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
 				file:      fileManager,
 				providers: providers,
@@ -82,10 +69,8 @@ func TestMergedTree(t *testing.T) {
 		{
 			name: "success with core commands",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repo1, repo2}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
 				file:      fileManager,
 				providers: providers,
@@ -96,10 +81,8 @@ func TestMergedTree(t *testing.T) {
 		{
 			name: "return empty tree when invalid tree",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repoInvalid}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repoInvalid},
 				},
 				file:      fileManager,
 				providers: providers,
@@ -114,13 +97,11 @@ func TestMergedTree(t *testing.T) {
 		{
 			name: "empty tree when tree.json does not exist",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repo1}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1},
 				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
 						return false
 					},
 				},
@@ -136,16 +117,14 @@ func TestMergedTree(t *testing.T) {
 		{
 			name: "read tree.json error",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repo1}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1},
 				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
 						return true
 					},
-					read: func(path string) ([]byte, error) {
+					ReadMock: func(path string) ([]byte, error) {
 						return nil, errors.New("error to read file")
 					},
 				},
@@ -162,7 +141,10 @@ func TestMergedTree(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tree := NewTreeManager(ritHome, tt.in.repo, coreCmds, tt.in.file, tt.in.providers)
+			repoMock := new(mocks.RepoManager)
+			repoMock.On("List").Return(tt.in.repo.repos, tt.in.repo.listErr)
+
+			tree := NewTreeManager(ritHome, repoMock, coreCmds, tt.in.file, tt.in.providers)
 
 			got := tree.MergedTree(tt.in.core)
 
@@ -172,36 +154,26 @@ func TestMergedTree(t *testing.T) {
 }
 
 func TestTree(t *testing.T) {
-	// Setup
+	defaultTreeSetup()
 	fileManager := stream.NewFileManager()
 	providers := formula.NewRepoProviders()
 
-	treeb1, _ := json.Marshal(tree1)
-	treeb2, _ := json.Marshal(tree2)
-	repo1Path := filepath.Join(ritHome, "repos", strings.ToLower(repo1.Name.String()), "tree.json")
-	repo2Path := filepath.Join(ritHome, "repos", strings.ToLower(repo2.Name.String()), "tree.json")
-	repo3Path := filepath.Join(ritHome, "repos", "invalid", "tree.json")
+	type (
+		repo struct {
+			repos   formula.Repos
+			listErr error
+		}
+		in struct {
+			repo      repo
+			file      stream.FileReadExister
+			providers formula.RepoProviders
+		}
 
-	_ = os.MkdirAll(filepath.Dir(repo1Path), os.ModePerm)
-	_ = os.MkdirAll(filepath.Dir(repo2Path), os.ModePerm)
-	_ = os.MkdirAll(filepath.Dir(repo3Path), os.ModePerm)
-
-	_ = fileManager.Write(repo1Path, treeb1)
-	_ = fileManager.Write(repo2Path, treeb2)
-	_ = fileManager.Write(repo3Path, []byte("invalid"))
-
-	// End setup
-
-	type in struct {
-		repo      formula.RepositoryLister
-		file      stream.FileReadExister
-		providers formula.RepoProviders
-	}
-
-	type want struct {
-		treeByRepo map[formula.RepoName]formula.Tree
-		err        error
-	}
+		want struct {
+			treeByRepo map[formula.RepoName]formula.Tree
+			err        error
+		}
+	)
 
 	tests := []struct {
 		name string
@@ -211,10 +183,8 @@ func TestTree(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repo1, repo2}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
 				file:      fileManager,
 				providers: providers,
@@ -231,10 +201,9 @@ func TestTree(t *testing.T) {
 		{
 			name: "repo list error",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{}, errors.New("repo list error")
-					},
+				repo: repo{
+					repos:   formula.Repos{},
+					listErr: errors.New("repo list error"),
 				},
 				file:      fileManager,
 				providers: providers,
@@ -246,13 +215,11 @@ func TestTree(t *testing.T) {
 		{
 			name: "return repos with empty tree commands when tree.json does not exist",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repo1, repo2}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
 						return false
 					},
 				},
@@ -270,16 +237,14 @@ func TestTree(t *testing.T) {
 		{
 			name: "read tree.json error",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{repo1, repo2}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
 						return true
 					},
-					read: func(path string) ([]byte, error) {
+					ReadMock: func(path string) ([]byte, error) {
 						return []byte("error"), errors.New("error to read tree.json")
 					},
 				},
@@ -293,44 +258,29 @@ func TestTree(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tree := NewTreeManager(ritHome, tt.in.repo, coreCmds, tt.in.file, tt.in.providers)
+			repoMock := new(mocks.RepoManager)
+			repoMock.On("List").Return(tt.in.repo.repos, tt.in.repo.listErr)
+
+			tree := NewTreeManager(ritHome, repoMock, coreCmds, tt.in.file, tt.in.providers)
 
 			got, err := tree.Tree()
 
-			if !reflect.DeepEqual(got, tt.want.treeByRepo) {
-				t.Errorf("Tree(%s) got %v; want %v", tt.name, got, tt.want.treeByRepo)
-			}
+			assert.Equal(t, tt.want.treeByRepo, got)
 
-			if tt.want.err != nil && tt.want.err.Error() != err.Error() {
-				t.Errorf("Tree(%s) got %v; want error %v", tt.name, err, tt.want.err)
+			if tt.want.err != nil || err != nil {
+				assert.EqualError(t, err, tt.want.err.Error())
 			}
 		})
 	}
 }
 
 func BenchmarkMergedTree(b *testing.B) {
+	defaultTreeSetup()
 	fileManager := stream.NewFileManager()
 	providers := formula.NewRepoProviders()
 
-	tree1, _ := json.Marshal(tree1)
-	tree2, _ := json.Marshal(tree2)
-	repo1Path := filepath.Join(ritHome, "repos", strings.ToLower(repo1.Name.String()), "tree.json")
-	repo2Path := filepath.Join(ritHome, "repos", strings.ToLower(repo2.Name.String()), "tree.json")
-	repo3Path := filepath.Join(ritHome, "repos", "invalid", "tree.json")
-
-	_ = os.MkdirAll(filepath.Dir(repo1Path), os.ModePerm)
-	_ = os.MkdirAll(filepath.Dir(repo2Path), os.ModePerm)
-	_ = os.MkdirAll(filepath.Dir(repo3Path), os.ModePerm)
-
-	_ = fileManager.Write(repo1Path, tree1)
-	_ = fileManager.Write(repo2Path, tree2)
-	_ = fileManager.Write(repo3Path, []byte("invalid"))
-
-	repoMock := repositoryListerCustomMock{
-		list: func() (formula.Repos, error) {
-			return formula.Repos{repo1, repo2}, nil
-		},
-	}
+	repoMock := new(mocks.RepoManager)
+	repoMock.On("List").Return(formula.Repos{repo1, repo2}, nil)
 
 	tree := NewTreeManager(ritHome, repoMock, coreCmds, fileManager, providers)
 
@@ -500,41 +450,20 @@ var (
 	}
 )
 
-type repositoryListerCustomMock struct {
-	list func() (formula.Repos, error)
-}
+func defaultTreeSetup() {
+	fileManager := stream.NewFileManager()
 
-func (m repositoryListerCustomMock) List() (formula.Repos, error) {
-	return m.list()
-}
+	tree1, _ := json.Marshal(tree1)
+	tree2, _ := json.Marshal(tree2)
+	repo1Path := filepath.Join(ritHome, "repos", strings.ToLower(repo1.Name.String()), "tree.json")
+	repo2Path := filepath.Join(ritHome, "repos", strings.ToLower(repo2.Name.String()), "tree.json")
+	repo3Path := filepath.Join(ritHome, "repos", "invalid", "tree.json")
 
-type FileReadExisterMock struct {
-	read   func(path string) ([]byte, error)
-	exists func(path string) bool
-}
+	_ = os.MkdirAll(filepath.Dir(repo1Path), os.ModePerm)
+	_ = os.MkdirAll(filepath.Dir(repo2Path), os.ModePerm)
+	_ = os.MkdirAll(filepath.Dir(repo3Path), os.ModePerm)
 
-func (m FileReadExisterMock) Read(path string) ([]byte, error) {
-	return m.read(path)
-}
-
-func (m FileReadExisterMock) Exists(path string) bool {
-	return m.exists(path)
-}
-
-type GitRepositoryMock struct {
-	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
-	tags      func(info git.RepoInfo) (git.Tags, error)
-	latestTag func(info git.RepoInfo) (git.Tag, error)
-}
-
-func (m GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
-	return m.zipball(info, version)
-}
-
-func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
-	return m.tags(info)
-}
-
-func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
-	return m.latestTag(info)
+	_ = fileManager.Write(repo1Path, tree1)
+	_ = fileManager.Write(repo2Path, tree2)
+	_ = fileManager.Write(repo3Path, []byte("invalid"))
 }
