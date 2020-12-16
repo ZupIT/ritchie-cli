@@ -275,7 +275,7 @@ func TestAddRepoCmd(t *testing.T) {
 
 			err := cmd.Execute()
 
-			assert.Equal(t, tt.wantErr, err != nil)
+			assert.Equal(t, tt.wantErr, (err != nil))
 		})
 	}
 }

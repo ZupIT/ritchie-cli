@@ -209,6 +209,7 @@ func tutorialRit(tutorialStatus string) {
 	}
 }
 
+// TODO: remove this method in the next release
 func (ro *rootCmd) convertContextsFileToEnvsFile() error {
 	ctx := struct {
 		Current string   `json:"current_context"`
@@ -256,6 +257,7 @@ func (ro *rootCmd) ritchieIsInitialized() bool {
 	return ro.dir.Exists(commonsRepoPath)
 }
 
+// TODO: remove this method in the next release
 func (ro *rootCmd) convertTree() error {
 	repos, err := ro.repo.List()
 	if err != nil {

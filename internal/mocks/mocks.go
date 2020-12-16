@@ -160,3 +160,47 @@ func (i *InputTextValidatorMock) Text(name string, validate func(interface{}) er
 
 	return args.String(0), args.Error(1)
 }
+
+type RepoManager struct {
+	mock.Mock
+}
+
+func (r *RepoManager) Add(repo formula.Repo) error {
+	args := r.Called(repo)
+	return args.Error(0)
+}
+
+func (r *RepoManager) List() (formula.Repos, error) {
+	args := r.Called()
+	return args.Get(0).(formula.Repos), args.Error(1)
+}
+
+func (r *RepoManager) Update(name formula.RepoName, version formula.RepoVersion) error {
+	args := r.Called(name, version)
+	return args.Error(0)
+}
+
+func (r *RepoManager) Delete(name formula.RepoName) error {
+	args := r.Called(name)
+	return args.Error(0)
+}
+
+func (r *RepoManager) SetPriority(name formula.RepoName, priority int) error {
+	args := r.Called(name, priority)
+	return args.Error(0)
+}
+
+func (r *RepoManager) Create(repo formula.Repo) error {
+	args := r.Called(repo)
+	return args.Error(0)
+}
+
+func (r *RepoManager) Write(repos formula.Repos) error {
+	args := r.Called(repos)
+	return args.Error(0)
+}
+
+func (r *RepoManager) LatestTag(repo formula.Repo) string {
+	args := r.Called(repo)
+	return args.String(0)
+}
