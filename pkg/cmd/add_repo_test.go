@@ -247,7 +247,7 @@ func TestAddRepoCmd(t *testing.T) {
 			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
 			tutorialFindMock := new(mocks.TutorialFindSetterMock)
 			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: fields.tutorialStatus.string}, fields.tutorialStatus.error)
-			repoListerAdderMock := new(mocks.RepoListerAdderMock)
+			repoListerAdderMock := new(mocks.RepoManager)
 			repoListerAdderMock.On("Add", mock.Anything).Return(fields.repo.errAdd)
 			repoListerAdderMock.On("List").Return(fields.repo.reposList, fields.repo.errList)
 

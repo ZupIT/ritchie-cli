@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -227,16 +228,29 @@ func TestConvertContextToEnv(t *testing.T) {
 }
 
 func TestConvertTree(t *testing.T) {
-	type repo struct {
-		repos    formula.Repos
-		listErr  error
-		writeErr error
-	}
+	type (
+		repo struct {
+			repos    formula.Repos
+			listErr  error
+			writeErr error
+		}
+		file struct {
+			exist     bool
+			readBytes []byte
+			readErr   error
+			writeErr  error
+			removeErr error
+		}
+		mockTree struct {
+			tree formula.Tree
+			err  error
+		}
+	)
 
 	type in struct {
-		file stream.FileWriteReadExistRemover
+		file file
 		repo repo
-		tree formula.TreeGenerator
+		tree mockTree
 	}
 
 	tests := []struct {
@@ -247,12 +261,23 @@ func TestConvertTree(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				file: sMocks.FileManagerMock{
-					WriteFunc: func(path string, content []byte) error {
-						return nil
+				tree: mockTree{
+					tree: formula.Tree{
+						Commands: api.Commands{
+							"root_group": {
+								Parent: "root",
+								Usage:  "group",
+								Help:   "group for add",
+							},
+							"root_group_verb": {
+								Parent:  "root_group",
+								Usage:   "verb",
+								Help:    "verb for add",
+								Formula: true,
+							},
+						},
 					},
 				},
-				tree: treeGeneratorMock{},
 				repo: repo{
 					repos: formula.Repos{
 						{
@@ -305,10 +330,10 @@ func TestConvertTree(t *testing.T) {
 			want: errors.New("error to list repos"),
 		},
 		{
-			name: "generate tree error",
+			name: "generate mockTree error",
 			in: in{
-				tree: treeGeneratorMock{
-					err: errors.New("error to generate tree"),
+				tree: mockTree{
+					err: errors.New("error to generate mockTree"),
 				},
 				repo: repo{
 					repos: formula.Repos{
@@ -329,16 +354,13 @@ func TestConvertTree(t *testing.T) {
 				},
 			},
 		},
-		/*{
-			name: "write tree.json error",
+		{
+			name: "write mockTree.json error",
 			in: in{
-				file: sMocks.FileManagerMock{
-					WriteFunc: func(path string, content []byte) error {
-						return errors.New("error to write tree.json")
-					},
+				file: file{
+					writeErr: errors.New("error to write mockTree.json"),
 				},
-				tree: treeGeneratorMock{},
-				repo: RepoListWriterMock{
+				repo: repo{
 					repos: []formula.Repo{
 						{
 							Provider: "Github",
@@ -360,13 +382,7 @@ func TestConvertTree(t *testing.T) {
 		{
 			name: "error to write repos",
 			in: in{
-				file: sMocks.FileManagerMock{
-					WriteFunc: func(path string, content []byte) error {
-						return nil
-					},
-				},
-				tree: treeGeneratorMock{},
-				repo: RepoListWriterMock{
+				repo: repo{
 					repos: []formula.Repo{
 						{
 							Provider: "Github",
@@ -386,19 +402,24 @@ func TestConvertTree(t *testing.T) {
 				},
 			},
 			want: errors.New("error to write repos"),
-		},*/
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			in := tt.in
 			repoMock := new(mocks.RepoManager)
-			repoMock.On("List").Return(tt.in.repo.repos, tt.in.repo.listErr)
-			repoMock.On("Write", mock.Anything).Return(tt.in.repo.writeErr)
+			repoMock.On("List").Return(in.repo.repos, in.repo.listErr)
+			repoMock.On("Write", mock.Anything).Return(in.repo.writeErr)
+			fileMock := new(mocks.FileManager)
+			fileMock.On("Write", mock.Anything, mock.Anything).Return(in.file.writeErr)
+			treeMock := new(mocks.TreeManager)
+			treeMock.On("Generate", mock.Anything).Return(in.tree.tree, in.tree.err)
 
 			cmd := rootCmd{
-				file: tt.in.file,
+				file: fileMock,
 				repo: repoMock,
-				tree: tt.in.tree,
+				tree: treeMock,
 			}
 
 			got := cmd.convertTree()
@@ -406,18 +427,4 @@ func TestConvertTree(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
-}
-
-type RepoListWriterMock struct {
-	repos    formula.Repos
-	listErr  error
-	writeErr error
-}
-
-func (r RepoListWriterMock) List() (formula.Repos, error) {
-	return r.repos, r.listErr
-}
-
-func (r RepoListWriterMock) Write(repos formula.Repos) error {
-	return r.writeErr
 }

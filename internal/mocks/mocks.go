@@ -21,6 +21,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
@@ -45,22 +46,6 @@ func (d *DetailManagerMock) LatestTag(repo formula.Repo) string {
 	args := d.Called(repo)
 
 	return args.String(0)
-}
-
-type RepoListerAdderMock struct {
-	mock.Mock
-}
-
-func (r *RepoListerAdderMock) List() (formula.Repos, error) {
-	args := r.Called()
-
-	return args.Get(0).(formula.Repos), args.Error(1)
-}
-
-func (r *RepoListerAdderMock) Add(repo formula.Repo) error {
-	args := r.Called(repo)
-
-	return args.Error(0)
 }
 
 type TutorialFindSetterMock struct {
@@ -203,4 +188,82 @@ func (r *RepoManager) Write(repos formula.Repos) error {
 func (r *RepoManager) LatestTag(repo formula.Repo) string {
 	args := r.Called(repo)
 	return args.String(0)
+}
+
+type FileManager struct {
+	mock.Mock
+}
+
+func (f *FileManager) Exists(path string) bool {
+	args := f.Called(path)
+	return args.Bool(0)
+}
+
+func (f *FileManager) Read(path string) ([]byte, error) {
+	args := f.Called(path)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
+func (f *FileManager) Write(path string, content []byte) error {
+	args := f.Called(path, content)
+	return args.Error(0)
+}
+
+func (f *FileManager) Create(path string, data io.ReadCloser) error {
+	args := f.Called(path, data)
+	return args.Error(0)
+}
+
+func (f *FileManager) Remove(path string) error {
+	args := f.Called(path)
+	return args.Error(0)
+}
+
+func (f *FileManager) List(file string) ([]string, error) {
+	args := f.Called(file)
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (f *FileManager) ListNews(oldPath, newPath string) ([]string, error) {
+	args := f.Called(oldPath, newPath)
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (f *FileManager) Copy(src, dst string) error {
+	args := f.Called(src, dst)
+	return args.Error(0)
+}
+
+func (f *FileManager) Append(path string, content []byte) error {
+	args := f.Called(path, content)
+	return args.Error(0)
+}
+
+func (f *FileManager) Move(oldPath, newPath string, files []string) error {
+	args := f.Called(oldPath, newPath, files)
+	return args.Error(0)
+}
+
+type TreeManager struct {
+	mock.Mock
+}
+
+func (t *TreeManager) Tree() (map[formula.RepoName]formula.Tree, error) {
+	args := t.Called()
+	return args.Get(0).(map[formula.RepoName]formula.Tree), args.Error(1)
+}
+
+func (t *TreeManager) MergedTree(core bool) formula.Tree {
+	args := t.Called(core)
+	return args.Get(0).(formula.Tree)
+}
+
+func (t *TreeManager) Generate(repoPath string) (formula.Tree, error) {
+	args := t.Called(repoPath)
+	return args.Get(0).(formula.Tree), args.Error(1)
+}
+
+func (t *TreeManager) Check() []api.CommandID {
+	args := t.Called()
+	return args.Get(0).([]api.CommandID)
 }
