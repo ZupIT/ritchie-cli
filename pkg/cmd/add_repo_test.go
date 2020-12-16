@@ -68,90 +68,85 @@ func TestAddRepoCmd(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		fields  fields
-		wantErr bool
+		name   string
+		fields fields
+		want   error
 	}{
 		{
-			name:    "Run with success",
-			wantErr: false,
+			name: "run with success",
 		},
 		{
-			name: "Run with success when user add a new commons",
+			name: "run with success when user add a new commons",
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: formula.RepoCommonsName}}, errList: nil},
 				InputTextValidator: returnWithStringErr{formula.RepoCommonsName.String(), nil},
 			},
-			wantErr: false,
 		},
 		{
-			name: "Run with success when user add a repo exitent",
+			name: "run with success when user add a repo exitent",
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: "name-repo"}}, errList: nil},
 				InputTextValidator: returnWithStringErr{"name-repo", nil},
 			},
-			wantErr: false,
 		},
 		{
-			name: "Return nil when user add a new commons incorrectly",
+			name: "return nil when user add a new commons incorrectly",
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: formula.RepoCommonsName}}, errList: nil},
 				InputTextValidator: returnWithStringErr{formula.RepoCommonsName.String(), nil},
 				InputBool:          returnOfInputBool{false, nil},
 			},
-			wantErr: false,
 		},
 		{
-			name: "Return nil success when user add a repo exitent incorrectly",
+			name: "return nil success when user add a repo existent incorrectly",
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: "name-repo"}}, errList: nil},
 				InputTextValidator: returnWithStringErr{"name-repo", nil},
 				InputBool:          returnOfInputBool{false, nil},
 			},
-			wantErr: false,
 		},
 		{
 			name: "return error when len of tags is 0",
 			fields: fields{
 				InputList: []returnOfInputList{{response: "GitLab", err: nil}},
 			},
-			wantErr: true,
+			want: errors.New("please, generate a release to add your repository"),
 		},
 		{
 			name: "return error when Repos.Tag fail",
 			fields: fields{
 				InputList: []returnOfInputList{{response: "Bitbucket", err: nil}},
 			},
-			wantErr: true,
+			want: errors.New("tag error"),
 		},
 		{
-			name: "Fail when repo.Add return err",
+			name: "fail when repo.Add return err",
 			fields: fields{
 				repo:      returnOfRepoListerAdder{errAdd: someError, reposList: formula.Repos{}, errList: nil},
 				InputList: []returnOfInputList{{response: "Github", err: nil}},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
 			name: "input bool error",
 			fields: fields{
 				InputBool: returnOfInputBool{false, someError},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
 			name: "input password error",
 			fields: fields{
 				InputPassword: returnWithStringErr{"", someError},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
 			name: "input list select provider return error",
 			fields: fields{
 				InputList: []returnOfInputList{{response: "item", err: someError}},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
 			name: "input list select version return error",
@@ -161,60 +156,57 @@ func TestAddRepoCmd(t *testing.T) {
 					{question: "", response: "Github", err: nil},
 				},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
 			name: "input text error",
 			fields: fields{
 				InputTextValidator: returnWithStringErr{"mocked text", someError},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
 			name: "input url error",
 			fields: fields{
 				InputURL: returnWithStringErr{"http://localhost/mocked", someError},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
-			name: "Tutorial status enabled",
+			name: "tutorial status enabled",
 			fields: fields{
 				tutorialStatus: returnWithStringErr{"enabled", nil},
 			},
-			wantErr: false,
 		},
 		{
 			name: "return error when tutorial.Find fail",
 			fields: fields{
 				tutorialStatus: returnWithStringErr{"", someError},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
-			name: "Fail when repo.List return err",
+			name: "fail when repo.List return err",
 			fields: fields{
 				repo: returnOfRepoListerAdder{errAdd: nil, reposList: nil, errList: someError},
 			},
-			wantErr: true,
+			want: someError,
 		},
 		{
-			name: "Run with success when input is stdin",
+			name: "run with success when input is stdin",
 			fields: fields{
 				stdin: `{"provider": "github", "name": "repo-name", "version": "0.0.0", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
 			},
-			wantErr: false,
 		},
 		{
-			name: "Run with success when input is stdin and version is not informed",
+			name: "run with success when input is stdin and version is not informed",
 			fields: fields{
 				stdin:           `{"provider": "github", "name": "repo-name", "version": "", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
 				detailLatestTag: "1.0.0",
 			},
-			wantErr: false,
 		},
 		{
-			name: "Return error when user add a repo existent",
+			name: "return error when user add a repo existent",
 			fields: fields{
 				repo:     returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{*repoTest}, errList: nil},
 				InputURL: returnWithStringErr{repoTest.Url, nil},
@@ -223,7 +215,6 @@ func TestAddRepoCmd(t *testing.T) {
 					{question: "", response: "Github", err: nil},
 				},
 			},
-			wantErr: false,
 		},
 	}
 	checkerManager := tree.NewChecker(treeMock{})
@@ -273,9 +264,9 @@ func TestAddRepoCmd(t *testing.T) {
 				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			}
 
-			err := cmd.Execute()
+			got := cmd.Execute()
 
-			assert.Equal(t, tt.wantErr, (err != nil))
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
