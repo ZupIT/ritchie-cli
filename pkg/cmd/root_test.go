@@ -235,11 +235,7 @@ func TestConvertTree(t *testing.T) {
 			writeErr error
 		}
 		file struct {
-			exist     bool
-			readBytes []byte
-			readErr   error
-			writeErr  error
-			removeErr error
+			writeErr error
 		}
 		mockTree struct {
 			tree formula.Tree
@@ -423,7 +419,6 @@ func TestConvertTree(t *testing.T) {
 			}
 
 			got := cmd.convertTree()
-
 			assert.Equal(t, tt.want, got)
 		})
 	}
