@@ -160,3 +160,56 @@ func (i *InputTextValidatorMock) Text(name string, validate func(interface{}) er
 
 	return args.String(0), args.Error(1)
 }
+
+type FormCreator struct {
+	mock.Mock
+}
+
+func (f *FormCreator) Create(cf formula.Create) error {
+	args := f.Called(cf)
+	return args.Error(0)
+}
+
+func (f *FormCreator) Build(info formula.BuildInfo) error {
+	args := f.Called(info)
+	return args.Error(0)
+}
+
+type WorkspaceForm struct {
+	mock.Mock
+}
+
+func (w *WorkspaceForm) Add(workspace formula.Workspace) error {
+	args := w.Called(workspace)
+	return args.Error(0)
+}
+
+func (w *WorkspaceForm) Delete(workspace formula.Workspace) error {
+	args := w.Called(workspace)
+	return args.Error(0)
+}
+
+func (w *WorkspaceForm) List() (formula.Workspaces, error) {
+	args := w.Called()
+	return args.Get(0).(formula.Workspaces), args.Error(1)
+}
+
+func (w *WorkspaceForm) Validate(workspace formula.Workspace) error {
+	args := w.Called(workspace)
+	return args.Error(0)
+}
+
+func (w *WorkspaceForm) CurrentHash(formulaPath string) (string, error) {
+	args := w.Called(formulaPath)
+	return args.String(0), args.Error(1)
+}
+
+func (w *WorkspaceForm) PreviousHash(formulaPath string) (string, error) {
+	args := w.Called(formulaPath)
+	return args.String(0), args.Error(1)
+}
+
+func (w *WorkspaceForm) UpdateHash(formulaPath string, hash string) error {
+	args := w.Called(formulaPath)
+	return args.Error(0)
+}

@@ -22,9 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -36,13 +34,17 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const newWorkspace = "Type new formula workspace?"
+const (
+	newWorkspace     = "Type new formula workspace?"
+	formulaCmdLabel  = "Enter the new formula command: "
+	formulaCmdHelper = "You must create your command based in this example [rit group verb noun]"
+)
 
 // createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
 	formula         formula.CreateBuilder
-	workspace       formula.WorkspaceAddLister
+	workspace       formula.WorkspaceAddListHasher
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
@@ -56,7 +58,7 @@ func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
 	tplM template.Manager,
-	workspace formula.WorkspaceAddLister,
+	workspace formula.WorkspaceAddListHasher,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
@@ -91,11 +93,7 @@ func NewCreateFormulaCmd(
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inTextValidator.Text(
-			"Enter the new formula command: ",
-			c.surveyCmdValidator,
-			"You must create your command based in this example [rit group verb noun]",
-		)
+		formulaCmd, err := c.inTextValidator.Text(formulaCmdLabel, c.surveyCmdValidator, formulaCmdHelper)
 		if err != nil {
 			return err
 		}
@@ -138,7 +136,9 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		c.tree.Check()
-		c.create(cf)
+		if err := c.create(cf); err != nil {
+			return err
+		}
 
 		return nil
 	}
@@ -157,42 +157,44 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		c.create(cf)
+		if err := c.create(cf); err != nil {
+			return err
+		}
+
 		return nil
 	}
 }
 
-func (c createFormulaCmd) create(cf formula.Create) {
-	buildInfo := prompt.Bold("Creating and building formula...")
-	s := spinner.StartNew(buildInfo)
-	time.Sleep(2 * time.Second)
-
+func (c createFormulaCmd) create(cf formula.Create) error {
 	if err := c.formula.Create(cf); err != nil {
-		err := prompt.NewError(err.Error())
-		s.Error(err)
-		return
+		return err
 	}
 
 	info := formula.BuildInfo{FormulaPath: cf.FormulaPath, Workspace: cf.Workspace}
 	if err := c.formula.Build(info); err != nil {
-		err := prompt.NewError(err.Error())
-		s.Error(err)
-		return
+		return err
 	}
+
+	hash, err := c.workspace.CurrentHash(cf.FormulaPath)
+	if err != nil {
+		return err
+	}
+
+	if err := c.workspace.UpdateHash(cf.FormulaPath, hash); err != nil {
+		return err
+	}
+
+	successMsg := fmt.Sprintf("%s formula successfully created!", cf.Lang)
+	prompt.Success(successMsg)
 
 	tutorialHolder, err := c.tutorial.Find()
 	if err != nil {
-		s.Error(err)
-		return
+		return err
 	}
-	createSuccess(s, cf.Lang)
-	buildSuccess(cf.FormulaPath, cf.FormulaCmd, tutorialHolder.Current)
-}
 
-func createSuccess(s *spinner.Spinner, lang string) {
-	msg := fmt.Sprintf("%s formula successfully created!", lang)
-	success := prompt.Green(msg)
-	s.Success(success)
+	buildSuccess(cf.FormulaPath, cf.FormulaCmd, tutorialHolder.Current)
+
+	return nil
 }
 
 func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
@@ -200,9 +202,10 @@ func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 
 	if tutorialStatus == tutorialStatusEnabled {
 		tutorialCreateFormula(formulaCmd)
-	} else {
-		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
+		return
 	}
+
+	prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
 }
 
 func formulaPath(workspacePath, cmd string) string {

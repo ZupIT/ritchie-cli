@@ -19,11 +19,18 @@ package cmd
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -32,11 +39,17 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	tplM := template.NewManager("../../testdata", dirManager)
 	tChecker := tree.NewChecker(treeMock{})
+	workspaceMock := new(mocks.WorkspaceForm)
+	workspaceMock.On("List").Return(formula.Workspaces{}, nil)
+	workspaceMock.On("Add", mock.Anything).Return(nil)
+	workspaceMock.On("CurrentHash", mock.Anything).Return("dsadasdas", nil)
+	workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
+
 	cmd := NewCreateFormulaCmd(
 		os.TempDir(),
 		formCreator{},
 		tplM,
-		workspaceForm{},
+		workspaceMock,
 		inputTextMock{},
 		inputTextValidatorMock{},
 		inputListMock{},
@@ -49,9 +62,8 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 		return
 	}
 
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-	}
+	err := cmd.Execute()
+	assert.NoError(t, err)
 }
 
 func TestCreateFormulaCmd(t *testing.T) {
@@ -123,7 +135,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				os.TempDir(),
 				formCreator{},
 				tt.in.tm,
-				workspaceForm{},
+				new(mocks.WorkspaceForm),
 				tt.in.inText,
 				tt.in.inTextValidator,
 				tt.in.inList,
@@ -137,6 +149,117 @@ func TestCreateFormulaCmd(t *testing.T) {
 		})
 	}
 
+}
+
+func TestCreateFormula(t *testing.T) {
+	workDir := filepath.Join(os.TempDir(), ".ritchie-formulas-local")
+	cf := formula.Create{
+		FormulaCmd: "rit test test",
+		Lang:       "go",
+		Workspace: formula.Workspace{
+			Name: "default",
+			Dir:  workDir,
+		},
+		FormulaPath: filepath.Join(workDir, "test", "test"),
+	}
+
+	type in struct {
+		createFormErr  error
+		buildFormErr   error
+		currentHash    string
+		currentHashErr error
+		updateHashErr  error
+		tutorialHolder rtutorial.TutorialHolder
+		tutorialErr    error
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "success",
+			in: in{
+				currentHash: "a6edc906-2f9f-5fb2-a373-efac406f0ef2",
+			},
+		},
+		{
+			name: "success with tutorial enabled",
+			in: in{
+				currentHash: "a6edc906-2f9f-5fb2-a373-efac406f0ef2",
+				tutorialHolder: rtutorial.TutorialHolder{
+					Current: "enabled",
+				},
+			},
+		},
+		{
+			name: "create formula error",
+			in: in{
+				createFormErr: errors.New("error to create formula"),
+			},
+			want: errors.New("error to create formula"),
+		},
+		{
+			name: "build formula error",
+			in: in{
+				buildFormErr: errors.New("error to build formula"),
+			},
+			want: errors.New("error to build formula"),
+		},
+		{
+			name: "current hash error",
+			in: in{
+				currentHashErr: errors.New("error to create current formula hash"),
+			},
+			want: errors.New("error to create current formula hash"),
+		},
+		{
+			name: "update hash error",
+			in: in{
+				updateHashErr: errors.New("error to update formula hash"),
+			},
+			want: errors.New("error to update formula hash"),
+		},
+		{
+			name: "tutorial disable",
+			in: in{
+				tutorialHolder: rtutorial.TutorialHolder{
+					Current: "disable",
+				},
+			},
+		},
+		{
+			name: "tutorial error",
+			in: in{
+				tutorialErr: errors.New("error to find tutorial"),
+			},
+			want: errors.New("error to find tutorial"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			creatorMock := new(mocks.FormCreator)
+			creatorMock.On("Create", mock.Anything).Return(tt.in.createFormErr)
+			creatorMock.On("Build", mock.Anything).Return(tt.in.buildFormErr)
+			workspaceMock := new(mocks.WorkspaceForm)
+			workspaceMock.On("CurrentHash", mock.Anything).Return(tt.in.currentHash, tt.in.currentHashErr)
+			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(tt.in.updateHashErr)
+			tutorialMock := new(mocks.TutorialFindSetterMock)
+			tutorialMock.On("Find").Return(tt.in.tutorialHolder, tt.in.tutorialErr)
+
+			createForm := createFormulaCmd{
+				formula:   creatorMock,
+				workspace: workspaceMock,
+				tutorial:  tutorialMock,
+			}
+
+			got := createForm.create(cf)
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
 }
 
 type TemplateManagerCustomMock struct {
