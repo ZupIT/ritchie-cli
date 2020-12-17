@@ -36,7 +36,6 @@ func TestFind(t *testing.T) {
 
 	githubCred := Detail{Service: "github"}
 
-	fileManager := stream.NewFileManager()
 	envFinder := env.NewFinder(tmp, fileManager)
 	dirManager := stream.NewDirManager(fileManager)
 
@@ -65,7 +64,7 @@ func TestFind(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			finder := NewFinder(tmp, envFinder, fileManager)
+			finder := NewFinder(tmp, envFinder)
 			got, err := finder.Find(tt.provider)
 
 			assert.Equal(t, tt.err, err)

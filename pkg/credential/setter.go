@@ -18,6 +18,9 @@ package credential
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -58,13 +61,13 @@ func (s SetManager) Set(cred Detail) error {
 		return err
 	}
 
-	dir := Dir(s.homePath, envHolder.Current)
+	dir := filepath.Join(s.homePath, credentialDir, envHolder.Current)
 	if err := s.dir.Create(dir); err != nil {
 		return err
 	}
 
-	credFile := File(s.homePath, envHolder.Current, cred.Service)
-	if err := s.file.Write(credFile, cb); err != nil {
+	credFile := filepath.Join(s.homePath, credentialDir, envHolder.Current, cred.Service)
+	if err := ioutil.WriteFile(credFile, cb, os.ModePerm); err != nil {
 		return err
 	}
 

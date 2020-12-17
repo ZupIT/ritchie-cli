@@ -24,6 +24,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -38,15 +40,11 @@ func providersPath() string {
 	return path
 }
 
-func TestSettings_ReadCredentialsFields(t *testing.T) {
+func TestReadCredentialsFields(t *testing.T) {
 	credentials, err := credSettings.ReadCredentialsFields("../../testdata/credentials.json")
-	if err != nil {
-		t.Errorf("Error reading credentials fields")
-	}
-
-	if credentials == nil || len(credentials) <= 0 {
-		t.Errorf("Error reading credentials fields, cannot be empty or null")
-	}
+	assert.NoError(t, err)
+	assert.NotNil(t, credentials)
+	assert.Greater(t, len(credentials), 0)
 }
 
 func TestSettings_ReadCredentialsValue(t *testing.T) {

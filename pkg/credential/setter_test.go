@@ -75,7 +75,7 @@ func (suite *SetterTestSuite) TestSetCredentialToDefault() {
 		suite.Run(t.testName, func() {
 			defer os.RemoveAll(suite.HomePath)
 			envFinderMock := new(mocks.EnvFinderMock)
-			filePathExpectedCreated := File(suite.HomePath, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
+			filePathExpectedCreated := filepath.Join(suite.HomePath, credentialDir, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
 			envFinderMock.On("Find").Return(t.env, nil)
 			setter := NewSetter(suite.HomePath, envFinderMock, dirManager, fileManager)
