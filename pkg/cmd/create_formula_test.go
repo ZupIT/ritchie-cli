@@ -26,10 +26,9 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -38,29 +37,38 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tplM := template.NewManager("../../testdata", dirManager)
-	tChecker := tree.NewChecker(treeMock{})
 	workspaceMock := new(mocks.WorkspaceForm)
 	workspaceMock.On("List").Return(formula.Workspaces{}, nil)
 	workspaceMock.On("Add", mock.Anything).Return(nil)
 	workspaceMock.On("CurrentHash", mock.Anything).Return("dsadasdas", nil)
 	workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
+	formulaCreatorMock := new(mocks.FormCreator)
+	formulaCreatorMock.On("Create", mock.Anything).Return(nil)
+	formulaCreatorMock.On("Build", mock.Anything).Return(nil)
+	inputTextMock := new(mocks.InputTextMock)
+	inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
+	inputTextValidatorMock := new(mocks.InputTextValidatorMock)
+	inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
+	inputListMock := new(mocks.InputListMock)
+	inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
+	tutorialMock := new(mocks.TutorialFindSetterMock)
+	tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
+	treeMock := new(mocks.TreeManager)
+	treeMock.On("Check").Return([]api.CommandID{})
 
 	cmd := NewCreateFormulaCmd(
 		os.TempDir(),
-		formCreator{},
+		formulaCreatorMock,
 		tplM,
 		workspaceMock,
-		inputTextMock{},
-		inputTextValidatorMock{},
-		inputListMock{},
-		TutorialFinderMock{},
-		tChecker,
+		inputTextMock,
+		inputTextValidatorMock,
+		inputListMock,
+		tutorialMock,
+		treeMock,
 	)
 	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	if cmd == nil {
-		t.Errorf("NewCreateFormulaCmd got %v", cmd)
-		return
-	}
+	assert.NotNil(t, cmd)
 
 	err := cmd.Execute()
 	assert.NoError(t, err)
@@ -68,84 +76,99 @@ func TestNewCreateFormulaCmd(t *testing.T) {
 
 func TestCreateFormulaCmd(t *testing.T) {
 	type in struct {
-		tm              template.Manager
-		inText          prompt.InputText
-		inTextValidator prompt.InputTextValidator
-		inList          prompt.InputList
+		inputTextVal     string
+		inputTextValErr  error
+		tempValErr       error
+		tempLanguages    []string
+		tempLanguagesErr error
+		inputList        string
+		inputListErr     error
 	}
 
 	tests := []struct {
-		name    string
-		in      in
-		wantErr bool
+		name string
+		in   in
+		want error
 	}{
 		{
 			name: "error on input text validator",
 			in: in{
-				inTextValidator: inputTextValidatorErrorMock{},
+				inputTextValErr: errors.New("error on input text"),
 			},
-			wantErr: true,
+			want: errors.New("error on input text"),
 		},
 		{
 			name: "error on template manager Validate func",
 			in: in{
-				inTextValidator: inputTextValidatorMock{},
-				tm: TemplateManagerCustomMock{ValidateMock: func() error {
-					return errors.New("error on validate func")
-				}},
+				inputTextVal: "rit test test",
+				tempValErr:   errors.New("error on validate func"),
 			},
-			wantErr: true,
+			want: errors.New("error on validate func"),
 		},
 		{
 			name: "error on template manager Languages func",
 			in: in{
-				inTextValidator: inputTextValidatorMock{},
-				tm: TemplateManagerCustomMock{
-					ValidateMock: func() error {
-						return nil
-					},
-					LanguagesMock: func() ([]string, error) {
-						return []string{}, errors.New("error on language func")
-					},
-				},
+				inputTextVal:     "rit test test",
+				tempLanguagesErr: errors.New("error on language func"),
 			},
-			wantErr: true,
+			want: errors.New("error on language func"),
 		},
 		{
 			name: "error on input list",
 			in: in{
-				inTextValidator: inputTextValidatorMock{},
-				tm: TemplateManagerCustomMock{
-					ValidateMock: func() error {
-						return nil
-					},
-					LanguagesMock: func() ([]string, error) {
-						return []string{}, nil
-					},
-				},
-				inList: inputListErrorMock{},
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "java", "c", "rust"},
+				inputListErr:  errors.New("error to list languages"),
 			},
-			wantErr: true,
+			want: errors.New("error to list languages"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			workspaceMock := new(mocks.WorkspaceForm)
+			workspaceMock.On("List").Return(formula.Workspaces{}, nil)
+			workspaceMock.On("Add", mock.Anything).Return(nil)
+			workspaceMock.On("CurrentHash", mock.Anything).Return("dsa", nil)
+			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
+
+			templateManagerMock := new(mocks.TemplateManagerMock)
+			templateManagerMock.On("Validate").Return(tt.in.tempValErr)
+			templateManagerMock.On("Languages").Return(tt.in.tempLanguages, tt.in.tempLanguagesErr)
+
+			formulaCreatorMock := new(mocks.FormCreator)
+			formulaCreatorMock.On("Create", mock.Anything).Return(nil)
+			formulaCreatorMock.On("Build", mock.Anything).Return(nil)
+
+			inputTextMock := new(mocks.InputTextMock)
+			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
+
+			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
+			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputTextVal, tt.in.inputTextValErr)
+
+			inputListMock := new(mocks.InputListMock)
+			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
+
+			tutorialMock := new(mocks.TutorialFindSetterMock)
+			tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
+
+			treeMock := new(mocks.TreeManager)
+			treeMock.On("Check").Return([]api.CommandID{})
+
 			createFormulaCmd := NewCreateFormulaCmd(
 				os.TempDir(),
-				formCreator{},
-				tt.in.tm,
-				new(mocks.WorkspaceForm),
-				tt.in.inText,
-				tt.in.inTextValidator,
-				tt.in.inList,
-				TutorialFinderMock{},
-				tree.CheckerManager{},
+				formulaCreatorMock,
+				templateManagerMock,
+				workspaceMock,
+				inputTextMock,
+				inputTextValidatorMock,
+				inputListMock,
+				tutorialMock,
+				treeMock,
 			)
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			if err := createFormulaCmd.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("%s = %v, want %v", createFormulaCmd.Use, err, nil)
-			}
+			got := createFormulaCmd.Execute()
+			assert.Equal(t, tt.want, got)
 		})
 	}
 
@@ -262,23 +285,46 @@ func TestCreateFormula(t *testing.T) {
 	}
 }
 
-type TemplateManagerCustomMock struct {
-	LanguagesMock         func() ([]string, error)
-	LangTemplateFilesMock func(lang string) ([]template.File, error)
-	ResolverNewPathMock   func(oldPath, newDir, lang, workspacePath string) (string, error)
-	ValidateMock          func() error
-}
+func TestFormulaCommandValidator(t *testing.T) {
+	tests := []struct {
+		name       string
+		formulaCmd string
+		want       error
+	}{
+		{
+			name:       "success",
+			formulaCmd: "rit test test",
+		},
+		{
+			name: "error empty command",
+			want: ErrFormulaCmdNotBeEmpty,
+		},
+		{
+			name:       "invalid start formula command",
+			formulaCmd: "richie test test",
+			want:       ErrFormulaCmdMustStartWithRit,
+		},
+		{
+			name:       "invalid formula command size",
+			formulaCmd: "rit test",
+			want:       ErrInvalidFormulaCmdSize,
+		},
+		{
+			name:       "invalid characters in formula command",
+			formulaCmd: "rit test test@test",
+			want:       ErrInvalidCharactersFormulaCmd,
+		},
+		{
+			name:       "invalid formula command with core command",
+			formulaCmd: "rit add test",
+			want:       errors.New("core command verb \"add\" after rit\nUse your formula group before the verb\nExample: rit aws list bucket\n"),
+		},
+	}
 
-func (tm TemplateManagerCustomMock) Languages() ([]string, error) {
-	return tm.LanguagesMock()
-}
-
-func (tm TemplateManagerCustomMock) LangTemplateFiles(lang string) ([]template.File, error) {
-	return tm.LangTemplateFilesMock(lang)
-}
-func (tm TemplateManagerCustomMock) ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error) {
-	return tm.ResolverNewPathMock(oldPath, newDir, lang, workspacePath)
-}
-func (tm TemplateManagerCustomMock) Validate() error {
-	return tm.ValidateMock()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := formulaCommandValidator(tt.formulaCmd)
+			assert.Equal(t, tt.want, got)
+		})
+	}
 }

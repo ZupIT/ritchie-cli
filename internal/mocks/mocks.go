@@ -24,6 +24,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
@@ -136,6 +137,15 @@ func (i *InputPasswordMock) Password(label string, helper ...string) (string, er
 	return args.String(0), args.Error(1)
 }
 
+type InputTextMock struct {
+	mock.Mock
+}
+
+func (i *InputTextMock) Text(name string, required bool, helper ...string) (string, error) {
+	args := i.Called(name, required, helper)
+	return args.String(0), args.Error(1)
+}
+
 type InputTextValidatorMock struct {
 	mock.Mock
 }
@@ -195,7 +205,7 @@ func (w *WorkspaceForm) PreviousHash(formulaPath string) (string, error) {
 }
 
 func (w *WorkspaceForm) UpdateHash(formulaPath string, hash string) error {
-	args := w.Called(formulaPath)
+	args := w.Called(formulaPath, hash)
 	return args.Error(0)
 }
 
@@ -319,4 +329,26 @@ func (t *TreeManager) Generate(repoPath string) (formula.Tree, error) {
 func (t *TreeManager) Check() []api.CommandID {
 	args := t.Called()
 	return args.Get(0).([]api.CommandID)
+}
+
+type TemplateManagerMock struct {
+	mock.Mock
+}
+
+func (tm *TemplateManagerMock) Languages() ([]string, error) {
+	args := tm.Called()
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (tm *TemplateManagerMock) LangTemplateFiles(lang string) ([]template.File, error) {
+	args := tm.Called(lang)
+	return args.Get(0).([]template.File), args.Error(1)
+}
+func (tm *TemplateManagerMock) ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error) {
+	args := tm.Called(oldPath, newDir, lang, workspacePath)
+	return args.String(0), args.Error(1)
+}
+func (tm *TemplateManagerMock) Validate() error {
+	args := tm.Called()
+	return args.Error(0)
 }
