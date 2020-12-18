@@ -1,82 +1,111 @@
 package tree
 
 import (
-	"io/ioutil"
-	"os"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 func TestChecker(t *testing.T) {
-	treeMock := treeMock{
-		tree: formula.Tree{
-			Commands: api.Commands{
-				{
-					Id:      "root_mock",
-					Parent:  "root",
-					Usage:   "mock",
-					Help:    "mock for add",
-					Formula: true,
-				},
-				{
-					Id:      "root_mock",
-					Parent:  "root_mock",
-					Usage:   "test",
-					Help:    "test for add",
-					Formula: true,
-				},
-			},
-		},
-	}
-
 	tests := []struct {
 		name string
+		in   map[formula.RepoName]formula.Tree
+		want []api.CommandID
 	}{
 		{
-			name: "Should warn conflicting commands",
+			name: "should return conflicting commands",
+			in:   conflictedTrees,
+			want: []api.CommandID{
+				"root_aws_create_bucket",
+			},
+		},
+		{
+			name: "should return empty conflict commands",
+			in:   nonConflictTrees,
+			want: []api.CommandID{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			out := captureCheckerStdout(treeMock)
-			if !strings.Contains(out, "rit mock") {
-				t.Error("Wrong output on tree checker function")
-			}
+			checker := NewChecker(treeMock{tree: tt.in})
+			got := checker.Check()
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
-func captureCheckerStdout(tree formula.TreeManager) string {
-	treeChecker := NewChecker(tree)
-
-	rescueStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	treeChecker.Check()
-
-	_ = w.Close()
-	out, _ := ioutil.ReadAll(r)
-	os.Stdout = rescueStdout
-	return string(out)
+func BenchmarkCheck(b *testing.B) {
+	tree := NewChecker(treeMock{tree: conflictedTrees})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tree.Check()
+	}
 }
+
+var (
+	createBucket = api.Command{
+		Parent:  "root",
+		Usage:   "bucket",
+		Help:    "create bucket for aws",
+		Formula: true,
+	}
+
+	createVpc = api.Command{
+		Parent:  "root",
+		Usage:   "vpc",
+		Help:    "create vpc for aws",
+		Formula: true,
+	}
+
+	conflictedTrees = map[formula.RepoName]formula.Tree{
+		core: {
+			Commands: coreCmds,
+		},
+		"repo1": {
+			Commands: api.Commands{
+				"root_aws_create_bucket": createBucket,
+			},
+		},
+		"repo2": {
+			Commands: api.Commands{
+				"root_aws_create_vpc":    createVpc,
+				"root_aws_create_bucket": createBucket,
+			},
+		},
+		"repo3": {
+			Commands: api.Commands{
+				"root_aws_create_bucket": createBucket,
+			},
+		},
+	}
+
+	nonConflictTrees = map[formula.RepoName]formula.Tree{
+		"repo1": {
+			Commands: api.Commands{
+				"root_aws_create_bucket": createBucket,
+			},
+		},
+		"repo2": {
+			Commands: api.Commands{
+				"root_aws_create_vpc": createVpc,
+			},
+		},
+	}
+)
 
 type treeMock struct {
-	tree  formula.Tree
+	tree  map[formula.RepoName]formula.Tree
+	repo  formula.RepoName
 	error error
-	value string
 }
 
-func (t treeMock) Tree() (map[string]formula.Tree, error) {
-	if t.value != "" {
-		return map[string]formula.Tree{t.value: t.tree}, t.error
-	}
-	return map[string]formula.Tree{"test": t.tree}, t.error
+func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
+	return t.tree, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {
-	return t.tree
+	return t.tree[t.repo]
 }

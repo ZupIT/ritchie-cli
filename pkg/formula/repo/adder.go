@@ -61,6 +61,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		return err
 	}
 
+	repo.TreeVersion = "v2"
 	repos = setPriority(repo, repos)
 
 	if err := ad.repo.Write(repos); err != nil {
