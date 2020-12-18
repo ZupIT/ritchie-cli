@@ -135,7 +135,10 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			FormulaPath: formulaPath,
 		}
 
-		c.tree.Check()
+		check := c.tree.Check()
+
+		printConflictingCommandsWarning(check)
+
 		if err := c.create(cf); err != nil {
 			return err
 		}

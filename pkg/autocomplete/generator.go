@@ -134,7 +134,7 @@ func formatterFunctionName(funcName string) string {
 	return funcName
 }
 
-func loadCommands(cc []api.Command) map[string]CompletionCommand {
+func loadCommands(cc api.Commands) map[string]CompletionCommand {
 	tmpCmd := make(map[string]CompletionCommand)
 	for _, v := range cc {
 		c := tmpCmd[v.Parent]

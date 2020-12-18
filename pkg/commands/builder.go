@@ -18,7 +18,6 @@ package commands
 
 import (
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -72,7 +71,6 @@ func SendMetric(commandExecutionTime float64, err ...string) {
 func Build() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
-	isRootCommand := len(os.Args[1:]) == 0
 
 	// prompt
 	inputText := prompt.NewSurveyText()
@@ -126,7 +124,8 @@ func Build() *cobra.Command {
 	credFinder := credential.NewFinder(ritchieHomeDir, envFinder, fileManager)
 	credDeleter := credential.NewCredDelete(ritchieHomeDir, envFinder, fileManager)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders, isRootCommand)
+
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders)
 	treeChecker := tree.NewChecker(treeManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := credential.NewResolver(credFinder, credSetter, inputPassword)
@@ -180,7 +179,7 @@ func Build() *cobra.Command {
 	upgradeDefaultUpdater := upgrade.NewDefaultUpdater()
 	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)
 	defaultUrlFinder := upgrade.NewDefaultUrlFinder(versionManager)
-	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager)
+	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager, treeGen, repoListWriter)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()

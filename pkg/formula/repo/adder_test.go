@@ -29,7 +29,7 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	treeWithOneCommand := formula.Tree{Commands: []api.Command{{Id: "", Parent: "", Usage: "", Help: "", LongHelp: "", Formula: false, Repo: ""}}}
+	treeWithOneCommand := formula.Tree{Commands: api.Commands{"": {Parent: "", Usage: "", Help: "", LongHelp: "", Formula: false, Repo: ""}}}
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
