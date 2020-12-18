@@ -39,7 +39,7 @@ func TestFind(t *testing.T) {
 	envFinder := env.NewFinder(tmp, fileManager)
 	dirManager := stream.NewDirManager(fileManager)
 
-	setter := NewSetter(tmp, envFinder, dirManager, fileManager)
+	setter := NewSetter(tmp, envFinder, dirManager)
 	_ = setter.Set(githubCred)
 
 	tests := []struct {

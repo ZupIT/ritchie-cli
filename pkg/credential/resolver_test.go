@@ -36,8 +36,8 @@ func TestCredentialResolver(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	envFinder := env.NewFinder(tempDirectory, fileManager)
-	credentialSetter := NewSetter(tempDirectory, envFinder, dirManager, fileManager)
-	credentialSetterError := NewSetter(tempDirectory+"/wrong_path", envFinder, dirManager, fileManager)
+	credentialSetter := NewSetter(tempDirectory, envFinder, dirManager)
+	credentialSetterError := NewSetter(tempDirectory+"/wrong_path", envFinder, dirManager)
 	credentialFinder := NewFinder(tempDirectory, envFinder)
 
 	var tests = []struct {
