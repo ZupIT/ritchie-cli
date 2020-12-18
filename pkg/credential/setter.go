@@ -30,20 +30,17 @@ type SetManager struct {
 	homePath string
 	env      env.Finder
 	dir      stream.DirCreater
-	file     stream.FileWriter
 }
 
 func NewSetter(
 	homePath string,
 	env env.Finder,
 	dir stream.DirCreater,
-	file stream.FileWriter,
 ) SetManager {
 	return SetManager{
 		homePath: homePath,
 		env:      env,
 		dir:      dir,
-		file:     file,
 	}
 }
 
