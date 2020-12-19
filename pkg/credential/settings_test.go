@@ -229,5 +229,5 @@ func TestProvidersArr(t *testing.T) {
 
 	assert.Equal(t, providersArray[len(providersArray)-1], AddNew)
 	assert.NotNil(t, providersArray)
-	assert.Equal(t, len(providersArray), 0)
+	assert.Greater(t, len(providersArray), 0)
 }
