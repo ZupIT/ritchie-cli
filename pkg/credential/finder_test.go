@@ -20,96 +20,55 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-
-	sMock "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
-)
-
-var (
-	githubCred = Detail{Service: "github"}
-	streamMock = sMock.FileReadExisterCustomMock{
-		ReadMock: func(path string) ([]byte, error) {
-			return []byte("{\"current_env\":\"default\"}"), nil
-		},
-		ExistsMock: func(path string) bool {
-			return true
-		},
-	}
-
-	envFinder = env.NewFinder("", streamMock)
 )
 
 func TestFind(t *testing.T) {
-
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
 	tmp := os.TempDir()
-	setter := NewSetter(tmp, envFinder, dirManager, fileManager)
+	defer os.RemoveAll(tmp)
+
+	githubCred := Detail{Service: "github"}
+
+	envFinder := env.NewFinder(tmp, fileManager)
+	dirManager := stream.NewDirManager(fileManager)
+
+	setter := NewSetter(tmp, envFinder, dirManager)
 	_ = setter.Set(githubCred)
 
-	type out struct {
-		cred Detail
-		err  error
-	}
-
-	type in struct {
-		homePath  string
-		envFinder env.Finder
-		file      stream.FileReader
-		provider  string
-	}
-
 	tests := []struct {
-		name string
-		in   in
-		out  out
+		name     string
+		provider string
+		cred     Detail
+		err      error
 	}{
 		{
-			name: "Run with success",
-			in: in{
-				homePath:  tmp,
-				envFinder: envFinder,
-				file:      fileManager,
-				provider:  githubCred.Service,
-			},
-			out: out{
-				cred: githubCred,
-				err:  nil,
-			},
+			name:     "Run with success",
+			provider: githubCred.Service,
+			cred:     githubCred,
+			err:      nil,
 		},
 		{
-			name: "Return err when file not exist",
-			in: in{
-				homePath:  tmp,
-				envFinder: envFinder,
-				file:      fileManager,
-				provider:  "aws",
-			},
-			out: out{
-				cred: Detail{Credential: Credential{}},
-				err:  errors.New(prompt.Red(fmt.Sprintf(errNotFoundTemplate, "aws"))),
-			},
+			name:     "Return err when file not exist",
+			provider: "aws",
+			cred:     Detail{Credential: Credential{}},
+			err:      errors.New(prompt.Red(fmt.Sprintf(errNotFoundTemplate, "aws"))),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			out := tt.out
-			finder := NewFinder(tt.in.homePath, tt.in.envFinder)
-			got, err := finder.Find(tt.in.provider)
-			if err != nil && err.Error() != out.err.Error() {
-				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)
-			}
+			finder := NewFinder(tmp, envFinder)
+			got, err := finder.Find(tt.provider)
 
-			if !reflect.DeepEqual(out.cred, got) {
-				t.Errorf("Find(%s) got %v, want %v", tt.name, got, out.cred)
-			}
+			assert.Equal(t, tt.err, err)
+			assert.Equal(t, tt.cred, got)
 		})
 	}
 }
