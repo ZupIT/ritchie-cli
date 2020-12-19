@@ -32,7 +32,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -116,7 +115,7 @@ func (f FormulaCommand) Add(root *cobra.Command) error {
 	for _, id := range tree.CommandsID {
 		cmd := tree.Commands[id]
 
-		if sliceutil.ContainsCmd(f.coreCmds, cmd) {
+		if containsCmd(f.coreCmds, cmd) {
 			continue
 		}
 
@@ -296,4 +295,18 @@ func isInputFlag(cmd *cobra.Command) bool {
 func path(cmd api.Command) string {
 	path := strings.ReplaceAll(strings.Replace(cmd.Parent, "root", "", 1), "_", string(os.PathSeparator))
 	return filepath.Join(path, cmd.Usage)
+}
+
+func containsCmd(aa api.Commands, c api.Command) bool {
+	for _, v := range aa {
+		if c.Parent == v.Parent && c.Usage == v.Usage {
+			return true
+		}
+
+		coreCmd := fmt.Sprintf("%s_%s", v.Parent, v.Usage)
+		if c.Parent == coreCmd { // Ensures that no core commands will be added
+			return true
+		}
+	}
+	return false
 }
