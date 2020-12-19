@@ -77,8 +77,6 @@ func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
 		inputParams, err := d.resolveInput(cmd, curEnv)
 		if err != nil {
 			return err
-		} else if inputParams.provider == "" {
-			return nil
 		}
 
 		if err := d.Delete(inputParams.provider); err != nil {
@@ -93,9 +91,8 @@ func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
 func (d *deleteCredentialCmd) resolveInput(cmd *cobra.Command, context string) (inputConfig, error) {
 	if IsFlagInput(cmd) {
 		return d.resolveFlags(cmd)
-	} else {
-		return d.resolvePrompt(context)
 	}
+	return d.resolvePrompt(context)
 }
 
 func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error) {
@@ -130,6 +127,8 @@ func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputConfig, err
 	provider, err := cmd.Flags().GetString(providerFlagName)
 	if err != nil {
 		return inputConfig{}, err
+	} else if provider == "" {
+		return inputConfig{}, errors.New("please provide a value for 'provider'")
 	}
 	return inputConfig{provider}, nil
 }

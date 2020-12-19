@@ -295,7 +295,7 @@ func TestDeleteCredential(t *testing.T) {
 	}
 }
 
-func TestDeleteCredentialViaPrompt(t *testing.T) {
+func TestDeleteCredentialFormula(t *testing.T) {
 	homeDir := os.TempDir()
 	ritHomeDir := filepath.Join(homeDir, ".rit")
 	credentialPath := filepath.Join(ritHomeDir, "credentials", env.Default)
@@ -325,6 +325,11 @@ func TestDeleteCredentialViaPrompt(t *testing.T) {
 		{
 			name: "execute flag with success",
 			args: "--provider=github",
+		},
+		{
+			name:    "execute flag with empty provider fail",
+			args:    "--provider=",
+			wantErr: "please provide a value for 'provider'",
 		},
 		{
 			name:            "fail on input list error",
