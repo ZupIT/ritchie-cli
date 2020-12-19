@@ -41,7 +41,7 @@ func providersPath() string {
 }
 
 func TestReadCredentialsFields(t *testing.T) {
-	credentials, err := credSettings.ReadCredentialsFields("./testdata/credentials.json")
+	credentials, err := credSettings.ReadCredentialsFields("../../testdata/credentials.json")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, credentials)
@@ -56,12 +56,12 @@ func TestReadCredentialsValues(t *testing.T) {
 	}{
 		{
 			name:    "run with success",
-			path:    "./testdata/.rit/credentials/",
+			path:    "../../testdata/.rit/credentials/",
 			wantErr: "",
 		},
 		{
 			name:    "error on json unmarshal",
-			path:    "./testdata/.rit/credentialserr/",
+			path:    "../../testdata/.rit/credentialserr/",
 			wantErr: "invalid character 'e' looking for beginning of object key string",
 		},
 	}
@@ -87,13 +87,13 @@ func TestReadCredentialsValueInEnv(t *testing.T) {
 	}{
 		{
 			name:    "run with success",
-			path:    "./testdata/.rit/credentials/",
+			path:    "../../testdata/.rit/credentials/",
 			env:     "default",
 			wantErr: "",
 		},
 		{
 			name:    "error on json unmarshal",
-			path:    "./testdata/.rit/credentialserr/",
+			path:    "../../testdata/.rit/credentialserr/",
 			env:     "error",
 			wantErr: "invalid character 'e' looking for beginning of object key string",
 		},
