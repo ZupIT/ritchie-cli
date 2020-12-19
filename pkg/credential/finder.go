@@ -20,11 +20,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const errNotFoundTemplate = `
@@ -36,14 +37,12 @@ Try again after use:
 type Finder struct {
 	homePath string
 	env      env.Finder
-	file     stream.FileReader
 }
 
-func NewFinder(homePath string, env env.Finder, file stream.FileReader) Finder {
+func NewFinder(homePath string, env env.Finder) Finder {
 	return Finder{
 		homePath: homePath,
 		env:      env,
-		file:     file,
 	}
 }
 
@@ -57,7 +56,8 @@ func (f Finder) Find(provider string) (Detail, error) {
 		envHolder.Current = env.Default
 	}
 
-	cb, err := f.file.Read(File(f.homePath, envHolder.Current, provider))
+	filePath := filepath.Join(f.homePath, credentialDir, envHolder.Current, provider)
+	cb, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		errMsg := fmt.Sprintf(errNotFoundTemplate, provider)
 		return Detail{Credential: Credential{}}, errors.New(prompt.Red(errMsg))
