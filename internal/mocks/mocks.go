@@ -354,3 +354,17 @@ func (tm *TemplateManagerMock) Validate() error {
 	args := tm.Called()
 	return args.Error(0)
 }
+
+type WorkspaceMock struct {
+	mock.Mock
+}
+
+func (w *WorkspaceMock) Add(workspace formula.Workspace) error {
+	args := w.Called(workspace)
+	return args.Error(0)
+}
+
+func (w *WorkspaceMock) List() (formula.Workspaces, error) {
+	args := w.Called()
+	return args.Get(0).(formula.Workspaces), args.Error(1)
+}
