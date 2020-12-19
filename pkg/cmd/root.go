@@ -32,7 +32,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/version"
 )

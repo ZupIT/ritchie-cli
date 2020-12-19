@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
