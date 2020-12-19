@@ -327,9 +327,10 @@ func TestDeleteCredentialFormula(t *testing.T) {
 			args: "--provider=github",
 		},
 		{
-			name:    "execute flag with empty provider fail",
-			args:    "--provider=",
-			wantErr: "please provide a value for 'provider'",
+			name:            "execute flag with empty provider fail",
+			args:            "--provider=",
+			wantErr:         "please provide a value for 'provider'",
+			fileShouldExist: true,
 		},
 		{
 			name:            "fail on input list error",

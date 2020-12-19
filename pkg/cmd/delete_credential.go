@@ -77,6 +77,8 @@ func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
 		inputParams, err := d.resolveInput(cmd, curEnv)
 		if err != nil {
 			return err
+		} else if inputParams.provider == "" {
+			return nil
 		}
 
 		if err := d.Delete(inputParams.provider); err != nil {
