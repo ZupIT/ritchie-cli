@@ -21,13 +21,14 @@ import "github.com/ZupIT/ritchie-cli/pkg/git"
 const RepoCommonsName = RepoName("commons")
 
 type Repo struct {
-	Provider RepoProvider `json:"provider"`
-	Name     RepoName     `json:"name"`
-	Version  RepoVersion  `json:"version"`
-	Url      string       `json:"url"`
-	Token    string       `json:"token,omitempty"`
-	Priority int          `json:"priority"`
-	IsLocal  bool         `json:"isLocal"`
+	Provider    RepoProvider `json:"provider"`
+	Name        RepoName     `json:"name"`
+	Version     RepoVersion  `json:"version"`
+	Url         string       `json:"url"`
+	Token       string       `json:"token,omitempty"`
+	Priority    int          `json:"priority"`
+	IsLocal     bool         `json:"isLocal"`
+	TreeVersion string       `json:"tree_version"`
 }
 
 type Repos []Repo

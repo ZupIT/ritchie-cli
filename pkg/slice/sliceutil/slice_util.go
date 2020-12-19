@@ -33,7 +33,7 @@ func Contains(aa []string, s string) bool {
 }
 
 // ContainsCmd tells whether a contains c.
-func ContainsCmd(aa []api.Command, c api.Command) bool {
+func ContainsCmd(aa api.Commands, c api.Command) bool {
 	for _, v := range aa {
 		if c.Parent == v.Parent && c.Usage == v.Usage {
 			return true

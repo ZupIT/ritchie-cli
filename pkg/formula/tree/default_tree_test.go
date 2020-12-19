@@ -19,444 +19,451 @@ package tree
 import (
 	"encoding/json"
 	"errors"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-)
-
-var (
-	tmpDir           = os.TempDir()
-	ritHome          = filepath.Join(tmpDir, ".rit-tree")
-	pathTreeSomeRepo = filepath.Join(ritHome, reposDirName, "someRepo", treeFileName)
-
-	coreCmds = []api.Command{
-		{Parent: "root", Usage: "add"},
-		{Parent: "root_add", Usage: "repo"},
-		{Parent: "root", Usage: "metrics"},
-	}
-
-	someRepoTree = formula.Tree{Commands: []api.Command{
-		{Parent: "root", Usage: "pokemon-list"},
-		{Parent: "root_pokemon-list", Usage: "add"},
-	}}
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 func TestMergedTree(t *testing.T) {
-	defer cleanRitHome()
+	defaultTreeSetup()
+	fileManager := stream.NewFileManager()
+	providers := formula.NewRepoProviders()
 
-	errFoo := errors.New("some error")
-	localTree := formula.Tree{Commands: []api.Command{
-		{Parent: "root", Usage: "jedi-list"},
-		{Parent: "root_jedi-list", Usage: "add"},
-	}}
-
-	pathTreeLocalRepo := filepath.Join(ritHome, reposDirName, "repo-local", treeFileName)
-	pathTreeOtherRepo := filepath.Join(ritHome, reposDirName, "otherRepo", treeFileName)
-
-	expectedTreeComplete := formula.Tree{
-		Commands: api.Commands{
-			coreCmds[0],
-			coreCmds[1],
-			coreCmds[2],
-			{
-				Parent: "root",
-				Usage:  "jedi-list",
-				Repo:   "repo-local",
-			},
-			{
-				Parent: "root_jedi-list",
-				Usage:  "add",
-				Repo:   "repo-local",
-			},
-			{
-				Parent: "root",
-				Usage:  "pokemon-list",
-				Repo:   "someRepo",
-			},
-			{
-				Parent: "root_pokemon-list",
-				Usage:  "add",
-				Repo:   "someRepo",
-			},
-		},
-	}
-
-	someRepo := formula.Repo{
-		Provider: formula.RepoProvider("Github"),
-		Name:     formula.RepoName("someRepo"),
-		Version:  formula.RepoVersion("1.0.0"),
-		Token:    "token",
-		Url:      "https://github.com/owner/someRepo",
-		Priority: 5,
-	}
-	otherRepo := formula.Repo{
-		Provider: formula.RepoProvider("Github"),
-		Name:     formula.RepoName("otherRepo"),
-		Version:  formula.RepoVersion("1.0.0"),
-		Token:    "token",
-		Url:      "https://github.com/owner/otherRepo",
-		Priority: 5,
-	}
-	localRepo := formula.Repo{
-		Provider: formula.RepoProvider("Local"),
-		Name:     formula.RepoName("repo-local"),
-		Version:  formula.RepoVersion("0.0.0"),
-		Priority: 2,
-		IsLocal:  true,
-	}
-
-	repoLister := repositoryListerCustomMock{
-		list: func() (formula.Repos, error) {
-			return formula.Repos{
-				localRepo,
-				someRepo,
-				otherRepo,
-			}, nil
-		},
-	}
-
-	githubRepo := github.NewRepoManager(http.DefaultClient)
-	repoProviders := formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
-
-	fileManager := FileReadExisterMock{
-		exists: func(path string) bool {
-			isLocalRepo := strings.Contains(path, pathTreeLocalRepo)
-			isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
-			isOtherRepo := strings.Contains(path, pathTreeOtherRepo)
-
-			if isLocalRepo || isSomeRepo || isOtherRepo {
-				return true
-			}
-			return false
-		},
-		read: func(path string) ([]byte, error) {
-			isLocalRepo := strings.Contains(path, pathTreeLocalRepo)
-			isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
-			isOtherRepo := strings.Contains(path, pathTreeOtherRepo)
-
-			if isLocalRepo {
-				return []byte(getStringOfTree(localTree)), nil
-			}
-			if isSomeRepo {
-				return []byte(getStringOfTree(someRepoTree)), nil
-			}
-			if isOtherRepo {
-				return []byte("any"), errFoo
-			}
-			return []byte("some data"), nil
-		},
-	}
-
-	var defaultGitRepositoryMock = GitRepositoryMock{
-		latestTag: func(info git.RepoInfo) (git.Tag, error) {
-			if strings.Contains(info.LatestTagUrl(), someRepo.Name.String()) {
-				return git.Tag{Name: "2.0.0"}, nil
-			}
-			return git.Tag{}, nil
-		},
-		tags: func(info git.RepoInfo) (git.Tags, error) {
-			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
-		},
-		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
-			return nil, nil
-		},
-	}
-	repoProviders = formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
-
-	newTree := NewTreeManager(ritHome, repoLister, coreCmds, fileManager, repoProviders, true)
-	mergedTree := newTree.MergedTree(true)
-
-	if !isSameFormulaTree(mergedTree, expectedTreeComplete) {
-		t.Errorf("NewTreeManager_MergedTree() \n\tmergedTree = %v\n\texpectedTree = %v", mergedTree, expectedTreeComplete)
-	}
-}
-
-func TestTree(t *testing.T) {
-	defer cleanRitHome()
-
-	errFoo := errors.New("some error")
-	expectedTreeEmpty := map[string]formula.Tree{}
-	expectedTreeComplete := map[string]formula.Tree{
-		"CORE": {
-			Commands: api.Commands{
-				coreCmds[0],
-				coreCmds[1],
-				coreCmds[2],
-			},
-		},
-		"someRepo": {
-			Commands: api.Commands{
-				someRepoTree.Commands[0],
-				someRepoTree.Commands[1],
-			},
-		},
+	type repo struct {
+		repos   formula.Repos
+		listErr error
 	}
 
 	type in struct {
-		repo formula.RepositoryLister
-		file FileReadExisterMock
+		repo      repo
+		file      stream.FileReadExister
+		providers formula.RepoProviders
+		core      bool
 	}
 
 	tests := []struct {
-		name         string
-		in           in
-		wantErr      bool
-		expectedTree map[string]formula.Tree
+		name string
+		in   in
+		want formula.Tree
 	}{
 		{
-			name: "run in success",
+			name: "success",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name:     "someRepo",
-								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
-								Token:    "token",
-							},
-						}, nil
-					},
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
-						isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
-						return isSomeRepo
-					},
-					read: func(path string) ([]byte, error) {
-						if strings.Contains(path, pathTreeSomeRepo) {
-							return []byte(getStringOfTree(someRepoTree)), nil
-						}
-						return []byte("some data"), nil
-					},
-				},
+				file:      fileManager,
+				providers: providers,
 			},
-			wantErr:      false,
-			expectedTree: expectedTreeComplete,
+			want: expectedTree,
 		},
 		{
-			name: "return error when repository lister returns error",
+			name: "success with core commands",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{}, errFoo
-					},
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
+				file:      fileManager,
+				providers: providers,
+				core:      true,
+			},
+			want: expectedTreeWithCoreCmds,
+		},
+		{
+			name: "return empty tree when invalid tree",
+			in: in{
+				repo: repo{
+					repos: formula.Repos{repoInvalid},
+				},
+				file:      fileManager,
+				providers: providers,
+				core:      false,
+			},
+			want: formula.Tree{
+				Version:    Version,
+				Commands:   api.Commands{},
+				CommandsID: []api.CommandID{},
+			},
+		},
+		{
+			name: "empty tree when tree.json does not exist",
+			in: in{
+				repo: repo{
+					repos: formula.Repos{repo1},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
 						return false
 					},
-					read: func(path string) ([]byte, error) {
-						return []byte("some data"), nil
-					},
 				},
+				providers: providers,
+				core:      false,
 			},
-			wantErr:      true,
-			expectedTree: expectedTreeEmpty,
+			want: formula.Tree{
+				Version:    Version,
+				Commands:   api.Commands{},
+				CommandsID: []api.CommandID{},
+			},
 		},
 		{
-			name: "return error when local tree in read returns error",
+			name: "read tree.json error",
 			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{}, errFoo
-					},
+				repo: repo{
+					repos: formula.Repos{repo1},
 				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
 						return true
 					},
-					read: func(path string) ([]byte, error) {
-						return []byte("some data"), errFoo
+					ReadMock: func(path string) ([]byte, error) {
+						return nil, errors.New("error to read file")
 					},
 				},
+				providers: providers,
+				core:      false,
 			},
-			wantErr:      true,
-			expectedTree: expectedTreeEmpty,
-		},
-		{
-			name: "return error when local tree in read returns error",
-			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{}, errFoo
-					},
-				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
-						return true
-					},
-					read: func(path string) ([]byte, error) {
-						return []byte("some data"), nil
-					},
-				},
+			want: formula.Tree{
+				Version:    Version,
+				Commands:   api.Commands{},
+				CommandsID: []api.CommandID{},
 			},
-			wantErr:      true,
-			expectedTree: expectedTreeEmpty,
-		},
-		{
-			name: "return error when tree by repo returns error",
-			in: in{
-				repo: repositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name:     "someRepo",
-								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
-							}}, nil
-					},
-				},
-				file: FileReadExisterMock{
-					exists: func(path string) bool {
-						isSomeRepo := strings.Contains(path, pathTreeSomeRepo)
-						return isSomeRepo
-					},
-					read: func(path string) ([]byte, error) {
-						if strings.Contains(path, pathTreeSomeRepo) {
-							return []byte("some"), errFoo
-						}
-						return []byte("some data"), nil
-					},
-				},
-			},
-			wantErr:      true,
-			expectedTree: expectedTreeEmpty,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var defaultGitRepositoryMock = GitRepositoryMock{
-				latestTag: func(info git.RepoInfo) (git.Tag, error) {
-					return git.Tag{}, nil
+			repoMock := new(mocks.RepoManager)
+			repoMock.On("List").Return(tt.in.repo.repos, tt.in.repo.listErr)
+
+			tree := NewTreeManager(ritHome, repoMock, coreCmds, tt.in.file, tt.in.providers)
+
+			got := tree.MergedTree(tt.in.core)
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestTree(t *testing.T) {
+	defaultTreeSetup()
+	fileManager := stream.NewFileManager()
+	providers := formula.NewRepoProviders()
+
+	type (
+		repo struct {
+			repos   formula.Repos
+			listErr error
+		}
+		in struct {
+			repo      repo
+			file      stream.FileReadExister
+			providers formula.RepoProviders
+		}
+
+		want struct {
+			treeByRepo map[formula.RepoName]formula.Tree
+			err        error
+		}
+	)
+
+	tests := []struct {
+		name string
+		in   in
+		want want
+	}{
+		{
+			name: "success",
+			in: in{
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
 				},
-				tags: func(info git.RepoInfo) (git.Tags, error) {
-					return git.Tags{git.Tag{Name: "1.0.0"}}, nil
+				file:      fileManager,
+				providers: providers,
+			},
+			want: want{
+				treeByRepo: map[formula.RepoName]formula.Tree{
+					core:    {Commands: coreCmds},
+					"repo1": tree1,
+					"repo2": tree2,
 				},
-				zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
-					return nil, nil
+				err: nil,
+			},
+		},
+		{
+			name: "repo list error",
+			in: in{
+				repo: repo{
+					repos:   formula.Repos{},
+					listErr: errors.New("repo list error"),
 				},
-			}
-			repoProviders := formula.NewRepoProviders()
-			repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
+				file:      fileManager,
+				providers: providers,
+			},
+			want: want{
+				err: errors.New("repo list error"),
+			},
+		},
+		{
+			name: "return repos with empty tree commands when tree.json does not exist",
+			in: in{
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return false
+					},
+				},
+				providers: providers,
+			},
+			want: want{
+				treeByRepo: map[formula.RepoName]formula.Tree{
+					core:    {Commands: coreCmds},
+					"repo1": {},
+					"repo2": {},
+				},
+				err: nil,
+			},
+		},
+		{
+			name: "read tree.json error",
+			in: in{
+				repo: repo{
+					repos: formula.Repos{repo1, repo2},
+				},
+				file: sMocks.FileReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte("error"), errors.New("error to read tree.json")
+					},
+				},
+				providers: providers,
+			},
+			want: want{
+				err: errors.New("error to read tree.json"),
+			},
+		},
+	}
 
-			in := tt.in
-			newTree := NewTreeManager(ritHome, in.repo, coreCmds, in.file, repoProviders, false)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repoMock := new(mocks.RepoManager)
+			repoMock.On("List").Return(tt.in.repo.repos, tt.in.repo.listErr)
 
-			tree, err := newTree.Tree()
+			tree := NewTreeManager(ritHome, repoMock, coreCmds, tt.in.file, tt.in.providers)
 
-			if !isSameTree(tree, tt.expectedTree) {
-				t.Errorf("NewTreeManager_Tree() \n\ttree = %v\n\texpected = %v", tree, tt.expectedTree)
-			}
+			got, err := tree.Tree()
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("NewTreeManager_Tree() \n\terror = %v\n\twantErr = %v", err, tt.wantErr)
+			assert.Equal(t, tt.want.treeByRepo, got)
+
+			if tt.want.err != nil || err != nil {
+				assert.EqualError(t, err, tt.want.err.Error())
 			}
 		})
 	}
 }
 
-func cleanRitHome() {
-	_ = os.RemoveAll(ritHome)
+func BenchmarkMergedTree(b *testing.B) {
+	defaultTreeSetup()
+	fileManager := stream.NewFileManager()
+	providers := formula.NewRepoProviders()
+
+	repoMock := new(mocks.RepoManager)
+	repoMock.On("List").Return(formula.Repos{repo1, repo2}, nil)
+
+	tree := NewTreeManager(ritHome, repoMock, coreCmds, fileManager, providers)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tree.MergedTree(false)
+	}
 }
 
-func isSameTree(tree, expected map[string]formula.Tree) bool {
-	if len(tree) != len(expected) {
-		return false
-	}
-	for i, v := range tree {
-		if !isSameFormulaTree(v, expected[i]) {
-			return false
-		}
-	}
-	return true
-}
+var (
+	tmpDir  = os.TempDir()
+	ritHome = filepath.Join(tmpDir, ".rit-tree")
 
-func isSameFormulaTree(formula, expected formula.Tree) bool {
-	if len(formula.Commands) != len(expected.Commands) {
-		return false
+	repo1 = formula.Repo{
+		Name:     formula.RepoName("repo1"),
+		Priority: 0,
 	}
-	for i, v := range expected.Commands {
-		commandsExists := formula.Commands[i] != api.Command{}
-		if !commandsExists {
-			return false
-		}
-		if !isSameCommand(v, formula.Commands[i]) {
-			return false
-		}
-	}
-	return true
-}
-
-func isSameCommand(command, expected api.Command) bool {
-	var (
-		idIsDiff       = command.Id != expected.Id
-		parentIsDiff   = command.Parent != expected.Parent
-		usageIsDiff    = command.Usage != expected.Usage
-		helpIsDiff     = command.Help != expected.Help
-		longHelpIsDiff = command.LongHelp != expected.LongHelp
-		formulaIsDiff  = command.Formula != expected.Formula
-		repoIsDiff     = command.Repo != expected.Repo
-	)
-
-	if idIsDiff || parentIsDiff || usageIsDiff || helpIsDiff || longHelpIsDiff || formulaIsDiff || repoIsDiff {
-		return false
+	repo2 = formula.Repo{
+		Name:     formula.RepoName("repo2"),
+		Priority: 1,
 	}
 
-	return true
-}
+	repoInvalid = formula.Repo{
+		Name:     formula.RepoName("invalid"),
+		Priority: 2,
+	}
 
-func getStringOfTree(formula formula.Tree) string {
-	bytes, _ := json.MarshalIndent(formula, "", "\t")
-	return string(bytes)
-}
+	coreCmds = api.Commands{
+		"root_add":      {Parent: "root", Usage: "add"},
+		"root_add_repo": {Parent: "root_add", Usage: "repo"},
+	}
 
-type repositoryListerCustomMock struct {
-	list func() (formula.Repos, error)
-}
+	tree1 = formula.Tree{
+		Version: Version,
+		Commands: api.Commands{
+			"root_pokemon": api.Command{
+				Parent:   "root",
+				Usage:    "pokemon",
+				Help:     "pokemon help",
+				LongHelp: "pokemon help long",
+				Formula:  false,
+			},
+			"root_pokemon_add": api.Command{
+				Parent:   "root_pokemon",
+				Usage:    "add-new-pokemon",
+				Help:     "pokemon add-new-pokemon help",
+				LongHelp: "pokemon add-new-pokemon help long",
+				Formula:  true,
+			},
+		},
+	}
 
-func (m repositoryListerCustomMock) List() (formula.Repos, error) {
-	return m.list()
-}
+	tree2 = formula.Tree{
+		Version: Version,
+		Commands: api.Commands{
+			"root_star_wars": api.Command{
+				Parent:   "root",
+				Usage:    "star-wars",
+				Help:     "star wars help",
+				LongHelp: "star wars help long",
+				Formula:  false,
+			},
+			"root_star_wars_list-jedis": api.Command{
+				Parent:   "root_star_wars",
+				Usage:    "list-jedis",
+				Help:     "star wars list-jedis help",
+				LongHelp: "star wars list-jedis help long",
+				Formula:  true,
+			},
+		},
+	}
 
-type FileReadExisterMock struct {
-	read   func(path string) ([]byte, error)
-	exists func(path string) bool
-}
+	expectedTree = formula.Tree{
+		Version: Version,
+		CommandsID: []api.CommandID{
+			"root_pokemon",
+			"root_star_wars",
+			"root_pokemon_add",
+			"root_star_wars_list-jedis",
+		},
+		Commands: api.Commands{
+			"root_pokemon": api.Command{
+				Parent:   "root",
+				Usage:    "pokemon",
+				Help:     "pokemon help",
+				LongHelp: "pokemon help long",
+				Formula:  false,
+				Repo:     "repo1",
+			},
+			"root_pokemon_add": api.Command{
+				Parent:   "root_pokemon",
+				Usage:    "add-new-pokemon",
+				Help:     "pokemon add-new-pokemon help",
+				LongHelp: "pokemon add-new-pokemon help long",
+				Formula:  true,
+				Repo:     "repo1",
+			},
+			"root_star_wars": api.Command{
+				Parent:   "root",
+				Usage:    "star-wars",
+				Help:     "star wars help",
+				LongHelp: "star wars help long",
+				Formula:  false,
+				Repo:     "repo2",
+			},
+			"root_star_wars_list-jedis": api.Command{
+				Parent:   "root_star_wars",
+				Usage:    "list-jedis",
+				Help:     "star wars list-jedis help",
+				LongHelp: "star wars list-jedis help long",
+				Formula:  true,
+				Repo:     "repo2",
+			},
+		},
+	}
 
-func (m FileReadExisterMock) Read(path string) ([]byte, error) {
-	return m.read(path)
-}
+	expectedTreeWithCoreCmds = formula.Tree{
+		Version: Version,
+		CommandsID: []api.CommandID{
+			"root_pokemon",
+			"root_star_wars",
+			"root_pokemon_add",
+			"root_star_wars_list-jedis",
+		},
+		Commands: api.Commands{
+			"root_pokemon": api.Command{
+				Parent:   "root",
+				Usage:    "pokemon",
+				Help:     "pokemon help",
+				LongHelp: "pokemon help long",
+				Formula:  false,
+				Repo:     "repo1",
+			},
+			"root_pokemon_add": api.Command{
+				Parent:   "root_pokemon",
+				Usage:    "add-new-pokemon",
+				Help:     "pokemon add-new-pokemon help",
+				LongHelp: "pokemon add-new-pokemon help long",
+				Formula:  true,
+				Repo:     "repo1",
+			},
+			"root_star_wars": api.Command{
+				Parent:   "root",
+				Usage:    "star-wars",
+				Help:     "star wars help",
+				LongHelp: "star wars help long",
+				Formula:  false,
+				Repo:     "repo2",
+			},
+			"root_star_wars_list-jedis": api.Command{
+				Parent:   "root_star_wars",
+				Usage:    "list-jedis",
+				Help:     "star wars list-jedis help",
+				LongHelp: "star wars list-jedis help long",
+				Formula:  true,
+				Repo:     "repo2",
+			},
+			"root_add": {
+				Parent: "root",
+				Usage:  "add",
+			},
+			"root_add_repo": {
+				Parent: "root_add",
+				Usage:  "repo",
+			},
+		},
+	}
+)
 
-func (m FileReadExisterMock) Exists(path string) bool {
-	return m.exists(path)
-}
+func defaultTreeSetup() {
+	fileManager := stream.NewFileManager()
 
-type GitRepositoryMock struct {
-	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
-	tags      func(info git.RepoInfo) (git.Tags, error)
-	latestTag func(info git.RepoInfo) (git.Tag, error)
-}
+	tree1, _ := json.Marshal(tree1)
+	tree2, _ := json.Marshal(tree2)
+	repo1Path := filepath.Join(ritHome, "repos", strings.ToLower(repo1.Name.String()), "tree.json")
+	repo2Path := filepath.Join(ritHome, "repos", strings.ToLower(repo2.Name.String()), "tree.json")
+	repo3Path := filepath.Join(ritHome, "repos", "invalid", "tree.json")
 
-func (m GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
-	return m.zipball(info, version)
-}
+	_ = os.MkdirAll(filepath.Dir(repo1Path), os.ModePerm)
+	_ = os.MkdirAll(filepath.Dir(repo2Path), os.ModePerm)
+	_ = os.MkdirAll(filepath.Dir(repo3Path), os.ModePerm)
 
-func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
-	return m.tags(info)
-}
-
-func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
-	return m.latestTag(info)
+	_ = fileManager.Write(repo1Path, tree1)
+	_ = fileManager.Write(repo2Path, tree2)
+	_ = fileManager.Write(repo3Path, []byte("invalid"))
 }

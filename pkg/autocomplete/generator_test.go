@@ -85,9 +85,8 @@ func TestGenerate(t *testing.T) {
 	}
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
-	isRootCommand := false
 
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.Commands{}, FileReadExisterMock{}, repoProviders, isRootCommand)
+	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.Commands{}, FileReadExisterMock{}, repoProviders)
 	autocomplete := NewGenerator(treeMan)
 
 	tests := []struct {
