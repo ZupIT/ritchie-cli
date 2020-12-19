@@ -210,7 +210,6 @@ func TestProviderPath(t *testing.T) {
 	provider := credSettings.ProviderPath()
 	slicedPath := strings.Split(provider, string(os.PathSeparator))
 	providersJson := slicedPath[len(slicedPath)-1]
-
 	assert.Equal(t, "providers.json", providersJson)
 }
 
@@ -219,14 +218,12 @@ func TestCredentialsPath(t *testing.T) {
 	slicedPath := strings.Split(credentials, string(os.PathSeparator))
 	fmt.Println(slicedPath)
 	providersDir := slicedPath[len(slicedPath)-1]
-
 	assert.Equal(t, "credentials", providersDir)
 }
 
 func TestProvidersArr(t *testing.T) {
 	credentials := NewDefaultCredentials()
 	providersArray := NewProviderArr(credentials)
-
 	assert.Equal(t, providersArray[len(providersArray)-1], AddNew)
 	assert.NotNil(t, providersArray)
 	assert.Greater(t, len(providersArray), 0)
