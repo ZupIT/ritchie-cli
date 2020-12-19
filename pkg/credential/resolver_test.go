@@ -32,7 +32,7 @@ import (
 
 func TestCredentialResolver(t *testing.T) {
 	tempDirectory := os.TempDir()
-	home := filepath.Join(tempDirectory, "CredDelete")
+	home := filepath.Join(tempDirectory, "CredResolver")
 	defer os.RemoveAll(home)
 
 	fileManager := stream.NewFileManager()

@@ -33,7 +33,7 @@ import (
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
-	home := filepath.Join(tmp, "CredDelete")
+	home := filepath.Join(tmp, "CredFinder")
 	defer os.RemoveAll(home)
 
 	githubCred := Detail{Service: "github"}
