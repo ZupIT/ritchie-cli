@@ -101,7 +101,7 @@ func TestFind(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := tt.out
-			finder := NewFinder(tt.in.homePath, tt.in.envFinder, tt.in.file)
+			finder := NewFinder(tt.in.homePath, tt.in.envFinder)
 			got, err := finder.Find(tt.in.provider)
 			if err != nil && err.Error() != out.err.Error() {
 				t.Errorf("Find(%s) got %v, want %v", tt.name, err, out.err)

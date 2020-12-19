@@ -33,7 +33,7 @@ func TestCredentialResolver(t *testing.T) {
 	tempDirectory := os.TempDir()
 	envFinder := env.NewFinder(tempDirectory, fileManager)
 	credentialSetter := NewSetter(tempDirectory, envFinder, dirManager, fileManager)
-	credentialFinder := NewFinder(tempDirectory, envFinder, fileManager)
+	credentialFinder := NewFinder(tempDirectory, envFinder)
 
 	defer os.RemoveAll(File(tempDirectory, "", ""))
 
