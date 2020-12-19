@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,14 +33,14 @@ import (
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
-	defer os.RemoveAll(tmp)
+	home := filepath.Join(tmp, "CredDelete")
+	defer os.RemoveAll(home)
 
 	githubCred := Detail{Service: "github"}
-
-	envFinder := env.NewFinder(tmp, fileManager)
+	envFinder := env.NewFinder(home, fileManager)
 	dirManager := stream.NewDirManager(fileManager)
 
-	setter := NewSetter(tmp, envFinder, dirManager)
+	setter := NewSetter(home, envFinder, dirManager)
 	_ = setter.Set(githubCred)
 
 	tests := []struct {
@@ -64,7 +65,7 @@ func TestFind(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			finder := NewFinder(tmp, envFinder)
+			finder := NewFinder(home, envFinder)
 			got, err := finder.Find(tt.provider)
 
 			assert.Equal(t, tt.err, err)

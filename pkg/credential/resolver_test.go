@@ -19,6 +19,7 @@ package credential
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,14 +32,15 @@ import (
 
 func TestCredentialResolver(t *testing.T) {
 	tempDirectory := os.TempDir()
-	defer os.RemoveAll(tempDirectory)
+	home := filepath.Join(tempDirectory, "CredDelete")
+	defer os.RemoveAll(home)
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	envFinder := env.NewFinder(tempDirectory, fileManager)
-	credentialSetter := NewSetter(tempDirectory, envFinder, dirManager)
-	credentialSetterError := NewSetter(tempDirectory+"/wrong_path", envFinder, dirManager)
-	credentialFinder := NewFinder(tempDirectory, envFinder)
+	envFinder := env.NewFinder(home, fileManager)
+	credentialSetter := NewSetter(home, envFinder, dirManager)
+	credentialSetterError := NewSetter(home+"/wrong_path", envFinder, dirManager)
+	credentialFinder := NewFinder(home, envFinder)
 
 	var tests = []struct {
 		name       string

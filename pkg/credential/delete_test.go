@@ -30,10 +30,11 @@ import (
 
 func TestCredDelete(t *testing.T) {
 	tmp := os.TempDir()
-	defer os.RemoveAll(tmp)
+	home := filepath.Join(tmp, "CredDelete")
+	defer os.RemoveAll(home)
 
 	service := "github"
-	credentialFolder := filepath.Join(tmp, credentialDir, env.Default)
+	credentialFolder := filepath.Join(home, credentialDir, env.Default)
 	_ = os.MkdirAll(credentialFolder, os.ModePerm)
 	credentialFile := filepath.Join(credentialFolder, service)
 	envFinder := env.NewFinder(homeDir, fileManager)
@@ -63,7 +64,7 @@ func TestCredDelete(t *testing.T) {
 			err := ioutil.WriteFile(credentialFile, jsonData, os.ModePerm)
 			assert.NoError(t, err)
 
-			deleteCredential := NewCredDelete(tmp, envFinder)
+			deleteCredential := NewCredDelete(home, envFinder)
 
 			err = deleteCredential.Delete(tt.service)
 			if err == nil {
