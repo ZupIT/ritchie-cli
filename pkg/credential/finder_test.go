@@ -22,7 +22,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
@@ -67,8 +67,8 @@ func TestFind(t *testing.T) {
 			finder := NewFinder(tmp, envFinder)
 			got, err := finder.Find(tt.provider)
 
-			assert.Equal(t, tt.err, err)
-			assert.Equal(t, tt.cred, got)
+			require.Equal(t, tt.err, err)
+			require.Equal(t, tt.cred, got)
 		})
 	}
 }
