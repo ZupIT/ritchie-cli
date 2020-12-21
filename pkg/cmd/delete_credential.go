@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -60,10 +61,14 @@ func NewDeleteCredentialCmd(
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
-	flags := cmd.Flags()
-	flags.String(providerFlagName, "", providerFlagDescription)
+
+	addFlags(cmd.Flags())
 
 	return cmd
+}
+
+func addFlags(flags *pflag.FlagSet) {
+	flags.String(providerFlagName, "", providerFlagDescription)
 }
 
 func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
