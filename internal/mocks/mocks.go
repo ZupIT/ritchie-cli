@@ -344,10 +344,12 @@ func (tm *TemplateManagerMock) LangTemplateFiles(lang string) ([]template.File, 
 	args := tm.Called(lang)
 	return args.Get(0).([]template.File), args.Error(1)
 }
+
 func (tm *TemplateManagerMock) ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error) {
 	args := tm.Called(oldPath, newDir, lang, workspacePath)
 	return args.String(0), args.Error(1)
 }
+
 func (tm *TemplateManagerMock) Validate() error {
 	args := tm.Called()
 	return args.Error(0)

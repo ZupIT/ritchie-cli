@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -28,54 +29,22 @@ import (
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestNewCreateFormulaCmd(t *testing.T) {
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
-	tplM := template.NewManager("../../testdata", dirManager)
-	workspaceMock := new(mocks.WorkspaceForm)
-	workspaceMock.On("List").Return(formula.Workspaces{}, nil)
-	workspaceMock.On("Add", mock.Anything).Return(nil)
-	workspaceMock.On("CurrentHash", mock.Anything).Return("dsadasdas", nil)
-	workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
-	formulaCreatorMock := new(mocks.FormCreator)
-	formulaCreatorMock.On("Create", mock.Anything).Return(nil)
-	formulaCreatorMock.On("Build", mock.Anything).Return(nil)
-	inputTextMock := new(mocks.InputTextMock)
-	inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
-	inputTextValidatorMock := new(mocks.InputTextValidatorMock)
-	inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
-	inputListMock := new(mocks.InputListMock)
-	inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
-	tutorialMock := new(mocks.TutorialFindSetterMock)
-	tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
-	treeMock := new(mocks.TreeManager)
-	treeMock.On("Check").Return([]api.CommandID{})
-
-	cmd := NewCreateFormulaCmd(
-		os.TempDir(),
-		formulaCreatorMock,
-		tplM,
-		workspaceMock,
-		inputTextMock,
-		inputTextValidatorMock,
-		inputListMock,
-		tutorialMock,
-		treeMock,
-	)
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	assert.NotNil(t, cmd)
-
-	err := cmd.Execute()
-	assert.NoError(t, err)
-}
-
 func TestCreateFormulaCmd(t *testing.T) {
 	type in struct {
+		inputText        string
+		inputTextErr     error
 		inputTextVal     string
 		inputTextValErr  error
 		tempValErr       error
@@ -83,6 +52,10 @@ func TestCreateFormulaCmd(t *testing.T) {
 		tempLanguagesErr error
 		inputList        string
 		inputListErr     error
+		wspaceList       formula.Workspaces
+		wspaceListErr    error
+		wspaceAddErr     error
+		createErr        error
 	}
 
 	tests := []struct {
@@ -90,6 +63,14 @@ func TestCreateFormulaCmd(t *testing.T) {
 		in   in
 		want error
 	}{
+		{
+			name: "success",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				inputList:     "go",
+			},
+		},
 		{
 			name: "error on input text validator",
 			in: in{
@@ -122,14 +103,54 @@ func TestCreateFormulaCmd(t *testing.T) {
 			},
 			want: errors.New("error to list languages"),
 		},
+		{
+			name: "list workspace error",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				inputList:     "go",
+				wspaceListErr: errors.New("error to list workspaces"),
+			},
+			want: errors.New("error to list workspaces"),
+		},
+		{
+			name: "error function FormulaWorkspaceInput",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				inputList:     newWorkspace,
+				inputTextErr:  errors.New("error in formula workspace"),
+			},
+			want: errors.New("error in formula workspace"),
+		},
+		{
+			name: "add workspace error",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				inputList:     "go",
+				wspaceAddErr:  errors.New("error to add workspace"),
+			},
+			want: errors.New("error to add workspace"),
+		},
+		{
+			name: "formula create error",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				inputList:     "go",
+				createErr:     errors.New("error to create formula"),
+			},
+			want: errors.New("error to create formula"),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			workspaceMock := new(mocks.WorkspaceForm)
-			workspaceMock.On("List").Return(formula.Workspaces{}, nil)
-			workspaceMock.On("Add", mock.Anything).Return(nil)
-			workspaceMock.On("CurrentHash", mock.Anything).Return("dsa", nil)
+			workspaceMock.On("List").Return(tt.in.wspaceList, tt.in.wspaceListErr)
+			workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr)
+			workspaceMock.On("CurrentHash", mock.Anything).Return("48d47029-2abf-4a2e-b5f2-f5b60471423e", nil)
 			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
 
 			templateManagerMock := new(mocks.TemplateManagerMock)
@@ -137,11 +158,11 @@ func TestCreateFormulaCmd(t *testing.T) {
 			templateManagerMock.On("Languages").Return(tt.in.tempLanguages, tt.in.tempLanguagesErr)
 
 			formulaCreatorMock := new(mocks.FormCreator)
-			formulaCreatorMock.On("Create", mock.Anything).Return(nil)
+			formulaCreatorMock.On("Create", mock.Anything).Return(tt.in.createErr)
 			formulaCreatorMock.On("Build", mock.Anything).Return(nil)
 
 			inputTextMock := new(mocks.InputTextMock)
-			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("test", nil)
+			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, tt.in.inputTextErr)
 
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
 			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputTextVal, tt.in.inputTextValErr)
@@ -166,6 +187,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tutorialMock,
 				treeMock,
 			)
+			// TODO: remove it after being deprecated
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			got := createFormulaCmd.Execute()
 			assert.Equal(t, tt.want, got)
@@ -175,7 +197,14 @@ func TestCreateFormulaCmd(t *testing.T) {
 }
 
 func TestCreateFormula(t *testing.T) {
+	ritchieHomeDir := filepath.Join(os.TempDir(), ".rit_create_formula")
 	workDir := filepath.Join(os.TempDir(), ".ritchie-formulas-local")
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
+	_ = dirManager.Remove(ritchieHomeDir)
+	_ = dirManager.Remove(workDir)
+
 	cf := formula.Create{
 		FormulaCmd: "rit test test",
 		Lang:       "go",
@@ -197,12 +226,17 @@ func TestCreateFormula(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name        string
+		in          in
+		withoutMock bool
+		want        error
 	}{
 		{
-			name: "success",
+			name:        "success without mock",
+			withoutMock: true,
+		},
+		{
+			name: "success mocked",
 			in: in{
 				currentHash: "a6edc906-2f9f-5fb2-a373-efac406f0ef2",
 			},
@@ -263,24 +297,44 @@ func TestCreateFormula(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			creatorMock := new(mocks.FormCreator)
-			creatorMock.On("Create", mock.Anything).Return(tt.in.createFormErr)
-			creatorMock.On("Build", mock.Anything).Return(tt.in.buildFormErr)
-			workspaceMock := new(mocks.WorkspaceForm)
-			workspaceMock.On("CurrentHash", mock.Anything).Return(tt.in.currentHash, tt.in.currentHashErr)
-			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(tt.in.updateHashErr)
-			tutorialMock := new(mocks.TutorialFindSetterMock)
-			tutorialMock.On("Find").Return(tt.in.tutorialHolder, tt.in.tutorialErr)
+			var createForm createFormulaCmd
+			if !tt.withoutMock {
+				creatorMock := new(mocks.FormCreator)
+				creatorMock.On("Create", mock.Anything).Return(tt.in.createFormErr)
+				creatorMock.On("Build", mock.Anything).Return(tt.in.buildFormErr)
+				workspaceMock := new(mocks.WorkspaceForm)
+				workspaceMock.On("CurrentHash", mock.Anything).Return(tt.in.currentHash, tt.in.currentHashErr)
+				workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(tt.in.updateHashErr)
+				tutorialMock := new(mocks.TutorialFindSetterMock)
+				tutorialMock.On("Find").Return(tt.in.tutorialHolder, tt.in.tutorialErr)
 
-			createForm := createFormulaCmd{
-				formula:   creatorMock,
-				workspace: workspaceMock,
-				tutorial:  tutorialMock,
+				createForm = createFormulaCmd{
+					formula:   creatorMock,
+					workspace: workspaceMock,
+					tutorial:  tutorialMock,
+				}
+			} else {
+				createForm = createFormulaCmdDeps(ritchieHomeDir, dirManager, fileManager)
 			}
 
 			got := createForm.create(cf)
-
 			assert.Equal(t, tt.want, got)
+
+			if tt.withoutMock {
+				assert.DirExists(t, ritchieHomeDir)
+
+				hashesDir := filepath.Join(ritchieHomeDir, "hashes")
+				assert.DirExists(t, hashesDir)
+
+				reposDir := filepath.Join(ritchieHomeDir, "repos")
+				assert.DirExists(t, reposDir)
+				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
+				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
+
+				assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+
+				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
+			}
 		})
 	}
 }
@@ -326,5 +380,38 @@ func TestFormulaCommandValidator(t *testing.T) {
 			got := formulaCommandValidator(tt.formulaCmd)
 			assert.Equal(t, tt.want, got)
 		})
+	}
+}
+
+func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, fileManager stream.FileManager) createFormulaCmd {
+	treeGen := tree.NewGenerator(dirManager, fileManager)
+	githubRepo := github.NewRepoManager(http.DefaultClient)
+	gitlabRepo := gitlab.NewRepoManager(http.DefaultClient)
+
+	repoProviders := formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
+	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
+	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
+	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
+	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
+	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
+
+	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
+	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, repoDeleter, treeGen, fileManager)
+
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, nil)
+	tmpManager := template.NewManager("../../testdata", dirManager)
+	createManager := creator.NewCreator(treeManager, dirManager, fileManager, tmpManager)
+	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
+	createBuilder := formula.NewCreateBuilder(createManager, formBuildLocal)
+	buildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
+	wspaceManager := workspace.New(ritchieHomeDir, os.TempDir(), dirManager, fileManager, buildLocal)
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
+
+	return createFormulaCmd{
+		formula:   createBuilder,
+		workspace: wspaceManager,
+		tutorial:  tutorialFinder,
 	}
 }
