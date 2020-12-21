@@ -26,10 +26,15 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-func TestFormulaCommand_Add(t *testing.T) {
+func TestAddFormulaCommand(t *testing.T) {
 	treeMock := treeMock{
 		tree: formula.Tree{
 			Commands: api.Commands{
+				"root_help": {
+					Parent: "root",
+					Usage:  "help",
+					Help:   "help core command",
+				},
 				"root_mock": {
 					Parent: "root",
 					Usage:  "mock",
@@ -43,6 +48,7 @@ func TestFormulaCommand_Add(t *testing.T) {
 				},
 			},
 			CommandsID: []api.CommandID{
+				"root_help",
 				"root_mock",
 				"root_mock_test",
 			},
