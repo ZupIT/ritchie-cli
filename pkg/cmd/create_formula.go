@@ -22,33 +22,41 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const newWorkspace = "Type new formula workspace?"
+const (
+	newWorkspace     = "Type new formula workspace?"
+	formulaCmdLabel  = "Enter the new formula command: "
+	formulaCmdHelper = "You must create your command based in this example [rit group verb noun]"
+)
+
+var (
+	ErrFormulaCmdNotBeEmpty        = errors.New("this input must not be empty")
+	ErrFormulaCmdMustStartWithRit  = errors.New("rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+	ErrInvalidFormulaCmdSize       = errors.New("rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+	ErrInvalidCharactersFormulaCmd = errors.New(`these characters are not allowed in the formula command [\ /,> <@ -]`)
+)
 
 // createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
 	formula         formula.CreateBuilder
-	workspace       formula.WorkspaceAddLister
+	workspace       formula.WorkspaceAddListHasher
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
-	tplM            template.Manager
+	template        template.Manager
 	tutorial        rtutorial.Finder
-	tree            tree.CheckerManager
+	tree            formula.TreeChecker
 }
 
 // CreateFormulaCmd creates a new cmd instance.
@@ -56,12 +64,12 @@ func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
 	tplM template.Manager,
-	workspace formula.WorkspaceAddLister,
+	workspace formula.WorkspaceAddListHasher,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 	rtf rtutorial.Finder,
-	treeChecker tree.CheckerManager,
+	treeChecker formula.TreeChecker,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,
@@ -70,7 +78,7 @@ func NewCreateFormulaCmd(
 		inText:          inText,
 		inTextValidator: inTextValidator,
 		inList:          inList,
-		tplM:            tplM,
+		template:        tplM,
 		tutorial:        rtf,
 		tree:            treeChecker,
 	}
@@ -91,20 +99,16 @@ func NewCreateFormulaCmd(
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inTextValidator.Text(
-			"Enter the new formula command: ",
-			c.surveyCmdValidator,
-			"You must create your command based in this example [rit group verb noun]",
-		)
+		formulaCmd, err := c.inTextValidator.Text(formulaCmdLabel, c.surveyCmdValidator, formulaCmdHelper)
 		if err != nil {
 			return err
 		}
 
-		if err := c.tplM.Validate(); err != nil {
+		if err := c.template.Validate(); err != nil {
 			return err
 		}
 
-		languages, err := c.tplM.Languages()
+		languages, err := c.template.Languages()
 		if err != nil {
 			return err
 		}
@@ -138,9 +142,12 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		check := c.tree.Check()
+
 		printConflictingCommandsWarning(check)
 
-		c.create(cf)
+		if err := c.create(cf); err != nil {
+			return err
+		}
 
 		return nil
 	}
@@ -159,42 +166,44 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		c.create(cf)
+		if err := c.create(cf); err != nil {
+			return err
+		}
+
 		return nil
 	}
 }
 
-func (c createFormulaCmd) create(cf formula.Create) {
-	buildInfo := prompt.Bold("Creating and building formula...")
-	s := spinner.StartNew(buildInfo)
-	time.Sleep(2 * time.Second)
-
+func (c createFormulaCmd) create(cf formula.Create) error {
 	if err := c.formula.Create(cf); err != nil {
-		err := prompt.NewError(err.Error())
-		s.Error(err)
-		return
+		return err
 	}
 
 	info := formula.BuildInfo{FormulaPath: cf.FormulaPath, Workspace: cf.Workspace}
 	if err := c.formula.Build(info); err != nil {
-		err := prompt.NewError(err.Error())
-		s.Error(err)
-		return
+		return err
 	}
+
+	hash, err := c.workspace.CurrentHash(cf.FormulaPath)
+	if err != nil {
+		return err
+	}
+
+	if err := c.workspace.UpdateHash(cf.FormulaPath, hash); err != nil {
+		return err
+	}
+
+	successMsg := fmt.Sprintf("%s formula successfully created!", cf.Lang)
+	prompt.Success(successMsg)
 
 	tutorialHolder, err := c.tutorial.Find()
 	if err != nil {
-		s.Error(err)
-		return
+		return err
 	}
-	createSuccess(s, cf.Lang)
-	buildSuccess(cf.FormulaPath, cf.FormulaCmd, tutorialHolder.Current)
-}
 
-func createSuccess(s *spinner.Spinner, lang string) {
-	msg := fmt.Sprintf("%s formula successfully created!", lang)
-	success := prompt.Green(msg)
-	s.Success(success)
+	buildSuccess(cf.FormulaPath, cf.FormulaCmd, tutorialHolder.Current)
+
+	return nil
 }
 
 func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
@@ -202,9 +211,10 @@ func buildSuccess(formulaPath, formulaCmd, tutorialStatus string) {
 
 	if tutorialStatus == tutorialStatusEnabled {
 		tutorialCreateFormula(formulaCmd)
-	} else {
-		prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
+		return
 	}
+
+	prompt.Info(fmt.Sprintf("Now you can run your formula with the following command %q", formulaCmd))
 }
 
 func formulaPath(workspacePath, cmd string) string {
@@ -223,19 +233,16 @@ func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 
 func formulaCommandValidator(formulaCmd string) error {
 	if len(strings.TrimSpace(formulaCmd)) < 1 {
-		return prompt.
-			NewError("this input must not be empty")
+		return ErrFormulaCmdNotBeEmpty
 	}
 
 	s := strings.Split(formulaCmd, " ")
 	if s[0] != "rit" {
-		return prompt.
-			NewError("Rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
+		return ErrFormulaCmdMustStartWithRit
 	}
 
 	if len(s) <= 2 {
-		return prompt.
-			NewError("Rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
+		return ErrInvalidFormulaCmdSize
 	}
 
 	if err := characterValidator(formulaCmd); err != nil {
@@ -266,7 +273,7 @@ func coreCmdValidator(formulaCmd string) error {
 
 func characterValidator(formula string) error {
 	if strings.ContainsAny(formula, `\/><,@`) {
-		return prompt.NewError(`not allowed character on formula name \/,><@-`)
+		return ErrInvalidCharactersFormulaCmd
 	}
 	return nil
 }
