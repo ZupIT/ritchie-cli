@@ -35,6 +35,11 @@ func TestAddFormulaCommand(t *testing.T) {
 					Usage:  "help",
 					Help:   "help core command",
 				},
+				"root_help_formula": {
+					Parent: "root_help",
+					Usage:  "formula",
+					Help:   "child of core command",
+				},
 				"root_mock": {
 					Parent: "root",
 					Usage:  "mock",
@@ -49,6 +54,7 @@ func TestAddFormulaCommand(t *testing.T) {
 			},
 			CommandsID: []api.CommandID{
 				"root_help",
+				"root_help_formula",
 				"root_mock",
 				"root_mock_test",
 			},
