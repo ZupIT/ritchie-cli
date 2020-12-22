@@ -1,13 +1,23 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type credDeleteMock struct {
@@ -26,6 +36,9 @@ type fieldsTestDeleteCredentialCmd struct {
 	inputList  prompt.InputList
 }
 
+const provider = "github"
+
+// TODO: remove upon stdin deprecation, reduce dependencies
 func TestDeleteCredential(t *testing.T) {
 	stdinTest := &deleteCredential{
 		Provider: "github",
@@ -39,13 +52,13 @@ func TestDeleteCredential(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		wantErr    bool
+		wantErr    string
 		fields     fieldsTestDeleteCredentialCmd
 		inputStdin string
 	}{
 		{
 			name:    "execute with success",
-			wantErr: false,
+			wantErr: "",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: deleteSuccess,
 				reader: credSettingsCustomMock{
@@ -68,7 +81,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error on find env",
-			wantErr: true,
+			wantErr: "some error on find env",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader:     credSettingsMock{},
@@ -84,7 +97,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error to read credentials value",
-			wantErr: true,
+			wantErr: "ReadCredentialsValue error",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader: credSettingsCustomMock{
@@ -107,7 +120,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error when there are no credentials in the env",
-			wantErr: false,
+			wantErr: "you have no defined credentials in this env",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader: credSettingsCustomMock{
@@ -130,7 +143,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error on input list",
-			wantErr: true,
+			wantErr: "some error",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader: credSettingsCustomMock{
@@ -153,7 +166,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error on input bool",
-			wantErr: true,
+			wantErr: "error on boolean list",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader: credSettingsCustomMock{
@@ -176,7 +189,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "cancel when input bool is false",
-			wantErr: false,
+			wantErr: "",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{},
 				reader: credSettingsCustomMock{
@@ -199,7 +212,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error on Delete",
-			wantErr: true,
+			wantErr: "some error on Delete",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: credDeleteMock{
 					deleteMock: func() error {
@@ -226,7 +239,7 @@ func TestDeleteCredential(t *testing.T) {
 		},
 		{
 			name:    "error different provider",
-			wantErr: false,
+			wantErr: "",
 			fields: fieldsTestDeleteCredentialCmd{
 				credDelete: deleteSuccess,
 				reader: credSettingsCustomMock{
@@ -256,17 +269,118 @@ func TestDeleteCredential(t *testing.T) {
 
 			deleteCredentialCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			deleteCredentialStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+			deleteCredentialCmd.SetArgs([]string{})
+			deleteCredentialStdin.SetArgs([]string{})
 
 			newReader := strings.NewReader(tt.inputStdin)
 			deleteCredentialStdin.SetIn(newReader)
 
-			if err := deleteCredentialCmd.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("delete credential command error = %v, wantErr %v", err, tt.wantErr)
+			err := deleteCredentialCmd.Execute()
+			if err != nil {
+				require.Equal(t, err.Error(), tt.wantErr)
+			} else {
+				require.Empty(t, tt.wantErr)
 			}
 
 			itsTestCaseWithStdin := tt.inputStdin != ""
-			if err := deleteCredentialStdin.Execute(); (err != nil) != tt.wantErr && itsTestCaseWithStdin {
-				t.Errorf("delete credential stdin command error = %v, wantErr %v", err, tt.wantErr)
+			err = deleteCredentialStdin.Execute()
+			if itsTestCaseWithStdin {
+				if err != nil {
+					require.Equal(t, err.Error(), tt.wantErr)
+				} else {
+					require.Empty(t, tt.wantErr)
+				}
+			}
+		})
+	}
+}
+
+func TestDeleteCredentialFormula(t *testing.T) {
+	homeDir := os.TempDir()
+	ritHomeDir := filepath.Join(homeDir, ".rit")
+	credentialPath := filepath.Join(ritHomeDir, "credentials", env.Default)
+	credentialFile := filepath.Join(credentialPath, provider)
+	_ = os.MkdirAll(credentialPath, os.ModePerm)
+	defer os.RemoveAll(ritHomeDir)
+
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
+	ctxFinder := env.NewFinder(ritHomeDir, fileManager)
+	credDeleter := credential.NewCredDelete(ritHomeDir, ctxFinder, fileManager)
+	credSettings := credential.NewSettings(fileManager, dirManager, homeDir)
+
+	tests := []struct {
+		name            string
+		inputBoolResult bool
+		inputListError  error
+		fileShouldExist bool
+		args            string
+		wantErr         string
+	}{
+		{
+			name:            "execute prompt with success",
+			inputBoolResult: true,
+		},
+		{
+			name: "execute flag with success",
+			args: "--provider=github",
+		},
+		{
+			name:            "execute flag with empty provider fail",
+			args:            "--provider=",
+			wantErr:         "please provide a value for 'provider'",
+			fileShouldExist: true,
+		},
+		{
+			name:            "fail on input list error",
+			wantErr:         "some error",
+			inputListError:  errors.New("some error"),
+			fileShouldExist: true,
+		},
+		{
+			name:            "do nothing on input bool refusal",
+			inputBoolResult: false,
+			fileShouldExist: true,
+		},
+	}
+
+	cred := credential.Detail{
+		Username: "",
+		Credential: credential.Credential{
+			"username": "my user",
+		},
+		Service: provider,
+		Type:    "text",
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsonData, _ := json.Marshal(cred)
+			err := ioutil.WriteFile(credentialFile, jsonData, os.ModePerm)
+			assert.NoError(t, err)
+
+			listMock := &mocks.InputListMock{}
+			listMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(provider, tt.inputListError)
+			boolMock := &mocks.InputBoolMock{}
+			boolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputBoolResult, nil)
+
+			cmd := NewDeleteCredentialCmd(credDeleter, credSettings, ctxFinder, boolMock, listMock)
+			// TODO: remove stdin flag after  deprecation
+			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+			cmd.SetArgs([]string{tt.args})
+
+			err = cmd.Execute()
+			if err != nil {
+				assert.Equal(t, err.Error(), tt.wantErr)
+			} else {
+				assert.Empty(t, tt.wantErr)
+			}
+
+			if tt.fileShouldExist {
+				assert.FileExists(t, credentialFile)
+			} else {
+				assert.NoFileExists(t, credentialFile)
 			}
 		})
 	}

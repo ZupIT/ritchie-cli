@@ -24,7 +24,7 @@ import (
 )
 
 const stdinWarning = "stdin commands are deprecated and will no longer be supported in future versions. Please use" +
-	"flags for programatic formula execution"
+	" flags for programatic formula execution"
 
 // CommandRunnerFunc represents that runner func for commands.
 type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
@@ -43,6 +43,10 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 		}
 		return promptFunc(cmd, args)
 	}
+}
+
+func IsFlagInput(cmd *cobra.Command) bool {
+	return cmd.Flags().NFlag() > 0
 }
 
 func DeprecateCmd(parentCmd *cobra.Command, deprecatedCmd, deprecatedMsg string) {
