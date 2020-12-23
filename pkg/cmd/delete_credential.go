@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -37,6 +37,15 @@ type deleteCredential struct {
 	Provider string `json:"provider"`
 }
 
+var deleteCredentialFlags = flags{
+	{
+		name:        providerFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: providerFlagDescription,
+	},
+}
+
 // NewDeleteCredentialCmd creates a new cmd instance
 func NewDeleteCredentialCmd(
 	credDelete credential.CredDelete,
@@ -62,13 +71,9 @@ func NewDeleteCredentialCmd(
 		Args:      cobra.OnlyValidArgs,
 	}
 
-	addFlags(cmd.Flags())
+	addReservedFlags(cmd.Flags(), deleteCredentialFlags)
 
 	return cmd
-}
-
-func addFlags(flags *pflag.FlagSet) {
-	flags.String(providerFlagName, "", providerFlagDescription)
 }
 
 func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
