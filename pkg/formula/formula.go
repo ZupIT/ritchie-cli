@@ -26,7 +26,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
-	"github.com/ZupIT/ritchie-cli/pkg/sliceutil"
+	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 )
 
 const (
