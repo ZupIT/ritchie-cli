@@ -14,4 +14,4 @@ merge_branch:
   ] # Users enabled to merge with comment
 
 issue_project:
-  enable: true # Enable issue to project when opening a new issue
+  enable: false # Enable issue to project when opening a new issue

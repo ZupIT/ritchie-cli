@@ -19,111 +19,103 @@ package tree
 import (
 	"encoding/json"
 	"path/filepath"
+	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const (
-	reposDirName = "repos"
-	treeFileName = "tree.json"
-	core         = "CORE"
-)
+const core = "CORE"
 
 type Manager struct {
 	ritchieHome   string
-	repoLister    formula.RepositoryLister
-	coreCmds      []api.Command
+	repo          formula.RepositoryLister
+	coreCmds      api.Commands
 	file          stream.FileReadExister
 	repoProviders formula.RepoProviders
-	isRootCommand bool
 }
 
 func NewTreeManager(
 	ritchieHome string,
 	rl formula.RepositoryLister,
-	coreCmds []api.Command,
+	coreCmds api.Commands,
 	file stream.FileReadExister,
 	rp formula.RepoProviders,
-	isRootCommand bool,
 ) Manager {
 	return Manager{
 		ritchieHome:   ritchieHome,
-		repoLister:    rl,
+		repo:          rl,
 		coreCmds:      coreCmds,
 		file:          file,
 		repoProviders: rp,
-		isRootCommand: isRootCommand,
 	}
 }
 
-func (d Manager) Tree() (map[string]formula.Tree, error) {
-	trees := make(map[string]formula.Tree)
+func (d Manager) Tree() (map[formula.RepoName]formula.Tree, error) {
+	trees := make(map[formula.RepoName]formula.Tree)
 	trees[core] = formula.Tree{Commands: d.coreCmds}
 
-	rr, err := d.repoLister.List()
+	rr, err := d.repo.List()
 	if err != nil {
 		return nil, err
 	}
+
 	for _, v := range rr {
 		treeRepo, err := d.treeByRepo(v.Name)
 		if err != nil {
 			return nil, err
 		}
-		trees[v.Name.String()] = treeRepo
+		trees[v.Name] = treeRepo
 	}
 
 	return trees, nil
 }
 
 func (d Manager) MergedTree(core bool) formula.Tree {
-	trees := make(map[string]api.Command)
-	treeMain := formula.Tree{Commands: []api.Command{}}
-	if core {
-		treeMain = formula.Tree{Commands: d.coreCmds}
-	}
+	mergedCommands := make(api.Commands)
+	rr, _ := d.repo.List()
 
-	for _, v := range treeMain.Commands {
-		key := v.Parent + "_" + v.Usage
-		trees[key] = v
-	}
-
-	rr, _ := d.repoLister.List()
-	for _, r := range rr {
-		treeRepo, err := d.treeByRepo(r.Name)
+	for i := rr.Len() - 1; i >= 0; i-- {
+		tree, err := d.treeByRepo(rr[i].Name)
 		if err != nil {
 			continue
 		}
 
-		var cc []api.Command
-		for _, c := range treeRepo.Commands {
-			key := c.Parent + "_" + c.Usage
-			if trees[key].Usage == "" {
-				c.Repo = r.Name.String()
-				trees[key] = c
-				cc = append(cc, c)
-			}
+		for k, v := range tree.Commands {
+			v.Repo = rr[i].Name.String()
+			mergedCommands[k] = v
 		}
-		treeMain.Commands = append(treeMain.Commands, cc...)
 	}
 
-	return treeMain
+	ids := make([]api.CommandID, 0)
+	for id := range mergedCommands {
+		ids = append(ids, id)
+	}
+
+	sort.Sort(api.ByLen(ids))
+
+	if core {
+		for k, v := range d.coreCmds {
+			mergedCommands[k] = v
+		}
+	}
+
+	return formula.Tree{
+		Version:    Version,
+		Commands:   mergedCommands,
+		CommandsID: ids,
+	}
 }
 
 func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {
-	treeCmdFile := filepath.Join(d.ritchieHome, reposDirName, repoName.String(), treeFileName)
-	return d.loadTree(treeCmdFile)
-}
-
-func (d Manager) loadTree(treeCmdFile string) (formula.Tree, error) {
 	tree := formula.Tree{}
-
-	if !d.file.Exists(treeCmdFile) {
+	treeFilePath := filepath.Join(d.ritchieHome, "repos", repoName.String(), "tree.json")
+	if !d.file.Exists(treeFilePath) {
 		return tree, nil
 	}
 
-	treeFile, err := d.file.Read(treeCmdFile)
+	treeFile, err := d.file.Read(treeFilePath)
 	if err != nil {
 		return tree, err
 	}

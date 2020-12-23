@@ -20,10 +20,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const errNotFoundTemplate = `
@@ -33,30 +35,29 @@ Try again after use:
 `
 
 type Finder struct {
-	homePath  string
-	ctxFinder rcontext.Finder
-	file      stream.FileReader
+	homePath string
+	env      env.Finder
 }
 
-func NewFinder(homePath string, cf rcontext.Finder, file stream.FileReader) Finder {
+func NewFinder(homePath string, env env.Finder) Finder {
 	return Finder{
-		homePath:  homePath,
-		ctxFinder: cf,
-		file:      file,
+		homePath: homePath,
+		env:      env,
 	}
 }
 
 func (f Finder) Find(provider string) (Detail, error) {
-	ctx, err := f.ctxFinder.Find()
+	envHolder, err := f.env.Find()
 
 	if err != nil {
 		return Detail{}, err
 	}
-	if ctx.Current == "" {
-		ctx.Current = rcontext.DefaultCtx
+	if envHolder.Current == "" {
+		envHolder.Current = env.Default
 	}
 
-	cb, err := f.file.Read(File(f.homePath, ctx.Current, provider))
+	filePath := filepath.Join(f.homePath, credentialDir, envHolder.Current, provider)
+	cb, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		errMsg := fmt.Sprintf(errNotFoundTemplate, provider)
 		return Detail{Credential: Credential{}}, errors.New(prompt.Red(errMsg))

@@ -14,20 +14,42 @@
  * limitations under the License.
  */
 
-package cmd
+package env
 
 import (
-	"testing"
+	"encoding/json"
+	"path/filepath"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestNewShowContextCmd(t *testing.T) {
-	cmd := NewShowContextCmd(ctxFinderMock{})
-	if cmd == nil {
-		t.Errorf("NewShowContextCmd got %v", cmd)
+type FindManager struct {
+	filePath string
+	file     stream.FileReadExister
+}
 
+func NewFinder(homePath string, file stream.FileReadExister) FindManager {
+	return FindManager{
+		filePath: filepath.Join(homePath, FileName),
+		file:     file,
+	}
+}
+
+func (f FindManager) Find() (Holder, error) {
+	envHolder := Holder{}
+
+	if !f.file.Exists(f.filePath) {
+		return envHolder, nil
 	}
 
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	b, err := f.file.Read(f.filePath)
+	if err != nil {
+		return envHolder, err
 	}
+
+	if err := json.Unmarshal(b, &envHolder); err != nil {
+		return envHolder, err
+	}
+
+	return envHolder, nil
 }

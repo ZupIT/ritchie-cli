@@ -84,3 +84,26 @@ func (f FileWriteReadExisterCustomMock) Exists(path string) bool {
 func (f FileWriteReadExisterCustomMock) Write(path string, content []byte) error {
 	return f.WriteMock(path, content)
 }
+
+type FileManagerMock struct {
+	WriteFunc  func(path string, content []byte) error
+	ReadFunc   func(path string) ([]byte, error)
+	ExistsFunc func(path string) bool
+	RemoveFunc func(path string) error
+}
+
+func (f FileManagerMock) Read(path string) ([]byte, error) {
+	return f.ReadFunc(path)
+}
+
+func (f FileManagerMock) Exists(path string) bool {
+	return f.ExistsFunc(path)
+}
+
+func (f FileManagerMock) Write(path string, content []byte) error {
+	return f.WriteFunc(path, content)
+}
+
+func (f FileManagerMock) Remove(path string) error {
+	return f.RemoveFunc(path)
+}

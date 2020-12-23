@@ -61,12 +61,12 @@ func printCredentialsTable(fields credential.ListCredDatas) {
 	table.Wrap = true
 	table.AddRow(
 		prompt.Bold("PROVIDER"),
-		prompt.Bold("CONTEXT"),
+		prompt.Bold("ENV"),
 		prompt.Bold("CREDENTIAL"),
 	)
 
 	for _, c := range fields {
-		table.AddRow(c.Provider, c.Context, c.Credential)
+		table.AddRow(c.Provider, c.Env, c.Credential)
 	}
 	if len(table.Rows) < 2 {
 		setCmd := prompt.Cyan("rit set credential")

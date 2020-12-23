@@ -32,7 +32,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -109,24 +108,27 @@ func NewFormulaCommand(
 }
 
 func (f FormulaCommand) Add(root *cobra.Command) error {
-	treeRep := f.treeManager.MergedTree(false)
+	tree := f.treeManager.MergedTree(false)
 	commands := make(map[string]*cobra.Command)
 	commands[rootCmdName] = root
 
-	for _, cmd := range treeRep.Commands {
-		cmdPath := api.Command{Id: cmd.Id, Parent: cmd.Parent, Usage: cmd.Usage}
-		if !sliceutil.ContainsCmd(f.coreCmds, cmdPath) {
-			var newCmd *cobra.Command
-			if cmd.Formula {
-				newCmd = f.newFormulaCmd(cmd)
-			} else {
-				newCmd = newSubCmd(cmd)
-			}
+	for _, id := range tree.CommandsID {
+		cmd := tree.Commands[id]
 
-			parentCmd := commands[cmd.Parent]
-			parentCmd.AddCommand(newCmd)
-			commands[cmdPath.Id] = newCmd
+		if containsCmd(f.coreCmds, cmd) {
+			continue
 		}
+
+		var newCmd *cobra.Command
+		if cmd.Formula {
+			newCmd = f.newFormulaCmd(cmd)
+		} else {
+			newCmd = newSubCmd(cmd)
+		}
+
+		parentCmd := commands[cmd.Parent]
+		parentCmd.AddCommand(newCmd)
+		commands[id.String()] = newCmd
 	}
 
 	return nil
@@ -293,4 +295,18 @@ func isInputFlag(cmd *cobra.Command) bool {
 func path(cmd api.Command) string {
 	path := strings.ReplaceAll(strings.Replace(cmd.Parent, "root", "", 1), "_", string(os.PathSeparator))
 	return filepath.Join(path, cmd.Usage)
+}
+
+func containsCmd(aa api.Commands, c api.Command) bool {
+	for _, v := range aa {
+		if c.Parent == v.Parent && c.Usage == v.Usage {
+			return true
+		}
+
+		coreCmd := fmt.Sprintf("%s_%s", v.Parent, v.Usage)
+		if c.Parent == coreCmd { // Ensures that no core commands will be added
+			return true
+		}
+	}
+	return false
 }

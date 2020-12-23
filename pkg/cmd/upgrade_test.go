@@ -20,6 +20,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
+	internal "github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
@@ -68,6 +72,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		UrlFinder upgrade.UrlFinder
 		input     prompt.InputList
 		file      stream.FileWriteReadExister
+		tag       git.Tag
 	}
 	tests := []struct {
 		name    string
@@ -85,6 +90,39 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 						return nil
 					},
 					func(current, installed string) string {
+						return ""
+					},
+				},
+				Manager: stubUpgradeManager{
+					func(upgradeUrl string) error {
+						return nil
+					},
+				},
+				UrlFinder: stubUrlFinder{
+					func() string {
+						return "any url"
+					},
+				},
+				file: sMocks.FileWriteReadExisterCustomMock{
+					ExistsMock: func(path string) bool {
+						return true
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "return nil when error on stable version",
+			in: in{
+				tag: git.Tag{Description: "Any description"},
+				resolver: stubVersionResolver{
+					stableVersion: func() (string, error) {
+						return "1.0.0", errors.New("stable version error")
+					},
+					updateCache: func() error {
+						return nil
+					},
+					verifyNewVersion: func(current, installed string) string {
 						return ""
 					},
 				},
@@ -173,6 +211,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		{
 			name: "success with no metrics file",
 			in: in{
+				tag: git.Tag{},
 				resolver: stubVersionResolver{
 					stableVersion: func() (string, error) {
 						return "1.0.0", nil
@@ -271,12 +310,16 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			m := &internal.GitRepositoryMock{}
+			m.On("LatestTag", mock.Anything).Return(tt.in.tag, nil)
 			u := NewUpgradeCmd(
 				tt.in.resolver,
 				tt.in.Manager,
 				tt.in.UrlFinder,
 				tt.in.input,
-				tt.in.file)
+				tt.in.file,
+				m)
+
 			if err := u.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("runFunc() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -1,4 +1,9 @@
-#!/bin/sh -xe
+#!/bin/sh
+
+usage () {
+	echo "./install.sh"
+}
+
 
 idempotent_config() {
   if [ -n "$SHELL_TYPE" ]; then
@@ -37,6 +42,26 @@ idempotent_config() {
   fi
 }
 
+rit_install () {
+	echo "Downloading rit..."
+	STABLE_VERSION=$(curl -s https://commons-repo.ritchiecli.io/stable.txt)
+	curl -SLO "https://commons-repo.ritchiecli.io/${STABLE_VERSION}/${OPERATIONAL_SYSTEM}/rit"
+
+
+	chmod +x ./rit
+
+	INSTALL_PATH="/usr/local/bin"
+
+	if [ ! -d "$INSTALL_PATH" ]; then
+		sudo mkdir -p $INSTALL_PATH
+	fi
+
+	sudo mv ./rit $INSTALL_PATH/rit
+	$INSTALL_PATH/rit --version
+
+	idempotent_config
+}
+
 rit_identify_shell () {
   if [ -n "$($SHELL -c 'echo $ZSH_VERSION')" ]; then
     echo "Going to install autocomplete for zsh"
@@ -50,5 +75,22 @@ rit_identify_shell () {
   fi
 }
 
+rit_identify_os () {
+
+  if [ $(uname) = "Linux" ]; then
+      echo "Installing Ritchie for Linux"
+      OPERATIONAL_SYSTEM="linux"
+  elif [ $(uname) = "Darwin" ]; then
+      echo "Installing Ritchie for Mac"
+      OPERATIONAL_SYSTEM="darwin"
+  else
+    echo "Unable to identify which OS you're using"
+    exit 1
+  fi
+}
+
+rit_identify_os
+
 rit_identify_shell
-idempotent_config
+
+rit_install

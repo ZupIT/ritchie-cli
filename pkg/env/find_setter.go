@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package rcontext
+package env
 
-import "fmt"
-
-type FindRemoverManager struct {
-	ctxFile string
+type FindSetterManager struct {
 	Finder
-	Remover
+	Setter
 }
 
-func NewFindRemover(homePath string, f Finder, r Remover) FindRemoverManager {
-	return FindRemoverManager{fmt.Sprintf(ContextPath, homePath), f, r}
+func NewFindSetter(f Finder, s Setter) FindSetterManager {
+	return FindSetterManager{f, s}
 }

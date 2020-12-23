@@ -22,10 +22,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/internal/mocks"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 type SetterTestSuite struct {
@@ -33,9 +34,9 @@ type SetterTestSuite struct {
 
 	HomePath string
 
-	contextHolderNil     *rcontext.ContextHolder
-	contextHolderDefault *rcontext.ContextHolder
-	contextHolderProd    *rcontext.ContextHolder
+	envHolderNil     *env.Holder
+	envHolderDefault *env.Holder
+	envHolderProd    *env.Holder
 
 	DetailCredentialInfo *Detail
 }
@@ -51,9 +52,9 @@ func (suite *SetterTestSuite) SetupSuite() {
 	}
 
 	suite.HomePath = filepath.Join(tempDir, nameSuite)
-	suite.contextHolderNil = &rcontext.ContextHolder{Current: ""}
-	suite.contextHolderDefault = &rcontext.ContextHolder{Current: "default"}
-	suite.contextHolderProd = &rcontext.ContextHolder{Current: "prod", All: []string{"defauld", "prod"}}
+	suite.envHolderNil = &env.Holder{Current: ""}
+	suite.envHolderDefault = &env.Holder{Current: "default"}
+	suite.envHolderProd = &env.Holder{Current: "prod", All: []string{"defauld", "prod"}}
 	suite.DetailCredentialInfo = detailExample
 }
 
@@ -63,20 +64,21 @@ func (suite *SetterTestSuite) fileInfo(path string) (string, error) {
 	return string(b), err
 }
 
-func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
+func (suite *SetterTestSuite) TestSetCredentialToDefault() {
 	for _, t := range []struct {
 		testName string
-		context  rcontext.ContextHolder
+		env      env.Holder
 	}{
-		{"Context informed", *suite.contextHolderDefault},
-		{"Context not informed", *suite.contextHolderNil},
+		{"env informed", *suite.envHolderDefault},
+		{"env not informed", *suite.envHolderNil},
 	} {
 		suite.Run(t.testName, func() {
-			contextFinderMock := new(mocks.ContextFinderMock)
-			filePathExpectedCreated := File(suite.HomePath, suite.contextHolderDefault.Current, suite.DetailCredentialInfo.Service)
+			defer os.RemoveAll(suite.HomePath)
+			envFinderMock := new(mocks.EnvFinderMock)
+			filePathExpectedCreated := filepath.Join(suite.HomePath, credentialDir, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
-			contextFinderMock.On("Find").Return(t.context, nil)
-			setter := NewSetter(suite.HomePath, contextFinderMock)
+			envFinderMock.On("Find").Return(t.env, nil)
+			setter := NewSetter(suite.HomePath, envFinderMock, dirManager)
 
 			suite.NoFileExists(filePathExpectedCreated)
 
@@ -89,7 +91,6 @@ func (suite *SetterTestSuite) TestSetCredentialToDefalt() {
 			data, err := suite.fileInfo(filePathExpectedCreated)
 			suite.Nil(err)
 			suite.Contains(data, nameExpected)
-			defer os.RemoveAll(suite.HomePath)
 		})
 	}
 }
