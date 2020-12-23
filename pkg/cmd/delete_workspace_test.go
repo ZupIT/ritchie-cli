@@ -30,7 +30,6 @@ import (
 
 func TestDeleteWorkspaces(t *testing.T) {
 	type in struct {
-		ritHome         string
 		wspaceList      formula.Workspaces
 		wspaceListErr   error
 		wspaceDeleteErr error
