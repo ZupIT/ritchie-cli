@@ -370,11 +370,11 @@ type treeMock struct {
 	value string
 }
 
-func (t treeMock) Tree() (map[string]formula.Tree, error) {
+func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
 	if t.value != "" {
-		return map[string]formula.Tree{t.value: t.tree}, t.error
+		return map[formula.RepoName]formula.Tree{formula.RepoName(t.value): t.tree}, t.error
 	}
-	return map[string]formula.Tree{"test": t.tree}, t.error
+	return map[formula.RepoName]formula.Tree{"test": t.tree}, t.error
 }
 
 func (t treeMock) MergedTree(bool) formula.Tree {
@@ -382,26 +382,25 @@ func (t treeMock) MergedTree(bool) formula.Tree {
 }
 
 type treeGeneratorMock struct {
+	err error
 }
 
 func (t treeGeneratorMock) Generate(path string) (formula.Tree, error) {
 	return formula.Tree{
 		Commands: api.Commands{
-			{
-				Id:     "root_group",
+			"root_group": {
 				Parent: "root",
 				Usage:  "group",
 				Help:   "group for add",
 			},
-			{
-				Id:      "root_group_verb",
+			"root_group_verb": {
 				Parent:  "root_group",
 				Usage:   "verb",
 				Help:    "verb for add",
 				Formula: true,
 			},
 		},
-	}, nil
+	}, t.err
 }
 
 type GitRepositoryMock struct {

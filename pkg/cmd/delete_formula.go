@@ -29,7 +29,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -200,7 +199,7 @@ func (d deleteFormulaCmd) readFormulas(dir string, currentFormula string) ([]str
 		return nil, err
 	}
 
-	dirs = sliceutil.Remove(dirs, docsDir)
+	dirs = removeFromArray(dirs, docsDir)
 
 	var groups []string
 	var formulaOptions []string
@@ -220,7 +219,7 @@ func (d deleteFormulaCmd) readFormulas(dir string, currentFormula string) ([]str
 		if response == currentFormula {
 			return groups, nil
 		}
-		dirs = sliceutil.Remove(dirs, srcDir)
+		dirs = removeFromArray(dirs, srcDir)
 	}
 
 	selected, err := d.inList.List(questionSelectFormulaGroup, dirs)
@@ -376,8 +375,17 @@ func isFormula(dirs []string) bool {
 }
 
 func hasFormulaInDir(dirs []string) bool {
-	dirs = sliceutil.Remove(dirs, docsDir)
-	dirs = sliceutil.Remove(dirs, srcDir)
+	dirs = removeFromArray(dirs, docsDir)
+	dirs = removeFromArray(dirs, srcDir)
 
 	return len(dirs) > 0
+}
+
+func removeFromArray(ss []string, r string) []string {
+	for i, s := range ss {
+		if s == r {
+			return append(ss[:i], ss[i+1:]...)
+		}
+	}
+	return ss
 }
