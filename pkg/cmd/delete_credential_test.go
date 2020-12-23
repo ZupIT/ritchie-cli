@@ -307,7 +307,7 @@ func TestDeleteCredentialFormula(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 
 	ctxFinder := env.NewFinder(ritHomeDir, fileManager)
-	credDeleter := credential.NewCredDelete(ritHomeDir, ctxFinder, fileManager)
+	credDeleter := credential.NewCredDelete(ritHomeDir, ctxFinder)
 	credSettings := credential.NewSettings(fileManager, dirManager, homeDir)
 
 	tests := []struct {
