@@ -18,8 +18,13 @@ package cmd
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -28,34 +33,35 @@ import (
 
 var creds = make(map[string][]credential.Field)
 
-func Test_setCredentialCmd_runPrompt(t *testing.T) {
+func TestSetCredentialCmd(t *testing.T) {
+	tmp := os.TempDir()
+	home := filepath.Join(tmp, "SetCredential")
+	defer os.RemoveAll(home)
+
+	provider := "github"
+
+	setter := credential.NewSetter()
+
 	type in struct {
-		Setter        credential.Setter
-		credFile      credential.ReaderWriterPather
-		file          stream.FileReadExister
-		InputText     prompt.InputText
-		InputBool     prompt.InputBool
-		InputList     prompt.InputList
-		InputPassword prompt.InputPassword
+		Setter   credential.Setter
+		credFile credential.ReaderWriterPather
 	}
 	var tests = []struct {
-		name    string
-		in      in
-		wantErr bool
+		name  string
+		flags string
+		in    in
+		err   error
 	}{
 		{
 			name: "success run with no data",
 			in: in{
-				Setter:    credSetterMock{},
-				credFile:  credSettingsMock{},
-				InputText: inputSecretMock{},
-				InputBool: inputFalseMock{},
+				Setter:   credSetterMock{},
+				credFile: credSettingsMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return credential.AddNew, nil
 					},
 				},
-				InputPassword: inputPasswordMock{},
 			},
 			wantErr: false,
 		},
@@ -75,22 +81,11 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return creds, nil
 					},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("some data"), nil
-					},
-				},
-				InputText: inputTextMock{},
-				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
-				InputPassword: inputPasswordMock{},
 			},
 			wantErr: false,
 		},
@@ -110,14 +105,6 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return creds, nil
 					},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("some data"), nil
-					},
-				},
 				InputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
 						return "", errors.New("text error")
@@ -129,7 +116,6 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return "file", nil
 					},
 				},
-				InputPassword: inputPasswordMock{},
 			},
 			wantErr: true,
 		},
@@ -149,22 +135,11 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return creds, nil
 					},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return nil, errors.New("error reading file")
-					},
-				},
-				InputText: inputTextMock{},
-				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
-				InputPassword: inputPasswordMock{},
 			},
 			wantErr: true,
 		},
@@ -184,22 +159,11 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return creds, nil
 					},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte(""), nil
-					},
-				},
-				InputText: inputTextMock{},
-				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						return "file", nil
 					},
 				},
-				InputPassword: inputPasswordMock{},
 			},
 			wantErr: true,
 		},
@@ -251,14 +215,6 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return creds, nil
 					},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return false
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("some data"), nil
-					},
-				},
 				InputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
 						return "", errors.New("text error")
@@ -290,12 +246,6 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return creds, nil
 					},
 				},
-				file: sMocks.FileReadExisterCustomMock{},
-				InputText: inputTextCustomMock{
-					text: func(name string, required bool) (string, error) {
-						return "./path/to/my/credentialFile", nil
-					},
-				},
 				InputBool: inputFalseMock{},
 				InputList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
@@ -315,7 +265,6 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 						return credential.Fields{}, errors.New("error reading credentials")
 					},
 				},
-				file: sMocks.FileReadExisterCustomMock{},
 				InputText: inputTextCustomMock{
 					text: func(name string, required bool) (string, error) {
 						return "./path/to/my/credentialFile", nil
@@ -331,61 +280,25 @@ func Test_setCredentialCmd_runPrompt(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		{
-			name: "fail when list return err",
-			in: in{
-				Setter:        credSetterMock{},
-				credFile:      credSettingsMock{},
-				InputText:     inputSecretMock{},
-				InputBool:     inputFalseMock{},
-				InputList:     inputListErrorMock{},
-				InputPassword: inputPasswordErrorMock{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "fail when text return err",
-			in: in{
-				Setter:    credSetterMock{},
-				credFile:  credSettingsMock{},
-				InputText: inputTextErrorMock{},
-				InputBool: inputFalseMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return credential.AddNew, nil
-					},
-				},
-				InputPassword: inputPasswordMock{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "fail when text bool err",
-			in: in{
-				Setter:    credSetterMock{},
-				credFile:  credSettingsMock{},
-				InputText: inputTextMock{},
-				InputBool: inputBoolErrorMock{},
-				InputList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return credential.AddNew, nil
-					},
-				},
-				InputPassword: inputPasswordMock{},
-			},
-			wantErr: true,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			inputText := &mocks.InputTextMock{}
+			inputText.On("Text", "Define your provider name:", true).Return("github", nil)
+			inputBool := &mocks.InputBoolMock{}
+			inputBool.On("Bool", "Add more credentials fields to this provider?", []string{"no", "yes"}).Return(false, nil)
+			inputList := &mocks.InputListMock{}
+			inputList.On("List", "Select your provider", mock.Anything).Return(provider, nil)
+			inputPassword := &mocks.InputPasswordMock{}
+			inputPassword.On("Password", "token:", true).Return("some pass", nil)
+
 			cmd := NewSetCredentialCmd(
 				tt.in.Setter,
 				tt.in.credFile,
-				tt.in.file,
-				tt.in.InputText,
-				tt.in.InputBool,
-				tt.in.InputList,
-				tt.in.InputPassword,
+				inputText,
+				inputBool,
+				inputList,
+				inputPassword,
 			)
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := cmd.Execute(); (err != nil) != tt.wantErr {
