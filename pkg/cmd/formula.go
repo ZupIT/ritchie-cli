@@ -152,7 +152,7 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	}
 
 	flags := formulaCmd.Flags()
-	addReservedFlags(flags)
+	addReservedFlags(flags, reservedFlags)
 	f.addInputFlags(def, flags)
 
 	return formulaCmd
