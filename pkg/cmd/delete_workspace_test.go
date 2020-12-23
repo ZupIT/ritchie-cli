@@ -18,133 +18,148 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-type listErrorMock struct{}
-
-func (listErrorMock) List(name string, items []string, helper ...string) (string, error) {
-	workspace := filepath.Join(os.TempDir(), "formulas-ritchie")
-	return fmt.Sprintf("Formulas-Ritchie (%s)", workspace), nil
-}
-
-type listMock struct{}
-
-func (listMock) List(name string, items []string, helper ...string) (string, error) {
-	workspace := filepath.Join(os.TempDir(), "ritchie-formulas-local")
-	return fmt.Sprintf("Default (%s)", workspace), nil
-}
-
-type workspaceMock struct{}
-
-func (workspaceMock) List() (formula.Workspaces, error) {
-	m := formula.Workspaces{"Formulas-Ritchie": filepath.Join(os.TempDir(), "formulas-ritchie")}
-	return m, nil
-}
-
-func (workspaceMock) Delete(workspace formula.Workspace) error {
-	return errors.New("Some error")
-}
-
-func TestDeleteWorkspaceCmd(t *testing.T) {
-	fileManager := stream.NewFileManager()
-	dirManager := stream.NewDirManager(fileManager)
-
-	cmd := NewDeleteWorkspaceCmd(
-		os.TempDir(),
-		workspaceForm{},
-		dirManager,
-		listMock{},
-		inputTrueMock{},
-	)
-
-	workspace := filepath.Join(os.TempDir(), "formulas-ritchie")
-	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
-		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
+func TestDeleteWorkspaces(t *testing.T) {
+	type in struct {
+		ritHome         string
+		wspaceList      formula.Workspaces
+		wspaceListErr   error
+		wspaceDeleteErr error
+		dirExist        bool
+		inputList       string
+		inputListErr    error
+		inputBool       bool
+		inputBoolErr    error
+		repoDeleteErr   error
 	}
 
-	if cmd == nil {
-		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-	}
-
-	cmd = NewDeleteWorkspaceCmd(
-		os.TempDir(),
-		workspaceForm{},
-		dirManager,
-		inputListCustomMock{
-			list: func(name string, items []string) (string, error) {
-				return "", errors.New("Some error")
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "success",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"local-commons": "/home/user/commons",
+				},
+				dirExist:  true,
+				inputList: "local-commons",
+				inputBool: true,
 			},
 		},
-		inputTrueMock{},
-	)
-
-	workspace = filepath.Join(os.TempDir(), "ritchie-formulas-local")
-	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
-		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
-	}
-
-	if cmd == nil {
-		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
-	}
-
-	if err := cmd.Execute(); err == nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, nil, err)
-	}
-
-	cmd = NewDeleteWorkspaceCmd(
-		os.TempDir(),
-		workspaceForm{},
-		DirManagerCustomMock{
-			exists: func(dir string) bool {
-				return false
+		{
+			name: "error to list workspace",
+			in: in{
+				wspaceListErr: errors.New("error to list workspace"),
+			},
+			want: errors.New("error to list workspace"),
+		},
+		{
+			name: "error empty workspace",
+			in: in{
+				wspaceList: formula.Workspaces{},
+			},
+			want: ErrEmptyWorkspaces,
+		},
+		{
+			name: "error to input list",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"local-commons": "/home/user/commons",
+				},
+				dirExist:     true,
+				inputListErr: errors.New("error to input list"),
+				inputBool:    true,
+			},
+			want: errors.New("error to input list"),
+		},
+		{
+			name: "error to accept to delete selected workspace",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"local-commons": "/home/user/commons",
+				},
+				dirExist:     true,
+				inputList:    "local-commons",
+				inputBoolErr: errors.New("error to accept"),
+			},
+			want: errors.New("error to accept"),
+		},
+		{
+			name: "not accept to delete selected workspace",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"local-commons": "/home/user/commons",
+				},
+				dirExist:  true,
+				inputList: "local-commons",
+				inputBool: false,
 			},
 		},
-		listMock{},
-		inputTrueMock{},
-	)
-
-	workspace = filepath.Join(os.TempDir(), "ritchie-formulas-local")
-	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
-		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
+		{
+			name: "error to delete repo",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"local-commons": "/home/user/commons",
+				},
+				dirExist:      true,
+				inputList:     "local-commons",
+				inputBool:     true,
+				repoDeleteErr: errors.New("error to delete repo"),
+			},
+			want: errors.New("error to delete repo"),
+		},
+		{
+			name: "error to delete workspace",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"local-commons": "/home/user/commons",
+				},
+				dirExist:        true,
+				inputList:       "local-commons",
+				inputBool:       true,
+				wspaceDeleteErr: errors.New("error to delete workspace"),
+			},
+			want: errors.New("error to delete workspace"),
+		},
 	}
 
-	if cmd == nil {
-		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			workspaceMock := new(mocks.WorkspaceForm)
+			workspaceMock.On("List").Return(tt.in.wspaceList, tt.in.wspaceListErr)
+			workspaceMock.On("Delete", mock.Anything).Return(tt.in.wspaceDeleteErr)
+			dirMock := new(mocks.DirManager)
+			dirMock.On("Exists", mock.Anything).Return(tt.in.dirExist)
+			inListMock := new(mocks.InputListMock)
+			inListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
+			inBoolMock := new(mocks.InputBoolMock)
+			inBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
+			repoManagerMock := new(mocks.RepoManager)
+			repoManagerMock.On("Delete", mock.Anything).Return(tt.in.repoDeleteErr)
 
-	if err := cmd.Execute(); err == nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, nil, err)
-	}
+			cmd := NewDeleteWorkspaceCmd(
+				os.TempDir(),
+				workspaceMock,
+				repoManagerMock,
+				dirMock,
+				inListMock,
+				inBoolMock,
+			)
 
-	cmd = NewDeleteWorkspaceCmd(
-		os.TempDir(),
-		workspaceMock{},
-		dirManager,
-		listErrorMock{},
-		inputTrueMock{},
-	)
-
-	workspace = filepath.Join(os.TempDir(), "formulas-ritchie")
-	if err := os.MkdirAll(filepath.Join(workspace, "mock", "test", "scr"), os.ModePerm); err != nil {
-		t.Errorf("TestNewDeleteWorkspaceCmd got error %v", err)
-	}
-
-	if cmd == nil {
-		t.Errorf("NewDeleteWorkspaceCmd got %v", cmd)
-	}
-
-	if err := cmd.Execute(); err == nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, nil, err)
+			got := cmd.Execute()
+			assert.Equal(t, tt.want, got)
+		})
 	}
 }

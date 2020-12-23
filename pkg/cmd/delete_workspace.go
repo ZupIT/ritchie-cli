@@ -19,30 +19,24 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	"github.com/spf13/cobra"
 )
 
-const (
-	msgWorkspaceIsNotValid = "the workspace informed is not valid"
-	msgEmptyWorkspaces     = "there are no workspaces to delete"
-)
-
-var (
-	ErrWorkspaceIsNotValid = errors.New(msgWorkspaceIsNotValid)
-	ErrEmptyWorkspaces     = errors.New(msgEmptyWorkspaces)
-)
+var ErrEmptyWorkspaces = errors.New("there are no workspaces to delete")
 
 type deleteWorkspaceCmd struct {
 	userHomeDir string
 	workspace   formula.WorkspaceListDeleter
-	directory   stream.DirListChecker
+	repo        formula.RepositoryDeleter
+	dir         stream.DirChecker
 	inList      prompt.InputList
 	inBool      prompt.InputBool
 }
@@ -50,16 +44,18 @@ type deleteWorkspaceCmd struct {
 func NewDeleteWorkspaceCmd(
 	userHomeDir string,
 	workspace formula.WorkspaceListDeleter,
-	directory stream.DirListChecker,
+	repo formula.RepositoryDeleter,
+	dir stream.DirChecker,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
 ) *cobra.Command {
 	d := deleteWorkspaceCmd{
-		userHomeDir,
-		workspace,
-		directory,
-		inList,
-		inBool,
+		userHomeDir: userHomeDir,
+		workspace:   workspace,
+		repo:        repo,
+		dir:         dir,
+		inList:      inList,
+		inBool:      inBool,
 	}
 
 	cmd := &cobra.Command{
@@ -80,7 +76,7 @@ func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		defaultWorkspace := filepath.Join(d.userHomeDir, formula.DefaultWorkspaceDir)
-		if d.directory.Exists(defaultWorkspace) {
+		if d.dir.Exists(defaultWorkspace) {
 			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
 		}
 
@@ -102,7 +98,8 @@ func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
 			return nil
 		}
 
-		if err := d.deleteWorkspace(wspace.Dir); err != nil {
+		repoLocalName := repoutil.LocalName(wspace.Name)
+		if err := d.repo.Delete(repoLocalName); err != nil {
 			return err
 		}
 
@@ -116,14 +113,6 @@ func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
 
 		return nil
 	}
-}
-
-func (d deleteWorkspaceCmd) deleteWorkspace(workspace string) error {
-	if d.directory.Exists(workspace) {
-		return os.RemoveAll(workspace)
-	}
-
-	return ErrWorkspaceIsNotValid
 }
 
 func WorkspaceListInput(

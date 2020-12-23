@@ -110,21 +110,21 @@ func (m Manager) Delete(workspace formula.Workspace) error {
 		return err
 	}
 
-	if _, exists := workspaces[workspace.Name]; exists {
-		delete(workspaces, workspace.Name)
-		content, err := json.Marshal(workspaces)
-		if err != nil {
-			return err
-		}
-
-		if err := m.file.Write(m.workspaceFile, content); err != nil {
-			return err
-		}
-
-		return nil
+	if _, exists := workspaces[workspace.Name]; !exists {
+		return ErrInvalidWorkspace
 	}
 
-	return ErrInvalidWorkspace
+	delete(workspaces, workspace.Name)
+	content, err := json.Marshal(workspaces)
+	if err != nil {
+		return err
+	}
+
+	if err := m.file.Write(m.workspaceFile, content); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m Manager) List() (formula.Workspaces, error) {
