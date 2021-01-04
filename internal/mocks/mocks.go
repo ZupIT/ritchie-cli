@@ -253,6 +253,20 @@ func (r *RepoManager) LatestTag(repo formula.Repo) string {
 	return args.String(0)
 }
 
+type DirManager struct {
+	mock.Mock
+}
+
+func (d *DirManager) Exists(path string) bool {
+	args := d.Called(path)
+	return args.Bool(0)
+}
+
+func (d *DirManager) IsDir(dir string) bool {
+	args := d.Called(dir)
+	return args.Bool(0)
+}
+
 type FileManager struct {
 	mock.Mock
 }
