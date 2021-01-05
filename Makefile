@@ -20,7 +20,7 @@ GIT_REMOTE=https://$(GIT_USERNAME):$(GIT_PASSWORD)@github.com/ZupIT/ritchie-cli
 MODULE=$(shell go list -m)
 DATE=$(shell date +%D_%H:%M)
 # Routing stuff
-IS_RELEASE=$(shell echo $(VERSION) | egrep "^([0-9]{1,}\.)+[0-9]{1,}$")
+IS_RELEASE=$(shell echo $(VERSION) | egrep "^([0-9]{1,}\.)+[0-9]{1,}$$")
 IS_BETA=$(shell echo $(VERSION) | egrep "*.pre.*")
 IS_QA=$(shell echo $(VERSION) | egrep "*qa.*")
 IS_STG=$(shell echo $(VERSION) | egrep "*stg.*")
