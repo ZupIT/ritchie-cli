@@ -117,7 +117,7 @@ func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error)
 		return inputConfig{}, errors.New("you have no defined credentials in this env")
 	}
 
-	providers := make([]string, len(data))
+	var providers []string
 	for _, c := range data {
 		providers = append(providers, c.Provider)
 	}
