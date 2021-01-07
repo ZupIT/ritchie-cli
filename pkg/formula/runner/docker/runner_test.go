@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -54,7 +53,7 @@ func TestRun(t *testing.T) {
 	envFinder := env.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, dockerBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{}, mocks.InputPathMock{})
+	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{}, InputPathMock{})
 	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
 	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
 
@@ -283,4 +282,10 @@ type inputResolverMock struct {
 
 func (i inputResolverMock) Resolve(inType api.TermInputType) (formula.InputRunner, error) {
 	return i.inRunner, i.err
+}
+
+type InputPathMock struct{}
+
+func (InputPathMock) Read(text string) (string, error) {
+	return text, nil
 }
