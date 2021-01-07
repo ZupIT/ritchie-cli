@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package credential
+package env
 
 import (
-	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
-	pathPattern     = "%s/credentials/%s"
-	credFilePattern = "%s/%s"
+	dev = "dev"
+	qa  = "qa"
 )
 
-func Dir(homePath, ctx string) string {
-	return fmt.Sprintf(pathPattern, homePath, ctx)
+func TestMain(m *testing.M) {
+	cleanEnv()
+	e := m.Run()
+	os.Exit(e)
 }
 
-func File(homePath, ctx, provider string) string {
-	return fmt.Sprintf(credFilePattern, Dir(homePath, ctx), provider)
+func cleanEnv() {
+	file := stream.NewFileManager()
+	_ = file.Remove(filepath.Join(os.TempDir(), FileName))
 }

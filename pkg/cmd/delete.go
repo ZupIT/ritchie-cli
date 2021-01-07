@@ -16,16 +16,32 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+)
 
 // NewDeleteCmd create a new delete instance.
 func NewDeleteCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:       "delete SUBCOMMAND",
-		Short:     "Delete contexts, repositories, formulas, workspaces and credentials",
-		Long:      "Delete contexts, repositories, formulas, workspaces and credentials",
-		Example:   "rit delete context",
-		ValidArgs: []string{"context", "formula", "repo", "workspace", "credential"},
+		Short:     "Delete env, repositories, formulas, workspaces and credentials",
+		Long:      "Delete env, repositories, formulas, workspaces and credentials",
+		Example:   "rit delete env",
+		ValidArgs: []string{"env", "formula", "repo", "workspace", "credential"},
 		Args:      cobra.OnlyValidArgs,
 	}
+
+	deprecatedMsg := fmt.Sprintf(
+		`you can now use the "%v" command for the same purpose as the "%v" command.`,
+		prompt.Bold("rit delete env"),
+		prompt.Bold("rit delete context"),
+	)
+
+	DeprecateCmd(cmd, "context", deprecatedMsg)
+
+	return cmd
 }

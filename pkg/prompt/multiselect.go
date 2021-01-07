@@ -14,42 +14,39 @@
  * limitations under the License.
  */
 
-package rcontext
+package prompt
 
 import (
-	"encoding/json"
-	"fmt"
-
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-type FindManager struct {
-	CtxFile string
-	File    stream.FileReadExister
+type SurveyMultiselect struct{}
+
+func NewSurveyMultiselect() SurveyMultiselect {
+	return SurveyMultiselect{}
 }
 
-func NewFinder(homePath string, file stream.FileReadExister) FindManager {
-	return FindManager{
-		CtxFile: fmt.Sprintf(ContextPath, homePath),
-		File:    file,
+func (SurveyMultiselect) Multiselect(input formula.Input) ([]string, error) {
+	value := []string{}
+	multiselect := &survey.MultiSelect{
+		Message: input.Label,
+		Options: input.Items,
+		Help:    input.Tutorial,
 	}
-}
-
-func (f FindManager) Find() (ContextHolder, error) {
-	ctxHolder := ContextHolder{}
-
-	if !f.File.Exists(f.CtxFile) {
-		return ctxHolder, nil
-	}
-
-	file, err := f.File.Read(f.CtxFile)
-	if err != nil {
-		return ctxHolder, err
+	multiQs := []*survey.Question{
+		{
+			Prompt: multiselect,
+		},
 	}
 
-	if err := json.Unmarshal(file, &ctxHolder); err != nil {
-		return ctxHolder, err
+	if *input.Required {
+		multiQs[0].Validate = survey.Required
 	}
 
-	return ctxHolder, nil
+	if err := survey.Ask(multiQs, &value); err != nil {
+		return value, err
+	}
+
+	return value, nil
 }

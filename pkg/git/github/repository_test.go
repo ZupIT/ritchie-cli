@@ -274,7 +274,7 @@ func TestLatestTag(t *testing.T) {
 					token:        "some_token",
 				},
 			},
-			want:    git.Tag{Name: "v1.0.0"},
+			want:    git.Tag{Name: "v1.0.0", Description: "Description of the release"},
 			wantErr: false,
 		},
 		{

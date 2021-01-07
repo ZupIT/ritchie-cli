@@ -16,6 +16,8 @@
 
 package credential
 
+const credentialDir = "credentials"
+
 // Detail represents a credential information of the user.
 type Detail struct {
 	Username   string     `json:"username"`
@@ -44,7 +46,7 @@ type ListCredDatas []ListCredData
 type ListCredData struct {
 	Provider   string
 	Credential string
-	Context    string
+	Env        string
 }
 
 // Fields are used to represents providers.json
@@ -65,7 +67,7 @@ type CredDelete interface {
 type Reader interface {
 	ReadCredentialsFields(path string) (Fields, error)
 	ReadCredentialsValue(path string) ([]ListCredData, error)
-	ReadCredentialsValueInContext(path string, context string) ([]ListCredData, error)
+	ReadCredentialsValueInEnv(path string, env string) ([]ListCredData, error)
 }
 
 type Writer interface {
@@ -76,6 +78,10 @@ type Writer interface {
 type Pather interface {
 	ProviderPath() string
 	CredentialsPath() string
+}
+
+type Resolver interface {
+	Resolve(name string) (string, error)
 }
 
 type ReaderWriterPather interface {

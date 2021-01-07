@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -109,7 +109,7 @@ func TestInputManager_Inputs(t *testing.T) {
 	fileManager := stream.NewFileManager()
 
 	type in struct {
-		creResolver env.Resolvers
+		creResolver credential.Resolver
 		file        stream.FileWriteReadExister
 		stdin       string
 	}
@@ -122,7 +122,7 @@ func TestInputManager_Inputs(t *testing.T) {
 		{
 			name: "success stdin",
 			in: in{
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver: envResolverMock{in: "test"},
 				stdin:       `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
 				file:        fileManager,
 			},
@@ -131,7 +131,7 @@ func TestInputManager_Inputs(t *testing.T) {
 		{
 			name: "error stdin",
 			in: in{
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}},
+				creResolver: envResolverMock{in: "test"},
 				stdin:       `"sample_text"`,
 				file:        fileManager,
 			},
@@ -141,7 +141,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			name: "error env resolver stdin",
 			in: in{
 				stdin:       `{"sample_text":"test_text","sample_list":"test_list","sample_bool": false}`,
-				creResolver: env.Resolvers{"CREDENTIAL": envResolverMock{in: "test", err: errors.New("credential not found")}},
+				creResolver: envResolverMock{in: "test", err: errors.New("credential not found")},
 				file:        fileManager,
 			},
 			want: errors.New("credential not found"),

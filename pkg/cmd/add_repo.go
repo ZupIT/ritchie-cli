@@ -19,9 +19,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -29,7 +31,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const defaultRepoURL = "https://github.com/ZupIT/ritchie-formulas"
+const (
+	defaultRepoURL  = "https://github.com/ZupIT/ritchie-formulas"
+	messageExisting = "This formula repository already exists, check using \"rit list repo\""
+)
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
 
@@ -165,6 +170,11 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
+		if existsRepo(url, version, repos) {
+			prompt.Info(messageExisting)
+			return nil
+		}
+
 		priority, err := ad.Int("Set the priority:", "0 is higher priority, the lower higher the priority")
 		if err != nil {
 			return err
@@ -194,9 +204,26 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
-		ad.tree.Check()
+		conflictCmds := ad.tree.Check()
+
+		printConflictingCommandsWarning(conflictCmds)
+
 		return nil
 	}
+}
+
+func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
+	if len(conflictingCommands) <= 0 {
+		return
+	}
+
+	lastCommandIndex := len(conflictingCommands) - 1
+	lastCommand := conflictingCommands[lastCommandIndex].String()
+	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
+	lastCommand = strings.ReplaceAll(lastCommand, "_", " ")
+	msg := fmt.Sprintf("There's a total of %d formula conflicting commands, like:\n %s", len(conflictingCommands), lastCommand)
+	msg = prompt.Yellow(msg)
+	fmt.Println(msg)
 }
 
 func (ad addRepoCmd) runStdin() CommandRunnerFunc {
@@ -211,6 +238,12 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		if r.Version.String() == "" {
 			latestTag := ad.detail.LatestTag(r)
 			r.Version = formula.RepoVersion(latestTag)
+		}
+
+		repos, _ := ad.repo.List()
+		if existsRepo(r.Url, r.Version.String(), repos) {
+			prompt.Info(messageExisting)
+			return nil
 		}
 
 		if err := ad.repo.Add(r); err != nil {
@@ -239,6 +272,15 @@ func (ad addRepoCmd) repoNameValidator(text interface{}) error {
 	}
 
 	return nil
+}
+
+func existsRepo(urlToAdd, versionToAdd string, repos formula.Repos) bool {
+	for i := range repos {
+		if repos[i].Url == urlToAdd && repos[i].Version.String() == versionToAdd {
+			return true
+		}
+	}
+	return false
 }
 
 func tutorialAddRepo(tutorialStatus string) {

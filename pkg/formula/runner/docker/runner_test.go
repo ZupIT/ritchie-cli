@@ -30,7 +30,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
-	"github.com/ZupIT/ritchie-cli/pkg/rcontext"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -51,12 +50,12 @@ func TestRun(t *testing.T) {
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 
-	ctxFinder := rcontext.NewFinder(ritHome, fileManager)
+	envFinder := env.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, dockerBuilder, dirManager, fileManager)
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	pInputRunner := prompt.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{})
-	sInputRunner := stdin.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
-	fInputRunner := flag.NewInputManager(env.Resolvers{"CREDENTIAL": envResolverMock{in: "test"}})
+	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{})
+	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
+	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
 
 	types := formula.TermInputTypes{
 		api.Prompt: pInputRunner,
@@ -70,7 +69,7 @@ func TestRun(t *testing.T) {
 		preRun        formula.PreRunner
 		postRun       formula.PostRunner
 		inputResolver formula.InputResolver
-		context       rcontext.Finder
+		env           env.Finder
 		fileManager   stream.FileWriteExistAppender
 	}
 
@@ -91,7 +90,7 @@ func TestRun(t *testing.T) {
 				postRun:       postRunner,
 				inputResolver: inputResolver,
 				fileManager:   fileManager,
-				context:       ctxFinder,
+				env:           envFinder,
 			},
 			out: out{
 				err: nil,
@@ -105,7 +104,7 @@ func TestRun(t *testing.T) {
 				postRun:       postRunner,
 				inputResolver: inputResolverMock{err: runner.ErrInputNotRecognized},
 				fileManager:   fileManager,
-				context:       ctxFinder,
+				env:           envFinder,
 			},
 			out: out{
 				err: runner.ErrInputNotRecognized,
@@ -119,7 +118,7 @@ func TestRun(t *testing.T) {
 				postRun:       postRunner,
 				inputResolver: inputResolver,
 				fileManager:   fileManager,
-				context:       ctxFinder,
+				env:           envFinder,
 			},
 			out: out{
 				err: errors.New("pre runner error"),
@@ -133,7 +132,7 @@ func TestRun(t *testing.T) {
 				postRun:       postRunnerMock{err: errors.New("post runner error")},
 				inputResolver: inputResolver,
 				fileManager:   fileManager,
-				context:       ctxFinder,
+				env:           envFinder,
 			},
 			out: out{
 				err: nil,
@@ -147,7 +146,7 @@ func TestRun(t *testing.T) {
 				postRun:       postRunner,
 				inputResolver: inputResolver,
 				fileManager:   fileManagerMock{wErr: errors.New("error to write env file")},
-				context:       ctxFinder,
+				env:           envFinder,
 			},
 			out: out{
 				err: errors.New("error to write env file"),
@@ -161,24 +160,24 @@ func TestRun(t *testing.T) {
 				postRun:       postRunner,
 				inputResolver: inputResolver,
 				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				context:       ctxFinder,
+				env:           envFinder,
 			},
 			out: out{
 				err: errors.New("error to append env file"),
 			},
 		},
 		{
-			name: "context find error",
+			name: "env find error",
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
 				postRun:       postRunner,
 				inputResolver: inputResolver,
 				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				context:       ctxFinderMock{err: errors.New("context not found")},
+				env:           envFinderMock{err: errors.New("env not found")},
 			},
 			out: out{
-				err: errors.New("context not found"),
+				err: errors.New("env not found"),
 			},
 		},
 	}
@@ -186,7 +185,7 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			docker := NewRunner(in.postRun, in.inputResolver, in.preRun, in.fileManager, in.context, homeDir)
+			docker := NewRunner(in.postRun, in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
 			got := docker.Run(in.def, api.Prompt, false, nil)
 
 			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
@@ -234,6 +233,7 @@ func (i inputTextValidatorMock) Text(name string, validate func(interface{}) err
 type inputMock struct {
 	text    string
 	boolean bool
+	items   []string
 	err     error
 }
 
@@ -253,6 +253,10 @@ func (i inputMock) Password(string, ...string) (string, error) {
 	return i.text, i.err
 }
 
+func (i inputMock) Multiselect(formula.Input) ([]string, error) {
+	return i.items, i.err
+}
+
 type inputTextDefaultMock struct {
 	text string
 	err  error
@@ -262,13 +266,13 @@ func (i inputTextDefaultMock) Text(formula.Input) (string, error) {
 	return i.text, i.err
 }
 
-type ctxFinderMock struct {
-	ctx rcontext.ContextHolder
+type envFinderMock struct {
+	env env.Holder
 	err error
 }
 
-func (c ctxFinderMock) Find() (rcontext.ContextHolder, error) {
-	return c.ctx, c.err
+func (c envFinderMock) Find() (env.Holder, error) {
+	return c.env, c.err
 }
 
 type inputResolverMock struct {
