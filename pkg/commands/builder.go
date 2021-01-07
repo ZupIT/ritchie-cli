@@ -237,10 +237,10 @@ func Build() *cobra.Command {
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, repoDeleter, dirManager, inputList, inputBool)
-	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
+	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, inputAutocomplete, treeGen, fileManager)
 	addWorkspaceCmd := cmd.NewAddWorkspaceCmd(formulaWorkspace, inputText, inputAutocomplete)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder, treeChecker)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, inputAutocomplete, tutorialFinder, treeChecker)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
