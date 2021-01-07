@@ -31,6 +31,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+const (
+	fieldsFlagName = "fields"
+	valuesFlagName = "values"
+)
+
 var inputTypes = []string{"plain text", "secret"}
 var inputWay = []string{"type", "file"}
 
@@ -46,19 +51,19 @@ type setCredentialCmd struct {
 
 var setCredentialFlags = flags{
 	{
-		name:        "provider",
+		name:        providerFlagName,
 		kind:        reflect.String,
 		defValue:    "",
 		description: "provider name (i.e.: github)",
 	},
 	{
-		name:        "fields",
+		name:        fieldsFlagName,
 		kind:        reflect.Slice,
 		defValue:    "",
 		description: "comma separated list of field names",
 	},
 	{
-		name:        "values",
+		name:        valuesFlagName,
 		kind:        reflect.Slice,
 		defValue:    "",
 		description: "comma separated list of field values",

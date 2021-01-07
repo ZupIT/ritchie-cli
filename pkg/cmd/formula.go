@@ -166,7 +166,7 @@ func (f FormulaCommand) newFormulaCmd(cmd api.Command) *cobra.Command {
 	}
 
 	flags := formulaCmd.Flags()
-	addReservedFlags(flags)
+	addReservedFlags(flags, reservedFlags)
 	f.addInputFlags(def, flags)
 
 	return formulaCmd
@@ -224,8 +224,8 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 	}
 }
 
-func addReservedFlags(flags *pflag.FlagSet) {
-	for _, flag := range reservedFlags {
+func addReservedFlags(flags *pflag.FlagSet, flagsToAdd flags) {
+	for _, flag := range flagsToAdd {
 		switch flag.kind { //nolint:exhaustive
 		case reflect.String:
 			flags.StringP(flag.name, flag.shortName, flag.defValue.(string), flag.description)
