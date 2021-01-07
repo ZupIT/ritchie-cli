@@ -156,6 +156,12 @@ func (i *InputTextValidatorMock) Text(name string, validate func(interface{}) er
 	return args.String(0), args.Error(1)
 }
 
+type InputPathMock struct{}
+
+func (InputPathMock) Read(text string) (string, error) {
+	return text, nil
+}
+
 type FormCreator struct {
 	mock.Mock
 }

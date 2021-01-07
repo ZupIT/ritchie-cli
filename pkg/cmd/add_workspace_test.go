@@ -69,7 +69,9 @@ func TestNewAddWorkspaceCmd(t *testing.T) {
 			workspaceMock := &mocks.WorkspaceMock{}
 			workspaceMock.On("Add", wspace).Return(tt.addWorkspaceWithError)
 
-			addNewWorkspace := NewAddWorkspaceCmd(workspaceMock, textMock)
+			inPath := mocks.InputPathMock{}
+
+			addNewWorkspace := NewAddWorkspaceCmd(workspaceMock, textMock, inPath)
 			addNewWorkspace.SetArgs([]string{tt.argsName, tt.argsPath})
 
 			err := addNewWorkspace.Execute()

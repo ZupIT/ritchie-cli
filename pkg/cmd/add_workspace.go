@@ -20,15 +20,18 @@ const (
 type addWorkspaceCmd struct {
 	workspace formula.WorkspaceAddLister
 	input     prompt.InputText
+	inPath    prompt.InputPath
 }
 
 func NewAddWorkspaceCmd(
 	workspace formula.WorkspaceAddLister,
 	input prompt.InputText,
+	inPath prompt.InputPath,
 ) *cobra.Command {
 	a := addWorkspaceCmd{
 		workspace: workspace,
 		input:     input,
+		inPath:    inPath,
 	}
 
 	cmd := &cobra.Command{
@@ -89,7 +92,7 @@ func addWorkspaceFromPrompt(a addWorkspaceCmd) (formula.Workspace, error) {
 		return formula.Workspace{}, err
 	}
 
-	workspacePath, err := a.input.Text("Enter the path of workspace (e.g.: /home/user/github)", true)
+	workspacePath, err := a.inPath.Read("Enter the path of workspace (e.g.: /home/user/github) ")
 	if err != nil {
 		return formula.Workspace{}, err
 	}

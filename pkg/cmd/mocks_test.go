@@ -178,6 +178,12 @@ func (a repoListerAdderCustomMock) Add(d formula.Repo) error {
 	return a.add(d)
 }
 
+type InputPathMock struct{}
+
+func (InputPathMock) Read(text string) (string, error) {
+	return text, nil
+}
+
 type formCreator struct{}
 
 func (formCreator) Create(cf formula.Create) error {
