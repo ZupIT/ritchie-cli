@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
@@ -181,39 +180,20 @@ func (s *setCredentialCmd) resolvePrompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
-	inputWayChoose, _ := s.List("Want to enter your credential typing or through a file?", inputWay)
 	for _, i := range inputs {
 		var value string
-		if inputWayChoose == inputWay[1] {
-			path, err := s.Text("Enter the credential file path for "+prompt.Cyan(i.Name)+":", true)
+		if i.Type == inputTypes[1] {
+			value, err = s.Password(i.Name + ":")
 			if err != nil {
-				return credential.Detail{}, err
+				return credDetail, err
 			}
-
-			byteValue, err := ioutil.ReadFile(path)
-			if err != nil {
-				return credential.Detail{}, err
-			}
-			if len(byteValue) == 0 {
-				return credential.Detail{}, prompt.NewError("Empty credential file!")
-			}
-
-			cred[i.Name] = string(byteValue)
-
 		} else {
-			if i.Type == inputTypes[1] {
-				value, err = s.Password(i.Name + ":")
-				if err != nil {
-					return credDetail, err
-				}
-			} else {
-				value, err = s.Text(i.Name+":", true)
-				if err != nil {
-					return credDetail, err
-				}
+			value, err = s.Text(i.Name+":", true)
+			if err != nil {
+				return credDetail, err
 			}
-			cred[i.Name] = value
 		}
+		cred[i.Name] = value
 	}
 	credDetail.Service = providerChoose
 	credDetail.Credential = cred
