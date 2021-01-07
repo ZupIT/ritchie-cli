@@ -120,9 +120,9 @@ func Build() *cobra.Command {
 	envRemover := env.NewRemover(ritchieHomeDir, envFinder, fileManager)
 	envFindSetter := env.NewFindSetter(envFinder, envSetter)
 	envFindRemover := env.NewFindRemover(envFinder, envRemover)
-	credSetter := credential.NewSetter(ritchieHomeDir, envFinder, dirManager, fileManager)
-	credFinder := credential.NewFinder(ritchieHomeDir, envFinder, fileManager)
-	credDeleter := credential.NewCredDelete(ritchieHomeDir, envFinder, fileManager)
+	credSetter := credential.NewSetter(ritchieHomeDir, envFinder, dirManager)
+	credFinder := credential.NewFinder(ritchieHomeDir, envFinder)
+	credDeleter := credential.NewCredDelete(ritchieHomeDir, envFinder)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 
 	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders)
@@ -235,8 +235,9 @@ func Build() *cobra.Command {
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
-	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, dirManager, inputList, inputBool)
+	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, repoDeleter, dirManager, inputList, inputBool)
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
+	addWorkspaceCmd := cmd.NewAddWorkspaceCmd(formulaWorkspace, inputText)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder, treeChecker)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
@@ -244,7 +245,7 @@ func Build() *cobra.Command {
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
-	addCmd.AddCommand(addRepoCmd)
+	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)
 	updateCmd.AddCommand(updateRepoCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteEnvCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)

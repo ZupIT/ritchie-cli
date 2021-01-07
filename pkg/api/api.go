@@ -32,6 +32,7 @@ var (
 	CoreCmds = Commands{
 		"root_add":                   {Parent: "root", Usage: "add"},
 		"root_add_repo":              {Parent: "root_add", Usage: "repo"},
+		"root_add_workspace":         {Parent: "root_add", Usage: "workspace"},
 		"root_completion":            {Parent: "root", Usage: "completion"},
 		"root_completion_bash":       {Parent: "root_completion", Usage: "bash"},
 		"root_completion_zsh":        {Parent: "root_completion", Usage: "zsh"},

@@ -17,15 +17,13 @@
 package builder
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
-
-const localPrefix = "local-%s"
 
 type Initializer interface {
 	Init(workspaceDir string, repoName string) (string, error)
@@ -61,13 +59,12 @@ func (m LocalManager) Build(info formula.BuildInfo) error {
 }
 
 func (m LocalManager) Init(workspaceDir string, repoName string) (string, error) {
-	repoNameStandard := strings.ToLower(fmt.Sprintf(localPrefix, repoName))
-
-	dest := filepath.Join(m.ritHome, "repos", repoNameStandard)
+	repoNameStandard := repoutil.LocalName(repoName)
+	dest := filepath.Join(m.ritHome, "repos", repoNameStandard.String())
 
 	repo := formula.Repo{
 		Provider: "Local",
-		Name:     formula.RepoName(repoNameStandard),
+		Name:     repoNameStandard,
 		Version:  "0.0.0",
 		Url:      "local repository",
 		Priority: 0,

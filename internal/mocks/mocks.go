@@ -252,6 +252,20 @@ func (r *RepoManager) LatestTag(repo formula.Repo) string {
 	return args.String(0)
 }
 
+type DirManager struct {
+	mock.Mock
+}
+
+func (d *DirManager) Exists(path string) bool {
+	args := d.Called(path)
+	return args.Bool(0)
+}
+
+func (d *DirManager) IsDir(dir string) bool {
+	args := d.Called(dir)
+	return args.Bool(0)
+}
+
 type FileManager struct {
 	mock.Mock
 }
@@ -352,4 +366,18 @@ func (tm *TemplateManagerMock) ResolverNewPath(oldPath, newDir, lang, workspaceP
 func (tm *TemplateManagerMock) Validate() error {
 	args := tm.Called()
 	return args.Error(0)
+}
+
+type WorkspaceMock struct {
+	mock.Mock
+}
+
+func (w *WorkspaceMock) Add(workspace formula.Workspace) error {
+	args := w.Called(workspace)
+	return args.Error(0)
+}
+
+func (w *WorkspaceMock) List() (formula.Workspaces, error) {
+	args := w.Called()
+	return args.Get(0).(formula.Workspaces), args.Error(1)
 }
