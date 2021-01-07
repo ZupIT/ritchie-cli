@@ -82,7 +82,7 @@ func Build() *cobra.Command {
 	inputList := prompt.NewSurveyList()
 	inputURL := prompt.NewSurveyURL()
 	inputMultiselect := prompt.NewSurveyMultiselect()
-	inputPath := prompt.NewInputPath()
+	inputAutocomplete := prompt.NewInputAutocomplete()
 
 	// deps
 	fileManager := stream.NewFileManager()
@@ -142,7 +142,7 @@ func Build() *cobra.Command {
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 
-	promptInManager := fprompt.NewInputManager(credResolver, fileManager, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect, inputPath)
+	promptInManager := fprompt.NewInputManager(credResolver, fileManager, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect, inputAutocomplete)
 	stdinInManager := stdin.NewInputManager(credResolver)
 	flagInManager := flag.NewInputManager(credResolver)
 	termInputTypes := formula.TermInputTypes{
