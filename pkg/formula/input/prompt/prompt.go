@@ -38,8 +38,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-
-	input_autocomplete "github.com/JoaoDanielRufino/go-input-autocomplete"
 )
 
 const (
@@ -59,6 +57,7 @@ type InputManager struct {
 	prompt.InputBool
 	prompt.InputPassword
 	prompt.InputMultiselect
+	prompt.InputPath
 }
 
 func NewInputManager(
@@ -71,6 +70,7 @@ func NewInputManager(
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 	inMultiselect prompt.InputMultiselect,
+	inPath prompt.InputPath,
 ) formula.InputRunner {
 	return InputManager{
 		cred:               cred,
@@ -82,6 +82,7 @@ func NewInputManager(
 		InputBool:          inBool,
 		InputPassword:      inPass,
 		InputMultiselect:   inMultiselect,
+		InputPath:          inPath,
 	}
 }
 
@@ -143,11 +144,11 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
-	case input.AutocompleteType:
+	case input.PathType:
 		if items != nil {
 			return in.loadInputValList(items, i)
 		}
-		return in.autocompleteInput(i)
+		return in.InputPath.Read(i.Label)
 	case input.Multiselect:
 		if len(items) == 0 {
 			return "", fmt.Errorf(EmptyItems, i.Name)
@@ -222,8 +223,8 @@ func (in InputManager) loadInputValList(items []string, i formula.Input) (string
 
 	inputVal, err := in.List(i.Label, items, i.Tutorial)
 	if inputVal == newLabel {
-		if i.Type == input.AutocompleteType {
-			return in.autocompleteInput(i)
+		if i.Type == input.PathType {
+			return in.InputPath.Read(i.Label)
 		}
 		return in.textValidator(i)
 	}
@@ -285,9 +286,9 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 	})
 }
 
-func (in InputManager) autocompleteInput(i formula.Input) (string, error) {
-	return input_autocomplete.Read(prompt.Green("? ") + prompt.Bold(i.Label))
-}
+// func (in InputManager) autocompleteInput(i formula.Input) (string, error) {
+// 	return input_autocomplete.Read(prompt.Green("? ") + prompt.Bold(i.Label))
+// }
 
 func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
 	body, err := makeRequest(info)
