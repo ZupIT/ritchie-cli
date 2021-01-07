@@ -253,6 +253,7 @@ func TestInputManager_Inputs(t *testing.T) {
 			iBool := tt.in.iBool
 			iPass := tt.in.iPass
 			iMultiselect := inputMock{}
+			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				tt.in.creResolver,
@@ -264,6 +265,7 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool,
 				iPass,
 				iMultiselect,
+				inPath,
 			)
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
@@ -409,6 +411,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{}
+			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -420,6 +423,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				iBool,
 				iPass,
 				iMultiselect,
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -522,6 +526,7 @@ func TestInputManager_RegexType(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{}
+			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -533,6 +538,7 @@ func TestInputManager_RegexType(t *testing.T) {
 				iBool,
 				iPass,
 				iMultiselect,
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -653,6 +659,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{}
+			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -664,6 +671,7 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 				iBool,
 				iPass,
 				iMultiselect,
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -752,6 +760,7 @@ func TestInputManager_Multiselect(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{items: []string{}}
+			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -763,6 +772,7 @@ func TestInputManager_Multiselect(t *testing.T) {
 				iBool,
 				iPass,
 				iMultiselect,
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -825,6 +835,7 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 				inputMock{},
 				inputMock{},
 				inputMock{},
+				InputPathMock{},
 			)
 
 			cmd := &exec.Cmd{}
@@ -938,4 +949,10 @@ func (fi fileManagerMock) Remove(path string) error {
 
 func (fi fileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
 	return fi.listNews, fi.lErr
+}
+
+type InputPathMock struct{}
+
+func (InputPathMock) Read(text string) (string, error) {
+	return text, nil
 }
