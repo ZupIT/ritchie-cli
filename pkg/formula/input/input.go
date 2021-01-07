@@ -14,10 +14,11 @@ type InputTextDefault interface {
 }
 
 const (
-	TextType    = "text"
-	BoolType    = "bool"
-	PassType    = "password"
-	DynamicType = "dynamic"
+	TextType         = "text"
+	BoolType         = "bool"
+	PassType         = "password"
+	DynamicType      = "dynamic"
+	AutocompleteType = "autocomplete"
 )
 
 // addEnv Add environment variable to run formulas.

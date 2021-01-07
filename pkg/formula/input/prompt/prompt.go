@@ -38,6 +38,8 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+
+	input_autocomplete "github.com/JoaoDanielRufino/go-input-autocomplete"
 )
 
 const (
@@ -138,6 +140,11 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
+	case input.AutocompleteType:
+		if items != nil {
+			return in.loadInputValList(items, i)
+		}
+		return in.autocompleteInput(i)
 	default:
 		return input.ResolveIfReserved(in.envResolvers, i)
 	}
@@ -192,18 +199,21 @@ func (in InputManager) persistCache(formulaPath, inputVal string, input formula.
 	}
 }
 
-func (in InputManager) loadInputValList(items []string, input formula.Input) (string, error) {
+func (in InputManager) loadInputValList(items []string, i formula.Input) (string, error) {
 	newLabel := DefaultCacheNewLabel
-	if input.Cache.Active {
-		if input.Cache.NewLabel != "" {
-			newLabel = input.Cache.NewLabel
+	if i.Cache.Active {
+		if i.Cache.NewLabel != "" {
+			newLabel = i.Cache.NewLabel
 		}
 		items = append(items, newLabel)
 	}
 
-	inputVal, err := in.List(input.Label, items, input.Tutorial)
+	inputVal, err := in.List(i.Label, items, i.Tutorial)
 	if inputVal == newLabel {
-		return in.textValidator(input)
+		if i.Type == input.AutocompleteType {
+			return in.autocompleteInput(i)
+		}
+		return in.textValidator(i)
 	}
 
 	return inputVal, err
@@ -261,6 +271,10 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 
 		return errors.New(input.Pattern.MismatchText)
 	})
+}
+
+func (in InputManager) autocompleteInput(i formula.Input) (string, error) {
+	return input_autocomplete.Read(prompt.Green("? ") + prompt.Bold(i.Label))
 }
 
 func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
