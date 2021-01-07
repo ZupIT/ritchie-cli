@@ -286,10 +286,6 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 	})
 }
 
-// func (in InputManager) autocompleteInput(i formula.Input) (string, error) {
-// 	return input_autocomplete.Read(prompt.Green("? ") + prompt.Bold(i.Label))
-// }
-
 func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
 	body, err := makeRequest(info)
 	if err != nil {
