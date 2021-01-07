@@ -59,7 +59,7 @@ func TestNewAddWorkspaceCmd(t *testing.T) {
 
 			textMock := &mocks.InputTextMock{}
 			textMock.On("Text", "Enter the name of workspace", true, mock.Anything).Return(tt.workspaceName, nil)
-			textMock.On("Text", "Enter the path of workspace (e.g.: /home/user/github)", true, mock.Anything).Return(tt.workspacePath, nil)
+			// textMock.On("Text", "Enter the path of workspace (e.g.: /home/user/github) ", true, mock.Anything).Return(tt.workspacePath, nil)
 
 			wspace := formula.Workspace{
 				Name: tt.workspaceName,
@@ -69,7 +69,8 @@ func TestNewAddWorkspaceCmd(t *testing.T) {
 			workspaceMock := &mocks.WorkspaceMock{}
 			workspaceMock.On("Add", wspace).Return(tt.addWorkspaceWithError)
 
-			inPath := mocks.InputPathMock{}
+			inPath := &mocks.InputPathMock{}
+			inPath.On("Read", "Enter the path of workspace (e.g.: /home/user/github) ").Return(tt.workspacePath, nil)
 
 			addNewWorkspace := NewAddWorkspaceCmd(workspaceMock, textMock, inPath)
 			addNewWorkspace.SetArgs([]string{tt.argsName, tt.argsPath})

@@ -326,7 +326,8 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 			}
 
-			inPath := mocks.InputPathMock{}
+			inPath := &mocks.InputPathMock{}
+			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
 
 			cmd := NewDeleteFormulaCmd(
 				userHomeDir,
@@ -398,7 +399,8 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
-	inPath := mocks.InputPathMock{}
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
 
 	cmd := NewDeleteFormulaCmd(
 		os.TempDir(),
