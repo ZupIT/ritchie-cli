@@ -21,19 +21,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
-)
-
-const (
-	fieldsFlagName = "fields"
-	valuesFlagName = "values"
 )
 
 var inputTypes = []string{"plain text", "secret"}
@@ -47,6 +42,27 @@ type setCredentialCmd struct {
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
+}
+
+var setCredentialFlags = flags{
+	{
+		name:        "provider",
+		kind:        reflect.String,
+		defValue:    "",
+		description: "provider name (i.e.: github)",
+	},
+	{
+		name:        "fields",
+		kind:        reflect.Slice,
+		defValue:    "",
+		description: "comma separated list of field names",
+	},
+	{
+		name:        "values",
+		kind:        reflect.Slice,
+		defValue:    "",
+		description: "comma separated list of field values",
+	},
 }
 
 // NewSetCredentialCmd creates a new cmd instance.
@@ -76,15 +92,9 @@ func NewSetCredentialCmd(
 		Args:      cobra.OnlyValidArgs,
 	}
 
-	s.addFlags(cmd.Flags())
+	addReservedFlags(cmd.Flags(), setCredentialFlags)
 
 	return cmd
-}
-
-func (s setCredentialCmd) addFlags(flags *pflag.FlagSet) {
-	flags.String(providerFlagName, "", "provider name (i.e.: github)")
-	flags.String("fields", "", "comma separated list of field names")
-	flags.String("values", "", "comma separated list of field values")
 }
 
 func (s setCredentialCmd) runFormula() CommandRunnerFunc {

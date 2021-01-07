@@ -233,6 +233,8 @@ func addReservedFlags(flags *pflag.FlagSet) {
 			flags.BoolP(flag.name, flag.shortName, flag.defValue.(bool), flag.description)
 		case reflect.Int:
 			flags.IntP(flag.name, flag.shortName, flag.defValue.(int), flag.description)
+		case reflect.Slice:
+			flags.StringSliceP(flag.name, flag.shortName, []string{}, flag.description)
 		default:
 			warning := fmt.Sprintf("The %q type is not supported for the %q flag", flag.kind.String(), flag.name)
 			prompt.Warning(warning)
