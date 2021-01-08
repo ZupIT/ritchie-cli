@@ -138,10 +138,6 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 		return git.Tag{}, errors.New(string(b))
 	}
 
-	type value struct {
-		Name string `json:"name"`
-	}
-
 	var bTags bitbucketTags
 	if err := json.NewDecoder(res.Body).Decode(&bTags); err != nil {
 		return git.Tag{}, err
