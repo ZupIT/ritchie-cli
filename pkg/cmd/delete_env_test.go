@@ -17,9 +17,14 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/stretchr/testify/assert"
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 )
 
 func TestNewDeleteEnvCmd(t *testing.T) {
@@ -36,5 +41,72 @@ func TestNewDeleteEnvCmd(t *testing.T) {
 
 	if err := cmd.Execute(); err != nil {
 		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
+	}
+}
+
+func TestNewDeleteEnvNew(t *testing.T) {
+	homeDir := os.TempDir()
+	ritHomeDir := filepath.Join(homeDir, ".rit")
+	envFile := filepath.Join(ritHomeDir, env.FileName)
+	_ = os.MkdirAll(ritHomeDir, os.ModePerm)
+	defer os.RemoveAll(ritHomeDir)
+
+	fileManager := stream.NewFileManager()
+
+	envFinder := env.NewFinder(ritHomeDir, fileManager)
+	envRemover := env.NewRemover(ritHomeDir, envFinder, fileManager)
+	envFindRemover := env.NewFindRemover(envFinder, envRemover)
+	nSetter := env.NewSetter(ritHomeDir, envFinder, fileManager)
+
+	tests := []struct {
+		name            string
+		env env.Holder
+		inputBoolResult bool
+		inputListString string
+		inputListError  error
+		wantErr         string
+		fileShouldExist bool
+	}{
+		{
+			name:            "execute with success",
+			inputBoolResult: true,
+			inputListString: "env",
+			env: env.Holder{Current: "env", All: []string{"env"}},
+			fileShouldExist: false,
+		},
+	}
+
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsonData, _ := json.Marshal(tt.env)
+			err := ioutil.WriteFile(envFile, jsonData, os.ModePerm)
+			assert.NoError(t, err)
+
+			listMock := &mocks.InputListMock{}
+			boolMock := &mocks.InputBoolMock{}
+			listMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputListString, tt.inputListError)
+			boolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputBoolResult, nil)
+
+			cmd := NewDeleteEnvCmd(envFindRemover, boolMock, listMock)
+			// TODO: remove stdin flag after  deprecation
+			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+			cmd.SetArgs([]string{tt.args})
+
+			err = cmd.Execute()
+			if err != nil {
+				assert.Equal(t, err.Error(), tt.wantErr)
+			} else {
+				assert.Empty(t, tt.wantErr)
+			}
+
+			assert.Equal(tt.fileShouldExist, assert.FileExists(t, envFile))
+			
+			if tt.fileShouldExist {
+				assert.FileExists(t, envFile)
+			} else {
+				assert.NoFileExists(t, envFile)
+			}
+		}
 	}
 }
