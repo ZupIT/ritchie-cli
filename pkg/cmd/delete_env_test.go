@@ -17,14 +17,17 @@
 package cmd
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/stretchr/testify/assert"
-	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestNewDeleteEnvCmd(t *testing.T) {
@@ -56,11 +59,10 @@ func TestNewDeleteEnvNew(t *testing.T) {
 	envFinder := env.NewFinder(ritHomeDir, fileManager)
 	envRemover := env.NewRemover(ritHomeDir, envFinder, fileManager)
 	envFindRemover := env.NewFindRemover(envFinder, envRemover)
-	nSetter := env.NewSetter(ritHomeDir, envFinder, fileManager)
 
 	tests := []struct {
 		name            string
-		env env.Holder
+		env             env.Holder
 		inputBoolResult bool
 		inputListString string
 		inputListError  error
@@ -71,12 +73,11 @@ func TestNewDeleteEnvNew(t *testing.T) {
 			name:            "execute with success",
 			inputBoolResult: true,
 			inputListString: "env",
-			env: env.Holder{Current: "env", All: []string{"env"}},
+			env:             env.Holder{Current: "env", All: []string{"env"}},
 			fileShouldExist: false,
 		},
 	}
 
-	
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			jsonData, _ := json.Marshal(tt.env)
@@ -91,7 +92,7 @@ func TestNewDeleteEnvNew(t *testing.T) {
 			cmd := NewDeleteEnvCmd(envFindRemover, boolMock, listMock)
 			// TODO: remove stdin flag after  deprecation
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			cmd.SetArgs([]string{tt.args})
+			cmd.SetArgs([]string{})
 
 			err = cmd.Execute()
 			if err != nil {
@@ -100,13 +101,11 @@ func TestNewDeleteEnvNew(t *testing.T) {
 				assert.Empty(t, tt.wantErr)
 			}
 
-			assert.Equal(tt.fileShouldExist, assert.FileExists(t, envFile))
-			
 			if tt.fileShouldExist {
 				assert.FileExists(t, envFile)
 			} else {
 				assert.NoFileExists(t, envFile)
 			}
-		}
+		})
 	}
 }
