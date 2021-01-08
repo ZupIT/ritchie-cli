@@ -31,24 +31,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestNewDeleteEnvCmd(t *testing.T) {
-	findRemoverMock := envFindRemoverMock{holder: env.Holder{
-		Current: "",
-		All:     []string{"prod", "qa"},
-	}}
-	cmd := NewDeleteEnvCmd(findRemoverMock, inputTrueMock{}, inputListMock{})
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-	if cmd == nil {
-		t.Errorf("NewDeleteEnvCmd got %v", cmd)
-
-	}
-
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-	}
-}
-
-func TestNewDeleteEnvNew(t *testing.T) {
+func TestNewDeleteEnv(t *testing.T) {
 	homeDir := os.TempDir()
 	ritHomeDir := filepath.Join(homeDir, ".rit")
 	envFile := filepath.Join(ritHomeDir, env.FileName)
@@ -62,7 +45,7 @@ func TestNewDeleteEnvNew(t *testing.T) {
 	envFindRemover := env.NewFindRemover(envFinder, envRemover)
 
 	envEmpty := env.Holder{Current: "", All: []string{}}
-	envCompleted := env.Holder{Current: "env", All: []string{"env"}}
+	envCompleted := env.Holder{Current: "prod", All: []string{"prod", "qa", "stg"}}
 
 	tests := []struct {
 		name            string
@@ -78,9 +61,9 @@ func TestNewDeleteEnvNew(t *testing.T) {
 		{
 			name:            "execute with success",
 			inputBoolResult: true,
-			inputListString: "env",
+			inputListString: "qa",
 			env:             envCompleted,
-			envResultInFile: envEmpty,
+			envResultInFile: env.Holder{Current: "prod", All: []string{"prod", "stg"}},
 		},
 		{
 			name:            "execute with success when not envs defined",
@@ -88,11 +71,10 @@ func TestNewDeleteEnvNew(t *testing.T) {
 			envResultInFile: envEmpty,
 		},
 		{
-			name:            "fail on input list error",
-			wantErr:         "some error",
-			inputListError:  errors.New("some error"),
-			env:             envCompleted,
-			envResultInFile: envEmpty,
+			name:           "fail on input list error",
+			wantErr:        "some error",
+			inputListError: errors.New("some error"),
+			env:            envCompleted,
 		},
 		{
 			name:            "fail on input bool error",
