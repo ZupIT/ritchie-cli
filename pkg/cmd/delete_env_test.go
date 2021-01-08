@@ -67,14 +67,14 @@ func TestNewDeleteEnvNew(t *testing.T) {
 		inputListString string
 		inputListError  error
 		wantErr         string
-		fileShouldExist bool
+		envResultInFile env.Holder
 	}{
 		{
 			name:            "execute with success",
 			inputBoolResult: true,
 			inputListString: "env",
 			env:             env.Holder{Current: "env", All: []string{"env"}},
-			fileShouldExist: false,
+			envResultInFile: env.Holder{Current: "", All: []string{}},
 		},
 	}
 
@@ -101,11 +101,12 @@ func TestNewDeleteEnvNew(t *testing.T) {
 				assert.Empty(t, tt.wantErr)
 			}
 
-			if tt.fileShouldExist {
-				assert.FileExists(t, envFile)
-			} else {
-				assert.NoFileExists(t, envFile)
-			}
+			assert.FileExists(t, envFile)
+
+			envResult, err := envFinder.Find()
+			assert.NoError(t, err)
+			assert.Equal(t, tt.envResultInFile, envResult)
+
 		})
 	}
 }
