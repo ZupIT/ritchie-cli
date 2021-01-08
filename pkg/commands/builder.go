@@ -41,6 +41,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/local"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
+	"github.com/ZupIT/ritchie-cli/pkg/git/bitbucket"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
@@ -89,10 +90,12 @@ func Build() *cobra.Command {
 
 	githubRepo := github.NewRepoManager(http.DefaultClient)
 	gitlabRepo := gitlab.NewRepoManager(http.DefaultClient)
+	bitbucketRepo := bitbucket.NewRepoManager(http.DefaultClient)
 
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
+	repoProviders.Add("Bitbucket", formula.Git{Repos: bitbucketRepo, NewRepoInfo: bitbucket.NewRepoInfo})
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
