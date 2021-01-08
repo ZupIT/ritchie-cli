@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -60,9 +61,14 @@ func TestNewDeleteEnvNew(t *testing.T) {
 	envRemover := env.NewRemover(ritHomeDir, envFinder, fileManager)
 	envFindRemover := env.NewFindRemover(envFinder, envRemover)
 
+	envEmpty := env.Holder{Current: "", All: []string{}}
+	envCompleted := env.Holder{Current: "env", All: []string{"env"}}
+
 	tests := []struct {
 		name            string
 		env             env.Holder
+		envFileNil      bool
+		inputBoolError  error
 		inputBoolResult bool
 		inputListString string
 		inputListError  error
@@ -73,45 +79,67 @@ func TestNewDeleteEnvNew(t *testing.T) {
 			name:            "execute with success",
 			inputBoolResult: true,
 			inputListString: "env",
-			env:             env.Holder{Current: "env", All: []string{"env"}},
-			envResultInFile: env.Holder{Current: "", All: []string{}},
+			env:             envCompleted,
+			envResultInFile: envEmpty,
 		},
 		{
 			name:            "execute with success when not envs defined",
-			env:             env.Holder{Current: "", All: []string{""}},
-			envResultInFile: env.Holder{Current: "", All: []string{""}},
+			env:             envEmpty,
+			envResultInFile: envEmpty,
+		},
+		{
+			name:            "fail on input list error",
+			wantErr:         "some error",
+			inputListError:  errors.New("some error"),
+			env:             envCompleted,
+			envResultInFile: envEmpty,
+		},
+		{
+			name:            "fail on input bool error",
+			wantErr:         "some error",
+			inputBoolError:  errors.New("some error"),
+			env:             envCompleted,
+			envResultInFile: envEmpty,
+		},
+		{
+			name:            "do nothing on input bool refusal",
+			inputBoolResult: false,
+			env:             envCompleted,
+			envResultInFile: envCompleted,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			jsonData, _ := json.Marshal(tt.env)
-			err := ioutil.WriteFile(envFile, jsonData, os.ModePerm)
-			assert.NoError(t, err)
+			if !tt.envFileNil {
+				jsonData, _ := json.Marshal(tt.env)
+				err := ioutil.WriteFile(envFile, jsonData, os.ModePerm)
+				assert.NoError(t, err)
+			}
 
 			listMock := &mocks.InputListMock{}
 			boolMock := &mocks.InputBoolMock{}
 			listMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputListString, tt.inputListError)
-			boolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputBoolResult, nil)
+			boolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputBoolResult, tt.inputBoolError)
 
 			cmd := NewDeleteEnvCmd(envFindRemover, boolMock, listMock)
 			// TODO: remove stdin flag after  deprecation
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs([]string{})
 
-			err = cmd.Execute()
+			err := cmd.Execute()
 			if err != nil {
 				assert.Equal(t, err.Error(), tt.wantErr)
 			} else {
 				assert.Empty(t, tt.wantErr)
+
+				assert.FileExists(t, envFile)
+
+				envResult, err := envFinder.Find()
+				assert.NoError(t, err)
+				assert.Equal(t, tt.envResultInFile, envResult)
+
 			}
-
-			assert.FileExists(t, envFile)
-
-			envResult, err := envFinder.Find()
-			assert.NoError(t, err)
-			assert.Equal(t, tt.envResultInFile, envResult)
-
 		})
 	}
 }
