@@ -76,6 +76,11 @@ func TestNewDeleteEnvNew(t *testing.T) {
 			env:             env.Holder{Current: "env", All: []string{"env"}},
 			envResultInFile: env.Holder{Current: "", All: []string{}},
 		},
+		{
+			name:            "execute with success when not envs defined",
+			env:             env.Holder{Current: "", All: []string{""}},
+			envResultInFile: env.Holder{Current: "", All: []string{""}},
+		},
 	}
 
 	for _, tt := range tests {
