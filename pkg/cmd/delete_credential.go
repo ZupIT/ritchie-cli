@@ -143,11 +143,6 @@ func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputDeleteCrede
 		return inputDeleteCredential{}, errors.New("please provide a value for 'provider'")
 	}
 
-	if b, err := d.Bool("Are you sure want to delete this credential?", []string{"yes", "no"}); err != nil {
-		return inputDeleteCredential{}, err
-	} else if !b {
-		return inputDeleteCredential{}, nil
-	}
 	return inputDeleteCredential{provider}, nil
 }
 
