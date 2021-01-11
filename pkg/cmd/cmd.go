@@ -17,6 +17,8 @@
 package cmd
 
 import (
+	"reflect"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -25,6 +27,16 @@ import (
 
 const stdinWarning = "stdin commands are deprecated and will no longer be supported in future versions. Please use" +
 	" flags for programatic formula execution"
+
+type flag struct {
+	name        string
+	shortName   string
+	kind        reflect.Kind
+	defValue    interface{}
+	description string
+}
+
+type flags []flag
 
 // CommandRunnerFunc represents that runner func for commands.
 type CommandRunnerFunc func(cmd *cobra.Command, args []string) error

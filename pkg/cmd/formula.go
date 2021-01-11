@@ -31,7 +31,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -73,16 +72,6 @@ var (
 		},
 	}
 )
-
-type flag struct {
-	name        string
-	shortName   string
-	kind        reflect.Kind
-	defValue    interface{}
-	description string
-}
-
-type flags []flag
 
 var ErrRunFormulaWithTwoFlag = errors.New("you cannot run formula with --docker and --local flags together")
 
