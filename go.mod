@@ -4,9 +4,10 @@ go 1.14
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
-	github.com/JoaoDanielRufino/go-input-autocomplete v0.0.0-20201202005724-858a18ad9eec
+	github.com/JoaoDanielRufino/go-input-autocomplete v0.0.0-20210111191156-c3ddfffb6b0b
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/denisbrodbeck/machineid v1.0.1
+	github.com/eiannone/keyboard v0.0.0-20200508000154-caf4b762e807 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/golang/protobuf v1.4.1
 	github.com/google/uuid v1.1.1
@@ -23,6 +24,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/mod v0.3.0
+	golang.org/x/sys v0.0.0-20200826173525-f9321e4c35a6 // indirect
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.25.0
 	k8s.io/kubectl v0.18.4
