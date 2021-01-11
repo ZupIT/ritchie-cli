@@ -31,8 +31,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-var creds = make(map[string][]credential.Field)
-
 func TestSetCredentialCmd(t *testing.T) {
 	tmp := os.TempDir()
 	home := filepath.Join(tmp, "SetCredential")

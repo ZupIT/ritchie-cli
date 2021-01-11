@@ -36,7 +36,6 @@ const (
 )
 
 var inputTypes = []string{"plain text", "secret"}
-var inputWay = []string{"type", "file"}
 
 // setCredentialCmd type for set credential command.
 type setCredentialCmd struct {
