@@ -31,7 +31,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -210,24 +209,6 @@ func (f FormulaCommand) execFormulaFunc(repo, path string) func(cmd *cobra.Comma
 		}
 
 		return nil
-	}
-}
-
-func addReservedFlags(flags *pflag.FlagSet, flagsToAdd flags) {
-	for _, flag := range flagsToAdd {
-		switch flag.kind { //nolint:exhaustive
-		case reflect.String:
-			flags.StringP(flag.name, flag.shortName, flag.defValue.(string), flag.description)
-		case reflect.Bool:
-			flags.BoolP(flag.name, flag.shortName, flag.defValue.(bool), flag.description)
-		case reflect.Int:
-			flags.IntP(flag.name, flag.shortName, flag.defValue.(int), flag.description)
-		case reflect.Slice:
-			flags.StringSliceP(flag.name, flag.shortName, []string{}, flag.description)
-		default:
-			warning := fmt.Sprintf("The %q type is not supported for the %q flag", flag.kind.String(), flag.name)
-			prompt.Warning(warning)
-		}
 	}
 }
 
