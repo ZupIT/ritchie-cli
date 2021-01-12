@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -197,8 +198,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 }
 
 func TestCreateFormula(t *testing.T) {
-	ritchieHomeDir := filepath.Join(os.TempDir(), ".rit_create_formula")
-	workDir := filepath.Join(os.TempDir(), ".ritchie-formulas-local")
+	tmpDir := os.TempDir()
+	ritchieHomeDir := filepath.Join(tmpDir, ".rit_create_formula")
+	workDir := filepath.Join(tmpDir, ".ritchie-formulas-local")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
@@ -314,7 +316,7 @@ func TestCreateFormula(t *testing.T) {
 					tutorial:  tutorialMock,
 				}
 			} else {
-				createForm = createFormulaCmdDeps(ritchieHomeDir, dirManager, fileManager)
+				createForm = createFormulaCmdDeps(tmpDir, ritchieHomeDir, dirManager, fileManager)
 			}
 
 			got := createForm.create(cf)
@@ -331,7 +333,8 @@ func TestCreateFormula(t *testing.T) {
 				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
 				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
 
-				assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+				fileName := strings.ReplaceAll(cf.FormulaPath, string(os.PathSeparator), "-") + ".txt"
+				assert.FileExists(t, filepath.Join(hashesDir, fileName))
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}
@@ -383,7 +386,7 @@ func TestFormulaCommandValidator(t *testing.T) {
 	}
 }
 
-func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, fileManager stream.FileManager) createFormulaCmd {
+func createFormulaCmdDeps(tmpDir, ritchieHomeDir string, dirManager stream.DirManager, fileManager stream.FileManager) createFormulaCmd {
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 	githubRepo := github.NewRepoManager(http.DefaultClient)
 	gitlabRepo := gitlab.NewRepoManager(http.DefaultClient)
@@ -406,7 +409,7 @@ func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, f
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 	createBuilder := formula.NewCreateBuilder(createManager, formBuildLocal)
 	buildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
-	wspaceManager := workspace.New(ritchieHomeDir, os.TempDir(), dirManager, fileManager, buildLocal)
+	wspaceManager := workspace.New(ritchieHomeDir, tmpDir, dirManager, fileManager, buildLocal)
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
 
 	return createFormulaCmd{
