@@ -16,40 +16,87 @@
 package bitbucket
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewRepoInfo(t *testing.T) {
-	want := DefaultRepoInfo{
-		host:  "bitbucket.org",
-		owner: "username",
-		repo:  "ritchie-formulas",
-		token: "gHexna7h7CQWafwNYSXp",
+	type in struct {
+		url   string
+		token string
 	}
-	got := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "gHexna7h7CQWafwNYSXp")
+	tests := []struct {
+		name string
+		in   in
+		want DefaultRepoInfo
+	}{
+		{
+			name: "Run with success",
+			in: in{
+				url:   "https://bitbucket.org/username/ritchie-formulas/src/master/",
+				token: "some_token",
+			},
+			want: DefaultRepoInfo{
+				host:  "bitbucket.org",
+				owner: "username",
+				repo:  "ritchie-formulas",
+				token: "some_token",
+			},
+		},
+		{
+			name: "Return err when the URL is incorrect",
+			in: in{
+				url:   "",
+				token: "some_token",
+			},
+			want: DefaultRepoInfo{},
+		},
+	}
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("NewRepoInfo() = %v, want %v", got, want)
+	for _, tt := range tests {
+		got := NewRepoInfo(tt.in.url, tt.in.token)
+
+		assert.Equal(t, tt.want, got)
 	}
 }
 
 func TestTagsUrl(t *testing.T) {
 	const want = "https://api.bitbucket.org/2.0/repositories/username/ritchie-formulas/refs/tags"
-	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "gHexna7h7CQWafwNYSXp")
+	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "some_token")
 	tagsUrl := repoInfo.TagsUrl()
 
-	if !reflect.DeepEqual(tagsUrl, want) {
-		t.Errorf("NewRepoInfo() = %v, want %v", "got", want)
-	}
+	assert.Equal(t, want, tagsUrl)
 }
 
 func TestZipUrl(t *testing.T) {
 	const want = "https://bitbucket.org/username/ritchie-formulas/get/1.0.0.zip"
-	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "gHexna7h7CQWafwNYSXp")
+	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "some_token")
 	tagsUrl := repoInfo.ZipUrl("1.0.0")
 
-	if !reflect.DeepEqual(tagsUrl, want) {
-		t.Errorf("NewRepoInfo() = %v, want %v", tagsUrl, want)
-	}
+	assert.Equal(t, want, tagsUrl)
+}
+
+func TestLatestTagUrl(t *testing.T) {
+	const want = "https://api.bitbucket.org/2.0/repositories/username/ritchie-formulas/refs/tags?sort=target.date"
+	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "some_token")
+	latestTagsUrl := repoInfo.LatestTagUrl()
+
+	assert.Equal(t, want, latestTagsUrl)
+}
+
+func TestTokenHeader(t *testing.T) {
+	const want = "some_token"
+	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "some_token")
+	tokenHeader := repoInfo.TokenHeader()
+
+	assert.Equal(t, want, tokenHeader)
+}
+
+func TestToken(t *testing.T) {
+	const want = "some_token"
+	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "some_token")
+	token := repoInfo.Token()
+
+	assert.Equal(t, want, token)
 }

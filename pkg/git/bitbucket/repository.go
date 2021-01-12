@@ -114,7 +114,6 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	apiUrl := info.LatestTagUrl()
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
 	if err != nil {
-
 		return git.Tag{}, err
 	}
 
