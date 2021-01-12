@@ -17,8 +17,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"reflect"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
@@ -28,10 +30,27 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+const (
+	envFlagName        = "env"
+	envFlagDescription = "Env name to delete"
+)
+
 var (
 	NoDefinedEnvsMsg    = "You have no defined envs"
 	DeleteEnvSuccessMsg = "Delete env successful!"
+	deleteEnvFlags      = flags{
+		{
+			name:        envFlagName,
+			kind:        reflect.String,
+			defValue:    "",
+			description: envFlagDescription,
+		},
+	}
 )
+
+type inputDeleteEnv struct {
+	env string
+}
 
 // deleteEnvCmd type for clean repo command.
 type deleteEnvCmd struct {
@@ -56,49 +75,30 @@ func NewDeleteEnvCmd(
 		Use:       "env",
 		Short:     "Delete env for credentials",
 		Example:   "rit delete env",
-		RunE:      RunFuncE(d.runStdin(), d.runPrompt()),
+		RunE:      RunFuncE(d.runStdin(), d.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
+
+	addReservedFlags(cmd.Flags(), deleteEnvFlags)
 
 	cmd.LocalFlags()
 
 	return cmd
 }
 
-func (d deleteEnvCmd) runPrompt() CommandRunnerFunc {
+func (d *deleteEnvCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		envHolder, err := d.env.Find()
+		inputParams, err := d.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
 
-		if len(envHolder.All) <= 0 {
-			prompt.Error(NoDefinedEnvsMsg)
+		if inputParams.env == "" {
 			return nil
 		}
 
-		for i := range envHolder.All {
-			if envHolder.All[i] == envHolder.Current {
-				envHolder.All[i] = fmt.Sprintf("%s%s", env.Current, envHolder.Current)
-			}
-		}
-
-		envName, err := d.List("Envs:", envHolder.All)
-		if err != nil {
-			return err
-		}
-
-		proceed, err := d.Bool("Are you sure want to delete this env?", []string{"yes", "no"})
-		if err != nil {
-			return err
-		}
-
-		if !proceed {
-			return nil
-		}
-
-		if _, err := d.env.Remove(envName); err != nil {
+		if _, err := d.env.Remove(inputParams.env); err != nil {
 			return err
 		}
 
@@ -107,6 +107,7 @@ func (d deleteEnvCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
+// TODO: remove upon stdin deprecation
 func (d deleteEnvCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		envHolder, err := d.env.Find()
@@ -131,4 +132,58 @@ func (d deleteEnvCmd) runStdin() CommandRunnerFunc {
 		prompt.Success(DeleteEnvSuccessMsg)
 		return nil
 	}
+}
+
+func (d *deleteEnvCmd) resolveInput(cmd *cobra.Command) (inputDeleteEnv, error) {
+	if IsFlagInput(cmd) {
+		return d.resolveFlags(cmd)
+	}
+	return d.resolvePrompt()
+}
+
+func (d *deleteEnvCmd) resolvePrompt() (inputDeleteEnv, error) {
+	envHolder, err := d.env.Find()
+	if err != nil {
+		return inputDeleteEnv{}, err
+	}
+
+	if len(envHolder.All) <= 0 {
+		prompt.Error(NoDefinedEnvsMsg)
+		return inputDeleteEnv{}, nil
+	}
+
+	for i := range envHolder.All {
+		if envHolder.All[i] == envHolder.Current {
+			envHolder.All[i] = fmt.Sprintf("%s%s", env.Current, envHolder.Current)
+		}
+	}
+
+	envName, err := d.List("Envs:", envHolder.All)
+	if err != nil {
+		return inputDeleteEnv{}, err
+	}
+
+	proceed, err := d.Bool("Are you sure want to delete this env?", []string{"yes", "no"})
+	if err != nil {
+		return inputDeleteEnv{}, err
+	}
+
+	if !proceed {
+		return inputDeleteEnv{}, nil
+	}
+
+	return inputDeleteEnv{envName}, nil
+}
+
+func (d *deleteEnvCmd) resolveFlags(cmd *cobra.Command) (inputDeleteEnv, error) {
+	env, err := cmd.Flags().GetString(envFlagName)
+	if err != nil {
+		return inputDeleteEnv{}, err
+	}
+
+	if env == "" {
+		return inputDeleteEnv{}, errors.New("please provide a value for 'env'")
+	}
+
+	return inputDeleteEnv{env}, nil
 }
