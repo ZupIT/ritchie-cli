@@ -202,9 +202,7 @@ func (s *setCredentialCmd) resolvePrompt() (credential.Detail, error) {
 
 func (s *setCredentialCmd) resolveFlags(cmd *cobra.Command) (credential.Detail, error) {
 	provider, err := cmd.Flags().GetString(providerFlagName)
-	if err != nil {
-		return credential.Detail{}, err
-	} else if provider == "" {
+	if err != nil || provider == "" {
 		return credential.Detail{}, errors.New("please provide a value for 'provider'")
 	}
 
