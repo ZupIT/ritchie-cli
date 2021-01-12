@@ -24,9 +24,15 @@ import (
 	"golang.org/x/text/language"
 )
 
-var Langs = map[string]string{
+var Langs = map[Lang]string{
 	"English":   "en",
 	"Português": "pt_BR",
+}
+
+type Lang string
+
+func (l Lang) String() string {
+	return string(l)
 }
 
 type Translation struct {
@@ -55,16 +61,4 @@ func NewTranslation() Translation {
 	}
 }
 
-func (t Translation) Println(messageID string) {
-	// TODO: create read/write to selected language
-	loc := i18n.NewLocalizer(t.bundle, "pt_BR")
-	message := loc.MustLocalize(
-		&i18n.LocalizeConfig{
-			DefaultMessage: &i18n.Message{
-				ID: messageID,
-			},
-		},
-	)
 
-	fmt.Println(message)
-}
