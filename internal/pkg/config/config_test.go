@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/BurntSushi/toml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,7 +68,12 @@ func TestWrite(t *testing.T) {
 			}
 
 			if tt.want == nil {
-				assert.FileExists(t, filepath.Join(os.TempDir(), File))
+				filePath := filepath.Join(os.TempDir(), File)
+				assert.FileExists(t, filePath)
+
+				var configs Configs
+				_, _ = toml.DecodeFile(filePath, &configs)
+				assert.Equal(t, tt.in.configs, configs)
 			}
 
 			_ = os.Remove(filepath.Join(tt.in.ritHome, File))
