@@ -60,5 +60,3 @@ func NewTranslation() Translation {
 		bundle: bundle,
 	}
 }
-
-
