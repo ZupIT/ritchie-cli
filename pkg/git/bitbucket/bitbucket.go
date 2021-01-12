@@ -35,6 +35,12 @@ type DefaultRepoInfo struct {
 	token string
 }
 
+const (
+	repoOffset  = 4
+	ownerOffset = 5
+	hostOffset  = 6
+)
+
 // NewRepoInfo returns the RepoInfo built by repository url
 // Repository url e.g. https://bitbucket.org/{{owner}}/{{repo}}/src/master/
 func NewRepoInfo(url string, token string) git.RepoInfo {
@@ -43,9 +49,9 @@ func NewRepoInfo(url string, token string) git.RepoInfo {
 		return DefaultRepoInfo{}
 	}
 
-	repo := split[len(split)-4]
-	owner := split[len(split)-5]
-	host := split[len(split)-6]
+	repo := split[len(split)-repoOffset]
+	owner := split[len(split)-ownerOffset]
+	host := split[len(split)-hostOffset]
 
 	return DefaultRepoInfo{
 		host:  host,
@@ -74,7 +80,6 @@ func (in DefaultRepoInfo) LatestTagUrl() string {
 }
 
 // TokenHeader returns the Authorization value formatted for Bitbucket API integration
-// e.g. "m6ioSP4o4q6tmiinXHf9KOHxQsjbvShS-zMullcRsxiJtMHIqr2tuHpJZbl-UXpm7E-1meNlAqKzmORTxyoNAnXWZlCFPsvJpQj4evGtafuH4NBBgRrQ_Mc3"
 func (in DefaultRepoInfo) TokenHeader() string {
 	return in.token
 }
