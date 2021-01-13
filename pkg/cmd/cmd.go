@@ -43,6 +43,10 @@ type flags []flag
 // CommandRunnerFunc represents that runner func for commands.
 type CommandRunnerFunc func(cmd *cobra.Command, args []string) error
 
+func missingFlagText(flagName string) string {
+	return fmt.Sprintf("please provide a value for '%s'", flagName)
+}
+
 func addReservedFlags(flags *pflag.FlagSet, flagsToAdd flags) {
 	for _, flag := range flagsToAdd {
 		switch flag.kind { //nolint:exhaustive
