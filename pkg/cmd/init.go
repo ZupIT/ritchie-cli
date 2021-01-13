@@ -230,7 +230,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 
 		if runType == formula.LocalRun {
 			prompt.Warning("\n\t\t\t⚠️  WARNING ⚠️")
-			fmt.Printf(FormulaLocalRunWarning)
+			fmt.Print(FormulaLocalRunWarning)
 		}
 
 		prompt.Success("\n✅  Initialization successful!\n")
@@ -302,7 +302,7 @@ func (in initCmd) setRunnerType() (formula.RunnerType, error) {
 
 	if runType == formula.LocalRun {
 		prompt.Warning("\n\t\t\t⚠️  WARNING ⚠️")
-		fmt.Printf(FormulaLocalRunWarning)
+		fmt.Print(FormulaLocalRunWarning)
 	}
 
 	return runType, nil
@@ -393,6 +393,6 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 
 func (in initCmd) CommonsWarning() {
 	prompt.Warning("\n\t\t\t⚠️  WARNING ⚠️")
-	fmt.Printf(addRepoInfo)
+	fmt.Print(addRepoInfo)
 	fmt.Println(addRepoMsg)
 }
