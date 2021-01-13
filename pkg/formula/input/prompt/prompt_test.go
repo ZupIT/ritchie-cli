@@ -59,7 +59,24 @@ func TestInputManager_Inputs(t *testing.T) {
         "type": "text",
         "label": "Type : ",
 		"required": true
-    },
+		},
+		{
+			"name": "sample_text_3",
+			"type": "path",
+			"label": "Type : ",
+	"required": true
+	},
+	{
+		"name": "sample_text_4",
+		"type": "path",
+		"label": "Type : ",
+		"cache": {
+				"active": true,
+				"qty": 6,
+				"newLabel": "Type new value. "
+			},
+	"tutorial": "Add a text for this field."
+	},
     {
         "name": "sample_list",
         "type": "text",
