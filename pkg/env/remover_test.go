@@ -36,7 +36,6 @@ func TestRemove(t *testing.T) {
 		file      stream.FileWriter
 		envFinder Finder
 		env       string
-		fileNil   bool
 	}
 
 	type out struct {
