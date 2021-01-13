@@ -242,7 +242,7 @@ func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
 		return formula.Repo{}, fmt.Errorf("please, generate a release to add your repository")
 	}
 
-	var tagNames []string
+	tagNames := make([]string, 0, len(tags))
 	for i := range tags {
 		tagNames = append(tagNames, tags[i].Name)
 	}
