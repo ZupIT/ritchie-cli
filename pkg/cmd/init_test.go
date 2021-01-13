@@ -19,9 +19,11 @@ package cmd
 import (
 	"errors"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/pkg/config"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
@@ -33,6 +35,7 @@ import (
 
 func Test_initCmd_runAnyEntry(t *testing.T) {
 	someError := errors.New("some error")
+	configManager := config.NewManager(os.TempDir())
 	type fields struct {
 		repo     formula.RepositoryAdder
 		git      git.Repositories
@@ -67,9 +70,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.LocalRun.String(), nil
+							return "🏠 local", nil
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -94,9 +97,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.DockerRun.String(), nil
+							return "🐳 docker", nil
 						}
-						return DoNotAcceptMetrics, nil
+						return DeclineOpt, nil
 					},
 				},
 			},
@@ -125,9 +128,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.DockerRun.String(), nil
+							return "🐳 docker", nil
 						}
-						return DoNotAcceptMetrics, nil
+						return DeclineOpt, nil
 					},
 				},
 			},
@@ -156,9 +159,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.LocalRun.String(), nil
+							return "🏠 local", nil
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -189,7 +192,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 						if name == SelectFormulaTypeQuestion {
 							return formula.LocalRun.String(), nil
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -210,11 +213,11 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 					createErr: nil,
 				},
 				tutorial: TutorialFinderMock{},
-				inBool:   inputTrueMock{},
+				inBool:   inputBoolErrorMock{},
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.LocalRun.String(), nil
+							return "🏠 local", nil
 						}
 						return "", someError
 					},
@@ -242,7 +245,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 						if name == SelectFormulaTypeQuestion {
 							return "", someError
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -266,9 +269,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.LocalRun.String(), nil
+							return "🏠 local", nil
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -293,9 +296,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.LocalRun.String(), nil
+							return "🏠 local", nil
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -320,9 +323,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList: inputListCustomMock{
 					list: func(name string, items []string) (string, error) {
 						if name == SelectFormulaTypeQuestion {
-							return formula.LocalRun.String(), nil
+							return "🏠 local", nil
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -348,7 +351,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 						if name == SelectFormulaTypeQuestion {
 							return "invalid", nil
 						}
-						return AcceptMetrics, nil
+						return AcceptOpt, nil
 					},
 				},
 			},
@@ -372,6 +375,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				field.inList,
 				field.inBool,
 				metricSender,
+				configManager,
 			)
 			initStdin := NewInitCmd(
 				field.repo,
@@ -382,6 +386,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				field.inList,
 				field.inBool,
 				metricSender,
+				configManager,
 			)
 
 			initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
