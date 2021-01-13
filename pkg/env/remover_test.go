@@ -19,6 +19,7 @@ package env
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -28,9 +29,12 @@ import (
 
 func TestRemove(t *testing.T) {
 	tmp := os.TempDir()
+	ritHomeDir := filepath.Join(tmp, ".rit")
 	file := stream.NewFileManager()
-	finder := NewFinder(tmp, file)
-	setter := NewSetter(tmp, finder, file)
+	finder := NewFinder(ritHomeDir, file)
+	setter := NewSetter(ritHomeDir, finder, file)
+	_ = os.MkdirAll(ritHomeDir, os.ModePerm)
+	defer os.RemoveAll(ritHomeDir)
 
 	type in struct {
 		file      stream.FileWriter
@@ -122,7 +126,7 @@ func TestRemove(t *testing.T) {
 			in := tt.in
 			out := tt.out
 
-			remover := NewRemover(tmp, in.envFinder, in.file)
+			remover := NewRemover(ritHomeDir, in.envFinder, in.file)
 			got, err := remover.Remove(in.env)
 
 			if out.err != nil {
