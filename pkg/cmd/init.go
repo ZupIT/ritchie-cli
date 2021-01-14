@@ -43,6 +43,8 @@ const (
 	AddMetricsQuestion        = "To help us improve and deliver more value to the community,\nwe will collect anonymous data about product and feature\nuse statistics and crash reports."
 	AcceptOpt                 = "✅ Yes"
 	DeclineOpt                = "❌ No"
+	LocalRunType              = "🏠 local"
+	DockerRunType             = "🐳 docker"
 	SelectFormulaTypeQuestion = "Select a default formula run type:"
 	FormulaLocalRunWarning    = `
 In order to run formulas locally, you must have the formula language installed on your machine,
@@ -78,7 +80,7 @@ type initCmd struct {
 	git      git.Repositories
 	tutorial rtutorial.Finder
 	config   formula.ConfigRunner
-	file     stream.FileWriteReadExister
+	file     stream.FileWriter
 	prompt.InputList
 	prompt.InputBool
 	prompt.InputMultiselect
@@ -91,7 +93,7 @@ func NewInitCmd(
 	git git.Repositories,
 	tutorial rtutorial.Finder,
 	config formula.ConfigRunner,
-	file stream.FileWriteReadExister,
+	file stream.FileWriter,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
 	metricSender metric.SendManagerHttp,
@@ -115,7 +117,7 @@ func NewInitCmd(
 		Long:      "Initialize rit configuration",
 		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
 		ValidArgs: []string{""},
-		Args:      cobra.OnlyValidArgs,
+		// Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd
@@ -249,7 +251,7 @@ func (in initCmd) metricsAuthorization() (string, error) {
 
 	fmt.Println(AddMetricsQuestion)
 
-	choose, err := in.InputBool.Bool("Do you agree?", options)
+	choose, err := in.Bool("Do you agree?", options)
 	if err != nil {
 		return "", err
 	}
@@ -278,7 +280,7 @@ func (in initCmd) metricsAuthorization() (string, error) {
 
 func (in initCmd) setRunnerType() (formula.RunnerType, error) {
 	prompt.Info("🏃 FORMULA RUN TYPE 🏃\n")
-	runTypes := []string{"🏠 local", "🐳 docker"}
+	runTypes := []string{LocalRunType, DockerRunType}
 	selected, err := in.List(SelectFormulaTypeQuestion, runTypes)
 	if err != nil {
 		return formula.DefaultRun, err
