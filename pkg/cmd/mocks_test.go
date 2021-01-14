@@ -543,15 +543,6 @@ func (w WorkspaceAddListHasherCustomMock) UpdateHash(path string, hash string) e
 }
 
 var (
-	defaultRepoAdderMock = repoListerAdderCustomMock{
-		add: func(d formula.Repo) error {
-			return nil
-		},
-		list: func() (formula.Repos, error) {
-			return formula.Repos{}, nil
-		},
-	}
-
 	defaultGitRepositoryMock = GitRepositoryMock{
 		latestTag: func(info git.RepoInfo) (git.Tag, error) {
 			return git.Tag{}, nil
