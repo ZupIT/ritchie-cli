@@ -381,3 +381,16 @@ func (w *WorkspaceMock) List() (formula.Workspaces, error) {
 	args := w.Called()
 	return args.Get(0).(formula.Workspaces), args.Error(1)
 }
+
+type BuilderMock struct {
+	mock.Mock
+}
+
+func (b *BuilderMock) Build(info formula.BuildInfo) error {
+	args := b.Called(info)
+	return args.Error(0)
+}
+func (b *BuilderMock) HasBuilt() bool {
+	args := b.Called()
+	return args.Bool(0)
+}
