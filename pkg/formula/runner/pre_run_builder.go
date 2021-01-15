@@ -25,8 +25,8 @@ import (
 )
 
 const (
-	messageChangeError = "Failed to detect formula changes, executing the last build"
-	messageBuildError  = "Failed to build formula"
+	messageChangeError = "Failed to detect formula changes, executing the last build: %s"
+	messageBuildError  = "Failed to build formula: %s"
 )
 
 type PreRunBuilderManager struct {
@@ -47,7 +47,8 @@ func NewPreRunBuilder(
 func (b PreRunBuilderManager) Build(relativePath string) {
 	workspace, err := b.modifiedWorkspace(relativePath)
 	if err != nil {
-		fmt.Println(prompt.Yellow(messageChangeError))
+		msg := fmt.Sprintf(messageChangeError, err.Error())
+		fmt.Println(prompt.Yellow(msg))
 		return
 	}
 
@@ -57,7 +58,8 @@ func (b PreRunBuilderManager) Build(relativePath string) {
 	}
 
 	if err = b.buildOnWorkspace(*workspace, relativePath); err != nil {
-		fmt.Println(prompt.Red(messageBuildError))
+		msg := fmt.Sprintf(messageBuildError, err.Error())
+		fmt.Println(prompt.Red(msg))
 		return
 	}
 }

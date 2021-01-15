@@ -18,9 +18,14 @@ package runner
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 type preRunBuilderTest struct {
@@ -32,8 +37,10 @@ type preRunBuilderTest struct {
 	currentHashError  error
 	previousHashError error
 	writeHashError    error
+	builderError      error
 
-	mustBuild bool
+	errExpected string
+	mustBuild   bool
 }
 
 var preRunBuilderTests = []preRunBuilderTest{
@@ -59,7 +66,8 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHashError: nil,
 		writeHashError:    fmt.Errorf("Failed to save hash"),
 
-		mustBuild: false,
+		errExpected: "Failed to detect formula changes, executing the last build: Failed to save hash",
+		mustBuild:   false,
 	},
 	{
 		name: "should not prompt to rebuild nor fail when no workspaces are returned",
@@ -97,39 +105,53 @@ var preRunBuilderTests = []preRunBuilderTest{
 
 		mustBuild: false,
 	},
+	{
+		name: "should not prompt to build when build workspace returns error",
+
+		workspaces:        map[string]string{"default": "/pathtodefault"},
+		currentHash:       "hashtwo",
+		previousHash:      "hash",
+		currentHashError:  nil,
+		previousHashError: nil,
+		writeHashError:    nil,
+		builderError:      fmt.Errorf("Some error"),
+
+		errExpected: "Failed to build formula: Some error",
+		mustBuild:   false,
+	},
 }
 
 func TestPreRunBuilder(t *testing.T) {
 	for _, test := range preRunBuilderTests {
 		t.Run(test.name, func(t *testing.T) {
-			builderMock := newBuilderMock()
+			builderMock := new(mocks.BuilderMock)
+			builderMock.On("Build", mock.Anything).Return(test.builderError)
+			builderMock.On("HasBuilt", mock.Anything).Return(false)
 
-			preRunBuilder := NewPreRunBuilder(workspaceListHasherMock{test.workspaces, test.currentHash, test.currentHashError, test.previousHash,
-				test.previousHashError, test.writeHashError}, builderMock)
+			rescueStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			preRunBuilder := NewPreRunBuilder(
+				workspaceListHasherMock{
+					test.workspaces,
+					test.currentHash,
+					test.currentHashError,
+					test.previousHash,
+					test.previousHashError,
+					test.writeHashError,
+				}, builderMock)
 			preRunBuilder.Build("/testing/formula")
 
+			_ = w.Close()
+			out, _ := ioutil.ReadAll(r)
+			os.Stdout = rescueStdout
+
 			gotBuilt := builderMock.HasBuilt()
-			if gotBuilt != test.mustBuild {
-				t.Errorf("Got build %v, wanted %v", gotBuilt, test.mustBuild)
-			}
+			assert.Equal(t, test.mustBuild, gotBuilt)
+			assert.Contains(t, string(out), test.errExpected)
 		})
 	}
-}
-
-type builderMock struct {
-	hasBuilt *bool
-}
-
-func newBuilderMock() builderMock {
-	hasBuilt := false
-	return builderMock{&hasBuilt}
-}
-func (bm builderMock) Build(info formula.BuildInfo) error {
-	*bm.hasBuilt = true
-	return nil
-}
-func (bm builderMock) HasBuilt() bool {
-	return *bm.hasBuilt
 }
 
 type workspaceListHasherMock struct {
