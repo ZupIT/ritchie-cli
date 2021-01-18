@@ -121,7 +121,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 				workspaces := formula.Workspaces{}
 				err = json.Unmarshal(file, &workspaces)
 				assert.NoError(t, err)
-				pathName, _ := workspaces[tt.workspace.Name]
+				pathName := workspaces[tt.workspace.Name]
 				assert.Equal(t, tt.workspace.Dir, pathName)
 			}
 		})
