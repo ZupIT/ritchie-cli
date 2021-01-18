@@ -48,10 +48,6 @@ var (
 	}
 )
 
-type teste struct {
-	env string
-}
-
 // deleteEnvCmd type for clean repo command.
 type deleteEnvCmd struct {
 	env env.FindRemover
