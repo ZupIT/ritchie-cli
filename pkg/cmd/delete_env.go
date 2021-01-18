@@ -48,7 +48,7 @@ var (
 	}
 )
 
-type inputDeleteEnv struct {
+type teste struct {
 	env string
 }
 
@@ -89,16 +89,16 @@ func NewDeleteEnvCmd(
 
 func (d *deleteEnvCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		inputParams, err := d.resolveInput(cmd)
+		env, err := d.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
 
-		if inputParams.env == "" {
+		if env == "" {
 			return nil
 		}
 
-		if _, err := d.env.Remove(inputParams.env); err != nil {
+		if _, err := d.env.Remove(env); err != nil {
 			return err
 		}
 
@@ -134,22 +134,22 @@ func (d deleteEnvCmd) runStdin() CommandRunnerFunc {
 	}
 }
 
-func (d *deleteEnvCmd) resolveInput(cmd *cobra.Command) (inputDeleteEnv, error) {
+func (d *deleteEnvCmd) resolveInput(cmd *cobra.Command) (string, error) {
 	if IsFlagInput(cmd) {
 		return d.resolveFlags(cmd)
 	}
 	return d.resolvePrompt()
 }
 
-func (d *deleteEnvCmd) resolvePrompt() (inputDeleteEnv, error) {
+func (d *deleteEnvCmd) resolvePrompt() (string, error) {
 	envHolder, err := d.env.Find()
 	if err != nil {
-		return inputDeleteEnv{}, err
+		return "", err
 	}
 
 	if len(envHolder.All) <= 0 {
 		prompt.Error(NoDefinedEnvsMsg)
-		return inputDeleteEnv{}, nil
+		return "", nil
 	}
 
 	for i := range envHolder.All {
@@ -160,30 +160,30 @@ func (d *deleteEnvCmd) resolvePrompt() (inputDeleteEnv, error) {
 
 	envName, err := d.List("Envs:", envHolder.All)
 	if err != nil {
-		return inputDeleteEnv{}, err
+		return "", err
 	}
 
 	proceed, err := d.Bool("Are you sure want to delete this env?", []string{"yes", "no"})
 	if err != nil {
-		return inputDeleteEnv{}, err
+		return "", err
 	}
 
 	if !proceed {
-		return inputDeleteEnv{}, nil
+		return "", nil
 	}
 
-	return inputDeleteEnv{envName}, nil
+	return envName, nil
 }
 
-func (d *deleteEnvCmd) resolveFlags(cmd *cobra.Command) (inputDeleteEnv, error) {
+func (d *deleteEnvCmd) resolveFlags(cmd *cobra.Command) (string, error) {
 	env, err := cmd.Flags().GetString(envFlagName)
 	if err != nil {
-		return inputDeleteEnv{}, err
+		return "", err
 	}
 
 	if env == "" {
-		return inputDeleteEnv{}, errors.New("please provide a value for 'env'")
+		return "", errors.New("please provide a value for 'env'")
 	}
 
-	return inputDeleteEnv{env}, nil
+	return env, nil
 }
