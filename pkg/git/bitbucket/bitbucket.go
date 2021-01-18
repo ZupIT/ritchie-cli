@@ -39,13 +39,14 @@ const (
 	repoOffset  = 4
 	ownerOffset = 5
 	hostOffset  = 6
+	defaultUrl  = 8
 )
 
 // NewRepoInfo returns the RepoInfo built by repository url
 // Repository url e.g. https://bitbucket.org/{{owner}}/{{repo}}/src/master/
 func NewRepoInfo(url string, token string) git.RepoInfo {
 	split := strings.Split(url, "/")
-	if len(split) < 8 {
+	if len(split) < defaultUrl {
 		return DefaultRepoInfo{}
 	}
 
