@@ -46,14 +46,13 @@ func NewRepoManager(client *http.Client) RepoManager {
 
 func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	zipUrl := info.ZipUrl(version)
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, zipUrl, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, zipUrl, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", authToken))
+		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
 	}
 
 	resp, err := re.client.Do(req)
@@ -61,7 +60,7 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		defer resp.Body.Close()
 
 		all, _ := ioutil.ReadAll(resp.Body)
@@ -74,14 +73,13 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiUrl := info.TagsUrl()
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, apiUrl, nil)
 	if err != nil {
 		return git.Tags{}, err
 	}
 
 	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", authToken))
+		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
 	}
 
 	res, err := re.client.Do(req)
@@ -112,14 +110,13 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	apiUrl := info.LatestTagUrl()
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, apiUrl, nil)
 	if err != nil {
 		return git.Tag{}, err
 	}
 
 	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", authToken))
+		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
 	}
 
 	res, err := re.client.Do(req)
@@ -142,17 +139,11 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 		return git.Tag{}, err
 	}
 
-	var tags git.Tags
-	for _, v := range bTags.Values {
-		tag := git.Tag{Name: v.Name}
-		tags = append(tags, tag)
-	}
-
-	if len(tags) == 0 {
+	if len(bTags.Values) == 0 {
 		return git.Tag{}, errors.New("release not found")
 	}
 
-	latestTag := tags[len(tags)-1]
+	latestTag := git.Tag{Name: bTags.Values[len(bTags.Values)-1].Name}
 
 	return latestTag, nil
 }

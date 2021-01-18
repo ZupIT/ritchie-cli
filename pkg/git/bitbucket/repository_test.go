@@ -64,12 +64,21 @@ func TestTags(t *testing.T) {
 			want:    git.Tags{},
 			wantErr: "There was an error adding the repository, status: 400 - Bad Request.",
 		},
+		{
+			name:   "Return err when the protocol is invalid",
+			client: mockServerThatFail.Client(),
+			info: info{
+				zipUrl: "htttp://yourhost.com/username/repo/",
+				token:  "some_token",
+			},
+			want:    git.Tags{},
+			wantErr: "Get \"\": unsupported protocol scheme \"\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git := &mocks.RepoInfo{}
 			git.On("Token").Return(tt.info.token)
-			git.On("TokenHeader").Return(tt.info.tokenHeader)
 			git.On("TagsUrl").Return(tt.info.tagsUrl)
 			re := NewRepoManager(tt.client)
 			got, err := re.Tags(git)
@@ -118,12 +127,21 @@ func TestZipball(t *testing.T) {
 			version: "0.0.1",
 			want:    "400 Bad Request",
 		},
+		{
+			name:   "Return err when the protocol is invalid",
+			client: mockServerThatFail.Client(),
+			info: info{
+				zipUrl: "htttp://yourhost.com/username/repo/",
+				token:  "some_token",
+			},
+			version: "0.0.1",
+			want:    "Get \"htttp://yourhost.com/username/repo/\": unsupported protocol scheme \"htttp\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git := &mocks.RepoInfo{}
 			git.On("Token").Return(tt.info.token)
-			git.On("TokenHeader").Return(tt.info.tokenHeader)
 			git.On("ZipUrl", tt.version).Return(tt.info.zipUrl)
 			re := RepoManager{client: tt.client}
 			got, err := re.Zipball(git, tt.version)
@@ -183,12 +201,21 @@ func TestLatestTag(t *testing.T) {
 			want:    git.Tag{},
 			wantErr: "release not found",
 		},
+		{
+			name:   "Return err when the protocol is invalid",
+			client: mockServerThatFail.Client(),
+			info: info{
+				zipUrl: "htttp://yourhost.com/username/repo/",
+				token:  "some_token",
+			},
+			want:    git.Tag{},
+			wantErr: "Get \"\": unsupported protocol scheme \"\"",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git := &mocks.RepoInfo{}
 			git.On("Token").Return(tt.info.token)
-			git.On("TokenHeader").Return(tt.info.tokenHeader)
 			git.On("LatestTagUrl").Return(tt.info.latestTagUrl)
 			re := NewRepoManager(tt.client)
 			got, err := re.LatestTag(git)
@@ -446,6 +473,5 @@ type info struct {
 	zipUrl       string
 	tagsUrl      string
 	latestTagUrl string
-	tokenHeader  string
 	token        string
 }
