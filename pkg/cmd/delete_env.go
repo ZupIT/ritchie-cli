@@ -147,7 +147,7 @@ func (d *deleteEnvCmd) resolvePrompt() (string, error) {
 		return "", err
 	}
 
-	if len(envHolder.All) <= 0 {
+	if len(envHolder.All) == 0 {
 		prompt.Error(NoDefinedEnvsMsg)
 		return "", nil
 	}
