@@ -125,7 +125,7 @@ func NewInitCmd(
 		Long:      "Initialize rit configuration",
 		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
 		ValidArgs: []string{""},
-		// Args:      cobra.OnlyValidArgs,
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd
