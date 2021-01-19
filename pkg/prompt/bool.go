@@ -26,6 +26,8 @@ var (
 		"no":    false,
 		"true":  true,
 		"false": false,
+		"Yes":   true,
+		"False": false,
 		"✅ Yes": true,
 		"❌ No":  false,
 	}
