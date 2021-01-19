@@ -381,4 +381,3 @@ func (w *WorkspaceMock) List() (formula.Workspaces, error) {
 	args := w.Called()
 	return args.Get(0).(formula.Workspaces), args.Error(1)
 }
-
