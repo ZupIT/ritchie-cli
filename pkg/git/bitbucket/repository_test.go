@@ -62,7 +62,7 @@ func TestTags(t *testing.T) {
 				tagsUrl: mockServerThatFail.URL,
 			},
 			want:    git.Tags{},
-			wantErr: "There was an error adding the repository, status: 400 - Bad Request.",
+			wantErr: "400 Bad Request-",
 		},
 		{
 			name:   "Return err when the protocol is invalid",
@@ -85,6 +85,7 @@ func TestTags(t *testing.T) {
 			if err == nil {
 				assert.Equal(t, tt.want, got)
 			} else {
+				assert.Equal(t, tt.want, got)
 				assert.EqualError(t, err, tt.wantErr)
 			}
 		})
@@ -125,7 +126,7 @@ func TestZipball(t *testing.T) {
 				token:  "some_token",
 			},
 			version: "0.0.1",
-			want:    "400 Bad Request",
+			want:    "400 Bad Request-",
 		},
 		{
 			name:   "Return err when the protocol is invalid",
@@ -190,7 +191,8 @@ func TestLatestTag(t *testing.T) {
 			info: info{
 				latestTagUrl: mockServerThatFail.URL,
 			},
-			want: git.Tag{},
+			want:    git.Tag{},
+			wantErr: "400 Bad Request-",
 		},
 		{
 			name:   "Return err when not finding tags",
@@ -222,6 +224,7 @@ func TestLatestTag(t *testing.T) {
 			if err == nil {
 				assert.Equal(t, tt.want, got)
 			} else {
+				assert.Equal(t, tt.want, got)
 				assert.EqualError(t, err, tt.wantErr)
 			}
 		})

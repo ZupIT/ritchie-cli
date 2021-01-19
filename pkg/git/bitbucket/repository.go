@@ -55,20 +55,18 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
 	}
 
-	resp, err := re.client.Do(req)
+	res, err := re.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		defer resp.Body.Close()
-
-		all, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(all)
-		return nil, errors.New(resp.Status)
+	if res.StatusCode != http.StatusOK {
+		defer res.Body.Close()
+		all, _ := ioutil.ReadAll(res.Body)
+		return nil, errors.New(res.Status + "-" + string(all))
 	}
 
-	return resp.Body, nil
+	return res.Body, nil
 }
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
@@ -90,8 +88,8 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		errorMessage := fmt.Sprintf("There was an error adding the repository, status: %d - %s.", res.StatusCode, http.StatusText(res.StatusCode))
-		return git.Tags{}, errors.New(errorMessage)
+		all, _ := ioutil.ReadAll(res.Body)
+		return git.Tags{}, errors.New(res.Status + "-" + string(all))
 	}
 
 	var bTags bitbucketTags
@@ -127,11 +125,8 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		b, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return git.Tag{}, err
-		}
-		return git.Tag{}, errors.New(string(b))
+		all, _ := ioutil.ReadAll(res.Body)
+		return git.Tag{}, errors.New(res.Status + "-" + string(all))
 	}
 
 	var bTags bitbucketTags
