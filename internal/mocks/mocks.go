@@ -21,7 +21,6 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/ZupIT/ritchie-cli/internal/pkg/config"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -383,30 +382,3 @@ func (w *WorkspaceMock) List() (formula.Workspaces, error) {
 	return args.Get(0).(formula.Workspaces), args.Error(1)
 }
 
-type ConfigRunnerMock struct {
-	mock.Mock
-}
-
-func (c *ConfigRunnerMock) Create(runType formula.RunnerType) error {
-	args := c.Called(runType)
-	return args.Error(0)
-}
-
-func (c *ConfigRunnerMock) Find() (formula.RunnerType, error) {
-	args := c.Called()
-	return args.Get(0).(formula.RunnerType), args.Error(1)
-}
-
-type RitConfigMock struct {
-	mock.Mock
-}
-
-func (r *RitConfigMock) Read() (config.Configs, error) {
-	args := r.Called()
-	return args.Get(0).(config.Configs), args.Error(1)
-}
-
-func (r *RitConfigMock) Write(configs config.Configs) error {
-	args := r.Called(configs)
-	return args.Error(0)
-}

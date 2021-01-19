@@ -91,7 +91,6 @@ type initCmd struct {
 	file     stream.FileWriter
 	prompt.InputList
 	prompt.InputBool
-	prompt.InputMultiselect
 	metricSender metric.SendManagerHttp
 	ritConfig    config.Writer
 }
@@ -134,7 +133,7 @@ func NewInitCmd(
 func (in initCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 
-		in.Welcome()
+		in.welcome()
 
 		metrics, err := in.metricsAuthorization()
 		if err != nil {
@@ -150,12 +149,6 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		success := "\n✅ Initialization successful!\n"
-		if osutil.IsWindows() {
-			success = "\n Initialization successful!\n"
-		}
-		prompt.Success(success)
-
 		configs := config.Configs{
 			Language: "English",
 			Metrics:  metrics,
@@ -166,6 +159,8 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 		if err := in.ritConfig.Write(configs); err != nil {
 			return err
 		}
+
+		in.initSuccess()
 
 		if err := in.tutorialInit(); err != nil {
 			return err
@@ -179,23 +174,23 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		init := initStdin{}
 
-		err := stdin.ReadJson(cmd.InOrStdin(), &init)
-		if err != nil {
+		if err := stdin.ReadJson(cmd.InOrStdin(), &init); err != nil {
 			return err
 		}
+
+		in.welcome()
 
 		sendMetrics := "no"
 		if init.SendMetrics {
 			sendMetrics = "yes"
 		}
 
-		if err = in.file.Write(metric.FilePath, []byte(sendMetrics)); err != nil {
+		if err := in.file.Write(metric.FilePath, []byte(sendMetrics)); err != nil {
 			return err
 		}
 
 		if !init.AddCommons {
-			prompt.Warning(addRepoInfo)
-			fmt.Println(addRepoMsg)
+			in.commonsWarning()
 		} else {
 			repo := formula.Repo{
 				Provider: "Github",
@@ -205,10 +200,8 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 			}
 
 			s := spinner.StartNew("Adding the commons repository...")
-			time.Sleep(time.Second * 2)
 
 			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
-
 			tag, err := in.git.LatestTag(repoInfo)
 			if err != nil {
 				s.Error(ErrInitCommonsRepo)
@@ -223,7 +216,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 				return nil
 			}
 
-			s.Success(prompt.Green("✅ Commons repository added successfully!\n"))
+			in.commonsSuccess(s)
 		}
 
 		runType := formula.DefaultRun
@@ -243,11 +236,11 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if runType == formula.LocalRun {
-			prompt.Warning("\n\t\t\t⚠️  WARNING ⚠️")
+			in.warning()
 			fmt.Print(FormulaLocalRunWarning)
 		}
 
-		prompt.Success("\n✅  Initialization successful!\n")
+		in.initSuccess()
 
 		if err := in.tutorialInit(); err != nil {
 			return err
@@ -326,7 +319,7 @@ func (in initCmd) setRunnerType() (formula.RunnerType, error) {
 	}
 
 	if runType == formula.LocalRun {
-		Warning()
+		in.warning()
 		fmt.Print(FormulaLocalRunWarning)
 	}
 
@@ -349,7 +342,7 @@ func (in initCmd) addCommonsRepo() error {
 
 	metric.CommonsRepoAdded = "yes"
 	if !choose {
-		in.CommonsWarning()
+		in.commonsWarning()
 		metric.CommonsRepoAdded = "no"
 		return nil
 	}
@@ -380,11 +373,7 @@ func (in initCmd) addCommonsRepo() error {
 		return nil
 	}
 
-	success := "✅ Commons repository added successfully!\n"
-	if osutil.IsWindows() {
-		success = "Commons repository added successfully!\n"
-	}
-	s.Success(prompt.Green(success))
+	in.commonsSuccess(s)
 
 	return nil
 }
@@ -418,7 +407,7 @@ func (in initCmd) tutorialInit() error {
 	return nil
 }
 
-func (in initCmd) Welcome() {
+func (in initCmd) welcome() {
 	const welcome = " _______       _     _             __         _                           ______    _____      _____  \n|_   __ \\     (_)   / |_          [  |       (_)                        .' ___  |  |_   _|    |_   _| \n  | |__) |    __   `| |-'  .---.   | |--.    __    .---.     ______    / .'   \\_|    | |        | |   \n  |  __ /    [  |   | |   / /'`\\]  | .-. |  [  |  / /__\\\\   |______|   | |           | |   _    | |   \n _| |  \\ \\_   | |   | |,  | \\__.   | | | |   | |  | \\__.,              \\ `.___.'\\   _| |__/ |  _| |_  \n|____| |___| [___]  \\__/  '.___.' [___]|__] [___]  '.__.'               `.____ .'  |________| |_____| \n\n"
 	const header = `Ritchie is a platform that helps you and your team to save time by
 giving you the power to create powerful templates to execute important
@@ -432,17 +421,34 @@ You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade
 	fmt.Print(header)
 }
 
-func (in initCmd) CommonsWarning() {
-	Warning()
+func (in initCmd) commonsSuccess(s *spinner.Spinner) {
+	success := "✅ Commons repository added successfully!\n"
+	if osutil.IsWindows() {
+		success = "Commons repository added successfully!\n"
+	}
+
+	s.Success(prompt.Green(success))
+}
+
+func (in initCmd) commonsWarning() {
+	in.warning()
 	fmt.Print(addRepoInfo)
 	fmt.Println(addRepoMsg)
 }
 
-func Warning() {
+func (in initCmd) warning() {
 	warningMsg := "\n\t\t\t⚠️  WARNING ⚠️"
 	if osutil.IsWindows() {
 		warningMsg = "\n\t\t\t  WARNING "
 	}
 
 	prompt.Warning(warningMsg)
+}
+
+func (in initCmd) initSuccess() {
+	success := "\n✅ Initialization successful!\n"
+	if osutil.IsWindows() {
+		success = "\n Initialization successful!\n"
+	}
+	prompt.Success(success)
 }
