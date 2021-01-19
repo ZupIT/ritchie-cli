@@ -72,9 +72,9 @@ func TestTagsUrl(t *testing.T) {
 func TestZipUrl(t *testing.T) {
 	const want = "https://bitbucket.org/username/ritchie-formulas/get/1.0.0.zip"
 	repoInfo := NewRepoInfo("https://bitbucket.org/username/ritchie-formulas/src/master/", "some_token")
-	tagsUrl := repoInfo.ZipUrl("1.0.0")
+	zipUrl := repoInfo.ZipUrl("1.0.0")
 
-	assert.Equal(t, want, tagsUrl)
+	assert.Equal(t, want, zipUrl)
 }
 
 func TestLatestTagUrl(t *testing.T) {
