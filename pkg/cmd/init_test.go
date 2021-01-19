@@ -28,11 +28,16 @@ import (
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
 func Test_initCmd_runAnyEntry(t *testing.T) {
+	type inBool struct {
+		label string
+		value bool
+		err   error
+	}
+
 	type in struct {
 		repoAddErr     error
 		gitTag         git.Tag
@@ -41,9 +46,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		tutorialErr    error
 		fileWriteErr   error
 		configRunErr   error
-		inBool         bool
-		inBoolErr      error
-		inList         prompt.InputList
+		inBools        []inBool
+		inList         string
+		inListErr      error
 		ritConfigErr   error
 	}
 
@@ -58,15 +63,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         true,
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return LocalRunType, nil
-						}
-						return AcceptOpt, nil
-					},
-				},
+				inList:         LocalRunType,
 			},
 			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"local\"}\n",
 		},
@@ -75,15 +72,17 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         false,
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return DockerRunType, nil
-						}
-						return DeclineOpt, nil
+				inBools: []inBool{
+					{
+						label: AddTheCommunityRepo,
+						value: false,
+					},
+					{
+						label: AgreeSendMetrics,
+						value: false,
 					},
 				},
+				inList: DockerRunType,
 			},
 			inputStdin: "{\"addCommons\": false,\"sendMetrics\": false, \"runType\": \"docker\" }\n",
 		},
@@ -92,15 +91,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTagErr:      errors.New("error to get latest tag"),
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         true,
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return DockerRunType, nil
-						}
-						return DeclineOpt, nil
-					},
-				},
+				inList:         DockerRunType,
 			},
 			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"docker\"}\n",
 		},
@@ -110,15 +101,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				repoAddErr:     errors.New("error to add commons repo"),
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         true,
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return LocalRunType, nil
-						}
-						return AcceptOpt, nil
-					},
-				},
+				inList:         LocalRunType,
 			},
 			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
 		},
@@ -127,15 +110,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:      git.Tag{Name: "1.0.0"},
 				tutorialErr: errors.New("error to find tutorial"),
-				inBool:      true,
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return LocalRunType, nil
-						}
-						return AcceptOpt, nil
-					},
-				},
+				inList:      LocalRunType,
 			},
 			wantErr:    errors.New("error to find tutorial"),
 			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
@@ -145,15 +120,14 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBoolErr:      errors.New("error to select metrics response"),
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return LocalRunType, nil
-						}
-						return "", nil
+				inBools: []inBool{
+					{
+						label: AgreeSendMetrics,
+						value: false,
+						err:   errors.New("error to select metrics response"),
 					},
 				},
+				inList: LocalRunType,
 			},
 			wantErr: errors.New("error to select metrics response"),
 		},
@@ -162,15 +136,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         true,
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return "", errors.New("error to select run type")
-						}
-						return AcceptOpt, nil
-					},
-				},
+				inListErr:      errors.New("error to select run type"),
 			},
 			wantErr: errors.New("error to select run type"),
 		},
@@ -179,16 +145,8 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         true,
 				fileWriteErr:   errors.New("error to write metric file"),
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return LocalRunType, nil
-						}
-						return AcceptOpt, nil
-					},
-				},
+				inList:         LocalRunType,
 			},
 			wantErr:    errors.New("error to write metric file"),
 			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
@@ -198,16 +156,8 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         true,
 				configRunErr:   errors.New("error to create runner config"),
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return LocalRunType, nil
-						}
-						return AcceptOpt, nil
-					},
-				},
+				inList:         LocalRunType,
 			},
 			wantErr:    errors.New("error to create runner config"),
 			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
@@ -217,15 +167,14 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBoolErr:      errors.New("error to select commons repo response"),
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return LocalRunType, nil
-						}
-						return AcceptOpt, nil
+				inBools: []inBool{
+					{
+						label: AddTheCommunityRepo,
+						value: false,
+						err:   errors.New("error to select commons repo response"),
 					},
 				},
+				inList: LocalRunType,
 			},
 			wantErr: errors.New("error to select commons repo response"),
 		},
@@ -234,18 +183,21 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inBool:         true,
-				inList: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						if name == SelectFormulaTypeQuestion {
-							return "invalid", nil
-						}
-						return AcceptOpt, nil
-					},
-				},
+				inList:         "invalid",
 			},
 			wantErr:    ErrInvalidRunType,
 			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"invalid\"}\n",
+		},
+		{
+			name: "error to write ritchie configs",
+			in: in{
+				gitTag:         git.Tag{Name: "1.0.0"},
+				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
+				inList:         LocalRunType,
+				ritConfigErr:   errors.New("error to write ritchie configs"),
+			},
+			wantErr:    errors.New("error to write ritchie configs"),
+			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"local\"}\n",
 		},
 	}
 
@@ -262,8 +214,16 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			fileMock.On("Write", mock.Anything, mock.Anything).Return(in.fileWriteErr)
 			configRunnerMock := new(mocks.ConfigRunnerMock)
 			configRunnerMock.On("Create", mock.Anything).Return(in.configRunErr)
+
 			inBoolMock := new(mocks.InputBoolMock)
-			inBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(in.inBool, in.inBoolErr)
+			for _, in := range in.inBools {
+				inBoolMock.On("Bool", in.label, mock.Anything, mock.Anything).Return(in.value, in.err)
+			}
+			inBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+
+			inListMock := new(mocks.InputListMock)
+			inListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(in.inList, in.inListErr)
+
 			ritConfigMock := new(mocks.RitConfigMock)
 			ritConfigMock.On("Write", mock.Anything).Return(in.ritConfigErr)
 			metricSender := metric.NewHttpSender("", http.DefaultClient)
@@ -274,7 +234,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorialMock,
 				configRunnerMock,
 				fileMock,
-				in.inList,
+				inListMock,
 				inBoolMock,
 				metricSender,
 				ritConfigMock,
@@ -285,7 +245,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorialMock,
 				configRunnerMock,
 				fileMock,
-				in.inList,
+				inListMock,
 				inBoolMock,
 				metricSender,
 				ritConfigMock,

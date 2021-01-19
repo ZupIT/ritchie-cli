@@ -51,6 +51,8 @@ const (
 	LocalRunType              = "🏠 local"
 	DockerRunType             = "🐳 docker"
 	SelectFormulaTypeQuestion = "Select a default formula run type:"
+	AddTheCommunityRepo       = "Would you like to add the community repository?"
+	AgreeSendMetrics          = "Do you agree?"
 	FormulaLocalRunWarning    = `
 In order to run formulas locally, you must have the formula language installed on your machine,
 if you don't want to install choose to run the formulas inside the docker.
@@ -124,7 +126,7 @@ func NewInitCmd(
 		Long:      "Initialize rit configuration",
 		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
 		ValidArgs: []string{""},
-		Args:      cobra.OnlyValidArgs,
+		// 	Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd
@@ -240,6 +242,17 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 			fmt.Print(FormulaLocalRunWarning)
 		}
 
+		configs := config.Configs{
+			Language: "English",
+			Metrics:  sendMetrics,
+			RunType:  runType,
+			Tutorial: tutorialStatusEnabled,
+		}
+
+		if err := in.ritConfig.Write(configs); err != nil {
+			return err
+		}
+
 		in.initSuccess()
 
 		if err := in.tutorialInit(); err != nil {
@@ -261,7 +274,7 @@ func (in initCmd) metricsAuthorization() (string, error) {
 	prompt.Info(header)
 	fmt.Println(AddMetricsQuestion)
 
-	choose, err := in.Bool("Do you agree?", options)
+	choose, err := in.Bool(AgreeSendMetrics, options)
 	if err != nil {
 		return "", err
 	}
@@ -335,7 +348,7 @@ func (in initCmd) addCommonsRepo() error {
 	}
 	prompt.Info(header)
 
-	choose, err := in.Bool("Would you like to add the community repository?", options)
+	choose, err := in.Bool(AddTheCommunityRepo, options)
 	if err != nil {
 		return err
 	}
