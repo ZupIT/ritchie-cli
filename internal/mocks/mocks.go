@@ -160,3 +160,13 @@ func (i *InputTextValidatorMock) Text(name string, validate func(interface{}) er
 
 	return args.String(0), args.Error(1)
 }
+
+type CredResolverMock struct {
+	mock.Mock
+}
+
+func (c *CredResolverMock) Resolve(name string) (string, error) {
+	args := c.Called(name)
+
+	return args.String(0), args.Error(1)
+}

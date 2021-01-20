@@ -225,7 +225,7 @@ func Build() *cobra.Command {
 	deleteEnvCmd := cmd.NewDeleteEnvCmd(envFindRemover, inputBool, inputList)
 	setEnvCmd := cmd.NewSetEnvCmd(envFindSetter, inputText, inputList)
 	showEnvCmd := cmd.NewShowEnvCmd(envFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, detailRepo)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, credResolver, inputTextValidator, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, detailRepo)
 
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder, detailRepo)

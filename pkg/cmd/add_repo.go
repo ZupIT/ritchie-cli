@@ -19,9 +19,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -39,8 +41,8 @@ var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empt
 type addRepoCmd struct {
 	repo          formula.RepositoryAddLister
 	repoProviders formula.RepoProviders
+	credential.Resolver
 	prompt.InputTextValidator
-	prompt.InputPassword
 	prompt.InputURL
 	prompt.InputList
 	prompt.InputBool
@@ -53,8 +55,8 @@ type addRepoCmd struct {
 func NewAddRepoCmd(
 	repo formula.RepositoryAddLister,
 	repoProviders formula.RepoProviders,
+	resolver credential.Resolver,
 	inText prompt.InputTextValidator,
-	inPass prompt.InputPassword,
 	inURL prompt.InputURL,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
@@ -71,10 +73,10 @@ func NewAddRepoCmd(
 		InputList:          inList,
 		InputBool:          inBool,
 		InputInt:           inInt,
-		InputPassword:      inPass,
 		tutorial:           rtf,
 		tree:               treeChecker,
 		detail:             rd,
+		Resolver:           resolver,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -140,7 +142,7 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 
 		var token string
 		if isPrivate {
-			token, err = ad.Password("Personal access tokens:")
+			token, err = ad.Resolve("CREDENTIAL_" + provider + "-add-repo_token")
 			if err != nil {
 				return err
 			}
@@ -151,6 +153,13 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 		gitRepoInfo := git.NewRepoInfo(url, token)
 		tags, err := git.Repos.Tags(gitRepoInfo)
 		if err != nil {
+			if strings.Contains(err.Error(), "401") {
+				errorString := fmt.Sprintf("permission error:\nYou must overwrite the current token (%s-add-repo) with command:\n"+
+					"\t rit set credential\n"+
+					"Or move to a new environment with command:\n"+
+					"\t rit set env", provider)
+				return errors.New(errorString)
+			}
 			return err
 		}
 
