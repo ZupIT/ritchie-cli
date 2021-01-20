@@ -28,6 +28,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -261,6 +262,9 @@ func TestInputManager_Inputs(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			iText := tt.in.iText
@@ -270,7 +274,6 @@ func TestInputManager_Inputs(t *testing.T) {
 			iBool := tt.in.iBool
 			iPass := tt.in.iPass
 			iMultiselect := inputMock{}
-			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				tt.in.creResolver,
@@ -409,6 +412,9 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
@@ -428,7 +434,6 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{}
-			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -523,6 +528,9 @@ func TestInputManager_RegexType(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	fileManager := stream.NewFileManager()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -543,7 +551,6 @@ func TestInputManager_RegexType(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{}
-			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -656,6 +663,9 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	fileManager := stream.NewFileManager()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -676,7 +686,6 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{}
-			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -757,6 +766,9 @@ func TestInputManager_Multiselect(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	fileManager := stream.NewFileManager()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -777,7 +789,6 @@ func TestInputManager_Multiselect(t *testing.T) {
 			iBool := inputMock{boolean: false}
 			iPass := inputMock{text: "******"}
 			iMultiselect := inputMock{items: []string{}}
-			inPath := InputPathMock{}
 
 			inputManager := NewInputManager(
 				envResolverMock{},
@@ -840,6 +851,9 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inputManager := NewInputManager(
@@ -852,7 +866,7 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 				inputMock{},
 				inputMock{},
 				inputMock{},
-				InputPathMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -966,10 +980,4 @@ func (fi fileManagerMock) Remove(path string) error {
 
 func (fi fileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
 	return fi.listNews, fi.lErr
-}
-
-type InputPathMock struct{}
-
-func (InputPathMock) Read(text string) (string, error) {
-	return text, nil
 }
