@@ -141,7 +141,7 @@
                 "action": "main"
             }
         ],
-        "result": "Rit formula's command needs at least 2 words"
+        "result": "rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]"
     },
     {
         "entry": "Create formula STDIN - no rit on formula name",
@@ -157,7 +157,7 @@
                 "action": "main"
             }
         ],
-        "result": "Rit formula's command needs to start with"
+        "result": "rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]"
     },
     {
         "entry": "Create formula STDIN - not allowed char",
@@ -173,7 +173,7 @@
                 "action": "main"
             }
         ],
-        "result": "not allowed character on formula name"
+        "result": "these characters are not allowed in the formula command [\\ /,> <@ -]"
     },
     {
         "entry": "Create formula STDIN - core command after rit",

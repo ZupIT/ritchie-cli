@@ -16,6 +16,8 @@
 
 package credential
 
+const credentialDir = "credentials"
+
 // Detail represents a credential information of the user.
 type Detail struct {
 	Username   string     `json:"username"`

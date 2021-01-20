@@ -115,7 +115,7 @@ jobs:
           name: Horus Security Analysis
           command: |
             curl -fsSL https://horusec.io/bin/install.sh | bash -s v1-5-0
-            horusec start -p ./ -i testdata,vendor
+            horusec start -p ./ -a "$HORUSEC_CLI_REPOSITORY_AUTHORIZATION" -G "true" -u "https://api-horusec.zup.com.br" -n "ritchie-cli"
 
   unit_test:
     executor: ritchie-tests-and-static-analisys-executor

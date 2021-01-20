@@ -73,11 +73,12 @@ func (suite *SetterTestSuite) TestSetCredentialToDefault() {
 		{"env not informed", *suite.envHolderNil},
 	} {
 		suite.Run(t.testName, func() {
+			defer os.RemoveAll(suite.HomePath)
 			envFinderMock := new(mocks.EnvFinderMock)
-			filePathExpectedCreated := File(suite.HomePath, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
+			filePathExpectedCreated := filepath.Join(suite.HomePath, credentialDir, suite.envHolderDefault.Current, suite.DetailCredentialInfo.Service)
 
 			envFinderMock.On("Find").Return(t.env, nil)
-			setter := NewSetter(suite.HomePath, envFinderMock, dirManager, fileManager)
+			setter := NewSetter(suite.HomePath, envFinderMock, dirManager)
 
 			suite.NoFileExists(filePathExpectedCreated)
 
@@ -90,7 +91,6 @@ func (suite *SetterTestSuite) TestSetCredentialToDefault() {
 			data, err := suite.fileInfo(filePathExpectedCreated)
 			suite.Nil(err)
 			suite.Contains(data, nameExpected)
-			defer os.RemoveAll(suite.HomePath)
 		})
 	}
 }

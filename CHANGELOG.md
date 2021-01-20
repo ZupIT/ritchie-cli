@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.7.0](https://github.com/zupit/ritchie-cli/tree/2.7.0) (2021-01-04)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.6.0...2.7.0)
+
+**Closed issues:**
+
+- Create a RIT ADD WORKSPACE command [\#802](https://github.com/ZupIT/ritchie-cli/issues/802)
+- Tests with Testify in Pkg/Stdin [\#797](https://github.com/ZupIT/ritchie-cli/issues/797)
+- Tests with Testify in Pkg/Formula/Input/Stdin [\#784](https://github.com/ZupIT/ritchie-cli/issues/784)
+- Tests with Testify in Pkg/Formula/Input/Flag [\#782](https://github.com/ZupIT/ritchie-cli/issues/782)
+- Tests with Testify in Pkg/Formula/Creator [\#781](https://github.com/ZupIT/ritchie-cli/issues/781)
+- Tests with Testify in Pkg/Credential [\#766](https://github.com/ZupIT/ritchie-cli/issues/766)
+- Support new http verbs and authentication on dynamic list input [\#652](https://github.com/ZupIT/ritchie-cli/issues/652)
+- Store the json list returned by an API consumed through the dynamic type input [\#646](https://github.com/ZupIT/ritchie-cli/issues/646)
+- Use credentials when consuming URL configured for the dynamic type list [\#645](https://github.com/ZupIT/ritchie-cli/issues/645)
+- Return error when trying to create a new formula in an empty workspace [\#814](https://github.com/ZupIT/ritchie-cli/issues/814)
+- Do NOT remove the user workspace folder on rit delete workspace [\#804](https://github.com/ZupIT/ritchie-cli/issues/804)
+- Tests with Testify in Pkg/Slice/SliceUtil [\#796](https://github.com/ZupIT/ritchie-cli/issues/796)
+- The formula is not automatically build at its creation [\#763](https://github.com/ZupIT/ritchie-cli/issues/763)
+- Create new commands tree to improve performance [\#679](https://github.com/ZupIT/ritchie-cli/issues/679)
+
+**Merged pull requests:**
+
+- Fix delete workspace [\#816](https://github.com/ZupIT/ritchie-cli/pull/816) ([kaduartur](https://github.com/kaduartur))
+- Fix add empty local repo [\#815](https://github.com/ZupIT/ritchie-cli/pull/815) ([kaduartur](https://github.com/kaduartur))
+- created rit add workspace command [\#809](https://github.com/ZupIT/ritchie-cli/pull/809) ([aronrichter](https://github.com/aronrichter))
+- Tests on slice [\#808](https://github.com/ZupIT/ritchie-cli/pull/808) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Tests on credential pkg [\#806](https://github.com/ZupIT/ritchie-cli/pull/806) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Improve performance to "rit create formula" command [\#805](https://github.com/ZupIT/ritchie-cli/pull/805) ([kaduartur](https://github.com/kaduartur))
+- New horus pipeline [\#803](https://github.com/ZupIT/ritchie-cli/pull/803) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Release 2.6.0 merge [\#778](https://github.com/ZupIT/ritchie-cli/pull/778) ([zup-ci](https://github.com/zup-ci))
+- Performance new tree struct [\#768](https://github.com/ZupIT/ritchie-cli/pull/768) ([kaduartur](https://github.com/kaduartur))
+
 ## [2.6.0](https://github.com/zupit/ritchie-cli/tree/2.6.0) (2020-12-14)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.5.0...2.6.0)
@@ -98,7 +131,6 @@
 **Merged pull requests:**
 
 - Fix update repo when all option selected [\#700](https://github.com/ZupIT/ritchie-cli/pull/700) ([brunasilvazup](https://github.com/brunasilvazup))
-- Convert contexts to envs file [\#697](https://github.com/ZupIT/ritchie-cli/pull/697) ([kaduartur](https://github.com/kaduartur))
 - fix: add check for variables with the same name [\#693](https://github.com/ZupIT/ritchie-cli/pull/693) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Kill bill\(d\) [\#692](https://github.com/ZupIT/ritchie-cli/pull/692) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - update horus url [\#690](https://github.com/ZupIT/ritchie-cli/pull/690) ([victorschumacherzup](https://github.com/victorschumacherzup))
@@ -448,7 +480,6 @@
 
 - \[FIX\] Add repo with the commons name [\#361](https://github.com/ZupIT/ritchie-cli/pull/361) ([kaduartur](https://github.com/kaduartur))
 - \[Feature\] Add hooks in packagings [\#359](https://github.com/ZupIT/ritchie-cli/pull/359) ([ernelio](https://github.com/ernelio))
-- Release 2.0.0 merge [\#358](https://github.com/ZupIT/ritchie-cli/pull/358) ([zup-ci](https://github.com/zup-ci))
 
 ## [2.0.0](https://github.com/zupit/ritchie-cli/tree/2.0.0) (2020-08-05)
 
@@ -466,6 +497,7 @@
 
 **Merged pull requests:**
 
+- Release 2.0.0 merge [\#358](https://github.com/ZupIT/ritchie-cli/pull/358) ([zup-ci](https://github.com/zup-ci))
 - \[Fix\] lint [\#357](https://github.com/ZupIT/ritchie-cli/pull/357) ([kaduartur](https://github.com/kaduartur))
 - \[FIX\] init warning msg [\#355](https://github.com/ZupIT/ritchie-cli/pull/355) ([kaduartur](https://github.com/kaduartur))
 - Fix notice [\#354](https://github.com/ZupIT/ritchie-cli/pull/354) ([brunats](https://github.com/brunats))

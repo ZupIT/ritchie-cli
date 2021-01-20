@@ -25,6 +25,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+var ErrInvalidRepo = errors.New("the selected repository has no formulas")
+
 type AddManager struct {
 	ritHome string
 	repo    formula.RepositoryListWriteCreator
@@ -61,6 +63,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		return err
 	}
 
+	repo.TreeVersion = "v2"
 	repos = setPriority(repo, repos)
 
 	if err := ad.repo.Write(repos); err != nil {
@@ -81,11 +84,8 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 		return err
 	}
 
-	if len(tree.Commands) == 0 {
-		if err := ad.deleter.Delete(repo.Name); err != nil {
-			return err
-		}
-		return errors.New("the selected repository has no formulas")
+	if err := ad.isValidRepo(repo, tree); err != nil {
+		return err
 	}
 
 	treeFilePath := filepath.Join(newRepoPath, "tree.json")
@@ -98,6 +98,16 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 		return err
 	}
 
+	return nil
+}
+
+func (ad AddManager) isValidRepo(repo formula.Repo, tree formula.Tree) error {
+	if len(tree.Commands) == 0 && !repo.IsLocal {
+		if err := ad.deleter.Delete(repo.Name); err != nil {
+			return err
+		}
+		return ErrInvalidRepo
+	}
 	return nil
 }
 

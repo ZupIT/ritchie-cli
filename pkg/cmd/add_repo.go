@@ -23,6 +23,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -211,9 +212,26 @@ func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
-		ad.tree.Check()
+		conflictCmds := ad.tree.Check()
+
+		printConflictingCommandsWarning(conflictCmds)
+
 		return nil
 	}
+}
+
+func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
+	if len(conflictingCommands) <= 0 {
+		return
+	}
+
+	lastCommandIndex := len(conflictingCommands) - 1
+	lastCommand := conflictingCommands[lastCommandIndex].String()
+	lastCommand = strings.Replace(lastCommand, "root", "rit", 1)
+	lastCommand = strings.ReplaceAll(lastCommand, "_", " ")
+	msg := fmt.Sprintf("There's a total of %d formula conflicting commands, like:\n %s", len(conflictingCommands), lastCommand)
+	msg = prompt.Yellow(msg)
+	fmt.Println(msg)
 }
 
 func (ad addRepoCmd) runStdin() CommandRunnerFunc {
