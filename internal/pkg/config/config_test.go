@@ -60,7 +60,7 @@ func TestWrite(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config := NewLanguageManager(tt.in.ritHome)
+			config := NewManager(tt.in.ritHome)
 
 			got := config.Write(tt.in.configs)
 			if tt.want != nil {
@@ -126,7 +126,7 @@ func TestRead(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config := NewLanguageManager(tt.in.ritHome)
+			config := NewManager(tt.in.ritHome)
 			if tt.in.configs != nil {
 				_ = config.Write(*tt.in.configs)
 			}

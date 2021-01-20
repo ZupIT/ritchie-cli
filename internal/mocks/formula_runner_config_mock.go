@@ -14,45 +14,24 @@
  * limitations under the License.
  */
 
-package prompt
+package mocks
 
 import (
-	"github.com/AlecAivazis/survey/v2"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-var (
-	boolOpts = map[string]bool{
-		"yes":   true,
-		"no":    false,
-		"true":  true,
-		"false": false,
-		"Yes":   true,
-		"False": false,
-		"✅ Yes": true,
-		"❌ No":  false,
-	}
-)
-
-type SurveyBool struct{}
-
-func NewSurveyBool() SurveyBool {
-	return SurveyBool{}
+type ConfigRunnerMock struct {
+	mock.Mock
 }
 
-func (SurveyBool) Bool(name string, items []string, helper ...string) (bool, error) {
-	choice := ""
-	prompt := &survey.Select{
-		Message: name,
-		Options: items,
-	}
+func (c *ConfigRunnerMock) Create(runType formula.RunnerType) error {
+	args := c.Called(runType)
+	return args.Error(0)
+}
 
-	if len(helper) > 0 {
-		prompt.Help = helper[0]
-	}
-
-	if err := survey.AskOne(prompt, &choice); err != nil {
-		return false, err
-	}
-
-	return boolOpts[choice], nil
+func (c *ConfigRunnerMock) Find() (formula.RunnerType, error) {
+	args := c.Called()
+	return args.Get(0).(formula.RunnerType), args.Error(1)
 }

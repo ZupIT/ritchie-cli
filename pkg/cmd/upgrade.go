@@ -35,7 +35,7 @@ type UpgradeCmd struct {
 	upgrade.Manager
 	resolver version.Resolver
 	upgrade.UrlFinder
-	input  prompt.InputList
+	input  prompt.InputBool
 	file   stream.FileWriteReadExister
 	github git.Repositories
 }
@@ -44,7 +44,7 @@ func NewUpgradeCmd(
 	r version.Resolver,
 	m upgrade.Manager,
 	uf upgrade.UrlFinder,
-	input prompt.InputList,
+	input prompt.InputBool,
 	file stream.FileWriteReadExister,
 	github git.Repositories,
 ) *cobra.Command {
@@ -70,15 +70,17 @@ func NewUpgradeCmd(
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if !u.file.Exists(metric.FilePath) {
+			prompt.Info("📊 Metrics 📊\n")
+			fmt.Println(AddMetricsQuestion)
 
-			options := []string{AcceptMetrics, DoNotAcceptMetrics}
-			choose, err := u.input.List(AddMetricsQuestion, options)
+			options := []string{AcceptOpt, DeclineOpt}
+			choose, err := u.input.Bool("Do you agree?", options)
 			if err != nil {
 				return err
 			}
 
 			responseToWrite := "yes"
-			if choose == DoNotAcceptMetrics {
+			if !choose {
 				responseToWrite = "no"
 			}
 

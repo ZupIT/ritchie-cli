@@ -25,6 +25,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	"github.com/ZupIT/ritchie-cli/internal/pkg/i18n"
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 const File = "configs.toml"
@@ -38,16 +39,17 @@ type Writer interface {
 }
 
 type Configs struct {
-	Language i18n.Lang `toml:"language"`
-	Tutorial string    `toml:"tutorial"`
-	Metrics  string    `toml:"metrics"`
+	Language i18n.Lang          `toml:"language"`
+	Tutorial string             `toml:"tutorial"`
+	Metrics  string             `toml:"metrics"`
+	RunType  formula.RunnerType `toml:"runType"`
 }
 
 type Manager struct {
 	configsPath string
 }
 
-func NewLanguageManager(ritHome string) Manager {
+func NewManager(ritHome string) Manager {
 	return Manager{
 		configsPath: filepath.Join(ritHome, File),
 	}

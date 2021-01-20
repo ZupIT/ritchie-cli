@@ -70,7 +70,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 		resolver  version.Resolver
 		Manager   upgrade.Manager
 		UrlFinder upgrade.UrlFinder
-		input     prompt.InputList
+		input     prompt.InputBool
 		file      stream.FileWriteReadExister
 		tag       git.Tag
 	}
@@ -238,9 +238,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 						return nil
 					},
 				},
-				input: inputListCustomMock{func(name string, items []string) (string, error) {
-					return DoNotAcceptMetrics, nil
-				}},
+				input: inputTrueMock{},
 			},
 			wantErr: false,
 		},
@@ -270,7 +268,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 						return false
 					},
 				},
-				input: inputListErrorMock{},
+				input: inputBoolErrorMock{},
 			},
 			wantErr: true,
 		},
@@ -303,7 +301,7 @@ func TestUpgradeCmd_runFunc(t *testing.T) {
 						return errors.New("error writing file")
 					},
 				},
-				input: inputListMock{},
+				input: inputFalseMock{},
 			},
 			wantErr: true,
 		},
