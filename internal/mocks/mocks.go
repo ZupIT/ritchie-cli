@@ -93,7 +93,6 @@ type InputURLMock struct {
 
 func (i *InputURLMock) URL(name, defaultValue string) (string, error) {
 	args := i.Called(name, defaultValue)
-
 	return args.String(0), args.Error(1)
 }
 

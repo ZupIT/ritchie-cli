@@ -212,7 +212,8 @@ func Build() *cobra.Command {
 		inputText,
 		inputBool,
 		inputList,
-		inputPassword)
+		inputPassword,
+	)
 	listCredentialCmd := cmd.NewListCredentialCmd(credSettings)
 	deleteCredentialCmd := cmd.NewDeleteCredentialCmd(
 		credDeleter,
