@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -27,7 +28,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+)
+
+const (
+	nameFlagName = "name"
 )
 
 var ErrEmptyWorkspaces = errors.New("there are no workspaces to delete")
@@ -36,16 +40,23 @@ type deleteWorkspaceCmd struct {
 	userHomeDir string
 	workspace   formula.WorkspaceListDeleter
 	repo        formula.RepositoryDeleter
-	dir         stream.DirChecker
 	inList      prompt.InputList
 	inBool      prompt.InputBool
+}
+
+var deleteWorkspaceFlags = flags{
+	{
+		name:        nameFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "workspace name",
+	},
 }
 
 func NewDeleteWorkspaceCmd(
 	userHomeDir string,
 	workspace formula.WorkspaceListDeleter,
 	repo formula.RepositoryDeleter,
-	dir stream.DirChecker,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
 ) *cobra.Command {
@@ -53,7 +64,6 @@ func NewDeleteWorkspaceCmd(
 		userHomeDir: userHomeDir,
 		workspace:   workspace,
 		repo:        repo,
-		dir:         dir,
 		inList:      inList,
 		inBool:      inBool,
 	}
@@ -62,57 +72,93 @@ func NewDeleteWorkspaceCmd(
 		Use:     "workspace",
 		Short:   "Delete a workspace",
 		Example: "rit delete workspace",
-		RunE:    d.runPrompt(),
+		RunE:    d.runFormula(),
 	}
+
+	addReservedFlags(cmd.Flags(), deleteWorkspaceFlags)
 
 	return cmd
 }
 
-func (d deleteWorkspaceCmd) runPrompt() CommandRunnerFunc {
+func (d *deleteWorkspaceCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		workspaces, err := d.workspace.List()
+		workspace, err := d.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
 
-		defaultWorkspace := filepath.Join(d.userHomeDir, formula.DefaultWorkspaceDir)
-		if d.dir.Exists(defaultWorkspace) {
-			workspaces[formula.DefaultWorkspaceName] = defaultWorkspace
-		}
-
-		if len(workspaces) == 0 {
-			return ErrEmptyWorkspaces
-		}
-
-		wspace, err := WorkspaceListInput(workspaces, d.inList)
-		if err != nil {
-			return err
-		}
-
-		question := fmt.Sprintf("Are you sure you want to delete the workspace: rit %s", wspace.Dir)
-		ans, err := d.inBool.Bool(question, []string{"no", "yes"})
-		if err != nil {
-			return err
-		}
-		if !ans {
-			return nil
-		}
-
-		repoLocalName := repoutil.LocalName(wspace.Name)
+		repoLocalName := repoutil.LocalName(workspace.Name)
 		if err := d.repo.Delete(repoLocalName); err != nil {
 			return err
 		}
 
-		if wspace.Dir != defaultWorkspace {
-			if err := d.workspace.Delete(wspace); err != nil {
-				return err
-			}
+		if workspace.Name == formula.DefaultWorkspaceName {
+			return errors.New("cannot delete default workspace")
+		}
+
+		if err := d.workspace.Delete(workspace); err != nil {
+			return err
 		}
 
 		prompt.Success("Workspace successfully deleted!")
 
 		return nil
 	}
+}
+
+func (d *deleteWorkspaceCmd) resolveInput(cmd *cobra.Command) (formula.Workspace, error) {
+	if IsFlagInput(cmd) {
+		return d.resolveFlags(cmd)
+	}
+	return d.resolvePrompt()
+}
+
+func (d *deleteWorkspaceCmd) resolvePrompt() (formula.Workspace, error) {
+	workspaces, err := d.workspace.List()
+	if err != nil {
+		return formula.Workspace{}, err
+	}
+
+	if len(workspaces) == 0 {
+		return formula.Workspace{}, ErrEmptyWorkspaces
+	}
+
+	wspace, err := WorkspaceListInput(workspaces, d.inList)
+	if err != nil {
+		return formula.Workspace{}, err
+	}
+
+	question := fmt.Sprintf("Are you sure you want to delete the workspace: rit %s", wspace.Dir)
+	ans, err := d.inBool.Bool(question, []string{"no", "yes"})
+	if err != nil {
+		return formula.Workspace{}, err
+	}
+	if !ans {
+		return formula.Workspace{}, nil
+	}
+	return wspace, nil
+}
+
+func (d *deleteWorkspaceCmd) resolveFlags(cmd *cobra.Command) (formula.Workspace, error) {
+	name, err := cmd.Flags().GetString(nameFlagName)
+	if err != nil {
+		return formula.Workspace{}, err
+	} else if name == "" {
+		return formula.Workspace{}, errors.New("please provide a value for 'name'")
+	}
+
+	workspaces, err := d.workspace.List()
+	workspaces[formula.DefaultWorkspaceName] = filepath.Join(d.userHomeDir, formula.DefaultWorkspaceDir)
+	if err != nil {
+		return formula.Workspace{}, err
+	}
+	for workspaceName, path := range workspaces {
+		if workspaceName == name {
+			return formula.Workspace{Name: workspaceName, Dir: path}, nil
+		}
+	}
+
+	return formula.Workspace{}, errors.New("no workspace found with this name")
 }
 
 func WorkspaceListInput(
