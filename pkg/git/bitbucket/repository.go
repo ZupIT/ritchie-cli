@@ -46,16 +46,7 @@ func NewRepoManager(client *http.Client) RepoManager {
 
 func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	zipUrl := info.ZipUrl(version)
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, zipUrl, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if info.Token() != "" {
-		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
-	}
-
-	res, err := re.client.Do(req)
+	res, err := re.performRequest(info, zipUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -71,16 +62,7 @@ func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser,
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiUrl := info.TagsUrl()
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, apiUrl, nil)
-	if err != nil {
-		return git.Tags{}, err
-	}
-
-	if info.Token() != "" {
-		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
-	}
-
-	res, err := re.client.Do(req)
+	res, err := re.performRequest(info, apiUrl)
 	if err != nil {
 		return git.Tags{}, err
 	}
@@ -108,16 +90,7 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	apiUrl := info.LatestTagUrl()
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, apiUrl, nil)
-	if err != nil {
-		return git.Tag{}, err
-	}
-
-	if info.Token() != "" {
-		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
-	}
-
-	res, err := re.client.Do(req)
+	res, err := re.performRequest(info, apiUrl)
 	if err != nil {
 		return git.Tag{}, err
 	}
@@ -141,4 +114,22 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	latestTag := git.Tag{Name: bTags.Values[len(bTags.Values)-1].Name}
 
 	return latestTag, nil
+}
+
+func (re RepoManager) performRequest(info git.RepoInfo, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if info.Token() != "" {
+		req.Header.Add(headers.Authorization, fmt.Sprintf("Bearer %s", info.Token()))
+	}
+
+	res, err := re.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

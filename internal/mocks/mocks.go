@@ -381,32 +381,3 @@ func (w *WorkspaceMock) List() (formula.Workspaces, error) {
 	args := w.Called()
 	return args.Get(0).(formula.Workspaces), args.Error(1)
 }
-
-type RepoInfo struct {
-	mock.Mock
-}
-
-func (ri *RepoInfo) ZipUrl(version string) string {
-	args := ri.Called(version)
-	return args.String(0)
-}
-
-func (ri *RepoInfo) TagsUrl() string {
-	args := ri.Called()
-	return args.String(0)
-}
-
-func (ri *RepoInfo) LatestTagUrl() string {
-	args := ri.Called()
-	return args.String(0)
-}
-
-func (ri *RepoInfo) TokenHeader() string {
-	args := ri.Called()
-	return args.String(0)
-}
-
-func (ri *RepoInfo) Token() string {
-	args := ri.Called()
-	return args.String(0)
-}
