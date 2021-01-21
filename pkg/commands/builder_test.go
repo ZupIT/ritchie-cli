@@ -19,8 +19,9 @@ package commands
 import (
 	"bytes"
 	"io/ioutil"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuild(t *testing.T) {
@@ -29,16 +30,13 @@ func TestBuild(t *testing.T) {
 		b := bytes.NewBufferString("")
 		cmd.SetArgs([]string{"--version"})
 		cmd.SetOut(b)
-		if err := cmd.Execute(); err != nil {
-			t.Fatal(err)
-		}
+		err := cmd.Execute()
+		assert.NoError(t, err)
+
 		out, err := ioutil.ReadAll(b)
-		if err != nil {
-			t.Fatal(err)
-		}
+		assert.NoError(t, err)
+
 		outString := string(out)
-		if !strings.Contains(outString, "rit version") {
-			t.Fatalf("expected \"%s\" got \"%s\"", "rit version", outString)
-		}
+		assert.Contains(t, outString, "rit version")
 	})
 }
