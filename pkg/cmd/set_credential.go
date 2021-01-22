@@ -17,8 +17,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -26,28 +28,50 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+)
+
+const (
+	fieldsFlagName = "fields"
+	valuesFlagName = "values"
 )
 
 var inputTypes = []string{"plain text", "secret"}
-var inputWay = []string{"type", "file"}
 
 // setCredentialCmd type for set credential command.
 type setCredentialCmd struct {
 	credential.Setter
 	credential.ReaderWriterPather
-	stream.FileReadExister
 	prompt.InputText
 	prompt.InputBool
 	prompt.InputList
 	prompt.InputPassword
 }
 
+var setCredentialFlags = flags{
+	{
+		name:        providerFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "provider name (i.e.: github)",
+	},
+	{
+		name:        fieldsFlagName,
+		kind:        reflect.Slice,
+		defValue:    "",
+		description: "comma separated list of field names",
+	},
+	{
+		name:        valuesFlagName,
+		kind:        reflect.Slice,
+		defValue:    "",
+		description: "comma separated list of field values",
+	},
+}
+
 // NewSetCredentialCmd creates a new cmd instance.
 func NewSetCredentialCmd(
 	credSetter credential.Setter,
 	credFile credential.ReaderWriterPather,
-	file stream.FileReadExister,
 	inText prompt.InputText,
 	inBool prompt.InputBool,
 	inList prompt.InputList,
@@ -56,7 +80,6 @@ func NewSetCredentialCmd(
 	s := &setCredentialCmd{
 		Setter:             credSetter,
 		ReaderWriterPather: credFile,
-		FileReadExister:    file,
 		InputText:          inText,
 		InputBool:          inBool,
 		InputList:          inList,
@@ -67,17 +90,19 @@ func NewSetCredentialCmd(
 		Use:       "credential",
 		Short:     "Set credential",
 		Long:      `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		RunE:      RunFuncE(s.runStdin(), s.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
-	cmd.LocalFlags()
+
+	addReservedFlags(cmd.Flags(), setCredentialFlags)
+
 	return cmd
 }
 
-func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
+func (s setCredentialCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		cred, err := s.prompt()
+		cred, err := s.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
@@ -92,7 +117,14 @@ func (s setCredentialCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (s setCredentialCmd) prompt() (credential.Detail, error) {
+func (s *setCredentialCmd) resolveInput(cmd *cobra.Command) (credential.Detail, error) {
+	if IsFlagInput(cmd) {
+		return s.resolveFlags(cmd)
+	}
+	return s.resolvePrompt()
+}
+
+func (s *setCredentialCmd) resolvePrompt() (credential.Detail, error) {
 	if err := s.WriteDefaultCredentialsFields(s.ProviderPath()); err != nil {
 		return credential.Detail{}, err
 	}
@@ -147,48 +179,60 @@ func (s setCredentialCmd) prompt() (credential.Detail, error) {
 
 	inputs := credentials[providerChoose]
 
-	inputWayChoose, _ := s.List("Want to enter your credential typing or through a file?", inputWay)
 	for _, i := range inputs {
 		var value string
-		if inputWayChoose == inputWay[1] {
-			path, err := s.Text("Enter the credential file path for "+prompt.Cyan(i.Name)+":", true)
+		if i.Type == inputTypes[1] {
+			value, err = s.Password(i.Name + ":")
 			if err != nil {
-				return credential.Detail{}, err
+				return credDetail, err
 			}
-
-			if !s.FileReadExister.Exists(path) {
-				return credDetail, prompt.NewError("Cannot find any credential file at " + path)
-			}
-
-			byteValue, err := s.FileReadExister.Read(path)
-			if err != nil {
-				return credential.Detail{}, err
-			}
-			if len(byteValue) == 0 {
-				return credential.Detail{}, prompt.NewError("Empty credential file!")
-			}
-
-			cred[i.Name] = string(byteValue)
-
 		} else {
-			if i.Type == inputTypes[1] {
-				value, err = s.Password(i.Name + ":")
-				if err != nil {
-					return credDetail, err
-				}
-			} else {
-				value, err = s.Text(i.Name+":", true)
-				if err != nil {
-					return credDetail, err
-				}
+			value, err = s.Text(i.Name+":", true)
+			if err != nil {
+				return credDetail, err
 			}
-			cred[i.Name] = value
 		}
+		cred[i.Name] = value
 	}
 	credDetail.Service = providerChoose
 	credDetail.Credential = cred
 
 	return credDetail, nil
+}
+
+func (s *setCredentialCmd) resolveFlags(cmd *cobra.Command) (credential.Detail, error) {
+	provider, err := cmd.Flags().GetString(providerFlagName)
+	if err != nil || provider == "" {
+		return credential.Detail{}, errors.New("please provide a value for 'provider'")
+	}
+
+	fields, err := cmd.Flags().GetStringSlice(fieldsFlagName)
+	if err != nil {
+		return credential.Detail{}, err
+	} else if len(fields) == 0 {
+		return credential.Detail{}, errors.New("please provide a value for 'fields'")
+	}
+
+	values, err := cmd.Flags().GetStringSlice(valuesFlagName)
+	if err != nil {
+		return credential.Detail{}, err
+	} else if len(values) == 0 {
+		return credential.Detail{}, errors.New("please provide a value for 'values'")
+	}
+
+	if len(fields) != len(values) {
+		return credential.Detail{}, errors.New("number of fields does not match with number of values")
+	}
+
+	credentialMap := make(map[string]string)
+	for i := 0; i < len(fields); i++ {
+		credentialMap[fields[i]] = values[i]
+	}
+
+	return credential.Detail{
+		Service:    provider,
+		Credential: credentialMap,
+	}, nil
 }
 
 func (s setCredentialCmd) runStdin() CommandRunnerFunc {
