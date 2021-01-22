@@ -40,7 +40,6 @@ type preRunBuilderTest struct {
 	listError         error
 
 	errExpected error
-	mustBuild   bool
 }
 
 var preRunBuilderTests = []preRunBuilderTest{
@@ -62,7 +61,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		errExpected: errors.New("Failed to detect formula changes, executing the last build: Failed to save hash"),
 	},
 	{
-		name: "return nil when when no workspaces are returned",
+		name: "return nil when no workspaces are returned",
 
 		workspaces:   map[string]string{},
 		currentHash:  "hash",
@@ -100,8 +99,6 @@ var preRunBuilderTests = []preRunBuilderTest{
 		workspaces:   map[string]string{"default": "/pathtodefault"},
 		currentHash:  "hashtwo",
 		previousHash: "hash",
-
-		mustBuild: true,
 	},
 	{
 		name: "returns error when list workspace returns error",
