@@ -17,11 +17,11 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
@@ -44,24 +44,24 @@ func NewPreRunBuilder(
 	}
 }
 
-func (b PreRunBuilderManager) Build(relativePath string) {
+func (b PreRunBuilderManager) Build(relativePath string) error {
 	workspace, err := b.modifiedWorkspace(relativePath)
 	if err != nil {
 		msg := fmt.Sprintf(messageChangeError, err.Error())
-		fmt.Println(prompt.Yellow(msg))
-		return
+		return errors.New(msg)
 	}
 
 	// No modifications on any workspace, skip
 	if workspace == nil {
-		return
+		return nil
 	}
 
 	if err = b.buildOnWorkspace(*workspace, relativePath); err != nil {
 		msg := fmt.Sprintf(messageBuildError, err.Error())
-		fmt.Println(prompt.Red(msg))
-		return
+		return errors.New(msg)
 	}
+
+	return nil
 }
 
 func (b PreRunBuilderManager) modifiedWorkspace(relativePath string) (*formula.Workspace, error) {

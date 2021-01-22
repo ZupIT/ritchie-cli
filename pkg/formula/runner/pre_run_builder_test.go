@@ -17,9 +17,8 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
@@ -39,7 +38,7 @@ type preRunBuilderTest struct {
 	writeHashError    error
 	builderError      error
 
-	errExpected string
+	errExpected error
 	mustBuild   bool
 }
 
@@ -66,7 +65,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		previousHashError: nil,
 		writeHashError:    fmt.Errorf("Failed to save hash"),
 
-		errExpected: "Failed to detect formula changes, executing the last build: Failed to save hash",
+		errExpected: errors.New("Failed to detect formula changes, executing the last build: Failed to save hash"),
 		mustBuild:   false,
 	},
 	{
@@ -116,7 +115,7 @@ var preRunBuilderTests = []preRunBuilderTest{
 		writeHashError:    nil,
 		builderError:      fmt.Errorf("Some error"),
 
-		errExpected: "Failed to build formula: Some error",
+		errExpected: errors.New("Failed to build formula: Some error"),
 		mustBuild:   false,
 	},
 }
@@ -128,10 +127,6 @@ func TestPreRunBuilder(t *testing.T) {
 			builderMock.On("Build", mock.Anything).Return(test.builderError)
 			builderMock.On("HasBuilt", mock.Anything).Return(false)
 
-			rescueStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
 			preRunBuilder := NewPreRunBuilder(
 				workspaceListHasherMock{
 					test.workspaces,
@@ -141,15 +136,12 @@ func TestPreRunBuilder(t *testing.T) {
 					test.previousHashError,
 					test.writeHashError,
 				}, builderMock)
-			preRunBuilder.Build("/testing/formula")
 
-			_ = w.Close()
-			out, _ := ioutil.ReadAll(r)
-			os.Stdout = rescueStdout
+			got := preRunBuilder.Build("/testing/formula")
+			assert.Equal(t, test.errExpected, got)
 
 			gotBuilt := builderMock.HasBuilt()
 			assert.Equal(t, test.mustBuild, gotBuilt)
-			assert.Contains(t, string(out), test.errExpected)
 		})
 	}
 }
