@@ -131,7 +131,11 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 func TestManagerDelete(t *testing.T) {
 	cleanForm()
 	fullDir := createFullDir()
-	tmpDir := os.TempDir()
+
+	tmpDir := path.Join(os.TempDir(), "workspace-delete")
+	_ = os.Mkdir(tmpDir, os.ModePerm)
+	defer os.RemoveAll(tmpDir)
+
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	fileNonExistentPath := path.Join(tmpDir, "non-existent")
 	dirManager := stream.NewDirManager(stream.NewFileManager())
@@ -201,7 +205,10 @@ func TestManagerDelete(t *testing.T) {
 }
 
 func TestManagerList(t *testing.T) {
-	tmpDir := os.TempDir()
+	tmpDir := path.Join(os.TempDir(), "workspace-list")
+	_ = os.Mkdir(tmpDir, os.ModePerm)
+	defer os.RemoveAll(tmpDir)
+
 	dirManager := stream.NewDirManager(stream.NewFileManager())
 
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
