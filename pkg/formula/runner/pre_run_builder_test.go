@@ -37,6 +37,7 @@ type preRunBuilderTest struct {
 	previousHashError error
 	writeHashError    error
 	builderError      error
+	listError         error
 
 	errExpected error
 	mustBuild   bool
@@ -46,77 +47,71 @@ var preRunBuilderTests = []preRunBuilderTest{
 	{
 		name: "should not prompt for rebuild when hash is the same",
 
-		workspaces:        map[string]string{"default": "/pathtodefault"},
-		currentHash:       "hash",
-		previousHash:      "hash",
-		currentHashError:  nil,
-		previousHashError: nil,
-		writeHashError:    nil,
-
-		mustBuild: false,
+		workspaces:   map[string]string{"default": "/pathtodefault"},
+		currentHash:  "hash",
+		previousHash: "hash",
 	},
 	{
-		name: "should not prompt for rebuild when hash fails to save",
+		name: "return error when hash fails to save",
 
-		workspaces:        map[string]string{"default": "/pathtodefault"},
-		currentHash:       "hash",
-		previousHash:      "anotherhash",
-		currentHashError:  nil,
-		previousHashError: nil,
-		writeHashError:    fmt.Errorf("Failed to save hash"),
+		workspaces:     map[string]string{"default": "/pathtodefault"},
+		currentHash:    "hash",
+		previousHash:   "anotherhash",
+		writeHashError: fmt.Errorf("Failed to save hash"),
 
 		errExpected: errors.New("Failed to detect formula changes, executing the last build: Failed to save hash"),
-		mustBuild:   false,
 	},
 	{
-		name: "should not prompt to rebuild nor fail when no workspaces are returned",
+		name: "return nil when when no workspaces are returned",
 
-		workspaces:        map[string]string{},
-		currentHash:       "hash",
-		previousHash:      "anotherhash",
-		currentHashError:  nil,
-		previousHashError: nil,
-		writeHashError:    nil,
-
-		mustBuild: false,
+		workspaces:   map[string]string{},
+		currentHash:  "hash",
+		previousHash: "anotherhash",
 	},
 	{
-		name: "should not prompt to build when the formula doesn't exist on any workspace",
+		name: "return nil when the formula doesn't exist on any workspace",
 
-		workspaces:        map[string]string{"default": "/pathtodefault"},
-		currentHash:       "",
-		previousHash:      "hash",
-		currentHashError:  fmt.Errorf("Formula doesn't exist here"),
-		previousHashError: nil,
-		writeHashError:    nil,
-
-		mustBuild: false,
+		workspaces:       map[string]string{"default": "/pathtodefault"},
+		currentHash:      "",
+		previousHash:     "hash",
+		currentHashError: fmt.Errorf("Formula doesn't exist here"),
 	},
 	{
-		name: "should not prompt to build when no previous hash exists",
+		name: "return nil when no previous hash exists",
 
 		workspaces:        map[string]string{"default": "/pathtodefault"},
 		currentHash:       "hash",
 		previousHash:      "",
-		currentHashError:  nil,
 		previousHashError: fmt.Errorf("No previous hash"),
-		writeHashError:    nil,
-
-		mustBuild: false,
 	},
 	{
-		name: "should not prompt to build when build workspace returns error",
+		name: "return error when build workspace returns error",
 
-		workspaces:        map[string]string{"default": "/pathtodefault"},
-		currentHash:       "hashtwo",
-		previousHash:      "hash",
-		currentHashError:  nil,
-		previousHashError: nil,
-		writeHashError:    nil,
-		builderError:      fmt.Errorf("Some error"),
+		workspaces:   map[string]string{"default": "/pathtodefault"},
+		currentHash:  "hashtwo",
+		previousHash: "hash",
+		builderError: fmt.Errorf("Some error builder"),
 
-		errExpected: errors.New("Failed to build formula: Some error"),
-		mustBuild:   false,
+		errExpected: errors.New("Failed to build formula: Some error builder"),
+	},
+	{
+		name: "returns null when routine runs without errors",
+
+		workspaces:   map[string]string{"default": "/pathtodefault"},
+		currentHash:  "hashtwo",
+		previousHash: "hash",
+
+		mustBuild: true,
+	},
+	{
+		name: "returns error when list workspace returns error",
+
+		workspaces:   map[string]string{"default": "/pathtodefault"},
+		currentHash:  "hashtwo",
+		previousHash: "hash",
+		listError:    fmt.Errorf("Some error list"),
+
+		errExpected: errors.New("Failed to detect formula changes, executing the last build: Some error list"),
 	},
 }
 
@@ -128,7 +123,7 @@ func TestPreRunBuilder(t *testing.T) {
 			builderMock.On("HasBuilt", mock.Anything).Return(false)
 
 			workspaceListHasherMock := new(mocks.WorkspaceListHasherMock)
-			workspaceListHasherMock.On("List").Return(test.workspaces, nil)
+			workspaceListHasherMock.On("List").Return(test.workspaces, test.listError)
 			workspaceListHasherMock.On("CurrentHash", mock.Anything).Return(test.currentHash, test.currentHashError)
 			workspaceListHasherMock.On("PreviousHash", mock.Anything).Return(test.previousHash, test.previousHashError)
 			workspaceListHasherMock.On("UpdateHash", mock.Anything, mock.Anything).Return(test.writeHashError)
@@ -137,9 +132,6 @@ func TestPreRunBuilder(t *testing.T) {
 
 			got := preRunBuilder.Build("/testing/formula")
 			assert.Equal(t, test.errExpected, got)
-
-			gotBuilt := builderMock.HasBuilt()
-			assert.Equal(t, test.mustBuild, gotBuilt)
 		})
 	}
 }
