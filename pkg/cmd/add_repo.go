@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -287,6 +288,7 @@ func (ar *addRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repo, error) {
 		}
 	}
 	if !providerValid {
+		sort.Strings(providers)
 		return formula.Repo{}, errors.New("please select a provider from " + strings.Join(providers, ", "))
 	}
 
