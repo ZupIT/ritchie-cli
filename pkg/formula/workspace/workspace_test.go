@@ -263,6 +263,8 @@ func TestPreviousHash(t *testing.T) {
 	dirManager := stream.NewDirManager(stream.NewFileManager())
 	tmpDir := os.TempDir()
 	ritHome := path.Join(tmpDir, ".rit")
+	defer os.RemoveAll(ritHome)
+
 	_ = os.MkdirAll(path.Join(ritHome, "hashes"), os.ModePerm)
 
 	formulaPath := "my/formula"
