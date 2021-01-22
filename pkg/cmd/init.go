@@ -23,10 +23,10 @@ import (
 	"time"
 
 	"github.com/ZupIT/ritchie-cli/internal/pkg/config"
+	"github.com/ZupIT/ritchie-cli/internal/pkg/i18n"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
-	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
@@ -39,44 +39,24 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-const (
-	addRepoMsg                = "Run \"rit add repo\" to add a new repository manually.\n"
-	AddMetricsQuestion        = "To help us improve and deliver more value to the community,\nwe will collect anonymous data about product and feature\nuse statistics and crash reports."
-	AcceptWinOpt              = "Yes"
-	DeclineWinOpt             = "No"
-	LocalRunWinType           = "local"
-	DockerRunWinType          = "docker"
-	AcceptOpt                 = "✅ Yes"
-	DeclineOpt                = "❌ No"
-	LocalRunType              = "🏠 local"
-	DockerRunType             = "🐳 docker"
-	SelectFormulaTypeQuestion = "Select a default formula run type:"
-	AddTheCommunityRepo       = "Would you like to add the community repository?"
-	AgreeSendMetrics          = "Do you agree?"
-	FormulaLocalRunWarning    = `
-In order to run formulas locally, you must have the formula language installed on your machine,
-if you don't want to install choose to run the formulas inside the docker.
-`
-	addRepoInfo = `
-You can keep the configuration without adding the community repository,
-but you will need to provide a git repo with the formulas templates and add them with
-"rit add repo" command, naming this repository obligatorily as "commons".
-
-See how to do this on the example: 
-[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]
-
-`
-	CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
-)
+const CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
 
 var (
-	AcceptDeclineOpts    = []string{AcceptOpt, DeclineOpt}
-	AcceptDeclineWinOpts = []string{AcceptWinOpt, DeclineWinOpt}
-	RunTypes             = []string{LocalRunType, DockerRunType}
-	RunWinTypes          = []string{LocalRunWinType, DockerRunWinType}
-	errMsg               = prompt.Yellow("It was not possible to add the commons repository at this time, please try again later.")
-	ErrInitCommonsRepo   = errors.New(errMsg)
-	ErrInvalidRunType    = fmt.Errorf("invalid formula run type, these run types are enabled [%v]", strings.Join(formula.RunnerTypes, ", "))
+	addRepoInfo               = i18n.T("init.add.commons.repo.info")
+	FormulaLocalRunWarning    = i18n.T("init.run.type.local.warning")
+	AddTheCommunityRepo       = i18n.T("init.add.commons.repo.question")
+	SelectFormulaTypeQuestion = i18n.T("init.run.type.question")
+	AgreeSendMetrics          = i18n.T("init.add.metric.question")
+	addRepoMsg                = i18n.T("init.add.commons.repo.help")
+	AcceptOpt                 = i18n.T("input.accept.opt")
+	DeclineOpt                = i18n.T("input.decline.opt")
+	LocalRunType              = i18n.T("input.run.type.local")
+	DockerRunType             = i18n.T("input.run.type.docker")
+	AcceptDeclineOpts         = []string{AcceptOpt, DeclineOpt}
+	RunTypes                  = []string{LocalRunType, DockerRunType}
+	errMsg                    = prompt.Yellow(i18n.T("init.add.commons.repo.error"))
+	ErrInitCommonsRepo        = errors.New(errMsg)
+	ErrInvalidRunType         = errors.New(i18n.T("init.invalid.run.type.error", strings.Join(formula.RunnerTypes, ", ")))
 )
 
 type initStdin struct {
@@ -122,11 +102,11 @@ func NewInitCmd(
 
 	cmd := &cobra.Command{
 		Use:       "init",
-		Short:     "Initialize rit configuration",
-		Long:      "Initialize rit configuration",
+		Short:     i18n.T("init.cmd.description"),
+		Long:      i18n.T("init.cmd.description"),
 		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
 		ValidArgs: []string{""},
-		// 	Args:      cobra.OnlyValidArgs,
+		Args:      cobra.OnlyValidArgs,
 	}
 
 	return cmd
@@ -201,7 +181,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 				Priority: 0,
 			}
 
-			s := spinner.StartNew("Adding the commons repository...")
+			s := spinner.StartNew(i18n.T("init.adding.commons.repo"))
 
 			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
 			tag, err := in.git.LatestTag(repoInfo)
@@ -264,22 +244,17 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 }
 
 func (in initCmd) metricsAuthorization() (string, error) {
-	header := "📊 Metrics 📊\n"
-	options := AcceptDeclineOpts
-	if osutil.IsWindows() {
-		header = " Metrics \n"
-		options = AcceptDeclineWinOpts
-	}
+	header := i18n.T("init.metric.header")
 
 	prompt.Info(header)
-	fmt.Println(AddMetricsQuestion)
+	fmt.Println(i18n.T("init.add.metric.info"))
 
-	choose, err := in.Bool(AgreeSendMetrics, options)
+	choose, err := in.Bool(AgreeSendMetrics, AcceptDeclineOpts)
 	if err != nil {
 		return "", err
 	}
 
-	const footer = "\nYou can always modify your choice using the \"rit metrics\" command.\n"
+	footer := i18n.T("init.metric.footer")
 	fmt.Println(footer)
 
 	responseToWrite := "yes"
@@ -302,22 +277,17 @@ func (in initCmd) metricsAuthorization() (string, error) {
 }
 
 func (in initCmd) setRunnerType() (formula.RunnerType, error) {
-	header := "🏃 FORMULA RUN TYPE 🏃\n"
-	runTypes := RunTypes
-	if osutil.IsWindows() {
-		header = " FORMULA RUN TYPE \n"
-		runTypes = RunWinTypes
-	}
-
+	header := i18n.T("init.run.type.header")
 	prompt.Info(header)
-	selected, err := in.List(SelectFormulaTypeQuestion, runTypes)
+
+	selected, err := in.List(SelectFormulaTypeQuestion, RunTypes)
 	if err != nil {
 		return formula.DefaultRun, err
 	}
 
 	runType := formula.DefaultRun
-	for i := range runTypes {
-		if runTypes[i] == selected {
+	for i := range RunTypes {
+		if RunTypes[i] == selected {
 			runType = formula.RunnerType(i)
 			break
 		}
@@ -340,15 +310,10 @@ func (in initCmd) setRunnerType() (formula.RunnerType, error) {
 }
 
 func (in initCmd) addCommonsRepo() error {
-	header := "⭐ Commons repository ⭐\n"
-	options := AcceptDeclineOpts
-	if osutil.IsWindows() {
-		header = " Commons repository \n"
-		options = AcceptDeclineWinOpts
-	}
+	header := i18n.T("init.commons.header")
 	prompt.Info(header)
 
-	choose, err := in.Bool(AddTheCommunityRepo, options)
+	choose, err := in.Bool(AddTheCommunityRepo, AcceptDeclineOpts)
 	if err != nil {
 		return err
 	}
@@ -367,7 +332,7 @@ func (in initCmd) addCommonsRepo() error {
 		Priority: 0,
 	}
 
-	s := spinner.StartNew("Adding the commons repository...")
+	s := spinner.StartNew(i18n.T("init.adding.commons.repo"))
 
 	repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
 
@@ -397,24 +362,15 @@ func (in initCmd) tutorialInit() error {
 		return err
 	}
 
-	tagTutorial := "\n📖 TUTORIAL 📖"
-	if osutil.IsWindows() {
-		tagTutorial = "\n TUTORIAL"
-	}
-
-	const MessageTitle = "How to create new formulas:"
-	const MessageBody = `
- ∙ Run "rit create formula"
- ∙ Open the project with your favorite text editor.
-`
-	const MessageCommons = "Take a look at the formulas you can run and" +
-		" test to see what you can with Ritchie using \"rit\"\n"
-
 	if tutorialHolder.Current == tutorialStatusEnabled {
-		prompt.Info(tagTutorial)
-		prompt.Info(MessageTitle)
-		fmt.Println(MessageBody)
-		prompt.Info(MessageCommons)
+		header := i18n.T("init.tutorial.header")
+		title := i18n.T("init.tutorial.title")
+		body := i18n.T("init.tutorial.body")
+		commons := i18n.T("init.tutorial.commons")
+		prompt.Info(header)
+		prompt.Info(title)
+		fmt.Println(body)
+		prompt.Info(commons)
 	}
 
 	return nil
@@ -422,24 +378,13 @@ func (in initCmd) tutorialInit() error {
 
 func (in initCmd) welcome() {
 	const welcome = " _______       _     _             __         _                           ______    _____      _____  \n|_   __ \\     (_)   / |_          [  |       (_)                        .' ___  |  |_   _|    |_   _| \n  | |__) |    __   `| |-'  .---.   | |--.    __    .---.     ______    / .'   \\_|    | |        | |   \n  |  __ /    [  |   | |   / /'`\\]  | .-. |  [  |  / /__\\\\   |______|   | |           | |   _    | |   \n _| |  \\ \\_   | |   | |,  | \\__.   | | | |   | |  | \\__.,              \\ `.___.'\\   _| |__/ |  _| |_  \n|____| |___| [___]  \\__/  '.___.' [___]|__] [___]  '.__.'               `.____ .'  |________| |_____| \n\n"
-	const header = `Ritchie is a platform that helps you and your team to save time by
-giving you the power to create powerful templates to execute important
-tasks across your team and organization with minimum time and with standards,
-delivering autonomy to developers with security.
 
-You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.
-
-`
 	prompt.Info(welcome)
-	fmt.Print(header)
+	fmt.Print(i18n.T("init.welcome"))
 }
 
 func (in initCmd) commonsSuccess(s *spinner.Spinner) {
-	success := "✅ Commons repository added successfully!\n"
-	if osutil.IsWindows() {
-		success = "Commons repository added successfully!\n"
-	}
-
+	success := i18n.T("init.commons.repo.success")
 	s.Success(prompt.Green(success))
 }
 
@@ -450,18 +395,11 @@ func (in initCmd) commonsWarning() {
 }
 
 func (in initCmd) warning() {
-	warningMsg := "\n\t\t\t⚠️  WARNING ⚠️"
-	if osutil.IsWindows() {
-		warningMsg = "\n\t\t\t  WARNING "
-	}
-
+	warningMsg := i18n.T("init.warning")
 	prompt.Warning(warningMsg)
 }
 
 func (in initCmd) initSuccess() {
-	success := "\n✅ Initialization successful!\n"
-	if osutil.IsWindows() {
-		success = "\n Initialization successful!\n"
-	}
+	success := i18n.T("init.successful")
 	prompt.Success(success)
 }

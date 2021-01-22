@@ -24,7 +24,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	"github.com/ZupIT/ritchie-cli/internal/pkg/i18n"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
@@ -39,7 +38,7 @@ type Writer interface {
 }
 
 type Configs struct {
-	Language i18n.Lang          `toml:"language"`
+	Language string             `toml:"language"`
 	Tutorial string             `toml:"tutorial"`
 	Metrics  string             `toml:"metrics"`
 	RunType  formula.RunnerType `toml:"runType"`
@@ -71,10 +70,20 @@ func (m Manager) Write(configs Configs) error {
 }
 
 func (m Manager) Read() (Configs, error) {
-	var configs Configs
-	if _, err := toml.DecodeFile(m.configsPath, &configs); err != nil {
+	c := Configs{
+		Language: "en",
+		Tutorial: "enabled",
+		Metrics:  "yes",
+		RunType:  formula.DockerRun,
+	}
+
+	if _, err := os.Stat(m.configsPath); os.IsNotExist(err) {
+		return c, nil
+	}
+
+	if _, err := toml.DecodeFile(m.configsPath, &c); err != nil {
 		return Configs{}, err
 	}
 
-	return configs, nil
+	return c, nil
 }

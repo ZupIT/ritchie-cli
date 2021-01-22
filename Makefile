@@ -36,7 +36,7 @@ build-linux:
 	mkdir -p $(DIST_LINUX)
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_BUILD) -ldflags $(BUILD_ENVS) -o ./$(DIST_LINUX)/$(BINARY_NAME) -v $(CMD_PATH)
 
-build-mac:
+build-mac:generate-translation
 	mkdir -p $(DIST_MAC)
 	GOOS=darwin GOARCH=amd64 $(GO_BUILD) -ldflags $(BUILD_ENVS) -o ./$(DIST_MAC)/$(BINARY_NAME) -v $(CMD_PATH)
 
@@ -170,5 +170,6 @@ else
 endif
 
 generate-translation:
-	go get -u github.com/go-bindata/go-bindata/...
-	~/go/bin/go-bindata -o ./internal/pkg/i18n/translations.go ./resources/i18n/...
+	go get github.com/go-bindata/go-bindata/v3/...
+	~/go/bin/go-bindata -pkg i18n -o ./internal/pkg/i18n/translations.go ./resources/i18n/...
+	go mod tidy

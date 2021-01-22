@@ -30,6 +30,8 @@ github.com/docker/spdystream/spdy
 # github.com/fatih/color v1.9.0
 ## explicit
 github.com/fatih/color
+# github.com/go-bindata/go-bindata/v3 v3.1.3
+## explicit
 # github.com/gogo/protobuf v1.3.1
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
