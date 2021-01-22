@@ -127,15 +127,13 @@ func TestPreRunBuilder(t *testing.T) {
 			builderMock.On("Build", mock.Anything).Return(test.builderError)
 			builderMock.On("HasBuilt", mock.Anything).Return(false)
 
-			preRunBuilder := NewPreRunBuilder(
-				workspaceListHasherMock{
-					test.workspaces,
-					test.currentHash,
-					test.currentHashError,
-					test.previousHash,
-					test.previousHashError,
-					test.writeHashError,
-				}, builderMock)
+			workspaceListHasherMock := new(mocks.WorkspaceListHasherMock)
+			workspaceListHasherMock.On("List").Return(test.workspaces, nil)
+			workspaceListHasherMock.On("CurrentHash", mock.Anything).Return(test.currentHash, test.currentHashError)
+			workspaceListHasherMock.On("PreviousHash", mock.Anything).Return(test.previousHash, test.previousHashError)
+			workspaceListHasherMock.On("UpdateHash", mock.Anything, mock.Anything).Return(test.writeHashError)
+
+			preRunBuilder := NewPreRunBuilder(workspaceListHasherMock, builderMock)
 
 			got := preRunBuilder.Build("/testing/formula")
 			assert.Equal(t, test.errExpected, got)
@@ -144,29 +142,4 @@ func TestPreRunBuilder(t *testing.T) {
 			assert.Equal(t, test.mustBuild, gotBuilt)
 		})
 	}
-}
-
-type workspaceListHasherMock struct {
-	workspaces        formula.Workspaces
-	currentHash       string
-	currentHashError  error
-	previousHash      string
-	previousHashError error
-	updateHashError   error
-}
-
-func (wm workspaceListHasherMock) List() (formula.Workspaces, error) {
-	return wm.workspaces, nil
-}
-
-func (wm workspaceListHasherMock) CurrentHash(string) (string, error) {
-	return wm.currentHash, wm.currentHashError
-}
-
-func (wm workspaceListHasherMock) PreviousHash(string) (string, error) {
-	return wm.previousHash, wm.previousHashError
-}
-
-func (wm workspaceListHasherMock) UpdateHash(string, string) error {
-	return wm.updateHashError
 }
