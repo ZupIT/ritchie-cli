@@ -90,6 +90,23 @@ func TestExecute(t *testing.T) {
 			want: nil,
 		},
 		{
+			name: "execute repo local success",
+			in: in{
+				runners: formula.Runners{
+					formula.LocalRun:  localRunnerMock{},
+					formula.DockerRun: dockerRunnerMock{},
+				},
+				config: configRunnerMock{runType: formula.LocalRun},
+				exe: formula.ExecuteData{
+					Def:     formula.Definition{RepoName: "local-user"},
+					InType:  0,
+					RunType: formula.DefaultRun,
+					Verbose: false,
+				},
+			},
+			want: nil,
+		},
+		{
 			name: "find default runner error",
 			in: in{
 				runners: formula.Runners{
