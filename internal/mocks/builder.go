@@ -21,6 +21,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+type LocalBuilderMock struct {
+	mock.Mock
+}
+
+func (lb *LocalBuilderMock) Init(workspaceDir string, repoName string) (string, error) {
+	args := lb.Called(workspaceDir, repoName)
+	return args.String(0), args.Error(1)
+}
+
 type BuilderMock struct {
 	mock.Mock
 }

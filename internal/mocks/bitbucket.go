@@ -14,19 +14,35 @@
  * limitations under the License.
  */
 
-package fileutil
+package mocks
 
-type Service interface {
-	ReadFile(path string) ([]byte, error)
-	WriteFilePerm(path string, content []byte, perm int32) error
+import "github.com/stretchr/testify/mock"
+
+type RepoInfo struct {
+	mock.Mock
 }
 
-type DefaultService struct{}
-
-func (s DefaultService) ReadFile(path string) ([]byte, error) {
-	return ReadFile(path)
+func (ri *RepoInfo) ZipUrl(version string) string {
+	args := ri.Called(version)
+	return args.String(0)
 }
 
-func (s DefaultService) WriteFilePerm(path string, content []byte, perm int32) error {
-	return WriteFilePerm(path, content, perm)
+func (ri *RepoInfo) TagsUrl() string {
+	args := ri.Called()
+	return args.String(0)
+}
+
+func (ri *RepoInfo) LatestTagUrl() string {
+	args := ri.Called()
+	return args.String(0)
+}
+
+func (ri *RepoInfo) TokenHeader() string {
+	args := ri.Called()
+	return args.String(0)
+}
+
+func (ri *RepoInfo) Token() string {
+	args := ri.Called()
+	return args.String(0)
 }
