@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"errors"
-	"sort"
 	"strings"
 	"testing"
 
@@ -45,9 +44,6 @@ func TestAddRepoCmd(t *testing.T) {
 	repoProviders.Add("Github", formula.Git{Repos: gitRepo, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("GitLab", formula.Git{Repos: gitRepositoryWithoutTagsMock, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
-
-	repoProvidersSorted := repoProviders.List()
-	sort.Strings(repoProvidersSorted)
 
 	repoTest := &formula.Repo{
 		Provider: "Github",
@@ -251,7 +247,7 @@ func TestAddRepoCmd(t *testing.T) {
 			name:   "fail flags with wrong provider",
 			args:   []string{"--provider=github"},
 			fields: fields{},
-			want:   errors.New("please select a provider from " + strings.Join(repoProvidersSorted, ", ")),
+			want:   errors.New("please select a provider from " + strings.Join(repoProviders.List(), ", ")),
 		},
 		{
 			name:   "fail flags with empty name",
