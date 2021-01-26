@@ -30,6 +30,11 @@ import (
 const stdinWarning = "stdin commands are deprecated and will no longer be supported in future versions. Please use" +
 	" flags for programatic formula execution"
 
+const (
+	nameFlagName     = "name"
+	providerFlagName = "provider"
+)
+
 type flag struct {
 	name        string
 	shortName   string

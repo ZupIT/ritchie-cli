@@ -30,10 +30,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-const (
-	nameFlagName = "name"
-)
-
 var ErrEmptyWorkspaces = errors.New("there are no workspaces to delete")
 
 type deleteWorkspaceCmd struct {
