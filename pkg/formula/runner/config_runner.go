@@ -28,7 +28,7 @@ import (
 
 var _ formula.ConfigRunner = ConfigManager{}
 
-const fileName = "default-formula-runner"
+const FileName = "default-formula-runner"
 
 var ErrConfigNotFound = errors.New("you must configure your default formula execution method, run \"rit set formula-runner\" to set up")
 
@@ -39,7 +39,7 @@ type ConfigManager struct {
 
 func NewConfigManager(ritHome string, file stream.FileWriteReadExister) ConfigManager {
 	return ConfigManager{
-		filePath: filepath.Join(ritHome, fileName),
+		filePath: filepath.Join(ritHome, FileName),
 		file:     file,
 	}
 }

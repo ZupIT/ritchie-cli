@@ -18,95 +18,97 @@ package cmd
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func Test_setFormulaRunnerCmd(t *testing.T) {
-	type in struct {
-		config formula.ConfigRunner
-		input  prompt.InputList
-	}
+func TestSetFormulaRunnerCmd(t *testing.T) {
+	tmpDir := os.TempDir()
+	ritHome := filepath.Join(tmpDir, "runner")
+	defer os.RemoveAll(ritHome)
+
+	fileManager := stream.NewFileManager()
+	configManager := runner.NewConfigManager(ritHome, fileManager)
+	runnerFile := filepath.Join(ritHome, runner.FileName)
+
 	var tests = []struct {
 		name       string
-		in         in
-		wantErr    bool
+		args       []string
 		inputStdin string
+		runner     string
+		listErr    error
+		err        error
 	}{
 		{
-			name: "success set formula run",
-			in: in{
-				input: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return formula.LocalRun.String(), nil
-					},
-				},
-				config: ConfigRunnerMock{},
-			},
-			wantErr:    false,
+			name:   "success prompt set formula run",
+			args:   []string{},
+			runner: formula.LocalRun.String(),
+		},
+		{
+			name:    "error on list",
+			args:    []string{},
+			listErr: errors.New("list error"),
+			err:     errors.New("list error"),
+		},
+		{
+			name: "success on flags",
+			args: []string{"--runner=local"},
+		},
+		{
+			name: "fail when missing flag",
+			args: []string{"--runner="},
+			err:  errors.New(missingFlagText(runnerFlagName)),
+		},
+		{
+			name: "fail for wrong flag name",
+			args: []string{"--runner=invalid"},
+			err:  ErrInvalidRunType,
+		},
+		{
+			name:       "success on stdin",
+			args:       []string{},
 			inputStdin: "{\"runType\": \"local\"}\n",
 		},
 		{
-			name: "error to create config",
-			in: in{
-				input: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return formula.LocalRun.String(), nil
-					},
-				},
-				config: ConfigRunnerMock{
-					createErr: errors.New("error to create config"),
-				},
-			},
-			wantErr:    true,
-			inputStdin: "{\"runType\": \"local\"}\n",
-		},
-		{
-			name: "error to select run type",
-			in: in{
-				input: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return formula.LocalRun.String(), errors.New("error to select run type")
-					},
-				},
-				config: ConfigRunnerMock{},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error to invalid run type",
-			in: in{
-				input: inputListCustomMock{
-					list: func(name string, items []string) (string, error) {
-						return "invalid", nil
-					},
-				},
-				config: ConfigRunnerMock{},
-			},
-			wantErr:    true,
+			name:       "fail with stdin wrong runner",
+			args:       []string{},
 			inputStdin: "{\"runType\": \"invalid\"}\n",
+			err:        ErrInvalidRunType,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			setFormulaPrompt := NewSetFormulaRunnerCmd(tt.in.config, tt.in.input)
-			setFormulaStdin := NewSetFormulaRunnerCmd(tt.in.config, tt.in.input)
+			_ = os.Remove(runnerFile)
+			inputList := &mocks.InputListMock{}
+			inputList.On(
+				"List", "Select a default formula run type", mock.Anything, mock.Anything,
+			).Return(tt.runner, tt.listErr)
 
-			setFormulaPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
-			setFormulaStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+			cmd := NewSetFormulaRunnerCmd(configManager, inputList)
+			cmd.SetArgs(tt.args)
+
+			cmd.PersistentFlags().Bool("stdin", tt.inputStdin != "", "input by stdin")
 
 			newReader := strings.NewReader(tt.inputStdin)
-			setFormulaStdin.SetIn(newReader)
+			cmd.SetIn(newReader)
 
-			if err := setFormulaPrompt.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("set formula runner type prompt command error = %v, wantErr %v", err, tt.wantErr)
-			}
+			err := cmd.Execute()
 
-			if err := setFormulaStdin.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("set formula runner type stdin command error = %v, wantErr %v", err, tt.wantErr)
+			if err != nil {
+				assert.Equal(t, tt.err, err)
+			} else {
+				assert.NoError(t, tt.err)
+				assert.FileExists(t, runnerFile)
 			}
 		})
 	}
