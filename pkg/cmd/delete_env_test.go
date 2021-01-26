@@ -32,8 +32,8 @@ import (
 )
 
 func TestNewDeleteEnv(t *testing.T) {
-	homeDir := os.TempDir()
-	ritHomeDir := filepath.Join(homeDir, ".rit")
+	tmpDir := os.TempDir()
+	ritHomeDir := filepath.Join(tmpDir, ".rit")
 	envFile := filepath.Join(ritHomeDir, env.FileName)
 	_ = os.MkdirAll(ritHomeDir, os.ModePerm)
 	defer os.RemoveAll(ritHomeDir)
@@ -57,13 +57,21 @@ func TestNewDeleteEnv(t *testing.T) {
 		inputListError  error
 		wantErr         string
 		envResultInFile env.Holder
+		args            []string
 	}{
 		{
-			name:            "execute with success",
+			name:            "execute prompt with success",
 			inputBoolResult: true,
 			inputListString: "qa",
 			env:             envCompleted,
 			envResultInFile: env.Holder{Current: "prod", All: []string{"prod", "stg"}},
+		},
+		{
+			name:            "execute flag with success",
+			inputListString: "prod",
+			env:             envCompleted,
+			envResultInFile: env.Holder{Current: "", All: []string{"qa", "stg"}},
+			args:            []string{"--env=prod"},
 		},
 		{
 			name:            "execute with success when not envs defined",
@@ -72,16 +80,31 @@ func TestNewDeleteEnv(t *testing.T) {
 		},
 		{
 			name:           "fail on input list error",
-			wantErr:        "some error",
 			inputListError: errors.New("some error"),
 			env:            envCompleted,
+			wantErr:        "some error",
 		},
 		{
 			name:            "fail on input bool error",
-			wantErr:         "some error",
 			inputBoolError:  errors.New("some error"),
 			env:             envCompleted,
 			envResultInFile: envEmpty,
+			wantErr:         "some error",
+		},
+		{
+			name:            "fail on flag error when flag not defined",
+			inputListString: "prod",
+			env:             envCompleted,
+			envResultInFile: env.Holder{Current: "", All: []string{"qa", "stg"}},
+			args:            []string{"--list=nana"},
+			wantErr:         "unknown flag: --list",
+		},
+		{
+			name:            "fail on flag error when env defined nil",
+			env:             envCompleted,
+			envResultInFile: env.Holder{Current: "", All: []string{"qa", "stg"}},
+			args:            []string{"--env="},
+			wantErr:         "please provide a value for 'env'",
 		},
 		{
 			name:            "do nothing on input bool refusal",
@@ -107,7 +130,7 @@ func TestNewDeleteEnv(t *testing.T) {
 			cmd := NewDeleteEnvCmd(envFindRemover, boolMock, listMock)
 			// TODO: remove stdin flag after  deprecation
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			cmd.SetArgs([]string{})
+			cmd.SetArgs(tt.args)
 
 			err := cmd.Execute()
 			if err != nil {
@@ -120,7 +143,6 @@ func TestNewDeleteEnv(t *testing.T) {
 				envResult, err := envFinder.Find()
 				assert.NoError(t, err)
 				assert.Equal(t, tt.envResultInFile, envResult)
-
 			}
 		})
 	}

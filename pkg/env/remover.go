@@ -18,6 +18,8 @@ package env
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -47,6 +49,19 @@ func (r RemoveManager) Remove(env string) (Holder, error) {
 	env = strings.ReplaceAll(env, Current, "")
 	if envHolder.Current == env {
 		envHolder.Current = ""
+	}
+
+	envExists := false
+	for i := range envHolder.All {
+		if envHolder.All[i] == env {
+			envExists = true
+			break
+		}
+	}
+
+	if !envExists {
+		errorString := fmt.Sprintf("env '%s' not found, please provide a value for env valid", env)
+		return Holder{}, errors.New(errorString)
 	}
 
 	for i, e := range envHolder.All {

@@ -19,7 +19,7 @@ const (
 	providerFlagDescription = "Provider name to delete"
 )
 
-type inputConfig struct {
+type inputDeleteCredential struct {
 	provider string
 }
 
@@ -100,49 +100,50 @@ func (d deleteCredentialCmd) runFormula() CommandRunnerFunc {
 	}
 }
 
-func (d *deleteCredentialCmd) resolveInput(cmd *cobra.Command, context string) (inputConfig, error) {
+func (d *deleteCredentialCmd) resolveInput(cmd *cobra.Command, context string) (inputDeleteCredential, error) {
 	if IsFlagInput(cmd) {
 		return d.resolveFlags(cmd)
 	}
 	return d.resolvePrompt(context)
 }
 
-func (d *deleteCredentialCmd) resolvePrompt(context string) (inputConfig, error) {
+func (d *deleteCredentialCmd) resolvePrompt(context string) (inputDeleteCredential, error) {
 	data, err := d.ReadCredentialsValueInEnv(d.CredentialsPath(), context)
 	if err != nil {
-		return inputConfig{}, err
+		return inputDeleteCredential{}, err
 	}
 
 	if len(data) == 0 {
-		return inputConfig{}, errors.New("you have no defined credentials in this env")
+		return inputDeleteCredential{}, errors.New("you have no defined credentials in this env")
 	}
 
-	providers := make([]string, 0, len(data))
+	providers := make([]string, len(data))
 	for _, c := range data {
 		providers = append(providers, c.Provider)
 	}
 
 	provider, err := d.List("Credentials: ", providers)
 	if err != nil {
-		return inputConfig{}, err
+		return inputDeleteCredential{}, err
 	}
 
 	if b, err := d.Bool("Are you sure want to delete this credential?", []string{"yes", "no"}); err != nil {
-		return inputConfig{}, err
+		return inputDeleteCredential{}, err
 	} else if !b {
-		return inputConfig{}, nil
+		return inputDeleteCredential{}, nil
 	}
-	return inputConfig{provider}, nil
+	return inputDeleteCredential{provider}, nil
 }
 
-func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputConfig, error) {
+func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputDeleteCredential, error) {
 	provider, err := cmd.Flags().GetString(providerFlagName)
 	if err != nil {
-		return inputConfig{}, err
+		return inputDeleteCredential{}, err
 	} else if provider == "" {
-		return inputConfig{}, errors.New("please provide a value for 'provider'")
+		return inputDeleteCredential{}, errors.New("please provide a value for 'provider'")
 	}
-	return inputConfig{provider}, nil
+
+	return inputDeleteCredential{provider}, nil
 }
 
 // TODO: remove upon stdin deprecation
