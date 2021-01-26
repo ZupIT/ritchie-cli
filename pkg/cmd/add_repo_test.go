@@ -61,16 +61,21 @@ func TestAddRepoCmd(t *testing.T) {
 		return inputListMock
 	}
 
+	providers := []string{"Github", "GitLab", "Bitbucket"}
+
 	tests := []struct {
 		name   string
+		args   []string
 		fields fields
 		want   error
 	}{
 		{
 			name: "run with success",
+			args: []string{},
 		},
 		{
 			name: "run with success when user add a new commons",
+			args: []string{},
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: formula.RepoCommonsName}}, errList: nil},
 				InputTextValidator: returnWithStringErr{formula.RepoCommonsName.String(), nil},
@@ -78,6 +83,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "run with success when user add a repo exitent",
+			args: []string{},
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: "name-repo"}}, errList: nil},
 				InputTextValidator: returnWithStringErr{"name-repo", nil},
@@ -85,6 +91,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "return nil when user add a new commons incorrectly",
+			args: []string{},
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: formula.RepoCommonsName}}, errList: nil},
 				InputTextValidator: returnWithStringErr{formula.RepoCommonsName.String(), nil},
@@ -93,6 +100,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "return nil success when user add a repo existent incorrectly",
+			args: []string{},
 			fields: fields{
 				repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{formula.Repo{Provider: "Github", Name: "name-repo"}}, errList: nil},
 				InputTextValidator: returnWithStringErr{"name-repo", nil},
@@ -101,6 +109,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "return error when len of tags is 0",
+			args: []string{},
 			fields: fields{
 				InputList: []returnOfInputList{{response: "GitLab", err: nil}},
 			},
@@ -108,6 +117,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "return error when Repos.Tag fail",
+			args: []string{},
 			fields: fields{
 				InputList: []returnOfInputList{{response: "Bitbucket", err: nil}},
 			},
@@ -115,6 +125,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "fail when repo.Add return err",
+			args: []string{},
 			fields: fields{
 				repo:      returnOfRepoListerAdder{errAdd: someError, reposList: formula.Repos{}, errList: nil},
 				InputList: []returnOfInputList{{response: "Github", err: nil}},
@@ -132,6 +143,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "input bool error",
+			args: []string{},
 			fields: fields{
 				InputBool: returnOfInputBool{false, someError},
 			},
@@ -139,6 +151,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "input list select provider return error",
+			args: []string{},
 			fields: fields{
 				InputList: []returnOfInputList{{response: "item", err: someError}},
 			},
@@ -146,6 +159,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "input list select version return error",
+			args: []string{},
 			fields: fields{
 				InputList: []returnOfInputList{
 					{question: "Select a tag version:", response: "", err: someError},
@@ -156,6 +170,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "input text error",
+			args: []string{},
 			fields: fields{
 				InputTextValidator: returnWithStringErr{"mocked text", someError},
 			},
@@ -163,6 +178,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "input url error",
+			args: []string{},
 			fields: fields{
 				InputURL: returnWithStringErr{"http://localhost/mocked", someError},
 			},
@@ -170,12 +186,14 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "tutorial status enabled",
+			args: []string{},
 			fields: fields{
 				tutorialStatus: returnWithStringErr{"enabled", nil},
 			},
 		},
 		{
 			name: "return error when tutorial.Find fail",
+			args: []string{},
 			fields: fields{
 				tutorialStatus: returnWithStringErr{"", someError},
 			},
@@ -183,6 +201,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "fail when repo.List return err",
+			args: []string{},
 			fields: fields{
 				repo: returnOfRepoListerAdder{errAdd: nil, reposList: nil, errList: someError},
 			},
@@ -190,12 +209,14 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "run with success when input is stdin",
+			args: []string{},
 			fields: fields{
 				stdin: `{"provider": "github", "name": "repo-name", "version": "0.0.0", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
 			},
 		},
 		{
 			name: "run with success when input is stdin and version is not informed",
+			args: []string{},
 			fields: fields{
 				stdin:           `{"provider": "github", "name": "repo-name", "version": "", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
 				detailLatestTag: "1.0.0",
@@ -203,6 +224,7 @@ func TestAddRepoCmd(t *testing.T) {
 		},
 		{
 			name: "return error when user add a repo existent",
+			args: []string{},
 			fields: fields{
 				repo:     returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{*repoTest}, errList: nil},
 				InputURL: returnWithStringErr{repoTest.Url, nil},
@@ -211,6 +233,41 @@ func TestAddRepoCmd(t *testing.T) {
 					{question: "", response: "Github", err: nil},
 				},
 			},
+		},
+		{
+			name:   "fail flags with empty provider",
+			args:   []string{"--provider="},
+			fields: fields{},
+			want:   errors.New(missingFlagText(providerFlagName)),
+		},
+		{
+			name:   "fail flags with wrong provider",
+			args:   []string{"--provider=github"},
+			fields: fields{},
+			want:   errors.New("please select a provider from " + strings.Join(providers, ", ")),
+		},
+		{
+			name:   "fail flags with empty name",
+			args:   []string{"--provider=Github"},
+			fields: fields{},
+			want:   errors.New(missingFlagText(nameFlagName)),
+		},
+		{
+			name:   "fail flags with empty repo url",
+			args:   []string{"--provider=Github", "--name=my-repo"},
+			fields: fields{},
+			want:   errors.New(missingFlagText(repoUrlFlagName)),
+		},
+		{
+			name:   "fail flags with empty tag",
+			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com"},
+			fields: fields{},
+			want:   errors.New(missingFlagText(tagFlagName)),
+		},
+		{
+			name:   "success flags",
+			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--tag=1.0.0"},
+			fields: fields{},
 		},
 	}
 	checkerManager := tree.NewChecker(treeMock{})
@@ -270,6 +327,7 @@ func TestAddRepoCmd(t *testing.T) {
 				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			}
 
+			cmd.SetArgs(tt.args)
 			got := cmd.Execute()
 
 			assert.Equal(t, tt.want, got)
