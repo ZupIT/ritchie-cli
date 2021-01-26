@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"errors"
-	"sort"
 	"strings"
 	"testing"
 
@@ -47,7 +46,6 @@ func TestAddRepoCmd(t *testing.T) {
 	repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
 
 	repoList := repoProviders.List()
-	sort.Strings(repoList)
 
 	repoTest := &formula.Repo{
 		Provider: "Github",
