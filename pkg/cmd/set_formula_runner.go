@@ -36,10 +36,10 @@ type setFormulaRunnerCmd struct {
 
 var setFormulaRunnerFlags = flags{
 	{
-		name:        providerFlagName,
+		name:        runnerFlagName,
 		kind:        reflect.String,
 		defValue:    "",
-		description: "provider name (i.e.: github)",
+		description: "runner name (local or docker)",
 	},
 }
 
