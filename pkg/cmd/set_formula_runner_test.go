@@ -29,7 +29,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestSetFormulaRunnerCmd(t *testing.T) {
@@ -39,8 +38,7 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.RemoveAll(ritHome)
 
-	fileManager := stream.NewFileManager()
-	configManager := runner.NewConfigManager(ritHome, fileManager)
+	configManager := runner.NewConfigManager(ritHome)
 	runnerFile := filepath.Join(ritHome, runner.FileName)
 
 	var tests = []struct {

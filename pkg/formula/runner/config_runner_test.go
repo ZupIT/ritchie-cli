@@ -17,19 +17,16 @@
 package runner
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestCreate(t *testing.T) {
@@ -84,81 +81,49 @@ func TestCreate(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	tmpDir := os.TempDir()
-
-	type in struct {
-		ritHome string
-		file    stream.FileWriteReadExister
-	}
-
-	type out struct {
-		runType formula.RunnerType
-		err     error
-	}
+	ritHome := filepath.Join(tmpDir, "find")
+	ritInvalidHome := filepath.Join(tmpDir, "invalid")
+	_ = os.Mkdir(ritHome, os.ModePerm)
+	defer os.RemoveAll(ritHome)
 
 	tests := []struct {
-		name    string
-		ritHome string
-		in      in
-		out     out
+		name        string
+		ritHome     string
+		fileContent string
+		runner      formula.RunnerType
+		err         string
 	}{
 		{
-			name:    "find config success",
-			ritHome: tmpDir,
-			in: in{
-				ritHome: tmpDir,
-				file:    fileManagerMock{rBytes: []byte("0"), exist: true},
-			},
-			out: out{
-				runType: formula.LocalRun,
-				err:     nil,
-			},
+			name:        "find config success",
+			ritHome:     ritHome,
+			fileContent: "0",
+			runner:      formula.LocalRun,
 		},
 		{
-			name: "find config not found error",
-			in: in{
-				ritHome: tmpDir,
-				file:    fileManagerMock{exist: false},
-			},
-			out: out{
-				runType: formula.DefaultRun,
-				err:     ErrConfigNotFound,
-			},
+			name:    "fail finding file",
+			ritHome: ritInvalidHome,
+			err:     ErrConfigNotFound.Error(),
 		},
 		{
-			name: "find config read error",
-			in: in{
-				ritHome: tmpDir,
-				file:    fileManagerMock{rErr: errors.New("read config error"), exist: true},
-			},
-			out: out{
-				runType: formula.DefaultRun,
-				err:     errors.New("read config error"),
-			},
-		},
-		{
-			name: "find config invalid runType",
-			in: in{
-				ritHome: tmpDir,
-				file:    fileManagerMock{rBytes: []byte("error"), exist: true},
-			},
-			out: out{
-				runType: formula.DefaultRun,
-				err:     errors.New("strconv.Atoi: parsing \"error\": invalid syntax"),
-			},
+			name:        "fail invalid runType",
+			fileContent: "error",
+			err:         "strconv.Atoi: parsing \"error\": invalid syntax",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config := NewConfigManager(tt.in.ritHome)
+			file := filepath.Join(tt.ritHome, FileName)
+			_ = ioutil.WriteFile(file, []byte(tt.fileContent), os.ModePerm)
+
+			config := NewConfigManager(tt.ritHome)
 			got, err := config.Find()
 
-			if (tt.out.err != nil && err == nil) || err != nil && err.Error() != tt.out.err.Error() {
-				t.Errorf("Find(%s) got %v, want %v", tt.name, err, tt.out.err)
-			}
-
-			if !reflect.DeepEqual(tt.out.runType, got) {
-				t.Errorf("Find(%s) got %v, want %v", tt.name, got, tt.out.runType)
+			if err != nil {
+				assert.EqualError(t, err, tt.err)
+			} else {
+				assert.Empty(t, tt.err)
+				assert.Equal(t, got, tt.runner)
 			}
 		})
 	}
