@@ -225,7 +225,7 @@ func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
 
 	var token string
 	if isPrivate {
-		token, err = ar.Resolve("CREDENTIAL_" + provider + "-add-repo_token")
+		token, err = ar.Resolve("CREDENTIAL_" + provider + "-ADD-REPO_TOKEN")
 		if err != nil {
 			return formula.Repo{}, err
 		}
@@ -239,7 +239,7 @@ func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
 		if strings.Contains(err.Error(), "401") {
 			errorString := fmt.Sprintf("permission error:\nYou must overwrite the current token (%s-add-repo) with command:\n"+
 				"\t rit set credential\n"+
-				"Or move to a new environment with command:\n"+
+				"Or switch to a new environment with the command:\n"+
 				"\t rit set env", provider)
 			return formula.Repo{}, errors.New(errorString)
 		}

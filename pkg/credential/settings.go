@@ -215,15 +215,13 @@ func NewDefaultCredentials() Fields {
 	}
 
 	dc := Fields{
-		AddNew:            []Field{},
-		"github":          []Field{username, email, token},
-		"gitlab":          []Field{username, email, token},
-		"aws":             []Field{accessKey, secretAccessKey},
-		"jenkins":         []Field{username, token},
-		"kubeconfig":      []Field{base64config},
-		"ansible":         []Field{username, password},
-		"github-add-repo": []Field{token},
-		"gitlab-add-repo": []Field{token},
+		AddNew:       []Field{},
+		"github":     []Field{username, email, token},
+		"gitlab":     []Field{username, email, token},
+		"aws":        []Field{accessKey, secretAccessKey},
+		"jenkins":    []Field{username, token},
+		"kubeconfig": []Field{base64config},
+		"ansible":    []Field{username, password},
 	}
 
 	return dc
