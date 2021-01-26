@@ -21,16 +21,20 @@ import (
 	"testing"
 
 	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
 func TestExecute(t *testing.T) {
 	type in struct {
-		runners formula.Runners
-		config  formula.ConfigRunner
-		exe     formula.ExecuteData
+		runners            formula.Runners
+		config             formula.ConfigRunner
+		exe                formula.ExecuteData
+		preRunBuilderError error
 	}
 
 	tests := []struct {
@@ -140,15 +144,38 @@ func TestExecute(t *testing.T) {
 			},
 			want: errors.New("error to run formula"),
 		},
+		{
+			name: "run pre run builder error",
+			in: in{
+				runners: formula.Runners{
+					formula.LocalRun:  localRunnerMock{},
+					formula.DockerRun: dockerRunnerMock{},
+				},
+				config: configRunnerMock{runType: formula.DockerRun},
+				exe: formula.ExecuteData{
+					Def:     formula.Definition{RepoName: "local-teste"},
+					InType:  0,
+					RunType: formula.DefaultRun,
+					Verbose: false,
+				},
+				preRunBuilderError: errors.New("error to pre run builder formula"),
+			},
+			want: errors.New("error to pre run builder formula"),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			executorManager := NewExecutor(tt.in.runners, preRunBuilderMock{}, tt.in.config)
+			preRunBuilder := new(mocks.PreRunBuilder)
+			preRunBuilder.On("Build", mock.Anything).Return(tt.in.preRunBuilderError)
+
+			executorManager := NewExecutor(tt.in.runners, preRunBuilder, tt.in.config)
 			got := executorManager.Execute(tt.in.exe)
 
-			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
-				t.Errorf("Execute(%s) got %v, want %v", tt.name, got, tt.want)
+			if got != nil {
+				assert.Equal(t, tt.want, got)
+			} else {
+				assert.Nil(t, tt.want)
 			}
 		})
 	}
@@ -182,10 +209,4 @@ func (c configRunnerMock) Create(runType formula.RunnerType) error {
 
 func (c configRunnerMock) Find() (formula.RunnerType, error) {
 	return c.runType, c.findErr
-}
-
-type preRunBuilderMock struct{}
-
-func (bm preRunBuilderMock) Build(string) error {
-	return nil
 }
