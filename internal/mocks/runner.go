@@ -16,15 +16,13 @@
 
 package mocks
 
-import (
-	"github.com/stretchr/testify/mock"
-)
+import "github.com/stretchr/testify/mock"
 
-type LocalBuilderMock struct {
+type PreRunBuilder struct {
 	mock.Mock
 }
 
-func (lb *LocalBuilderMock) Init(workspaceDir string, repoName string) (string, error) {
-	args := lb.Called(workspaceDir, repoName)
-	return args.String(0), args.Error(1)
+func (prb *PreRunBuilder) Build(relativePath string) error {
+	args := prb.Called(relativePath)
+	return args.Error(0)
 }

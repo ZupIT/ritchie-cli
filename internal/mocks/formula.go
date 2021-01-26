@@ -17,14 +17,19 @@
 package mocks
 
 import (
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/stretchr/testify/mock"
 )
 
-type LocalBuilderMock struct {
+type BuilderMock struct {
 	mock.Mock
 }
 
-func (lb *LocalBuilderMock) Init(workspaceDir string, repoName string) (string, error) {
-	args := lb.Called(workspaceDir, repoName)
-	return args.String(0), args.Error(1)
+func (b *BuilderMock) Build(info formula.BuildInfo) error {
+	args := b.Called(info)
+	return args.Error(0)
+}
+func (b *BuilderMock) HasBuilt() bool {
+	args := b.Called()
+	return args.Bool(0)
 }
