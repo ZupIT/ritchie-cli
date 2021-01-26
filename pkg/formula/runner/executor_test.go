@@ -172,11 +172,7 @@ func TestExecute(t *testing.T) {
 			executorManager := NewExecutor(tt.in.runners, preRunBuilder, tt.in.config)
 			got := executorManager.Execute(tt.in.exe)
 
-			if got != nil {
-				assert.Equal(t, tt.want, got)
-			} else {
-				assert.Nil(t, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

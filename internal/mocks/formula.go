@@ -29,6 +29,7 @@ func (b *BuilderMock) Build(info formula.BuildInfo) error {
 	args := b.Called(info)
 	return args.Error(0)
 }
+
 func (b *BuilderMock) HasBuilt() bool {
 	args := b.Called()
 	return args.Bool(0)
