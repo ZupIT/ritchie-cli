@@ -18,9 +18,15 @@ package runner
 
 import (
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -28,45 +34,49 @@ import (
 
 func TestCreate(t *testing.T) {
 	tmpDir := os.TempDir()
-
-	type in struct {
-		ritHome string
-		file    stream.FileWriteReadExister
-		runType formula.RunnerType
-	}
+	ritHome := filepath.Join(tmpDir, "create")
+	ritInvalidHome := filepath.Join(tmpDir, "invalid")
+	_ = os.Mkdir(ritHome, os.ModePerm)
+	defer os.RemoveAll(ritHome)
 
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name    string
+		ritHome string
+		err     string
 	}{
 		{
-			name: "create config success",
-			in: in{
-				ritHome: tmpDir,
-				file:    fileManagerMock{},
-				runType: formula.LocalRun,
-			},
-			want: nil,
+			name:    "create config success",
+			ritHome: ritHome,
 		},
 		{
-			name: "create config write error",
-			in: in{
-				ritHome: tmpDir,
-				file:    fileManagerMock{wErr: errors.New("error to write file")},
-				runType: formula.LocalRun,
-			},
-			want: errors.New("error to write file"),
+			name:    "create config write error",
+			ritHome: ritInvalidHome,
+			err: fmt.Sprintf(
+				"open %s: no such file or directory",
+				filepath.Join(ritInvalidHome, FileName),
+			),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config := NewConfigManager(tt.in.ritHome, tt.in.file)
-			got := config.Create(tt.in.runType)
+			file := filepath.Join(ritHome, FileName)
+			_ = os.Remove(file)
+			config := NewConfigManager(tt.ritHome)
+			got := config.Create(formula.LocalRun)
 
-			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
-				t.Errorf("Create(%s) got %v, want %v", tt.name, got, tt.want)
+			if got != nil {
+				assert.EqualError(t, got, tt.err)
+			} else {
+				assert.Empty(t, tt.err)
+				assert.FileExists(t, file)
+
+				data, err := ioutil.ReadFile(file)
+				assert.NoError(t, err)
+
+				runType, err := strconv.Atoi(string(data))
+				assert.NoError(t, err)
+				assert.Equal(t, formula.LocalRun.Int(), runType)
 			}
 		})
 	}
@@ -86,12 +96,14 @@ func TestFind(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
-		in   in
-		out  out
+		name    string
+		ritHome string
+		in      in
+		out     out
 	}{
 		{
-			name: "find config success",
+			name:    "find config success",
+			ritHome: tmpDir,
 			in: in{
 				ritHome: tmpDir,
 				file:    fileManagerMock{rBytes: []byte("0"), exist: true},
@@ -138,7 +150,7 @@ func TestFind(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config := NewConfigManager(tt.in.ritHome, tt.in.file)
+			config := NewConfigManager(tt.in.ritHome)
 			got, err := config.Find()
 
 			if (tt.out.err != nil && err == nil) || err != nil && err.Error() != tt.out.err.Error() {
@@ -150,44 +162,4 @@ func TestFind(t *testing.T) {
 			}
 		})
 	}
-}
-
-type fileManagerMock struct {
-	rBytes   []byte
-	rErr     error
-	wErr     error
-	aErr     error
-	mErr     error
-	rmErr    error
-	lErr     error
-	exist    bool
-	listNews []string
-}
-
-func (fi fileManagerMock) Write(string, []byte) error {
-	return fi.wErr
-}
-
-func (fi fileManagerMock) Read(string) ([]byte, error) {
-	return fi.rBytes, fi.rErr
-}
-
-func (fi fileManagerMock) Exists(string) bool {
-	return fi.exist
-}
-
-func (fi fileManagerMock) Append(path string, content []byte) error {
-	return fi.aErr
-}
-
-func (fi fileManagerMock) Move(oldPath, newPath string, files []string) error {
-	return fi.mErr
-}
-
-func (fi fileManagerMock) Remove(path string) error {
-	return fi.rmErr
-}
-
-func (fi fileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
-	return fi.listNews, fi.lErr
 }

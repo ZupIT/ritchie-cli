@@ -35,6 +35,8 @@ import (
 func TestSetFormulaRunnerCmd(t *testing.T) {
 	tmpDir := os.TempDir()
 	ritHome := filepath.Join(tmpDir, "runner")
+	err := os.Mkdir(ritHome, os.ModePerm)
+	assert.NoError(t, err)
 	defer os.RemoveAll(ritHome)
 
 	fileManager := stream.NewFileManager()
@@ -107,7 +109,7 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, tt.err, err)
 			} else {
-				assert.NoError(t, tt.err)
+				assert.Nil(t, tt.err)
 				assert.FileExists(t, runnerFile)
 			}
 		})

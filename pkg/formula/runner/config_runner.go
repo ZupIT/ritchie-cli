@@ -19,11 +19,12 @@ package runner
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 var _ formula.ConfigRunner = ConfigManager{}
@@ -34,13 +35,11 @@ var ErrConfigNotFound = errors.New("you must configure your default formula exec
 
 type ConfigManager struct {
 	filePath string
-	file     stream.FileWriteReadExister
 }
 
-func NewConfigManager(ritHome string, file stream.FileWriteReadExister) ConfigManager {
+func NewConfigManager(ritHome string) ConfigManager {
 	return ConfigManager{
 		filePath: filepath.Join(ritHome, FileName),
-		file:     file,
 	}
 }
 
@@ -50,7 +49,7 @@ func (c ConfigManager) Create(runType formula.RunnerType) error {
 		return err
 	}
 
-	if err := c.file.Write(c.filePath, data); err != nil {
+	if err := ioutil.WriteFile(c.filePath, data, os.ModePerm); err != nil {
 		return err
 	}
 
@@ -58,13 +57,9 @@ func (c ConfigManager) Create(runType formula.RunnerType) error {
 }
 
 func (c ConfigManager) Find() (formula.RunnerType, error) {
-	if !c.file.Exists(c.filePath) {
-		return formula.DefaultRun, ErrConfigNotFound
-	}
-
-	data, err := c.file.Read(c.filePath)
+	data, err := ioutil.ReadFile(c.filePath)
 	if err != nil {
-		return formula.DefaultRun, err
+		return formula.DefaultRun, ErrConfigNotFound
 	}
 
 	runType, err := strconv.Atoi(string(data))
