@@ -45,6 +45,8 @@ func TestAddRepoCmd(t *testing.T) {
 	repoProviders.Add("GitLab", formula.Git{Repos: gitRepositoryWithoutTagsMock, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
 
+	repoList := repoProviders.List()
+
 	repoTest := &formula.Repo{
 		Provider: "Github",
 		Name:     "someRepo1",
@@ -247,7 +249,7 @@ func TestAddRepoCmd(t *testing.T) {
 			name:   "fail flags with wrong provider",
 			args:   []string{"--provider=github"},
 			fields: fields{},
-			want:   errors.New("please select a provider from " + strings.Join(repoProviders.List(), ", ")),
+			want:   errors.New("please select a provider from " + strings.Join(repoList, ", ")),
 		},
 		{
 			name:   "fail flags with empty name",

@@ -16,7 +16,11 @@
 
 package formula
 
-import "github.com/ZupIT/ritchie-cli/pkg/git"
+import (
+	"sort"
+
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+)
 
 const RepoCommonsName = RepoName("commons")
 
@@ -87,6 +91,7 @@ func (re RepoProviders) List() []string {
 	for provider := range re {
 		providers = append(providers, provider.String())
 	}
+	sort.Strings(providers)
 
 	return providers
 }
