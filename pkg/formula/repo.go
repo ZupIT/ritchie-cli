@@ -91,6 +91,7 @@ func (re RepoProviders) List() []string {
 	for provider := range re {
 		providers = append(providers, provider.String())
 	}
+	sort.Strings(providers)
 
 	sort.Strings(providers)
 
