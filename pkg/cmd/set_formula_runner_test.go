@@ -18,8 +18,10 @@ package cmd
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -34,8 +36,7 @@ import (
 func TestSetFormulaRunnerCmd(t *testing.T) {
 	tmpDir := os.TempDir()
 	ritHome := filepath.Join(tmpDir, "runner")
-	err := os.Mkdir(ritHome, os.ModePerm)
-	assert.NoError(t, err)
+	_ = os.Mkdir(ritHome, os.ModePerm)
 	defer os.RemoveAll(ritHome)
 
 	configManager := runner.NewConfigManager(ritHome)
@@ -61,8 +62,9 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 			err:     errors.New("list error"),
 		},
 		{
-			name: "success on flags",
-			args: []string{"--runner=local"},
+			name:   "success on flags",
+			args:   []string{"--runner=local"},
+			runner: formula.LocalRun.String(),
 		},
 		{
 			name: "fail when missing flag",
@@ -78,6 +80,7 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 			name:       "success on stdin",
 			args:       []string{},
 			inputStdin: "{\"runType\": \"local\"}\n",
+			runner:     formula.LocalRun.String(),
 		},
 		{
 			name:       "fail with stdin wrong runner",
@@ -109,6 +112,12 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 			} else {
 				assert.Nil(t, tt.err)
 				assert.FileExists(t, runnerFile)
+
+				data, err := ioutil.ReadFile(runnerFile)
+				assert.NoError(t, err)
+				runType, err := strconv.Atoi(string(data))
+				assert.NoError(t, err)
+				assert.Equal(t, tt.runner, formula.RunnerType(runType).String())
 			}
 		})
 	}
