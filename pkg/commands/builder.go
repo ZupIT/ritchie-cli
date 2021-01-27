@@ -41,6 +41,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/local"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
+	"github.com/ZupIT/ritchie-cli/pkg/git/bitbucket"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
@@ -90,10 +91,12 @@ func Build() *cobra.Command {
 
 	githubRepo := github.NewRepoManager(http.DefaultClient)
 	gitlabRepo := gitlab.NewRepoManager(http.DefaultClient)
+	bitbucketRepo := bitbucket.NewRepoManager(http.DefaultClient)
 
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
+	repoProviders.Add("Bitbucket", formula.Git{Repos: bitbucketRepo, NewRepoInfo: bitbucket.NewRepoInfo})
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
@@ -165,7 +168,7 @@ func Build() *cobra.Command {
 	}
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, fileManager, formBuildLocal)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, formBuildLocal)
 
 	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal)
 	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
@@ -208,7 +211,6 @@ func Build() *cobra.Command {
 	setCredentialCmd := cmd.NewSetCredentialCmd(
 		credSetter,
 		credSettings,
-		fileManager,
 		inputText,
 		inputBool,
 		inputList,
@@ -237,7 +239,7 @@ func Build() *cobra.Command {
 	autocompleteBash := cmd.NewAutocompleteBash(autocompleteGen)
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
-	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, repoDeleter, dirManager, inputList, inputBool)
+	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, repoDeleter, inputList, inputBool)
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, inputAutocomplete, treeGen, fileManager)
 	addWorkspaceCmd := cmd.NewAddWorkspaceCmd(formulaWorkspace, inputText, inputAutocomplete)
 
