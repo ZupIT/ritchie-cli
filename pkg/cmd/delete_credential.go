@@ -14,11 +14,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	providerFlagName        = "provider"
-	providerFlagDescription = "Provider name to delete"
-)
-
 type inputDeleteCredential struct {
 	provider string
 }
@@ -42,7 +37,7 @@ var deleteCredentialFlags = flags{
 		name:        providerFlagName,
 		kind:        reflect.String,
 		defValue:    "",
-		description: providerFlagDescription,
+		description: "Provider name to delete",
 	},
 }
 

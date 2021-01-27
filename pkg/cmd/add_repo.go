@@ -35,7 +35,6 @@ import (
 const (
 	defaultRepoURL   = "https://github.com/ZupIT/ritchie-formulas"
 	messageExisting  = "This formula repository already exists, check using \"rit list repo\""
-	nameFlagName     = "name"
 	repoUrlFlagName  = "repoUrl"
 	priorityFlagName = "priority"
 	tokenFlagName    = "token"

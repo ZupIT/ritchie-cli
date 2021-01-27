@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.8.0](https://github.com/zupit/ritchie-cli/tree/2.8.0) (2021-01-26)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.7.0...2.8.0)
+
+**Closed issues:**
+
+- Tests with Testify in Pkg/Formula/Workspace [\#790](https://github.com/ZupIT/ritchie-cli/issues/790)
+- Add new tests [\#684](https://github.com/ZupIT/ritchie-cli/issues/684)
+- Remove fileutil package [\#810](https://github.com/ZupIT/ritchie-cli/issues/810)
+- Tests with Testify in Pkg/Commands [\#765](https://github.com/ZupIT/ritchie-cli/issues/765)
+- Support flags for rit delete workspace [\#723](https://github.com/ZupIT/ritchie-cli/issues/723)
+- Support flags for rit set credential [\#720](https://github.com/ZupIT/ritchie-cli/issues/720)
+- Support flags for rit delete credential [\#714](https://github.com/ZupIT/ritchie-cli/issues/714)
+- Support flags for rit delete env [\#713](https://github.com/ZupIT/ritchie-cli/issues/713)
+- Support flags for rit add repo [\#711](https://github.com/ZupIT/ritchie-cli/issues/711)
+- Latest version is not updating during the release [\#703](https://github.com/ZupIT/ritchie-cli/issues/703)
+- Add Bitbucket to provider list for rit add repo [\#647](https://github.com/ZupIT/ritchie-cli/issues/647)
+
+**Merged pull requests:**
+
+- Adding flags and tests to delete workspace [\#832](https://github.com/ZupIT/ritchie-cli/pull/832) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Testify on commands package [\#831](https://github.com/ZupIT/ritchie-cli/pull/831) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Removing file util package with test refactor [\#830](https://github.com/ZupIT/ritchie-cli/pull/830) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Flags for rit add repo [\#827](https://github.com/ZupIT/ritchie-cli/pull/827) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Add flags to delete env [\#826](https://github.com/ZupIT/ritchie-cli/pull/826) ([brunasilvazup](https://github.com/brunasilvazup))
+- Set credential flags [\#824](https://github.com/ZupIT/ritchie-cli/pull/824) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- feat: add bitbucket as a provider to add repos [\#823](https://github.com/ZupIT/ritchie-cli/pull/823) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- Updating horusec endpoint [\#820](https://github.com/ZupIT/ritchie-cli/pull/820) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- fixing release pipeline [\#819](https://github.com/ZupIT/ritchie-cli/pull/819) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Release 2.7.0 merge [\#818](https://github.com/ZupIT/ritchie-cli/pull/818) ([zup-ci](https://github.com/zup-ci))
+- Delete credential flags [\#774](https://github.com/ZupIT/ritchie-cli/pull/774) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Added new tests to rit delete env [\#822](https://github.com/ZupIT/ritchie-cli/pull/822) ([brunasilvazup](https://github.com/brunasilvazup))
+
 ## [2.7.0](https://github.com/zupit/ritchie-cli/tree/2.7.0) (2021-01-04)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.6.0...2.7.0)
@@ -226,7 +259,6 @@
 - Adding developer guide [\#604](https://github.com/ZupIT/ritchie-cli/pull/604) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Fix significant typos and grammar in CONTRIBUTING.md [\#603](https://github.com/ZupIT/ritchie-cli/pull/603) ([Bharat123rox](https://github.com/Bharat123rox))
 - Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
-- Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
 - Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
 - Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
@@ -480,6 +512,7 @@
 
 - \[FIX\] Add repo with the commons name [\#361](https://github.com/ZupIT/ritchie-cli/pull/361) ([kaduartur](https://github.com/kaduartur))
 - \[Feature\] Add hooks in packagings [\#359](https://github.com/ZupIT/ritchie-cli/pull/359) ([ernelio](https://github.com/ernelio))
+- Release 2.0.0 merge [\#358](https://github.com/ZupIT/ritchie-cli/pull/358) ([zup-ci](https://github.com/zup-ci))
 
 ## [2.0.0](https://github.com/zupit/ritchie-cli/tree/2.0.0) (2020-08-05)
 
@@ -497,7 +530,6 @@
 
 **Merged pull requests:**
 
-- Release 2.0.0 merge [\#358](https://github.com/ZupIT/ritchie-cli/pull/358) ([zup-ci](https://github.com/zup-ci))
 - \[Fix\] lint [\#357](https://github.com/ZupIT/ritchie-cli/pull/357) ([kaduartur](https://github.com/kaduartur))
 - \[FIX\] init warning msg [\#355](https://github.com/ZupIT/ritchie-cli/pull/355) ([kaduartur](https://github.com/kaduartur))
 - Fix notice [\#354](https://github.com/ZupIT/ritchie-cli/pull/354) ([brunats](https://github.com/brunats))

@@ -30,6 +30,7 @@ import (
 
 func TestDeleteWorkspaces(t *testing.T) {
 	type in struct {
+		args            []string
 		wspaceList      formula.Workspaces
 		wspaceListErr   error
 		wspaceDeleteErr error
@@ -49,6 +50,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "success",
 			in: in{
+				args: []string{},
 				wspaceList: formula.Workspaces{
 					"local-commons": "/home/user/commons",
 				},
@@ -60,6 +62,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "error to list workspace",
 			in: in{
+				args:          []string{},
 				wspaceListErr: errors.New("error to list workspace"),
 			},
 			want: errors.New("error to list workspace"),
@@ -67,6 +70,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "error empty workspace",
 			in: in{
+				args:       []string{},
 				wspaceList: formula.Workspaces{},
 			},
 			want: ErrEmptyWorkspaces,
@@ -74,6 +78,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "error to input list",
 			in: in{
+				args: []string{},
 				wspaceList: formula.Workspaces{
 					"local-commons": "/home/user/commons",
 				},
@@ -86,6 +91,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "error to accept to delete selected workspace",
 			in: in{
+				args: []string{},
 				wspaceList: formula.Workspaces{
 					"local-commons": "/home/user/commons",
 				},
@@ -98,6 +104,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "not accept to delete selected workspace",
 			in: in{
+				args: []string{},
 				wspaceList: formula.Workspaces{
 					"local-commons": "/home/user/commons",
 				},
@@ -109,6 +116,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "error to delete repo",
 			in: in{
+				args: []string{},
 				wspaceList: formula.Workspaces{
 					"local-commons": "/home/user/commons",
 				},
@@ -122,6 +130,7 @@ func TestDeleteWorkspaces(t *testing.T) {
 		{
 			name: "error to delete workspace",
 			in: in{
+				args: []string{},
 				wspaceList: formula.Workspaces{
 					"local-commons": "/home/user/commons",
 				},
@@ -131,6 +140,42 @@ func TestDeleteWorkspaces(t *testing.T) {
 				wspaceDeleteErr: errors.New("error to delete workspace"),
 			},
 			want: errors.New("error to delete workspace"),
+		},
+		{
+			name: "error on empty flag name",
+			in: in{
+				args: []string{"--name="},
+			},
+			want: errors.New("please provide a value for 'name'"),
+		},
+		{
+			name: "error on wrong workspace name",
+			in: in{
+				args: []string{"--name=Zup"},
+				wspaceList: formula.Workspaces{
+					"zup": "/home/user/commons",
+				},
+			},
+			want: errors.New("no workspace found with this name"),
+		},
+		{
+			name: "error to delete default workspace",
+			in: in{
+				args: []string{"--name=" + formula.DefaultWorkspaceName},
+				wspaceList: formula.Workspaces{
+					formula.DefaultWorkspaceName: "/home/user/commons",
+				},
+			},
+			want: errors.New("cannot delete default workspace"),
+		},
+		{
+			name: "success on workspace name",
+			in: in{
+				args: []string{"--name=zup"},
+				wspaceList: formula.Workspaces{
+					"zup": "/home/user/commons",
+				},
+			},
 		},
 	}
 
@@ -152,10 +197,10 @@ func TestDeleteWorkspaces(t *testing.T) {
 				os.TempDir(),
 				workspaceMock,
 				repoManagerMock,
-				dirMock,
 				inListMock,
 				inBoolMock,
 			)
+			cmd.SetArgs(tt.in.args)
 
 			got := cmd.Execute()
 			assert.Equal(t, tt.want, got)
