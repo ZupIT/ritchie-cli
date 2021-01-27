@@ -61,7 +61,7 @@ func init() {
 
 		bytes, err := Asset(file)
 		if err != nil {
-			fmt.Printf("Error to load %q translation", i)
+			panic(fmt.Sprintf("Error to load %q translation", i))
 		}
 
 		bundle.MustParseMessageFileBytes(bytes, file)
@@ -75,11 +75,7 @@ func init() {
 
 func (t *Translation) resolver(msgID string, params ...interface{}) string {
 	var msg string
-	c, err := t.config.Read()
-	if err != nil {
-		panic(err)
-	}
-
+	c, _ := t.config.Read()
 	loc := i18n.NewLocalizer(t.bundle, Langs[c.Language])
 	locConfig := &i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{},

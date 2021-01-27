@@ -17,6 +17,7 @@
 package i18n
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -67,6 +68,7 @@ func TestTranslation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			_ = os.RemoveAll(c.ConfigsPath)
 			in := tt.in
 			if in.lang != "" {
 				configs := config.Configs{
@@ -78,9 +80,8 @@ func TestTranslation(t *testing.T) {
 			message := T(in.msgID)
 
 			assert.Equal(t, tt.want, message)
-
-			_ = c.Write(defaultConfig)
 		})
 	}
 
+	_ = c.Write(defaultConfig)
 }

@@ -132,7 +132,7 @@ func (in initCmd) runPrompt() CommandRunnerFunc {
 		}
 
 		configs := config.Configs{
-			Language: "English",
+			Language: config.DefaultLang,
 			Metrics:  metrics,
 			RunType:  runType,
 			Tutorial: tutorialStatusEnabled,

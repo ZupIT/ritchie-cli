@@ -18,6 +18,7 @@ package config
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -27,7 +28,14 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 )
 
-const File = "configs.toml"
+const (
+	File             = "configs.toml"
+	DefaultLang      = "English"
+	DefaultTutorial  = "enabled"
+	DefaultMetrics   = "yes"
+	DefaultRunType   = formula.DockerRun
+	errNotReadConfig = "it was not possible to read your configs.toml file, you are using the default Configs %+v"
+)
 
 type Reader interface {
 	Read() (Configs, error)
@@ -45,12 +53,12 @@ type Configs struct {
 }
 
 type Manager struct {
-	configsPath string
+	ConfigsPath string
 }
 
 func NewManager(ritHome string) Manager {
 	return Manager{
-		configsPath: filepath.Join(ritHome, File),
+		ConfigsPath: filepath.Join(ritHome, File),
 	}
 }
 
@@ -62,27 +70,37 @@ func (m Manager) Write(configs Configs) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(m.configsPath, buf.Bytes(), os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(m.ConfigsPath, buf.Bytes(), os.ModePerm); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// Read reads the Configs file inside the .rit home dir
+// If configs.toml does not exist it's return a default
+// value and error == nil:
+// Configs{
+//		Language: DefaultLang,
+//		Tutorial: DefaultTutorial,
+//		Metrics:  DefaultMetrics,
+//		RunType:  DefaultRunType,
+//	}
+// in case of an error decoding the error != nil
 func (m Manager) Read() (Configs, error) {
 	c := Configs{
-		Language: "en",
-		Tutorial: "enabled",
-		Metrics:  "yes",
-		RunType:  formula.DockerRun,
+		Language: DefaultLang,
+		Tutorial: DefaultTutorial,
+		Metrics:  DefaultMetrics,
+		RunType:  DefaultRunType,
 	}
 
-	if _, err := os.Stat(m.configsPath); os.IsNotExist(err) {
+	if _, err := os.Stat(m.ConfigsPath); os.IsNotExist(err) {
 		return c, nil
 	}
 
-	if _, err := toml.DecodeFile(m.configsPath, &c); err != nil {
-		return Configs{}, err
+	if _, err := toml.DecodeFile(m.ConfigsPath, &c); err != nil {
+		return c, fmt.Errorf(errNotReadConfig, c)
 	}
 
 	return c, nil
