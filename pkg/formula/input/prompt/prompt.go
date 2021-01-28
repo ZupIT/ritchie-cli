@@ -131,7 +131,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		}
 		return in.textValidator(i)
 	case input.ListType:
-		if items == nil || len(items) == 0 {
+		if len(items) == 0 {
 			return "", fmt.Errorf(EmptyItems, i.Name)
 		}
 		return in.loadInputValList(items, i)
@@ -142,7 +142,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		}
 		return in.List(i.Label, dl, i.Tutorial)
 	case input.Multiselect:
-		if items == nil || len(items) == 0 {
+		if len(items) == 0 {
 			return "", fmt.Errorf(EmptyItems, i.Name)
 		}
 		sl, err := in.Multiselect(i)
