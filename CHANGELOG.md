@@ -1,5 +1,71 @@
 # Changelog
 
+## [2.8.0](https://github.com/zupit/ritchie-cli/tree/2.8.0) (2021-01-26)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.7.0...2.8.0)
+
+**Closed issues:**
+
+- Tests with Testify in Pkg/Formula/Workspace [\#790](https://github.com/ZupIT/ritchie-cli/issues/790)
+- Add new tests [\#684](https://github.com/ZupIT/ritchie-cli/issues/684)
+- Remove fileutil package [\#810](https://github.com/ZupIT/ritchie-cli/issues/810)
+- Tests with Testify in Pkg/Commands [\#765](https://github.com/ZupIT/ritchie-cli/issues/765)
+- Support flags for rit delete workspace [\#723](https://github.com/ZupIT/ritchie-cli/issues/723)
+- Support flags for rit set credential [\#720](https://github.com/ZupIT/ritchie-cli/issues/720)
+- Support flags for rit delete credential [\#714](https://github.com/ZupIT/ritchie-cli/issues/714)
+- Support flags for rit delete env [\#713](https://github.com/ZupIT/ritchie-cli/issues/713)
+- Support flags for rit add repo [\#711](https://github.com/ZupIT/ritchie-cli/issues/711)
+- Latest version is not updating during the release [\#703](https://github.com/ZupIT/ritchie-cli/issues/703)
+- Add Bitbucket to provider list for rit add repo [\#647](https://github.com/ZupIT/ritchie-cli/issues/647)
+
+**Merged pull requests:**
+
+- Adding flags and tests to delete workspace [\#832](https://github.com/ZupIT/ritchie-cli/pull/832) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Testify on commands package [\#831](https://github.com/ZupIT/ritchie-cli/pull/831) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Removing file util package with test refactor [\#830](https://github.com/ZupIT/ritchie-cli/pull/830) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Flags for rit add repo [\#827](https://github.com/ZupIT/ritchie-cli/pull/827) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Add flags to delete env [\#826](https://github.com/ZupIT/ritchie-cli/pull/826) ([brunasilvazup](https://github.com/brunasilvazup))
+- Set credential flags [\#824](https://github.com/ZupIT/ritchie-cli/pull/824) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- feat: add bitbucket as a provider to add repos [\#823](https://github.com/ZupIT/ritchie-cli/pull/823) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- Updating horusec endpoint [\#820](https://github.com/ZupIT/ritchie-cli/pull/820) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- fixing release pipeline [\#819](https://github.com/ZupIT/ritchie-cli/pull/819) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
+- Release 2.7.0 merge [\#818](https://github.com/ZupIT/ritchie-cli/pull/818) ([zup-ci](https://github.com/zup-ci))
+- Delete credential flags [\#774](https://github.com/ZupIT/ritchie-cli/pull/774) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Added new tests to rit delete env [\#822](https://github.com/ZupIT/ritchie-cli/pull/822) ([brunasilvazup](https://github.com/brunasilvazup))
+
+## [2.7.0](https://github.com/zupit/ritchie-cli/tree/2.7.0) (2021-01-04)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.6.0...2.7.0)
+
+**Closed issues:**
+
+- Create a RIT ADD WORKSPACE command [\#802](https://github.com/ZupIT/ritchie-cli/issues/802)
+- Tests with Testify in Pkg/Stdin [\#797](https://github.com/ZupIT/ritchie-cli/issues/797)
+- Tests with Testify in Pkg/Formula/Input/Stdin [\#784](https://github.com/ZupIT/ritchie-cli/issues/784)
+- Tests with Testify in Pkg/Formula/Input/Flag [\#782](https://github.com/ZupIT/ritchie-cli/issues/782)
+- Tests with Testify in Pkg/Formula/Creator [\#781](https://github.com/ZupIT/ritchie-cli/issues/781)
+- Tests with Testify in Pkg/Credential [\#766](https://github.com/ZupIT/ritchie-cli/issues/766)
+- Support new http verbs and authentication on dynamic list input [\#652](https://github.com/ZupIT/ritchie-cli/issues/652)
+- Store the json list returned by an API consumed through the dynamic type input [\#646](https://github.com/ZupIT/ritchie-cli/issues/646)
+- Use credentials when consuming URL configured for the dynamic type list [\#645](https://github.com/ZupIT/ritchie-cli/issues/645)
+- Return error when trying to create a new formula in an empty workspace [\#814](https://github.com/ZupIT/ritchie-cli/issues/814)
+- Do NOT remove the user workspace folder on rit delete workspace [\#804](https://github.com/ZupIT/ritchie-cli/issues/804)
+- Tests with Testify in Pkg/Slice/SliceUtil [\#796](https://github.com/ZupIT/ritchie-cli/issues/796)
+- The formula is not automatically build at its creation [\#763](https://github.com/ZupIT/ritchie-cli/issues/763)
+- Create new commands tree to improve performance [\#679](https://github.com/ZupIT/ritchie-cli/issues/679)
+
+**Merged pull requests:**
+
+- Fix delete workspace [\#816](https://github.com/ZupIT/ritchie-cli/pull/816) ([kaduartur](https://github.com/kaduartur))
+- Fix add empty local repo [\#815](https://github.com/ZupIT/ritchie-cli/pull/815) ([kaduartur](https://github.com/kaduartur))
+- created rit add workspace command [\#809](https://github.com/ZupIT/ritchie-cli/pull/809) ([aronrichter](https://github.com/aronrichter))
+- Tests on slice [\#808](https://github.com/ZupIT/ritchie-cli/pull/808) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Tests on credential pkg [\#806](https://github.com/ZupIT/ritchie-cli/pull/806) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Improve performance to "rit create formula" command [\#805](https://github.com/ZupIT/ritchie-cli/pull/805) ([kaduartur](https://github.com/kaduartur))
+- New horus pipeline [\#803](https://github.com/ZupIT/ritchie-cli/pull/803) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Release 2.6.0 merge [\#778](https://github.com/ZupIT/ritchie-cli/pull/778) ([zup-ci](https://github.com/zup-ci))
+- Performance new tree struct [\#768](https://github.com/ZupIT/ritchie-cli/pull/768) ([kaduartur](https://github.com/kaduartur))
+
 ## [2.6.0](https://github.com/zupit/ritchie-cli/tree/2.6.0) (2020-12-14)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.5.0...2.6.0)
@@ -98,7 +164,6 @@
 **Merged pull requests:**
 
 - Fix update repo when all option selected [\#700](https://github.com/ZupIT/ritchie-cli/pull/700) ([brunasilvazup](https://github.com/brunasilvazup))
-- Convert contexts to envs file [\#697](https://github.com/ZupIT/ritchie-cli/pull/697) ([kaduartur](https://github.com/kaduartur))
 - fix: add check for variables with the same name [\#693](https://github.com/ZupIT/ritchie-cli/pull/693) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Kill bill\(d\) [\#692](https://github.com/ZupIT/ritchie-cli/pull/692) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - update horus url [\#690](https://github.com/ZupIT/ritchie-cli/pull/690) ([victorschumacherzup](https://github.com/victorschumacherzup))
@@ -194,7 +259,6 @@
 - Adding developer guide [\#604](https://github.com/ZupIT/ritchie-cli/pull/604) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Fix significant typos and grammar in CONTRIBUTING.md [\#603](https://github.com/ZupIT/ritchie-cli/pull/603) ([Bharat123rox](https://github.com/Bharat123rox))
 - Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
-- Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
 - Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
 - Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))

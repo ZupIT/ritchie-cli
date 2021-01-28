@@ -93,7 +93,6 @@ type InputURLMock struct {
 
 func (i *InputURLMock) URL(name, defaultValue string) (string, error) {
 	args := i.Called(name, defaultValue)
-
 	return args.String(0), args.Error(1)
 }
 
@@ -251,6 +250,20 @@ func (r *RepoManager) Write(repos formula.Repos) error {
 func (r *RepoManager) LatestTag(repo formula.Repo) string {
 	args := r.Called(repo)
 	return args.String(0)
+}
+
+type DirManager struct {
+	mock.Mock
+}
+
+func (d *DirManager) Exists(path string) bool {
+	args := d.Called(path)
+	return args.Bool(0)
+}
+
+func (d *DirManager) IsDir(dir string) bool {
+	args := d.Called(dir)
+	return args.Bool(0)
 }
 
 type FileManager struct {

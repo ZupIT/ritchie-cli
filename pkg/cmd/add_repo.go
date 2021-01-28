@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -32,11 +33,54 @@ import (
 )
 
 const (
-	defaultRepoURL  = "https://github.com/ZupIT/ritchie-formulas"
-	messageExisting = "This formula repository already exists, check using \"rit list repo\""
+	defaultRepoURL   = "https://github.com/ZupIT/ritchie-formulas"
+	messageExisting  = "This formula repository already exists, check using \"rit list repo\""
+	repoUrlFlagName  = "repoUrl"
+	priorityFlagName = "priority"
+	tokenFlagName    = "token"
+	tagFlagName      = "tag"
 )
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
+
+var addRepoFlags = flags{
+	{
+		name:        providerFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "provider name (Github|Gitlab|Bitbucket)",
+	},
+	{
+		name:        nameFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "repository name",
+	},
+	{
+		name:        repoUrlFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "repository url",
+	},
+	{
+		name:        tokenFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "access token",
+	},
+	{
+		name:        tagFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "repository tag version",
+	},
+	{
+		name:        priorityFlagName,
+		kind:        reflect.Int,
+		defValue:    1000,
+		description: "repository priority (0 is highest)",
+	},
+}
 
 type addRepoCmd struct {
 	repo          formula.RepositoryAddLister
@@ -82,134 +126,202 @@ func NewAddRepoCmd(
 		Use:       "repo",
 		Short:     "Add a repository",
 		Example:   "rit add repo",
-		RunE:      RunFuncE(addRepo.runStdin(), addRepo.runPrompt()),
+		RunE:      RunFuncE(addRepo.runStdin(), addRepo.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
-	cmd.LocalFlags()
+
+	addReservedFlags(cmd.Flags(), addRepoFlags)
 
 	return cmd
 }
 
-func (ad addRepoCmd) runPrompt() CommandRunnerFunc {
+func (ar *addRepoCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		provider, err := ad.List("Select your provider:", ad.repoProviders.List())
-		if err != nil {
+		repo, err := ar.resolveInput(cmd)
+		if err != nil || repo.Provider == "" {
 			return err
 		}
 
-		name, err := ad.Text("Repository name:", ad.repoNameValidator)
-		if err != nil {
-			return err
-		}
-
-		repos, err := ad.repo.List()
-		if err != nil {
-			return err
-		}
-
-		for i := range repos {
-			repo := repos[i]
-			if repo.Name == formula.RepoCommonsName && formula.RepoName(name) == formula.RepoCommonsName {
-				prompt.Warning("You are trying to replace the \"commons\" repository!")
-				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"})
-				if !choice {
-					prompt.Info("Operation cancelled")
-					return nil
-				}
-				break
-			}
-
-			if repo.Name == formula.RepoName(name) {
-				prompt.Warning(fmt.Sprintf("Your repository %q is gonna be overwritten.", repo.Name))
-				choice, _ := ad.Bool("Do you want to proceed?", []string{"yes", "no"})
-				if !choice {
-					prompt.Info("Operation cancelled")
-					return nil
-				}
-			}
-		}
-
-		url, err := ad.URL("Repository URL:", defaultRepoURL)
-		if err != nil {
-			return err
-		}
-
-		isPrivate, err := ad.Bool("Is a private repository?", []string{"no", "yes"})
-		if err != nil {
-			return err
-		}
-
-		var token string
-		if isPrivate {
-			token, err = ad.Password("Personal access tokens:")
-			if err != nil {
-				return err
-			}
-		}
-
-		git := ad.repoProviders.Resolve(formula.RepoProvider(provider))
-
-		gitRepoInfo := git.NewRepoInfo(url, token)
-		tags, err := git.Repos.Tags(gitRepoInfo)
-		if err != nil {
-			return err
-		}
-
-		if len(tags) <= 0 {
-			return fmt.Errorf("please, generate a release to add your repository")
-		}
-
-		var tagNames []string
-		for i := range tags {
-			tagNames = append(tagNames, tags[i].Name)
-		}
-
-		version, err := ad.List("Select a tag version:", tagNames)
-		if err != nil {
-			return err
-		}
-
-		if existsRepo(url, version, repos) {
-			prompt.Info(messageExisting)
-			return nil
-		}
-
-		priority, err := ad.Int("Set the priority:", "0 is higher priority, the lower higher the priority")
-		if err != nil {
-			return err
-		}
-
-		repository := formula.Repo{
-			Provider: formula.RepoProvider(provider),
-			Name:     formula.RepoName(name),
-			Version:  formula.RepoVersion(version),
-			Token:    token,
-			Url:      url,
-			Priority: int(priority),
-		}
-
-		if err := ad.repo.Add(repository); err != nil {
+		if err := ar.repo.Add(repo); err != nil {
 			return err
 		}
 
 		successMsg := fmt.Sprintf(
 			"The %q repository was added with success, now you can use your formulas with the Ritchie!",
-			repository.Name,
+			repo.Name,
 		)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.tutorial.Find()
+		tutorialHolder, err := ar.tutorial.Find()
 		if err != nil {
 			return err
 		}
 		tutorialAddRepo(tutorialHolder.Current)
-		conflictCmds := ad.tree.Check()
+		conflictCmds := ar.tree.Check()
 
 		printConflictingCommandsWarning(conflictCmds)
 
 		return nil
 	}
+}
+
+func (ar *addRepoCmd) resolveInput(cmd *cobra.Command) (formula.Repo, error) {
+	if IsFlagInput(cmd) {
+		return ar.resolveFlags(cmd)
+	}
+	return ar.resolvePrompt()
+}
+
+func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
+	provider, err := ar.List("Select your provider:", ar.repoProviders.List())
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	name, err := ar.Text("Repository name:", ar.repoNameValidator)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	repos, err := ar.repo.List()
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	for i := range repos {
+		repo := repos[i]
+		if repo.Name == formula.RepoCommonsName && formula.RepoName(name) == formula.RepoCommonsName {
+			prompt.Warning("You are trying to replace the \"commons\" repository!")
+			choice, _ := ar.Bool("Do you want to proceed?", []string{"yes", "no"})
+			if !choice {
+				prompt.Info("Operation cancelled")
+				return formula.Repo{}, nil
+			}
+			break
+		}
+
+		if repo.Name == formula.RepoName(name) {
+			prompt.Warning(fmt.Sprintf("Your repository %q is gonna be overwritten.", repo.Name))
+			choice, _ := ar.Bool("Do you want to proceed?", []string{"yes", "no"})
+			if !choice {
+				prompt.Info("Operation cancelled")
+				return formula.Repo{}, nil
+			}
+		}
+	}
+
+	url, err := ar.URL("Repository URL:", defaultRepoURL)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	isPrivate, err := ar.Bool("Is a private repository?", []string{"no", "yes"})
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	var token string
+	if isPrivate {
+		token, err = ar.Password("Personal access tokens:")
+		if err != nil {
+			return formula.Repo{}, err
+		}
+	}
+
+	git := ar.repoProviders.Resolve(formula.RepoProvider(provider))
+
+	gitRepoInfo := git.NewRepoInfo(url, token)
+	tags, err := git.Repos.Tags(gitRepoInfo)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	if len(tags) <= 0 {
+		return formula.Repo{}, fmt.Errorf("please, generate a release to add your repository")
+	}
+
+	tagNames := make([]string, 0, len(tags))
+	for i := range tags {
+		tagNames = append(tagNames, tags[i].Name)
+	}
+
+	version, err := ar.List("Select a tag version:", tagNames)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	if existsRepo(url, version, repos) {
+		prompt.Info(messageExisting)
+		return formula.Repo{}, nil
+	}
+
+	priority, err := ar.Int("Set the priority:", "0 is highest")
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	return formula.Repo{
+		Provider: formula.RepoProvider(provider),
+		Name:     formula.RepoName(name),
+		Version:  formula.RepoVersion(version),
+		Token:    token,
+		Url:      url,
+		Priority: int(priority),
+	}, nil
+}
+
+func (ar *addRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repo, error) {
+	provider, err := cmd.Flags().GetString(providerFlagName)
+	if err != nil || provider == "" {
+		return formula.Repo{}, errors.New(missingFlagText(providerFlagName))
+	}
+
+	providers := ar.repoProviders.List()
+	providerValid := false
+	for _, repoProvider := range providers {
+		if repoProvider == provider {
+			providerValid = true
+			break
+		}
+	}
+	if !providerValid {
+		return formula.Repo{}, errors.New("please select a provider from " + strings.Join(providers, ", "))
+	}
+
+	name, err := cmd.Flags().GetString(nameFlagName)
+	if err != nil || name == "" {
+		return formula.Repo{}, errors.New(missingFlagText(nameFlagName))
+	}
+
+	repoUrl, err := cmd.Flags().GetString(repoUrlFlagName)
+	if err != nil || repoUrl == "" {
+		return formula.Repo{}, errors.New(missingFlagText(repoUrlFlagName))
+	}
+
+	tag, err := cmd.Flags().GetString(tagFlagName)
+	if err != nil || tag == "" {
+		return formula.Repo{}, errors.New(missingFlagText(tagFlagName))
+	}
+
+	token, err := cmd.Flags().GetString(tokenFlagName)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	priority, err := cmd.Flags().GetInt(priorityFlagName)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	return formula.Repo{
+		Provider: formula.RepoProvider(provider),
+		Name:     formula.RepoName(name),
+		Version:  formula.RepoVersion(tag),
+		Token:    token,
+		Url:      repoUrl,
+		Priority: priority,
+	}, nil
 }
 
 func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
@@ -226,7 +338,7 @@ func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
 	fmt.Println(msg)
 }
 
-func (ad addRepoCmd) runStdin() CommandRunnerFunc {
+func (ar addRepoCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		r := formula.Repo{}
 
@@ -236,17 +348,17 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		}
 
 		if r.Version.String() == "" {
-			latestTag := ad.detail.LatestTag(r)
+			latestTag := ar.detail.LatestTag(r)
 			r.Version = formula.RepoVersion(latestTag)
 		}
 
-		repos, _ := ad.repo.List()
+		repos, _ := ar.repo.List()
 		if existsRepo(r.Url, r.Version.String(), repos) {
 			prompt.Info(messageExisting)
 			return nil
 		}
 
-		if err := ad.repo.Add(r); err != nil {
+		if err := ar.repo.Add(r); err != nil {
 			return err
 		}
 
@@ -256,7 +368,7 @@ func (ad addRepoCmd) runStdin() CommandRunnerFunc {
 		)
 		prompt.Success(successMsg)
 
-		tutorialHolder, err := ad.tutorial.Find()
+		tutorialHolder, err := ar.tutorial.Find()
 		if err != nil {
 			return err
 		}
