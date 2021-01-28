@@ -35,8 +35,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
-
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -49,7 +47,6 @@ const (
 
 type InputManager struct {
 	cred credential.Resolver
-	file stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
 	input.InputTextDefault
@@ -61,7 +58,6 @@ type InputManager struct {
 
 func NewInputManager(
 	cred credential.Resolver,
-	file stream.FileWriteReadExister,
 	inList prompt.InputList,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
@@ -72,7 +68,6 @@ func NewInputManager(
 ) formula.InputRunner {
 	return InputManager{
 		cred:               cred,
-		file:               file,
 		InputList:          inList,
 		InputText:          inText,
 		InputTextValidator: inTextValidator,
@@ -201,11 +196,9 @@ func (in InputManager) persistCache(formulaPath, inputVal string, input formula.
 			items = items[0:qtd]
 		}
 		itemsBytes, _ := json.Marshal(items)
-		if err := in.file.Write(cachePath, itemsBytes); err != nil {
-			fmt.Sprintln("Write file error")
-			return
+		if err := ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
+			fmt.Sprintln("Write cache error")
 		}
-
 	}
 }
 
@@ -229,27 +222,23 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]string, error) {
 	if input.Cache.Active {
 		cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
-		if in.file.Exists(cachePath) {
-			fileBytes, err := in.file.Read(cachePath)
-			if err != nil {
-				return nil, err
-			}
-			var items []string
-			err = json.Unmarshal(fileBytes, &items)
-			if err != nil {
-				return nil, err
-			}
-			return items, nil
-		} else {
+		fileBytes, err := ioutil.ReadFile(cachePath)
+		if err != nil {
 			itemsBytes, err := json.Marshal(input.Items)
 			if err != nil {
 				return nil, err
 			}
-			if err = in.file.Write(cachePath, itemsBytes); err != nil {
+			if err = ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
 				return nil, err
 			}
 			return input.Items, nil
 		}
+		var items []string
+		err = json.Unmarshal(fileBytes, &items)
+		if err != nil {
+			return nil, err
+		}
+		return items, nil
 	} else {
 		return input.Items, nil
 	}
