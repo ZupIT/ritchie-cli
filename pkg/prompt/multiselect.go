@@ -19,6 +19,7 @@ package prompt
 import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	fInput "github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
 
 type SurveyMultiselect struct{}
@@ -40,7 +41,7 @@ func (SurveyMultiselect) Multiselect(input formula.Input) ([]string, error) {
 		},
 	}
 
-	if *input.Required {
+	if fInput.IsRequired(input) {
 		multiQs[0].Validate = survey.Required
 	}
 
