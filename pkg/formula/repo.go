@@ -93,8 +93,6 @@ func (re RepoProviders) List() []string {
 	}
 	sort.Strings(providers)
 
-	sort.Strings(providers)
-
 	return providers
 }
 
