@@ -177,9 +177,9 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input text error",
 			args: []string{},
 			fields: fields{
-				InputTextValidator: returnWithStringErr{"mocked text", someError},
+				InputTextValidator: returnWithStringErr{"", ErrFormulaCmdNotBeEmpty},
 			},
-			want: someError,
+			want: ErrFormulaCmdNotBeEmpty,
 		},
 		{
 			name: "input url error",

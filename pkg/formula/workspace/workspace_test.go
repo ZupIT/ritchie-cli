@@ -96,10 +96,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 				Name: "commons",
 				Dir:  fullDir,
 			},
-			outErr: fmt.Sprintf(
-				"open %s: no such file or directory",
-				filepath.Join(workspaceNonExistingPath, formula.WorkspacesFile),
-			),
+			outErr: mocks.FileNotFoundError(filepath.Join(workspaceNonExistingPath, formula.WorkspacesFile)),
 		},
 	}
 
@@ -170,10 +167,7 @@ func TestManagerDelete(t *testing.T) {
 				Name: "Default",
 				Dir:  fullDir,
 			},
-			outErr: fmt.Sprintf(
-				"open %s: no such file or directory",
-				filepath.Join(fileNonExistentPath, formula.WorkspacesFile),
-			),
+			outErr: mocks.FileNotFoundError(filepath.Join(fileNonExistentPath, formula.WorkspacesFile)),
 		},
 	}
 
@@ -286,10 +280,7 @@ func TestPreviousHash(t *testing.T) {
 		{
 			name:     "shoud fail when file doesn't exist",
 			homePath: formulaNonExistentPath,
-			outErr: fmt.Sprintf(
-				"open %s: no such file or directory",
-				path.Join(formulaNonExistentPath, "hashes", "my-formula.txt"),
-			),
+			outErr:   mocks.FileNotFoundError(path.Join(formulaNonExistentPath, "hashes", "my-formula.txt")),
 		},
 	}
 

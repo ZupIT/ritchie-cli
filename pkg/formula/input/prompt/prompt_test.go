@@ -117,6 +117,7 @@ func TestInputManager(t *testing.T) {
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 	_ = os.Setenv("SAMPLE_TEXT", "someValue")
 	ritHome := filepath.Join(os.TempDir(), "inputs")
+	ritInvalidHome := filepath.Join(ritHome, "invalid")
 	_ = os.Mkdir(ritHome, os.ModePerm)
 	defer os.RemoveAll(ritHome)
 
@@ -142,14 +143,17 @@ func TestInputManager(t *testing.T) {
 			expectedError: "invalid character 'e' looking for beginning of value",
 		},
 		{
-			name:          "cache file doesn't exist success",
-			ritHome:       ritHome,
-			expectedError: "",
+			name:    "cache file doesn't exist success",
+			ritHome: ritHome,
 		},
 		{
-			name:          "persist cache file write error",
-			ritHome:       ritHome,
-			expectedError: "",
+			name:    "persist cache file write error",
+			ritHome: ritHome,
+		},
+		{
+			name:          "fail cache path",
+			ritHome:       ritInvalidHome,
+			expectedError: mocks.FileNotFoundError(fmt.Sprintf(CachePattern, ritInvalidHome, strings.ToUpper("SAMPLE_TEXT"))),
 		},
 		{
 			name:            "error env resolver prompt",
@@ -213,7 +217,7 @@ func TestInputManager(t *testing.T) {
 				Config: formula.Config{
 					Inputs: inputs,
 				},
-				FormulaPath: ritHome,
+				FormulaPath: tt.ritHome,
 			}
 
 			inputManager := NewInputManager(
@@ -717,5 +721,43 @@ func TestDefaultFlag(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Contains(t, string(out), "Added sample_text by default: test")
+	})
+}
+
+func TestEmptyList(t *testing.T) {
+	inputJson := `[
+		{
+			"name": "sample_list",
+			"type": "list",
+			"label": "Type : ",
+			"default": "test"
+		}
+	]`
+	var inputs []formula.Input
+	_ = json.Unmarshal([]byte(inputJson), &inputs)
+
+	setup := formula.Setup{
+		Config: formula.Config{
+			Inputs: inputs,
+		},
+		FormulaPath: os.TempDir(),
+	}
+
+	t.Run("success prompt", func(t *testing.T) {
+		inputManager := NewInputManager(
+			&mocks.CredResolverMock{},
+			&mocks.InputListMock{},
+			&mocks.InputTextMock{},
+			&mocks.InputTextValidatorMock{},
+			&mocks.InputDefaultTextMock{},
+			&mocks.InputBoolMock{},
+			&mocks.InputPasswordMock{},
+			&mocks.InputMultiselectMock{},
+		)
+
+		cmd := &exec.Cmd{}
+		got := inputManager.Inputs(cmd, setup, nil)
+
+		assert.Equal(t, fmt.Errorf(EmptyItems, "SAMPLE_LIST"), got)
 	})
 }
