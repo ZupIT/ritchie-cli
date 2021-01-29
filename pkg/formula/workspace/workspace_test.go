@@ -18,7 +18,6 @@ package workspace
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
