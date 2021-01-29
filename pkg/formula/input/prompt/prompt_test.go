@@ -147,11 +147,7 @@ func TestInputManager(t *testing.T) {
 			ritHome: ritHome,
 		},
 		{
-			name:    "persist cache file write error",
-			ritHome: ritHome,
-		},
-		{
-			name:          "fail cache path",
+			name:          "persist cache file write error",
 			ritHome:       ritInvalidHome,
 			expectedError: mocks.FileNotFoundError(fmt.Sprintf(CachePattern, ritInvalidHome, strings.ToUpper("SAMPLE_TEXT"))),
 		},
