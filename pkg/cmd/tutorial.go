@@ -17,12 +17,15 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
+
+	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
-	"github.com/spf13/cobra"
 )
 
 type tutorialCmd struct {
@@ -34,7 +37,17 @@ type tutorialCmd struct {
 const (
 	tutorialStatusEnabled  = "enabled"
 	tutorialStatusDisabled = "disabled"
+	enabledFlagName        = "enabled"
 )
+
+var tutorialFlags = flags{
+	{
+		name:        enabledFlagName,
+		kind:        reflect.Bool,
+		defValue:    false,
+		description: "enable the tutorial",
+	},
+}
 
 // NewTutorialCmd creates tutorial command.
 func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSetter) *cobra.Command {
@@ -44,17 +57,70 @@ func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSette
 		Use:       "tutorial",
 		Short:     "Enable or disable the tutorial",
 		Long:      "Enable or disable the tutorial",
-		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
+		RunE:      RunFuncE(o.runStdin(), o.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
 
-	cmd.LocalFlags()
+	addReservedFlags(cmd.Flags(), tutorialFlags)
 
 	return cmd
 }
 
-func (o tutorialCmd) runStdin() CommandRunnerFunc {
+func (t *tutorialCmd) runFormula() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		enabled, err := t.resolveInput(cmd)
+		if err != nil {
+			return err
+		}
+
+		_, err = t.tutorial.Set(enabled)
+		if err != nil {
+			return err
+		}
+		prompt.Success("Tutorial " + enabled + "!")
+		return nil
+	}
+}
+
+func (t *tutorialCmd) resolveInput(cmd *cobra.Command) (string, error) {
+	if IsFlagInput(cmd) {
+		return t.resolveFlags(cmd)
+	}
+	return t.resolvePrompt()
+}
+
+func (t *tutorialCmd) resolveFlags(cmd *cobra.Command) (string, error) {
+	enabled, err := cmd.Flags().GetBool(enabledFlagName)
+	if err != nil {
+		return "", errors.New(missingFlagText(enabledFlagName))
+	} else if enabled {
+		return tutorialStatusEnabled, nil
+	} else {
+		return tutorialStatusDisabled, nil
+	}
+}
+
+func (t *tutorialCmd) resolvePrompt() (string, error) {
+	msg := "Status tutorial?"
+	var statusTypes = []string{tutorialStatusEnabled, tutorialStatusDisabled}
+
+	tutorialHolder, err := t.tutorial.Find()
+	if err != nil {
+		return "", err
+	}
+
+	tutorialStatusCurrent := tutorialHolder.Current
+	fmt.Println("Current tutorial status: ", tutorialStatusCurrent)
+
+	response, err := t.List(msg, statusTypes)
+	if err != nil {
+		return "", err
+	}
+	return response, nil
+}
+
+func (t *tutorialCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		obj := struct {
 			Tutorial string `json:"tutorial"`
@@ -64,39 +130,12 @@ func (o tutorialCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if _, err := o.tutorial.Set(obj.Tutorial); err != nil {
+		if _, err := t.tutorial.Set(obj.Tutorial); err != nil {
 			return err
 		}
 
 		prompt.Success("Tutorial " + obj.Tutorial + "!")
 
-		return nil
-	}
-}
-
-func (o tutorialCmd) runPrompt() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		msg := "Status tutorial?"
-		var statusTypes = []string{tutorialStatusEnabled, tutorialStatusDisabled}
-
-		tutorialHolder, err := o.tutorial.Find()
-		if err != nil {
-			return err
-		}
-
-		tutorialStatusCurrent := tutorialHolder.Current
-		fmt.Println("Current tutorial status: ", tutorialStatusCurrent)
-
-		response, err := o.List(msg, statusTypes)
-		if err != nil {
-			return err
-		}
-
-		_, err = o.tutorial.Set(response)
-		if err != nil {
-			return err
-		}
-		prompt.Success("Tutorial " + response + "!")
 		return nil
 	}
 }
