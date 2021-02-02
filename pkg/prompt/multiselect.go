@@ -19,7 +19,7 @@ package prompt
 import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	fInput "github.com/ZupIT/ritchie-cli/pkg/formula/input"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
 
 type SurveyMultiselect struct{}
@@ -28,12 +28,12 @@ func NewSurveyMultiselect() SurveyMultiselect {
 	return SurveyMultiselect{}
 }
 
-func (SurveyMultiselect) Multiselect(input formula.Input) ([]string, error) {
+func (SurveyMultiselect) Multiselect(in formula.Input) ([]string, error) {
 	value := []string{}
 	multiselect := &survey.MultiSelect{
-		Message: input.Label,
-		Options: input.Items,
-		Help:    input.Tutorial,
+		Message: in.Label,
+		Options: in.Items,
+		Help:    in.Tutorial,
 	}
 	multiQs := []*survey.Question{
 		{
@@ -41,7 +41,7 @@ func (SurveyMultiselect) Multiselect(input formula.Input) ([]string, error) {
 		},
 	}
 
-	if fInput.IsRequired(input) {
+	if input.IsRequired(in) {
 		multiQs[0].Validate = survey.Required
 	}
 
