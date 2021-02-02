@@ -29,7 +29,6 @@ import (
 )
 
 type tutorialCmd struct {
-	homePath string
 	prompt.InputList
 	tutorial rtutorial.FindSetter
 }
@@ -50,8 +49,8 @@ var tutorialFlags = flags{
 }
 
 // NewTutorialCmd creates tutorial command.
-func NewTutorialCmd(homePath string, il prompt.InputList, fs rtutorial.FindSetter) *cobra.Command {
-	o := tutorialCmd{homePath, il, fs}
+func NewTutorialCmd(il prompt.InputList, tt rtutorial.FindSetter) *cobra.Command {
+	o := tutorialCmd{il, tt}
 
 	cmd := &cobra.Command{
 		Use:       "tutorial",

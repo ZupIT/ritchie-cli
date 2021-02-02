@@ -19,32 +19,28 @@ package rtutorial
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"io/ioutil"
+	"os"
 )
 
 type FindManager struct {
 	tutorialFile string
-	homePath     string
-	fr           stream.FileReadExister
 }
 
-func NewFinder(homePath string, fr stream.FileReadExister) FindManager {
+func NewFinder(homePath string) FindManager {
 	return FindManager{
 		tutorialFile: fmt.Sprintf(TutorialPath, homePath),
-		homePath:     homePath,
-		fr:           fr,
 	}
 }
 
 func (f FindManager) Find() (TutorialHolder, error) {
 	tutorialHolder := TutorialHolder{Current: DefaultTutorial}
 
-	if !f.fr.Exists(f.tutorialFile) {
+	if _, err := os.Stat(f.tutorialFile); os.IsNotExist(err) {
 		return tutorialHolder, nil
 	}
 
-	file, err := f.fr.Read(f.tutorialFile)
+	file, err := ioutil.ReadFile(f.tutorialFile)
 	if err != nil {
 		return tutorialHolder, err
 	}
