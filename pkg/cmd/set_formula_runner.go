@@ -18,7 +18,9 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -39,7 +41,7 @@ var setFormulaRunnerFlags = flags{
 		name:        runnerFlagName,
 		kind:        reflect.String,
 		defValue:    "",
-		description: "runner name (local or docker)",
+		description: fmt.Sprintf("runner name (%s)", strings.Join(formula.RunnerTypes, "|")),
 	},
 }
 
