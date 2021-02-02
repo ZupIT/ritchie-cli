@@ -754,6 +754,6 @@ func TestEmptyList(t *testing.T) {
 		cmd := &exec.Cmd{}
 		got := inputManager.Inputs(cmd, setup, nil)
 
-		assert.Equal(t, fmt.Errorf(EmptyItems, "SAMPLE_LIST"), got)
+		assert.Equal(t, fmt.Errorf(EmptyItems, "sample_list"), got)
 	})
 }
