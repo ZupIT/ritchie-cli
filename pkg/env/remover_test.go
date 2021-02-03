@@ -18,31 +18,23 @@ package env
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"reflect"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMock "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRemove(t *testing.T) {
 	tmp := os.TempDir()
+	ritHomeDir := filepath.Join(tmp, ".rit")
 	file := stream.NewFileManager()
-	finder := NewFinder(tmp, file)
-	setter := NewSetter(tmp, finder, file)
-
-	_, err := setter.Set(dev)
-	if err != nil {
-		fmt.Sprintln("Error in Set")
-		return
-	}
-	_, err = setter.Set(qa)
-	if err != nil {
-		fmt.Sprintln("Error in Set")
-		return
-	}
+	finder := NewFinder(ritHomeDir, file)
+	setter := NewSetter(ritHomeDir, finder, file)
+	_ = os.MkdirAll(ritHomeDir, os.ModePerm)
+	defer os.RemoveAll(ritHomeDir)
 
 	type in struct {
 		file      stream.FileWriter
@@ -80,8 +72,19 @@ func TestRemove(t *testing.T) {
 				env:       Current + qa,
 			},
 			out: &out{
-				want: Holder{All: []string{}},
+				want: Holder{All: []string{dev}},
 				err:  nil,
+			},
+		},
+		{
+			name: "env not defined",
+			in: in{
+				file:      file,
+				envFinder: finder,
+				env:       "other-env",
+			},
+			out: &out{
+				err: errors.New("env 'other-env' not found, please provide a value for env valid"),
 			},
 		},
 		{
@@ -89,7 +92,7 @@ func TestRemove(t *testing.T) {
 			in: in{
 				file:      file,
 				envFinder: findEnvMock{err: errors.New("error to find env")},
-				env:       qa,
+				env:       "any",
 			},
 			out: &out{
 				err: errors.New("error to find env"),
@@ -114,17 +117,23 @@ func TestRemove(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			_, err := setter.Set(dev)
+			assert.Nil(t, err)
+
+			_, err = setter.Set(qa)
+			assert.Nil(t, err)
+
 			in := tt.in
 			out := tt.out
 
-			remover := NewRemover(tmp, in.envFinder, in.file)
+			remover := NewRemover(ritHomeDir, in.envFinder, in.file)
 			got, err := remover.Remove(in.env)
-			if out.err != nil && out.err.Error() != err.Error() {
-				t.Errorf("Remove(%s) got %v, want %v", tt.name, err, out.err)
+
+			if out.err != nil {
+				assert.Equal(t, out.err, err)
 			}
-			if !reflect.DeepEqual(out.want, got) {
-				t.Errorf("Remove(%s) got %v, want %v", tt.name, got, out.want)
-			}
+
+			assert.Equal(t, out.want, got)
 		})
 	}
 }

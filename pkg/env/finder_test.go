@@ -19,6 +19,7 @@ package env
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -28,6 +29,9 @@ import (
 
 func TestFind(t *testing.T) {
 	tmp := os.TempDir()
+	ritHomeDir := filepath.Join(tmp, ".rit")
+	_ = os.MkdirAll(ritHomeDir, os.ModePerm)
+	defer os.RemoveAll(ritHomeDir)
 
 	type in struct {
 		holder          Holder
@@ -119,7 +123,7 @@ func TestFind(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			finder := NewFinder(tmp, tt.in.FileReadExister)
+			finder := NewFinder(ritHomeDir, tt.in.FileReadExister)
 			out := tt.out
 			got, err := finder.Find()
 			if out.err != nil && out.err.Error() != err.Error() {

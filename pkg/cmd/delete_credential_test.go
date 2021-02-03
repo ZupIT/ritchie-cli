@@ -315,31 +315,35 @@ func TestDeleteCredentialFormula(t *testing.T) {
 		inputBoolResult bool
 		inputListError  error
 		fileShouldExist bool
-		args            string
+		args            []string
 		wantErr         string
 	}{
 		{
 			name:            "execute prompt with success",
+			args:            []string{},
 			inputBoolResult: true,
 		},
 		{
-			name: "execute flag with success",
-			args: "--provider=github",
+			name:            "execute flag with success",
+			args:            []string{"--provider=github"},
+			inputBoolResult: true,
 		},
 		{
 			name:            "execute flag with empty provider fail",
-			args:            "--provider=",
+			args:            []string{"--provider="},
 			wantErr:         "please provide a value for 'provider'",
 			fileShouldExist: true,
 		},
 		{
 			name:            "fail on input list error",
+			args:            []string{},
 			wantErr:         "some error",
 			inputListError:  errors.New("some error"),
 			fileShouldExist: true,
 		},
 		{
 			name:            "do nothing on input bool refusal",
+			args:            []string{},
 			inputBoolResult: false,
 			fileShouldExist: true,
 		},
@@ -368,7 +372,7 @@ func TestDeleteCredentialFormula(t *testing.T) {
 			cmd := NewDeleteCredentialCmd(credDeleter, credSettings, ctxFinder, boolMock, listMock)
 			// TODO: remove stdin flag after  deprecation
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			cmd.SetArgs([]string{tt.args})
+			cmd.SetArgs(tt.args)
 
 			err = cmd.Execute()
 			if err != nil {

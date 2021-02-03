@@ -18,118 +18,111 @@ package workspace
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/file/fileutil"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 func TestWorkspaceManagerAdd(t *testing.T) {
 	cleanForm()
 	fullDir := createFullDir()
 
-	tmpDir := os.TempDir()
-	dirManager := dirHashManagerMock{nil, nil, "", nil}
-	fileManager := stream.NewFileManager()
-	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
-	if err := fileManager.Remove(workspaceFile); err != nil {
-		t.Error(err)
-	}
+	tmpDir := path.Join(os.TempDir(), "workspace-add")
+	_ = os.Mkdir(tmpDir, os.ModePerm)
+	defer os.RemoveAll(tmpDir)
 
-	type in struct {
-		workspace   formula.Workspace
-		fileManager stream.FileWriteReadExister
-	}
+	dirManager := stream.NewDirManager(stream.NewFileManager())
+	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
+	workspaceBrokenPath := path.Join(tmpDir, "broken")
+	workspaceNonExistingPath := filepath.Join(tmpDir, "non-existing-dir")
+	err := os.Mkdir(workspaceBrokenPath, os.ModePerm)
+	assert.NoError(t, err)
+	err = ioutil.WriteFile(path.Join(workspaceBrokenPath, formula.WorkspacesFile), []byte("error"), os.ModePerm)
+	assert.NoError(t, err)
 
 	tests := []struct {
-		name string
-		in   in
-		out  error
+		name          string
+		workspacePath string
+		workspace     formula.Workspace
+		outErr        string
 	}{
 		{
-			name: "success create",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  fullDir,
-				},
-				fileManager: fileManager,
+			name:          "success create",
+			workspacePath: tmpDir,
+			workspace: formula.Workspace{
+				Name: "zup",
+				Dir:  fullDir,
 			},
-			out: nil,
 		},
 		{
-			name: "success edit",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "commons",
-					Dir:  fullDir,
-				},
-				fileManager: fileManager,
+			name:          "success edit",
+			workspacePath: tmpDir,
+			workspace: formula.Workspace{
+				Name: "commons",
+				Dir:  fullDir,
 			},
-			out: nil,
 		},
 		{
-			name: "invalid workspace",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
-				},
-				fileManager: fileManager,
+			name:          "invalid workspace",
+			workspacePath: workspaceFile,
+			workspace: formula.Workspace{
+				Name: "zup",
+				Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
 			},
-			out: ErrInvalidWorkspace,
+			outErr: ErrInvalidWorkspace.Error(),
 		},
 		{
-			name: "read not found",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "commons",
-					Dir:  fullDir,
-				},
-				fileManager: fileManagerMock{exist: true, readErr: errors.New("not found file")},
+			name:          "unmarshal error",
+			workspacePath: workspaceBrokenPath,
+			workspace: formula.Workspace{
+				Name: "commons",
+				Dir:  fullDir,
 			},
-			out: errors.New("not found file"),
+			outErr: "invalid character 'e' looking for beginning of value",
 		},
 		{
-			name: "unmarshal error",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "commons",
-					Dir:  fullDir,
-				},
-				fileManager: fileManagerMock{exist: true, read: []byte("error")},
+			name:          "write error",
+			workspacePath: workspaceNonExistingPath,
+			workspace: formula.Workspace{
+				Name: "commons",
+				Dir:  fullDir,
 			},
-			out: errors.New("invalid character 'e' looking for beginning of value"),
-		},
-		{
-			name: "write error",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "commons",
-					Dir:  fullDir,
-				},
-				fileManager: fileManagerMock{exist: true, read: []byte("{\"name\":\"name\"}"), writeErr: errors.New("write file error")},
-			},
-			out: errors.New("write file error"),
+			outErr: fmt.Sprintf(
+				"open %s: no such file or directory",
+				filepath.Join(workspaceNonExistingPath, formula.WorkspacesFile),
+			),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := tt.in
+			localBuilder := &mocks.LocalBuilderMock{}
+			localBuilder.On("Init", tt.workspace.Dir, tt.workspace.Name).Return("", nil)
 
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
-			got := workspace.Add(in.workspace)
+			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
+			got := workspace.Add(tt.workspace)
 
-			if got != nil && got.Error() != tt.out.Error() {
-				t.Errorf("Add(%s) got %v, out %v", tt.name, got, tt.out)
+			if got != nil {
+				assert.EqualError(t, got, tt.outErr)
+			} else {
+				assert.Empty(t, tt.outErr)
+
+				file, err := ioutil.ReadFile(path.Join(tt.workspacePath, formula.WorkspacesFile))
+				assert.NoError(t, err)
+				workspaces := formula.Workspaces{}
+				err = json.Unmarshal(file, &workspaces)
+				assert.NoError(t, err)
+				pathName := workspaces[tt.workspace.Name]
+				assert.Equal(t, tt.workspace.Dir, pathName)
 			}
 		})
 	}
@@ -139,444 +132,226 @@ func TestManagerDelete(t *testing.T) {
 	cleanForm()
 	fullDir := createFullDir()
 
-	tmpDir := os.TempDir()
-	dirManager := dirHashManagerMock{nil, nil, "", nil}
-	fileManager := stream.NewFileManager()
+	tmpDir := path.Join(os.TempDir(), "workspace-delete")
+	_ = os.Mkdir(tmpDir, os.ModePerm)
+	defer os.RemoveAll(tmpDir)
 
-	type in struct {
-		workspace   formula.Workspace
-		fileManager stream.FileWriteReadExister
-	}
+	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
+	fileNonExistentPath := path.Join(tmpDir, "non-existent")
+	dirManager := stream.NewDirManager(stream.NewFileManager())
 
 	tests := []struct {
-		name string
-		in   in
-		out  error
+		name          string
+		workspacePath string
+		workspace     formula.Workspace
+		outErr        string
 	}{
 		{
-			name: "success delete",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  fullDir,
-				},
-				fileManager: fileManager,
+			name:          "success delete",
+			workspacePath: tmpDir,
+			workspace: formula.Workspace{
+				Name: "zup",
+				Dir:  fullDir,
 			},
-			out: nil,
 		},
 		{
-			name: "invalid workspace",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
-				},
-				fileManager: fileManager,
+			name:          "invalid workspace",
+			workspacePath: tmpDir,
+			workspace: formula.Workspace{
+				Name: "zup-not-exists",
+				Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
 			},
-			out: ErrInvalidWorkspace,
+			outErr: ErrInvalidWorkspace.Error(),
 		},
 		{
-			name: "read not found",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "commons",
-					Dir:  fullDir,
-				},
-				fileManager: fileManagerMock{exist: true, readErr: errors.New("not found file")},
+			name:          "write file error",
+			workspacePath: fileNonExistentPath,
+			workspace: formula.Workspace{
+				Name: "Default",
+				Dir:  fullDir,
 			},
-			out: errors.New("not found file"),
-		},
-		{
-			name: "unmarshal error",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "commons",
-					Dir:  fullDir,
-				},
-				fileManager: fileManagerMock{exist: true, read: []byte("error")},
-			},
-			out: errors.New("invalid character 'e' looking for beginning of value"),
+			outErr: fmt.Sprintf(
+				"open %s: no such file or directory",
+				filepath.Join(fileNonExistentPath, formula.WorkspacesFile),
+			),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := tt.in
+			err := ioutil.WriteFile(workspaceFile, []byte(`{"zup": "some/dir/path"}`), os.ModePerm)
+			assert.NoError(t, err)
 
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
-			got := workspace.Delete(in.workspace)
+			localBuilder := &mocks.LocalBuilderMock{}
 
-			if got != nil && got.Error() != tt.out.Error() {
-				t.Errorf("Add(%s) got %v, out %v", tt.name, got, tt.out)
+			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
+			got := workspace.Delete(tt.workspace)
+
+			if got != nil {
+				assert.EqualError(t, got, tt.outErr)
+			} else {
+				assert.Empty(t, tt.outErr)
+
+				file, err := ioutil.ReadFile(path.Join(tt.workspacePath, formula.WorkspacesFile))
+				assert.NoError(t, err)
+				workspaces := formula.Workspaces{}
+				err = json.Unmarshal(file, &workspaces)
+				assert.NoError(t, err)
+				_, exists := workspaces[tt.workspace.Name]
+				assert.False(t, exists)
 			}
 		})
 	}
 }
 
 func TestManagerList(t *testing.T) {
-	tmpDir := os.TempDir()
-	dirManager := dirHashManagerMock{nil, nil, "", nil}
-	fileManager := stream.NewFileManager()
+	tmpDir := path.Join(os.TempDir(), "workspace-list")
+	_ = os.Mkdir(tmpDir, os.ModePerm)
+	defer os.RemoveAll(tmpDir)
+
+	dirManager := stream.NewDirManager(stream.NewFileManager())
+
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
-
-	type in struct {
-		workspaces  *formula.Workspaces
-		fileManager stream.FileWriteReadExister
-	}
-
-	type out struct {
-		listSize int
-		error    error
-	}
+	err := ioutil.WriteFile(workspaceFile, []byte(`{"zup": "/some/path"}`), os.ModePerm)
+	assert.NoError(t, err)
+	workspaceBrokenFile := path.Join(tmpDir, "broken", formula.WorkspacesFile)
+	_ = os.Mkdir(path.Join(tmpDir, "broken"), os.ModePerm)
+	err = ioutil.WriteFile(workspaceBrokenFile, []byte(`error`), os.ModePerm)
+	assert.NoError(t, err)
 
 	tests := []struct {
-		name string
-		in   in
-		out  out
+		name          string
+		workspacePath string
+		listSize      int
+		outErr        string
 	}{
 		{
-			name: "success list",
-			in: in{
-				workspaces:  &formula.Workspaces{"commons": "/home/user/ritchie-formulas"},
-				fileManager: fileManager,
-			},
-			out: out{
-				listSize: 2,
-				error:    nil,
-			},
+			name:          "success list",
+			workspacePath: tmpDir,
+			listSize:      2,
 		},
 		{
-			name: "not exist file",
-			in: in{
-				workspaces:  nil,
-				fileManager: fileManager,
-			},
-			out: out{
-				listSize: 1,
-				error:    nil,
-			},
+			name:          "success on non existent file",
+			workspacePath: path.Join(tmpDir, "non-existent"),
+			listSize:      1,
 		},
 		{
-			name: "read not found",
-			in: in{
-				fileManager: fileManagerMock{exist: true, readErr: errors.New("not found file")},
-			},
-			out: out{
-				listSize: 0,
-				error:    errors.New("not found file"),
-			},
-		},
-		{
-			name: "unmarshal error",
-			in: in{
-				fileManager: fileManagerMock{exist: true, read: []byte("error")},
-			},
-			out: out{
-				listSize: 0,
-				error:    errors.New("invalid character 'e' looking for beginning of value"),
-			},
+			name:          "unmarshal error",
+			workspacePath: path.Join(tmpDir, "broken"),
+			outErr:        "invalid character 'e' looking for beginning of value",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := tt.in
-			out := tt.out
+			localBuilder := &mocks.LocalBuilderMock{}
 
-			_ = fileManager.Remove(workspaceFile)
-			if in.workspaces != nil {
-				content, _ := json.Marshal(in.workspaces)
-				_ = fileManager.Write(workspaceFile, content)
-			}
-
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
+			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
 			got, err := workspace.List()
 
-			if err != nil && err.Error() != out.error.Error() {
-				t.Errorf("List(%s) got err %v, out err %v", tt.name, err, out.error)
-			}
-
-			if len(got) != out.listSize {
-				t.Errorf("List(%s) got size %v, out size %v", tt.name, len(got), out.listSize)
-			}
-		})
-	}
-}
-
-func TestValidate(t *testing.T) {
-	cleanForm()
-	fullDir := createFullDir()
-
-	tmpDir := os.TempDir()
-	dirManager := dirHashManagerMock{nil, nil, "", nil}
-	fileManager := stream.NewFileManager()
-	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
-	if err := fileManager.Remove(workspaceFile); err != nil {
-		t.Error(err)
-	}
-
-	type in struct {
-		workspace   formula.Workspace
-		fileManager stream.FileWriteReadExister
-	}
-
-	tests := []struct {
-		name string
-		in   in
-		out  error
-	}{
-		{
-			name: "valid",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  fullDir,
-				},
-				fileManager: fileManager,
-			},
-			out: nil,
-		},
-		{
-			name: "invalid workspace",
-			in: in{
-				workspace: formula.Workspace{
-					Name: "zup",
-					Dir:  "/home/user/invalid-workspace",
-				},
-				fileManager: fileManager,
-			},
-			out: ErrInvalidWorkspace,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			in := tt.in
-
-			workspace := New(tmpDir, tmpDir, dirManager, in.fileManager, buildInitializerMock{})
-			got := workspace.Add(in.workspace)
-
-			if got != nil && got.Error() != tt.out.Error() {
-				t.Errorf("Validate(%s) got %v, out %v", tt.name, got, tt.out)
+			if err != nil {
+				assert.EqualError(t, err, tt.outErr)
+			} else {
+				assert.Empty(t, tt.outErr)
+				assert.Equal(t, tt.listSize, len(got))
 			}
 		})
 	}
-
 }
 
 func TestPreviousHash(t *testing.T) {
-	dirManager := dirHashManagerMock{nil, nil, "", nil}
-	ritHome := "/path/to/rit"
+	dirManager := stream.NewDirManager(stream.NewFileManager())
+	tmpDir := os.TempDir()
+	ritHome := path.Join(tmpDir, ".rit")
+	defer os.RemoveAll(ritHome)
 
-	type in struct {
-		formulaPath     string
-		hashFileContent []byte
-		hashFileError   error
-	}
-	type out struct {
-		hash string
-		path string
-		err  error
-	}
+	_ = os.MkdirAll(path.Join(ritHome, "hashes"), os.ModePerm)
+
+	formulaPath := "my/formula"
+	hashFile := path.Join(ritHome, "hashes", "my-formula.txt")
+	hashValue := "somehash"
+	err := ioutil.WriteFile(hashFile, []byte(hashValue), os.ModePerm)
+	assert.NoError(t, err)
+	formulaNonExistentPath := path.Join(tmpDir, "non-existent")
 
 	tests := []struct {
-		name string
-		in   in
-		out  out
+		name     string
+		homePath string
+		outErr   string
 	}{
 		{
-			name: "shoud return hash file content on success",
-			in:   in{"/path/to/formula", []byte("hash"), nil},
-			out:  out{"hash", "/path/to/rit/hashes/-path-to-formula.txt", nil},
+			name:     "shoud return hash file content on success",
+			homePath: ritHome,
 		},
 		{
-			name: "shoud fail when file doesn't exist",
-			in:   in{"/path/to/formula", nil, fmt.Errorf("file doesn't exist")},
-			out:  out{"", "/path/to/rit/hashes/-path-to-formula.txt", fmt.Errorf("file doesn't exist")},
+			name:     "shoud fail when file doesn't exist",
+			homePath: formulaNonExistentPath,
+			outErr: fmt.Sprintf(
+				"open %s: no such file or directory",
+				path.Join(formulaNonExistentPath, "hashes", "my-formula.txt"),
+			),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hashPath := ""
-			fileManager := sMocks.FileWriteReadExisterCustomMock{
-				WriteMock: func(string, []byte) error {
-					return nil
-				},
-				ExistsMock: func(string) bool {
-					return true
-				},
-				ReadMock: func(path string) ([]byte, error) {
-					hashPath = path
-					return tt.in.hashFileContent, tt.in.hashFileError
-				},
-			}
-			workspace := New(ritHome, ritHome, dirManager, fileManager, buildInitializerMock{})
-			hash, err := workspace.PreviousHash(tt.in.formulaPath)
+			localBuilder := &mocks.LocalBuilderMock{}
 
-			if hashPath != tt.out.path {
-				t.Errorf("Expected hash to be read from %s instead of %s", tt.out.path, hashPath)
-			}
-			if (err != nil) != (tt.out.err != nil) || (err != nil && err.Error() != tt.out.err.Error()) {
-				t.Errorf("Got error '%v', expected error '%v'", err, tt.out.err)
-			}
-			if err == nil && hash != tt.out.hash {
-				t.Errorf("Got hash '%v', expected hash '%v'", hash, tt.out.hash)
+			workspace := New(tt.homePath, tt.homePath, dirManager, localBuilder)
+			hash, err := workspace.PreviousHash(formulaPath)
+
+			if err != nil {
+				assert.EqualError(t, err, tt.outErr)
+			} else {
+				assert.Empty(t, tt.outErr)
+				assert.Equal(t, hashValue, hash)
 			}
 		})
 	}
 }
 
 func TestUpdateHash(t *testing.T) {
-	ritHome := "/path/to/rit"
-
-	type in struct {
-		formulaPath string
-		hash        string
-		createErr   error
-		writeErr    error
-	}
-	type out struct {
-		err     error
-		path    string
-		content []byte
-	}
+	dirManager := stream.NewDirManager(stream.NewFileManager())
+	ritHome := path.Join(os.TempDir(), "update-hash")
+	_ = os.Mkdir(ritHome, os.ModePerm)
+	defer os.RemoveAll(ritHome)
 
 	tests := []struct {
-		name string
-		in   in
-		out  out
+		name     string
+		homePath string
 	}{
 		{
-			name: "should update the correct file",
-			in: in{
-				formulaPath: "/path/to/formula",
-				hash:        "hash",
-				createErr:   nil,
-				writeErr:    nil,
-			},
-			out: out{
-				err:     nil,
-				path:    "/path/to/rit/hashes/-path-to-formula.txt",
-				content: []byte("hash"),
-			},
+			name:     "should update the correct file",
+			homePath: ritHome,
 		},
 		{
-			name: "should ignore dir creation errors",
-			in: in{
-				formulaPath: "/path/to/formula",
-				hash:        "hash",
-				createErr:   fmt.Errorf("Directory already exists"),
-				writeErr:    nil,
-			},
-			out: out{
-				err:     nil,
-				path:    "/path/to/rit/hashes/-path-to-formula.txt",
-				content: []byte("hash"),
-			},
-		},
-		{
-			name: "should fail on file creation errors",
-			in: in{
-				formulaPath: "/path/to/formula",
-				hash:        "hash",
-				createErr:   nil,
-				writeErr:    fmt.Errorf("Unable to write file"),
-			},
-			out: out{
-				err:     fmt.Errorf("Unable to write file"),
-				path:    "/path/to/rit/hashes/-path-to-formula.txt",
-				content: []byte("hash"),
-			},
+			name:     "should ignore dir creation errors",
+			homePath: ritHome,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hashPath := ""
-			hashContent := []byte{}
+			localBuilder := &mocks.LocalBuilderMock{}
 
-			dirManager := dirHashManagerMock{tt.in.createErr, nil, "", nil}
-			fileManager := sMocks.FileWriteReadExisterCustomMock{
-				WriteMock: func(path string, content []byte) error {
-					hashPath = path
-					hashContent = content
-					return tt.in.writeErr
-				},
-				ExistsMock: func(string) bool {
-					return true
-				},
-				ReadMock: func(string) ([]byte, error) {
-					return []byte{}, nil
-				},
-			}
-			workspace := New(ritHome, ritHome, dirManager, fileManager, buildInitializerMock{})
-			err := workspace.UpdateHash(tt.in.formulaPath, tt.in.hash)
+			workspace := New(tt.homePath, tt.homePath, dirManager, localBuilder)
+			err := workspace.UpdateHash("my/formula", "hash")
+			assert.NoError(t, err)
 
-			if hashPath != tt.out.path {
-				t.Errorf("Expected hash to be written to %s instead of %s", tt.out.path, hashPath)
-			}
-			if string(hashContent) != string(tt.out.content) {
-				t.Errorf("Expected hash %s to be written instead of %s", string(tt.out.content), string(hashContent))
-			}
-			if (err != nil) != (tt.out.err != nil) || (err != nil && err.Error() != tt.out.err.Error()) {
-				t.Errorf("Got error '%v', expected error '%v'", err, tt.out.err)
-			}
+			file, err := ioutil.ReadFile(path.Join(tt.homePath, "hashes", "my-formula.txt"))
+			assert.NoError(t, err)
+			assert.Equal(t, "hash", string(file))
 		})
 	}
 }
 
 func cleanForm() {
-	_ = fileutil.RemoveDir(filepath.Join(os.TempDir(), "my-custom-repo"))
+	_ = os.Remove(filepath.Join(os.TempDir(), "my-custom-repo"))
 }
 
 func createFullDir() string {
 	dir := filepath.Join(os.TempDir(), "my-custom-repo")
-	_ = fileutil.CreateDirIfNotExists(dir, os.ModePerm)
+	_ = os.MkdirAll(dir, os.ModePerm)
 
 	return dir
-}
-
-type fileManagerMock struct {
-	exist    bool
-	read     []byte
-	readErr  error
-	writeErr error
-}
-
-func (f fileManagerMock) Exists(string) bool {
-	return f.exist
-}
-
-func (f fileManagerMock) Read(string) ([]byte, error) {
-	return f.read, f.readErr
-}
-
-func (f fileManagerMock) Write(string, []byte) error {
-	return f.writeErr
-}
-
-type dirHashManagerMock struct {
-	createErr error
-	removeErr error
-	hash      string
-	hashErr   error
-}
-
-func (di dirHashManagerMock) Create(dir string) error {
-	return di.createErr
-}
-
-func (di dirHashManagerMock) Remove(dir string) error {
-	return di.removeErr
-}
-
-func (di dirHashManagerMock) Hash(dir string) (string, error) {
-	return di.hash, di.hashErr
-}
-
-type buildInitializerMock struct{}
-
-func (bi buildInitializerMock) Init(workspaceDir string, repoName string) (string, error) {
-	return "", nil
 }

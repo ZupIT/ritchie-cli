@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-package commands
+package mocks
 
-import (
-	"bytes"
-	"io/ioutil"
-	"testing"
+import "github.com/stretchr/testify/mock"
 
-	"github.com/stretchr/testify/assert"
-)
+type RepoInfo struct {
+	mock.Mock
+}
 
-func TestBuild(t *testing.T) {
-	t.Run("Build commands successfully", func(t *testing.T) {
-		cmd := Build()
-		b := bytes.NewBufferString("")
-		cmd.SetArgs([]string{"--version"})
-		cmd.SetOut(b)
-		err := cmd.Execute()
-		assert.NoError(t, err)
+func (ri *RepoInfo) ZipUrl(version string) string {
+	args := ri.Called(version)
+	return args.String(0)
+}
 
-		out, err := ioutil.ReadAll(b)
-		assert.NoError(t, err)
+func (ri *RepoInfo) TagsUrl() string {
+	args := ri.Called()
+	return args.String(0)
+}
 
-		outString := string(out)
-		assert.Contains(t, outString, "rit version")
-	})
+func (ri *RepoInfo) LatestTagUrl() string {
+	args := ri.Called()
+	return args.String(0)
+}
+
+func (ri *RepoInfo) TokenHeader() string {
+	args := ri.Called()
+	return args.String(0)
+}
+
+func (ri *RepoInfo) Token() string {
+	args := ri.Called()
+	return args.String(0)
 }
