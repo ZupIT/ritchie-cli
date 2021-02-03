@@ -24,10 +24,10 @@ import (
 func NewAddCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:       "add SUBCOMMAND",
-		Short:     "Add repositories ",
-		Long:      "Add a new repository of formulas",
+		Short:     "Add repositories and workspaces",
+		Long:      "Add a new repository of formulas or a new workspace",
 		Example:   "rit add repo",
-		ValidArgs: []string{"repo"},
+		ValidArgs: []string{"repo", "workspace"},
 		Args:      cobra.OnlyValidArgs,
 	}
 }
