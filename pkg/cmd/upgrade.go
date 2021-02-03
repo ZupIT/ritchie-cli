@@ -22,6 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/internal/pkg/i18n"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
@@ -70,11 +71,11 @@ func NewUpgradeCmd(
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if !u.file.Exists(metric.FilePath) {
-			prompt.Info("📊 Metrics 📊\n")
-			fmt.Println(AddMetricsQuestion)
+			header := i18n.T("init.metric.header")
+			prompt.Info(header)
+			fmt.Println(i18n.T("init.add.metric.info"))
 
-			options := []string{AcceptOpt, DeclineOpt}
-			choose, err := u.input.Bool("Do you agree?", options)
+			choose, err := u.input.Bool(AgreeSendMetrics, AcceptDeclineOpts)
 			if err != nil {
 				return err
 			}

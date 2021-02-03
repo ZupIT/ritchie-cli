@@ -22,26 +22,37 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
+
+	"github.com/ZupIT/ritchie-cli/internal/pkg/config"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 )
 
-var Langs = map[Lang]string{
-	"English":   "en",
-	"Português": "pt_BR",
-}
-
-type Lang string
-
-func (l Lang) String() string {
-	return string(l)
+var Langs = map[string]string{
+	"English":    "en",
+	"Portuguese": "pt_BR",
 }
 
 type Translation struct {
 	bundle *i18n.Bundle
+	config config.Reader
 }
 
-var T Translation
+// T receives msgID to identify your message and parameters
+// to format your message, you can use parameters like fmt.Sprintf.
+// Examples:
+// message := i18n.T("my.message.without.params")
+// message := i18n.T("my.message.with.params", "name", "test")
+var T = func(msgID string, params ...interface{}) string {
+	return t.resolver(msgID, params...)
+}
 
-func NewTranslation() Translation {
+var t *Translation
+
+func init() {
+	ritHome := api.RitchieHomeDir()
+	c := config.NewManager(ritHome)
+
 	bundle := i18n.NewBundle(language.English)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
@@ -50,13 +61,45 @@ func NewTranslation() Translation {
 
 		bytes, err := Asset(file)
 		if err != nil {
-			fmt.Printf("Error to load %q translation", i)
+			panic(fmt.Sprintf("Error to load %q translation", i))
 		}
 
-		bundle.MustParseMessageFileBytes(bytes, v)
+		bundle.MustParseMessageFileBytes(bytes, file)
 	}
 
-	return Translation{
+	t = &Translation{
 		bundle: bundle,
+		config: c,
 	}
+}
+
+func (t *Translation) resolver(msgID string, params ...interface{}) string {
+	var msg string
+	c, _ := t.config.Read()
+	loc := i18n.NewLocalizer(t.bundle, Langs[c.Language])
+	locConfig := &i18n.LocalizeConfig{
+		DefaultMessage: &i18n.Message{},
+	}
+
+	// If OS is Windows we will try
+	// to find the specific message,
+	// case not found message for
+	// Windows we will try to find
+	// the default message.
+	if osutil.IsWindows() {
+		id := fmt.Sprintf("%s_windows", msgID)
+		locConfig.DefaultMessage.ID = id
+
+		msg, _ = loc.Localize(locConfig)
+		if msg != "" {
+			msg = fmt.Sprintf(msg, params...)
+			return msg
+		}
+	}
+
+	locConfig.DefaultMessage.ID = msgID
+	msg, _ = loc.Localize(locConfig)
+	msg = fmt.Sprintf(msg, params...)
+
+	return msg
 }
