@@ -258,6 +258,12 @@ func TestAddRepoCmd(t *testing.T) {
 			want:   errors.New(missingFlagText(nameFlagName)),
 		},
 		{
+			name:   "fail flags with priority not a number",
+			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--priority=text"},
+			fields: fields{},
+			want:   errors.New("invalid argument \"text\" for \"--priority\" flag: strconv.ParseInt: parsing \"text\": invalid syntax"),
+		},
+		{
 			name:   "success flags",
 			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--tag=1.0.0"},
 			fields: fields{},
