@@ -22,7 +22,7 @@ type DirManagerMock struct {
 	mock.Mock
 }
 
-func (d DirManagerMock) Remove(dir string) error {
+func (d *DirManagerMock) Remove(dir string) error {
 	args := d.Called(dir)
 	return args.Error(0)
 }
