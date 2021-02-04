@@ -44,7 +44,6 @@ func TestPostRun(t *testing.T) {
 			name: "success",
 			in: in{
 				file:   fileManagerMock{},
-				dir:    nil,
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -54,7 +53,6 @@ func TestPostRun(t *testing.T) {
 			name: "success docker",
 			in: in{
 				file:   fileManagerMock{},
-				dir:    nil,
 				setup:  formula.Setup{},
 				docker: true,
 			},
@@ -64,7 +62,6 @@ func TestPostRun(t *testing.T) {
 			name: "error remove .env file docker",
 			in: in{
 				file:   fileManagerMock{rmErr: errors.New("error to remove .env file")},
-				dir:    nil,
 				setup:  formula.Setup{},
 				docker: true,
 			},
@@ -74,7 +71,6 @@ func TestPostRun(t *testing.T) {
 			name: "error list new files",
 			in: in{
 				file:   fileManagerMock{lErr: errors.New("error to list new files")},
-				dir:    nil,
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -84,7 +80,6 @@ func TestPostRun(t *testing.T) {
 			name: "error move new files",
 			in: in{
 				file:   fileManagerMock{mErr: errors.New("error to move new files")},
-				dir:    nil,
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -103,9 +98,16 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "input deprecated",
 			in: in{
-				file:   fileManagerMock{},
-				dir:    nil,
-				setup:  formula.Setup{Config: formula.Config{Inputs: formula.Inputs{formula.Input{Type: "dynamic"}}}},
+				file: fileManagerMock{},
+				setup: formula.Setup{
+					Config: formula.Config{
+						Inputs: formula.Inputs{
+							formula.Input{
+								Type: "dynamic",
+							},
+						},
+					},
+				},
 				docker: false,
 			},
 			want: nil,
