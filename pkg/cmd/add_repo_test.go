@@ -258,6 +258,12 @@ func TestAddRepoCmd(t *testing.T) {
 			want:   errors.New(missingFlagText(nameFlagName)),
 		},
 		{
+			name:   "fail flags with empty repo url",
+			args:   []string{"--provider=Github", "--name=my-repo"},
+			fields: fields{},
+			want:   errors.New(missingFlagText(repoUrlFlagName)),
+		},
+		{
 			name:   "fail flags with priority not a number",
 			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--priority=text"},
 			fields: fields{},
