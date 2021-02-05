@@ -35,6 +35,10 @@ type Repo struct {
 	TreeVersion string       `json:"tree_version"`
 }
 
+func (r Repo) EmptyVersion() bool {
+	return r.Version.String() == ""
+}
+
 type Repos []Repo
 
 func (r Repos) Len() int {

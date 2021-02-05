@@ -322,7 +322,7 @@ func (ar *addRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repo, error) {
 		Priority: priority,
 	}
 
-	if repo.Version.String() == "" {
+	if repo.EmptyVersion() {
 		latestTag := ar.detail.LatestTag(repo)
 		repo.Version = formula.RepoVersion(latestTag)
 	}
@@ -353,7 +353,7 @@ func (ar addRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if r.Version.String() == "" {
+		if r.EmptyVersion() {
 			latestTag := ar.detail.LatestTag(r)
 			r.Version = formula.RepoVersion(latestTag)
 		}
