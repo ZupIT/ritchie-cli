@@ -197,7 +197,7 @@ func (in InputManager) persistCache(formulaPath, inputVal string, input formula.
 		}
 		itemsBytes, _ := json.Marshal(items)
 		if err := ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
-			fmt.Sprintln("Write cache error")
+			fmt.Println("Write cache error")
 		}
 	}
 }
@@ -220,28 +220,27 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 }
 
 func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]string, error) {
-	if input.Cache.Active {
-		cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
-		fileBytes, err := ioutil.ReadFile(cachePath)
-		if err != nil {
-			itemsBytes, err := json.Marshal(input.Items)
-			if err != nil {
-				return nil, err
-			}
-			if err = ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
-				return nil, err
-			}
-			return input.Items, nil
-		}
-		var items []string
-		err = json.Unmarshal(fileBytes, &items)
+	if !input.Cache.Active {
+		return input.Items, nil
+	}
+	cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
+	fileBytes, err := ioutil.ReadFile(cachePath)
+	if err != nil {
+		itemsBytes, err := json.Marshal(input.Items)
 		if err != nil {
 			return nil, err
 		}
-		return items, nil
-	} else {
+		if err = ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
+			return nil, err
+		}
 		return input.Items, nil
 	}
+	var items []string
+	err = json.Unmarshal(fileBytes, &items)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 func (in InputManager) textValidator(i formula.Input) (string, error) {
