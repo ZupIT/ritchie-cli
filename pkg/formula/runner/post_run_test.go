@@ -28,7 +28,13 @@ import (
 
 func TestPostRun(t *testing.T) {
 	type in struct {
-		file   error
+		wrErr  error
+		rdErr  error
+		apErr  error
+		mvErr  error
+		rmErr  error
+		lnErr  error
+		exist  bool
 		dir    error
 		setup  formula.Setup
 		docker bool
@@ -58,7 +64,7 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "error remove .env file docker",
 			in: in{
-				file:   errors.New("error to remove .env file"),
+				rmErr:  errors.New("error to remove .env file"),
 				setup:  formula.Setup{},
 				docker: true,
 			},
@@ -67,7 +73,7 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "error list new files",
 			in: in{
-				file:   errors.New("error to list new files"),
+				lnErr:  errors.New("error to list new files"),
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -76,7 +82,7 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "error move new files",
 			in: in{
-				file:   errors.New("error to move new files"),
+				mvErr:  errors.New("error to move new files"),
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -114,13 +120,13 @@ func TestPostRun(t *testing.T) {
 			dm := &mocks.DirManagerMock{}
 			dm.On("Remove", mock.Anything).Return(tt.in.dir)
 			fm := &mocks.FileManagerMock{}
-			fm.On("Write", mock.Anything, mock.Anything).Return(tt.in.file)
-			fm.On("Read", mock.Anything).Return([]byte{}, tt.in.file)
-			fm.On("Exists", mock.Anything).Return(tt.in.file)
-			fm.On("Append", mock.Anything, mock.Anything).Return(tt.in.file)
-			fm.On("Move", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.file)
-			fm.On("Remove", mock.Anything).Return(tt.in.file)
-			fm.On("ListNews", mock.Anything, mock.Anything).Return([]string{}, tt.in.file)
+			fm.On("Write", mock.Anything, mock.Anything).Return(tt.in.wrErr)
+			fm.On("Read", mock.Anything).Return([]byte{}, tt.in.rdErr)
+			fm.On("Exists", mock.Anything).Return(tt.in.exist)
+			fm.On("Append", mock.Anything, mock.Anything).Return(tt.in.apErr)
+			fm.On("Move", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.mvErr)
+			fm.On("Remove", mock.Anything).Return(tt.in.rmErr)
+			fm.On("ListNews", mock.Anything, mock.Anything).Return([]string{}, tt.in.lnErr)
 			runner := NewPostRunner(fm, dm)
 			got := runner.PostRun(tt.in.setup, tt.in.docker)
 
