@@ -621,8 +621,7 @@ func TestMultiselect(t *testing.T) {
 		},
 		{
 			name: "success multiselect input test when the required field is not sent",
-			in: in{
-				inputJSON: `[
+			inputJSON: `[
 					{
 						"name": "sample_multiselect",
 						"type": "multiselect",
@@ -636,9 +635,8 @@ func TestMultiselect(t *testing.T) {
 						"tutorial": "Select one or more items for this field."
 					}
 				]`,
-				inMultiselect: inputMock{items: []string{"item_1", "item_2"}},
-			},
-			want: nil,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
 		},
 		{
 			name: "fail multiselect input test",
