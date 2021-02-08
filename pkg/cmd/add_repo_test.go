@@ -177,9 +177,9 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input text error",
 			args: []string{},
 			fields: fields{
-				InputTextValidator: returnWithStringErr{"mocked text", someError},
+				InputTextValidator: returnWithStringErr{"", ErrRepoNameNotEmpty},
 			},
-			want: someError,
+			want: ErrRepoNameNotEmpty,
 		},
 		{
 			name: "input url error",
@@ -293,7 +293,7 @@ func TestAddRepoCmd(t *testing.T) {
 			inputPasswordMock := new(mocks.InputPasswordMock)
 			inputPasswordMock.On("Password", mock.Anything, mock.Anything).Return(fields.InputPassword.string, fields.InputPassword.error)
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
-			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
+			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, nil)
 			tutorialFindMock := new(mocks.TutorialFindSetterMock)
 			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: fields.tutorialStatus.string}, fields.tutorialStatus.error)
 			repoListerAdderMock := new(mocks.RepoManager)
