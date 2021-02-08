@@ -26,3 +26,42 @@ func (d *DirManagerMock) Remove(dir string) error {
 	args := d.Called(dir)
 	return args.Error(0)
 }
+
+type FileManagerMock struct {
+	mock.Mock
+}
+
+func (fi *FileManagerMock) Write(string, []byte) error {
+	args := fi.Called()
+	return args.Error(0)
+}
+
+func (fi *FileManagerMock) Read(string) ([]byte, error) {
+	args := fi.Called()
+	return args.Get(0).([]byte), args.Error(1)
+}
+
+func (fi *FileManagerMock) Exists(string) bool {
+	args := fi.Called()
+	return args.Bool(0)
+}
+
+func (fi *FileManagerMock) Append(path string, content []byte) error {
+	args := fi.Called(path, content)
+	return args.Error(0)
+}
+
+func (fi *FileManagerMock) Move(oldPath, newPath string, files []string) error {
+	args := fi.Called(oldPath, newPath, files)
+	return args.Error(0)
+}
+
+func (fi *FileManagerMock) Remove(path string) error {
+	args := fi.Called(path)
+	return args.Error(0)
+}
+
+func (fi *FileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
+	args := fi.Called(oldPath, newPath)
+	return args.Get(0).([]string), args.Error(1)
+}

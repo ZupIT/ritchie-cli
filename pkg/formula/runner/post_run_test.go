@@ -22,14 +22,13 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestPostRun(t *testing.T) {
 	type in struct {
-		file   stream.FileNewListMoveRemover
+		file   error
 		dir    error
 		setup  formula.Setup
 		docker bool
@@ -43,7 +42,6 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				file:   fileManagerMock{},
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -52,7 +50,6 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "success docker",
 			in: in{
-				file:   fileManagerMock{},
 				setup:  formula.Setup{},
 				docker: true,
 			},
@@ -61,7 +58,7 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "error remove .env file docker",
 			in: in{
-				file:   fileManagerMock{rmErr: errors.New("error to remove .env file")},
+				file:   errors.New("error to remove .env file"),
 				setup:  formula.Setup{},
 				docker: true,
 			},
@@ -70,7 +67,7 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "error list new files",
 			in: in{
-				file:   fileManagerMock{lErr: errors.New("error to list new files")},
+				file:   errors.New("error to list new files"),
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -79,7 +76,7 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "error move new files",
 			in: in{
-				file:   fileManagerMock{mErr: errors.New("error to move new files")},
+				file:   errors.New("error to move new files"),
 				setup:  formula.Setup{},
 				docker: false,
 			},
@@ -88,7 +85,6 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "error remove work dir",
 			in: in{
-				file:   fileManagerMock{},
 				dir:    errors.New("error to remove workdir"),
 				setup:  formula.Setup{},
 				docker: false,
@@ -98,7 +94,6 @@ func TestPostRun(t *testing.T) {
 		{
 			name: "input deprecated",
 			in: in{
-				file: fileManagerMock{},
 				setup: formula.Setup{
 					Config: formula.Config{
 						Inputs: formula.Inputs{
@@ -116,9 +111,17 @@ func TestPostRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			removeDir := &mocks.DirManagerMock{}
-			removeDir.On("Remove", mock.Anything).Return(tt.in.dir)
-			runner := NewPostRunner(tt.in.file, removeDir)
+			dm := &mocks.DirManagerMock{}
+			dm.On("Remove", mock.Anything).Return(tt.in.dir)
+			fm := &mocks.FileManagerMock{}
+			fm.On("Write", mock.Anything, mock.Anything).Return(tt.in.file)
+			fm.On("Read", mock.Anything).Return([]byte{}, tt.in.file)
+			fm.On("Exists", mock.Anything).Return(tt.in.file)
+			fm.On("Append", mock.Anything, mock.Anything).Return(tt.in.file)
+			fm.On("Move", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.file)
+			fm.On("Remove", mock.Anything).Return(tt.in.file)
+			fm.On("ListNews", mock.Anything, mock.Anything).Return([]string{}, tt.in.file)
+			runner := NewPostRunner(fm, dm)
 			got := runner.PostRun(tt.in.setup, tt.in.docker)
 
 			assert.Equal(t, tt.want, got)

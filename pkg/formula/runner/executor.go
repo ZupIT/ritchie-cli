@@ -52,7 +52,9 @@ func (ex ExecutorManager) Execute(exe formula.ExecuteData) error {
 	}
 
 	if strings.HasPrefix(exe.Def.RepoName, "local-") {
-		ex.preRunBuilder.Build(exe.Def.Path)
+		if err := ex.preRunBuilder.Build(exe.Def.Path); err != nil {
+			return err
+		}
 	}
 
 	if err := runner.Run(exe.Def, exe.InType, exe.Verbose, exe.Flags); err != nil {
