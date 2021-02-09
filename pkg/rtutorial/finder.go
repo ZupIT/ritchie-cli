@@ -18,9 +18,9 @@ package rtutorial
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type FindManager struct {
@@ -29,7 +29,7 @@ type FindManager struct {
 
 func NewFinder(homePath string) FindManager {
 	return FindManager{
-		tutorialFile: fmt.Sprintf(TutorialPath, homePath),
+		tutorialFile: filepath.Join(homePath, TutorialFile),
 	}
 }
 

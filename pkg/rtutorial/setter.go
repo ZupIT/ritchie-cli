@@ -18,9 +18,9 @@ package rtutorial
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type SetterManager struct {
@@ -29,7 +29,7 @@ type SetterManager struct {
 
 func NewSetter(homePath string) Setter {
 	return SetterManager{
-		tutorialFile: fmt.Sprintf(TutorialPath, homePath),
+		tutorialFile: filepath.Join(homePath, TutorialFile),
 	}
 }
 

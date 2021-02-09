@@ -95,9 +95,8 @@ func (t *tutorialCmd) resolveFlags(cmd *cobra.Command) (string, error) {
 		return "", errors.New(missingFlagText(enabledFlagName))
 	} else if enabled {
 		return tutorialStatusEnabled, nil
-	} else {
-		return tutorialStatusDisabled, nil
 	}
+	return tutorialStatusDisabled, nil
 }
 
 func (t *tutorialCmd) resolvePrompt() (string, error) {

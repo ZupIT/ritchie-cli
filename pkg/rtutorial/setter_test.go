@@ -18,9 +18,9 @@ package rtutorial
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +45,7 @@ func TestSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmp := os.TempDir()
-			tmpTutorial := fmt.Sprintf(TutorialPath, tmp)
+			tmpTutorial := filepath.Join(tmp, TutorialFile)
 			defer os.Remove(tmpTutorial)
 
 			setter := NewSetter(tmp)

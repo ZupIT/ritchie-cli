@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -92,7 +91,7 @@ func TestTutorialCmd(t *testing.T) {
 				assert.Equal(t, tt.err, err)
 			} else {
 				assert.Nil(t, tt.err)
-				assert.FileExists(t, fmt.Sprintf(rtutorial.TutorialPath, tt.ritHome))
+				assert.FileExists(t, filepath.Join(tt.ritHome, rtutorial.TutorialFile))
 			}
 		})
 	}

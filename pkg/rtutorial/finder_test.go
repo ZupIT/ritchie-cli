@@ -17,7 +17,6 @@
 package rtutorial
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -56,7 +55,7 @@ func TestFind(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.fileContent != "" {
-				err := ioutil.WriteFile(fmt.Sprintf(TutorialPath, ritHome), []byte(tt.fileContent), os.ModePerm)
+				err := ioutil.WriteFile(filepath.Join(ritHome, TutorialFile), []byte(tt.fileContent), os.ModePerm)
 				assert.NoError(t, err)
 			}
 
