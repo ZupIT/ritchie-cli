@@ -106,6 +106,7 @@ func TestFind(t *testing.T) {
 		},
 		{
 			name:        "fail invalid runType",
+			ritHome:     ritHome,
 			fileContent: "error",
 			err:         "strconv.Atoi: parsing \"error\": invalid syntax",
 		},
