@@ -408,7 +408,7 @@ func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, f
 	createBuilder := formula.NewCreateBuilder(createManager, formBuildLocal)
 	buildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 	wspaceManager := workspace.New(ritchieHomeDir, os.TempDir(), dirManager, buildLocal)
-	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
 
 	return createFormulaCmd{
 		formula:   createBuilder,

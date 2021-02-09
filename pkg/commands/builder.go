@@ -132,9 +132,9 @@ func Build() *cobra.Command {
 	treeChecker := tree.NewChecker(treeManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := credential.NewResolver(credFinder, credSetter, inputPassword)
-	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
-	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
-	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
+	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir)
+	tutorialFindSetter := rtutorial.NewFindSetter(tutorialFinder, tutorialSetter)
 
 	formBuildMake := builder.NewBuildMake()
 	formBuildSh := builder.NewBuildShell()
@@ -204,7 +204,7 @@ func Build() *cobra.Command {
 		githubRepo,
 	)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
-	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
+	tutorialCmd := cmd.NewTutorialCmd(inputList, tutorialFindSetter)
 
 	// level 2
 	setCredentialCmd := cmd.NewSetCredentialCmd(
