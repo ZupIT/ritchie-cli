@@ -16,8 +16,9 @@
 package gitlab
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewRepoInfo(t *testing.T) {
@@ -25,31 +26,49 @@ func TestNewRepoInfo(t *testing.T) {
 		host:  "gitlab.com",
 		owner: "username",
 		repo:  "ritchie-formulas",
-		token: "gHexna7h7CQWafwNYSXp",
+		token: "some-token",
 	}
-	got := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "gHexna7h7CQWafwNYSXp")
+	got := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "some-token")
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("NewRepoInfo() = %v, want %v", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestTagsUrl(t *testing.T) {
 	const want = "https://gitlab.com/api/v4/projects/username%2Fritchie-formulas/releases"
-	repoInfo := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "gHexna7h7CQWafwNYSXp")
+	repoInfo := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "some-token")
 	tagsUrl := repoInfo.TagsUrl()
 
-	if !reflect.DeepEqual(tagsUrl, want) {
-		t.Errorf("NewRepoInfo() = %v, want %v", "got", want)
-	}
+	assert.Equal(t, want, tagsUrl)
 }
 
 func TestZipUrl(t *testing.T) {
 	const want = "https://gitlab.com/api/v4/projects/username%2Fritchie-formulas/repository/archive.zip?sha=1.0.0"
-	repoInfo := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "gHexna7h7CQWafwNYSXp")
-	tagsUrl := repoInfo.ZipUrl("1.0.0")
+	repoInfo := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "some-token")
+	zipUrl := repoInfo.ZipUrl("1.0.0")
 
-	if !reflect.DeepEqual(tagsUrl, want) {
-		t.Errorf("NewRepoInfo() = %v, want %v", tagsUrl, want)
-	}
+	assert.Equal(t, want, zipUrl)
+}
+
+func TestLatestTagUrl(t *testing.T) {
+	const want = "https://gitlab.com/api/v4/projects/username%2Fritchie-formulas/releases?per_page=1&page=1"
+	repoInfo := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "some-token")
+	latestTagUrl := repoInfo.LatestTagUrl()
+
+	assert.Equal(t, want, latestTagUrl)
+}
+
+func TestTokenHeader(t *testing.T) {
+	const want = "some-token"
+	repoInfo := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "some-token")
+	tokenHeader := repoInfo.TokenHeader()
+
+	assert.Equal(t, want, tokenHeader)
+}
+
+func TestToken(t *testing.T) {
+	const want = "some-token"
+	repoInfo := NewRepoInfo("https://gitlab.com/username/ritchie-formulas", "some-token")
+	token := repoInfo.Token()
+
+	assert.Equal(t, want, token)
 }
