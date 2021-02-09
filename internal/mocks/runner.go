@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package cmd
+package mocks
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/stretchr/testify/mock"
 
-// NewAddCmd create a new add instance.
-func NewAddCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:       "add SUBCOMMAND",
-		Short:     "Add repositories and workspaces",
-		Long:      "Add a new repository of formulas or a new workspace",
-		Example:   "rit add repo",
-		ValidArgs: []string{"repo", "workspace"},
-		Args:      cobra.OnlyValidArgs,
-	}
+type PreRunBuilder struct {
+	mock.Mock
+}
+
+func (prb *PreRunBuilder) Build(relativePath string) error {
+	args := prb.Called(relativePath)
+	return args.Error(0)
 }

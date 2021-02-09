@@ -17,6 +17,11 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -24,41 +29,44 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
+const runnerFlagName = "runner"
+
 type setFormulaRunnerCmd struct {
 	config formula.ConfigRunner
 	input  prompt.InputList
 }
 
+var setFormulaRunnerFlags = flags{
+	{
+		name:        runnerFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: fmt.Sprintf("runner name (%s)", strings.Join(formula.RunnerTypes, "|")),
+	},
+}
+
 func NewSetFormulaRunnerCmd(c formula.ConfigRunner, i prompt.InputList) *cobra.Command {
 	s := setFormulaRunnerCmd{c, i}
 
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:       "formula-runner",
 		Short:     "Set the default formula runner",
 		Example:   "rit set formula-runner",
-		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		RunE:      RunFuncE(s.runStdin(), s.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
+
+	addReservedFlags(cmd.Flags(), setFormulaRunnerFlags)
+
+	return cmd
 }
 
-func (c setFormulaRunnerCmd) runPrompt() CommandRunnerFunc {
+func (c *setFormulaRunnerCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		choose, err := c.input.List("Select a default formula run type", formula.RunnerTypes)
+		runType, err := c.resolveInput(cmd)
 		if err != nil {
 			return err
-		}
-
-		runType := formula.DefaultRun
-		for i := range formula.RunnerTypes {
-			if formula.RunnerTypes[i] == choose {
-				runType = formula.RunnerType(i)
-				break
-			}
-		}
-
-		if runType == formula.DefaultRun {
-			return ErrInvalidRunType
 		}
 
 		if err := c.config.Create(runType); err != nil {
@@ -75,7 +83,43 @@ func (c setFormulaRunnerCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (c setFormulaRunnerCmd) runStdin() CommandRunnerFunc {
+func (c *setFormulaRunnerCmd) resolveInput(cmd *cobra.Command) (formula.RunnerType, error) {
+	if IsFlagInput(cmd) {
+		return c.resolveFlags(cmd)
+	}
+	return c.resolvePrompt()
+}
+
+func (c *setFormulaRunnerCmd) resolveFlags(cmd *cobra.Command) (formula.RunnerType, error) {
+	runner, err := cmd.Flags().GetString(runnerFlagName)
+	if err != nil || runner == "" {
+		return formula.DefaultRun, errors.New(missingFlagText(runnerFlagName))
+	}
+
+	return c.resolveRunner(runner)
+}
+
+func (c *setFormulaRunnerCmd) resolvePrompt() (formula.RunnerType, error) {
+	choose, err := c.input.List("Select a default formula run type", formula.RunnerTypes)
+	if err != nil {
+		return formula.DefaultRun, err
+	}
+
+	return c.resolveRunner(choose)
+}
+
+func (c *setFormulaRunnerCmd) resolveRunner(runner string) (formula.RunnerType, error) {
+	for i := range formula.RunnerTypes {
+		if formula.RunnerTypes[i] == runner {
+			return formula.RunnerType(i), nil
+		}
+	}
+
+	return formula.DefaultRun, ErrInvalidRunType
+}
+
+// TODO: Remove stdin after deprecation
+func (c *setFormulaRunnerCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		stdinData := struct {
 			RunType string `json:"runType"`
