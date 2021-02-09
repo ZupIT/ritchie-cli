@@ -14,40 +14,23 @@
  * limitations under the License.
  */
 
-package prompt
+package mocks
 
 import (
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
+	"github.com/stretchr/testify/mock"
 )
 
-type SurveyMultiselect struct{}
-
-func NewSurveyMultiselect() SurveyMultiselect {
-	return SurveyMultiselect{}
+type BuilderMock struct {
+	mock.Mock
 }
 
-func (SurveyMultiselect) Multiselect(in formula.Input) ([]string, error) {
-	value := []string{}
-	multiselect := &survey.MultiSelect{
-		Message: in.Label,
-		Options: in.Items,
-		Help:    in.Tutorial,
-	}
-	multiQs := []*survey.Question{
-		{
-			Prompt: multiselect,
-		},
-	}
+func (b *BuilderMock) Build(info formula.BuildInfo) error {
+	args := b.Called(info)
+	return args.Error(0)
+}
 
-	if input.IsRequired(in) {
-		multiQs[0].Validate = survey.Required
-	}
-
-	if err := survey.Ask(multiQs, &value); err != nil {
-		return value, err
-	}
-
-	return value, nil
+func (b *BuilderMock) HasBuilt() bool {
+	args := b.Called()
+	return args.Bool(0)
 }

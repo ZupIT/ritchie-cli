@@ -144,7 +144,7 @@ func Build() *cobra.Command {
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 
-	promptInManager := fprompt.NewInputManager(credResolver, fileManager, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect)
+	promptInManager := fprompt.NewInputManager(credResolver, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect)
 	stdinInManager := stdin.NewInputManager(credResolver)
 	flagInManager := flag.NewInputManager(credResolver)
 	termInputTypes := formula.TermInputTypes{
@@ -170,7 +170,7 @@ func Build() *cobra.Command {
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, formBuildLocal)
 
 	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal)
-	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
+	configManager := runner.NewConfigManager(ritchieHomeDir)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
