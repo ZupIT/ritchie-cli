@@ -38,7 +38,7 @@ func TestAddRepoCmd(t *testing.T) {
 	gitRepo := new(mocks.GitRepositoryMock)
 	gitRepo.On("Zipball", mock.Anything, mock.Anything).Return(nil, nil)
 	gitRepo.On("Tags", mock.Anything).Return(git.Tags{git.Tag{Name: "1.0.0"}}, nil)
-	gitRepo.On("LatestTag", mock.Anything).Return(git.Tag{}, nil)
+	gitRepo.On("LatestTag", mock.Anything).Return(git.Tag{Name: "2.0.0"}, nil)
 
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: gitRepo, NewRepoInfo: github.NewRepoInfo})
@@ -264,14 +264,19 @@ func TestAddRepoCmd(t *testing.T) {
 			want:   errors.New(missingFlagText(repoUrlFlagName)),
 		},
 		{
-			name:   "fail flags with empty tag",
-			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com"},
+			name:   "fail flags with priority not a number",
+			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--priority=text"},
 			fields: fields{},
-			want:   errors.New(missingFlagText(tagFlagName)),
+			want:   errors.New("invalid argument \"text\" for \"--priority\" flag: strconv.ParseInt: parsing \"text\": invalid syntax"),
 		},
 		{
 			name:   "success flags",
 			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--tag=1.0.0"},
+			fields: fields{},
+		},
+		{
+			name:   "success flags when version is not informed",
+			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com"},
 			fields: fields{},
 		},
 	}
