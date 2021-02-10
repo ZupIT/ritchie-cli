@@ -1,5 +1,41 @@
 # Changelog
 
+## [2.9.0](https://github.com/zupit/ritchie-cli/tree/2.9.0) (2021-02-09)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.8.0...2.9.0)
+
+**Closed issues:**
+
+- Make to easier to contribute to other formulas repositories [\#845](https://github.com/ZupIT/ritchie-cli/issues/845)
+- Tests with Testify in Pkg/Formula/Input/Prompt [\#783](https://github.com/ZupIT/ritchie-cli/issues/783)
+- Allow to import other formulas repositories as dependency [\#581](https://github.com/ZupIT/ritchie-cli/issues/581)
+- Add an output capacity for formulas [\#536](https://github.com/ZupIT/ritchie-cli/issues/536)
+- Formula structure enhancement \(V3 Suggestion\) [\#535](https://github.com/ZupIT/ritchie-cli/issues/535)
+- Improve 'rit completion bash' command output [\#524](https://github.com/ZupIT/ritchie-cli/issues/524)
+- Add a link to documentation on HELPER [\#501](https://github.com/ZupIT/ritchie-cli/issues/501)
+- Required field in multiselect input [\#839](https://github.com/ZupIT/ritchie-cli/issues/839)
+- Support latest tag on rit add repo via flag [\#835](https://github.com/ZupIT/ritchie-cli/issues/835)
+- Deprecate the dynamic list [\#813](https://github.com/ZupIT/ritchie-cli/issues/813)
+- Support for list input type [\#812](https://github.com/ZupIT/ritchie-cli/issues/812)
+- Expose specific error message during build [\#801](https://github.com/ZupIT/ritchie-cli/issues/801)
+- Tests with Testify in Pkg/RTutorial [\#795](https://github.com/ZupIT/ritchie-cli/issues/795)
+- Support flags for rit set formula-runner [\#721](https://github.com/ZupIT/ritchie-cli/issues/721)
+- Support flags for rit tutorial [\#715](https://github.com/ZupIT/ritchie-cli/issues/715)
+
+**Merged pull requests:**
+
+- Fix merge conflict between PRs [\#850](https://github.com/ZupIT/ritchie-cli/pull/850) ([brunasilvazup](https://github.com/brunasilvazup))
+- refactor: deprecated dynamic input [\#848](https://github.com/ZupIT/ritchie-cli/pull/848) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- Tutorial flags [\#846](https://github.com/ZupIT/ritchie-cli/pull/846) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Support for list input type [\#843](https://github.com/ZupIT/ritchie-cli/pull/843) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- fix: required multiselect [\#842](https://github.com/ZupIT/ritchie-cli/pull/842) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- Add step to check de latest version on rit add repo and entry by flags [\#841](https://github.com/ZupIT/ritchie-cli/pull/841) ([brunasilvazup](https://github.com/brunasilvazup))
+- Adds a simple fix to the help menu [\#838](https://github.com/ZupIT/ritchie-cli/pull/838) ([brunasilvazup](https://github.com/brunasilvazup))
+- Release 2.8.0 merge [\#837](https://github.com/ZupIT/ritchie-cli/pull/837) ([zup-ci](https://github.com/zup-ci))
+- Set formula runner flags [\#836](https://github.com/ZupIT/ritchie-cli/pull/836) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Fix- Print error messages in pre builder [\#829](https://github.com/ZupIT/ritchie-cli/pull/829) ([brunasilvazup](https://github.com/brunasilvazup))
+- Fix/readme repo template [\#840](https://github.com/ZupIT/ritchie-cli/pull/840) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+
 ## [2.8.0](https://github.com/zupit/ritchie-cli/tree/2.8.0) (2021-01-26)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.7.0...2.8.0)
@@ -259,6 +295,7 @@
 - Adding developer guide [\#604](https://github.com/ZupIT/ritchie-cli/pull/604) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Fix significant typos and grammar in CONTRIBUTING.md [\#603](https://github.com/ZupIT/ritchie-cli/pull/603) ([Bharat123rox](https://github.com/Bharat123rox))
 - Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
+- Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
 - Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
 - Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
