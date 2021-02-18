@@ -83,10 +83,9 @@ func TestTags(t *testing.T) {
 			git.On("TagsUrl").Return(tt.info.tagsUrl)
 			re := NewRepoManager(tt.client)
 			got, err := re.Tags(git)
-			if err == nil {
-				assert.Equal(t, tt.want, got)
-			} else {
-				assert.Equal(t, tt.want, got)
+
+			assert.Equal(t, tt.want, got)
+			if err != nil {
 				assert.EqualError(t, err, tt.wantErr)
 			}
 		})
@@ -154,9 +153,8 @@ func TestZipball(t *testing.T) {
 				assert.EqualError(t, err, tt.want)
 			} else {
 				result, err := ioutil.ReadAll(got)
-				if assert.Nil(t, err) {
-					assert.Equal(t, tt.want, string(result))
-				}
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, string(result))
 			}
 		})
 	}
@@ -226,10 +224,9 @@ func TestLatestTag(t *testing.T) {
 			git.On("LatestTagUrl").Return(tt.info.latestTagUrl)
 			re := NewRepoManager(tt.client)
 			got, err := re.LatestTag(git)
-			if err == nil {
-				assert.Equal(t, tt.want, got)
-			} else {
-				assert.Equal(t, tt.want, got)
+
+			assert.Equal(t, tt.want, got)
+			if err != nil {
 				assert.EqualError(t, err, tt.wantErr)
 			}
 		})
