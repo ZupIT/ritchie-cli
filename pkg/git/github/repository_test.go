@@ -20,11 +20,168 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestTags(t *testing.T) {
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		_, _ = writer.Write([]byte(PayloadListAllTags))
+	}))
+
+	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.WriteHeader(http.StatusBadRequest)
+	}))
+
+	tests := []struct {
+		name    string
+		client  *http.Client
+		info    info
+		want    git.Tags
+		wantErr string
+	}{
+		{
+			name:   "Run with success",
+			client: mockServer.Client(),
+			info: info{
+				tagsUrl: mockServer.URL,
+				token:   "some_token",
+			},
+			want: git.Tags{
+				{
+					Name: "v1.0.0",
+				},
+			},
+		},
+		{
+			name:   "Return err when request fail",
+			client: mockServerThatFail.Client(),
+			info: info{
+				tagsUrl: mockServerThatFail.URL,
+			},
+			want:    git.Tags{},
+			wantErr: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			git := &mocks.RepoInfo{}
+			git.On("Token").Return(tt.info.token)
+			git.On("TagsUrl").Return(tt.info.tagsUrl)
+			re := NewRepoManager(tt.client)
+			got, err := re.Tags(git)
+			if err == nil {
+				assert.Equal(t, tt.want, got)
+			} else {
+				assert.Equal(t, tt.want, got)
+				assert.EqualError(t, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestLatestTag(t *testing.T) {
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		_, _ = writer.Write([]byte(PayloadListLastTags))
+	}))
+
+	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.WriteHeader(http.StatusBadRequest)
+	}))
+
+	tests := []struct {
+		name    string
+		client  *http.Client
+		info    info
+		want    git.Tag
+		wantErr string
+	}{
+		{
+			name:   "Run with success",
+			client: mockServer.Client(),
+			info: info{
+				latestTagUrl: mockServer.URL,
+				token:        "some_token",
+			},
+			want: git.Tag{Name: "v1.0.0", Description: "Description of the release"},
+		},
+		{
+			name:   "Return err when request fail",
+			client: mockServerThatFail.Client(),
+			info: info{
+				latestTagUrl: mockServerThatFail.URL,
+			},
+			want:    git.Tag{},
+			wantErr: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			git := &mocks.RepoInfo{}
+			git.On("Token").Return(tt.info.token)
+			git.On("Token").Return(tt.info.token)
+			git.On("LatestTagUrl").Return(tt.info.latestTagUrl)
+			re := NewRepoManager(tt.client)
+			got, err := re.LatestTag(git)
+			if err == nil {
+				assert.Equal(t, tt.want, got)
+			} else {
+				assert.Equal(t, tt.want, got)
+				assert.EqualError(t, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestZipball(t *testing.T) {
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		data := `zipValue`
+		_, _ = writer.Write([]byte(data))
+	}))
+
+	tests := []struct {
+		name    string
+		client  *http.Client
+		info    info
+		version string
+		want    string
+	}{
+		{
+			name:   "Run with success",
+			client: mockServer.Client(),
+			info: info{
+				zipUrl: mockServer.URL,
+				token:  "some_token",
+			},
+			version: "1.0.0",
+			want:    "zipValue",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			git := &mocks.RepoInfo{}
+			git.On("Token").Return(tt.info.token)
+			git.On("TokenHeader").Return(tt.info.tokenHeader)
+			git.On("ZipUrl", tt.version).Return(tt.info.zipUrl)
+			re := RepoManager{client: tt.client}
+			got, err := re.Zipball(git, tt.version)
+			if err != nil {
+				assert.EqualError(t, err, tt.want)
+			} else {
+				result, err := ioutil.ReadAll(got)
+				if assert.Nil(t, err) {
+					assert.Equal(t, tt.want, string(result))
+				}
+			}
+		})
+	}
+}
 
 const (
 	PayloadListLastTags = `
@@ -181,211 +338,10 @@ const (
 ]`
 )
 
-func TestTags(t *testing.T) {
-
-	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		_, _ = writer.Write([]byte(PayloadListAllTags))
-	}))
-
-	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.WriteHeader(http.StatusBadRequest)
-	}))
-
-	type in struct {
-		client *http.Client
-		info   git.RepoInfo
-	}
-	tests := []struct {
-		name    string
-		in      in
-		want    git.Tags
-		wantErr bool
-	}{
-		{
-			name: "Run with success",
-			in: in{
-				client: mockServer.Client(),
-				info: RepoInfoCustomMock{
-					tagsUrl: mockServer.URL,
-					token:   "some_token",
-				},
-			},
-			want: git.Tags{
-				{
-					Name: "v1.0.0",
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "Return err when request fail",
-			in: in{
-				client: mockServerThatFail.Client(),
-				info: RepoInfoCustomMock{
-					tagsUrl: mockServerThatFail.URL,
-				},
-			},
-			want:    git.Tags{},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			re := NewRepoManager(tt.in.client)
-
-			got, err := re.Tags(tt.in.info)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Tags() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Tags() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestLatestTag(t *testing.T) {
-
-	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		_, _ = writer.Write([]byte(PayloadListLastTags))
-	}))
-
-	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.WriteHeader(http.StatusBadRequest)
-	}))
-
-	type in struct {
-		client *http.Client
-		info   git.RepoInfo
-	}
-	tests := []struct {
-		name    string
-		in      in
-		want    git.Tag
-		wantErr bool
-	}{
-		{
-			name: "Run with success",
-			in: in{
-				client: mockServer.Client(),
-				info: RepoInfoCustomMock{
-					latestTagUrl: mockServer.URL,
-					token:        "some_token",
-				},
-			},
-			want:    git.Tag{Name: "v1.0.0", Description: "Description of the release"},
-			wantErr: false,
-		},
-		{
-			name: "Return err when request fail",
-			in: in{
-				client: mockServerThatFail.Client(),
-				info: RepoInfoCustomMock{
-					latestTagUrl: mockServerThatFail.URL,
-				},
-			},
-			want:    git.Tag{},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			re := NewRepoManager(tt.in.client)
-
-			got, err := re.LatestTag(tt.in.info)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("LatestTag() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("LatestTag() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestZipball(t *testing.T) {
-
-	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		data := `zipValue`
-		_, _ = writer.Write([]byte(data))
-	}))
-
-	type in struct {
-		client  *http.Client
-		info    git.RepoInfo
-		version string
-	}
-	tests := []struct {
-		name    string
-		in      in
-		want    string
-		wantErr bool
-	}{
-		{
-			name: "Run with success",
-			in: in{
-				client: mockServer.Client(),
-				info: RepoInfoCustomMock{
-					zipUrl: func(version string) string {
-						return mockServer.URL
-					},
-					token: "some_token",
-				},
-				version: "1.0.0",
-			},
-			want:    "zipValue",
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			re := RepoManager{
-				client: tt.in.client,
-			}
-			got, err := re.Zipball(tt.in.info, tt.in.version)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Zipball() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			result, err := ioutil.ReadAll(got)
-			if err != nil {
-				t.Errorf("fail to parse result")
-			}
-
-			if string(result) != tt.want {
-				t.Errorf("Zipball() got = %v, want %v", got, tt.want)
-			}
-
-		})
-	}
-}
-
-type RepoInfoCustomMock struct {
-	zipUrl       func(version string) string
+type info struct {
+	zipUrl       string
 	tagsUrl      string
 	latestTagUrl string
-	tokenHeader  string
 	token        string
-}
-
-func (m RepoInfoCustomMock) ZipUrl(version string) string {
-	return m.zipUrl(version)
-}
-
-func (m RepoInfoCustomMock) TagsUrl() string {
-	return m.tagsUrl
-}
-
-func (m RepoInfoCustomMock) LatestTagUrl() string {
-	return m.latestTagUrl
-}
-
-func (m RepoInfoCustomMock) TokenHeader() string {
-	return m.tokenHeader
-}
-
-func (m RepoInfoCustomMock) Token() string {
-	return m.token
+	tokenHeader  string
 }
