@@ -103,7 +103,7 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		flagAll := (name == updateOptionAll)
+		flagAll := name == updateOptionAll
 
 		var repoToUpdate []formula.Repo
 
@@ -111,8 +111,8 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 			repoToUpdate = externalRepos
 		} else {
 			for i := range externalRepos {
-				if repos[i].Name == formula.RepoName(name) {
-					repoToUpdate = append(repoToUpdate, repos[i])
+				if externalRepos[i].Name == formula.RepoName(name) {
+					repoToUpdate = append(repoToUpdate, externalRepos[i])
 					break
 				}
 			}
