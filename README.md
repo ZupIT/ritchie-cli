@@ -47,7 +47,8 @@ rit init
 To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you'll need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally. To do so, you can use the `rit add repo` command, or execute the command line below:
 
 ```bash
-echo '{"provider":"Github", "name":"demo", "url":"https://github.com/ZupIT/ritchie-formulas-demo", "priority":1}' | rit add repo --stdin
+rit add repo --provider=Github --name=demo --repoUrl=https://github.com/ZupIT/ritchie-formulas-demo --priority=1
+
 ```
 
 Then, you'll be able to execute the "hello-world" formula through the command line below:
