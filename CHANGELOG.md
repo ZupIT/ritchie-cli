@@ -1,17 +1,5 @@
 # Changelog
 
-## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
-
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.9.1...HEAD)
-
-**Merged pull requests:**
-
-- Update repo fix [\#866](https://github.com/ZupIT/ritchie-cli/pull/866) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
-- Fixing delete credential empty fields bug [\#864](https://github.com/ZupIT/ritchie-cli/pull/864) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
-- \[BUGFIX\] - Fix build with build.sh [\#862](https://github.com/ZupIT/ritchie-cli/pull/862) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
-- test: gitlab testify [\#856](https://github.com/ZupIT/ritchie-cli/pull/856) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
-- Release 2.9.0 merge [\#855](https://github.com/ZupIT/ritchie-cli/pull/855) ([zup-ci](https://github.com/zup-ci))
-
 ## [2.9.1](https://github.com/zupit/ritchie-cli/tree/2.9.1) (2021-02-22)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.9.0...2.9.1)
@@ -32,6 +20,13 @@
 - Support flags for rit set credential [\#710](https://github.com/ZupIT/ritchie-cli/issues/710)
 - Enrich --help flag with more formula-related info [\#623](https://github.com/ZupIT/ritchie-cli/issues/623)
 - Create repo command [\#621](https://github.com/ZupIT/ritchie-cli/issues/621)
+
+**Merged pull requests:**
+
+- Update repo fix [\#866](https://github.com/ZupIT/ritchie-cli/pull/866) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Fixing delete credential empty fields bug [\#864](https://github.com/ZupIT/ritchie-cli/pull/864) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- \[BUGFIX\] - Fix build with build.sh [\#862](https://github.com/ZupIT/ritchie-cli/pull/862) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+- Release 2.9.0 merge [\#855](https://github.com/ZupIT/ritchie-cli/pull/855) ([zup-ci](https://github.com/zup-ci))
 
 ## [2.9.0](https://github.com/zupit/ritchie-cli/tree/2.9.0) (2021-02-09)
 
