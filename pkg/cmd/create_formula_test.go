@@ -76,7 +76,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inputTextValErr: errors.New("error on input text"),
 			},
-			want: errors.New("error on input text"),
+			want: ErrFormulaCmdNotBeEmpty,
 		},
 		{
 			name: "error on template manager Validate func",
@@ -191,6 +191,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tutorialMock,
 				treeMock,
 			)
+			createFormulaCmd.SetArgs([]string{})
 			// TODO: remove it after being deprecated
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			got := createFormulaCmd.Execute()
@@ -411,7 +412,7 @@ func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, f
 	createBuilder := formula.NewCreateBuilder(createManager, formBuildLocal)
 	buildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 	wspaceManager := workspace.New(ritchieHomeDir, os.TempDir(), dirManager, buildLocal)
-	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
 
 	return createFormulaCmd{
 		formula:   createBuilder,

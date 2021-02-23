@@ -116,6 +116,26 @@ func (i *InputListMock) List(name string, items []string, helper ...string) (str
 	return args.String(0), args.Error(1)
 }
 
+type InputMultiselectMock struct {
+	mock.Mock
+}
+
+func (i *InputMultiselectMock) Multiselect(input formula.Input) ([]string, error) {
+	args := i.Called(input)
+
+	return args.Get(0).([]string), args.Error(1)
+}
+
+type InputDefaultTextMock struct {
+	mock.Mock
+}
+
+func (i *InputDefaultTextMock) Text(input formula.Input) (string, error) {
+	args := i.Called(input)
+
+	return args.String(0), args.Error(1)
+}
+
 type InputIntMock struct {
 	mock.Mock
 }
@@ -152,7 +172,7 @@ type InputTextValidatorMock struct {
 func (i *InputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
 	args := i.Called(name, validate)
 
-	return args.String(0), args.Error(1)
+	return args.String(0), validate(args.String(0))
 }
 
 type InputPathMock struct {

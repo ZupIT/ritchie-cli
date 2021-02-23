@@ -133,9 +133,9 @@ func Build() *cobra.Command {
 	treeChecker := tree.NewChecker(treeManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := credential.NewResolver(credFinder, credSetter, inputPassword)
-	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
-	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir, fileManager)
-	tutorialFindSetter := rtutorial.NewFindSetter(ritchieHomeDir, tutorialFinder, tutorialSetter)
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
+	tutorialSetter := rtutorial.NewSetter(ritchieHomeDir)
+	tutorialFindSetter := rtutorial.NewFindSetter(tutorialFinder, tutorialSetter)
 
 	formBuildMake := builder.NewBuildMake()
 	formBuildSh := builder.NewBuildShell()
@@ -145,7 +145,7 @@ func Build() *cobra.Command {
 
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 
-	promptInManager := fprompt.NewInputManager(credResolver, fileManager, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect, inputAutocomplete)
+	promptInManager := fprompt.NewInputManager(credResolver, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect, inputAutocomplete)
 	stdinInManager := stdin.NewInputManager(credResolver)
 	flagInManager := flag.NewInputManager(credResolver)
 	termInputTypes := formula.TermInputTypes{
@@ -171,7 +171,7 @@ func Build() *cobra.Command {
 	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, formBuildLocal)
 
 	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal)
-	configManager := runner.NewConfigManager(ritchieHomeDir, fileManager)
+	configManager := runner.NewConfigManager(ritchieHomeDir)
 	formulaExec := runner.NewExecutor(runners, preRunBuilder, configManager)
 
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
@@ -205,7 +205,7 @@ func Build() *cobra.Command {
 		githubRepo,
 	)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
-	tutorialCmd := cmd.NewTutorialCmd(ritchieHomeDir, inputList, tutorialFindSetter)
+	tutorialCmd := cmd.NewTutorialCmd(inputList, tutorialFindSetter)
 
 	// level 2
 	setCredentialCmd := cmd.NewSetCredentialCmd(
