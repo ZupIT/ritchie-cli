@@ -17,92 +17,57 @@
 package rtutorial
 
 import (
-	"errors"
-	"fmt"
+	"io/ioutil"
 	"os"
-	"reflect"
+	"path/filepath"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+	"github.com/stretchr/testify/assert"
 )
 
-var errReadingFile = errors.New("error reading file")
-
 func TestFind(t *testing.T) {
-	type out struct {
-		err       error
-		want      TutorialHolder
-		wantError bool
-	}
+	ritHome := filepath.Join(os.TempDir(), "tutorial")
+	_ = os.Mkdir(ritHome, os.ModePerm)
+	defer os.RemoveAll(ritHome)
 
 	tests := []struct {
-		name string
-		in   stream.FileReadExister
-		out  *out
+		name        string
+		holderState string
+		fileContent string
+		err         string
 	}{
 		{
-			name: "With no tutorial file",
-			in: sMocks.FileReadExisterCustomMock{
-				ExistsMock: func(path string) bool {
-					return false
-				},
-			},
-			out: &out{
-				want:      TutorialHolder{Current: "enabled"},
-				err:       nil,
-				wantError: false,
-			},
+			name:        "With no tutorial file",
+			holderState: "enabled",
 		},
 		{
-			name: "With existing tutorial file",
-			in: sMocks.FileReadExisterCustomMock{
-				ReadMock: func(path string) ([]byte, error) {
-					return []byte("{\"tutorial\":\"disabled\"}"), nil
-				},
-				ExistsMock: func(path string) bool {
-					return true
-				},
-			},
-			out: &out{
-				want:      TutorialHolder{Current: "disabled"},
-				err:       nil,
-				wantError: false,
-			},
+			name:        "With existing tutorial file",
+			holderState: "disabled",
+			fileContent: `{"tutorial": "disabled"}`,
 		},
 		{
-			name: "Error reading the tutorial file",
-			in: sMocks.FileReadExisterCustomMock{
-				ReadMock: func(path string) ([]byte, error) {
-					return []byte(""), errReadingFile
-				},
-				ExistsMock: func(path string) bool {
-					return true
-				},
-			},
-			out: &out{
-				want:      TutorialHolder{Current: "enabled"},
-				err:       errReadingFile,
-				wantError: true,
-			},
+			name:        "Error reading the tutorial file",
+			fileContent: "error",
+			err:         "invalid character 'e' looking for beginning of value",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tmp := os.TempDir()
-			tmpTutorial := fmt.Sprintf(TutorialPath, tmp)
-			defer os.RemoveAll(tmpTutorial)
-
-			finder := NewFinder(tmp, tt.in)
-
-			out := tt.out
-			got, err := finder.Find()
-			if err != nil && !tt.out.wantError {
-				t.Errorf("%s - Execution error - got %v, want %v", tt.name, err, out.err)
+			if tt.fileContent != "" {
+				err := ioutil.WriteFile(filepath.Join(ritHome, TutorialFile), []byte(tt.fileContent), os.ModePerm)
+				assert.NoError(t, err)
 			}
-			if !reflect.DeepEqual(out.want, got) {
-				t.Errorf("%s - Error in the expected response -  got %v, want %v", tt.name, got, out.want)
+
+			finder := NewFinder(ritHome)
+
+			got, err := finder.Find()
+
+			if err != nil {
+				assert.EqualError(t, err, tt.err)
+			} else {
+				assert.Empty(t, tt.err)
+				assert.Equal(t, tt.holderState, got.Current)
 			}
 		})
 	}

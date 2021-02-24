@@ -36,7 +36,6 @@ import (
 const (
 	defaultRepoURL   = "https://github.com/ZupIT/ritchie-formulas"
 	messageExisting  = "This formula repository already exists, check using \"rit list repo\""
-	nameFlagName     = "name"
 	repoUrlFlagName  = "repoUrl"
 	priorityFlagName = "priority"
 	tokenFlagName    = "token"
@@ -309,10 +308,9 @@ func (ar *addRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repo, error) {
 	}
 
 	tag, err := cmd.Flags().GetString(tagFlagName)
-	if err != nil || tag == "" {
+	if err != nil {
 		return formula.Repo{}, errors.New(missingFlagText(tagFlagName))
 	}
-
 	token, err := cmd.Flags().GetString(tokenFlagName)
 	if err != nil {
 		return formula.Repo{}, err
@@ -323,14 +321,21 @@ func (ar *addRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repo, error) {
 		return formula.Repo{}, err
 	}
 
-	return formula.Repo{
+	repo := formula.Repo{
 		Provider: formula.RepoProvider(provider),
 		Name:     formula.RepoName(name),
 		Version:  formula.RepoVersion(tag),
 		Token:    token,
 		Url:      repoUrl,
 		Priority: priority,
-	}, nil
+	}
+
+	if repo.EmptyVersion() {
+		latestTag := ar.detail.LatestTag(repo)
+		repo.Version = formula.RepoVersion(latestTag)
+	}
+
+	return repo, nil
 }
 
 func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
@@ -356,7 +361,7 @@ func (ar addRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if r.Version.String() == "" {
+		if r.EmptyVersion() {
 			latestTag := ar.detail.LatestTag(r)
 			r.Version = formula.RepoVersion(latestTag)
 		}

@@ -128,9 +128,7 @@ func (pr PreRunManager) buildFormula(formulaPath string) error {
 		if err := pr.shell.Build(info); err != nil {
 			return err
 		}
-	}
-
-	if err := pr.make.Build(info); err != nil { // Build formula with Makefile
+	} else if err := pr.make.Build(info); err != nil { // Build formula with Makefile
 		return err
 	}
 

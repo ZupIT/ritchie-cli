@@ -61,7 +61,7 @@ func TestAddRepoCmd(t *testing.T) {
 		return inputListMock
 	}
 
-	providers := []string{"Github", "GitLab", "Bitbucket"}
+	providers := []string{"Bitbucket", "GitLab", "Github"}
 
 	tests := []struct {
 		name   string
@@ -172,9 +172,9 @@ func TestAddRepoCmd(t *testing.T) {
 			name: "input text error",
 			args: []string{},
 			fields: fields{
-				InputTextValidator: returnWithStringErr{"mocked text", someError},
+				InputTextValidator: returnWithStringErr{"", ErrRepoNameNotEmpty},
 			},
-			want: someError,
+			want: ErrRepoNameNotEmpty,
 		},
 		{
 			name: "input url error",
@@ -259,14 +259,19 @@ func TestAddRepoCmd(t *testing.T) {
 			want:   errors.New(missingFlagText(repoUrlFlagName)),
 		},
 		{
-			name:   "fail flags with empty tag",
-			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com"},
+			name:   "fail flags with priority not a number",
+			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--priority=text"},
 			fields: fields{},
-			want:   errors.New(missingFlagText(tagFlagName)),
+			want:   errors.New("invalid argument \"text\" for \"--priority\" flag: strconv.ParseInt: parsing \"text\": invalid syntax"),
 		},
 		{
 			name:   "success flags",
 			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com", "--tag=1.0.0"},
+			fields: fields{},
+		},
+		{
+			name:   "success flags when version is not informed",
+			args:   []string{"--provider=Github", "--name=my-repo", "--repoUrl=github.com"},
 			fields: fields{},
 		},
 	}
@@ -296,7 +301,7 @@ func TestAddRepoCmd(t *testing.T) {
 			inputIntMock := new(mocks.InputIntMock)
 			inputIntMock.On("Int", mock.Anything, mock.Anything).Return(int64(0), nil)
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
-			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, fields.InputTextValidator.error)
+			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, nil)
 			tutorialFindMock := new(mocks.TutorialFindSetterMock)
 			tutorialFindMock.On("Find").Return(rtutorial.TutorialHolder{Current: fields.tutorialStatus.string}, fields.tutorialStatus.error)
 			repoListerAdderMock := new(mocks.RepoManager)

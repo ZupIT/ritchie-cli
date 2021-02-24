@@ -14,11 +14,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
-const (
-	providerFlagName        = "provider"
-	providerFlagDescription = "Provider name to delete"
-)
-
 type inputDeleteCredential struct {
 	provider string
 }
@@ -42,7 +37,7 @@ var deleteCredentialFlags = flags{
 		name:        providerFlagName,
 		kind:        reflect.String,
 		defValue:    "",
-		description: providerFlagDescription,
+		description: "Provider name to delete",
 	},
 }
 
@@ -117,7 +112,7 @@ func (d *deleteCredentialCmd) resolvePrompt(context string) (inputDeleteCredenti
 		return inputDeleteCredential{}, errors.New("you have no defined credentials in this env")
 	}
 
-	providers := make([]string, len(data))
+	providers := make([]string, 0, len(data))
 	for _, c := range data {
 		providers = append(providers, c.Provider)
 	}
