@@ -34,10 +34,12 @@ import (
 
 func TestAddRepoCmd(t *testing.T) {
 	someError := errors.New("some error")
-	unauthorizedError := errors.New("permission error:\nYou must overwrite the current token (Github-add-repo) with command:\n" +
-		"\t rit set credential\n" +
-		"Or switch to a new environment with the command:\n" +
-		"\t rit set env")
+	unauthorizedError := errors.New(`
+	permission error:
+	You must overwrite the current token (Github-add-repo) with command:
+		rit set credential
+	Or switch to a new environment with the command:
+		rit set env`)
 
 	repoTest := &formula.Repo{
 		Provider: "Github",

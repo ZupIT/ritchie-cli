@@ -40,6 +40,12 @@ const (
 	priorityFlagName = "priority"
 	tokenFlagName    = "token"
 	tagFlagName      = "tag"
+	permissionError  = `
+	permission error:
+	You must overwrite the current token (%s-add-repo) with command:
+		rit set credential
+	Or switch to a new environment with the command:
+		rit set env`
 )
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
@@ -86,7 +92,7 @@ var addRepoFlags = flags{
 type addRepoCmd struct {
 	repo          formula.RepositoryAddLister
 	repoProviders formula.RepoProviders
-	credential.Resolver
+	cred          credential.Resolver
 	prompt.InputTextValidator
 	prompt.InputURL
 	prompt.InputList
@@ -121,7 +127,7 @@ func NewAddRepoCmd(
 		tutorial:           rtf,
 		tree:               treeChecker,
 		detail:             rd,
-		Resolver:           resolver,
+		cred:               resolver,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -224,7 +230,7 @@ func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
 
 	var token string
 	if isPrivate {
-		token, err = ar.Resolve("CREDENTIAL_" + provider + "-ADD-REPO_TOKEN")
+		token, err = ar.cred.Resolve("CREDENTIAL_" + provider + "-ADD-REPO_TOKEN")
 		if err != nil {
 			return formula.Repo{}, err
 		}
@@ -236,10 +242,7 @@ func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
 	tags, err := git.Repos.Tags(gitRepoInfo)
 	if err != nil {
 		if strings.Contains(err.Error(), "401") {
-			errorString := fmt.Sprintf("permission error:\nYou must overwrite the current token (%s-add-repo) with command:\n"+
-				"\t rit set credential\n"+
-				"Or switch to a new environment with the command:\n"+
-				"\t rit set env", provider)
+			errorString := fmt.Sprintf(permissionError, provider)
 			return formula.Repo{}, errors.New(errorString)
 		}
 		return formula.Repo{}, err
@@ -391,7 +394,7 @@ func (ar addRepoCmd) runStdin() CommandRunnerFunc {
 	}
 }
 
-func (ad addRepoCmd) repoNameValidator(text interface{}) error {
+func (ar addRepoCmd) repoNameValidator(text interface{}) error {
 	in := text.(string)
 	if in == "" {
 		return ErrRepoNameNotEmpty
