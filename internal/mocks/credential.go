@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package fileutil
+package mocks
 
-type Service interface {
-	ReadFile(path string) ([]byte, error)
-	WriteFilePerm(path string, content []byte, perm int32) error
+import "github.com/stretchr/testify/mock"
+
+type CredResolverMock struct {
+	mock.Mock
 }
 
-type DefaultService struct{}
-
-func (s DefaultService) ReadFile(path string) ([]byte, error) {
-	return ReadFile(path)
-}
-
-func (s DefaultService) WriteFilePerm(path string, content []byte, perm int32) error {
-	return WriteFilePerm(path, content, perm)
+func (i *CredResolverMock) Resolve(name string) (string, error) {
+	args := i.Called(name)
+	return args.String(0), args.Error(1)
 }

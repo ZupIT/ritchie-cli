@@ -18,6 +18,7 @@ package workspace
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,7 +41,6 @@ type Manager struct {
 	workspaceFile       string
 	defaultWorkspaceDir string
 	dir                 stream.DirCreateHasher
-	file                stream.FileWriteReadExister
 	local               builder.Initializer
 }
 
@@ -48,7 +48,6 @@ func New(
 	ritchieHome string,
 	userHome string,
 	dirManager stream.DirCreateHasher,
-	fileManager stream.FileWriteReadExister,
 	local builder.Initializer,
 ) Manager {
 	workspaceFile := filepath.Join(ritchieHome, formula.WorkspacesFile)
@@ -58,7 +57,6 @@ func New(
 		workspaceFile:       workspaceFile,
 		defaultWorkspaceDir: workspaceHome,
 		dir:                 dirManager,
-		file:                fileManager,
 		local:               local,
 	}
 }
@@ -67,17 +65,13 @@ func (m Manager) Add(workspace formula.Workspace) error {
 	if workspace.Dir == m.defaultWorkspaceDir {
 		return nil
 	}
-	if !m.file.Exists(workspace.Dir) {
+	if _, err := os.Stat(workspace.Dir); os.IsNotExist(err) {
 		return ErrInvalidWorkspace
 	}
 
 	workspaces := formula.Workspaces{}
-	if m.file.Exists(m.workspaceFile) {
-		file, err := m.file.Read(m.workspaceFile)
-		if err != nil {
-			return err
-		}
-
+	file, err := ioutil.ReadFile(m.workspaceFile)
+	if err == nil {
 		if err := json.Unmarshal(file, &workspaces); err != nil {
 			return err
 		}
@@ -92,12 +86,12 @@ func (m Manager) Add(workspace formula.Workspace) error {
 	}
 
 	workspaces[workspace.Name] = workspace.Dir
-	content, err := json.Marshal(workspaces)
+	content, err := json.MarshalIndent(workspaces, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	if err := m.file.Write(m.workspaceFile, content); err != nil {
+	if err := ioutil.WriteFile(m.workspaceFile, content, os.ModePerm); err != nil {
 		return err
 	}
 
@@ -110,33 +104,30 @@ func (m Manager) Delete(workspace formula.Workspace) error {
 		return err
 	}
 
-	if _, exists := workspaces[workspace.Name]; exists {
-		delete(workspaces, workspace.Name)
-		content, err := json.Marshal(workspaces)
-		if err != nil {
-			return err
-		}
-
-		if err := m.file.Write(m.workspaceFile, content); err != nil {
-			return err
-		}
-
-		return nil
+	if _, exists := workspaces[workspace.Name]; !exists {
+		return ErrInvalidWorkspace
 	}
 
-	return ErrInvalidWorkspace
+	delete(workspaces, workspace.Name)
+	content, err := json.MarshalIndent(workspaces, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	if err := ioutil.WriteFile(m.workspaceFile, content, os.ModePerm); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m Manager) List() (formula.Workspaces, error) {
 	workspaces := formula.Workspaces{}
 	workspaces[formula.DefaultWorkspaceName] = m.defaultWorkspaceDir
-	if !m.file.Exists(m.workspaceFile) {
-		return workspaces, nil
-	}
 
-	file, err := m.file.Read(m.workspaceFile)
+	file, err := ioutil.ReadFile(m.workspaceFile)
 	if err != nil {
-		return nil, err
+		return workspaces, nil
 	}
 
 	if err := json.Unmarshal(file, &workspaces); err != nil {
@@ -149,7 +140,7 @@ func (m Manager) List() (formula.Workspaces, error) {
 func (m Manager) PreviousHash(formulaPath string) (string, error) {
 	filePath := m.hashPath(formulaPath)
 
-	hash, err := m.file.Read(filePath)
+	hash, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}
@@ -166,7 +157,7 @@ func (m Manager) UpdateHash(formulaPath string, hash string) error {
 
 	hashDir := filepath.Join(m.ritchieHome, hashesPath)
 	_ = m.dir.Create(hashDir)
-	return m.file.Write(filePath, []byte(hash))
+	return ioutil.WriteFile(filePath, []byte(hash), os.ModePerm)
 }
 
 func (m Manager) hashPath(formulaPath string) string {

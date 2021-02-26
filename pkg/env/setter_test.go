@@ -19,6 +19,7 @@ package env
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -28,8 +29,11 @@ import (
 
 func TestSet(t *testing.T) {
 	tmp := os.TempDir()
+	ritHomeDir := filepath.Join(tmp, ".rit")
 	file := stream.NewFileManager()
-	finder := NewFinder(tmp, file)
+	finder := NewFinder(ritHomeDir, file)
+	_ = os.MkdirAll(ritHomeDir, os.ModePerm)
+	defer os.RemoveAll(ritHomeDir)
 
 	type in struct {
 		file      stream.FileWriter
@@ -128,7 +132,7 @@ func TestSet(t *testing.T) {
 			in := tt.in
 			out := tt.out
 
-			setter := NewSetter(tmp, in.envFinder, in.file)
+			setter := NewSetter(ritHomeDir, in.envFinder, in.file)
 			got, err := setter.Set(in.env)
 
 			if out.err != nil && out.err.Error() != err.Error() {

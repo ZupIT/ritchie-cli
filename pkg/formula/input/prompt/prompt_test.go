@@ -23,18 +23,19 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestInputManager_Inputs(t *testing.T) {
+func TestInputManager(t *testing.T) {
 
 	inputJson := `[
     {
@@ -78,6 +79,18 @@ func TestInputManager_Inputs(t *testing.T) {
         "label": "Pick your : ",
 		"tutorial": "Select an item for this field."
     },
+	{
+        "name": "sample_list2",
+        "type": "list",
+        "default": "in1",
+        "items": [
+            "in_list1",
+            "in_list2",
+            "in_list3",
+            "in_listN"
+        ],
+        "label": "Pick your : "
+    },
     {
         "name": "sample_bool",
         "type": "bool",
@@ -103,161 +116,140 @@ func TestInputManager_Inputs(t *testing.T) {
 	var inputs []formula.Input
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 	_ = os.Setenv("SAMPLE_TEXT", "someValue")
-
-	setup := formula.Setup{
-		Config: formula.Config{
-			Inputs: inputs,
-		},
-		FormulaPath: os.TempDir(),
-	}
-	fileManager := stream.NewFileManager()
-
-	type in struct {
-		iText          inputMock
-		iTextValidator inputTextValidatorMock
-		iTextDefault   inputTextDefaultMock
-		iList          inputMock
-		iBool          inputMock
-		iPass          inputMock
-		inType         api.TermInputType
-		creResolver    credential.Resolver
-		file           stream.FileWriteReadExister
-	}
+	ritHome := filepath.Join(os.TempDir(), "inputs")
+	ritInvalidHome := filepath.Join(ritHome, "invalid")
+	_ = os.Mkdir(ritHome, os.ModePerm)
+	defer os.RemoveAll(ritHome)
 
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name            string
+		ritHome         string
+		cacheContents   string
+		credResolverErr error
+		inputBoolErr    error
+		inputPassErr    error
+		inputTextErr    error
+		inputListErr    error
+		expectedError   string
 	}{
 		{
-			name: "success prompt",
-			in: in{
-				iText:          inputMock{text: ""},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "Type new value?"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManager,
-			},
-			want: nil,
+			name:    "success prompt",
+			ritHome: ritHome,
 		},
 		{
-			name: "error read file load items",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{rErr: errors.New("error to read file"), exist: true},
-			},
-			want: errors.New("error to read file"),
+			name:          "error unmarshal load items",
+			ritHome:       ritHome,
+			cacheContents: "error",
+			expectedError: "invalid character 'e' looking for beginning of value",
 		},
 		{
-			name: "error unmarshal load items",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{rBytes: []byte("error"), exist: true},
-			},
-			want: errors.New("invalid character 'e' looking for beginning of value"),
+			name:    "cache file doesn't exist success",
+			ritHome: ritHome,
 		},
 		{
-			name: "cache file doesn't exist success",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{exist: false},
-			},
-			want: nil,
+			name:          "persist cache file write error",
+			ritHome:       ritInvalidHome,
+			expectedError: mocks.FileNotFoundError(fmt.Sprintf(CachePattern, ritInvalidHome, strings.ToUpper("SAMPLE_TEXT"))),
 		},
 		{
-			name: "cache file doesn't exist error file write",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{wErr: errors.New("error to write file"), exist: false},
-			},
-			want: errors.New("error to write file"),
+			name:            "error env resolver prompt",
+			ritHome:         ritHome,
+			credResolverErr: errors.New("credential not found"),
+			expectedError:   "credential not found",
 		},
 		{
-			name: "persist cache file write error",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{wErr: errors.New("error to write file"), rBytes: []byte(`["in_list1","in_list2"]`), exist: true},
-			},
-			want: nil,
+			name:          "error input bool",
+			ritHome:       ritHome,
+			inputBoolErr:  errors.New("bool error"),
+			expectedError: "bool error",
 		},
 		{
-			name: "error env resolver prompt",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test", err: errors.New("credential not found")},
-				file:           fileManager,
-			},
-			want: errors.New("credential not found"),
+			name:          "error input pass",
+			ritHome:       ritHome,
+			inputPassErr:  errors.New("pass error"),
+			expectedError: "pass error",
+		},
+		{
+			name:          "error input text",
+			ritHome:       ritHome,
+			inputTextErr:  errors.New("text error"),
+			expectedError: "text error",
+		},
+		{
+			name:          "error input list",
+			ritHome:       ritHome,
+			inputListErr:  errors.New("list error"),
+			expectedError: "list error",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			iText := tt.in.iText
-			iTextValidator := tt.in.iTextValidator
-			iTextDefault := tt.in.iTextDefault
-			iList := tt.in.iList
-			iBool := tt.in.iBool
-			iPass := tt.in.iPass
+			cacheFile := fmt.Sprintf(CachePattern, tt.ritHome, strings.ToUpper("SAMPLE_TEXT"))
+			if tt.cacheContents == "" {
+				_ = os.Remove(cacheFile)
+			} else {
+				_ = ioutil.WriteFile(cacheFile, []byte(tt.cacheContents), os.ModePerm)
+			}
 
-			inputManager := NewInputManager(tt.in.creResolver, tt.in.file, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
+			iText := &mocks.InputTextMock{}
+			iText.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("text value", nil)
+			iTextValidator := &mocks.InputTextValidatorMock{}
+			iTextValidator.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("validator value", nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", tt.inputListErr)
+			iBool := &mocks.InputBoolMock{}
+			iBool.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(true, tt.inputBoolErr)
+			iPass := &mocks.InputPasswordMock{}
+			iPass.On("Password", mock.Anything, mock.Anything, mock.Anything).Return("pass value", tt.inputPassErr)
+			iMultiselect := &mocks.InputMultiselectMock{}
+			iMultiselect.On("Multiselect", mock.Anything).Return([]string{"multiselect value"}, nil)
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("default value", tt.inputTextErr)
+			credResover := &mocks.CredResolverMock{}
+			credResover.On("Resolve", mock.Anything).Return("resolver value", tt.credResolverErr)
 
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: tt.ritHome,
+			}
+
+			inputManager := NewInputManager(
+				credResover,
+				iList,
+				iText,
+				iTextValidator,
+				iTextDefault,
+				iBool,
+				iPass,
+				iMultiselect,
+			)
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
-				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
+			if got != nil {
+				assert.EqualError(t, got, tt.expectedError)
+			} else {
+				assert.Empty(t, tt.expectedError)
+				expected := []string{
+					"SAMPLE_TEXT=default value",
+					"SAMPLE_TEXT=default value",
+					"SAMPLE_TEXT_2=default value",
+					"SAMPLE_LIST=list value",
+					"SAMPLE_LIST2=list value",
+					"SAMPLE_BOOL=true",
+					"SAMPLE_PASSWORD=pass value",
+					"TEST_RESOLVER=resolver value",
+				}
+				assert.Equal(t, expected, cmd.Env)
 			}
 		})
 	}
 }
 
-func TestInputManager_ConditionalInputs(t *testing.T) {
+func TestConditionalInputs(t *testing.T) {
 
 	inputJson := `[
 	{
@@ -270,11 +262,6 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
             "in_list3",
             "in_listN"
         ],
- 		"cache": {
-            "active": true,
-            "qty": 3,
-            "newLabel": "Type new value?"
-        },
         "label": "Pick your : "
     },
  	{
@@ -289,8 +276,6 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 		}
     }
 ]`
-
-	fileManager := stream.NewFileManager()
 
 	type in struct {
 		variable string
@@ -380,42 +365,40 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				FormulaPath: os.TempDir(),
 			}
 
-			iText := inputMock{text: DefaultCacheNewLabel}
-			iTextValidator := inputTextValidatorMock{}
-			iTextDefault := inputTextDefaultMock{}
-			iList := inputMock{text: "in_list1"}
-			iBool := inputMock{boolean: false}
-			iPass := inputMock{text: "******"}
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("default value", nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", nil)
 
-			inputManager := NewInputManager(envResolverMock{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				iList,
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
+				iTextDefault,
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+			)
 
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
-				t.Errorf("Error on conditional Inputs(%s): got %v, want %v", tt.name, got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
-func TestInputManager_RegexType(t *testing.T) {
-	type in struct {
-		inputJson      string
-		inText         inputMock
-		iTextValidator inputTextValidatorMock
-		iTextDefault   inputTextDefaultMock
-	}
-
+func TestRegexType(t *testing.T) {
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name      string
+		inputJson string
+		inText    string
+		want      error
 	}{
 		{
 			name: "Success regex test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					    {
 					        "name": "sample_text",
 					        "type": "text",
@@ -426,15 +409,12 @@ func TestInputManager_RegexType(t *testing.T) {
 									}
 					    }
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
-			want: nil,
+			inText: "a",
+			want:   nil,
 		},
 		{
 			name: "Failed regex test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					    {
 					        "name": "sample_text",
 					        "type": "text",
@@ -445,15 +425,12 @@ func TestInputManager_RegexType(t *testing.T) {
 									}
 					    }
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
-			want: errors.New("regex error, mismatch"),
+			inText: "a",
+			want:   errors.New("mismatch"),
 		},
 		{
 			name: "Success regex test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					    {
 					        "name": "sample_text",
 					        "type": "text",
@@ -464,18 +441,15 @@ func TestInputManager_RegexType(t *testing.T) {
 									}
 					    }
 					]`,
-				inText:         inputMock{text: "abcc"},
-				iTextValidator: inputTextValidatorMock{str: "abcc"},
-			},
-			want: nil,
+			inText: "abcc",
+			want:   nil,
 		},
 	}
 
-	fileManager := stream.NewFileManager()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
-			_ = json.Unmarshal([]byte(tt.in.inputJson), &inputs)
+			_ = json.Unmarshal([]byte(tt.inputJson), &inputs)
 
 			setup := formula.Setup{
 				Config: formula.Config{
@@ -484,45 +458,39 @@ func TestInputManager_RegexType(t *testing.T) {
 				FormulaPath: os.TempDir(),
 			}
 
-			iText := tt.in.inText
-			iTextValidator := tt.in.iTextValidator
-			iTextDefault := tt.in.iTextDefault
-			iList := inputMock{text: "in_list1"}
-			iBool := inputMock{boolean: false}
-			iPass := inputMock{text: "******"}
+			iText := &mocks.InputTextMock{}
+			iText.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.inText, nil)
+			iTextValidator := &mocks.InputTextValidatorMock{}
+			iTextValidator.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.inText, nil)
 
-			inputManager := NewInputManager(envResolverMock{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				&mocks.InputListMock{},
+				iText,
+				iTextValidator,
+				&mocks.InputDefaultTextMock{},
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+			)
 
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if tt.want != nil && got == nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, nil, tt.want)
-			}
-
-			if tt.want == nil && got != nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, got, nil)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
-func TestInputManager_DynamicInputs(t *testing.T) {
-	type in struct {
-		inputJson      string
-		inText         inputMock
-		iTextValidator inputTextValidatorMock
-	}
-
+func TestDynamicInputs(t *testing.T) {
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name      string
+		inputJson string
+		want      error
 	}{
 		{
 			name: "Success dynamic input test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -533,15 +501,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
 			want: nil,
 		},
 		{
 			name: "fail dynamic input when http status is not ok",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -552,15 +516,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
-			want: errors.New("dynamic list request was not in 2xx range"),
+			want: errors.New("dynamic list request got http status 404 expecting some 2xx range"),
 		},
 		{
 			name: "fail dynamic input when jsonpath is wrong",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -571,15 +531,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
 			want: errors.New(`unexpected "[" while scanning JSON select expected Ident, "." or "*"`),
 		},
 		{
 			name: "fail dynamic input when config.json url is empty",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -590,18 +546,14 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
 			want: errors.New(`unsupported protocol scheme ""`),
 		},
 	}
 
-	fileManager := stream.NewFileManager()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
-			_ = json.Unmarshal([]byte(tt.in.inputJson), &inputs)
+			_ = json.Unmarshal([]byte(tt.inputJson), &inputs)
 
 			setup := formula.Setup{
 				Config: formula.Config{
@@ -610,38 +562,142 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 				FormulaPath: os.TempDir(),
 			}
 
-			iText := tt.in.inText
-			iTextValidator := tt.in.iTextValidator
-			iTextDefault := inputTextDefaultMock{}
-			iList := inputMock{text: "in_list1"}
-			iBool := inputMock{boolean: false}
-			iPass := inputMock{text: "******"}
+			iText := &mocks.InputTextMock{}
+			iText.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("a", nil)
+			iTextValidator := &mocks.InputTextValidatorMock{}
+			iTextValidator.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("a", nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", nil)
 
-			inputManager := NewInputManager(envResolverMock{}, fileManager, iList, iText, iTextValidator, iTextDefault, iBool, iPass)
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				iList,
+				iText,
+				iTextValidator,
+				&mocks.InputDefaultTextMock{},
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+			)
 
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if tt.want != nil && got == nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, nil, tt.want)
-			}
-
-			if tt.want == nil && got != nil {
-				t.Errorf("Inputs regex(%s): got %v, want %v", tt.name, got, nil)
+			if tt.want != nil {
+				assert.NotNil(t, got)
+			} else {
+				assert.Equal(t, tt.want, got)
 			}
 		})
 	}
 }
 
-func TestInputManager_DefaultFlag(t *testing.T) {
+func TestMultiselect(t *testing.T) {
+	tests := []struct {
+		name             string
+		inputJSON        string
+		multiselectValue []string
+		want             error
+	}{
+		{
+			name: "success multiselect input test",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": true,
+						"tutorial": "Select one or more items for this field."
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
+		},
+		{
+			name: "success multiselect input test when the required field is not sent",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"tutorial": "Select one or more items for this field."
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
+		},
+		{
+			name: "fail multiselect input test",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [],
+						"label": "Choose one or more items: ",
+						"required": true,
+						"tutorial": "Select one or more items for this field."
+					}
+				]`,
+			multiselectValue: []string{},
+			want:             fmt.Errorf(EmptyItems, "sample_multiselect"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(tt.inputJSON), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iMultiselect := &mocks.InputMultiselectMock{}
+			iMultiselect.On("Multiselect", mock.Anything).Return(tt.multiselectValue, nil)
+
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				&mocks.InputListMock{},
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
+				&mocks.InputDefaultTextMock{},
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				iMultiselect,
+			)
+
+			cmd := &exec.Cmd{}
+			got := inputManager.Inputs(cmd, setup, nil)
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestDefaultFlag(t *testing.T) {
 	inputJson := `[
- 	{
-        "name": "sample_text",
-        "type": "text",
-        "label": "Type : ",
-		"default": "test"
-    }
-]`
+		{
+			"name": "sample_text",
+			"type": "text",
+			"label": "Type : ",
+			"default": "test"
+		}
+	]`
 	var inputs []formula.Input
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 
@@ -651,150 +707,72 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 		},
 		FormulaPath: os.TempDir(),
 	}
-	fileManager := stream.NewFileManager()
 
-	type in struct {
-		inType      api.TermInputType
-		creResolver credential.Resolver
-		file        stream.FileWriteReadExister
-	}
+	t.Run("success prompt", func(t *testing.T) {
+		inputManager := NewInputManager(
+			&mocks.CredResolverMock{},
+			&mocks.InputListMock{},
+			&mocks.InputTextMock{},
+			&mocks.InputTextValidatorMock{},
+			&mocks.InputDefaultTextMock{},
+			&mocks.InputBoolMock{},
+			&mocks.InputPasswordMock{},
+			&mocks.InputMultiselectMock{},
+		)
 
-	tests := []struct {
-		name string
-		in   in
-	}{
+		cmd := &exec.Cmd{}
+		flags := pflag.NewFlagSet("default", 0)
+		flags.Bool("default", true, "default")
+
+		rescueStdout := os.Stdout
+		r, w, _ := os.Pipe()
+		os.Stdout = w
+
+		err := inputManager.Inputs(cmd, setup, flags)
+
+		_ = w.Close()
+		out, _ := ioutil.ReadAll(r)
+		os.Stdout = rescueStdout
+
+		assert.Nil(t, err)
+		assert.Contains(t, string(out), "Added sample_text by default: test")
+	})
+}
+
+func TestEmptyList(t *testing.T) {
+	inputJson := `[
 		{
-			name: "success prompt",
-			in: in{
-				inType:      api.Prompt,
-				creResolver: envResolverMock{in: "test"},
-				file:        fileManager,
-			},
+			"name": "sample_list",
+			"type": "list",
+			"label": "Type : ",
+			"default": "test"
+		}
+	]`
+	var inputs []formula.Input
+	_ = json.Unmarshal([]byte(inputJson), &inputs)
+
+	setup := formula.Setup{
+		Config: formula.Config{
+			Inputs: inputs,
 		},
+		FormulaPath: os.TempDir(),
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			inputManager := NewInputManager(
-				tt.in.creResolver,
-				tt.in.file,
-				inputMock{},
-				inputMock{},
-				inputTextValidatorMock{},
-				inputTextDefaultMock{},
-				inputMock{},
-				inputMock{},
-			)
+	t.Run("success prompt", func(t *testing.T) {
+		inputManager := NewInputManager(
+			&mocks.CredResolverMock{},
+			&mocks.InputListMock{},
+			&mocks.InputTextMock{},
+			&mocks.InputTextValidatorMock{},
+			&mocks.InputDefaultTextMock{},
+			&mocks.InputBoolMock{},
+			&mocks.InputPasswordMock{},
+			&mocks.InputMultiselectMock{},
+		)
 
-			cmd := &exec.Cmd{}
-			flags := pflag.NewFlagSet("default", 0)
-			flags.Bool("default", true, "default")
+		cmd := &exec.Cmd{}
+		got := inputManager.Inputs(cmd, setup, nil)
 
-			rescueStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			err := inputManager.Inputs(cmd, setup, flags)
-
-			_ = w.Close()
-			out, _ := ioutil.ReadAll(r)
-			os.Stdout = rescueStdout
-
-			if err != nil {
-				t.Error("error executing prompt with default flag")
-			}
-
-			if !strings.Contains(string(out), "Added sample_text by default: test") {
-				t.Error("unexpected output on prompt with default flag")
-			}
-		})
-	}
-}
-
-type inputTextValidatorMock struct {
-	str string
-}
-
-func (i inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return i.str, validate(i.str)
-}
-
-type inputMock struct {
-	text    string
-	boolean bool
-	err     error
-}
-
-func (i inputMock) List(string, []string, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Text(string, bool, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Bool(string, []string, ...string) (bool, error) {
-	return i.boolean, i.err
-}
-
-func (i inputMock) Password(string, ...string) (string, error) {
-	return i.text, i.err
-}
-
-type inputTextDefaultMock struct {
-	text string
-	err  error
-}
-
-func (i inputTextDefaultMock) Text(formula.Input) (string, error) {
-	return i.text, i.err
-}
-
-type envResolverMock struct {
-	in  string
-	err error
-}
-
-func (e envResolverMock) Resolve(string) (string, error) {
-	return e.in, e.err
-}
-
-type fileManagerMock struct {
-	rBytes   []byte
-	rErr     error
-	wErr     error
-	aErr     error
-	mErr     error
-	rmErr    error
-	lErr     error
-	exist    bool
-	listNews []string
-}
-
-func (fi fileManagerMock) Write(string, []byte) error {
-	return fi.wErr
-}
-
-func (fi fileManagerMock) Read(string) ([]byte, error) {
-	return fi.rBytes, fi.rErr
-}
-
-func (fi fileManagerMock) Exists(string) bool {
-	return fi.exist
-}
-
-func (fi fileManagerMock) Append(path string, content []byte) error {
-	return fi.aErr
-}
-
-func (fi fileManagerMock) Move(oldPath, newPath string, files []string) error {
-	return fi.mErr
-}
-
-func (fi fileManagerMock) Remove(path string) error {
-	return fi.rmErr
-}
-
-func (fi fileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
-	return fi.listNews, fi.lErr
+		assert.Equal(t, fmt.Errorf(EmptyItems, "sample_list"), got)
+	})
 }

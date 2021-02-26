@@ -52,7 +52,8 @@ func TestRun(t *testing.T) {
 
 	envFinder := env.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, dockerBuilder, dirManager, fileManager)
-	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, fileManager, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{})
+
+	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{})
 	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
 	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
 
@@ -211,6 +212,7 @@ func (i inputTextValidatorMock) Text(name string, validate func(interface{}) err
 type inputMock struct {
 	text    string
 	boolean bool
+	items   []string
 	err     error
 }
 
@@ -228,6 +230,10 @@ func (i inputMock) Bool(string, []string, ...string) (bool, error) {
 
 func (i inputMock) Password(string, ...string) (string, error) {
 	return i.text, i.err
+}
+
+func (i inputMock) Multiselect(formula.Input) ([]string, error) {
+	return i.items, i.err
 }
 
 type inputTextDefaultMock struct {

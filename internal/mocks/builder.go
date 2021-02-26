@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package credential
+package mocks
 
 import (
-	"path/filepath"
+	"github.com/stretchr/testify/mock"
 )
 
-const credentialDir = "credentials"
-
-func Dir(homePath, env string) string {
-	return filepath.Join(homePath, credentialDir, env)
+type LocalBuilderMock struct {
+	mock.Mock
 }
 
-func File(homePath, env, provider string) string {
-	return filepath.Join(homePath, credentialDir, env, provider)
+func (lb *LocalBuilderMock) Init(workspaceDir string, repoName string) (string, error) {
+	args := lb.Called(workspaceDir, repoName)
+	return args.String(0), args.Error(1)
 }

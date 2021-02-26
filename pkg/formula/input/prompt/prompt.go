@@ -35,8 +35,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
-
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -44,38 +42,39 @@ const (
 	CachePattern         = "%s/.%s.cache"
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
+	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
 )
 
 type InputManager struct {
 	cred credential.Resolver
-	file stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
 	input.InputTextDefault
 	prompt.InputTextValidator
 	prompt.InputBool
 	prompt.InputPassword
+	prompt.InputMultiselect
 }
 
 func NewInputManager(
 	cred credential.Resolver,
-	file stream.FileWriteReadExister,
 	inList prompt.InputList,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inDefValue input.InputTextDefault,
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
+	inMultiselect prompt.InputMultiselect,
 ) formula.InputRunner {
 	return InputManager{
 		cred:               cred,
-		file:               file,
 		InputList:          inList,
 		InputText:          inText,
 		InputTextValidator: inTextValidator,
 		InputTextDefault:   inDefValue,
 		InputBool:          inBool,
 		InputPassword:      inPass,
+		InputMultiselect:   inMultiselect,
 	}
 }
 
@@ -131,13 +130,26 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return in.loadInputValList(items, i)
 		}
 		return in.textValidator(i)
-
+	case input.ListType:
+		if len(items) == 0 {
+			return "", fmt.Errorf(EmptyItems, i.Name)
+		}
+		return in.loadInputValList(items, i)
 	case input.DynamicType:
 		dl, err := in.dynamicList(i.RequestInfo)
 		if err != nil {
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
+	case input.Multiselect:
+		if len(items) == 0 {
+			return "", fmt.Errorf(EmptyItems, i.Name)
+		}
+		sl, err := in.Multiselect(i)
+		if err != nil {
+			return "", err
+		}
+		return strings.Join(sl, "|"), nil
 	default:
 		return in.cred.Resolve(i.Type)
 	}
@@ -184,11 +196,9 @@ func (in InputManager) persistCache(formulaPath, inputVal string, input formula.
 			items = items[0:qtd]
 		}
 		itemsBytes, _ := json.Marshal(items)
-		if err := in.file.Write(cachePath, itemsBytes); err != nil {
-			fmt.Sprintln("Write file error")
-			return
+		if err := ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
+			fmt.Println("Write cache error")
 		}
-
 	}
 }
 
@@ -210,32 +220,27 @@ func (in InputManager) loadInputValList(items []string, input formula.Input) (st
 }
 
 func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]string, error) {
-	if input.Cache.Active {
-		cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
-		if in.file.Exists(cachePath) {
-			fileBytes, err := in.file.Read(cachePath)
-			if err != nil {
-				return nil, err
-			}
-			var items []string
-			err = json.Unmarshal(fileBytes, &items)
-			if err != nil {
-				return nil, err
-			}
-			return items, nil
-		} else {
-			itemsBytes, err := json.Marshal(input.Items)
-			if err != nil {
-				return nil, err
-			}
-			if err = in.file.Write(cachePath, itemsBytes); err != nil {
-				return nil, err
-			}
-			return input.Items, nil
-		}
-	} else {
+	if !input.Cache.Active {
 		return input.Items, nil
 	}
+	cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
+	fileBytes, err := ioutil.ReadFile(cachePath)
+	if err != nil {
+		itemsBytes, err := json.Marshal(input.Items)
+		if err != nil {
+			return nil, err
+		}
+		if err = ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return input.Items, nil
+	}
+	var items []string
+	err = json.Unmarshal(fileBytes, &items)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 func (in InputManager) textValidator(i formula.Input) (string, error) {

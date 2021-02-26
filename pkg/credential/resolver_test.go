@@ -19,131 +19,78 @@ package credential
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestCredentialResolver(t *testing.T) {
+	tempDirectory := os.TempDir()
+	home := filepath.Join(tempDirectory, "CredResolver")
+	defer os.RemoveAll(home)
+
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
-	tempDirectory := os.TempDir()
-	envFinder := env.NewFinder(tempDirectory, fileManager)
-	credentialSetter := NewSetter(tempDirectory, envFinder, dirManager, fileManager)
-	credentialFinder := NewFinder(tempDirectory, envFinder, fileManager)
-
-	defer os.RemoveAll(File(tempDirectory, "", ""))
-
-	type in struct {
-		credSetter      Setter
-		credFinder      CredFinder
-		credentialField string
-		pass            prompt.InputPassword
-	}
-
-	type out struct {
-		want string
-		err  error
-	}
+	envFinder := env.NewFinder(home, fileManager)
+	credentialSetter := NewSetter(home, envFinder, dirManager)
+	credentialSetterError := NewSetter(home+"/wrong_path", envFinder, dirManager)
+	credentialFinder := NewFinder(home, envFinder)
 
 	var tests = []struct {
-		name string
-		in   in
-		out  out
+		name       string
+		credSetter Setter
+		credential string
+		expected   string
+		err        error
 	}{
 		{
-			name: "resolve new provider",
-			in: in{
-				credSetter:      credentialSetter,
-				credFinder:      credentialFinder,
-				credentialField: "CREDENTIAL_PROVIDER_KEY",
-				pass:            passwordMock{value: "key"},
-			},
-			out: out{
-				want: "key",
-			},
+			name:       "resolve new provider",
+			credential: "CREDENTIAL_PROVIDER_KEY",
+			credSetter: credentialSetter,
+			expected:   "key",
 		},
 		{
-			name: "resolve new key",
-			in: in{
-				credSetter:      credentialSetter,
-				credFinder:      credentialFinder,
-				credentialField: "CREDENTIAL_PROVIDER_KEY2",
-				pass:            passwordMock{value: "key2"},
-			},
-			out: out{
-				want: "key2",
-			},
+			name:       "resolve new key",
+			credential: "CREDENTIAL_PROVIDER_KEY2",
+			credSetter: credentialSetter,
+			expected:   "key2",
 		},
 		{
-			name: "resolve existing key",
-			in: in{
-				credSetter:      credentialSetter,
-				credFinder:      credentialFinder,
-				credentialField: "CREDENTIAL_PROVIDER_KEY2",
-				pass:            passwordMock{value: "key2"},
-			},
-			out: out{
-				want: "key2",
-			},
+			name:       "resolve existing key",
+			credential: "CREDENTIAL_PROVIDER_KEY2",
+			credSetter: credentialSetter,
+			expected:   "key2",
 		},
 		{
-			name: "error to read password",
-			in: in{
-				credSetter:      credentialSetter,
-				credFinder:      credentialFinder,
-				credentialField: "CREDENTIAL_PROVIDER_NEW_ERROR",
-				pass:            passwordMock{err: errors.New("error to read password")},
-			},
-			out: out{
-				err: errors.New("error to read password"),
-			},
+			name:       "error to read password",
+			credential: "CREDENTIAL_PROVIDER_NEW_ERROR",
+			credSetter: credentialSetter,
+			err:        errors.New("error to read password"),
 		},
 		{
-			name: "error to read password",
-			in: in{
-				credSetter:      setCredMock{err: errors.New("error to set credential")},
-				credFinder:      credentialFinder,
-				credentialField: "CREDENTIAL_AWS_USER",
-				pass:            passwordMock{value: "username"},
-			},
-			out: out{
-				err: errors.New("error to set credential"),
-			},
+			name:       "error to set credential",
+			credential: "CREDENTIAL_AWS_USER",
+			credSetter: credentialSetterError,
+			err:        errors.New("error to set credential"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			credentialResolver := NewResolver(tt.in.credFinder, tt.in.credSetter, tt.in.pass)
-			got, err := credentialResolver.Resolve(tt.in.credentialField)
+			pass := &mocks.InputPasswordMock{}
+			pass.On("Password", mock.Anything, mock.Anything).Return(tt.expected, tt.err)
 
-			if tt.out.err != nil && tt.out.err.Error() != err.Error() {
-				t.Errorf("Resolve(%s) got %v, want %v", tt.name, err, tt.out.err)
-			}
-			if got != tt.out.want {
-				t.Errorf("Resolve(%s) got %v, want %v", tt.name, got, tt.out.want)
-			}
+			credentialResolver := NewResolver(credentialFinder, tt.credSetter, pass)
+			got, err := credentialResolver.Resolve(tt.credential)
+
+			assert.Equal(t, tt.err, err)
+			assert.Equal(t, tt.expected, got)
 		})
 	}
-}
-
-type passwordMock struct {
-	value string
-	err   error
-}
-
-func (pass passwordMock) Password(string, ...string) (string, error) {
-	return pass.value, pass.err
-}
-
-type setCredMock struct {
-	err error
-}
-
-func (s setCredMock) Set(d Detail) error {
-	return s.err
 }
