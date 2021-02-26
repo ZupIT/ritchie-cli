@@ -341,7 +341,7 @@ func TestConditionalInputs(t *testing.T) {
 				variable: "sample_list",
 				operator: "eq",
 			},
-			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
+			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=, containsAny, containsAll, containsOnly, notContains)"),
 		},
 		{
 			name: "non-existing variable conditional",
@@ -676,6 +676,392 @@ func TestMultiselect(t *testing.T) {
 				&mocks.InputTextMock{},
 				&mocks.InputTextValidatorMock{},
 				&mocks.InputDefaultTextMock{},
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				iMultiselect,
+			)
+
+			cmd := &exec.Cmd{}
+			got := inputManager.Inputs(cmd, setup, nil)
+
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestConditionalInputsWithMultiselect(t *testing.T) {
+	tests := []struct {
+		name             string
+		inputJSON        string
+		multiselectValue []string
+		want             error
+	}{
+		{
+			name: "success multiselect input test with conditional containsAny",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAny",
+							"value":    "item_2|item_3"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3"},
+			want:             nil,
+		},
+		{
+			name: "error multiselect input test with conditional containsAny",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAny",
+							"value":    "item_2|item_3"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_4"},
+			want:             nil,
+		},
+		{
+			name: "success multiselect input test with conditional containsAll",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAll",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3", "item_4"},
+			want:             nil,
+		},
+		{
+			name: "error multiselect input test with conditional containsAll",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAll",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3"},
+			want:             nil,
+		},
+		{
+			name: "success multiselect input test with conditional containsOnly",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsOnly",
+							"value":    "item_1|item_2"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
+		},
+		{
+			name: "error multiselect input test with conditional containsOnly",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsOnly",
+							"value":    "item_1|item_2"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3"},
+			want:             nil,
+		},
+		{
+			name: "error multiselect input test with conditional containsOnly",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsOnly",
+							"value":    "item_1|item_2"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_3"},
+			want:             nil,
+		},
+		{
+			name: "error multiselect input test with conditional containsOnly",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsOnly",
+							"value":    "item_1|item_3"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
+		},
+		{
+			name: "success multiselect input test with conditional notContains",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContains",
+							"value":    "item_3|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
+		},
+		{
+			name: "error multiselect input test with conditional notContains",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContains",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_3", "item_4"},
+			want:             nil,
+		},
+		{
+			name: "error multiselect input test with conditional wrong separator",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAny",
+							"value":    "item_2,item_3"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3"},
+			want:             nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(tt.inputJSON), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("sample_text", nil)
+			iMultiselect := &mocks.InputMultiselectMock{}
+			iMultiselect.On("Multiselect", mock.Anything).Return(tt.multiselectValue, nil)
+
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				&mocks.InputListMock{},
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
+				iTextDefault,
 				&mocks.InputBoolMock{},
 				&mocks.InputPasswordMock{},
 				iMultiselect,
