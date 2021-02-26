@@ -85,17 +85,6 @@ func valueContainsOnly(value string, input string) bool {
 	return true
 }
 
-func valueNotContains(value string, input string) bool {
-	splitValue := strings.Split(value, "|")
-	splitInput := strings.Split(input, "|")
-	for _, v := range splitInput {
-		if contains(splitValue, v) {
-			return false
-		}
-	}
-	return true
-}
-
 func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
 	if input.Condition.Variable == "" {
 		return true, nil
@@ -136,11 +125,13 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
 		return valueContainsAll(value, input.Condition.Value), nil
 	case "containsOnly":
 		return valueContainsOnly(value, input.Condition.Value), nil
-	case "notContains":
-		return valueNotContains(value, input.Condition.Value), nil
+	case "notContainsAny":
+		return !valueContainsAny(value, input.Condition.Value), nil
+	case "notContainsAll":
+		return !valueContainsAll(value, input.Condition.Value), nil
 	default:
 		return false, fmt.Errorf(
-			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=, containsAny, containsAll, containsOnly, notContains)",
+			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=, containsAny, containsAll, containsOnly, notContainsAny, notContainsAll)",
 			input.Condition.Operator,
 		)
 	}
