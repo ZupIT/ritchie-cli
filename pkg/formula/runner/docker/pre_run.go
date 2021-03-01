@@ -158,20 +158,6 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 	return formulaConfig, nil
 }
 
-func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Definition) (string, error) {
-	tDir := def.TmpWorkDirPath(home)
-	if err := pr.dir.Create(tDir); err != nil {
-		return "", err
-	}
-
-	binPath := def.BinPath(formulaPath)
-	if err := pr.dir.Copy(binPath, tDir); err != nil {
-		return "", err
-	}
-
-	return tDir, nil
-}
-
 func buildRunImg(def formula.Definition) (string, error) {
 	prompt.Info("Docker image build started")
 	formName := strings.ReplaceAll(def.Path, string(os.PathSeparator), "-")
