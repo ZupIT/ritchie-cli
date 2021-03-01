@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -163,13 +165,20 @@ func TestRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			pwd, _ := os.Getwd()
+			formulaPath := tt.in.def.FormulaPath(ritHome)
+			binPath := tt.in.def.BinPath(formulaPath)
+			_ = os.Chdir(binPath)
+
 			in := tt.in
 			docker := NewRunner(in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
 			got := docker.Run(in.def, api.Prompt, false, nil)
 
-			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
-				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.out.err)
+			if got != nil || tt.out.err != nil {
+				assert.EqualError(t, tt.out.err, got.Error())
 			}
+
+			_ = os.Chdir(pwd)
 		})
 	}
 
@@ -182,14 +191,6 @@ type preRunnerMock struct {
 
 func (pr preRunnerMock) PreRun(def formula.Definition) (formula.Setup, error) {
 	return pr.setup, pr.err
-}
-
-type postRunnerMock struct {
-	err error
-}
-
-func (po postRunnerMock) PostRun(p formula.Setup, docker bool) error {
-	return po.err
 }
 
 type envResolverMock struct {

@@ -18,9 +18,11 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -332,7 +334,9 @@ func TestCreateFormula(t *testing.T) {
 				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
 				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
 
-				assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+				tmpDir := strings.ReplaceAll(os.TempDir(), "/", "-")
+				hashFile := fmt.Sprintf("%s.ritchie-formulas-local-test-test.txt", tmpDir)
+				assert.FileExists(t, filepath.Join(hashesDir, hashFile))
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}

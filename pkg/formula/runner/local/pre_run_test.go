@@ -261,6 +261,7 @@ type fileManagerMock struct {
 	wErr   error
 	aErr   error
 	exist  bool
+	remErr error
 }
 
 func (fi fileManagerMock) Write(string, []byte) error {
@@ -277,6 +278,10 @@ func (fi fileManagerMock) Exists(string) bool {
 
 func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
+}
+
+func (fi fileManagerMock) Remove(path string) error {
+	return fi.remErr
 }
 
 const configJson = `{

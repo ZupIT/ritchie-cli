@@ -17,6 +17,7 @@
 package local
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,6 +37,7 @@ import (
 )
 
 func TestRun(t *testing.T) {
+	pwd, _ := os.Getwd()
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
@@ -91,7 +93,7 @@ func TestRun(t *testing.T) {
 			},
 			want: nil,
 		},
-		/*{
+		{
 			name: "Input error local",
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
@@ -136,11 +138,15 @@ func TestRun(t *testing.T) {
 				}},
 			},
 			want: nil,
-		},*/
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			formulaPath := tt.in.def.FormulaPath(ritHome)
+			binPath := tt.in.def.BinPath(formulaPath)
+			_ = os.Chdir(binPath)
+
 			in := tt.in
 			local := NewRunner(in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
 			got := local.Run(in.def, api.Prompt, false, nil)
@@ -149,9 +155,7 @@ func TestRun(t *testing.T) {
 				assert.EqualError(t, got, tt.want.Error())
 			}
 
-			/*if tt.want != nil && tt.want.Error() != got.Error() {
-				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.want)
-			}*/
+			_ = os.Chdir(pwd)
 		})
 	}
 
@@ -164,14 +168,6 @@ type preRunnerMock struct {
 
 func (pr preRunnerMock) PreRun(def formula.Definition) (formula.Setup, error) {
 	return pr.setup, pr.err
-}
-
-type postRunnerMock struct {
-	err error
-}
-
-func (po postRunnerMock) PostRun(p formula.Setup, docker bool) error {
-	return po.err
 }
 
 type envResolverMock struct {
