@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -39,6 +40,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -334,9 +336,15 @@ func TestCreateFormula(t *testing.T) {
 				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
 				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
 
-				tmpDir := strings.ReplaceAll(os.TempDir(), "/", "-")
-				hashFile := fmt.Sprintf("%s.ritchie-formulas-local-test-test.txt", tmpDir)
-				assert.FileExists(t, filepath.Join(hashesDir, hashFile))
+				if osutil.Darwin == runtime.GOOS {
+					tmpDir := strings.ReplaceAll(os.TempDir(), "/", "-")
+					hashFile := fmt.Sprintf("%s.ritchie-formulas-local-test-test.txt", tmpDir)
+					assert.FileExists(t, filepath.Join(hashesDir, hashFile))
+				}
+
+				if osutil.Linux == runtime.GOOS {
+					assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+				}
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}
