@@ -28,11 +28,9 @@ import (
 )
 
 func TestTags(t *testing.T) {
-
 	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		_, _ = writer.Write([]byte(PayloadListAllTags))
 	}))
-
 	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusBadRequest)
 	}))
@@ -64,20 +62,30 @@ func TestTags(t *testing.T) {
 				tagsUrl: mockServerThatFail.URL,
 			},
 			want:    git.Tags{},
-			wantErr: "",
+			wantErr: "400 Bad Request-",
+		},
+		{
+			name:   "Return err when the protocol is invalid",
+			client: mockServerThatFail.Client(),
+			info: info{
+				tagsUrl: "htttp://yourhost.com/username/repo/",
+				token:   "some_token",
+			},
+			want:    git.Tags{},
+			wantErr: "Get \"htttp://yourhost.com/username/repo/\": unsupported protocol scheme \"htttp\"",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git := &mocks.RepoInfo{}
 			git.On("Token").Return(tt.info.token)
+			git.On("TokenHeader").Return(tt.info.token)
 			git.On("TagsUrl").Return(tt.info.tagsUrl)
 			re := NewRepoManager(tt.client)
 			got, err := re.Tags(git)
-			if err == nil {
-				assert.Equal(t, tt.want, got)
-			} else {
-				assert.Equal(t, tt.want, got)
+
+			assert.Equal(t, tt.want, got)
+			if err != nil {
 				assert.EqualError(t, err, tt.wantErr)
 			}
 		})
@@ -85,13 +93,14 @@ func TestTags(t *testing.T) {
 }
 
 func TestLatestTag(t *testing.T) {
-
 	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		_, _ = writer.Write([]byte(PayloadListLastTags))
 	}))
-
 	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusBadRequest)
+	}))
+	mockServerNotFound := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		_, _ = writer.Write([]byte(PayloadEmptyTags))
 	}))
 
 	tests := []struct {
@@ -117,14 +126,33 @@ func TestLatestTag(t *testing.T) {
 				latestTagUrl: mockServerThatFail.URL,
 			},
 			want:    git.Tag{},
-			wantErr: "",
+			wantErr: "400 Bad Request-",
+		},
+		{
+			name:   "Return err when not finding tags",
+			client: mockServerNotFound.Client(),
+			info: info{
+				latestTagUrl: mockServerNotFound.URL,
+			},
+			want:    git.Tag{},
+			wantErr: "json: cannot unmarshal array into Go value of type struct { Name string \"json:\\\"tag_name\\\"\"; ReleaseDescription string \"json:\\\"body\\\"\" }",
+		},
+		{
+			name:   "Return err when the protocol is invalid",
+			client: mockServerThatFail.Client(),
+			info: info{
+				tagsUrl: "htttp://yourhost.com/username/repo/",
+				token:   "some_token",
+			},
+			want:    git.Tag{},
+			wantErr: "Get \"\": unsupported protocol scheme \"\"",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			git := &mocks.RepoInfo{}
 			git.On("Token").Return(tt.info.token)
-			git.On("Token").Return(tt.info.token)
+			git.On("TokenHeader").Return(tt.info.token)
 			git.On("LatestTagUrl").Return(tt.info.latestTagUrl)
 			re := NewRepoManager(tt.client)
 			got, err := re.LatestTag(git)
@@ -139,10 +167,12 @@ func TestLatestTag(t *testing.T) {
 }
 
 func TestZipball(t *testing.T) {
-
 	mockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		data := `zipValue`
 		_, _ = writer.Write([]byte(data))
+	}))
+	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.WriteHeader(http.StatusBadRequest)
 	}))
 
 	tests := []struct {
@@ -151,6 +181,7 @@ func TestZipball(t *testing.T) {
 		info    info
 		version string
 		want    string
+		wantErr bool
 	}{
 		{
 			name:   "Run with success",
@@ -161,6 +192,27 @@ func TestZipball(t *testing.T) {
 			},
 			version: "1.0.0",
 			want:    "zipValue",
+			wantErr: false,
+		},
+		{
+			name:   "Return err when request fail",
+			client: mockServerThatFail.Client(),
+			info: info{
+				zipUrl: mockServerThatFail.URL,
+				token:  "some_token",
+			},
+			version: "0.0.1",
+			want:    "400 Bad Request-",
+		},
+		{
+			name:   "Return err when the protocol is invalid",
+			client: mockServerThatFail.Client(),
+			info: info{
+				zipUrl: "htttp://yourhost.com/username/repo/",
+				token:  "some_token",
+			},
+			version: "0.0.1",
+			want:    "Get \"htttp://yourhost.com/username/repo/\": unsupported protocol scheme \"htttp\"",
 		},
 	}
 	for _, tt := range tests {
@@ -175,9 +227,8 @@ func TestZipball(t *testing.T) {
 				assert.EqualError(t, err, tt.want)
 			} else {
 				result, err := ioutil.ReadAll(got)
-				if assert.Nil(t, err) {
-					assert.Equal(t, tt.want, string(result))
-				}
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, string(result))
 			}
 		})
 	}
@@ -336,6 +387,8 @@ const (
     ]
   }
 ]`
+
+	PayloadEmptyTags = `[]`
 )
 
 type info struct {

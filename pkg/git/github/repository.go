@@ -56,13 +56,13 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiURL := info.TagsUrl()
 	res, err := re.performRequest(info, apiURL)
 	if err != nil {
-		return nil, err
+		return git.Tags{}, err
 	}
 
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		all, _ := ioutil.ReadAll(res.Body)
-		return nil, errors.New(res.Status + "-" + string(all))
+		return git.Tags{}, errors.New(res.Status + "-" + string(all))
 	}
 
 	var tags git.Tags
