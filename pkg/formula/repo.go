@@ -39,7 +39,7 @@ type Repo struct {
 }
 
 func (r Repo) CacheExpired() bool {
-	return r.Cache.After(time.Now())
+	return r.Cache.Before(time.Now())
 }
 
 func (r Repo) EmptyVersion() bool {
