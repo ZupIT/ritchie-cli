@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -73,7 +72,7 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 
 	latestTag := up.repo.LatestTag(*repo)
 	repo.LatestVersion = formula.RepoVersion(latestTag)
-	repo.Cache = time.Now().Add(time.Hour)
+	repo.UpdateCache()
 	repo.Version = version
 	repo.TreeVersion = tree.Version
 

@@ -42,6 +42,10 @@ func (r Repo) CacheExpired() bool {
 	return r.Cache.Before(time.Now())
 }
 
+func (r *Repo) UpdateCache() {
+	r.Cache = time.Now().Add(24 * time.Hour)
+}
+
 func (r Repo) EmptyVersion() bool {
 	return r.Version.String() == ""
 }

@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
@@ -52,7 +51,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 	if !repo.IsLocal {
 		latestTag := ad.repo.LatestTag(repo)
 		repo.LatestVersion = formula.RepoVersion(latestTag)
-		repo.Cache = time.Now().Add(time.Hour)
+		repo.UpdateCache()
 
 		if err := ad.repo.Create(repo); err != nil {
 			return err
