@@ -91,7 +91,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
-	if err := inputRunner.Inputs(cmd, setup, flags); err != nil {
+	if _, err := inputRunner.Inputs(cmd, setup, flags); err != nil {
 		return err
 	}
 

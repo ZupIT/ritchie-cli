@@ -54,6 +54,10 @@ type InputResolver interface {
 	Resolve(inType api.TermInputType) (InputRunner, error)
 }
 
+type InputRunnerConditionals interface {
+	InputsConditionals(cmd *exec.Cmd, setup Setup, flags *pflag.FlagSet) (bool, error)
+}
+
 type InputRunner interface {
 	Inputs(cmd *exec.Cmd, setup Setup, flags *pflag.FlagSet) error
 }

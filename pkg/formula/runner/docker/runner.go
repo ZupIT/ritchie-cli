@@ -138,7 +138,7 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 		return nil, err
 	}
 
-	if err := inputRunner.Inputs(cmd, setup, flags); err != nil {
+	if _, err := inputRunner.Inputs(cmd, setup, flags); err != nil {
 		return nil, err
 	}
 

@@ -65,7 +65,7 @@ func NewInputManager(
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 	inMultiselect prompt.InputMultiselect,
-) formula.InputRunner {
+) formula.InputRunnerConditionals {
 	return InputManager{
 		cred:               cred,
 		InputList:          inList,
@@ -78,20 +78,21 @@ func NewInputManager(
 	}
 }
 
-func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagSet) error {
+func (in InputManager) InputsConditionals(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagSet) (bool, error) {
 	config := setup.Config
 	defaultFlag := false
+	var conditionPass bool
 	if f != nil {
 		defaultFlag, _ = f.GetBool("default")
 	}
 	for _, i := range config.Inputs {
 		items, err := in.loadItems(i, setup.FormulaPath)
 		if err != nil {
-			return err
+			return conditionPass, err
 		}
-		conditionPass, err := input.VerifyConditional(cmd, i)
+		conditionPass, err = input.VerifyConditional(cmd, i)
 		if err != nil {
-			return err
+			return conditionPass, err
 		}
 		if !conditionPass {
 			continue
@@ -102,7 +103,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 		if !defaultFlagSet {
 			inputVal, err = in.inputTypeToPrompt(items, i)
 			if err != nil {
-				return err
+				return conditionPass, err
 			}
 		}
 
@@ -111,8 +112,10 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 			checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
 		}
+
 	}
-	return nil
+
+	return conditionPass, nil
 }
 
 func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (string, error) {
