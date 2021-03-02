@@ -18,6 +18,7 @@ package formula
 
 import (
 	"sort"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
@@ -25,14 +26,20 @@ import (
 const RepoCommonsName = RepoName("commons")
 
 type Repo struct {
-	Provider    RepoProvider `json:"provider"`
-	Name        RepoName     `json:"name"`
-	Version     RepoVersion  `json:"version"`
-	Url         string       `json:"url"`
-	Token       string       `json:"token,omitempty"`
-	Priority    int          `json:"priority"`
-	IsLocal     bool         `json:"isLocal"`
-	TreeVersion string       `json:"tree_version"`
+	Provider      RepoProvider `json:"provider"`
+	Name          RepoName     `json:"name"`
+	Version       RepoVersion  `json:"version"`
+	Url           string       `json:"url"`
+	Token         string       `json:"token,omitempty"`
+	Priority      int          `json:"priority"`
+	IsLocal       bool         `json:"isLocal"`
+	TreeVersion   string       `json:"tree_version"`
+	LatestVersion RepoVersion  `json:"latest_version"`
+	Cache         time.Time    `json:"cache"`
+}
+
+func (r Repo) CacheExpired() bool {
+	return r.Cache.After(time.Now())
 }
 
 func (r Repo) EmptyVersion() bool {
@@ -142,10 +149,12 @@ type RepositoryListWriter interface {
 	RepositoryWriter
 }
 
-type RepositoryListWriteCreator interface {
-	RepositoryLister
-	RepositoryWriter
+type RepositoryCreateWriteListDetailDeleter interface {
 	RepositoryCreator
+	RepositoryWriter
+	RepositoryLister
+	RepositoryDetail
+	RepositoryDeleter
 }
 
 type RepositoryListUpdater interface {

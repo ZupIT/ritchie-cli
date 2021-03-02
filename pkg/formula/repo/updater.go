@@ -20,32 +20,32 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 )
 
 var ErrLocalRepo = errors.New("local repository cannot be updated")
 
 type UpdateManager struct {
 	ritHome string
-	repo    formula.RepositoryListWriteCreator
+	repo    formula.RepositoryCreateWriteListDetailDeleter
 	tree    formula.TreeGenerator
-	file    stream.FileWriter
 }
 
 func NewUpdater(
 	ritHome string,
-	repo formula.RepositoryListWriteCreator,
+	repo formula.RepositoryCreateWriteListDetailDeleter,
 	tree formula.TreeGenerator,
-	file stream.FileWriter,
 ) UpdateManager {
 	return UpdateManager{
 		ritHome: ritHome,
 		repo:    repo,
 		tree:    tree,
-		file:    file,
 	}
 }
 
@@ -71,7 +71,11 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 		return ErrLocalRepo
 	}
 
+	latestTag := up.repo.LatestTag(*repo)
+	repo.LatestVersion = formula.RepoVersion(latestTag)
+	repo.Cache = time.Now().Add(time.Hour)
 	repo.Version = version
+	repo.TreeVersion = tree.Version
 
 	if err := up.repo.Create(*repo); err != nil {
 		return err
@@ -82,18 +86,18 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 	}
 
 	repoPath := filepath.Join(up.ritHome, reposDirName, name.String())
-	tree, err := up.tree.Generate(repoPath)
+	treeData, err := up.tree.Generate(repoPath)
 	if err != nil {
 		return err
 	}
 
-	treeFilePath := filepath.Join(repoPath, "tree.json")
-	bytes, err := json.MarshalIndent(tree, "", "\t")
+	treeFilePath := filepath.Join(repoPath, tree.FileName)
+	bytes, err := json.MarshalIndent(treeData, "", "\t")
 	if err != nil {
 		return err
 	}
 
-	if err := up.file.Write(treeFilePath, bytes); err != nil {
+	if err := ioutil.WriteFile(treeFilePath, bytes, os.ModePerm); err != nil {
 		return err
 	}
 

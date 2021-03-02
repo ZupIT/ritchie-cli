@@ -19,40 +19,41 @@ package repo
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 )
 
 var ErrInvalidRepo = errors.New("the selected repository has no formulas")
 
 type AddManager struct {
 	ritHome string
-	repo    formula.RepositoryListWriteCreator
-	deleter formula.RepositoryDeleter
+	repo    formula.RepositoryCreateWriteListDetailDeleter
 	tree    formula.TreeGenerator
-	file    stream.FileWriter
 }
 
 func NewAdder(
 	ritHome string,
-	repo formula.RepositoryListWriteCreator,
-	deleter formula.RepositoryDeleter,
+	repo formula.RepositoryCreateWriteListDetailDeleter,
 	tree formula.TreeGenerator,
-	file stream.FileWriter,
 ) AddManager {
 	return AddManager{
 		ritHome: ritHome,
 		repo:    repo,
-		deleter: deleter,
 		tree:    tree,
-		file:    file,
 	}
 }
 
 func (ad AddManager) Add(repo formula.Repo) error {
 	if !repo.IsLocal {
+		latestTag := ad.repo.LatestTag(repo)
+		repo.LatestVersion = formula.RepoVersion(latestTag)
+		repo.Cache = time.Now().Add(time.Hour)
+
 		if err := ad.repo.Create(repo); err != nil {
 			return err
 		}
@@ -63,7 +64,7 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		return err
 	}
 
-	repo.TreeVersion = "v2"
+	repo.TreeVersion = tree.Version
 	repos = setPriority(repo, repos)
 
 	if err := ad.repo.Write(repos); err != nil {
@@ -94,7 +95,7 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 		return err
 	}
 
-	if err := ad.file.Write(treeFilePath, bytes); err != nil {
+	if err := ioutil.WriteFile(treeFilePath, bytes, os.ModePerm); err != nil {
 		return err
 	}
 
@@ -103,7 +104,7 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 
 func (ad AddManager) isValidRepo(repo formula.Repo, tree formula.Tree) error {
 	if len(tree.Commands) == 0 && !repo.IsLocal {
-		if err := ad.deleter.Delete(repo.Name); err != nil {
+		if err := ad.repo.Delete(repo.Name); err != nil {
 			return err
 		}
 		return ErrInvalidRepo
@@ -116,7 +117,7 @@ func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
 		for i := range repos {
 			r := repos[i]
 			if repo.Name == r.Name {
-				repos[i].Priority = repo.Priority
+				repos[i] = repo
 				return true
 			}
 		}
