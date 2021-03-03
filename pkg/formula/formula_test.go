@@ -20,7 +20,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
@@ -45,15 +44,6 @@ func TestFormulaPath(t *testing.T) {
 
 	if want != got {
 		t.Errorf("FormulaPath got %v, want %v", got, want)
-	}
-}
-
-func TestTmpWorkDirPath(t *testing.T) {
-	want := filepath.Join(home, TmpDir)
-	gotTmpDir := def.TmpWorkDirPath(home)
-
-	if !strings.Contains(gotTmpDir, want) {
-		t.Errorf("TmpWorkDirPath got tmp dir %v, want some string that contains %v", gotTmpDir, want)
 	}
 }
 
