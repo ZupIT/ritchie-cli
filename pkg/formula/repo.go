@@ -23,7 +23,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
-const RepoCommonsName = RepoName("commons")
+const (
+	RepoCacheTime   = 24 * time.Hour
+	RepoCommonsName = RepoName("commons")
+)
 
 type Repo struct {
 	Provider      RepoProvider `json:"provider"`
@@ -43,7 +46,7 @@ func (r Repo) CacheExpired() bool {
 }
 
 func (r *Repo) UpdateCache() {
-	r.Cache = time.Now().Add(24 * time.Hour)
+	r.Cache = time.Now().Add(RepoCacheTime)
 }
 
 func (r Repo) EmptyVersion() bool {
