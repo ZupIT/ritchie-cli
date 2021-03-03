@@ -65,6 +65,11 @@ func (m Manager) Add(workspace formula.Workspace) error {
 	if workspace.Dir == m.defaultWorkspaceDir {
 		return nil
 	}
+
+	// Avoid finishing separators
+	if last := len(workspace.Dir) - 1; last >= 0 && workspace.Dir[last] == filepath.Separator {
+		workspace.Dir = workspace.Dir[:last]
+	}
 	if _, err := os.Stat(workspace.Dir); os.IsNotExist(err) {
 		return ErrInvalidWorkspace
 	}
