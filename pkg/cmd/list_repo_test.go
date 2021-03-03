@@ -50,7 +50,7 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial:        TutorialFinderMockReturnDisabled{},
+				Tutorial: TutorialFinderMockReturnDisabled{},
 			},
 			wantErr: false,
 		},
@@ -75,7 +75,7 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial:        TutorialFinderMockReturnDisabled{},
+				Tutorial: TutorialFinderMockReturnDisabled{},
 			},
 			wantErr: false,
 		},
@@ -94,7 +94,7 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial:        TutorialFinderMock{},
+				Tutorial: TutorialFinderMock{},
 			},
 			wantErr: false,
 		},
