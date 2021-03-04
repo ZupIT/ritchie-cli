@@ -1,6 +1,9 @@
 package input_autocomplete
 
-import "fmt"
+import (
+	"fmt"
+	"runtime"
+)
 
 type Input struct {
 	cursor      *Cursor
@@ -66,6 +69,23 @@ func (i *Input) Autocomplete() {
 	i.currentText = autocompletedText
 	i.cursor.SetPosition(len(i.currentText))
 	i.Print()
+}
+
+func (i *Input) RemoveLastSlashIfNeeded() {
+	os := runtime.GOOS
+	size := len(i.currentText)
+	var slash byte
+
+	switch os {
+	case "linux", "darwin":
+		slash = '/'
+	case "windows":
+		slash = '\\'
+	}
+
+	if i.currentText[size-1] == slash {
+		i.currentText = i.currentText[:size-1]
+	}
 }
 
 func (i *Input) Print() {

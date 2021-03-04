@@ -1,6 +1,7 @@
 package input_autocomplete
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 
@@ -28,6 +29,8 @@ func keyboardListener(input *Input) error {
 			input.RemoveChar()
 		case keyboard.KeyTab:
 			input.Autocomplete()
+		case keyboard.KeyCtrlC:
+			return errors.New("Aborted")
 
 		default:
 			input.AddChar(char)
@@ -56,6 +59,8 @@ func Read(text string) (string, error) {
 	if err := keyboardListener(input); err != nil {
 		return "", err
 	}
+
+	input.RemoveLastSlashIfNeeded()
 
 	return input.GetCurrentText(), nil
 }
