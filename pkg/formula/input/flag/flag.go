@@ -59,13 +59,19 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		}
 
 		switch i.Type {
-		case input.TextType, input.PassType, input.DynamicType:
+		case input.TextType, input.PassType, input.DynamicType, input.ListType:
 			inputVal, err = flags.GetString(i.Name)
 			if err := validateItem(i, inputVal); err != nil {
 				return err
 			}
 
 			if err := matchWithRegex(i, inputVal); err != nil {
+				return err
+			}
+
+		case input.Multiselect:
+			inputVal, err = flags.GetString(i.Name)
+			if err := validateMultiselect(i, inputVal); err != nil {
 				return err
 			}
 
@@ -120,6 +126,19 @@ func validateItem(i formula.Input, inputVal string) error {
 		items := strings.Join(i.Items, ", ")
 		formattedName := fmt.Sprintf("--%s", i.Name)
 		return fmt.Errorf(errInvalidInputItemsMsg, items, formattedName)
+	}
+
+	return nil
+}
+
+func validateMultiselect(i formula.Input, inputVal string) error {
+	allValues := strings.Split(inputVal, input.MultiselectSeparator)
+	for _, value := range allValues {
+		if !i.Items.Contains(value) {
+			items := strings.Join(i.Items, ", ")
+			formattedName := fmt.Sprintf("--%s", i.Name)
+			return fmt.Errorf(errInvalidInputItemsMsg, items, formattedName)
+		}
 	}
 
 	return nil

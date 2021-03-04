@@ -149,7 +149,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		if err != nil {
 			return "", err
 		}
-		return strings.Join(sl, "|"), nil
+		return strings.Join(sl, input.MultiselectSeparator), nil
 	default:
 		return in.cred.Resolve(i.Type)
 	}
