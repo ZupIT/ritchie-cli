@@ -227,7 +227,7 @@ func TestInputManager(t *testing.T) {
 				iMultiselect,
 			)
 			cmd := &exec.Cmd{}
-			_, got := inputManager.InputsConditionals(cmd, setup, nil)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if got != nil {
 				assert.EqualError(t, got, tt.expectedError)
@@ -382,7 +382,7 @@ func TestConditionalInputs(t *testing.T) {
 			)
 
 			cmd := &exec.Cmd{}
-			_, got := inputManager.InputsConditionals(cmd, setup, nil)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			assert.Equal(t, tt.want, got)
 		})
@@ -475,7 +475,7 @@ func TestRegexType(t *testing.T) {
 			)
 
 			cmd := &exec.Cmd{}
-			_, got := inputManager.InputsConditionals(cmd, setup, nil)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			assert.Equal(t, tt.want, got)
 		})
@@ -581,7 +581,7 @@ func TestDynamicInputs(t *testing.T) {
 			)
 
 			cmd := &exec.Cmd{}
-			_, got := inputManager.InputsConditionals(cmd, setup, nil)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			if tt.want != nil {
 				assert.NotNil(t, got)
@@ -682,19 +682,19 @@ func TestMultiselect(t *testing.T) {
 			)
 
 			cmd := &exec.Cmd{}
-			_, got := inputManager.InputsConditionals(cmd, setup, nil)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
-func TestConditionalInputsWithMultiselect(t *testing.T) {
+func TestContainsConditionalInputs(t *testing.T) {
 	tests := []struct {
 		name             string
 		inputJSON        string
 		multiselectValue []string
-		want             bool
+		want             error
 	}{
 		{
 			name: "success: multiselect input test with conditional containsAny",
@@ -725,7 +725,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             true,
+			want:             nil,
 		},
 		{
 			name: "fail: multiselect input test with conditional containsAny",
@@ -756,7 +756,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_4"},
-			want:             false,
+			want:             nil,
 		},
 		{
 			name: "success: multiselect input test with conditional containsAll",
@@ -787,7 +787,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3", "item_4"},
-			want:             true,
+			want:             nil,
 		},
 		{
 			name: "fail: multiselect input test with conditional containsAll",
@@ -818,7 +818,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             false,
+			want:             nil,
 		},
 		{
 			name: "success: multiselect input test with conditional containsOnly",
@@ -849,7 +849,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2"},
-			want:             true,
+			want:             nil,
 		},
 		{
 			name: "fail: multiselect input test with conditional containsOnly",
@@ -880,7 +880,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             false,
+			want:             nil,
 		},
 		{
 			name: "fail: multiselect input test with conditional containsOnly",
@@ -911,38 +911,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_3"},
-			want:             false,
-		},
-		{
-			name: "fail: multiselect input test with conditional containsOnly",
-			inputJSON: `[
-					{
-						"name": "sample_multiselect",
-						"type": "multiselect",
-						"items": [
-							"item_1",
-							"item_2",
-							"item_3",
-							"item_4"
-						],
-						"label": "Choose one or more items: ",
-						"required": false,
-						"tutorial": "Select one or more items for this field."
-					},
- 					{
-						"name": "sample_text",
-						"type": "text",
-						"label": "Type : ",
-						"default": "test",
-						"condition": {
-							"variable": "sample_multiselect",
-							"operator": "containsOnly",
-							"value":    "item_1|item_3"
-						}
-					}
-				]`,
-			multiselectValue: []string{"item_1", "item_2"},
-			want:             false,
+			want:             nil,
 		},
 		{
 			name: "success: multiselect input test with conditional notContainsAny",
@@ -973,7 +942,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2"},
-			want:             true,
+			want:             nil,
 		},
 		{
 			name: "fail: multiselect input test with conditional notContainsAny",
@@ -1004,7 +973,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_3", "item_4"},
-			want:             false,
+			want:             nil,
 		},
 		{
 			name: "success: multiselect input test with conditional notContainsAll",
@@ -1035,7 +1004,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3", "item_4"},
-			want:             true,
+			want:             nil,
 		},
 		{
 			name: "success: multiselect input test with conditional notContainsAll",
@@ -1066,7 +1035,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3"},
-			want:             true,
+			want:             nil,
 		},
 		{
 			name: "fail: multiselect input test with conditional notContainsAll",
@@ -1097,7 +1066,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3", "item_4"},
-			want:             false,
+			want:             nil,
 		},
 		{
 			name: "fail: multiselect input test with conditional notContainsAll",
@@ -1128,7 +1097,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_4"},
-			want:             false,
+			want:             nil,
 		},
 	}
 
@@ -1161,7 +1130,7 @@ func TestConditionalInputsWithMultiselect(t *testing.T) {
 			)
 
 			cmd := &exec.Cmd{}
-			got, _ := inputManager.InputsConditionals(cmd, setup, nil)
+			got := inputManager.Inputs(cmd, setup, nil)
 
 			assert.Equal(t, tt.want, got)
 		})
@@ -1207,7 +1176,7 @@ func TestDefaultFlag(t *testing.T) {
 		r, w, _ := os.Pipe()
 		os.Stdout = w
 
-		_, err := inputManager.InputsConditionals(cmd, setup, flags)
+		err := inputManager.Inputs(cmd, setup, flags)
 
 		_ = w.Close()
 		out, _ := ioutil.ReadAll(r)
@@ -1250,7 +1219,7 @@ func TestEmptyList(t *testing.T) {
 		)
 
 		cmd := &exec.Cmd{}
-		_, got := inputManager.InputsConditionals(cmd, setup, nil)
+		got := inputManager.Inputs(cmd, setup, nil)
 
 		assert.Equal(t, fmt.Errorf(EmptyItems, "sample_list"), got)
 	})

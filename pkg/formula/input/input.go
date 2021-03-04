@@ -19,6 +19,7 @@ const (
 	PassType    = "password"
 	DynamicType = "dynamic"
 	Multiselect = "multiselect"
+	TypeSuffix  = "_type"
 )
 
 // addEnv Add environment variable to run formulas.
@@ -40,7 +41,7 @@ func HasRegex(input formula.Input) bool {
 	return len(input.Pattern.Regex) > 0
 }
 
-func contains(s []string, str string) bool {
+func containsArray(s []string, str string) bool {
 	for _, v := range s {
 		if v == str {
 			return true
@@ -49,36 +50,56 @@ func contains(s []string, str string) bool {
 	return false
 }
 
-func valueContainsAny(value string, input string) bool {
-	splitValue := strings.Split(value, "|")
+func containsSubstring(s string, substr string) bool {
+	return strings.Contains(s, substr)
+}
+
+func valueContainsAny(inputType string, value string, input string) bool {
 	splitInput := strings.Split(input, "|")
-	for _, v := range splitInput {
-		if contains(splitValue, v) {
-			return true
+	if(inputType == Multiselect){
+		splitValue := strings.Split(value, "|")
+		for _, i := range splitInput {
+			if containsArray(splitValue, i) {
+				return true
+			}
+		}
+	} else {
+		for _, i := range splitInput {
+			if containsSubstring(value, i) {
+				return true
+			}
 		}
 	}
 	return false
 }
 
-func valueContainsAll(value string, input string) bool {
-	splitValue := strings.Split(value, "|")
+func valueContainsAll(inputType string, value string, input string) bool {
 	splitInput := strings.Split(input, "|")
-	for _, v := range splitInput {
-		if !contains(splitValue, v) {
-			return false
+	if(inputType == Multiselect) {
+		splitValue := strings.Split(value, "|")
+		for _, v := range splitInput {
+			if !containsArray(splitValue, v) {
+				return false
+			}
+		}
+	} else {
+		for _, v := range splitInput {
+			if !containsSubstring(value, v) {
+				return false
+			}
 		}
 	}
 	return true
 }
 
-func valueContainsOnly(value string, input string) bool {
+func valueContainsOnly(inputType string, value string, input string) bool {
 	splitValue := strings.Split(value, "|")
 	splitInput := strings.Split(input, "|")
 	if len(splitValue) != len(splitInput) {
 		return false
 	}
 	for _, v := range splitInput {
-		if !contains(splitValue, v) {
+		if !containsArray(splitValue, v) {
 			return false
 		}
 	}
@@ -91,16 +112,22 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
 	}
 
 	var value string
+	var typeValue string
 	variable := input.Condition.Variable
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
 		if strings.ToLower(components[0]) == variable {
 			value = components[1]
-			break
+		} else if strings.ToLower(components[0]) == (variable + TypeSuffix) {
+			typeValue = components[1]
 		}
 	}
 	if value == "" {
 		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
+	}
+
+	if typeValue == "" {
+		return false, fmt.Errorf("config.json: conditional variable %s has no type", variable)
 	}
 
 	// Currently using case implementation to avoid adding a dependency module or exposing
@@ -120,15 +147,15 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
 	case "<=":
 		return value <= input.Condition.Value, nil
 	case "containsAny":
-		return valueContainsAny(value, input.Condition.Value), nil
+		return valueContainsAny(typeValue, value, input.Condition.Value), nil
 	case "containsAll":
-		return valueContainsAll(value, input.Condition.Value), nil
+		return valueContainsAll(typeValue, value, input.Condition.Value), nil
 	case "containsOnly":
-		return valueContainsOnly(value, input.Condition.Value), nil
+		return valueContainsOnly(typeValue, value, input.Condition.Value), nil
 	case "notContainsAny":
-		return !valueContainsAny(value, input.Condition.Value), nil
+		return !valueContainsAny(typeValue, value, input.Condition.Value), nil
 	case "notContainsAll":
-		return !valueContainsAll(value, input.Condition.Value), nil
+		return !valueContainsAll(typeValue, value, input.Condition.Value), nil
 	default:
 		return false, fmt.Errorf(
 			"config.json: conditional operator %s not valid. Use any of (==, !=, >, >=, <, <=, containsAny, containsAll, containsOnly, notContainsAny, notContainsAll)",

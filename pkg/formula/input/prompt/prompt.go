@@ -43,6 +43,7 @@ const (
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
+	TypeSuffix			 = "_type"
 )
 
 type InputManager struct {
@@ -65,7 +66,7 @@ func NewInputManager(
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 	inMultiselect prompt.InputMultiselect,
-) formula.InputRunnerConditionals {
+) formula.InputRunner {
 	return InputManager{
 		cred:               cred,
 		InputList:          inList,
@@ -78,21 +79,20 @@ func NewInputManager(
 	}
 }
 
-func (in InputManager) InputsConditionals(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagSet) (bool, error) {
+func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagSet) error {
 	config := setup.Config
 	defaultFlag := false
-	var conditionPass bool
 	if f != nil {
 		defaultFlag, _ = f.GetBool("default")
 	}
 	for _, i := range config.Inputs {
 		items, err := in.loadItems(i, setup.FormulaPath)
 		if err != nil {
-			return conditionPass, err
+			return err
 		}
-		conditionPass, err = input.VerifyConditional(cmd, i)
+		conditionPass, err := input.VerifyConditional(cmd, i)
 		if err != nil {
-			return conditionPass, err
+			return err
 		}
 		if !conditionPass {
 			continue
@@ -103,7 +103,7 @@ func (in InputManager) InputsConditionals(cmd *exec.Cmd, setup formula.Setup, f 
 		if !defaultFlagSet {
 			inputVal, err = in.inputTypeToPrompt(items, i)
 			if err != nil {
-				return conditionPass, err
+				return err
 			}
 		}
 
@@ -111,11 +111,13 @@ func (in InputManager) InputsConditionals(cmd *exec.Cmd, setup formula.Setup, f 
 			in.persistCache(setup.FormulaPath, inputVal, i, items)
 			checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
+			checkForSameEnv(i.Name + TypeSuffix)
+			input.AddEnv(cmd, i.Name + TypeSuffix, i.Type)
 		}
 
 	}
 
-	return conditionPass, nil
+	return nil
 }
 
 func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (string, error) {
@@ -166,6 +168,10 @@ func checkForSameEnv(envKey string) {
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}
+}
+
+func addTypeToInputVal(inputVal string, inputType string) string {
+	return inputVal + ", TYPE=" + inputType
 }
 
 func (in InputManager) defaultFlag(input formula.Input, defaultFlag bool) (string, bool) {
