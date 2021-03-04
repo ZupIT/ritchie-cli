@@ -141,7 +141,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
-	case input.Multiselect:
+	case input.MultiselectType:
 		if len(items) == 0 {
 			return "", fmt.Errorf(EmptyItems, i.Name)
 		}

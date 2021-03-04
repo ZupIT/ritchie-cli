@@ -69,7 +69,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 				return err
 			}
 
-		case input.Multiselect:
+		case input.MultiselectType:
 			inputVal, err = flags.GetString(i.Name)
 			if err := validateMultiselect(i, inputVal); err != nil {
 				return err
@@ -137,7 +137,7 @@ func validateMultiselect(i formula.Input, inputVal string) error {
 		if !i.Items.Contains(value) {
 			items := strings.Join(i.Items, ", ")
 			formattedName := fmt.Sprintf("--%s", i.Name)
-			return fmt.Errorf(errInvalidInputItemsMsg, items, formattedName)
+			return fmt.Errorf(errInvalidInputItemsMsg, inputVal, items, formattedName)
 		}
 	}
 
