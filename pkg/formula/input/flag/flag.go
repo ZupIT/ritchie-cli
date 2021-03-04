@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	errInvalidInputItemsMsg = "only these input items [%s] are accepted in the %q flag"
+	errInvalidInputItemsMsg = "the value [%v] is not valid, only these input items [%s] are accepted in the %q flag"
 )
 
 type InputManager struct {
@@ -119,7 +119,7 @@ func validateItem(i formula.Input, inputVal string) error {
 	if len(i.Items) > 0 && !i.Items.Contains(inputVal) {
 		items := strings.Join(i.Items, ", ")
 		formattedName := fmt.Sprintf("--%s", i.Name)
-		return fmt.Errorf(errInvalidInputItemsMsg, items, formattedName)
+		return fmt.Errorf(errInvalidInputItemsMsg, inputVal, items, formattedName)
 	}
 
 	return nil
