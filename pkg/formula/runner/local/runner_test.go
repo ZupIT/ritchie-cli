@@ -37,13 +37,14 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	pwd, _ := os.Getwd()
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 	tmpDir := os.TempDir()
 	homeDir, _ := os.UserHomeDir()
 	ritHome := filepath.Join(tmpDir, ".rit-runner-local")
 	repoPath := filepath.Join(ritHome, "repos", "commons")
+	defer os.Remove("test.txt")
+	defer os.RemoveAll(ritHome)
 
 	makeBuilder := builder.NewBuildMake()
 	batBuilder := builder.NewBuildBat(fileManager)
@@ -143,22 +144,17 @@ func TestRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			formulaPath := tt.in.def.FormulaPath(ritHome)
-			binPath := tt.in.def.BinPath(formulaPath)
-			_ = os.Chdir(binPath)
-
 			in := tt.in
 			local := NewRunner(in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
 			got := local.Run(in.def, api.Prompt, false, nil)
 
 			if tt.want != nil || got != nil {
 				assert.EqualError(t, got, tt.want.Error())
+			} else {
+				assert.FileExists(t, "test.txt")
 			}
-
-			_ = os.Chdir(pwd)
 		})
 	}
-
 }
 
 type preRunnerMock struct {

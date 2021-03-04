@@ -39,6 +39,9 @@ func NewBuildMake() MakeManager {
 }
 
 func (ma MakeManager) Build(info formula.BuildInfo) error {
+	pwd, _ := os.Getwd()
+	defer os.Chdir(pwd)
+
 	if err := os.Chdir(info.FormulaPath); err != nil {
 		return err
 	}

@@ -167,8 +167,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			pwd, _ := os.Getwd()
 			formulaPath := tt.in.def.FormulaPath(ritHome)
-			binPath := tt.in.def.BinPath(formulaPath)
-			_ = os.Chdir(binPath)
+			_ = os.Chdir(formulaPath)
 
 			in := tt.in
 			docker := NewRunner(in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
@@ -176,6 +175,10 @@ func TestRun(t *testing.T) {
 
 			if got != nil || tt.out.err != nil {
 				assert.EqualError(t, tt.out.err, got.Error())
+			} else {
+				fileCreted := filepath.Join(formulaPath, "test.txt")
+				assert.FileExists(t, fileCreted)
+				_ = os.Remove(fileCreted)
 			}
 
 			_ = os.Chdir(pwd)
