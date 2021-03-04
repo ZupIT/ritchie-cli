@@ -137,7 +137,7 @@ func validateMultiselect(i formula.Input, inputVal string) error {
 		if !i.Items.Contains(value) {
 			items := strings.Join(i.Items, ", ")
 			formattedName := fmt.Sprintf("--%s", i.Name)
-			return fmt.Errorf(errInvalidInputItemsMsg, inputVal, items, formattedName)
+			return fmt.Errorf(errInvalidInputItemsMsg, value, items, formattedName)
 		}
 	}
 

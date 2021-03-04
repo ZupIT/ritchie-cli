@@ -224,11 +224,10 @@ func (f FormulaCommand) addInputFlags(def formula.Definition, flags *pflag.FlagS
 			continue
 		}
 
-		switch in.Type {
-		case input.TextType, input.PassType, input.DynamicType:
-			flags.String(in.Name, in.Default, in.Tutorial)
-		case input.BoolType:
+		if in.Type == input.BoolType {
 			flags.Bool(in.Name, false, in.Tutorial)
+		} else {
+			flags.String(in.Name, in.Default, in.Tutorial)
 		}
 	}
 }
