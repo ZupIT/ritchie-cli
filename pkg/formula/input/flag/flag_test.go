@@ -75,7 +75,7 @@ func TestInputs(t *testing.T) {
 			in: in{
 				valueForList: "invalid",
 			},
-			want: errors.New("only these input items [in_list1, in_list2, in_list3, in_listN] are accepted in the \"--sample_list\" flag"),
+			want: errors.New("the value [invalid] is not valid, only these input items [in_list1, in_list2, in_list3, in_listN] are accepted in the \"--sample_list\" flag"),
 		},
 		{
 			name: "invalid operator",

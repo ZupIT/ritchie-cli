@@ -17,155 +17,53 @@
 package github
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/stretchr/testify/assert"
+)
+
+const (
+	repoUrl = "http://github.com/username/repo-name"
+	token   = "some_token"
+	version = "0.0.3"
 )
 
 func TestLatestTagUrl(t *testing.T) {
-	type in struct {
-		Url   string
-		Token string
-	}
-	tests := []struct {
-		name string
-		in   in
-		want string
-	}{
-		{
-			name: "Generate LatestTagUrlWithSuccess",
-			in: in{
-				Url: "http://github.com/zupIt/ritchie-cli",
-			},
-			want: "https://api.github.com/repos/zupIt/ritchie-cli/releases/latest",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.in.Url, tt.in.Token)
+	const want = "https://api.github.com/repos/username/repo-name/releases/latest"
+	repoInfo := NewRepoInfo(repoUrl, token)
+	latestTagsUrl := repoInfo.LatestTagUrl()
 
-			if got := in.LatestTagUrl(); got != tt.want {
-				t.Errorf("LatestTagUrl() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	assert.Equal(t, want, latestTagsUrl)
 }
 
 func TestTagsUrl(t *testing.T) {
-	type in struct {
-		Url   string
-		Token string
-	}
-	tests := []struct {
-		name string
-		in   in
-		want string
-	}{
-		{
-			name: "Generate LatestTagUrlWithSuccess",
-			in: in{
-				Url: "http://github.com/zupIt/ritchie-cli",
-			},
-			want: "https://api.github.com/repos/zupIt/ritchie-cli/releases",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.in.Url, tt.in.Token)
+	const want = "https://api.github.com/repos/username/repo-name/releases"
+	repoInfo := NewRepoInfo(repoUrl, token)
+	tagsUrl := repoInfo.TagsUrl()
 
-			if got := in.TagsUrl(); got != tt.want {
-				t.Errorf("TagsUrl() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	assert.Equal(t, want, tagsUrl)
 }
 
-func TestRepoInfo_TokenHeader(t *testing.T) {
-	type in struct {
-		Url   string
-		Token string
-	}
-	tests := []struct {
-		name string
-		in   in
-		want string
-	}{
-		{
-			name: "Generate LatestTagUrlWithSuccess",
-			in: in{
-				Url:   "http://github.com/zupIt/ritchie-cli",
-				Token: "any_token",
-			},
-			want: "token any_token",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.in.Url, tt.in.Token)
+func TestTokenHeader(t *testing.T) {
+	const want = "token some_token"
+	repoInfo := NewRepoInfo(repoUrl, token)
+	tokenHeader := repoInfo.TokenHeader()
 
-			if got := in.TokenHeader(); got != tt.want {
-				t.Errorf("TokenHeader() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	assert.Equal(t, want, tokenHeader)
 }
 
 func TestZipUrl(t *testing.T) {
-	type in struct {
-		Url     string
-		Token   string
-		version string
-	}
+	const want = "https://api.github.com/repos/username/repo-name/zipball/0.0.3"
+	repoInfo := NewRepoInfo(repoUrl, token)
+	zipUrl := repoInfo.ZipUrl(version)
 
-	tests := []struct {
-		name string
-		in   in
-		want string
-	}{
-		{
-			name: "Generate LatestTagUrlWithSuccess",
-			in: in{
-				Url:     "http://github.com/zupIt/ritchie-cli",
-				version: "0.0.3",
-			},
-			want: "https://api.github.com/repos/zupIt/ritchie-cli/zipball/0.0.3",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			in := NewRepoInfo(tt.in.Url, tt.in.Token)
-			if got := in.ZipUrl(tt.in.version); got != tt.want {
-				t.Errorf("ZipUrl() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	assert.Equal(t, want, zipUrl)
 }
 
-func TestTags_Names(t *testing.T) {
-	tests := []struct {
-		name string
-		t    git.Tags
-		want []string
-	}{
-		{
-			name: "Return tags name",
-			t: git.Tags{
-				{
-					Name: "tag1",
-				},
-				{
-					Name: "tag2",
-				},
-			},
-			want: []string{"tag1", "tag2"},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.t.Names(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Names() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+func TestToken(t *testing.T) {
+	const want = "some_token"
+	repoInfo := NewRepoInfo(repoUrl, token)
+	token := repoInfo.Token()
+
+	assert.Equal(t, want, token)
 }
