@@ -78,6 +78,13 @@ func TestInputs(t *testing.T) {
 			want: errors.New("the value [invalid] is not valid, only these input items [in_list1, in_list2, in_list3, in_listN] are accepted in the \"--sample_list\" flag"),
 		},
 		{
+			name: "invalid value for multiselect item",
+			in: in{
+				valueForMultiselect: "invalid",
+			},
+			want: errors.New("the value [invalid] is not valid, only these input items [multi1, multi2, multi3, multiN] are accepted in the \"--sample_multiselect\" flag"),
+		},
+		{
 			name: "invalid operator",
 			in: in{
 				operator: "eq",
@@ -116,6 +123,8 @@ func TestInputs(t *testing.T) {
 					}
 				case input.BoolType:
 					flags.Bool(in.Name, false, in.Tutorial)
+				case input.MultiselectType:
+					flags.String(in.Name, tt.in.valueForMultiselect, in.Tutorial)
 				}
 			}
 
@@ -133,22 +142,24 @@ func TestInputs(t *testing.T) {
 }
 
 type in struct {
-	creResolver      credential.Resolver
-	defaultFlagValue string
-	valueForList     string
-	valueForRegex    string
-	regex            string
-	operator         string
+	creResolver         credential.Resolver
+	defaultFlagValue    string
+	valueForList        string
+	valueForMultiselect string
+	valueForRegex       string
+	regex               string
+	operator            string
 }
 
 func defaultFields(testFields in) in {
 	defaultFields := in{
-		creResolver:      envResolverMock{in: "test"},
-		defaultFlagValue: "text",
-		valueForList:     "in_list2",
-		valueForRegex:    "text_ok",
-		regex:            "text_ok",
-		operator:         "==",
+		creResolver:         envResolverMock{in: "test"},
+		defaultFlagValue:    "text",
+		valueForList:        "in_list2",
+		valueForMultiselect: "multi1",
+		valueForRegex:       "text_ok",
+		regex:               "text_ok",
+		operator:            "==",
 	}
 
 	if testFields.creResolver != nil {
@@ -165,6 +176,10 @@ func defaultFields(testFields in) in {
 
 	if testFields.valueForList != "" {
 		defaultFields.valueForList = testFields.valueForList
+	}
+
+	if testFields.valueForMultiselect != "" {
+		defaultFields.valueForMultiselect = testFields.valueForMultiselect
 	}
 
 	if testFields.regex != "" {
@@ -265,6 +280,18 @@ const inputJson = `[
         "type": "password",
         "label": "Pick: ",
 		"tutorial": "Add a secret password for this field."
+    },
+	{
+        "name": "sample_multiselect",
+        "type": "multiselect",
+		"items": [
+            "multi1",
+            "multi2",
+            "multi3",
+            "multiN"
+        ],
+        "label": "Pick: ",
+		"tutorial": "Select any of the options."
     },
     {
         "name": "test_resolver",
