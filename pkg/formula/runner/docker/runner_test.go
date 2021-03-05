@@ -176,9 +176,9 @@ func TestRun(t *testing.T) {
 			if got != nil || tt.out.err != nil {
 				assert.EqualError(t, tt.out.err, got.Error())
 			} else {
-				fileCreted := filepath.Join(formulaPath, "test.txt")
-				assert.FileExists(t, fileCreted)
-				_ = os.Remove(fileCreted)
+				fileCreated := filepath.Join(formulaPath, "test.txt")
+				assert.FileExists(t, fileCreated)
+				_ = os.Remove(fileCreated)
 			}
 
 			_ = os.Chdir(pwd)
