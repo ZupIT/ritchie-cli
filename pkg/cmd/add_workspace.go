@@ -47,18 +47,9 @@ func NewAddWorkspaceCmd(
 	return cmd
 }
 
-func (a addWorkspaceCmd) runFormula() CommandRunnerFunc {
+func (a *addWorkspaceCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if cmd.Flags().NFlag() == 0 {
-			wspace, err := addWorkspaceFromPrompt(a)
-			if err != nil {
-				return err
-			}
-
-			return a.workspace.Add(wspace)
-		}
-
-		wspace, err := addWorkspaceFromFlags(cmd)
+		wspace, err := a.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
@@ -67,7 +58,14 @@ func (a addWorkspaceCmd) runFormula() CommandRunnerFunc {
 	}
 }
 
-func addWorkspaceFromFlags(cmd *cobra.Command) (formula.Workspace, error) {
+func (a *addWorkspaceCmd) resolveInput(cmd *cobra.Command) (formula.Workspace, error) {
+	if IsFlagInput(cmd) {
+		return a.resolveFlags(cmd)
+	}
+	return a.resolvePrompt()
+}
+
+func (a *addWorkspaceCmd) resolveFlags(cmd *cobra.Command) (formula.Workspace, error) {
 	workspaceName, _ := cmd.Flags().GetString(workspaceNameFlag)
 	workspacePath, _ := cmd.Flags().GetString(workspacePathFlag)
 
@@ -83,7 +81,7 @@ func addWorkspaceFromFlags(cmd *cobra.Command) (formula.Workspace, error) {
 	return wspace, nil
 }
 
-func addWorkspaceFromPrompt(a addWorkspaceCmd) (formula.Workspace, error) {
+func (a *addWorkspaceCmd) resolvePrompt() (formula.Workspace, error) {
 	workspaceName, err := a.input.Text("Enter the name of workspace", true)
 	if err != nil {
 		return formula.Workspace{}, err

@@ -141,7 +141,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
-	case input.Multiselect:
+	case input.MultiselectType:
 		if len(items) == 0 {
 			return "", fmt.Errorf(EmptyItems, i.Name)
 		}
@@ -149,7 +149,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		if err != nil {
 			return "", err
 		}
-		return strings.Join(sl, "|"), nil
+		return strings.Join(sl, input.MultiselectSeparator), nil
 	default:
 		return in.cred.Resolve(i.Type)
 	}

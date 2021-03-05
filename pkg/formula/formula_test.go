@@ -22,6 +22,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 )
 
@@ -42,9 +44,7 @@ func TestFormulaPath(t *testing.T) {
 	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java")
 	got := def.FormulaPath(home)
 
-	if want != got {
-		t.Errorf("FormulaPath got %v, want %v", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestBinPath(t *testing.T) {
@@ -52,9 +52,7 @@ func TestBinPath(t *testing.T) {
 	formulaPath := def.FormulaPath(home)
 	got := def.BinPath(formulaPath)
 
-	if want != got {
-		t.Errorf("BinPath got %v, want %v", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestBinFilePath(t *testing.T) {
@@ -68,9 +66,7 @@ func TestBinFilePath(t *testing.T) {
 	formulaPath := def.FormulaPath(home)
 	got := def.BinFilePath(formulaPath)
 
-	if want != got {
-		t.Errorf("BinFilePath got %v, want %v", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestFormulaCmdName(t *testing.T) {
@@ -81,9 +77,7 @@ func TestFormulaCmdName(t *testing.T) {
 
 	got := create.FormulaCmdName()
 
-	if want != got {
-		t.Errorf("FormulaName got %v, want %v", got, want)
-	}
+	assert.Equal(t, want, got)
 }
 
 func TestPkgName(t *testing.T) {
@@ -94,9 +88,7 @@ func TestPkgName(t *testing.T) {
 
 	got := create.PkgName()
 
-	if want != got {
-		t.Errorf("PkgName got %v, want %v", got, want)
-	}
+	assert.Equal(t, got, want)
 }
 
 func TestConfigPath(t *testing.T) {
@@ -104,7 +96,5 @@ func TestConfigPath(t *testing.T) {
 
 	got := def.ConfigPath(def.FormulaPath(home))
 
-	if want != got {
-		t.Errorf("TestConfigPath got %v, want %v", got, want)
-	}
+	assert.Equal(t, got, want)
 }
