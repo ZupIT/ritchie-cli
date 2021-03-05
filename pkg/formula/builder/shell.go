@@ -45,7 +45,7 @@ func NewBuildShell() ShellManager {
 
 func (sh ShellManager) Build(info formula.BuildInfo) error {
 	pwd, _ := os.Getwd()
-	defer os.Chdir(pwd)
+	defer os.Chdir(pwd) //nolint:errcheck
 
 	if err := os.Chdir(info.FormulaPath); err != nil {
 		return err
