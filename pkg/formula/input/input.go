@@ -93,13 +93,19 @@ func valueContainsAll(inputType string, value string, input string) bool {
 }
 
 func valueContainsOnly(inputType string, value string, input string) bool {
-	splitValue := strings.Split(value, "|")
-	splitInput := strings.Split(input, "|")
-	if len(splitValue) != len(splitInput) {
-		return false
-	}
-	for _, v := range splitInput {
-		if !containsArray(splitValue, v) {
+	if (inputType == Multiselect) {
+		splitInput := strings.Split(input, "|")
+		splitValue := strings.Split(value, "|")
+		if (len(splitValue) != len(splitInput)) {
+			return false
+		}
+		for _, v := range splitInput {
+			if !containsArray(splitValue, v) {
+				return false
+			}
+		}
+	} else {
+		if !(strings.ToLower(value) == strings.ToLower(input)) {
 			return false
 		}
 	}

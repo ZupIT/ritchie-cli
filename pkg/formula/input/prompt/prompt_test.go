@@ -33,6 +33,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
 
 func TestInputManager(t *testing.T) {
@@ -689,15 +690,19 @@ func TestMultiselect(t *testing.T) {
 	}
 }
 
-func TestContainsConditionalInputs(t *testing.T) {
+func TestContainsConditionalInputsMultiselect(t *testing.T) {
+	type TestResults struct {
+		error 				error
+		conditionalResult 	bool
+	}
 	tests := []struct {
 		name             string
 		inputJSON        string
 		multiselectValue []string
-		want             error
+		want             TestResults
 	}{
 		{
-			name: "success: multiselect input test with conditional containsAny",
+			name: "[containsAny] SUCCESS: multiselect input contains the conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -725,10 +730,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             nil,
+			want:             TestResults{nil,true},
 		},
 		{
-			name: "fail: multiselect input test with conditional containsAny",
+			name: "[containsAny] FAIL: multiselect input does not contain any the conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -756,10 +761,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_4"},
-			want:             nil,
+			want:             TestResults{nil,false},
 		},
 		{
-			name: "success: multiselect input test with conditional containsAll",
+			name: "[containsAll] SUCCESS: multiselect input contains all conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -787,10 +792,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3", "item_4"},
-			want:             nil,
+			want:             TestResults{nil,true},
 		},
 		{
-			name: "fail: multiselect input test with conditional containsAll",
+			name: "[containsAll] FAIL: multiselect input does not contain all conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -818,10 +823,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             nil,
+			want:             TestResults{nil,false},
 		},
 		{
-			name: "success: multiselect input test with conditional containsOnly",
+			name: "[containsOnly] SUCCESS: multiselect input contains only conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -849,10 +854,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2"},
-			want:             nil,
+			want:             TestResults{nil,true},
 		},
 		{
-			name: "fail: multiselect input test with conditional containsOnly",
+			name: "[containsOnly] FAIL: multiselect input does not contain only conditional values and they are not the same size",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -880,10 +885,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             nil,
+			want:             TestResults{nil,false},
 		},
 		{
-			name: "fail: multiselect input test with conditional containsOnly",
+			name: "[containsOnly] FAIL: multiselect input does not contain only conditional values and they are the same size",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -911,10 +916,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_3"},
-			want:             nil,
+			want:             TestResults{nil,false},
 		},
 		{
-			name: "success: multiselect input test with conditional notContainsAny",
+			name: "[notContainsAny] SUCCESS: multiselect input does not contain any of the conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -942,10 +947,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2"},
-			want:             nil,
+			want:             TestResults{nil,true},
 		},
 		{
-			name: "fail: multiselect input test with conditional notContainsAny",
+			name: "[notContainsAny] FAIL: multiselect input contains any of the conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -973,10 +978,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_3", "item_4"},
-			want:             nil,
+			want:             TestResults{nil,false},
 		},
 		{
-			name: "success: multiselect input test with conditional notContainsAll",
+			name: "[notContainsAll] SUCCESS: multiselect input only contains one of the conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -1004,10 +1009,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3", "item_4"},
-			want:             nil,
+			want:             TestResults{nil,true},
 		},
 		{
-			name: "success: multiselect input test with conditional notContainsAll",
+			name: "[notContainsAll] SUCCESS: multiselect input does not contain any of the conditional values",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -1035,10 +1040,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3"},
-			want:             nil,
+			want:             TestResults{nil,true},
 		},
 		{
-			name: "fail: multiselect input test with conditional notContainsAll",
+			name: "[notContainsAll] FAIL: multiselect input contains all the conditional values and they are the same size",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -1066,10 +1071,10 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3", "item_4"},
-			want:             nil,
+			want:             TestResults{nil,false},
 		},
 		{
-			name: "fail: multiselect input test with conditional notContainsAll",
+			name: "[notContainsAll] FAIL: multiselect input contains all the conditional values and they are not the same size",
 			inputJSON: `[
 					{
 						"name": "sample_multiselect",
@@ -1097,7 +1102,7 @@ func TestContainsConditionalInputs(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_4"},
-			want:             nil,
+			want:             TestResults{nil,false},
 		},
 	}
 
@@ -1130,9 +1135,394 @@ func TestContainsConditionalInputs(t *testing.T) {
 			)
 
 			cmd := &exec.Cmd{}
-			got := inputManager.Inputs(cmd, setup, nil)
 
-			assert.Equal(t, tt.want, got)
+			got := inputManager.Inputs(cmd, setup, nil)
+			result, _ := input.VerifyConditional(cmd, inputs[1])
+
+			assert.Equal(t, tt.want.error, got)
+			assert.Equal(t, tt.want.conditionalResult, result)
+		})
+	}
+}
+
+func TestContainsConditionalInputsString(t *testing.T) {
+	type TestResults struct {
+		error 				error
+		conditionalResult 	bool
+	}
+	tests := []struct {
+		name             string
+		inputJSON        string
+		textValue        string
+		want             TestResults
+	}{
+		{
+			name: "[containsAny] SUCCESS: text input contains the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAny",
+							"value":    "input_2|input_3"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,true},
+			textValue: 			"input_1,input_2,input_3",
+		},
+		{
+			name: "[containsAny] FAIL: text input does not contain any the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAny",
+							"value":    "input_2|input_3"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,false},
+			textValue: 			"input_1,input_4",
+		},
+		{
+			name: "[containsAll] SUCCESS: text input contains all conditional substrings values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAll",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,true},
+			textValue: 			"input_1,input_2,input_3,input_4",
+		},
+		{
+			name: "[containsAll] FAIL: text input does not contain all conditional sbustring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAll",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,false},
+			textValue: 			"input_1,input_2,input_3",
+		},
+		{
+			name: "[containsOnly] SUCCESS: text input contains only conditional substring value",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsOnly",
+							"value":    "input_1"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,true},
+			textValue: 			"input_1",
+		},
+		{
+			name: "[containsOnly] FAIL: text input does not contain only conditional substring value",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsOnly",
+							"value":    "input_1"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,false},
+			textValue: 			"input_1,input_2",
+		},
+		{
+			name: "[notContainsAny] SUCCESS: text input does not contain any of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAny",
+							"value":    "input_3|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,true},
+			textValue: 			"input_1,input_2",
+		},
+		{
+			name: "[notContainsAny] FAIL: text input contains any of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAny",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,false},
+			textValue: 			"input_3,input_4",
+		},
+		{
+			name: "[notContainsAll] SUCCESS: text input only contains one of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAll",
+							"value":    "input_1|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,true},
+			textValue: 			"input_2,input_3,input_4",
+		},
+		{
+			name: "[notContainsAll] SUCCESS: text input does not contain any of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAll",
+							"value":    "input_1|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,true},
+			textValue: 			"input_2,input_3",
+		},
+		{
+			name: "[notContainsAll] FAIL: text input contains all the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAll",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:             	TestResults{nil,false},
+			textValue: 			"input_2,input_3,input_4",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(tt.inputJSON), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.textValue, nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", nil)
+
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				iList,
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
+				iTextDefault,
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+			)
+
+			cmd := &exec.Cmd{}
+
+			got := inputManager.Inputs(cmd, setup, nil)
+			result, _ := input.VerifyConditional(cmd, inputs[1])
+
+			assert.Equal(t, tt.want.error, got)
+			assert.Equal(t, tt.want.conditionalResult, result)
 		})
 	}
 }
