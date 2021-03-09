@@ -54,6 +54,7 @@ type createFormulaCmd struct {
 	inText          prompt.InputText
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
+	inPath          prompt.InputPath
 	template        template.Manager
 	tutorial        rtutorial.Finder
 	tree            formula.TreeChecker
@@ -68,6 +69,7 @@ func NewCreateFormulaCmd(
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
+	inPath prompt.InputPath,
 	rtf rtutorial.Finder,
 	treeChecker formula.TreeChecker,
 ) *cobra.Command {
@@ -78,6 +80,7 @@ func NewCreateFormulaCmd(
 		inText:          inText,
 		inTextValidator: inTextValidator,
 		inList:          inList,
+		inPath:          inPath,
 		template:        tplM,
 		tutorial:        rtf,
 		tree:            treeChecker,
@@ -123,7 +126,7 @@ func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText)
+		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText, c.inPath)
 		if err != nil {
 			return err
 		}
@@ -282,6 +285,7 @@ func FormulaWorkspaceInput(
 	workspaces formula.Workspaces,
 	inList prompt.InputList,
 	inText prompt.InputText,
+	inPath prompt.InputPath,
 ) (formula.Workspace, error) {
 	items := make([]string, 0, len(workspaces))
 	for k, v := range workspaces {
@@ -304,7 +308,7 @@ func FormulaWorkspaceInput(
 			return formula.Workspace{}, err
 		}
 
-		workspacePath, err = inText.Text("Workspace path (e.g.: /home/user/github):", true)
+		workspacePath, err = inPath.Read("Workspace path (e.g.: /home/user/github): ")
 		if err != nil {
 			return formula.Workspace{}, err
 		}
