@@ -80,6 +80,11 @@ type FileNewListMoveRemover interface {
 	FileNewLister
 }
 
+type FileListMover interface {
+	FileLister
+	FileMover
+}
+
 type FileCopyExistListerWriter interface {
 	FileLister
 	FileCopier

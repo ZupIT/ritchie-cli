@@ -71,7 +71,6 @@ func TestRun(t *testing.T) {
 		preRun        formula.PreRunner
 		inputResolver formula.InputResolver
 		env           env.Finder
-		fileManager   stream.FileWriteExistAppendRemover
 	}
 
 	type out struct {
@@ -89,7 +88,6 @@ func TestRun(t *testing.T) {
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
 				inputResolver: inputResolver,
-				fileManager:   fileManager,
 				env:           envFinder,
 			},
 			out: out{
@@ -102,7 +100,6 @@ func TestRun(t *testing.T) {
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
 				inputResolver: inputResolverMock{err: runner.ErrInputNotRecognized},
-				fileManager:   fileManager,
 				env:           envFinder,
 			},
 			out: out{
@@ -115,37 +112,10 @@ func TestRun(t *testing.T) {
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunnerMock{err: errors.New("pre runner error")},
 				inputResolver: inputResolver,
-				fileManager:   fileManager,
 				env:           envFinder,
 			},
 			out: out{
 				err: errors.New("pre runner error"),
-			},
-		},
-		{
-			name: "run docker write .env error",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				inputResolver: inputResolver,
-				fileManager:   fileManagerMock{wErr: errors.New("error to write env file")},
-				env:           envFinder,
-			},
-			out: out{
-				err: errors.New("error to write env file"),
-			},
-		},
-		{
-			name: "Run docker append .env error",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				inputResolver: inputResolver,
-				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				env:           envFinder,
-			},
-			out: out{
-				err: errors.New("error to append env file"),
 			},
 		},
 		{
@@ -154,7 +124,6 @@ func TestRun(t *testing.T) {
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
 				inputResolver: inputResolver,
-				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
 				env:           envFinderMock{err: errors.New("env not found")},
 			},
 			out: out{
@@ -170,7 +139,7 @@ func TestRun(t *testing.T) {
 			_ = os.Chdir(formulaPath)
 
 			in := tt.in
-			docker := NewRunner(in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
+			docker := NewRunner(homeDir, in.inputResolver, in.preRun, in.env)
 			got := docker.Run(in.def, api.Prompt, false, nil)
 
 			if got != nil || tt.out.err != nil {

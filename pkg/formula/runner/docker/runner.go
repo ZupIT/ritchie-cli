@@ -18,9 +18,11 @@ package docker
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
@@ -29,7 +31,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -40,24 +41,21 @@ const (
 var _ formula.Runner = RunManager{}
 
 type RunManager struct {
+	homeDir string
+	env     env.Finder
 	formula.InputResolver
 	formula.PreRunner
-	file    stream.FileWriteExistAppendRemover
-	env     env.Finder
-	homeDir string
 }
 
 func NewRunner(
+	homeDir string,
 	input formula.InputResolver,
 	preRun formula.PreRunner,
-	file stream.FileWriteExistAppendRemover,
 	env env.Finder,
-	homeDir string,
 ) formula.Runner {
 	return RunManager{
 		InputResolver: input,
 		PreRunner:     preRun,
-		file:          file,
 		env:           env,
 		homeDir:       homeDir,
 	}
@@ -70,7 +68,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	}
 
 	defer func() {
-		if err := ru.file.Remove(envFile); err != nil {
+		if err := os.Remove(envFile); err != nil {
 			return
 		}
 	}()
@@ -157,16 +155,14 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
 	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv, env)
 
-	for _, e := range cmd.Env { // Create a file named .envHolder and add the environment variable inName=inValue
-		if !ru.file.Exists(envFile) {
-			if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
-				return err
-			}
-			continue
-		}
-		if err := ru.file.Append(envFile, []byte(e+"\n")); err != nil {
-			return err
-		}
+	envs := strings.Builder{}
+	for _, e := range cmd.Env {
+		envs.WriteString(e + "\n")
+	}
+
+	// Create a file named .env and add the environment variable inName=inValue
+	if err := ioutil.WriteFile(envFile, []byte(envs.String()), os.ModePerm); err != nil {
+		return err
 	}
 
 	return nil
