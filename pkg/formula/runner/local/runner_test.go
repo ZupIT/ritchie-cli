@@ -24,6 +24,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -46,6 +47,9 @@ func TestRun(t *testing.T) {
 	defer os.Remove("test.txt")
 	defer os.RemoveAll(ritHome)
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	makeBuilder := builder.NewBuildMake()
 	batBuilder := builder.NewBuildBat(fileManager)
 	shellBuilder := builder.NewBuildShell()
@@ -59,7 +63,7 @@ func TestRun(t *testing.T) {
 	envFinder := env.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
 
-	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{})
+	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{}, inPath)
 	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
 	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
 

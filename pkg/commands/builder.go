@@ -83,6 +83,7 @@ func Build() *cobra.Command {
 	inputList := prompt.NewSurveyList()
 	inputURL := prompt.NewSurveyURL()
 	inputMultiselect := prompt.NewSurveyMultiselect()
+	inputAutocomplete := prompt.NewInputAutocomplete()
 
 	// deps
 	fileManager := stream.NewFileManager()
@@ -142,7 +143,7 @@ func Build() *cobra.Command {
 	formBuildDocker := builder.NewBuildDocker(fileManager)
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 
-	promptInManager := fprompt.NewInputManager(credResolver, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect)
+	promptInManager := fprompt.NewInputManager(credResolver, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect, inputAutocomplete)
 	stdinInManager := stdin.NewInputManager(credResolver)
 	flagInManager := flag.NewInputManager(credResolver)
 	termInputTypes := formula.TermInputTypes{
@@ -237,10 +238,10 @@ func Build() *cobra.Command {
 	autocompleteFish := cmd.NewAutocompleteFish(autocompleteGen)
 	autocompletePowerShell := cmd.NewAutocompletePowerShell(autocompleteGen)
 	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, repoDeleter, inputList, inputBool)
-	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, treeGen, fileManager)
-	addWorkspaceCmd := cmd.NewAddWorkspaceCmd(formulaWorkspace, inputText)
+	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, inputAutocomplete, treeGen, fileManager)
+	addWorkspaceCmd := cmd.NewAddWorkspaceCmd(formulaWorkspace, inputText, inputAutocomplete)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, tutorialFinder, treeChecker)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, inputAutocomplete, tutorialFinder, treeChecker)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)

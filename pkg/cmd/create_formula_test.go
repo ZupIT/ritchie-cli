@@ -174,6 +174,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
 
+			inPath := &mocks.InputPathMock{}
+			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
+
 			tutorialMock := new(mocks.TutorialFindSetterMock)
 			tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
 
@@ -188,6 +191,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inputTextMock,
 				inputTextValidatorMock,
 				inputListMock,
+				inPath,
 				tutorialMock,
 				treeMock,
 			)

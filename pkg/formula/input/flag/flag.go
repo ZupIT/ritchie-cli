@@ -59,7 +59,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		}
 
 		switch i.Type {
-		case input.TextType, input.PassType, input.DynamicType, input.ListType:
+		case input.TextType, input.PassType, input.DynamicType, input.ListType, input.PathType:
 			inputVal, err = flags.GetString(i.Name)
 			if err := validateItem(i, inputVal); err != nil {
 				return err
