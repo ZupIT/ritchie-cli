@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -39,49 +38,31 @@ func NewRepoManager(client *http.Client) RepoManager {
 
 func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	zipURL := info.ZipUrl(version)
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, zipURL, nil)
+	res, err := re.performRequest(info, zipURL)
 	if err != nil {
 		return nil, err
 	}
 
-	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, authToken)
+	if res.StatusCode != http.StatusOK {
+		defer res.Body.Close()
+		all, _ := ioutil.ReadAll(res.Body)
+		return nil, errors.New(res.Status + "-" + string(all))
 	}
 
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	resp, err := re.client.Do(req) //nolint:bodyclose
-	if err != nil {
-		return nil, err
-	}
-
-	return resp.Body, nil
+	return res.Body, nil
 }
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiURL := info.TagsUrl()
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiURL, nil)
-	if err != nil {
-		return git.Tags{}, err
-	}
-
-	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, authToken)
-	}
-
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	res, err := re.client.Do(req)
+	res, err := re.performRequest(info, apiURL)
 	if err != nil {
 		return git.Tags{}, err
 	}
 
 	defer res.Body.Close()
-
 	if res.StatusCode != http.StatusOK {
-		errorMessage := fmt.Sprintf("There was an error adding the repository,"+
-			" status: %d - %s.", res.StatusCode, http.StatusText(res.StatusCode))
-		return git.Tags{}, errors.New(errorMessage)
+		all, _ := ioutil.ReadAll(res.Body)
+		return git.Tags{}, errors.New(res.Status + "-" + string(all))
 	}
 
 	var tags git.Tags
@@ -94,29 +75,15 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	apiURL := info.LatestTagUrl()
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiURL, nil)
-	if err != nil {
-		return git.Tag{}, err
-	}
-
-	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.Authorization, authToken)
-	}
-
-	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
-	res, err := re.client.Do(req)
+	res, err := re.performRequest(info, apiURL)
 	if err != nil {
 		return git.Tag{}, err
 	}
 
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		b, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return git.Tag{}, err
-		}
-		return git.Tag{}, errors.New(string(b))
+		all, _ := ioutil.ReadAll(res.Body)
+		return git.Tag{}, errors.New(res.Status + "-" + string(all))
 	}
 
 	githubTag := struct {
@@ -131,4 +98,24 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 		Description: githubTag.ReleaseDescription,
 	}
 	return tag, nil
+}
+
+func (re RepoManager) performRequest(info git.RepoInfo, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if info.Token() != "" {
+		authToken := info.TokenHeader()
+		req.Header.Add(headers.Authorization, authToken)
+	}
+
+	req.Header.Add(headers.Accept, "application/vnd.github.v3+json")
+	res, err := re.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

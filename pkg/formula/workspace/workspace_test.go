@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -60,6 +61,14 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 			workspace: formula.Workspace{
 				Name: "zup",
 				Dir:  fullDir,
+			},
+		},
+		{
+			name:          "success create with trailing separator",
+			workspacePath: tmpDir,
+			workspace: formula.Workspace{
+				Name: "zup2",
+				Dir:  fullDir + string(filepath.Separator),
 			},
 		},
 		{
@@ -102,7 +111,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			localBuilder := &mocks.LocalBuilderMock{}
-			localBuilder.On("Init", tt.workspace.Dir, tt.workspace.Name).Return("", nil)
+			localBuilder.On("Init", mock.AnythingOfType("string"), tt.workspace.Name).Return("", nil)
 
 			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
 			got := workspace.Add(tt.workspace)
@@ -118,7 +127,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 				err = json.Unmarshal(file, &workspaces)
 				assert.NoError(t, err)
 				pathName := workspaces[tt.workspace.Name]
-				assert.Equal(t, tt.workspace.Dir, pathName)
+				assert.Contains(t, tt.workspace.Dir, pathName)
 			}
 		})
 	}

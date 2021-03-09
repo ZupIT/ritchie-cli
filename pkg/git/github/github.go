@@ -69,7 +69,7 @@ func (in DefaultRepoInfo) LatestTagUrl() string { //nolint:stylecheck
 }
 
 // TokenHeader returns the Authorization value formatted for Github API integration
-// e.g. "token f39c5aca-858f-4a04-9ca3-5104d02b9c56"
+// e.g. "token some_token"
 func (in DefaultRepoInfo) TokenHeader() string {
 	return fmt.Sprintf("token %s", in.token)
 }

@@ -62,6 +62,7 @@ type (
 		inBool         prompt.InputBool
 		inText         prompt.InputText
 		inList         prompt.InputList
+		inPath         prompt.InputPath
 		treeGen        formula.TreeGenerator
 		fileManager    stream.FileWriteRemover
 	}
@@ -75,6 +76,7 @@ func NewDeleteFormulaCmd(
 	inBool prompt.InputBool,
 	inText prompt.InputText,
 	inList prompt.InputList,
+	inPath prompt.InputPath,
 	treeGen formula.TreeGenerator,
 	fileManager stream.FileWriteRemover,
 ) *cobra.Command {
@@ -86,6 +88,7 @@ func NewDeleteFormulaCmd(
 		inBool,
 		inText,
 		inList,
+		inPath,
 		treeGen,
 		fileManager,
 	}
@@ -109,7 +112,7 @@ func (d deleteFormulaCmd) runPrompt() CommandRunnerFunc {
 			return err
 		}
 
-		wspace, err := FormulaWorkspaceInput(workspaces, d.inList, d.inText)
+		wspace, err := FormulaWorkspaceInput(workspaces, d.inList, d.inText, d.inPath)
 		if err != nil {
 			return err
 		}
