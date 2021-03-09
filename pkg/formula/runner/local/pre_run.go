@@ -18,6 +18,7 @@ package local
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -27,6 +28,7 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -71,6 +73,10 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 
 	config, err := pr.loadConfig(formulaPath, def)
 	if err != nil {
+		return formula.Setup{}, err
+	}
+
+	if err := pr.checksLatestVersionCompliance(config.RequireLatestVersion, def.RepoName); err != nil {
 		return formula.Setup{}, err
 	}
 
@@ -163,4 +169,17 @@ func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Defi
 	}
 
 	return tDir, nil
+}
+
+func (pr PreRunManager) checksLatestVersionCompliance(requireLatestVersion bool, repoName string) error {
+	if requireLatestVersion {
+		repoLister := repo.NewLister(pr.ritchieHome, pr.file)
+		repos, _ := repoLister.List()
+		repo, _ := repos.Get(repoName)
+		if repo.Version.String() != repo.LatestVersion.String() {
+			return errors.New("Version of repo installed not is the latest version avaliable, Please update the repo to run this formula.")
+		}
+	}
+
+	return nil
 }
