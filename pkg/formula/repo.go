@@ -17,6 +17,7 @@
 package formula
 
 import (
+	"errors"
 	"sort"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
@@ -25,14 +26,15 @@ import (
 const RepoCommonsName = RepoName("commons")
 
 type Repo struct {
-	Provider    RepoProvider `json:"provider"`
-	Name        RepoName     `json:"name"`
-	Version     RepoVersion  `json:"version"`
-	Url         string       `json:"url"`
-	Token       string       `json:"token,omitempty"`
-	Priority    int          `json:"priority"`
-	IsLocal     bool         `json:"isLocal"`
-	TreeVersion string       `json:"tree_version"`
+	Provider      RepoProvider `json:"provider"`
+	Name          RepoName     `json:"name"`
+	Version       RepoVersion  `json:"version"`
+	Url           string       `json:"url"`
+	Token         string       `json:"token,omitempty"`
+	Priority      int          `json:"priority"`
+	IsLocal       bool         `json:"isLocal"`
+	TreeVersion   string       `json:"tree_version"`
+	LatestVersion RepoVersion  `json:"latest_version"`
 }
 
 func (r Repo) EmptyVersion() bool {
@@ -51,6 +53,15 @@ func (r Repos) Less(i, j int) bool {
 
 func (r Repos) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
+}
+
+func (r Repos) Get(name string) (Repo, error) {
+	for _, repo := range r {
+		if repo.Name.String() == name {
+			return repo, nil
+		}
+	}
+	return Repo{}, errors.New("Repo with name: " + name + " not found")
 }
 
 type RepoName string
