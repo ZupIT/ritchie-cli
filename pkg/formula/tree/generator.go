@@ -30,6 +30,7 @@ import (
 const (
 	root       = "root"
 	configFile = "config.json"
+	FileName   = "tree.json"
 	Version    = "v2"
 )
 

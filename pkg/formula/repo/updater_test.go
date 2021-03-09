@@ -17,310 +17,299 @@
 package repo
 
 import (
+	"encoding/json"
 	"errors"
-	"strings"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/git"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 func TestUpdateManager_Update(t *testing.T) {
+	ritHome := filepath.Join(os.TempDir(), ".rit_update_repo")
 
 	type in struct {
-		ritHome string
-		repo    formula.RepositoryListWriteCreator
-		tree    formula.TreeGenerator
-		file    stream.FileWriter
-		name    formula.RepoName
-		version formula.RepoVersion
+		ritHome       string
+		repo          formula.Repo
+		mock          bool
+		latestTag     string
+		createRepoErr error
+		listRepos     formula.Repos
+		listRepoErr   error
+		writeRepoErr  error
+		deleteRepoErr error
+		treeGen       formula.Tree
+		treeGenErr    error
 	}
+
 	tests := []struct {
-		name    string
-		in      in
-		wantErr bool
+		name string
+		in   in
+		want error
 	}{
 		{
-			name: "Return err when listRepos fail",
+			name: "success",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{}, errors.New("some error")
-					},
+				ritHome: ritHome,
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Url:      "https://github.com/ZupIT/ritchie-cli",
+					Priority: 0,
 				},
-				tree:    treeGeneratorCustomMock{},
-				file:    FileWriteCreatorReadExistRemover{},
-				name:    "any_name",
-				version: "any_version",
 			},
-			wantErr: true,
 		},
 		{
-			name: "Return err when listRepos is empty",
+			name: "error to list repos",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name: "any_repo",
-							},
-						}, nil
-					},
+				ritHome: ritHome,
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Url:      "https://github.com/ZupIT/ritchie-cli",
+					Priority: 0,
 				},
-				tree:    treeGeneratorCustomMock{},
-				file:    FileWriteCreatorReadExistRemover{},
-				name:    "not_a_repo_added_name",
-				version: "any_version",
+				listRepoErr: errors.New("error to list repos"),
+				mock:        true,
 			},
-			wantErr: true,
+			want: errors.New("error to list repos"),
 		},
 		{
-			name: "Return err when Create fail",
+			name: "repository not found",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name: "any_repo",
-							},
-						}, nil
-					},
-					create: func(repo formula.Repo) error {
-						return errors.New("some error")
-					},
+				ritHome: ritHome,
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Url:      "https://github.com/ZupIT/ritchie-cli",
+					Priority: 0,
 				},
-				tree:    treeGeneratorCustomMock{},
-				file:    FileWriteCreatorReadExistRemover{},
-				name:    "any_repo",
-				version: "any_version",
+				listRepos: formula.Repos{},
+				mock:      true,
 			},
-			wantErr: true,
+			want: errors.New("repository name \"default\" was not found"),
 		},
 		{
-			name: "Return err when write repo fail",
+			name: "error local repo",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name: "any_repo",
-							},
-						}, nil
-					},
-					create: func(repo formula.Repo) error {
-						return nil
-					},
-					write: func(repos formula.Repos) error {
-						return errors.New("some error")
+				ritHome: ritHome,
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Priority: 0,
+					IsLocal:  true,
+				},
+				listRepos: formula.Repos{
+					formula.Repo{
+						Name:    "default",
+						IsLocal: true,
 					},
 				},
-				tree: treeGeneratorCustomMock{
-					generate: func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
-					},
-				},
-				file: FileWriteCreatorReadExistRemover{
-					write: func(path string, content []byte) error {
-						return nil
-					},
-				},
-				name:    "any_repo",
-				version: "any_version",
+				mock: true,
 			},
-			wantErr: true,
+			want: ErrLocalRepo,
 		},
 		{
-			name: "Return err when try update a local repo",
+			name: "error to create repo",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name:    "any_repo",
-								IsLocal: true,
-							},
-						}, nil
+				ritHome: ritHome,
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Priority: 0,
+				},
+				listRepos: formula.Repos{
+					formula.Repo{
+						Name: "default",
 					},
 				},
-				name:    "any_repo",
-				version: "any_version",
+				latestTag:     "3.0.0",
+				createRepoErr: errors.New("error to create repo"),
+				mock:          true,
 			},
-			wantErr: true,
+			want: errors.New("error to create repo"),
 		},
 		{
-			name: "Return err when write fail",
+			name: "error to write repo",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name: "any_repo",
-							},
-						}, nil
-					},
-					create: func(repo formula.Repo) error {
-						return nil
-					},
-					write: func(repos formula.Repos) error {
-						return nil
+				ritHome: ritHome,
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Priority: 0,
+				},
+				listRepos: formula.Repos{
+					formula.Repo{
+						Name: "default",
 					},
 				},
-				tree: treeGeneratorCustomMock{
-					generate: func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
-					},
-				},
-				file: FileWriteCreatorReadExistRemover{
-					write: func(path string, content []byte) error {
-						return errors.New("some error")
-					},
-				},
-				name:    "any_repo",
-				version: "any_version",
+				latestTag:    "3.0.0",
+				writeRepoErr: errors.New("error to write repo"),
+				mock:         true,
 			},
-			wantErr: true,
+			want: errors.New("error to write repo"),
 		},
 		{
-			name: "Return err when generate fail",
+			name: "error to generate tree.json",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name: "any_repo",
-							},
-						}, nil
-					},
-					create: func(repo formula.Repo) error {
-						return nil
-					},
-					write: func(repos formula.Repos) error {
-						return nil
+				ritHome: ritHome,
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Priority: 0,
+				},
+				listRepos: formula.Repos{
+					formula.Repo{
+						Name: "default",
 					},
 				},
-				tree: treeGeneratorCustomMock{
-					generate: func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, errors.New("some error")
-					},
-				},
-				file: FileWriteCreatorReadExistRemover{
-					write: func(path string, content []byte) error {
-						return nil
-					},
-				},
-				name:    "any_repo",
-				version: "any_version",
+				latestTag:  "3.0.0",
+				treeGenErr: errors.New("error to generate tree"),
+				mock:       true,
 			},
-			wantErr: true,
+			want: errors.New("error to generate tree"),
 		},
 		{
-			name: "Return err when fail to write tree",
+			name: "error to write tree.json",
 			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name: "any_repo",
-							},
-						}, nil
-					},
-					create: func(repo formula.Repo) error {
-						return nil
-					},
-					write: func(repos formula.Repos) error {
-						return nil
+				ritHome: "invalid",
+				repo: formula.Repo{
+					Provider: "Github",
+					Name:     "default",
+					Version:  "3.0.0",
+					Url:      "https://github.com/ZupIT/ritchie-cli",
+					Priority: 0,
+				},
+				mock:      true,
+				latestTag: "2.0.0",
+				listRepos: formula.Repos{
+					formula.Repo{
+						Name: "default",
 					},
 				},
-				tree: treeGeneratorCustomMock{
-					generate: func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
+				treeGen: formula.Tree{
+					Commands: api.Commands{
+						"root_test": api.Command{},
 					},
 				},
-				file: FileWriteCreatorReadExistRemover{
-					write: func(path string, content []byte) error {
-						if strings.Contains(path, "tree.json") {
-							return errors.New("some error")
-						}
-						return nil
-					},
-				},
-				name:    "any_repo",
-				version: "any_version",
 			},
-			wantErr: true,
-		},
-		{
-			name: "Run with success",
-			in: in{
-				ritHome: "",
-				repo: repoListWriteCreatorMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name: "any_repo",
-							},
-						}, nil
-					},
-					create: func(repo formula.Repo) error {
-						return nil
-					},
-					write: func(repos formula.Repos) error {
-						return nil
-					},
-				},
-				tree: treeGeneratorCustomMock{
-					generate: func(repoPath string) (formula.Tree, error) {
-						return formula.Tree{}, nil
-					},
-				},
-				file: FileWriteCreatorReadExistRemover{
-					write: func(path string, content []byte) error {
-						return nil
-					},
-				},
-				name:    "any_repo",
-				version: "any_version",
-			},
-			wantErr: false,
+			want: errors.New("open invalid/repos/default/tree.json: no such file or directory"),
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			up := NewUpdater(
-				tt.in.ritHome,
-				tt.in.repo,
-				tt.in.tree,
-				tt.in.file,
-			)
-			if err := up.Update(tt.in.name, tt.in.version); (err != nil) != tt.wantErr {
-				t.Errorf("Update() error = %v, wantErr %v", err, tt.wantErr)
+			repoPath := filepath.Join(ritHome, "repos", tt.in.repo.Name.String())
+			var repoAdder formula.RepositoryUpdater
+			if !tt.in.mock {
+				repoAdder = updateRepoSetup(ritHome, repoPath)
+				defer os.RemoveAll(ritHome)
+			} else {
+				repoManagerMock := &mocks.RepoManager{}
+				repoManagerMock.On("LatestTag", mock.Anything).Return(tt.in.latestTag)
+				repoManagerMock.On("Create", mock.Anything).Return(tt.in.createRepoErr)
+				repoManagerMock.On("List").Return(tt.in.listRepos, tt.in.listRepoErr)
+				repoManagerMock.On("Write", mock.Anything).Return(tt.in.writeRepoErr)
+				repoManagerMock.On("Delete", mock.Anything).Return(tt.in.deleteRepoErr)
+
+				treeManager := &mocks.TreeManager{}
+				treeManager.On("Generate", mock.Anything).Return(tt.in.treeGen, tt.in.treeGenErr)
+
+				repoAdder = NewUpdater(tt.in.ritHome, repoManagerMock, treeManager)
+			}
+
+			got := repoAdder.Update(tt.in.repo.Name, tt.in.repo.Version)
+
+			if got != nil {
+				assert.EqualError(t, tt.want, got.Error())
+			} else {
+				assert.Nil(t, tt.want)
+			}
+
+			if !tt.in.mock {
+				reposPath := filepath.Join(ritHome, "repos", "repositories.json")
+				file, _ := ioutil.ReadFile(reposPath)
+
+				var repos formula.Repos
+				_ = json.Unmarshal(file, &repos)
+				repo := repos[0]
+				expectRepo := tt.in.repo
+
+				assert.Equal(t, expectRepo.Provider, repo.Provider)
+				assert.Equal(t, expectRepo.Name, repo.Name)
+				assert.Equal(t, expectRepo.Version, repo.Version)
+				assert.Equal(t, expectRepo.Url, repo.Url)
+				assert.Equal(t, expectRepo.Priority, repo.Priority)
+				assert.Equal(t, "v2", repo.TreeVersion)
+				assert.Equal(t, formula.RepoVersion("3.0.0"), repo.LatestVersion)
+				assert.NotEmpty(t, repo.Cache)
+				assert.FileExists(t, reposPath)
+				assert.FileExists(t, filepath.Join(repoPath, "tree.json"))
 			}
 		})
 	}
 }
 
-type repoListWriteCreatorMock struct {
-	create func(repo formula.Repo) error
-	list   func() (formula.Repos, error)
-	write  func(repos formula.Repos) error
-}
+func updateRepoSetup(ritHome, repoPath string) formula.RepositoryUpdater {
+	_ = os.MkdirAll(filepath.Join(repoPath, "test", "test"), os.ModePerm)
+	_ = ioutil.WriteFile(filepath.Join(repoPath, "test", "help.json"), []byte("{}"), os.ModePerm)
 
-func (m repoListWriteCreatorMock) Create(repo formula.Repo) error {
-	return m.create(repo)
-}
+	defaultRepos := formula.Repos{
+		{
+			Provider:      "Github",
+			Name:          "default",
+			Version:       "1.0.0",
+			Url:           "https://github.com/ZupIT/ritchie-cli",
+			Priority:      0,
+			TreeVersion:   "v2",
+			LatestVersion: "3.0.0",
+			Cache:         time.Now().Add(time.Hour),
+		},
+	}
 
-func (m repoListWriteCreatorMock) List() (formula.Repos, error) {
-	return m.list()
-}
+	bytes, _ := json.Marshal(defaultRepos)
+	reposPath := filepath.Join(ritHome, "repos", "repositories.json")
+	_ = ioutil.WriteFile(reposPath, bytes, os.ModePerm)
 
-func (m repoListWriteCreatorMock) Write(repos formula.Repos) error {
-	return m.write(repos)
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	repoProviders := formula.NewRepoProviders()
+
+	githubRepo := &mocks.GitRepositoryMock{}
+	githubRepo.On("LatestTag", mock.Anything).Return(git.Tag{Name: "3.0.0"}, nil)
+
+	gitProvider := formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo}
+	repoProviders.Add("Github", gitProvider)
+
+	repoCreator := &mocks.RepoManager{}
+	repoCreator.On("Create", mock.Anything).Return(nil)
+
+	repoLister := NewLister(ritHome, fileManager)
+	repoWriter := NewWriter(ritHome, fileManager)
+	repoDetail := NewDetail(repoProviders)
+	repoListWriter := NewListWriter(repoLister, repoWriter)
+	repoDeleter := NewDeleter(ritHome, repoListWriter, dirManager)
+	repoManager := NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+	treeGen := tree.NewGenerator(dirManager, fileManager)
+
+	return NewUpdater(ritHome, repoManager, treeGen)
 }

@@ -18,20 +18,26 @@ package repo
 
 import "github.com/ZupIT/ritchie-cli/pkg/formula"
 
-type ListWriteCreateManager struct {
+type CreateWriteListDetailDeleter struct {
 	formula.RepositoryLister
 	formula.RepositoryCreator
 	formula.RepositoryWriter
+	formula.RepositoryDetail
+	formula.RepositoryDeleter
 }
 
-func NewListWriteCreator(
+func NewCreateWriteListDetailDeleter(
 	repoList formula.RepositoryLister,
 	repoCreate formula.RepositoryCreator,
 	repoWrite formula.RepositoryWriter,
-) formula.RepositoryListWriteCreator {
-	return ListWriteCreateManager{
+	repoDetail formula.RepositoryDetail,
+	repoDeleter formula.RepositoryDeleter,
+) formula.RepositoryCreateWriteListDetailDeleter {
+	return CreateWriteListDetailDeleter{
 		RepositoryLister:  repoList,
 		RepositoryCreator: repoCreate,
 		RepositoryWriter:  repoWrite,
+		RepositoryDetail:  repoDetail,
+		RepositoryDeleter: repoDeleter,
 	}
 }

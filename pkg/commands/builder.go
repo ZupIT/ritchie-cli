@@ -106,17 +106,16 @@ func Build() *cobra.Command {
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
 	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
-	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
-	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListWriteCreator, treeGen, fileManager)
-	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
-
+	repoDetail := repo.NewDetail(repoProviders)
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, repoDeleter, treeGen, fileManager)
+	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListWriteCreator, treeGen)
+	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
+
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen)
 	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
 	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
-
-	detailRepo := repo.NewDetail(repoProviders)
 
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
 	envFinder := env.NewFinder(ritchieHomeDir, fileManager)
@@ -228,10 +227,10 @@ func Build() *cobra.Command {
 	deleteEnvCmd := cmd.NewDeleteEnvCmd(envFindRemover, inputBool, inputList)
 	setEnvCmd := cmd.NewSetEnvCmd(envFindSetter, inputText, inputList)
 	showEnvCmd := cmd.NewShowEnvCmd(envFinder)
-	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, detailRepo)
+	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, inputTextValidator, inputPassword, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, repoDetail)
 
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
-	listRepoCmd := cmd.NewListRepoCmd(repoLister, repoProviders, tutorialFinder, detailRepo)
+	listRepoCmd := cmd.NewListRepoCmd(repoLister, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, repoDeleter)
 	listWorkspaceCmd := cmd.NewListWorkspaceCmd(formulaWorkspace, tutorialFinder)
 	setPriorityCmd := cmd.NewSetPriorityCmd(inputList, inputInt, repoLister, repoPrioritySetter)
