@@ -39,26 +39,26 @@ import (
 var _ formula.Runner = RunManager{}
 
 type RunManager struct {
-	formula.InputResolver
-	formula.PreRunner
+	homeDir string
 	file    stream.FileListMover
 	env     env.Finder
-	homeDir string
+	formula.InputResolver
+	formula.PreRunner
 }
 
 func NewRunner(
-	input formula.InputResolver,
-	preRun formula.PreRunner,
+	homeDir string,
 	file stream.FileListMover,
 	env env.Finder,
-	homeDir string,
+	input formula.InputResolver,
+	preRun formula.PreRunner,
 ) formula.Runner {
 	return RunManager{
-		InputResolver: input,
-		PreRunner:     preRun,
+		homeDir:       homeDir,
 		file:          file,
 		env:           env,
-		homeDir:       homeDir,
+		InputResolver: input,
+		PreRunner:     preRun,
 	}
 }
 

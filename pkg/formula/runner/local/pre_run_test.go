@@ -256,12 +256,15 @@ func (di dirManagerMock) Remove(dir string) error {
 }
 
 type fileManagerMock struct {
-	rBytes []byte
-	rErr   error
-	wErr   error
-	aErr   error
-	exist  bool
-	remErr error
+	rBytes  []byte
+	rErr    error
+	wErr    error
+	aErr    error
+	exist   bool
+	remErr  error
+	movErr  error
+	files   []string
+	listErr error
 }
 
 func (fi fileManagerMock) Write(string, []byte) error {
@@ -282,6 +285,14 @@ func (fi fileManagerMock) Append(path string, content []byte) error {
 
 func (fi fileManagerMock) Remove(path string) error {
 	return fi.remErr
+}
+
+func (fi fileManagerMock) List(file string) ([]string, error) {
+	return fi.files, fi.listErr
+}
+
+func (fi fileManagerMock) Move(oldPath, newPath string, files []string) error {
+	return fi.movErr
 }
 
 const configJson = `{

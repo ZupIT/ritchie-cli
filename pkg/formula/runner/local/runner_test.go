@@ -74,7 +74,7 @@ func TestRun(t *testing.T) {
 		def           formula.Definition
 		preRun        formula.PreRunner
 		inputResolver formula.InputResolver
-		fileManager   stream.FileWriteExistAppendRemover
+		fileManager   stream.FileListMover
 		env           env.Finder
 	}
 
@@ -95,7 +95,19 @@ func TestRun(t *testing.T) {
 			want: nil,
 		},
 		{
-			name: "Input error local",
+			name: "success with a non default env",
+			in: in{
+				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				preRun:        preRunner,
+				inputResolver: inputResolver,
+				env: envFinderMock{env: env.Holder{
+					Current: "prod",
+				}},
+			},
+			want: nil,
+		},
+		{
+			name: "input error local",
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
@@ -106,7 +118,7 @@ func TestRun(t *testing.T) {
 			want: runner.ErrInputNotRecognized,
 		},
 		{
-			name: "Pre run error",
+			name: "pre run error",
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunnerMock{err: errors.New("pre runner error")},
@@ -122,30 +134,16 @@ func TestRun(t *testing.T) {
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
 				inputResolver: inputResolver,
-				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
 				env:           envFinderMock{err: errors.New("env not found")},
 			},
 			want: errors.New("env not found"),
-		},
-		{
-			name: "success with a non default env",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				inputResolver: inputResolver,
-				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				env: envFinderMock{env: env.Holder{
-					Current: "prod",
-				}},
-			},
-			want: nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
-			local := NewRunner(in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
+			local := NewRunner(homeDir, in.fileManager, in.env, in.inputResolver, in.preRun)
 			got := local.Run(in.def, api.Prompt, false, nil)
 
 			if tt.want != nil || got != nil {

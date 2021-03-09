@@ -154,7 +154,7 @@ func Build() *cobra.Command {
 	inputResolver := runner.NewInputResolver(termInputTypes)
 
 	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
-	formulaLocalRun := local.NewRunner(inputResolver, formulaLocalPreRun, fileManager, envFinder, userHomeDir)
+	formulaLocalRun := local.NewRunner(userHomeDir, fileManager, envFinder, inputResolver, formulaLocalPreRun)
 
 	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
 	formulaDockerRun := docker.NewRunner(userHomeDir, inputResolver, formulaDockerPreRun, envFinder)
