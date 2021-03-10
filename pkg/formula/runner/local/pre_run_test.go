@@ -275,7 +275,7 @@ func TestPreRun(t *testing.T) {
 		{
 			name: "local build success with latest version required and repository is updated",
 			in: in{
-				def: formula.Definition{Path: "testing/withLatestVersionRequiredAndOutdatedRepo", RepoName: "commonsOutdated"},
+				def: formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commonsOutdated"},
 				makeBuild: makeBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
@@ -305,13 +305,13 @@ func TestPreRun(t *testing.T) {
 		{
 			name: "local build failed with latest version required and repository is outdated",
 			in: in{
-				def:  formula.Definition{Path: "testing/withLatestVersionRequiredAndOutdatedRepo", RepoName: "commons"},
+				def:  formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commons"},
 				file: fileManager,
 				dir:  dirManager,
 			},
 			out: out{
 				wantErr: true,
-				err:     nil,
+				err:     errors.New("Version of repo installed not is the latest version available, please update the repo to run this formula."),
 			},
 		},
 	}

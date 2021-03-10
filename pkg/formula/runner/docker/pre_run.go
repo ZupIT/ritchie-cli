@@ -232,7 +232,7 @@ func (pr PreRunManager) checksLatestVersionCompliance(requireLatestVersion bool,
 		repos, _ := repoLister.List()
 		repo, _ := repos.Get(repoName)
 		if repo.Version.String() != repo.LatestVersion.String() {
-			return errors.New("Version of repo installed not is the latest version avaliable, Please update the repo to run this formula.")
+			return errors.New("Version of repo installed not is the latest version available, please update the repo to run this formula.")
 		}
 	}
 

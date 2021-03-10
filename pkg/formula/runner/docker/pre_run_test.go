@@ -37,18 +37,28 @@ func TestPreRun(t *testing.T) {
 	tmpDir := os.TempDir()
 	ritHomeName := ".rit-pre-run-docker"
 	ritHome := filepath.Join(tmpDir, ritHomeName)
-	repoPath := filepath.Join(ritHome, "repos", "commons")
+	reposPath := filepath.Join(ritHome, "repos")
+	repoPath := filepath.Join(reposPath, "commons")
+	repoPathOutdated := filepath.Join(reposPath, "commonsOutdated")
 	dockerBuilder := builder.NewBuildDocker(fileManager)
 
+	defer os.RemoveAll(ritHome)
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
 	_ = dirManager.Create(repoPath)
+	_ = dirManager.Remove(repoPathOutdated)
+	_ = dirManager.Create(repoPathOutdated)
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, repoPath)
+	_ = streams.Unzip(zipFile, repoPathOutdated)
+	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
+	_ = streams.Unzip(zipRepositories, reposPath)
 
 	var config, invalidConfig formula.Config
 	_ = json.Unmarshal([]byte(configJson), &config)
 	_ = json.Unmarshal([]byte(invalidConfigJson), &invalidConfig)
+	configWithLatestTagRequired := config
+	configWithLatestTagRequired.RequireLatestVersion = true
 
 	type in struct {
 		def         formula.Definition
@@ -187,6 +197,35 @@ func TestPreRun(t *testing.T) {
 			out: out{
 				wantErr: true,
 				err:     errors.New("error to copy dir"),
+			},
+		},
+		{
+			name: "local build success with latest version required and repository is updated",
+			in: in{
+				def:         formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commonsOutdated"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManager,
+			},
+			out: out{
+				want: formula.Setup{
+					Config: configWithLatestTagRequired,
+				},
+				wantErr: false,
+				err:     nil,
+			},
+		},
+		{
+			name: "local build failed with latest version required and repository is outdated",
+			in: in{
+				def:         formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManager,
+			},
+			out: out{
+				wantErr: true,
+				err:     errors.New("Version of repo installed not is the latest version available, please update the repo to run this formula."),
 			},
 		},
 	}
