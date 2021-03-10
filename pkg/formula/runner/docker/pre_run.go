@@ -24,7 +24,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
@@ -79,6 +78,7 @@ func NewPreRun(
 func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	pwd, _ := os.Getwd()
 	formulaPath := def.FormulaPath(pr.ritchieHome)
+	binPath := def.BinPath(formulaPath)
 
 	config, err := pr.loadConfig(formulaPath, def)
 	if err != nil {
@@ -88,13 +88,11 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	binFilePath := def.UnixBinFilePath(formulaPath)
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
-		time.Sleep(2 * time.Second)
-
 		if err := pr.buildFormula(formulaPath, config.DockerIB); err != nil {
 			s.Stop()
 
 			// Remove /bin dir to force formula rebuild in next execution
-			if err := pr.dir.Remove(def.BinPath(formulaPath)); err != nil {
+			if err := pr.dir.Remove(binPath); err != nil {
 				return formula.Setup{}, err
 			}
 
@@ -104,12 +102,7 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		s.Success(prompt.Green("Formula was successfully built!"))
 	}
 
-	tmpDir, err := pr.createWorkDir(pr.ritchieHome, formulaPath, def)
-	if err != nil {
-		return formula.Setup{}, err
-	}
-
-	if err := os.Chdir(tmpDir); err != nil {
+	if err := os.Chdir(binPath); err != nil {
 		return formula.Setup{}, err
 	}
 
@@ -117,12 +110,11 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		Pwd:         pwd,
 		FormulaPath: formulaPath,
 		BinName:     def.BinName(),
-		BinPath:     def.BinPath(formulaPath),
-		TmpDir:      tmpDir,
+		BinPath:     binPath,
 		Config:      config,
 	}
 
-	dockerFile := filepath.Join(tmpDir, "Dockerfile")
+	dockerFile := filepath.Join(binPath, "Dockerfile")
 	if !pr.file.Exists(dockerFile) {
 		return formula.Setup{}, ErrDockerfileNotFound
 	}
@@ -164,20 +156,6 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 		return formula.Config{}, err
 	}
 	return formulaConfig, nil
-}
-
-func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Definition) (string, error) {
-	tDir := def.TmpWorkDirPath(home)
-	if err := pr.dir.Create(tDir); err != nil {
-		return "", err
-	}
-
-	binPath := def.BinPath(formulaPath)
-	if err := pr.dir.Copy(binPath, tDir); err != nil {
-		return "", err
-	}
-
-	return tDir, nil
 }
 
 func buildRunImg(def formula.Definition) (string, error) {
