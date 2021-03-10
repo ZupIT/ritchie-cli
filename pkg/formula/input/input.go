@@ -71,7 +71,7 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inp
 	}
 
 	if value == "" {
-		return true, nil
+		return false, nil
 	}
 
 	// Currently using case implementation to avoid adding a dependency module or exposing
