@@ -37,16 +37,27 @@ func TestPreRun(t *testing.T) {
 	tmpDir := os.TempDir()
 	ritHomeName := ".rit-pre-run-local"
 	ritHome := filepath.Join(tmpDir, ritHomeName)
-	repoPath := filepath.Join(ritHome, "repos", "commons")
+	reposPath := filepath.Join(ritHome, "repos")
+	repoPath := filepath.Join(reposPath, "commons")
+	repoPathOutdated := filepath.Join(reposPath, "commonsOutdated")
 
+	defer os.RemoveAll(ritHome)
 	_ = dirManager.Remove(ritHome)
 	_ = dirManager.Remove(repoPath)
 	_ = dirManager.Create(repoPath)
+	_ = dirManager.Remove(repoPathOutdated)
+	_ = dirManager.Create(repoPathOutdated)
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, repoPath)
+	_ = streams.Unzip(zipFile, repoPathOutdated)
+	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
+	_ = streams.Unzip(zipRepositories, reposPath)
 
 	var config formula.Config
-	_ = json.Unmarshal([]byte(configJson), &config)
+	_ = json.Unmarshal([]byte(configJSON), &config)
+
+	configWithLatestTagRequired := config
+	configWithLatestTagRequired.RequireLatestVersion = true
 
 	type in struct {
 		def        formula.Definition
@@ -261,6 +272,48 @@ func TestPreRun(t *testing.T) {
 				err:     errors.New("remove bin dir error"),
 			},
 		},
+		{
+			name: "local build success with latest version required and repository is updated",
+			in: in{
+				def: formula.Definition{Path: "testing/withLatestVersionRequiredAndOutdatedRepo", RepoName: "commonsOutdated"},
+				makeBuild: makeBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				shellBuild: shellBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				file: fileManager,
+				dir:  dirManager,
+			},
+			out: out{
+				want: formula.Setup{
+					Config: configWithLatestTagRequired,
+				},
+				wantErr: false,
+				err:     nil,
+			},
+		},
+		{
+			name: "local build failed with latest version required and repository is outdated",
+			in: in{
+				def:  formula.Definition{Path: "testing/withLatestVersionRequiredAndOutdatedRepo", RepoName: "commons"},
+				file: fileManager,
+				dir:  dirManager,
+			},
+			out: out{
+				wantErr: true,
+				err:     nil,
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -359,7 +412,11 @@ func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
 }
 
-const configJson = `{
+func savedCreate() {
+
+}
+
+const configJSON = `{
   "dockerImageBuilder": "cimg/go:1.14",
   "inputs": [
     {
