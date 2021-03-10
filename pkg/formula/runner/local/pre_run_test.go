@@ -412,10 +412,6 @@ func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
 }
 
-func savedCreate() {
-
-}
-
 const configJSON = `{
   "dockerImageBuilder": "cimg/go:1.14",
   "inputs": [
