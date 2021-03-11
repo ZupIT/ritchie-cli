@@ -42,13 +42,27 @@ func HasRegex(input formula.Input) bool {
 	return len(input.Pattern.Regex) > 0
 }
 
-func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
+func inputConditionVariableExistsOnInputList(variable string, inputList formula.Inputs) bool {
+	for _, inputListElement := range inputList {
+		if inputListElement.Name == variable {
+			return true
+		}
+	}
+	return false
+}
+
+func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inputs) (bool, error) {
 	if input.Condition.Variable == "" {
 		return true, nil
 	}
 
-	var value string
 	variable := input.Condition.Variable
+
+	if !inputConditionVariableExistsOnInputList(variable, inputList) {
+		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
+	}
+
+	var value string
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
 		if strings.ToLower(components[0]) == variable {
@@ -56,8 +70,9 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
 			break
 		}
 	}
+
 	if value == "" {
-		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
+		return false, nil
 	}
 
 	// Currently using case implementation to avoid adding a dependency module or exposing

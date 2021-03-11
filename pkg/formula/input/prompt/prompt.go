@@ -92,7 +92,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 		if err != nil {
 			return err
 		}
-		conditionPass, err := input.VerifyConditional(cmd, i)
+		conditionPass, err := input.VerifyConditional(cmd, i, config.Inputs)
 		if err != nil {
 			return err
 		}
