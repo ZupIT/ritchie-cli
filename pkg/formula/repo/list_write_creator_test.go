@@ -19,8 +19,9 @@ package repo
 import (
 	"net/http"
 	"os"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 
@@ -28,8 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-func TestNewListWriteCreator(t *testing.T) {
-
+func TestNewCreateWriteListDetailDeleter(t *testing.T) {
 	ritHome := os.TempDir()
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
@@ -42,38 +42,20 @@ func TestNewListWriteCreator(t *testing.T) {
 		},
 	}
 	repoCreator := NewCreator(ritHome, repoProviders, dirManager, fileManager)
-
 	repoWrite := NewWriter(ritHome, fileManager)
+	repoDetail := NewDetail(repoProviders)
+	repoListWriter := NewListWriter(repoList, repoWrite)
+	repoDeleter := NewDeleter(ritHome, repoListWriter, dirManager)
 
-	type in struct {
-		repoList   formula.RepositoryLister
-		repoCreate formula.RepositoryCreator
-		repoWrite  formula.RepositoryWriter
+	want := CreateWriteListDetailDeleter{
+		RepositoryLister:  repoList,
+		RepositoryCreator: repoCreator,
+		RepositoryWriter:  repoWrite,
+		RepositoryDetail:  repoDetail,
+		RepositoryDeleter: repoDeleter,
 	}
-	tests := []struct {
-		name string
-		in   in
-		want formula.RepositoryListWriteCreator
-	}{
-		{
-			name: "Build with success",
-			in: in{
-				repoList:   repoList,
-				repoCreate: repoCreator,
-				repoWrite:  repoWrite,
-			},
-			want: ListWriteCreateManager{
-				RepositoryLister:  repoList,
-				RepositoryCreator: repoCreator,
-				RepositoryWriter:  repoWrite,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewListWriteCreator(tt.in.repoList, tt.in.repoCreate, tt.in.repoWrite); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewListWriteCreator() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
+	got := NewCreateWriteListDetailDeleter(repoList, repoCreator, repoWrite, repoDetail, repoDeleter)
+	assert.Equal(t, want, got)
+
 }

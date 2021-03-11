@@ -13,13 +13,15 @@ type InputTextDefault interface {
 }
 
 const (
-	TextType    = "text"
-	ListType    = "list"
-	BoolType    = "bool"
-	PassType    = "password"
-	DynamicType = "dynamic"
-	Multiselect = "multiselect"
-	TypeSuffix  = "_type"
+	TextType             = "text"
+	ListType             = "list"
+	BoolType             = "bool"
+	PassType             = "password"
+	PathType             = "path"
+	DynamicType          = "dynamic"
+	MultiselectType      = "multiselect"
+	MultiselectSeparator = "|"
+  TypeSuffix           = "_type"
 )
 
 // addEnv Add environment variable to run formulas.

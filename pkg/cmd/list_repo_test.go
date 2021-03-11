@@ -20,21 +20,15 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestListRepoRunFunc(t *testing.T) {
 	someError := errors.New("some error")
 	type in struct {
 		RepositoryLister formula.RepositoryLister
-		Repos            git.Repositories
 		Tutorial         rtutorial.Finder
-		detailLatestTag  string
 	}
 	tests := []struct {
 		name    string
@@ -56,9 +50,7 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial:        TutorialFinderMockReturnDisabled{},
-				Repos:           defaultGitRepositoryMock,
-				detailLatestTag: "2.0.0",
+				Tutorial: TutorialFinderMockReturnDisabled{},
 			},
 			wantErr: false,
 		},
@@ -83,9 +75,7 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial:        TutorialFinderMockReturnDisabled{},
-				Repos:           defaultGitRepositoryMock,
-				detailLatestTag: "2.0.0",
+				Tutorial: TutorialFinderMockReturnDisabled{},
 			},
 			wantErr: false,
 		},
@@ -104,9 +94,7 @@ func TestListRepoRunFunc(t *testing.T) {
 						}, nil
 					},
 				},
-				Tutorial:        TutorialFinderMock{},
-				Repos:           defaultGitRepositoryMock,
-				detailLatestTag: "2.0.0",
+				Tutorial: TutorialFinderMock{},
 			},
 			wantErr: false,
 		},
@@ -119,34 +107,8 @@ func TestListRepoRunFunc(t *testing.T) {
 					},
 				},
 				Tutorial: TutorialFinderMockReturnDisabled{},
-				Repos:    defaultGitRepositoryMock,
 			},
 			wantErr: true,
-		},
-		{
-			name: "Run with success when lasted tag fail",
-			in: in{
-				RepositoryLister: RepositoryListerCustomMock{
-					list: func() (formula.Repos, error) {
-						return formula.Repos{
-							{
-								Name:     "someRepo1",
-								Provider: "Github",
-								Url:      "https://github.com/owner/repo",
-								Token:    "token",
-							},
-						}, nil
-					},
-				},
-				Tutorial: TutorialFinderMockReturnDisabled{},
-				Repos: GitRepositoryMock{
-					latestTag: func(info git.RepoInfo) (git.Tag, error) {
-						return git.Tag{}, someError
-					},
-				},
-				detailLatestTag: "",
-			},
-			wantErr: false,
 		},
 		{
 			name: "Return err when find tutorial fail",
@@ -168,21 +130,13 @@ func TestListRepoRunFunc(t *testing.T) {
 						return rtutorial.TutorialHolder{}, someError
 					},
 				},
-				Repos:           defaultGitRepositoryMock,
-				detailLatestTag: "",
 			},
 			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			detailMock := new(mocks.DetailManagerMock)
-			detailMock.On("LatestTag", mock.Anything).Return(tt.in.detailLatestTag)
-
-			repoProviders := formula.NewRepoProviders()
-			repoProviders.Add("Github", formula.Git{Repos: tt.in.Repos, NewRepoInfo: github.NewRepoInfo})
-
-			lr := NewListRepoCmd(tt.in.RepositoryLister, repoProviders, tt.in.Tutorial, detailMock)
+			lr := NewListRepoCmd(tt.in.RepositoryLister, tt.in.Tutorial)
 			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := lr.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)

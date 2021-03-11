@@ -61,7 +61,24 @@ func TestInputManager(t *testing.T) {
         "type": "text",
         "label": "Type : ",
 		"required": true
-    },
+		},
+		{
+			"name": "sample_text_3",
+			"type": "path",
+			"label": "Type : ",
+	"required": true
+	},
+	{
+		"name": "sample_text_4",
+		"type": "path",
+		"label": "Type : ",
+		"cache": {
+				"active": true,
+				"qty": 6,
+				"newLabel": "Type new value. "
+			},
+	"tutorial": "Add a text for this field."
+	},
     {
         "name": "sample_list",
         "type": "text",
@@ -184,6 +201,9 @@ func TestInputManager(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cacheFile := fmt.Sprintf(CachePattern, tt.ritHome, strings.ToUpper("SAMPLE_TEXT"))
@@ -226,6 +246,7 @@ func TestInputManager(t *testing.T) {
 				iBool,
 				iPass,
 				iMultiselect,
+				inPath,
 			)
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
@@ -362,6 +383,9 @@ func TestConditionalInputs(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
@@ -388,6 +412,7 @@ func TestConditionalInputs(t *testing.T) {
 				&mocks.InputBoolMock{},
 				&mocks.InputPasswordMock{},
 				&mocks.InputMultiselectMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -455,6 +480,9 @@ func TestRegexType(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
@@ -481,6 +509,7 @@ func TestRegexType(t *testing.T) {
 				&mocks.InputBoolMock{},
 				&mocks.InputPasswordMock{},
 				&mocks.InputMultiselectMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -559,6 +588,9 @@ func TestDynamicInputs(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
@@ -587,6 +619,7 @@ func TestDynamicInputs(t *testing.T) {
 				&mocks.InputBoolMock{},
 				&mocks.InputPasswordMock{},
 				&mocks.InputMultiselectMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -664,6 +697,9 @@ func TestMultiselect(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
@@ -688,6 +724,7 @@ func TestMultiselect(t *testing.T) {
 				&mocks.InputBoolMock{},
 				&mocks.InputPasswordMock{},
 				iMultiselect,
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -1564,6 +1601,7 @@ func TestDefaultFlag(t *testing.T) {
 			&mocks.InputBoolMock{},
 			&mocks.InputPasswordMock{},
 			&mocks.InputMultiselectMock{},
+			&mocks.InputPathMock{},
 		)
 
 		cmd := &exec.Cmd{}
@@ -1614,6 +1652,7 @@ func TestEmptyList(t *testing.T) {
 			&mocks.InputBoolMock{},
 			&mocks.InputPasswordMock{},
 			&mocks.InputMultiselectMock{},
+			&mocks.InputPathMock{},
 		)
 
 		cmd := &exec.Cmd{}
