@@ -33,7 +33,7 @@ import (
 
 const (
 	errInvalidInputItemsMsg = "only these input items [%s] are accepted in the %q flag"
-	TypeSuffix			 = "_type"
+	TypeSuffix              = "_type"
 )
 
 type InputManager struct {
@@ -84,7 +84,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 
 		if len(inputVal) != 0 {
 			input.AddEnv(cmd, i.Name, inputVal)
-			input.AddEnv(cmd, i.Name + TypeSuffix, i.Type)
+			input.AddEnv(cmd, i.Name+TypeSuffix, i.Type)
 		} else {
 			emptyInputs = append(emptyInputs, i)
 		}

@@ -43,7 +43,7 @@ const (
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
-	TypeSuffix			 = "_type"
+	TypeSuffix           = "_type"
 )
 
 type InputManager struct {
@@ -112,7 +112,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 			checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
 			checkForSameEnv(i.Name + TypeSuffix)
-			input.AddEnv(cmd, i.Name + TypeSuffix, i.Type)
+			input.AddEnv(cmd, i.Name+TypeSuffix, i.Type)
 		}
 
 	}
@@ -168,10 +168,6 @@ func checkForSameEnv(envKey string) {
 				" It will probably result on unexpect behavior", envKey)
 		prompt.Warning(warnMsg)
 	}
-}
-
-func addTypeToInputVal(inputVal string, inputType string) string {
-	return inputVal + ", TYPE=" + inputType
 }
 
 func (in InputManager) defaultFlag(input formula.Input, defaultFlag bool) (string, bool) {

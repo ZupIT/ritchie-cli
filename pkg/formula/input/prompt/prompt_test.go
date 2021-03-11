@@ -692,8 +692,8 @@ func TestMultiselect(t *testing.T) {
 
 func TestContainsConditionalInputsMultiselect(t *testing.T) {
 	type TestResults struct {
-		error 				error
-		conditionalResult 	bool
+		error             error
+		conditionalResult bool
 	}
 	tests := []struct {
 		name             string
@@ -730,7 +730,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             TestResults{nil,true},
+			want:             TestResults{nil, true},
 		},
 		{
 			name: "[containsAny] FAIL: multiselect input does not contain any the conditional values",
@@ -761,7 +761,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_4"},
-			want:             TestResults{nil,false},
+			want:             TestResults{nil, false},
 		},
 		{
 			name: "[containsAll] SUCCESS: multiselect input contains all conditional values",
@@ -792,7 +792,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3", "item_4"},
-			want:             TestResults{nil,true},
+			want:             TestResults{nil, true},
 		},
 		{
 			name: "[containsAll] FAIL: multiselect input does not contain all conditional values",
@@ -823,7 +823,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             TestResults{nil,false},
+			want:             TestResults{nil, false},
 		},
 		{
 			name: "[containsOnly] SUCCESS: multiselect input contains only conditional values",
@@ -854,7 +854,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2"},
-			want:             TestResults{nil,true},
+			want:             TestResults{nil, true},
 		},
 		{
 			name: "[containsOnly] FAIL: multiselect input does not contain only conditional values and they are not the same size",
@@ -885,7 +885,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2", "item_3"},
-			want:             TestResults{nil,false},
+			want:             TestResults{nil, false},
 		},
 		{
 			name: "[containsOnly] FAIL: multiselect input does not contain only conditional values and they are the same size",
@@ -916,7 +916,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_3"},
-			want:             TestResults{nil,false},
+			want:             TestResults{nil, false},
 		},
 		{
 			name: "[notContainsAny] SUCCESS: multiselect input does not contain any of the conditional values",
@@ -947,7 +947,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_1", "item_2"},
-			want:             TestResults{nil,true},
+			want:             TestResults{nil, true},
 		},
 		{
 			name: "[notContainsAny] FAIL: multiselect input contains any of the conditional values",
@@ -978,7 +978,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_3", "item_4"},
-			want:             TestResults{nil,false},
+			want:             TestResults{nil, false},
 		},
 		{
 			name: "[notContainsAll] SUCCESS: multiselect input only contains one of the conditional values",
@@ -1009,7 +1009,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3", "item_4"},
-			want:             TestResults{nil,true},
+			want:             TestResults{nil, true},
 		},
 		{
 			name: "[notContainsAll] SUCCESS: multiselect input does not contain any of the conditional values",
@@ -1040,7 +1040,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3"},
-			want:             TestResults{nil,true},
+			want:             TestResults{nil, true},
 		},
 		{
 			name: "[notContainsAll] FAIL: multiselect input contains all the conditional values and they are the same size",
@@ -1071,7 +1071,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_3", "item_4"},
-			want:             TestResults{nil,false},
+			want:             TestResults{nil, false},
 		},
 		{
 			name: "[notContainsAll] FAIL: multiselect input contains all the conditional values and they are not the same size",
@@ -1102,7 +1102,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 					}
 				]`,
 			multiselectValue: []string{"item_2", "item_4"},
-			want:             TestResults{nil,false},
+			want:             TestResults{nil, false},
 		},
 	}
 
@@ -1147,14 +1147,14 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 
 func TestContainsConditionalInputsString(t *testing.T) {
 	type TestResults struct {
-		error 				error
-		conditionalResult 	bool
+		error             error
+		conditionalResult bool
 	}
 	tests := []struct {
-		name             string
-		inputJSON        string
-		textValue        string
-		want             TestResults
+		name      string
+		inputJSON string
+		textValue string
+		want      TestResults
 	}{
 		{
 			name: "[containsAny] SUCCESS: text input contains the conditional substring values",
@@ -1183,8 +1183,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,true},
-			textValue: 			"input_1,input_2,input_3",
+			want:      TestResults{nil, true},
+			textValue: "input_1,input_2,input_3",
 		},
 		{
 			name: "[containsAny] FAIL: text input does not contain any the conditional substring values",
@@ -1213,8 +1213,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,false},
-			textValue: 			"input_1,input_4",
+			want:      TestResults{nil, false},
+			textValue: "input_1,input_4",
 		},
 		{
 			name: "[containsAll] SUCCESS: text input contains all conditional substrings values",
@@ -1243,8 +1243,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,true},
-			textValue: 			"input_1,input_2,input_3,input_4",
+			want:      TestResults{nil, true},
+			textValue: "input_1,input_2,input_3,input_4",
 		},
 		{
 			name: "[containsAll] FAIL: text input does not contain all conditional sbustring values",
@@ -1273,8 +1273,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,false},
-			textValue: 			"input_1,input_2,input_3",
+			want:      TestResults{nil, false},
+			textValue: "input_1,input_2,input_3",
 		},
 		{
 			name: "[containsOnly] SUCCESS: text input contains only conditional substring value",
@@ -1303,8 +1303,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,true},
-			textValue: 			"input_1",
+			want:      TestResults{nil, true},
+			textValue: "input_1",
 		},
 		{
 			name: "[containsOnly] FAIL: text input does not contain only conditional substring value",
@@ -1333,8 +1333,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,false},
-			textValue: 			"input_1,input_2",
+			want:      TestResults{nil, false},
+			textValue: "input_1,input_2",
 		},
 		{
 			name: "[notContainsAny] SUCCESS: text input does not contain any of the conditional substring values",
@@ -1363,8 +1363,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,true},
-			textValue: 			"input_1,input_2",
+			want:      TestResults{nil, true},
+			textValue: "input_1,input_2",
 		},
 		{
 			name: "[notContainsAny] FAIL: text input contains any of the conditional substring values",
@@ -1393,8 +1393,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,false},
-			textValue: 			"input_3,input_4",
+			want:      TestResults{nil, false},
+			textValue: "input_3,input_4",
 		},
 		{
 			name: "[notContainsAll] SUCCESS: text input only contains one of the conditional substring values",
@@ -1423,8 +1423,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,true},
-			textValue: 			"input_2,input_3,input_4",
+			want:      TestResults{nil, true},
+			textValue: "input_2,input_3,input_4",
 		},
 		{
 			name: "[notContainsAll] SUCCESS: text input does not contain any of the conditional substring values",
@@ -1453,8 +1453,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,true},
-			textValue: 			"input_2,input_3",
+			want:      TestResults{nil, true},
+			textValue: "input_2,input_3",
 		},
 		{
 			name: "[notContainsAll] FAIL: text input contains all the conditional substring values",
@@ -1483,8 +1483,8 @@ func TestContainsConditionalInputsString(t *testing.T) {
         				"label": "Pick your : "
     				}
 				]`,
-			want:             	TestResults{nil,false},
-			textValue: 			"input_2,input_3,input_4",
+			want:      TestResults{nil, false},
+			textValue: "input_2,input_3,input_4",
 		},
 	}
 
