@@ -19,11 +19,15 @@ package formula
 import (
 	"errors"
 	"sort"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
-const RepoCommonsName = RepoName("commons")
+const (
+	RepoCacheTime   = 24 * time.Hour
+	RepoCommonsName = RepoName("commons")
+)
 
 type Repo struct {
 	Provider      RepoProvider `json:"provider"`
@@ -35,6 +39,15 @@ type Repo struct {
 	IsLocal       bool         `json:"isLocal"`
 	TreeVersion   string       `json:"tree_version"`
 	LatestVersion RepoVersion  `json:"latest_version"`
+	Cache         time.Time    `json:"cache"`
+}
+
+func (r Repo) CacheExpired() bool {
+	return r.Cache.Before(time.Now())
+}
+
+func (r *Repo) UpdateCache() {
+	r.Cache = time.Now().Add(RepoCacheTime)
 }
 
 func (r Repo) EmptyVersion() bool {
@@ -153,10 +166,12 @@ type RepositoryListWriter interface {
 	RepositoryWriter
 }
 
-type RepositoryListWriteCreator interface {
-	RepositoryLister
-	RepositoryWriter
+type RepositoryCreateWriteListDetailDeleter interface {
 	RepositoryCreator
+	RepositoryWriter
+	RepositoryLister
+	RepositoryDetail
+	RepositoryDeleter
 }
 
 type RepositoryListUpdater interface {

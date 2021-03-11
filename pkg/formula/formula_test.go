@@ -47,13 +47,6 @@ func TestFormulaPath(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
-func TestTmpWorkDirPath(t *testing.T) {
-	want := filepath.Join(home, TmpDir)
-	gotTmpDir := def.TmpWorkDirPath(home)
-
-	assert.Contains(t, gotTmpDir, want)
-}
-
 func TestBinPath(t *testing.T) {
 	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "bin")
 	formulaPath := def.FormulaPath(home)

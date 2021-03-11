@@ -39,14 +39,22 @@ func NewBuildMake() MakeManager {
 }
 
 func (ma MakeManager) Build(info formula.BuildInfo) error {
+	pwd, _ := os.Getwd()
+	defer os.Chdir(pwd) //nolint:errcheck
+
 	if err := os.Chdir(info.FormulaPath); err != nil {
 		return err
 	}
+
 	var stderr bytes.Buffer
 	cmd := exec.Command("make", "build")
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf(errMsgFmt, ErrBuildFormulaMakefile, stderr.String())
+	}
+
+	if err := os.Chdir(pwd); err != nil {
+		return err
 	}
 
 	return nil

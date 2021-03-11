@@ -23,7 +23,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
@@ -83,7 +82,6 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	binFilePath := def.BinFilePath(formulaPath)
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
-		time.Sleep(2 * time.Second)
 
 		if err := pr.buildFormula(formulaPath); err != nil {
 			s.Stop()
@@ -99,21 +97,11 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		s.Success(prompt.Green("Formula was successfully built!"))
 	}
 
-	tmpDir, err := pr.createWorkDir(pr.ritchieHome, formulaPath, def)
-	if err != nil {
-		return formula.Setup{}, err
-	}
-
-	if err := os.Chdir(tmpDir); err != nil {
-		return formula.Setup{}, err
-	}
-
 	s := formula.Setup{
 		Pwd:         pwd,
 		FormulaPath: formulaPath,
 		BinName:     def.BinName(),
 		BinPath:     def.BinPath(formulaPath),
-		TmpDir:      tmpDir,
 		Config:      config,
 	}
 
@@ -156,19 +144,6 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 		return formula.Config{}, err
 	}
 	return formulaConfig, nil
-}
-
-func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Definition) (string, error) {
-	tDir := def.TmpWorkDirPath(home)
-	if err := pr.dir.Create(tDir); err != nil {
-		return "", err
-	}
-
-	if err := pr.dir.Copy(def.BinPath(formulaPath), tDir); err != nil {
-		return "", err
-	}
-
-	return tDir, nil
 }
 
 func (pr PreRunManager) checksLatestVersionCompliance(requireLatestVersion bool, repoName string) error {

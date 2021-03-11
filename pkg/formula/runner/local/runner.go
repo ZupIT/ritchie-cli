@@ -23,9 +23,11 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/ZupIT/ritchie-cli/pkg/env"
-
 	"github.com/spf13/pflag"
+
+	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
+	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -37,29 +39,26 @@ import (
 var _ formula.Runner = RunManager{}
 
 type RunManager struct {
-	formula.PostRunner
+	homeDir string
+	file    stream.FileListMover
+	env     env.Finder
 	formula.InputResolver
 	formula.PreRunner
-	file    stream.FileWriteExistAppender
-	env     env.Finder
-	homeDir string
 }
 
 func NewRunner(
-	postRun formula.PostRunner,
+	homeDir string,
+	file stream.FileListMover,
+	env env.Finder,
 	input formula.InputResolver,
 	preRun formula.PreRunner,
-	file stream.FileWriteExistAppender,
-	env env.Finder,
-	homeDir string,
 ) formula.Runner {
 	return RunManager{
-		PostRunner:    postRun,
-		InputResolver: input,
-		PreRunner:     preRun,
+		homeDir:       homeDir,
 		file:          file,
 		env:           env,
-		homeDir:       homeDir,
+		InputResolver: input,
+		PreRunner:     preRun,
 	}
 }
 
@@ -69,14 +68,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
-	defer func() {
-		if err := ru.PostRun(setup, false); err != nil {
-			prompt.Error(err.Error())
-			return
-		}
-	}()
-
-	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
+	formulaRun := filepath.Join(setup.BinPath, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -95,11 +87,47 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
+	metric.RepoName = def.RepoName
+
+	if osutil.IsWindows() {
+		if err := ru.runWin(cmd, setup); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	if err := cmd.Run(); err != nil {
 		return err
 	}
 
-	metric.RepoName = def.RepoName
+	return nil
+}
+
+func (ru RunManager) runWin(cmd *exec.Cmd, setup formula.Setup) error {
+	if err := os.Chdir(setup.BinPath); err != nil {
+		return err
+	}
+
+	of, err := ru.file.List(setup.BinPath)
+	if err != nil {
+		return err
+	}
+
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	nf, err := ru.file.List(setup.BinPath)
+	if err != nil {
+		return err
+	}
+
+	files := append(of, nf...)
+	newFiles := sliceutil.Unique(files)
+	if err := ru.file.Move(setup.BinPath, setup.Pwd, newFiles); err != nil {
+		return err
+	}
 
 	return nil
 }
