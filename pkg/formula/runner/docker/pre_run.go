@@ -51,6 +51,7 @@ var (
 	ErrDockerfileNotFound = errors.New(
 		"the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker",
 	)
+	versionError = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
 )
 
 var _ formula.PreRunner = PreRunManager{}
@@ -210,7 +211,7 @@ func (pr PreRunManager) checksLatestVersionCompliance(requireLatestVersion bool,
 		repos, _ := repoLister.List()
 		repo, _ := repos.Get(repoName)
 		if repo.Version.String() != repo.LatestVersion.String() {
-			return errors.New("Version of repo installed not is the latest version available, please update the repo to run this formula.")
+			return fmt.Errorf(versionError, repo.Version.String(), repo.LatestVersion.String())
 		}
 	}
 

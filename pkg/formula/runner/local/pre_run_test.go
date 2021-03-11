@@ -31,6 +31,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
+const (
+	currentVersionCommonsInRepositoriesZip = "2.15.1"
+	latestVersionCommonsInRepositoriesZip  = "3.0.0"
+)
+
 func TestPreRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
@@ -231,7 +236,7 @@ func TestPreRun(t *testing.T) {
 			},
 			out: out{
 				wantErr: true,
-				err:     errors.New("Version of repo installed not is the latest version available, please update the repo to run this formula."),
+				err:     fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
 			},
 		},
 	}

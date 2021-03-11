@@ -18,7 +18,6 @@ package local
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,9 +32,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const loadConfigErrMsg = `Failed to load formula config file
-Try running rit update repo
-Config file path not found: %s`
+const (
+	loadConfigErrMsg = "Failed to load formula config file\nTry running rit update repo\nConfig file path not found: %s"
+	versionError     = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
+)
 
 var _ formula.PreRunner = PreRunManager{}
 
@@ -152,7 +152,7 @@ func (pr PreRunManager) checksLatestVersionCompliance(requireLatestVersion bool,
 		repos, _ := repoLister.List()
 		repo, _ := repos.Get(repoName)
 		if repo.Version.String() != repo.LatestVersion.String() {
-			return errors.New("Version of repo installed not is the latest version available, please update the repo to run this formula.")
+			return fmt.Errorf(versionError, repo.Version.String(), repo.LatestVersion.String())
 		}
 	}
 
