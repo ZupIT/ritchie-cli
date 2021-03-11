@@ -40,7 +40,6 @@ func HasRegex(input formula.Input) bool {
 	return len(input.Pattern.Regex) > 0
 }
 
-
 func inputConditionVariableExistsOnInputList(variable string, inputList formula.Inputs) (bool) {
 	for _, inputListElement := range inputList {
 		if inputListElement.Name == variable {
