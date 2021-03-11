@@ -236,13 +236,21 @@ func TestInputManager(t *testing.T) {
 				assert.Empty(t, tt.expectedError)
 				expected := []string{
 					"SAMPLE_TEXT=default value",
+					"SAMPLE_TEXT_TYPE=text",
 					"SAMPLE_TEXT=default value",
+					"SAMPLE_TEXT_TYPE=text",
 					"SAMPLE_TEXT_2=default value",
+					"SAMPLE_TEXT_2_TYPE=text",
 					"SAMPLE_LIST=list value",
+					"SAMPLE_LIST_TYPE=text",
 					"SAMPLE_LIST2=list value",
+					"SAMPLE_LIST2_TYPE=list",
 					"SAMPLE_BOOL=true",
+					"SAMPLE_BOOL_TYPE=bool",
 					"SAMPLE_PASSWORD=pass value",
+					"SAMPLE_PASSWORD_TYPE=password",
 					"TEST_RESOLVER=resolver value",
+					"TEST_RESOLVER_TYPE=CREDENTIAL_TEST",
 				}
 				assert.Equal(t, expected, cmd.Env)
 			}
