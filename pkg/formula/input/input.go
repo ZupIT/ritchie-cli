@@ -21,7 +21,7 @@ const (
 	DynamicType          = "dynamic"
 	MultiselectType      = "multiselect"
 	MultiselectSeparator = "|"
-  TypeSuffix           = "_type"
+    TypeSuffix           = "_type"
 )
 
 // addEnv Add environment variable to run formulas.
@@ -58,7 +58,7 @@ func containsSubstring(s string, substr string) bool {
 
 func valueContainsAny(inputType string, value string, input string) bool {
 	splitInput := strings.Split(input, "|")
-	if inputType == Multiselect {
+	if inputType == MultiselectType {
 		splitValue := strings.Split(value, "|")
 		for _, i := range splitInput {
 			if containsArray(splitValue, i) {
@@ -77,7 +77,7 @@ func valueContainsAny(inputType string, value string, input string) bool {
 
 func valueContainsAll(inputType string, value string, input string) bool {
 	splitInput := strings.Split(input, "|")
-	if inputType == Multiselect {
+	if inputType == MultiselectType {
 		splitValue := strings.Split(value, "|")
 		for _, v := range splitInput {
 			if !containsArray(splitValue, v) {
@@ -95,7 +95,7 @@ func valueContainsAll(inputType string, value string, input string) bool {
 }
 
 func valueContainsOnly(inputType string, value string, input string) bool {
-	if inputType == Multiselect {
+	if inputType == MultiselectType {
 		splitInput := strings.Split(input, "|")
 		splitValue := strings.Split(value, "|")
 		if len(splitValue) != len(splitInput) {

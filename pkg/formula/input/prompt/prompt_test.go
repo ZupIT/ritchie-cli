@@ -1151,6 +1151,9 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
@@ -1177,6 +1180,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 				&mocks.InputBoolMock{},
 				&mocks.InputPasswordMock{},
 				iMultiselect,
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -1533,6 +1537,9 @@ func TestContainsConditionalInputsString(t *testing.T) {
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
@@ -1559,6 +1566,7 @@ func TestContainsConditionalInputsString(t *testing.T) {
 				&mocks.InputBoolMock{},
 				&mocks.InputPasswordMock{},
 				&mocks.InputMultiselectMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
