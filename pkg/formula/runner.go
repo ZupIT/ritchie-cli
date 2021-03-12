@@ -38,6 +38,10 @@ type PreRunBuilder interface {
 	Build(string) error
 }
 
+type PreRunChecker interface {
+	CheckVersionCompliance() error
+}
+
 type PreRunner interface {
 	PreRun(def Definition) (Setup, error)
 }

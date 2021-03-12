@@ -20,32 +20,22 @@ import (
 	"fmt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const versionError = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
 
-type PreRunBuilderCheckerManager struct {
-	ritchieHome          string
-	repoName             string
-	requireLatestVersion bool
-	file                 stream.FileReadExister
+type PreRunCheckerManager struct {
+	repoList repo.ListManager
 }
 
-func NewPreRunBuilderChecker(ritchieHome, repoName string, requireLatestVersion bool, file stream.FileReadExister) PreRunBuilderCheckerManager {
-	return PreRunBuilderCheckerManager{
-		ritchieHome,
-		repoName,
-		requireLatestVersion,
-		file,
-	}
+func NewPreRunBuilderChecker(listManager repo.ListManager) PreRunCheckerManager {
+	return PreRunCheckerManager{listManager}
 }
 
-func (pr *PreRunBuilderCheckerManager) CheckVersionCompliance() error {
-	if pr.requireLatestVersion {
-		repoLister := repo.NewLister(pr.ritchieHome, pr.file)
-		repos, _ := repoLister.List()
-		repo, _ := repos.Get(pr.repoName)
+func (pr *PreRunCheckerManager) CheckVersionCompliance(repoName string, requireLatestVersion bool) error {
+	if requireLatestVersion {
+		repos, _ := pr.repoList.List()
+		repo, _ := repos.Get(repoName)
 		if repo.Version.String() != repo.LatestVersion.String() {
 			return fmt.Errorf(versionError, repo.Version.String(), repo.LatestVersion.String())
 		}

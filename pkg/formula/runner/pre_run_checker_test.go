@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 	"github.com/stretchr/testify/assert"
@@ -40,6 +41,7 @@ func TestCheckVersionCompliance(t *testing.T) {
 
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
+	repoLister := repo.NewLister(ritHome, fileManager)
 
 	reposPath := filepath.Join(ritHome, "repos")
 	repoPath := filepath.Join(reposPath, "commons")
@@ -86,8 +88,8 @@ func TestCheckVersionCompliance(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			check := NewPreRunBuilderChecker(ritHome, tt.repoName, tt.requirelatestVersion, fileManager)
-			err := check.CheckVersionCompliance()
+			check := NewPreRunBuilderChecker(repoLister)
+			err := check.CheckVersionCompliance(tt.repoName, tt.requirelatestVersion)
 
 			assert.Equal(t, tt.outErr, err)
 		})
