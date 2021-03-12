@@ -45,53 +45,48 @@ func TestCheckVersionCompliance(t *testing.T) {
 	repoPath := filepath.Join(reposPath, "commons")
 	repoPathOutdated := filepath.Join(reposPath, "commonsOutdated")
 
-	_ = dirManager.Remove(ritHome)
-	_ = dirManager.Remove(repoPath)
-	_ = dirManager.Create(repoPath)
-	_ = dirManager.Remove(repoPathOutdated)
-	_ = dirManager.Create(repoPathOutdated)
+	createSaved := func(path string) {
+		_ = dirManager.Remove(path)
+		_ = dirManager.Create(path)
+	}
+	createSaved(ritHome)
+	createSaved(repoPath)
+	createSaved(repoPathOutdated)
+
 	zipFile := filepath.Join("../../../testdata", "ritchie-formulas-test.zip")
+	zipRepositories := filepath.Join("../../../testdata", "repositories.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 	_ = streams.Unzip(zipFile, repoPathOutdated)
-	zipRepositories := filepath.Join("../../../testdata", "repositories.zip")
 	_ = streams.Unzip(zipRepositories, reposPath)
-	type in struct {
-		repoName             string
-		requirelatestVersion bool
-	}
 
 	tests := []struct {
-		name   string
-		in     in
-		outErr error
+		name                 string
+		repoName             string
+		requirelatestVersion bool
+		outErr               error
 	}{
 		{
-			name: "Return nil when require latest version in true and repository is updated",
-			in: in{
-				repoName:             "commonsOutdated",
-				requirelatestVersion: true,
-			},
+			name:                 "Return nil when require latest version in true and repository is updated",
+			repoName:             "commonsOutdated",
+			requirelatestVersion: true,
 		},
 		{
-			name: "Return nil when require latest version in true and repository is outdated",
-			in: in{
-				repoName:             "commons",
-				requirelatestVersion: true,
-			},
+			name:                 "Return nil when require latest version in false",
+			repoName:             "commons",
+			requirelatestVersion: false,
+		},
+		{
+			name:                 "Return nil when require latest version in true and repository is outdated",
+			repoName:             "commons",
+			requirelatestVersion: true,
+
 			outErr: fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
-		},
-		{
-			name: "Return nil when require latest version in false",
-			in: in{
-				repoName:             "commons",
-				requirelatestVersion: false,
-			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			check := NewPreRunBuilderChecker(ritHome, tt.in.repoName, tt.in.requirelatestVersion, fileManager)
+			check := NewPreRunBuilderChecker(ritHome, tt.repoName, tt.requirelatestVersion, fileManager)
 			err := check.CheckVersionCompliance()
 
 			assert.Equal(t, tt.outErr, err)
