@@ -1213,7 +1213,7 @@ func TestContainsConditionalInputsMultiselect(t *testing.T) {
 			cmd := &exec.Cmd{}
 
 			got := inputManager.Inputs(cmd, setup, nil)
-			result, _ := input.VerifyConditional(cmd, inputs[1])
+			result, _ := input.VerifyConditional(cmd, inputs[1], inputs)
 
 			assert.Equal(t, tt.want.error, got)
 			assert.Equal(t, tt.want.conditionalResult, result)
@@ -1599,7 +1599,7 @@ func TestContainsConditionalInputsString(t *testing.T) {
 			cmd := &exec.Cmd{}
 
 			got := inputManager.Inputs(cmd, setup, nil)
-			result, _ := input.VerifyConditional(cmd, inputs[1])
+			result, _ := input.VerifyConditional(cmd, inputs[1], inputs)
 
 			assert.Equal(t, tt.want.error, got)
 			assert.Equal(t, tt.want.conditionalResult, result)

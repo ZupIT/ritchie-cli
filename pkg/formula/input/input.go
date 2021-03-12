@@ -123,7 +123,6 @@ func valueContainsOnly(inputType string, value string, input string) bool {
 	return true
 }
 
-
 func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inputs) (bool, error) {
 
 	if input.Condition.Variable == "" {
@@ -131,7 +130,7 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inp
 	}
 
 	var typeValue string
-  var value string
+	var value string
 
 	variable := input.Condition.Variable
 
