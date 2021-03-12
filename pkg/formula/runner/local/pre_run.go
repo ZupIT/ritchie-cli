@@ -26,7 +26,7 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -46,6 +46,7 @@ type PreRunManager struct {
 	shell       formula.Builder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
+	checker     runner.PreRunCheckerManager
 }
 
 func NewPreRun(
@@ -55,6 +56,7 @@ func NewPreRun(
 	shell formula.Builder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
+	checker runner.PreRunCheckerManager,
 ) PreRunManager {
 	return PreRunManager{
 		ritchieHome: ritchieHome,
@@ -63,6 +65,7 @@ func NewPreRun(
 		shell:       shell,
 		dir:         dir,
 		file:        file,
+		checker:     checker,
 	}
 }
 
@@ -75,7 +78,7 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		return formula.Setup{}, err
 	}
 
-	if err := pr.checksLatestVersionCompliance(config.RequireLatestVersion, def.RepoName); err != nil {
+	if err := pr.checker.CheckVersionCompliance(def.RepoName, config.RequireLatestVersion); err != nil {
 		return formula.Setup{}, err
 	}
 
@@ -144,17 +147,4 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 		return formula.Config{}, err
 	}
 	return formulaConfig, nil
-}
-
-func (pr PreRunManager) checksLatestVersionCompliance(requireLatestVersion bool, repoName string) error {
-	if requireLatestVersion {
-		repoLister := repo.NewLister(pr.ritchieHome, pr.file)
-		repos, _ := repoLister.List()
-		repo, _ := repos.Get(repoName)
-		if repo.Version.String() != repo.LatestVersion.String() {
-			return fmt.Errorf(versionError, repo.Version.String(), repo.LatestVersion.String())
-		}
-	}
-
-	return nil
 }

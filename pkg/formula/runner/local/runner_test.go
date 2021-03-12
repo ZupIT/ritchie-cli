@@ -32,6 +32,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
@@ -61,7 +62,9 @@ func TestRun(t *testing.T) {
 	_ = streams.Unzip(zipFile, repoPath)
 
 	envFinder := env.NewFinder(ritHome, fileManager)
-	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
+	repoLister := repo.NewLister(ritHome, fileManager)
+	preRunChecker := runner.NewPreRunBuilderChecker(repoLister)
+	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager, preRunChecker)
 
 	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{}, inPath)
 	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})

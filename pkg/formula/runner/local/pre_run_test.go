@@ -27,6 +27,8 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -63,6 +65,9 @@ func TestPreRun(t *testing.T) {
 
 	configWithLatestTagRequired := config
 	configWithLatestTagRequired.RequireLatestVersion = true
+
+	repoLister := repo.NewLister(ritHome, fileManager)
+	preRunChecker := runner.NewPreRunBuilderChecker(repoLister)
 
 	type in struct {
 		def        formula.Definition
@@ -245,7 +250,7 @@ func TestPreRun(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			_ = dirManager.Remove(filepath.Join(in.def.FormulaPath(ritHome), "bin"))
-			preRun := NewPreRun(ritHome, in.makeBuild, in.batBuild, in.shellBuild, in.dir, in.file)
+			preRun := NewPreRun(ritHome, in.makeBuild, in.batBuild, in.shellBuild, in.dir, in.file, preRunChecker)
 			got, err := preRun.PreRun(in.def)
 
 			if tt.out.wantErr {
