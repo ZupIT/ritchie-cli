@@ -51,7 +51,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		var inputVal string
 		var err error
 
-		conditionPass, err := input.VerifyConditional(cmd, i)
+		conditionPass, err := input.VerifyConditional(cmd, i, inputs)
 		if err != nil {
 			return err
 		}

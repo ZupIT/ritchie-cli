@@ -1,5 +1,40 @@
 # Changelog
 
+## [2.10.0](https://github.com/zupit/ritchie-cli/tree/2.10.0) (2021-03-11)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.9.1...2.10.0)
+
+**Closed issues:**
+
+- Autobuild does not work for workspaces with trailing separator [\#880](https://github.com/ZupIT/ritchie-cli/issues/880)
+- Tests with Testify in Pkg/Formula [\#791](https://github.com/ZupIT/ritchie-cli/issues/791)
+- Flags do not support multiselect [\#881](https://github.com/ZupIT/ritchie-cli/issues/881)
+- config.json crash when have multiples conditional variables [\#873](https://github.com/ZupIT/ritchie-cli/issues/873)
+- 'rit create formula' doesn't create local workspace [\#870](https://github.com/ZupIT/ritchie-cli/issues/870)
+- Empty item in credential selection [\#852](https://github.com/ZupIT/ritchie-cli/issues/852)
+- Some repos from rit update repo do not show all its release [\#851](https://github.com/ZupIT/ritchie-cli/issues/851)
+- Tests with Testify in Pkg/Git/Gitlab [\#793](https://github.com/ZupIT/ritchie-cli/issues/793)
+- Tests with Testify in Pkg/Git/Github [\#792](https://github.com/ZupIT/ritchie-cli/issues/792)
+- Remove the necessity to copy formulas to tmp dir [\#773](https://github.com/ZupIT/ritchie-cli/issues/773)
+
+**Merged pull requests:**
+
+- Changing conditional to only return an error when the conditional input variable does not exist in the config.json variable list [\#884](https://github.com/ZupIT/ritchie-cli/pull/884) ([andressaabreuzup](https://github.com/andressaabreuzup))
+- Multiselect flag support [\#882](https://github.com/ZupIT/ritchie-cli/pull/882) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Adding safety check to workspace add [\#879](https://github.com/ZupIT/ritchie-cli/pull/879) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Add new fields to enable cache in the repositories [\#878](https://github.com/ZupIT/ritchie-cli/pull/878) ([kaduartur](https://github.com/kaduartur))
+- test: github testify [\#876](https://github.com/ZupIT/ritchie-cli/pull/876) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- Remove formula tmp dir [\#875](https://github.com/ZupIT/ritchie-cli/pull/875) ([kaduartur](https://github.com/kaduartur))
+- Improved error msg on invalid value on list input [\#872](https://github.com/ZupIT/ritchie-cli/pull/872) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+- Release 2.9.1 merge [\#869](https://github.com/ZupIT/ritchie-cli/pull/869) ([zup-ci](https://github.com/zup-ci))
+- Update input flag README file [\#868](https://github.com/ZupIT/ritchie-cli/pull/868) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
+- Update repo fix [\#866](https://github.com/ZupIT/ritchie-cli/pull/866) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- Fixing delete credential empty fields bug [\#864](https://github.com/ZupIT/ritchie-cli/pull/864) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- \[BUGFIX\] - Fix build with build.sh [\#862](https://github.com/ZupIT/ritchie-cli/pull/862) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+- test: gitlab testify [\#856](https://github.com/ZupIT/ritchie-cli/pull/856) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- Release 2.9.0 merge [\#855](https://github.com/ZupIT/ritchie-cli/pull/855) ([zup-ci](https://github.com/zup-ci))
+- Feature - input autocomplete [\#821](https://github.com/ZupIT/ritchie-cli/pull/821) ([JoaoDanielRufino](https://github.com/JoaoDanielRufino))
+
 ## [2.9.1](https://github.com/zupit/ritchie-cli/tree/2.9.1) (2021-02-22)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.9.0...2.9.1)
@@ -7,9 +42,6 @@
 **Closed issues:**
 
 - Fix build with build.sh [\#863](https://github.com/ZupIT/ritchie-cli/issues/863)
-- Empty item in credential selection [\#852](https://github.com/ZupIT/ritchie-cli/issues/852)
-- Some repos from rit update repo do not show all its release [\#851](https://github.com/ZupIT/ritchie-cli/issues/851)
-- Tests with Testify in Pkg/Git/Gitlab [\#793](https://github.com/ZupIT/ritchie-cli/issues/793)
 - Release repo command [\#727](https://github.com/ZupIT/ritchie-cli/issues/727)
 - Support flags for rit update repo [\#722](https://github.com/ZupIT/ritchie-cli/issues/722)
 - Support flags for rit set env [\#719](https://github.com/ZupIT/ritchie-cli/issues/719)
@@ -20,13 +52,6 @@
 - Support flags for rit set credential [\#710](https://github.com/ZupIT/ritchie-cli/issues/710)
 - Enrich --help flag with more formula-related info [\#623](https://github.com/ZupIT/ritchie-cli/issues/623)
 - Create repo command [\#621](https://github.com/ZupIT/ritchie-cli/issues/621)
-
-**Merged pull requests:**
-
-- Update repo fix [\#866](https://github.com/ZupIT/ritchie-cli/pull/866) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
-- Fixing delete credential empty fields bug [\#864](https://github.com/ZupIT/ritchie-cli/pull/864) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
-- \[BUGFIX\] - Fix build with build.sh [\#862](https://github.com/ZupIT/ritchie-cli/pull/862) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
-- Release 2.9.0 merge [\#855](https://github.com/ZupIT/ritchie-cli/pull/855) ([zup-ci](https://github.com/zup-ci))
 
 ## [2.9.0](https://github.com/zupit/ritchie-cli/tree/2.9.0) (2021-02-09)
 
@@ -212,7 +237,6 @@
 - Add Research feature on the CLI [\#557](https://github.com/ZupIT/ritchie-cli/issues/557)
 - Unify and Simplify Context and Credential files and suggest the use of the file to set batch context and credentials  [\#556](https://github.com/ZupIT/ritchie-cli/issues/556)
 - Create a new command to add formulas template repository [\#521](https://github.com/ZupIT/ritchie-cli/issues/521)
-- Add the formula templates to ritchie-cli [\#511](https://github.com/ZupIT/ritchie-cli/issues/511)
 - Create new command rit "clean repo local" or "delete repo local" [\#475](https://github.com/ZupIT/ritchie-cli/issues/475)
 - Create new command rit list context [\#474](https://github.com/ZupIT/ritchie-cli/issues/474)
 - Create new command rit delete credential [\#472](https://github.com/ZupIT/ritchie-cli/issues/472)
@@ -255,6 +279,7 @@
 - fix lint [\#662](https://github.com/ZupIT/ritchie-cli/pull/662) ([victorschumacherzup](https://github.com/victorschumacherzup))
 - Release 2.3.0 merge [\#661](https://github.com/ZupIT/ritchie-cli/pull/661) ([zup-ci](https://github.com/zup-ci))
 - feat: add default text input to formula [\#654](https://github.com/ZupIT/ritchie-cli/pull/654) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
+- add default flag [\#635](https://github.com/ZupIT/ritchie-cli/pull/635) ([victorschumacherzup](https://github.com/victorschumacherzup))
 - Added update All for repo [\#602](https://github.com/ZupIT/ritchie-cli/pull/602) ([Harirai](https://github.com/Harirai))
 
 ## [2.3.0](https://github.com/zupit/ritchie-cli/tree/2.3.0) (2020-11-09)
@@ -284,7 +309,6 @@
 - Update CODEOWNERS [\#643](https://github.com/ZupIT/ritchie-cli/pull/643) ([kaduartur](https://github.com/kaduartur))
 - Feature/pipeline [\#639](https://github.com/ZupIT/ritchie-cli/pull/639) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - warning when formulas commands conflicts  [\#638](https://github.com/ZupIT/ritchie-cli/pull/638) ([victorschumacherzup](https://github.com/victorschumacherzup))
-- add default flag [\#635](https://github.com/ZupIT/ritchie-cli/pull/635) ([victorschumacherzup](https://github.com/victorschumacherzup))
 - added warning on same env name [\#633](https://github.com/ZupIT/ritchie-cli/pull/633) ([victorschumacherzup](https://github.com/victorschumacherzup))
 - added context printing [\#632](https://github.com/ZupIT/ritchie-cli/pull/632) ([victorschumacherzup](https://github.com/victorschumacherzup))
 - More linters [\#631](https://github.com/ZupIT/ritchie-cli/pull/631) ([lcd1232](https://github.com/lcd1232))
@@ -845,6 +869,7 @@
 
 - changed folder name [\#145](https://github.com/ZupIT/ritchie-cli/pull/145) ([victor-schumacher](https://github.com/victor-schumacher))
 - Release 1.0.0-beta.12 merge [\#144](https://github.com/ZupIT/ritchie-cli/pull/144) ([zup-ci](https://github.com/zup-ci))
+- \[FIX\] changed go to compiled [\#143](https://github.com/ZupIT/ritchie-cli/pull/143) ([victor-schumacher](https://github.com/victor-schumacher))
 - \[FIX\] update local repo name [\#142](https://github.com/ZupIT/ritchie-cli/pull/142) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
 ## [1.0.0-beta.12](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.12) (2020-06-03)
@@ -853,7 +878,6 @@
 
 **Merged pull requests:**
 
-- \[FIX\] changed go to compiled [\#143](https://github.com/ZupIT/ritchie-cli/pull/143) ([victor-schumacher](https://github.com/victor-schumacher))
 - Release 1.0.0-beta.11 merge [\#139](https://github.com/ZupIT/ritchie-cli/pull/139) ([zup-ci](https://github.com/zup-ci))
 
 ## [1.0.0-beta.11](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.11) (2020-06-02)

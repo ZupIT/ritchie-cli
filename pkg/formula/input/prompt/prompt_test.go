@@ -304,6 +304,33 @@ func TestConditionalInputs(t *testing.T) {
 			"operator": "%s",
 			"value":    "in_list1"
 		}
+    },
+    {
+        "name": "sample_bool",
+        "type": "bool",
+        "default": "false",
+        "items": [
+            "false",
+            "true"
+        ],
+		"condition": {
+			"variable": "sample_list",
+			"operator": "==",
+			"value":    "in_list2"
+		},
+        "label": "Pick: ",
+		"tutorial": "Select true or false for this field."
+    },
+    {
+        "name": "sample_password",
+        "type": "password",
+		"condition": {
+			"variable": "sample_bool",
+			"operator": "==",
+			"value":    "true"
+		},
+        "label": "Pick: ",
+		"tutorial": "Add a secret password for this field."
     }
 ]`
 
@@ -399,9 +426,9 @@ func TestConditionalInputs(t *testing.T) {
 			}
 
 			iTextDefault := &mocks.InputDefaultTextMock{}
-			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("default value", nil)
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("default", nil)
 			iList := &mocks.InputListMock{}
-			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", nil)
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("in_list1", nil)
 
 			inputManager := NewInputManager(
 				&mocks.CredResolverMock{},

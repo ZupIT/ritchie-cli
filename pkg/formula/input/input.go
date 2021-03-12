@@ -52,6 +52,15 @@ func containsArray(s []string, str string) bool {
 	return false
 }
 
+func inputConditionVariableExistsOnInputList(variable string, inputList formula.Inputs) bool {
+	for _, inputListElement := range inputList {
+		if inputListElement.Name == variable {
+			return true
+		}
+	}
+	return false
+}
+
 func containsSubstring(s string, substr string) bool {
 	return strings.Contains(s, substr)
 }
@@ -114,14 +123,22 @@ func valueContainsOnly(inputType string, value string, input string) bool {
 	return true
 }
 
-func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
+
+func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inputs) (bool, error) {
+
 	if input.Condition.Variable == "" {
 		return true, nil
 	}
 
-	var value string
 	var typeValue string
+  var value string
+
 	variable := input.Condition.Variable
+
+	if !inputConditionVariableExistsOnInputList(variable, inputList) {
+		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
+	}
+
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
 		if strings.ToLower(components[0]) == variable {
@@ -130,8 +147,9 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input) (bool, error) {
 			typeValue = components[1]
 		}
 	}
+
 	if value == "" {
-		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
+		return false, nil
 	}
 
 	if typeValue == "" {
