@@ -42,24 +42,30 @@ const (
 func TestPreRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
+	dockerBuilder := builder.NewBuildDocker(fileManager)
+
 	tmpDir := os.TempDir()
 	ritHomeName := ".rit-pre-run-docker"
 	ritHome := filepath.Join(tmpDir, ritHomeName)
+
 	reposPath := filepath.Join(ritHome, "repos")
 	repoPath := filepath.Join(reposPath, "commons")
 	repoPathOutdated := filepath.Join(reposPath, "commonsOutdated")
-	dockerBuilder := builder.NewBuildDocker(fileManager)
 
 	defer os.RemoveAll(ritHome)
 	_ = dirManager.Remove(ritHome)
-	_ = dirManager.Remove(repoPath)
-	_ = dirManager.Create(repoPath)
-	_ = dirManager.Remove(repoPathOutdated)
-	_ = dirManager.Create(repoPathOutdated)
+
+	createSaved := func(path string) {
+		_ = dirManager.Remove(path)
+		_ = dirManager.Create(path)
+	}
+	createSaved(repoPath)
+	createSaved(repoPathOutdated)
+
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 	_ = streams.Unzip(zipFile, repoPathOutdated)
-	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
 	_ = streams.Unzip(zipRepositories, reposPath)
 
 	var config, invalidConfig formula.Config
@@ -79,9 +85,8 @@ func TestPreRun(t *testing.T) {
 	}
 
 	type out struct {
-		want    formula.Setup
-		wantErr bool
-		err     error
+		want formula.Setup
+		err  error
 	}
 
 	tests := []struct {
@@ -101,8 +106,6 @@ func TestPreRun(t *testing.T) {
 				want: formula.Setup{
 					Config: config,
 				},
-				wantErr: false,
-				err:     nil,
 			},
 		},
 		{
@@ -118,9 +121,8 @@ func TestPreRun(t *testing.T) {
 				dir:  dirManager,
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     errors.New("failed building formula with Docker, we will try to build your formula locally"),
+				want: formula.Setup{},
+				err:  errors.New("failed building formula with Docker, we will try to build your formula locally"),
 			},
 		},
 		{
@@ -132,9 +134,8 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManager,
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     ErrDockerImageNotFound,
+				want: formula.Setup{},
+				err:  ErrDockerImageNotFound,
 			},
 		},
 		{
@@ -146,9 +147,8 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManagerMock{rmErr: errors.New("error to remove bin dir")},
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     errors.New("error to remove bin dir"),
+				want: formula.Setup{},
+				err:  errors.New("error to remove bin dir"),
 			},
 		},
 		{
@@ -158,8 +158,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: false},
 			},
 			out: out{
-				wantErr: true,
-				err:     fmt.Errorf(loadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
+				err: fmt.Errorf(loadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
 			},
 		},
 		{
@@ -169,8 +168,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: true, rErr: errors.New("error to read config")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("error to read config"),
+				err: errors.New("error to read config"),
 			},
 		},
 		{
@@ -180,8 +178,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: true, rBytes: []byte("error")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("invalid character 'e' looking for beginning of value"),
+				err: errors.New("invalid character 'e' looking for beginning of value"),
 			},
 		},
 		{
@@ -196,8 +193,6 @@ func TestPreRun(t *testing.T) {
 				want: formula.Setup{
 					Config: configWithLatestTagRequired,
 				},
-				wantErr: false,
-				err:     nil,
 			},
 		},
 		{
@@ -209,8 +204,7 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManager,
 			},
 			out: out{
-				wantErr: true,
-				err:     fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
+				err: fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
 			},
 		},
 	}

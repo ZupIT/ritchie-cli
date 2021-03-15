@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -31,6 +30,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -50,14 +50,18 @@ func TestPreRun(t *testing.T) {
 
 	defer os.RemoveAll(ritHome)
 	_ = dirManager.Remove(ritHome)
-	_ = dirManager.Remove(repoPath)
-	_ = dirManager.Create(repoPath)
-	_ = dirManager.Remove(repoPathOutdated)
-	_ = dirManager.Create(repoPathOutdated)
+
+	createSaved := func(path string) {
+		_ = dirManager.Remove(path)
+		_ = dirManager.Create(path)
+	}
+	createSaved(repoPath)
+	createSaved(repoPathOutdated)
+
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 	_ = streams.Unzip(zipFile, repoPathOutdated)
-	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
 	_ = streams.Unzip(zipRepositories, reposPath)
 
 	var config formula.Config
@@ -79,9 +83,8 @@ func TestPreRun(t *testing.T) {
 	}
 
 	type out struct {
-		want    formula.Setup
-		wantErr bool
-		err     error
+		want formula.Setup
+		err  error
 	}
 
 	tests := []struct {
@@ -115,8 +118,6 @@ func TestPreRun(t *testing.T) {
 				want: formula.Setup{
 					Config: config,
 				},
-				wantErr: false,
-				err:     nil,
 			},
 		},
 		{
@@ -137,8 +138,7 @@ func TestPreRun(t *testing.T) {
 				dir:  dirManager,
 			},
 			out: out{
-				wantErr: true,
-				err:     builder.ErrBuildFormulaMakefile,
+				err: builder.ErrBuildFormulaMakefile,
 			},
 		},
 		{
@@ -148,8 +148,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: false},
 			},
 			out: out{
-				wantErr: true,
-				err:     fmt.Errorf(loadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
+				err: fmt.Errorf(loadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
 			},
 		},
 		{
@@ -159,8 +158,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: true, rErr: errors.New("error to read config")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("error to read config"),
+				err: errors.New("error to read config"),
 			},
 		},
 		{
@@ -170,8 +168,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: true, rBytes: []byte("error")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("invalid character 'e' looking for beginning of value"),
+				err: errors.New("invalid character 'e' looking for beginning of value"),
 			},
 		},
 		{
@@ -197,9 +194,7 @@ func TestPreRun(t *testing.T) {
 				dir:  dirManagerMock{removeErr: errors.New("remove bin dir error")},
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     errors.New("remove bin dir error"),
+				err: errors.New("remove bin dir error"),
 			},
 		},
 		{
@@ -228,8 +223,6 @@ func TestPreRun(t *testing.T) {
 				want: formula.Setup{
 					Config: configWithLatestTagRequired,
 				},
-				wantErr: false,
-				err:     nil,
 			},
 		},
 		{
@@ -240,8 +233,7 @@ func TestPreRun(t *testing.T) {
 				dir:  dirManager,
 			},
 			out: out{
-				wantErr: true,
-				err:     fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
+				err: fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
 			},
 		},
 	}
@@ -251,21 +243,14 @@ func TestPreRun(t *testing.T) {
 			in := tt.in
 			_ = dirManager.Remove(filepath.Join(in.def.FormulaPath(ritHome), "bin"))
 			preRun := NewPreRun(ritHome, in.makeBuild, in.batBuild, in.shellBuild, in.dir, in.file, preRunChecker)
+
 			got, err := preRun.PreRun(in.def)
 
-			if tt.out.wantErr {
-				if tt.out.err == nil && err == nil {
-					t.Errorf("PreRun(%s) want a error", tt.name)
-				}
-
-				if tt.out.err != nil && err != nil && tt.out.err.Error() != err.Error() {
-					t.Errorf("PreRun(%s) got %v, want %v", tt.name, err, tt.out.err)
-				}
+			if err != nil || tt.out.err != nil {
+				assert.Equal(t, tt.out.err.Error(), err.Error())
 			}
 
-			if !reflect.DeepEqual(tt.out.want.Config, got.Config) {
-				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got.Config, tt.out.want.Config)
-			}
+			assert.Equal(t, tt.out.want.Config, got.Config)
 
 			_ = os.Chdir(got.Pwd) // Return to test folder
 		})
