@@ -38,10 +38,3 @@ func TestContains(t *testing.T) {
 		})
 	}
 }
-
-func TestUnique(t *testing.T) {
-	aa := []string{"Dockerfile", "run.sh", "Dockerfile", "run.sh", "docker-compose.yml"}
-	unique := Unique(aa)
-	assert.Len(t, unique, 1)
-	assert.Equal(t, unique[0], "docker-compose.yml")
-}

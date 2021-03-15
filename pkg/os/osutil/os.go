@@ -16,14 +16,8 @@
 
 package osutil
 
-import "runtime"
-
 const (
 	Darwin  = "darwin"
 	Linux   = "linux"
 	Windows = "windows"
 )
-
-func IsWindows() bool {
-	return runtime.GOOS == Windows
-}
