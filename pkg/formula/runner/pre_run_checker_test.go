@@ -68,21 +68,21 @@ func TestCheckVersionCompliance(t *testing.T) {
 		outErr               error
 	}{
 		{
-			name:                 "Return nil when require latest version in true and repository is updated",
+			name:                 "Return nil when require latest version is true and repository is updated",
 			repoName:             "commonsOutdated",
 			requirelatestVersion: true,
 		},
 		{
-			name:                 "Return nil when require latest version in false",
-			repoName:             "commons",
-			requirelatestVersion: false,
-		},
-		{
-			name:                 "Return nil when require latest version in true and repository is outdated",
+			name:                 "Return nil when require latest version is true and repository is outdated",
 			repoName:             "commons",
 			requirelatestVersion: true,
 
 			outErr: fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
+		},
+		{
+			name:                 "Return nil when require latest version is false",
+			repoName:             "commons",
+			requirelatestVersion: false,
 		},
 	}
 
