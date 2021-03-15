@@ -116,7 +116,7 @@ func valueContainsOnly(inputType string, value string, input string) bool {
 			}
 		}
 	} else {
-		if !(strings.EqualFold(strings.ToLower(value), strings.ToLower(input))) {
+		if !strings.EqualFold(value, input) {
 			return false
 		}
 	}
@@ -140,9 +140,9 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inp
 
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
-		if strings.ToLower(components[0]) == variable {
+		if strings.ToLower(components[0]) == strings.ToLower(variable) {
 			value = components[1]
-		} else if strings.ToLower(components[0]) == (variable + TypeSuffix) {
+		} else if strings.ToLower(components[0]) == strings.ToLower(variable + TypeSuffix) {
 			typeValue = components[1]
 		}
 	}
