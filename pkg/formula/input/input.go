@@ -116,9 +116,7 @@ func valueContainsOnly(inputType string, value string, input string) bool {
 			}
 		}
 	} else {
-		if !strings.EqualFold(value, input) {
-			return false
-		}
+		return strings.EqualFold(value, input)
 	}
 	return true
 }
