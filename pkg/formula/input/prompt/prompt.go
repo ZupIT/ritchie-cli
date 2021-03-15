@@ -115,7 +115,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 			checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
 			checkForSameEnv(i.Name + TypeSuffix)
-			input.AddEnv(cmd, i.Name + TypeSuffix, i.Type)
+			input.AddEnv(cmd, i.Name+TypeSuffix, i.Type)
 		}
 
 	}

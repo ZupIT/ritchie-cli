@@ -140,9 +140,9 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inp
 
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
-		if strings.ToLower(components[0]) == strings.ToLower(variable) {
+		if strings.EqualFold(components[0], variable) {
 			value = components[1]
-		} else if strings.ToLower(components[0]) == strings.ToLower(variable + TypeSuffix) {
+		} else if strings.EqualFold(components[0], variable+TypeSuffix) {
 			typeValue = components[1]
 		}
 	}
