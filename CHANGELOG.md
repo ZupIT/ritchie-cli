@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.10.1](https://github.com/zupit/ritchie-cli/tree/2.10.1) (2021-03-15)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.10.0...2.10.1)
+
+**Merged pull requests:**
+
+- Revert "Remove formula tmp dir \(\#875\)" [\#886](https://github.com/ZupIT/ritchie-cli/pull/886) ([kaduartur](https://github.com/kaduartur))
+- Release 2.10.0 merge [\#885](https://github.com/ZupIT/ritchie-cli/pull/885) ([zup-ci](https://github.com/zup-ci))
+
 ## [2.10.0](https://github.com/zupit/ritchie-cli/tree/2.10.0) (2021-03-11)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.9.1...2.10.0)
@@ -115,7 +124,6 @@
 - Flags for rit add repo [\#827](https://github.com/ZupIT/ritchie-cli/pull/827) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Add flags to delete env [\#826](https://github.com/ZupIT/ritchie-cli/pull/826) ([brunasilvazup](https://github.com/brunasilvazup))
 - Set credential flags [\#824](https://github.com/ZupIT/ritchie-cli/pull/824) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
-- feat: add bitbucket as a provider to add repos [\#823](https://github.com/ZupIT/ritchie-cli/pull/823) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Updating horusec endpoint [\#820](https://github.com/ZupIT/ritchie-cli/pull/820) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - fixing release pipeline [\#819](https://github.com/ZupIT/ritchie-cli/pull/819) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - Release 2.7.0 merge [\#818](https://github.com/ZupIT/ritchie-cli/pull/818) ([zup-ci](https://github.com/zup-ci))
@@ -145,6 +153,7 @@
 
 **Merged pull requests:**
 
+- feat: add bitbucket as a provider to add repos [\#823](https://github.com/ZupIT/ritchie-cli/pull/823) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Fix delete workspace [\#816](https://github.com/ZupIT/ritchie-cli/pull/816) ([kaduartur](https://github.com/kaduartur))
 - Fix add empty local repo [\#815](https://github.com/ZupIT/ritchie-cli/pull/815) ([kaduartur](https://github.com/kaduartur))
 - created rit add workspace command [\#809](https://github.com/ZupIT/ritchie-cli/pull/809) ([aronrichter](https://github.com/aronrichter))
@@ -349,7 +358,6 @@
 - Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
 - Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
 - Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
-- Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - refactor: add timeout to the functional testing job [\#596](https://github.com/ZupIT/ritchie-cli/pull/596) ([DittrichLucas](https://github.com/DittrichLucas))
 - stable version was not updating when generate release [\#595](https://github.com/ZupIT/ritchie-cli/pull/595) ([victorschumacherzup](https://github.com/victorschumacherzup))
@@ -381,6 +389,7 @@
 
 - Remove preinst.sh script [\#586](https://github.com/ZupIT/ritchie-cli/pull/586) ([kaduartur](https://github.com/kaduartur))
 - Set tutorial output more informative [\#583](https://github.com/ZupIT/ritchie-cli/pull/583) ([Harirai](https://github.com/Harirai))
+- Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - Fixing windows installer and logo [\#574](https://github.com/ZupIT/ritchie-cli/pull/574) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Default tree refactoring to use file manager of package stream [\#568](https://github.com/ZupIT/ritchie-cli/pull/568) ([brunats](https://github.com/brunats))
 - Use version 1.3.0 of horus [\#567](https://github.com/ZupIT/ritchie-cli/pull/567) ([victor-schumacher](https://github.com/victor-schumacher))
@@ -869,7 +878,6 @@
 
 - changed folder name [\#145](https://github.com/ZupIT/ritchie-cli/pull/145) ([victor-schumacher](https://github.com/victor-schumacher))
 - Release 1.0.0-beta.12 merge [\#144](https://github.com/ZupIT/ritchie-cli/pull/144) ([zup-ci](https://github.com/zup-ci))
-- \[FIX\] changed go to compiled [\#143](https://github.com/ZupIT/ritchie-cli/pull/143) ([victor-schumacher](https://github.com/victor-schumacher))
 - \[FIX\] update local repo name [\#142](https://github.com/ZupIT/ritchie-cli/pull/142) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 
 ## [1.0.0-beta.12](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.12) (2020-06-03)
@@ -878,6 +886,7 @@
 
 **Merged pull requests:**
 
+- \[FIX\] changed go to compiled [\#143](https://github.com/ZupIT/ritchie-cli/pull/143) ([victor-schumacher](https://github.com/victor-schumacher))
 - Release 1.0.0-beta.11 merge [\#139](https://github.com/ZupIT/ritchie-cli/pull/139) ([zup-ci](https://github.com/zup-ci))
 
 ## [1.0.0-beta.11](https://github.com/zupit/ritchie-cli/tree/1.0.0-beta.11) (2020-06-02)
