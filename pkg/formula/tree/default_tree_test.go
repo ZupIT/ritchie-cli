@@ -43,8 +43,8 @@ func TestMergedTree(t *testing.T) {
 	}
 
 	type in struct {
-		repo    repo
-		core    bool
+		repo repo
+		core bool
 	}
 
 	tests := []struct {
