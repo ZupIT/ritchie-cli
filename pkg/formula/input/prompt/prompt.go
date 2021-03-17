@@ -43,7 +43,7 @@ const (
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
-	TypeSuffix           = "_type"
+	TypeSuffix           = "__type"
 )
 
 type InputManager struct {

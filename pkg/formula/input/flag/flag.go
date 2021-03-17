@@ -33,7 +33,7 @@ import (
 
 const (
 	errInvalidInputItemsMsg = "the value [%v] is not valid, only these input items [%s] are accepted in the %q flag"
-	TypeSuffix              = "_type"
+	TypeSuffix              = "__type"
 )
 
 type InputManager struct {

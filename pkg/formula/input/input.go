@@ -21,7 +21,7 @@ const (
 	DynamicType          = "dynamic"
 	MultiselectType      = "multiselect"
 	MultiselectSeparator = "|"
-	TypeSuffix           = "_type"
+	TypeSuffix           = "__type"
 )
 
 // addEnv Add environment variable to run formulas.
