@@ -1,8 +1,26 @@
 # Changelog
 
+## [2.10.2](https://github.com/zupit/ritchie-cli/tree/2.10.2) (2021-03-17)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.10.1...2.10.2)
+
+**Closed issues:**
+
+- Add a "contains" operator to the conditional input \(config.json file\) [\#858](https://github.com/ZupIT/ritchie-cli/issues/858)
+
+**Merged pull requests:**
+
+- Release 2.10.1 merge [\#887](https://github.com/ZupIT/ritchie-cli/pull/887) ([zup-ci](https://github.com/zup-ci))
+- Adding feature containsAny, containsAll, containsOnly, notContainsAny and notContainsAll in conditional options [\#874](https://github.com/ZupIT/ritchie-cli/pull/874) ([andressaabreuzup](https://github.com/andressaabreuzup))
+- Correction of input flags with parameter not required. [\#894](https://github.com/ZupIT/ritchie-cli/pull/894) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
+
 ## [2.10.1](https://github.com/zupit/ritchie-cli/tree/2.10.1) (2021-03-15)
 
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.10.0...2.10.1)
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/v2.10.1...2.10.1)
+
+## [v2.10.1](https://github.com/zupit/ritchie-cli/tree/v2.10.1) (2021-03-15)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.10.0...v2.10.1)
 
 **Merged pull requests:**
 
@@ -124,6 +142,7 @@
 - Flags for rit add repo [\#827](https://github.com/ZupIT/ritchie-cli/pull/827) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Add flags to delete env [\#826](https://github.com/ZupIT/ritchie-cli/pull/826) ([brunasilvazup](https://github.com/brunasilvazup))
 - Set credential flags [\#824](https://github.com/ZupIT/ritchie-cli/pull/824) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
+- feat: add bitbucket as a provider to add repos [\#823](https://github.com/ZupIT/ritchie-cli/pull/823) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Updating horusec endpoint [\#820](https://github.com/ZupIT/ritchie-cli/pull/820) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - fixing release pipeline [\#819](https://github.com/ZupIT/ritchie-cli/pull/819) ([viniciusramosdefaria](https://github.com/viniciusramosdefaria))
 - Release 2.7.0 merge [\#818](https://github.com/ZupIT/ritchie-cli/pull/818) ([zup-ci](https://github.com/zup-ci))
@@ -153,7 +172,6 @@
 
 **Merged pull requests:**
 
-- feat: add bitbucket as a provider to add repos [\#823](https://github.com/ZupIT/ritchie-cli/pull/823) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Fix delete workspace [\#816](https://github.com/ZupIT/ritchie-cli/pull/816) ([kaduartur](https://github.com/kaduartur))
 - Fix add empty local repo [\#815](https://github.com/ZupIT/ritchie-cli/pull/815) ([kaduartur](https://github.com/kaduartur))
 - created rit add workspace command [\#809](https://github.com/ZupIT/ritchie-cli/pull/809) ([aronrichter](https://github.com/aronrichter))
@@ -358,6 +376,7 @@
 - Fix timer os metric build formula watch [\#601](https://github.com/ZupIT/ritchie-cli/pull/601) ([brunats](https://github.com/brunats))
 - Add env docker\_execution [\#599](https://github.com/ZupIT/ritchie-cli/pull/599) ([fabianofernandeszup](https://github.com/fabianofernandeszup))
 - Release 2.1.0 merge [\#590](https://github.com/ZupIT/ritchie-cli/pull/590) ([zup-ci](https://github.com/zup-ci))
+- Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - List workspace command [\#485](https://github.com/ZupIT/ritchie-cli/pull/485) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - refactor: add timeout to the functional testing job [\#596](https://github.com/ZupIT/ritchie-cli/pull/596) ([DittrichLucas](https://github.com/DittrichLucas))
 - stable version was not updating when generate release [\#595](https://github.com/ZupIT/ritchie-cli/pull/595) ([victorschumacherzup](https://github.com/victorschumacherzup))
@@ -389,7 +408,6 @@
 
 - Remove preinst.sh script [\#586](https://github.com/ZupIT/ritchie-cli/pull/586) ([kaduartur](https://github.com/kaduartur))
 - Set tutorial output more informative [\#583](https://github.com/ZupIT/ritchie-cli/pull/583) ([Harirai](https://github.com/Harirai))
-- Added new version warning for repositories in rit helper [\#582](https://github.com/ZupIT/ritchie-cli/pull/582) ([brunats](https://github.com/brunats))
 - Fixing windows installer and logo [\#574](https://github.com/ZupIT/ritchie-cli/pull/574) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Default tree refactoring to use file manager of package stream [\#568](https://github.com/ZupIT/ritchie-cli/pull/568) ([brunats](https://github.com/brunats))
 - Use version 1.3.0 of horus [\#567](https://github.com/ZupIT/ritchie-cli/pull/567) ([victor-schumacher](https://github.com/victor-schumacher))
