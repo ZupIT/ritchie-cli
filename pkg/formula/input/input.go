@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/slice/sliceutil"
 )
 
 type InputTextDefault interface {
@@ -13,15 +14,16 @@ type InputTextDefault interface {
 }
 
 const (
-	TextType             = "text"
-	ListType             = "list"
-	BoolType             = "bool"
-	PassType             = "password"
-	PathType             = "path"
-	DynamicType          = "dynamic"
-	MultiselectType      = "multiselect"
-	MultiselectSeparator = "|"
-	TypeSuffix           = "__type"
+	TextType                  = "text"
+	ListType                  = "list"
+	BoolType                  = "bool"
+	PassType                  = "password"
+	PathType                  = "path"
+	DynamicType               = "dynamic"
+	MultiselectType           = "multiselect"
+	MultiselectSeparator      = "|"
+	InputConditionalSeparator = "|"
+	TypeSuffix                = "__type"
 )
 
 // addEnv Add environment variable to run formulas.
@@ -43,15 +45,6 @@ func HasRegex(input formula.Input) bool {
 	return len(input.Pattern.Regex) > 0
 }
 
-func containsArray(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-	return false
-}
-
 func inputConditionVariableExistsOnInputList(variable string, inputList formula.Inputs) bool {
 	for _, inputListElement := range inputList {
 		if inputListElement.Name == variable {
@@ -66,11 +59,11 @@ func containsSubstring(s string, substr string) bool {
 }
 
 func valueContainsAny(inputType string, value string, input string) bool {
-	splitInput := strings.Split(input, "|")
+	splitInput := strings.Split(input, InputConditionalSeparator)
 	if inputType == MultiselectType {
-		splitValue := strings.Split(value, "|")
+		splitValue := strings.Split(value, MultiselectSeparator)
 		for _, i := range splitInput {
-			if containsArray(splitValue, i) {
+			if sliceutil.Contains(splitValue, i) {
 				return true
 			}
 		}
@@ -85,11 +78,11 @@ func valueContainsAny(inputType string, value string, input string) bool {
 }
 
 func valueContainsAll(inputType string, value string, input string) bool {
-	splitInput := strings.Split(input, "|")
+	splitInput := strings.Split(input, InputConditionalSeparator)
 	if inputType == MultiselectType {
-		splitValue := strings.Split(value, "|")
+		splitValue := strings.Split(value, MultiselectSeparator)
 		for _, v := range splitInput {
-			if !containsArray(splitValue, v) {
+			if !sliceutil.Contains(splitValue, v) {
 				return false
 			}
 		}
@@ -105,13 +98,13 @@ func valueContainsAll(inputType string, value string, input string) bool {
 
 func valueContainsOnly(inputType string, value string, input string) bool {
 	if inputType == MultiselectType {
-		splitInput := strings.Split(input, "|")
-		splitValue := strings.Split(value, "|")
+		splitInput := strings.Split(input, InputConditionalSeparator)
+		splitValue := strings.Split(value, MultiselectSeparator)
 		if len(splitValue) != len(splitInput) {
 			return false
 		}
 		for _, v := range splitInput {
-			if !containsArray(splitValue, v) {
+			if !sliceutil.Contains(splitValue, v) {
 				return false
 			}
 		}
@@ -127,14 +120,14 @@ func VerifyConditional(cmd *exec.Cmd, input formula.Input, inputList formula.Inp
 		return true, nil
 	}
 
-	var typeValue string
-	var value string
-
 	variable := input.Condition.Variable
 
 	if !inputConditionVariableExistsOnInputList(variable, inputList) {
 		return false, fmt.Errorf("config.json: conditional variable %s not found", variable)
 	}
+
+	var typeValue string
+	var value string
 
 	for _, envVal := range cmd.Env {
 		components := strings.Split(envVal, "=")
