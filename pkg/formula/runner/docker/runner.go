@@ -107,9 +107,6 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 			volume,
 			"-v",
 			homeDirVolume,
-			"--name",
-			setup.ContainerId,
-			setup.ContainerId,
 		}
 	} else {
 		args = []string{
@@ -121,12 +118,14 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 			volume,
 			"-v",
 			homeDirVolume,
-			"--name",
-			setup.ContainerId,
-			setup.ContainerId,
 		}
 	}
 
+	for _, value := range setup.Config.Volumes {
+		args = append(args, []string{"-v", value}...)
+	}
+
+	args = append(args, []string{"--name", setup.ContainerId, setup.ContainerId}...)
 	//nolint:gosec,lll
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Stdin = os.Stdin

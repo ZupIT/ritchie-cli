@@ -92,6 +92,7 @@ type (
 	Config struct {
 		DockerIB string `json:"dockerImageBuilder"`
 		Inputs   Inputs `json:"inputs"`
+		Volumes  []string `json:"dockerVolumes"`
 	}
 
 	// Definition type that represents a Formula
