@@ -34,11 +34,11 @@ function Unzip
 
 Write-Output 'EXTRACTING WIX FILES TO PATH'
 
-Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\circleci\AppData\Local\Microsoft\WindowsApps"
+Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\ContainerAdministrator\AppData\Local\Microsoft\WindowsApps"
 
 Write-Output 'Setting Release Version Variable'
 
-$release_version=$(Get-Content .\workspace\dist\release_version.txt)
+$release_version=$(Get-Content .\dist\release_version.txt)
 
 mkdir dist\installer
 
@@ -46,19 +46,25 @@ cd packaging\windows
 
 Write-Output 'GENERATING WIX MSI TEMPLATE'
 
-& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix.json --version $release_version --src ritchie-wix-templates --out $release_version
+& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix.json --version $release_version --src ritchie-admin-wix-templates --out $release_version\admin
+
+& 'C:\Program Files\go-msi\go-msi.exe' generate-templates --path wix.json --version $release_version --src ritchie-user-wix-templates --out $release_version\user
 
 Write-Output 'GENERATING MSI INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version --path wix.json --src $release_version
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli.msi --version $release_version --path wix.json --src $release_version\admin
+
+& 'C:\Program Files\go-msi\go-msi.exe' make --msi ritchiecli-user.msi --version $release_version --path wix.json --src $release_version\user
 
 Write-Output 'GENERATING CHOCO INSTALLER'
 
-& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-ritchie" --input ritchiecli.msi --path wix.json --src $release_version
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-ritchie" --input ritchiecli.msi --path wix.json --src $release_version\admin
+
+& 'C:\Program Files\go-msi\go-msi.exe' choco --version $release_version"-ritchie" --input ritchiecli-user.msi --path wix.json --src $release_version\user
 
 
 Write-Output 'COPYING FILES TO THE RIGHT PLACE'
 
-copy ritchie* ..\..\dist\installer
+copy *.msi ..\..\dist\installer
 
 copy *.nupkg ..\..\dist\installer
