@@ -34,11 +34,11 @@ function Unzip
 
 Write-Output 'EXTRACTING WIX FILES TO PATH'
 
-Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\ContainerAdministrator\AppData\Local\Microsoft\WindowsApps"
+Unzip "$((Get-Item -Path ".\").FullName)\wix310-binaries.zip" "C:\\Users\circleci\AppData\Local\Microsoft\WindowsApps"
 
 Write-Output 'Setting Release Version Variable'
 
-$release_version=$(Get-Content .\dist\release_version.txt)
+$release_version=$(Get-Content .\workspace\dist\release_version.txt)
 
 mkdir dist\installer
 
