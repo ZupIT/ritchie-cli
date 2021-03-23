@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"strconv"
 
+
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/mattn/go-isatty"
@@ -93,39 +94,38 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 }
 
 func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) (*exec.Cmd, error) {
-	volume := fmt.Sprintf("%s:/app", setup.Pwd)
-	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir)
-	var args []string
+	volumes := []string{
+		fmt.Sprintf("%s:/app", setup.Pwd),
+		fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir),
+	}
+
+	volumes = append(
+		volumes,
+		setup.Config.Volumes...,
+	)
+
+	args := []string {
+		"run",
+		"--rm",
+		"--env-file",
+		envFile,
+	}
+
 	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
-		args = []string{
-			"run",
-			"--rm",
-			"-it",
-			"--env-file",
-			envFile,
-			"-v",
-			volume,
-			"-v",
-			homeDirVolume,
-		}
-	} else {
-		args = []string{
-			"run",
-			"--rm",
-			"--env-file",
-			envFile,
-			"-v",
-			volume,
-			"-v",
-			homeDirVolume,
-		}
+		args = append(args, "-it")
 	}
 
-	for _, value := range setup.Config.Volumes {
-		args = append(args, []string{"-v", value}...)
+	for _, volume := range volumes {
+		args = append(args, "-v", volume)
 	}
 
-	args = append(args, []string{"--name", setup.ContainerId, setup.ContainerId}...)
+	args = append(
+		args,
+		"--name",
+		setup.ContainerId,
+		setup.ContainerId,
+	)
+
 	//nolint:gosec,lll
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Stdin = os.Stdin

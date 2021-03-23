@@ -90,8 +90,8 @@ type (
 	Inputs []Input
 
 	Config struct {
-		DockerIB string `json:"dockerImageBuilder"`
-		Inputs   Inputs `json:"inputs"`
+		DockerIB string   `json:"dockerImageBuilder"`
+		Inputs   Inputs   `json:"inputs"`
 		Volumes  []string `json:"dockerVolumes"`
 	}
 
