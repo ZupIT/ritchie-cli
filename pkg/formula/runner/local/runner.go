@@ -17,11 +17,15 @@
 package local
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/pflag"
 
@@ -71,7 +75,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	formulaRun := filepath.Join(setup.BinPath, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
+	// cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := ru.setEnvs(cmd, setup.Pwd, verbose); err != nil {
@@ -97,8 +101,44 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return nil
 	}
 
+	out, _ := cmd.StdoutPipe()
+	done := make(chan struct{})
+	scanner := bufio.NewScanner(out)
+
+	output := []string{}
+	if out != nil {
+		go func() {
+			if scanner != nil {
+				for scanner.Scan() {
+					line := scanner.Text()
+
+					if strings.Contains(line,
+						"::output") {
+						output = append(output, line)
+					} else {
+						fmt.Println(line)
+					}
+				}
+			}
+
+			done <- struct{}{}
+		}()
+	} else {
+		close(done)
+	}
+
 	if err := cmd.Run(); err != nil {
 		return err
+	}
+	<-done
+
+	sanitizeOutput := sanitizeData(output)
+	flattenOutput := flattenData(sanitizeOutput)
+	transformOutput := transformData(flattenOutput)
+	if len(transformOutput) > 0 {
+		output := filepath.Join(setup.BinPath, "output.json")
+		testJson, _ := json.MarshalIndent(transformOutput, "", "\t")
+		ioutil.WriteFile(output, testJson, os.ModePerm)
 	}
 
 	return nil
@@ -153,4 +193,39 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv, env)
 
 	return nil
+}
+
+func sanitizeData(data []string) []string {
+	var sanitizeData []string
+	for i := range data {
+		output := strings.Split(data[i], " ")[1:]
+		newOutput := strings.Join(output, " ")
+		sanitizeData = append(sanitizeData, newOutput)
+	}
+
+	return sanitizeData
+}
+
+func flattenData(data []string) []string {
+	var flattenData []string
+	for i := range data {
+		element := strings.Split(data[i], " ")
+		for j := range element {
+			flattenData = append(flattenData, element[j])
+		}
+	}
+
+	return flattenData
+}
+
+func transformData(data []string) map[string]string {
+	transformData := make(map[string]string)
+	for i := range data {
+		test := strings.Split(data[i], "=")
+		key := test[0]
+		value := test[1]
+		transformData[key] = value
+	}
+
+	return transformData
 }
