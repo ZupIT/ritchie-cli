@@ -102,22 +102,28 @@ ifneq "$(IS_RELEASE)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
+	cp dist/installer/ritchiecli-user.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli-user.msi"
 endif
 ifneq "$(IS_QA)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
+	cp dist/installer/ritchiecli-user.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli-user.msi"
 endif
 ifneq "$(IS_STG)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
+	cp dist/installer/ritchiecli-user.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli-user.msi"
 endif
 else
 	echo "NOT GONNA PUBLISH"
