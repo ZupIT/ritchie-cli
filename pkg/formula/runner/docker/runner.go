@@ -98,11 +98,12 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 		fmt.Sprintf("%s:/app", setup.Pwd),
 		fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir),
 	}
-
-	volumes = append(
-		volumes,
-		setup.Config.Volumes...,
-	)
+	if setup.Config.Volumes != nil && len(setup.Config.Volumes) != 0 {
+		volumes = append(
+			volumes,
+			setup.Config.Volumes...,
+		)
+	}
 
 	args := []string {
 		"run",

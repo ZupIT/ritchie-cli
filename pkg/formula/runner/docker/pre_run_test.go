@@ -69,6 +69,36 @@ func TestPreRun(t *testing.T) {
 		out  out
 	}{
 		{
+		name: "docker volumes success",
+		in: in{
+			def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
+			dockerBuild: dockerBuilder,
+			file:        fileManager,
+			dir:         dirManager,
+		},
+		out: out{
+			want:    formula.Setup{
+				Config: config,
+			},
+			wantErr: false,
+			err:     nil,
+		},
+	},
+		{
+			name: "invalid docker volume",
+			in: in{
+				def:         formula.Definition{Path: "testing/invalid-volumes-config", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManager,
+			},
+			out: out{
+				want:    formula.Setup{},
+				wantErr: true,
+				err:     ErrInvalidVolume,
+			},
+		},
+		{
 			name: "docker build success",
 			in: in{
 				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
@@ -274,6 +304,8 @@ func (fi fileManagerMock) Append(path string, content []byte) error {
 const (
 	configJson = `{
   "dockerImageBuilder": "cimg/go:1.14",
+  "dockerVolumes" : [
+  ],
   "inputs": [
     {
       "cache": {
