@@ -22,7 +22,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 )
 
-const versionError = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
+const ErrPreRunCheckerVersion = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
 
 type PreRunCheckerManager struct {
 	repoList repo.ListManager
@@ -37,7 +37,7 @@ func (pr *PreRunCheckerManager) CheckVersionCompliance(repoName string, requireL
 		repos, _ := pr.repoList.List()
 		repo, _ := repos.Get(repoName)
 		if repo.Version.String() != repo.LatestVersion.String() {
-			return fmt.Errorf(versionError, repo.Version.String(), repo.LatestVersion.String())
+			return fmt.Errorf(ErrPreRunCheckerVersion, repo.Version.String(), repo.LatestVersion.String())
 		}
 	}
 	return nil

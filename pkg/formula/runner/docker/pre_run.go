@@ -51,7 +51,6 @@ var (
 	ErrDockerfileNotFound = errors.New(
 		"the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker",
 	)
-	versionError = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
 )
 
 var _ formula.PreRunner = PreRunManager{}

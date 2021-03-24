@@ -77,7 +77,7 @@ func TestCheckVersionCompliance(t *testing.T) {
 			repoName:             "commons",
 			requirelatestVersion: true,
 
-			outErr: fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
+			outErr: fmt.Errorf(ErrorPreRunCheckerVersion, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
 		},
 		{
 			name:                 "Return nil when require latest version is false",

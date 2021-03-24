@@ -233,7 +233,7 @@ func TestPreRun(t *testing.T) {
 				dir:  dirManager,
 			},
 			out: out{
-				err: fmt.Errorf(versionError, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
+				err: fmt.Errorf(runner.ErrPreRunCheckerVersion, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
 			},
 		},
 	}

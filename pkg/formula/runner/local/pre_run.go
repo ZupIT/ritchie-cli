@@ -34,7 +34,6 @@ import (
 
 const (
 	loadConfigErrMsg = "Failed to load formula config file\nTry running rit update repo\nConfig file path not found: %s"
-	versionError     = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
 )
 
 var _ formula.PreRunner = PreRunManager{}
