@@ -25,26 +25,3 @@ func Contains(aa []string, s string) bool {
 	}
 	return false
 }
-
-// Unique returns a slice that contains
-// only non repeated values.
-func Unique(aa []string) []string {
-	check := make(map[string]int)
-	for _, v := range aa {
-		if check[v] == 1 {
-			check[v]++
-			continue
-		}
-
-		check[v] = 1
-	}
-
-	var res []string
-	for _, v := range aa {
-		if check[v] == 1 {
-			res = append(res, v)
-		}
-	}
-
-	return res
-}

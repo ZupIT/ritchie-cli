@@ -22,9 +22,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
@@ -100,7 +99,7 @@ func TestPreRun(t *testing.T) {
 			out: out{
 				want:    formula.Setup{},
 				wantErr: true,
-				err:     errors.New("failed building formula with Docker, we will try to build your formula locally"),
+				err:     nil,
 			},
 		},
 		{
@@ -164,6 +163,32 @@ func TestPreRun(t *testing.T) {
 				err:     errors.New("invalid character 'e' looking for beginning of value"),
 			},
 		},
+		{
+			name: "create work dir error",
+			in: in{
+				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManagerMock{createErr: errors.New("error to create dir")},
+			},
+			out: out{
+				wantErr: true,
+				err:     errors.New("error to create dir"),
+			},
+		},
+		{
+			name: "copy work dir error",
+			in: in{
+				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManagerMock{copyErr: errors.New("error to copy dir")},
+			},
+			out: out{
+				wantErr: true,
+				err:     errors.New("error to copy dir"),
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -173,11 +198,19 @@ func TestPreRun(t *testing.T) {
 			preRun := NewPreRun(ritHome, in.dockerBuild, in.dir, in.file)
 			got, err := preRun.PreRun(in.def)
 
-			if err != nil || tt.out.err != nil {
-				assert.EqualError(t, tt.out.err, err.Error())
+			if tt.out.wantErr {
+				if tt.out.err == nil && err == nil {
+					t.Errorf("PreRun(%s) want a error", tt.name)
+				}
+
+				if tt.out.err != nil && err != nil && tt.out.err.Error() != err.Error() {
+					t.Errorf("PreRun(%s) got %v, want %v", tt.name, err, tt.out.err)
+				}
 			}
 
-			assert.Equal(t, tt.out.want.Config, got.Config)
+			if !reflect.DeepEqual(tt.out.want.Config, got.Config) {
+				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got.Config, tt.out.want.Config)
+			}
 
 			_ = os.Chdir(got.Pwd) // Return to test folder
 		})
@@ -219,7 +252,6 @@ type fileManagerMock struct {
 	rErr   error
 	wErr   error
 	aErr   error
-	reErr  error
 	exist  bool
 }
 
@@ -237,10 +269,6 @@ func (fi fileManagerMock) Exists(string) bool {
 
 func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
-}
-
-func (fi fileManagerMock) Remove(path string) error {
-	return fi.reErr
 }
 
 const (

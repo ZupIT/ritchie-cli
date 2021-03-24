@@ -43,6 +43,7 @@ const (
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
+	TypeSuffix           = "__type"
 )
 
 type InputManager struct {
@@ -113,8 +114,12 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 			in.persistCache(setup.FormulaPath, inputVal, i, items)
 			checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
+			checkForSameEnv(i.Name + TypeSuffix)
+			input.AddEnv(cmd, i.Name+TypeSuffix, i.Type)
 		}
+
 	}
+
 	return nil
 }
 

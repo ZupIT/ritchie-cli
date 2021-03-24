@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+
+ <!-- The URL for add/remove programs -->
+<?define InfoURL="https://docs.ritchiecli.io/" ?>
+
+<?if $(sys.BUILDARCH)="x86"?>
+    <?define Program_Files="ProgramFilesFolder"?>
+<?elseif $(sys.BUILDARCH)="x64"?>
+    <?define Program_Files="ProgramFiles64Folder"?>
+<?else?>
+    <?error Unsupported value of sys.BUILDARCH=$(sys.BUILDARCH)?>
+<?endif?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+   <Product Id="*" UpgradeCode="{{.UpgradeCode}}"
+            Name="{{.Product}}"
+            Version="{{.VersionOk}}"
+            Manufacturer="{{.Company}}"
+            Language="1033">
+
+      <Package
+         InstallerVersion="200"
+         Compressed="yes"
+         Comments="Windows Installer Package"
+         AdminImage="no"
+         ReadOnly="yes"/>
+
+      <WixVariable Id="WixUIBannerBmp" Value="C:\workspace\docs\img\ritchie-banner.bmp" />
+      <WixVariable Id="WixUIDialogBmp" Value="C:\workspace\docs\img\ritchie-dialog.bmp" />
+
+      <Property Id="ARPHELPLINK" Value="$(var.InfoURL)" />
+
+      <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
+
+      <Upgrade Id="{{.UpgradeCode}}">
+         <UpgradeVersion Minimum="{{.VersionOk}}" OnlyDetect="yes" Property="NEWERVERSIONDETECTED"/>
+         <UpgradeVersion Minimum="0.0.0" Maximum="{{.VersionOk}}" IncludeMinimum="yes" IncludeMaximum="no"
+                         Property="OLDERVERSIONBEINGUPGRADED"/>
+      </Upgrade>
+      <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
+
+      <Directory Id="TARGETDIR" Name="SourceDir">
+         <Directory Id="$(var.Program_Files)">
+            <Directory Id="INSTALLDIR" Name="{{.Product}}">
+               <Component Id="ApplicationFiles" Guid="{{.Files.GUID}}">
+                    <File Id="ApplicationFile0" Source="C:\workspace\workspace\dist\windows\rit.exe"/>
+               </Component>
+            </Directory>
+         </Directory>
+
+         {{if gt (.Env.Vars | len) 0}}
+         <Component Id="ENVS" Guid="{{.Env.GUID}}">
+          {{range $i, $e := .Env.Vars}}
+          <Environment Id="ENV{{$i}}"
+            Name="{{$e.Name}}"
+            Value="{{$e.Value}}"
+            Permanent="{{$e.Permanent}}"
+            Part="{{$e.Part}}"
+            Action="{{$e.Action}}"
+            System="{{$e.System}}" />
+          {{end}}
+        </Component>
+        {{end}}
+      </Directory>
+      <InstallExecuteSequence>
+         <RemoveExistingProducts After="InstallValidate"/>
+      </InstallExecuteSequence>
+
+      <Feature Id="DefaultFeature" Level="1">
+         <ComponentRef Id="ENVS"/>
+         <ComponentRef Id="ApplicationFiles"/>
+      </Feature>
+
+      <UI>
+         <!-- Define the installer UI -->
+         <UIRef Id="WixUI_HK" />
+      </UI>
+
+      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+      <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Thank you for installing Ritchie!" />
+
+      <!-- this should help to propagate env var changes -->
+      <CustomActionRef Id="WixBroadcastEnvironmentChange" />
+
+   </Product>
+
+</Wix>
