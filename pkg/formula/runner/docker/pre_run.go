@@ -53,7 +53,7 @@ var (
 	)
 	ErrInvalidVolume = errors.New(
 		"config.json file does not contain a valid volume to be mounted",
-		)
+	)
 )
 
 var _ formula.PreRunner = PreRunManager{}
@@ -230,10 +230,10 @@ func validateDocker(dockerImg string) error {
 
 // validate checks if volumes is not nul
 func validateVolumes(dockerVolumes []string) error {
-			for _, volume := range dockerVolumes {
-				if !strings.Contains(volume,":") {
-					return ErrInvalidVolume
-				}
-			}
+	for _, volume := range dockerVolumes {
+		if !strings.Contains(volume, ":") {
+			return ErrInvalidVolume
+		}
+	}
 	return nil
 }

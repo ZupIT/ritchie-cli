@@ -22,7 +22,6 @@ import (
 	"os/exec"
 	"strconv"
 
-
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
 	"github.com/mattn/go-isatty"
@@ -105,7 +104,7 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 		)
 	}
 
-	args := []string {
+	args := []string{
 		"run",
 		"--rm",
 		"--env-file",

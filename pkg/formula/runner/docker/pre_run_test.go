@@ -69,21 +69,21 @@ func TestPreRun(t *testing.T) {
 		out  out
 	}{
 		{
-		name: "docker volumes success",
-		in: in{
-			def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
-			dockerBuild: dockerBuilder,
-			file:        fileManager,
-			dir:         dirManager,
-		},
-		out: out{
-			want:    formula.Setup{
-				Config: config,
+			name: "docker volumes success",
+			in: in{
+				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManager,
 			},
-			wantErr: false,
-			err:     nil,
+			out: out{
+				want: formula.Setup{
+					Config: config,
+				},
+				wantErr: false,
+				err:     nil,
+			},
 		},
-	},
 		{
 			name: "invalid docker volume",
 			in: in{
