@@ -40,6 +40,11 @@ func (pr *PreRunCheckerManager) CheckVersionCompliance(repoName string, requireL
 		if err != nil {
 			return fmt.Errorf(ErrPreRunCheckerRepo, repoName)
 		}
+
+		if repo.IsLocal {
+			return nil
+		}
+
 		if repo.Version.String() != repo.LatestVersion.String() {
 			return fmt.Errorf(ErrPreRunCheckerVersion, repo.Version.String(), repo.LatestVersion.String())
 		}

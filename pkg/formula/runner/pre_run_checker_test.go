@@ -46,6 +46,7 @@ func TestCheckVersionCompliance(t *testing.T) {
 	reposPath := filepath.Join(ritHome, "repos")
 	repoPath := filepath.Join(reposPath, "commons")
 	repoPathUpdated := filepath.Join(reposPath, "commonsUpdated")
+	repoPathLocal := filepath.Join(reposPath, "local")
 
 	createSaved := func(path string) {
 		_ = dirManager.Remove(path)
@@ -54,11 +55,13 @@ func TestCheckVersionCompliance(t *testing.T) {
 	createSaved(ritHome)
 	createSaved(repoPath)
 	createSaved(repoPathUpdated)
+	createSaved(repoPathLocal)
 
 	zipFile := filepath.Join("../../../testdata", "ritchie-formulas-test.zip")
 	zipRepositories := filepath.Join("../../../testdata", "repositories.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 	_ = streams.Unzip(zipFile, repoPathUpdated)
+	_ = streams.Unzip(zipFile, repoPathLocal)
 	_ = streams.Unzip(zipRepositories, reposPath)
 
 	tests := []struct {
@@ -75,6 +78,11 @@ func TestCheckVersionCompliance(t *testing.T) {
 		{
 			name:     "Return nil when require latest version is false",
 			repoName: "commons",
+		},
+		{
+			name:                 "Return nil when require latest version is true and repository it's local",
+			repoName:             "local",
+			requireLatestVersion: true,
 		},
 		{
 			name:                 "Return error version when require latest version is true and repository is outdated",
