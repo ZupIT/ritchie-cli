@@ -46,7 +46,7 @@ func TestPreRun(t *testing.T) {
 	ritHome := filepath.Join(tmpDir, ritHomeName)
 	reposPath := filepath.Join(ritHome, "repos")
 	repoPath := filepath.Join(reposPath, "commons")
-	repoPathOutdated := filepath.Join(reposPath, "commonsOutdated")
+	repoPathOutdated := filepath.Join(reposPath, "commonsUpdated")
 
 	defer os.RemoveAll(ritHome)
 	_ = dirManager.Remove(ritHome)
@@ -200,7 +200,7 @@ func TestPreRun(t *testing.T) {
 		{
 			name: "local build success with latest version required and repository is updated",
 			in: in{
-				def: formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commonsOutdated"},
+				def: formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commonsUpdated"},
 				makeBuild: makeBuildMock{
 					build: func(formulaPath string) error {
 						return dirManager.Create(filepath.Join(formulaPath, "bin"))
