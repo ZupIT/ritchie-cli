@@ -19,11 +19,13 @@ package runner
 import (
 	"fmt"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 )
 
-const ErrPreRunCheckerVersion = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
-const ErrPreRunCheckerRepo = "Failed to run formula, this formula needs run in the last version of repository.\n\tThe repository could not be identified: %s"
+const ErrPreRunChecker = "Failed to run formula, this formula needs run in the last version of repository."
+const ErrPreRunCheckerVersion = ErrPreRunChecker + "\n\tCurrent version: %s\n\tLatest version: %s"
+const ErrPreRunCheckerRepo = ErrPreRunChecker + "\n\t%s"
 
 type PreRunCheckerManager struct {
 	repoList repo.ListManager
@@ -34,20 +36,36 @@ func NewPreRunBuilderChecker(listManager repo.ListManager) PreRunCheckerManager 
 }
 
 func (pr *PreRunCheckerManager) CheckVersionCompliance(repoName string, requireLatestVersion bool) error {
-	if requireLatestVersion {
-		repos, _ := pr.repoList.List()
-		repo, err := repos.Get(repoName)
-		if err != nil {
-			return fmt.Errorf(ErrPreRunCheckerRepo, repoName)
-		}
-
-		if repo.IsLocal {
-			return nil
-		}
-
-		if repo.Version.String() != repo.LatestVersion.String() {
-			return fmt.Errorf(ErrPreRunCheckerVersion, repo.Version.String(), repo.LatestVersion.String())
-		}
+	if !requireLatestVersion {
+		return nil
 	}
+
+	repo, err := pr.getRepo(repoName)
+	if err != nil {
+		return err
+	}
+
+	if repo.IsLocal {
+		return nil
+	}
+
+	if repo.Version.String() != repo.LatestVersion.String() {
+		return fmt.Errorf(ErrPreRunCheckerVersion, repo.Version.String(), repo.LatestVersion.String())
+	}
+
 	return nil
+}
+
+func (pr *PreRunCheckerManager) getRepo(name string) (formula.Repo, error) {
+	repos, err := pr.repoList.List()
+	if err != nil {
+		return formula.Repo{}, fmt.Errorf(ErrPreRunCheckerRepo, err)
+	}
+
+	repo, err := repos.Get(name)
+	if err != nil {
+		return formula.Repo{}, fmt.Errorf(ErrPreRunCheckerRepo, err)
+	}
+
+	return repo, nil
 }

@@ -17,7 +17,7 @@
 package runner
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -80,7 +80,7 @@ func TestCheckVersionCompliance(t *testing.T) {
 			repoName: "commons",
 		},
 		{
-			name:                 "Return nil when require latest version is true and repository it's local",
+			name:                 "Return nil when require latest version is true and repository is local",
 			repoName:             "local",
 			requireLatestVersion: true,
 		},
@@ -89,14 +89,14 @@ func TestCheckVersionCompliance(t *testing.T) {
 			repoName:             "commons",
 			requireLatestVersion: true,
 
-			outErr: fmt.Errorf(ErrPreRunCheckerVersion, currentVersionCommonsInRepositoriesZip, latestVersionCommonsInRepositoriesZip),
+			outErr: errors.New("Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: 2.15.1\n\tLatest version: 3.0.0"),
 		},
 		{
-			name:                 "Return error repo when require latest version is true and repository not be identify",
+			name:                 "Return error repo when repository not be identify",
 			repoName:             "otherRepo",
 			requireLatestVersion: true,
 
-			outErr: fmt.Errorf(ErrPreRunCheckerRepo, "otherRepo"),
+			outErr: errors.New("Failed to run formula, this formula needs run in the last version of repository.\n\tRepo with name: otherRepo not found"),
 		},
 	}
 
