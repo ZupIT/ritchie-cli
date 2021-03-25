@@ -28,11 +28,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	currentVersionCommonsInRepositoriesZip = "2.15.1"
-	latestVersionCommonsInRepositoriesZip  = "3.0.0"
-)
-
 func TestCheckVersionCompliance(t *testing.T) {
 	tmpDir := os.TempDir()
 	ritHomeName := ".rit-pre-run-checker"
