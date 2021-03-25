@@ -23,6 +23,7 @@ import (
 )
 
 const ErrPreRunCheckerVersion = "Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: %s\n\tLatest version: %s"
+const ErrPreRunCheckerRepo = "Failed to run formula, this formula needs run in the last version of repository.\n\tThe repository could not be identified: %s"
 
 type PreRunCheckerManager struct {
 	repoList repo.ListManager
@@ -35,7 +36,10 @@ func NewPreRunBuilderChecker(listManager repo.ListManager) PreRunCheckerManager 
 func (pr *PreRunCheckerManager) CheckVersionCompliance(repoName string, requireLatestVersion bool) error {
 	if requireLatestVersion {
 		repos, _ := pr.repoList.List()
-		repo, _ := repos.Get(repoName)
+		repo, err := repos.Get(repoName)
+		if err != nil {
+			return fmt.Errorf(ErrPreRunCheckerRepo, repoName)
+		}
 		if repo.Version.String() != repo.LatestVersion.String() {
 			return fmt.Errorf(ErrPreRunCheckerVersion, repo.Version.String(), repo.LatestVersion.String())
 		}
