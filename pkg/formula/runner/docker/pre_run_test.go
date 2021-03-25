@@ -24,14 +24,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPreRun(t *testing.T) {
@@ -117,7 +116,7 @@ func TestPreRun(t *testing.T) {
 			},
 			out: out{
 				want: formula.Setup{},
-				err:  errors.New("failed building formula with Docker, we will try to build your formula locally"),
+				err:  builder.ErrDockerBuild,
 			},
 		},
 		{
@@ -202,6 +201,30 @@ func TestPreRun(t *testing.T) {
 				err: fmt.Errorf("Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: 2.15.1\n\tLatest version: 3.0.0"),
 			},
 		},
+		{
+			name: "create work dir error",
+			in: in{
+				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManagerMock{createErr: errors.New("error to create dir")},
+			},
+			out: out{
+				err: errors.New("error to create dir"),
+			},
+		},
+		{
+			name: "copy work dir error",
+			in: in{
+				def:         formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManagerMock{copyErr: errors.New("error to copy dir")},
+			},
+			out: out{
+				err: errors.New("error to copy dir"),
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -257,7 +280,6 @@ type fileManagerMock struct {
 	rErr   error
 	wErr   error
 	aErr   error
-	reErr  error
 	exist  bool
 }
 
@@ -275,10 +297,6 @@ func (fi fileManagerMock) Exists(string) bool {
 
 func (fi fileManagerMock) Append(path string, content []byte) error {
 	return fi.aErr
-}
-
-func (fi fileManagerMock) Remove(path string) error {
-	return fi.reErr
 }
 
 const (

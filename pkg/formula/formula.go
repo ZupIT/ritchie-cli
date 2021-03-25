@@ -21,6 +21,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/spf13/pflag"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
@@ -105,6 +106,7 @@ type (
 		FormulaPath string
 		BinName     string
 		BinPath     string
+		TmpDir      string
 		Config      Config
 		ContainerId string
 	}
@@ -144,6 +146,13 @@ type CreateBuilder interface {
 // FormulaPath builds the formula path from ritchie home
 func (d *Definition) FormulaPath(home string) string {
 	return filepath.Join(home, ReposDir, d.RepoName, d.Path)
+}
+
+// TmpWorkDirPath builds the tmp paths to run formula, first parameter is tmpDir created
+// second parameter is tmpBinDir
+func (d *Definition) TmpWorkDirPath(home string) string {
+	u := uuid.New().String()
+	return filepath.Join(home, TmpDir, u)
 }
 
 func (d *Definition) UnixBinFilePath(fPath string) string {
