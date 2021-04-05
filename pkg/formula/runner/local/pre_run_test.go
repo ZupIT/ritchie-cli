@@ -78,8 +78,9 @@ func TestPreRun(t *testing.T) {
 	}
 
 	type out struct {
-		want formula.Setup
-		err  error
+		want             formula.Setup
+		err              error
+		NonSpecificError bool
 	}
 
 	tests := []struct {
@@ -240,6 +241,10 @@ func TestPreRun(t *testing.T) {
 				file: fileManager,
 				dir:  dirManagerMock{},
 			},
+			out: out{
+				err:              errors.New("chdir /tmp/.rit-pre-run-local/tmp/"),
+				NonSpecificError: true,
+			},
 		},
 		{
 			name: "local build error delete bin dir",
@@ -317,7 +322,11 @@ func TestPreRun(t *testing.T) {
 			got, err := preRun.PreRun(in.def)
 
 			if err != nil || tt.out.err != nil {
-				assert.Equal(t, tt.out.err.Error(), err.Error())
+				if tt.out.NonSpecificError {
+					assert.Contains(t, err.Error(), tt.out.err.Error())
+				} else {
+					assert.Equal(t, tt.out.err.Error(), err.Error())
+				}
 			}
 
 			assert.Equal(t, tt.out.want.Config, got.Config)
