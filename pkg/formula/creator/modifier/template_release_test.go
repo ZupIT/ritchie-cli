@@ -18,10 +18,10 @@ package modifier
 
 import (
 	"net/http"
-	"reflect"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTemplateRelease(t *testing.T) {
@@ -49,9 +49,8 @@ func TestTemplateRelease(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tr := TemplateRelease{}
-			if got := tr.modify(tt.args.b); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("modify() = %v, want %v", string(got), string(tt.want))
-			}
+			got := tr.modify(tt.args.b)
+			assert.Equal(t, got, tt.want)
 		})
 	}
 }
