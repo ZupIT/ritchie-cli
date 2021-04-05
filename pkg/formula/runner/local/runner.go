@@ -134,8 +134,15 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	transformOutput := transformData(flattenOutput)
 	if len(transformOutput) > 0 {
 		output := filepath.Join(setup.BinPath, "output.json")
-		testJson, _ := json.MarshalIndent(transformOutput, "", "\t")
-		ioutil.WriteFile(output, testJson, os.ModePerm)
+
+		data, err := json.MarshalIndent(transformOutput, "", "\t")
+		if err != nil {
+			return err
+		}
+
+		if err := ioutil.WriteFile(output, data, os.ModePerm); err != nil {
+			return err
+		}
 	}
 
 	metric.RepoName = def.RepoName
@@ -167,7 +174,7 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 }
 
 func sanitizeData(data []string) []string {
-	var sanitizeData []string
+	sanitizeData := []string{}
 	for i := range data {
 		output := strings.Split(data[i], " ")[1:]
 		newOutput := strings.Join(output, " ")
@@ -178,7 +185,7 @@ func sanitizeData(data []string) []string {
 }
 
 func flattenData(data []string) []string {
-	var flattenData []string
+	flattenData := []string{}
 	for i := range data {
 		element := strings.Split(data[i], " ")
 		for j := range element {
