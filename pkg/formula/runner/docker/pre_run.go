@@ -228,7 +228,7 @@ func validateDocker(dockerImg string) error {
 	return nil
 }
 
-// validate checks if volumes is not nul
+// validate checks if volumes is not null
 func validateVolumes(dockerVolumes []string) error {
 	for _, volume := range dockerVolumes {
 		if !strings.Contains(volume, ":") {
