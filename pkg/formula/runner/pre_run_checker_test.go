@@ -84,14 +84,14 @@ func TestCheckVersionCompliance(t *testing.T) {
 			repoName:             "commons",
 			requireLatestVersion: true,
 
-			outErr: errors.New("Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: 2.15.1\n\tLatest version: 3.0.0"),
+			outErr: errors.New("This formula needs run in the latest version of the repository\n\tCurrent version: 2.15.1\n\tLatest version: 3.0.0\nRun 'rit update repo' to update."),
 		},
 		{
 			name:                 "Return error repo when repository not be identify",
 			repoName:             "otherRepo",
 			requireLatestVersion: true,
 
-			outErr: errors.New("Failed to run formula, this formula needs run in the last version of repository.\n\tRepo with name: otherRepo not found"),
+			outErr: errors.New("This formula needs run in the latest version of the repository\n\tRepo with name: otherRepo not found."),
 		},
 	}
 

@@ -23,9 +23,9 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 )
 
-const ErrPreRunChecker = "Failed to run formula, this formula needs run in the last version of repository."
-const ErrPreRunCheckerVersion = ErrPreRunChecker + "\n\tCurrent version: %s\n\tLatest version: %s"
-const ErrPreRunCheckerRepo = ErrPreRunChecker + "\n\t%s"
+const ErrPreRunChecker = "This formula needs run in the latest version of the repository"
+const ErrPreRunCheckerVersion = ErrPreRunChecker + "\n\tCurrent version: %s\n\tLatest version: %s\nRun 'rit update repo' to update."
+const ErrPreRunCheckerRepo = ErrPreRunChecker + "\n\t%s."
 
 type PreRunCheckerManager struct {
 	repoList repo.ListManager

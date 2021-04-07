@@ -308,7 +308,7 @@ func TestPreRun(t *testing.T) {
 				dir:  dirManager,
 			},
 			out: out{
-				err: fmt.Errorf("Failed to run formula, this formula needs run in the last version of repository.\n\tCurrent version: 2.15.1\n\tLatest version: 3.0.0"),
+				err: fmt.Errorf("This formula needs run in the latest version of the repository\n\tCurrent version: 2.15.1\n\tLatest version: 3.0.0\nRun 'rit update repo' to update."),
 			},
 		},
 	}
