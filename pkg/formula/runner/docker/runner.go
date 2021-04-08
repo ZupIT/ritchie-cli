@@ -18,11 +18,9 @@ package docker
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
@@ -31,6 +29,8 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
@@ -41,21 +41,27 @@ const (
 var _ formula.Runner = RunManager{}
 
 type RunManager struct {
-	homeDir string
-	env     env.Finder
+	formula.PostRunner
 	formula.InputResolver
 	formula.PreRunner
+	file    stream.FileWriteExistAppender
+	env     env.Finder
+	homeDir string
 }
 
 func NewRunner(
-	homeDir string,
+	postRun formula.PostRunner,
 	input formula.InputResolver,
 	preRun formula.PreRunner,
+	file stream.FileWriteExistAppender,
 	env env.Finder,
+	homeDir string,
 ) formula.Runner {
 	return RunManager{
+		PostRunner:    postRun,
 		InputResolver: input,
 		PreRunner:     preRun,
+		file:          file,
 		env:           env,
 		homeDir:       homeDir,
 	}
@@ -68,7 +74,8 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	}
 
 	defer func() {
-		if err := os.Remove(envFile); err != nil {
+		if err := ru.PostRun(setup, true); err != nil {
+			prompt.Error(err.Error())
 			return
 		}
 	}()
@@ -86,39 +93,38 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 }
 
 func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) (*exec.Cmd, error) {
-	volume := fmt.Sprintf("%s:/app", setup.Pwd)
-	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir)
-	var args []string
-	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
-		args = []string{
-			"run",
-			"--rm",
-			"-it",
-			"--env-file",
-			envFile,
-			"-v",
-			volume,
-			"-v",
-			homeDirVolume,
-			"--name",
-			setup.ContainerId,
-			setup.ContainerId,
-		}
-	} else {
-		args = []string{
-			"run",
-			"--rm",
-			"--env-file",
-			envFile,
-			"-v",
-			volume,
-			"-v",
-			homeDirVolume,
-			"--name",
-			setup.ContainerId,
-			setup.ContainerId,
-		}
+	volumes := []string{
+		fmt.Sprintf("%s:/app", setup.Pwd),
+		fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir),
 	}
+	if setup.Config.Volumes != nil && len(setup.Config.Volumes) != 0 {
+		volumes = append(
+			volumes,
+			setup.Config.Volumes...,
+		)
+	}
+
+	args := []string{
+		"run",
+		"--rm",
+		"--env-file",
+		envFile,
+	}
+
+	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
+		args = append(args, "-it")
+	}
+
+	for _, volume := range volumes {
+		args = append(args, "-v", volume)
+	}
+
+	args = append(
+		args,
+		"--name",
+		setup.ContainerId,
+		setup.ContainerId,
+	)
 
 	//nolint:gosec,lll
 	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
@@ -155,14 +161,16 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
 	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv, env)
 
-	envs := strings.Builder{}
-	for _, e := range cmd.Env {
-		envs.WriteString(e + "\n")
-	}
-
-	// Create a file named .env and add the environment variable inName=inValue
-	if err := ioutil.WriteFile(envFile, []byte(envs.String()), os.ModePerm); err != nil {
-		return err
+	for _, e := range cmd.Env { // Create a file named .envHolder and add the environment variable inName=inValue
+		if !ru.file.Exists(envFile) {
+			if err := ru.file.Write(envFile, []byte(e+"\n")); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := ru.file.Append(envFile, []byte(e+"\n")); err != nil {
+			return err
+		}
 	}
 
 	return nil

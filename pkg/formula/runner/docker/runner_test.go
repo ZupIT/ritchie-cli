@@ -22,8 +22,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -57,7 +55,7 @@ func TestRun(t *testing.T) {
 
 	envFinder := env.NewFinder(ritHome, fileManager)
 	preRunner := NewPreRun(ritHome, dockerBuilder, dirManager, fileManager)
-
+	postRunner := runner.NewPostRunner(fileManager, dirManager)
 	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, inputMock{}, inputMock{}, inputTextValidatorMock{str: "test"}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{}, inPath)
 	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
 	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
@@ -72,8 +70,10 @@ func TestRun(t *testing.T) {
 	type in struct {
 		def           formula.Definition
 		preRun        formula.PreRunner
+		postRun       formula.PostRunner
 		inputResolver formula.InputResolver
 		env           env.Finder
+		fileManager   stream.FileWriteExistAppender
 	}
 
 	type out struct {
@@ -90,7 +90,9 @@ func TestRun(t *testing.T) {
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
+				postRun:       postRunner,
 				inputResolver: inputResolver,
+				fileManager:   fileManager,
 				env:           envFinder,
 			},
 			out: out{
@@ -102,7 +104,9 @@ func TestRun(t *testing.T) {
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
+				postRun:       postRunner,
 				inputResolver: inputResolverMock{err: runner.ErrInputNotRecognized},
+				fileManager:   fileManager,
 				env:           envFinder,
 			},
 			out: out{
@@ -114,7 +118,9 @@ func TestRun(t *testing.T) {
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunnerMock{err: errors.New("pre runner error")},
+				postRun:       postRunner,
 				inputResolver: inputResolver,
+				fileManager:   fileManager,
 				env:           envFinder,
 			},
 			out: out{
@@ -122,11 +128,55 @@ func TestRun(t *testing.T) {
 			},
 		},
 		{
+			name: "post run error",
+			in: in{
+				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				preRun:        preRunner,
+				postRun:       postRunnerMock{err: errors.New("post runner error")},
+				inputResolver: inputResolver,
+				fileManager:   fileManager,
+				env:           envFinder,
+			},
+			out: out{
+				err: nil,
+			},
+		},
+		{
+			name: "run docker write .env error",
+			in: in{
+				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				preRun:        preRunner,
+				postRun:       postRunner,
+				inputResolver: inputResolver,
+				fileManager:   fileManagerMock{wErr: errors.New("error to write env file")},
+				env:           envFinder,
+			},
+			out: out{
+				err: errors.New("error to write env file"),
+			},
+		},
+		{
+			name: "Run docker append .env error",
+			in: in{
+				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
+				preRun:        preRunner,
+				postRun:       postRunner,
+				inputResolver: inputResolver,
+				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
+				env:           envFinder,
+			},
+			out: out{
+				err: errors.New("error to append env file"),
+			},
+		},
+		{
 			name: "env find error",
 			in: in{
 				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
 				preRun:        preRunner,
+				postRun:       postRunner,
 				inputResolver: inputResolver,
+				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
 				env:           envFinderMock{err: errors.New("env not found")},
 			},
 			out: out{
@@ -137,23 +187,13 @@ func TestRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pwd, _ := os.Getwd()
-			formulaPath := tt.in.def.FormulaPath(ritHome)
-			_ = os.Chdir(formulaPath)
-
 			in := tt.in
-			docker := NewRunner(homeDir, in.inputResolver, in.preRun, in.env)
+			docker := NewRunner(in.postRun, in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
 			got := docker.Run(in.def, api.Prompt, false, nil)
 
-			if got != nil || tt.out.err != nil {
-				assert.EqualError(t, tt.out.err, got.Error())
-			} else {
-				fileCreated := filepath.Join(formulaPath, "test.txt")
-				assert.FileExists(t, fileCreated)
-				_ = os.Remove(fileCreated)
+			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
+				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.out.err)
 			}
-
-			_ = os.Chdir(pwd)
 		})
 	}
 
@@ -166,6 +206,14 @@ type preRunnerMock struct {
 
 func (pr preRunnerMock) PreRun(def formula.Definition) (formula.Setup, error) {
 	return pr.setup, pr.err
+}
+
+type postRunnerMock struct {
+	err error
+}
+
+func (po postRunnerMock) PostRun(p formula.Setup, docker bool) error {
+	return po.err
 }
 
 type envResolverMock struct {

@@ -91,7 +91,7 @@ func TestInputs(t *testing.T) {
 			in: in{
 				operator: "eq",
 			},
-			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
+			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=, containsAny, containsAll, containsOnly, notContainsAny, notContainsAll)"),
 		},
 		{
 			name: "mismatch error operator",

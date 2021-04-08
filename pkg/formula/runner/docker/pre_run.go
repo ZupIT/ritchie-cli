@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
@@ -49,6 +50,9 @@ var (
 	)
 	ErrDockerfileNotFound = errors.New(
 		"the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker",
+	)
+	ErrInvalidVolume = errors.New(
+		"config.json file does not contain a valid volume to be mounted",
 	)
 )
 
@@ -78,7 +82,6 @@ func NewPreRun(
 func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	pwd, _ := os.Getwd()
 	formulaPath := def.FormulaPath(pr.ritchieHome)
-	binPath := def.BinPath(formulaPath)
 
 	config, err := pr.loadConfig(formulaPath, def)
 	if err != nil {
@@ -88,11 +91,13 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	binFilePath := def.UnixBinFilePath(formulaPath)
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
-		if err := pr.buildFormula(formulaPath, config.DockerIB); err != nil {
+		time.Sleep(2 * time.Second)
+
+		if err := pr.buildFormula(formulaPath, config.DockerIB, config.Volumes); err != nil {
 			s.Stop()
 
 			// Remove /bin dir to force formula rebuild in next execution
-			if err := pr.dir.Remove(binPath); err != nil {
+			if err := pr.dir.Remove(def.BinPath(formulaPath)); err != nil {
 				return formula.Setup{}, err
 			}
 
@@ -102,7 +107,12 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		s.Success(prompt.Green("Formula was successfully built!"))
 	}
 
-	if err := os.Chdir(binPath); err != nil {
+	tmpDir, err := pr.createWorkDir(pr.ritchieHome, formulaPath, def)
+	if err != nil {
+		return formula.Setup{}, err
+	}
+
+	if err := os.Chdir(tmpDir); err != nil {
 		return formula.Setup{}, err
 	}
 
@@ -110,11 +120,12 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		Pwd:         pwd,
 		FormulaPath: formulaPath,
 		BinName:     def.BinName(),
-		BinPath:     binPath,
+		BinPath:     def.BinPath(formulaPath),
+		TmpDir:      tmpDir,
 		Config:      config,
 	}
 
-	dockerFile := filepath.Join(binPath, "Dockerfile")
+	dockerFile := filepath.Join(tmpDir, "Dockerfile")
 	if !pr.file.Exists(dockerFile) {
 		return formula.Setup{}, ErrDockerfileNotFound
 	}
@@ -127,8 +138,12 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	return s, nil
 }
 
-func (pr PreRunManager) buildFormula(formulaPath, dockerImg string) error {
+func (pr PreRunManager) buildFormula(formulaPath, dockerImg string, dockerVolumes []string) error {
 	if err := validateDocker(dockerImg); err != nil {
+		return err
+	}
+
+	if err := validateVolumes(dockerVolumes); err != nil {
 		return err
 	}
 
@@ -156,6 +171,20 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 		return formula.Config{}, err
 	}
 	return formulaConfig, nil
+}
+
+func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Definition) (string, error) {
+	tDir := def.TmpWorkDirPath(home)
+	if err := pr.dir.Create(tDir); err != nil {
+		return "", err
+	}
+
+	binPath := def.BinPath(formulaPath)
+	if err := pr.dir.Copy(binPath, tDir); err != nil {
+		return "", err
+	}
+
+	return tDir, nil
 }
 
 func buildRunImg(def formula.Definition) (string, error) {
@@ -196,5 +225,15 @@ func validateDocker(dockerImg string) error {
 		return ErrDockerImageNotFound
 	}
 
+	return nil
+}
+
+// validate checks if volumes is not null
+func validateVolumes(dockerVolumes []string) error {
+	for _, volume := range dockerVolumes {
+		if !strings.Contains(volume, ":") {
+			return ErrInvalidVolume
+		}
+	}
 	return nil
 }
