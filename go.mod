@@ -7,7 +7,6 @@ require (
 	github.com/JoaoDanielRufino/go-input-autocomplete v0.0.0-20210303185303-8a29eb5e8f8d
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/denisbrodbeck/machineid v1.0.1
-	github.com/eiannone/keyboard v0.0.0-20200508000154-caf4b762e807 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/golang/protobuf v1.4.1
 	github.com/google/uuid v1.1.1
