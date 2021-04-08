@@ -101,7 +101,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		}
 	}
 
-	if len(emptyInputs) > 0 {
+	if len(emptyFlags) > 0 {
 		return fmt.Errorf("these flags cannot be empty [%s]", strings.Join(emptyFlags, ", "))
 	}
 
