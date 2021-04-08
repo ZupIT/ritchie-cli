@@ -22,33 +22,54 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPreRun(t *testing.T) {
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
+	dockerBuilder := builder.NewBuildDocker(fileManager)
+
 	tmpDir := os.TempDir()
 	ritHomeName := ".rit-pre-run-docker"
 	ritHome := filepath.Join(tmpDir, ritHomeName)
-	repoPath := filepath.Join(ritHome, "repos", "commons")
-	dockerBuilder := builder.NewBuildDocker(fileManager)
 
+	reposPath := filepath.Join(ritHome, "repos")
+	repoPath := filepath.Join(reposPath, "commons")
+	repoPathOutdated := filepath.Join(reposPath, "commonsUpdated")
+
+	defer os.RemoveAll(ritHome)
 	_ = dirManager.Remove(ritHome)
-	_ = dirManager.Remove(repoPath)
-	_ = dirManager.Create(repoPath)
+
+	createSaved := func(path string) {
+		_ = dirManager.Remove(path)
+		_ = dirManager.Create(path)
+	}
+	createSaved(repoPath)
+	createSaved(repoPathOutdated)
+
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
 	_ = streams.Unzip(zipFile, repoPath)
+	_ = streams.Unzip(zipFile, repoPathOutdated)
+	_ = streams.Unzip(zipRepositories, reposPath)
 
 	var config, invalidConfig formula.Config
-	_ = json.Unmarshal([]byte(configJson), &config)
-	_ = json.Unmarshal([]byte(invalidConfigJson), &invalidConfig)
+	_ = json.Unmarshal([]byte(configJSON), &config)
+	_ = json.Unmarshal([]byte(invalidConfigJSON), &invalidConfig)
+	configWithLatestTagRequired := config
+	configWithLatestTagRequired.RequireLatestVersion = true
+
+	repoLister := repo.NewLister(ritHome, fileManager)
+	preRunChecker := runner.NewPreRunBuilderChecker(repoLister)
 
 	type in struct {
 		def         formula.Definition
@@ -58,9 +79,8 @@ func TestPreRun(t *testing.T) {
 	}
 
 	type out struct {
-		want    formula.Setup
-		wantErr bool
-		err     error
+		want formula.Setup
+		err  error
 	}
 
 	tests := []struct {
@@ -80,8 +100,7 @@ func TestPreRun(t *testing.T) {
 				want: formula.Setup{
 					Config: config,
 				},
-				wantErr: false,
-				err:     nil,
+				err: nil,
 			},
 		},
 		{
@@ -93,9 +112,7 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManager,
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     ErrInvalidVolume,
+				err: ErrInvalidVolume,
 			},
 		},
 		{
@@ -110,8 +127,6 @@ func TestPreRun(t *testing.T) {
 				want: formula.Setup{
 					Config: config,
 				},
-				wantErr: false,
-				err:     nil,
 			},
 		},
 		{
@@ -127,9 +142,8 @@ func TestPreRun(t *testing.T) {
 				dir:  dirManager,
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     nil,
+				want: formula.Setup{},
+				err:  builder.ErrDockerBuild,
 			},
 		},
 		{
@@ -141,9 +155,8 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManager,
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     ErrDockerImageNotFound,
+				want: formula.Setup{},
+				err:  ErrDockerImageNotFound,
 			},
 		},
 		{
@@ -155,9 +168,8 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManagerMock{rmErr: errors.New("error to remove bin dir")},
 			},
 			out: out{
-				want:    formula.Setup{},
-				wantErr: true,
-				err:     errors.New("error to remove bin dir"),
+				want: formula.Setup{},
+				err:  errors.New("error to remove bin dir"),
 			},
 		},
 		{
@@ -167,8 +179,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: false},
 			},
 			out: out{
-				wantErr: true,
-				err:     fmt.Errorf(loadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
+				err: fmt.Errorf(loadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
 			},
 		},
 		{
@@ -178,8 +189,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: true, rErr: errors.New("error to read config")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("error to read config"),
+				err: errors.New("error to read config"),
 			},
 		},
 		{
@@ -189,8 +199,33 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: true, rBytes: []byte("error")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("invalid character 'e' looking for beginning of value"),
+				err: errors.New("invalid character 'e' looking for beginning of value"),
+			},
+		},
+		{
+			name: "local build success with latest version required and repository is updated",
+			in: in{
+				def:         formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commonsUpdated"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManager,
+			},
+			out: out{
+				want: formula.Setup{
+					Config: configWithLatestTagRequired,
+				},
+			},
+		},
+		{
+			name: "local build failed with latest version required and repository is outdated",
+			in: in{
+				def:         formula.Definition{Path: "testing/withLatestVersionRequired", RepoName: "commons"},
+				dockerBuild: dockerBuilder,
+				file:        fileManager,
+				dir:         dirManager,
+			},
+			out: out{
+				err: fmt.Errorf("This formula needs run in the latest version of the repository\n\tCurrent version: 2.15.1\n\tLatest version: 3.0.0\nRun 'rit update repo' to update."),
 			},
 		},
 		{
@@ -202,8 +237,7 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManagerMock{createErr: errors.New("error to create dir")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("error to create dir"),
+				err: errors.New("error to create dir"),
 			},
 		},
 		{
@@ -215,8 +249,7 @@ func TestPreRun(t *testing.T) {
 				dir:         dirManagerMock{copyErr: errors.New("error to copy dir")},
 			},
 			out: out{
-				wantErr: true,
-				err:     errors.New("error to copy dir"),
+				err: errors.New("error to copy dir"),
 			},
 		},
 	}
@@ -225,22 +258,14 @@ func TestPreRun(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			in := tt.in
 			_ = dirManager.Remove(filepath.Join(in.def.FormulaPath(ritHome), "bin"))
-			preRun := NewPreRun(ritHome, in.dockerBuild, in.dir, in.file)
+			preRun := NewPreRun(ritHome, in.dockerBuild, in.dir, in.file, preRunChecker)
 			got, err := preRun.PreRun(in.def)
 
-			if tt.out.wantErr {
-				if tt.out.err == nil && err == nil {
-					t.Errorf("PreRun(%s) want a error", tt.name)
-				}
-
-				if tt.out.err != nil && err != nil && tt.out.err.Error() != err.Error() {
-					t.Errorf("PreRun(%s) got %v, want %v", tt.name, err, tt.out.err)
-				}
+			if err != nil || tt.out.err != nil {
+				assert.EqualError(t, tt.out.err, err.Error())
 			}
 
-			if !reflect.DeepEqual(tt.out.want.Config, got.Config) {
-				t.Errorf("PreRun(%s) got %v, want %v", tt.name, got.Config, tt.out.want.Config)
-			}
+			assert.Equal(t, tt.out.want.Config, got.Config)
 
 			_ = os.Chdir(got.Pwd) // Return to test folder
 		})
@@ -302,7 +327,7 @@ func (fi fileManagerMock) Append(path string, content []byte) error {
 }
 
 const (
-	configJson = `{
+	configJSON = `{
   "dockerImageBuilder": "cimg/go:1.14",
   "dockerVolumes" : [
   ],
@@ -346,7 +371,7 @@ const (
     }
   ]
 }`
-	invalidConfigJson = `{
+	invalidConfigJSON = `{
   "inputs": [
     {
       "cache": {
