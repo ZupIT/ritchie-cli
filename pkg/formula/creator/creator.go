@@ -25,7 +25,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/modifier"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -36,14 +35,14 @@ var (
 )
 
 type CreateManager struct {
-	treeManager tree.Manager
+	treeManager formula.TreeManager
 	dir         stream.DirCreateChecker
 	file        stream.FileWriteReadExister
 	tplM        template.Manager
 }
 
 func NewCreator(
-	tm tree.Manager,
+	tm formula.TreeManager,
 	dir stream.DirCreateChecker,
 	file stream.FileWriteReadExister,
 	tplM template.Manager,

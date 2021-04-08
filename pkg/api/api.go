@@ -92,12 +92,13 @@ func (a ByLen) Swap(i, j int) {
 
 // Command type
 type Command struct {
-	Parent   string `json:"parent"`
-	Usage    string `json:"usage"`
-	Help     string `json:"help,omitempty"`
-	LongHelp string `json:"longHelp,omitempty"`
-	Formula  bool   `json:"formula,omitempty"`
-	Repo     string `json:"-"`
+	Parent         string `json:"parent"`
+	Usage          string `json:"usage"`
+	Help           string `json:"help,omitempty"`
+	LongHelp       string `json:"longHelp,omitempty"`
+	Formula        bool   `json:"formula,omitempty"`
+	Repo           string `json:"-"`
+	RepoNewVersion string `json:"-"`
 }
 
 type Commands map[CommandID]Command
