@@ -75,7 +75,7 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 	defer res.Body.Close()
 
-	if res.StatusCode == http.StatusForbidden {
+	if res.StatusCode == http.StatusForbidden || res.StatusCode == http.StatusNotFound {
 		return git.Tags{}, ErrRepoNotFound
 	} else if res.StatusCode != http.StatusOK {
 		all, _ := ioutil.ReadAll(res.Body)
