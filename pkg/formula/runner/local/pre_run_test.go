@@ -361,6 +361,8 @@ func (fi fileManagerMock) Append(path string, content []byte) error {
 
 const configJson = `{
   "dockerImageBuilder": "cimg/go:1.14",
+  "dockerVolumes": [
+	],
   "inputs": [
     {
       "cache": {
