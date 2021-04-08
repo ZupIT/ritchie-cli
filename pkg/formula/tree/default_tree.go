@@ -18,37 +18,33 @@ package tree
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
+	"sync"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const core = "CORE"
 
 type Manager struct {
-	ritchieHome   string
-	repo          formula.RepositoryLister
-	coreCmds      api.Commands
-	file          stream.FileReadExister
-	repoProviders formula.RepoProviders
+	ritchieHome string
+	repo        formula.RepositoryListDetailWriter
+	coreCmds    api.Commands
 }
 
 func NewTreeManager(
 	ritchieHome string,
-	rl formula.RepositoryLister,
+	repo formula.RepositoryListDetailWriter,
 	coreCmds api.Commands,
-	file stream.FileReadExister,
-	rp formula.RepoProviders,
 ) Manager {
 	return Manager{
-		ritchieHome:   ritchieHome,
-		repo:          rl,
-		coreCmds:      coreCmds,
-		file:          file,
-		repoProviders: rp,
+		ritchieHome: ritchieHome,
+		repo:        repo,
+		coreCmds:    coreCmds,
 	}
 }
 
@@ -76,6 +72,18 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	mergedCommands := make(api.Commands)
 	rr, _ := d.repo.List()
 
+	var hasUpdate bool
+	wg := &sync.WaitGroup{}
+	for i := range rr {
+		wg.Add(1)
+		go d.updateCache(wg, &hasUpdate, &rr[i])
+	}
+	wg.Wait()
+
+	if hasUpdate {
+		_ = d.repo.Write(rr)
+	}
+
 	for i := rr.Len() - 1; i >= 0; i-- {
 		tree, err := d.treeByRepo(rr[i].Name)
 		if err != nil {
@@ -84,6 +92,9 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 
 		for k, v := range tree.Commands {
 			v.Repo = rr[i].Name.String()
+			if rr[i].Version != rr[i].LatestVersion && v.Parent == "root" {
+				v.RepoNewVersion = rr[i].LatestVersion.String()
+			}
 			mergedCommands[k] = v
 		}
 	}
@@ -109,20 +120,33 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 }
 
 func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {
-	tree := formula.Tree{}
-	treeFilePath := filepath.Join(d.ritchieHome, "repos", repoName.String(), "tree.json")
-	if !d.file.Exists(treeFilePath) {
-		return tree, nil
+	treeFilePath := filepath.Join(d.ritchieHome, "repos", repoName.String(), FileName)
+	treeFile, err := ioutil.ReadFile(treeFilePath)
+	if os.IsNotExist(err) {
+		return formula.Tree{}, nil
 	}
 
-	treeFile, err := d.file.Read(treeFilePath)
 	if err != nil {
-		return tree, err
+		return formula.Tree{}, err
 	}
 
+	var tree formula.Tree
 	if err = json.Unmarshal(treeFile, &tree); err != nil {
-		return tree, err
+		return formula.Tree{}, err
 	}
 
 	return tree, nil
+}
+
+func (d Manager) updateCache(wg *sync.WaitGroup, hasUpdate *bool, repo *formula.Repo) {
+	defer wg.Done()
+	if repo.IsLocal || !repo.CacheExpired() {
+		return
+	}
+
+	if tag := d.repo.LatestTag(*repo); tag != "" {
+		repo.LatestVersion = formula.RepoVersion(tag)
+		repo.UpdateCache()
+		*hasUpdate = true
+	}
 }

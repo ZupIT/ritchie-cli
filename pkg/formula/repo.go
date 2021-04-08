@@ -166,6 +166,12 @@ type RepositoryListWriter interface {
 	RepositoryWriter
 }
 
+type RepositoryListDetailWriter interface {
+	RepositoryLister
+	RepositoryDetail
+	RepositoryWriter
+}
+
 type RepositoryCreateWriteListDetailDeleter interface {
 	RepositoryCreator
 	RepositoryWriter

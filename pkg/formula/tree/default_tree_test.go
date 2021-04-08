@@ -23,20 +23,19 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
 func TestMergedTree(t *testing.T) {
 	defaultTreeSetup()
-	fileManager := stream.NewFileManager()
-	providers := formula.NewRepoProviders()
 
 	type repo struct {
 		repos   formula.Repos
@@ -44,10 +43,8 @@ func TestMergedTree(t *testing.T) {
 	}
 
 	type in struct {
-		repo      repo
-		file      stream.FileReadExister
-		providers formula.RepoProviders
-		core      bool
+		repo repo
+		core bool
 	}
 
 	tests := []struct {
@@ -61,8 +58,6 @@ func TestMergedTree(t *testing.T) {
 				repo: repo{
 					repos: formula.Repos{repo1, repo2},
 				},
-				file:      fileManager,
-				providers: providers,
 			},
 			want: expectedTree,
 		},
@@ -72,9 +67,7 @@ func TestMergedTree(t *testing.T) {
 				repo: repo{
 					repos: formula.Repos{repo1, repo2},
 				},
-				file:      fileManager,
-				providers: providers,
-				core:      true,
+				core: true,
 			},
 			want: expectedTreeWithCoreCmds,
 		},
@@ -84,9 +77,7 @@ func TestMergedTree(t *testing.T) {
 				repo: repo{
 					repos: formula.Repos{repoInvalid},
 				},
-				file:      fileManager,
-				providers: providers,
-				core:      false,
+				core: false,
 			},
 			want: formula.Tree{
 				Version:    Version,
@@ -98,15 +89,9 @@ func TestMergedTree(t *testing.T) {
 			name: "empty tree when tree.json does not exist",
 			in: in{
 				repo: repo{
-					repos: formula.Repos{repo1},
+					repos: formula.Repos{repoInvalid},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return false
-					},
-				},
-				providers: providers,
-				core:      false,
+				core: false,
 			},
 			want: formula.Tree{
 				Version:    Version,
@@ -115,21 +100,12 @@ func TestMergedTree(t *testing.T) {
 			},
 		},
 		{
-			name: "read tree.json error",
+			name: "unmarshal tree.json error",
 			in: in{
 				repo: repo{
-					repos: formula.Repos{repo1},
+					repos: formula.Repos{repoInvalid},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return nil, errors.New("error to read file")
-					},
-				},
-				providers: providers,
-				core:      false,
+				core: false,
 			},
 			want: formula.Tree{
 				Version:    Version,
@@ -143,8 +119,10 @@ func TestMergedTree(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repoMock := new(mocks.RepoManager)
 			repoMock.On("List").Return(tt.in.repo.repos, tt.in.repo.listErr)
+			repoMock.On("LatestTag", mock.Anything).Return("3.0.0")
+			repoMock.On("Write", mock.Anything).Return(nil)
 
-			tree := NewTreeManager(ritHome, repoMock, coreCmds, tt.in.file, tt.in.providers)
+			tree := NewTreeManager(ritHome, repoMock, coreCmds)
 
 			got := tree.MergedTree(tt.in.core)
 
@@ -155,8 +133,6 @@ func TestMergedTree(t *testing.T) {
 
 func TestTree(t *testing.T) {
 	defaultTreeSetup()
-	fileManager := stream.NewFileManager()
-	providers := formula.NewRepoProviders()
 
 	type (
 		repo struct {
@@ -164,9 +140,8 @@ func TestTree(t *testing.T) {
 			listErr error
 		}
 		in struct {
-			repo      repo
-			file      stream.FileReadExister
-			providers formula.RepoProviders
+			ritHome string
+			repo    repo
 		}
 
 		want struct {
@@ -183,11 +158,10 @@ func TestTree(t *testing.T) {
 		{
 			name: "success",
 			in: in{
+				ritHome: ritHome,
 				repo: repo{
 					repos: formula.Repos{repo1, repo2},
 				},
-				file:      fileManager,
-				providers: providers,
 			},
 			want: want{
 				treeByRepo: map[formula.RepoName]formula.Tree{
@@ -201,12 +175,11 @@ func TestTree(t *testing.T) {
 		{
 			name: "repo list error",
 			in: in{
+				ritHome: ritHome,
 				repo: repo{
 					repos:   formula.Repos{},
 					listErr: errors.New("repo list error"),
 				},
-				file:      fileManager,
-				providers: providers,
 			},
 			want: want{
 				err: errors.New("repo list error"),
@@ -215,15 +188,10 @@ func TestTree(t *testing.T) {
 		{
 			name: "return repos with empty tree commands when tree.json does not exist",
 			in: in{
+				ritHome: "/invalid",
 				repo: repo{
 					repos: formula.Repos{repo1, repo2},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return false
-					},
-				},
-				providers: providers,
 			},
 			want: want{
 				treeByRepo: map[formula.RepoName]formula.Tree{
@@ -235,23 +203,15 @@ func TestTree(t *testing.T) {
 			},
 		},
 		{
-			name: "read tree.json error",
+			name: "unmarshal tree.json error",
 			in: in{
+				ritHome: ritHome,
 				repo: repo{
-					repos: formula.Repos{repo1, repo2},
+					repos: formula.Repos{repoInvalid},
 				},
-				file: sMocks.FileReadExisterCustomMock{
-					ExistsMock: func(path string) bool {
-						return true
-					},
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte("error"), errors.New("error to read tree.json")
-					},
-				},
-				providers: providers,
 			},
 			want: want{
-				err: errors.New("error to read tree.json"),
+				err: errors.New("invalid character 'i' looking for beginning of value"),
 			},
 		},
 	}
@@ -260,8 +220,10 @@ func TestTree(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repoMock := new(mocks.RepoManager)
 			repoMock.On("List").Return(tt.in.repo.repos, tt.in.repo.listErr)
+			repoMock.On("LatestTag", mock.Anything).Return("3.0.0")
+			repoMock.On("Write", mock.Anything).Return(nil)
 
-			tree := NewTreeManager(ritHome, repoMock, coreCmds, tt.in.file, tt.in.providers)
+			tree := NewTreeManager(tt.in.ritHome, repoMock, coreCmds)
 
 			got, err := tree.Tree()
 
@@ -276,13 +238,13 @@ func TestTree(t *testing.T) {
 
 func BenchmarkMergedTree(b *testing.B) {
 	defaultTreeSetup()
-	fileManager := stream.NewFileManager()
-	providers := formula.NewRepoProviders()
 
 	repoMock := new(mocks.RepoManager)
 	repoMock.On("List").Return(formula.Repos{repo1, repo2}, nil)
+	repoMock.On("LatestTag", mock.Anything).Return("3.0.0")
+	repoMock.On("Write", mock.Anything).Return(nil)
 
-	tree := NewTreeManager(ritHome, repoMock, coreCmds, fileManager, providers)
+	tree := NewTreeManager(ritHome, repoMock, coreCmds)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -297,10 +259,12 @@ var (
 	repo1 = formula.Repo{
 		Name:     formula.RepoName("repo1"),
 		Priority: 0,
+		Cache:    time.Now().Add(time.Hour),
 	}
 	repo2 = formula.Repo{
 		Name:     formula.RepoName("repo2"),
 		Priority: 1,
+		Cache:    time.Now().Add(-time.Hour),
 	}
 
 	repoInvalid = formula.Repo{
@@ -379,12 +343,13 @@ var (
 				Repo:     "repo1",
 			},
 			"root_star_wars": api.Command{
-				Parent:   "root",
-				Usage:    "star-wars",
-				Help:     "star wars help",
-				LongHelp: "star wars help long",
-				Formula:  false,
-				Repo:     "repo2",
+				Parent:         "root",
+				Usage:          "star-wars",
+				Help:           "star wars help",
+				LongHelp:       "star wars help long",
+				Formula:        false,
+				Repo:           "repo2",
+				RepoNewVersion: "3.0.0",
 			},
 			"root_star_wars_list-jedis": api.Command{
 				Parent:   "root_star_wars",
@@ -423,12 +388,13 @@ var (
 				Repo:     "repo1",
 			},
 			"root_star_wars": api.Command{
-				Parent:   "root",
-				Usage:    "star-wars",
-				Help:     "star wars help",
-				LongHelp: "star wars help long",
-				Formula:  false,
-				Repo:     "repo2",
+				Parent:         "root",
+				Usage:          "star-wars",
+				Help:           "star wars help",
+				LongHelp:       "star wars help long",
+				Formula:        false,
+				Repo:           "repo2",
+				RepoNewVersion: "3.0.0",
 			},
 			"root_star_wars_list-jedis": api.Command{
 				Parent:   "root_star_wars",
