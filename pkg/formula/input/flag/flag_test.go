@@ -43,21 +43,21 @@ func TestInputs(t *testing.T) {
 		in   in
 		want error
 	}{
-		// {
-		// 	name: "success flags",
-		// 	in: in{
-		// 		defaultFlagValue: "text",
-		// 	},
-		// 	want: nil,
-		// },
-		// {
-		// 	name: "success with input omitted",
-		// 	in: in{
-		// 		defaultFlagValue: "text",
-		// 		operator:         "!=",
-		// 	},
-		// 	want: nil,
-		// },
+		{
+			name: "success flags",
+			in: in{
+				defaultFlagValue: "text",
+			},
+			want: nil,
+		},
+		{
+			name: "success with input omitted",
+			in: in{
+				defaultFlagValue: "text",
+				operator:         "!=",
+			},
+			want: nil,
+		},
 		{
 			name: "error flags empty",
 			in: in{
