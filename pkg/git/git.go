@@ -15,7 +15,16 @@
  */
 package git
 
-import "io"
+import (
+	"errors"
+	"io"
+)
+
+var ErrRepoNotFound = errors.New(
+	`could not retrieve new versions for selected repository
+Please check if it still exists or changed visiblity
+Try adding it again using:
+rit add repo`)
 
 type Tag struct {
 	Name        string `json:"tag_name"`

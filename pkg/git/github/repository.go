@@ -28,12 +28,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/http/headers"
 )
 
-var ErrRepoNotFound = errors.New(
-	`could not retrieve new versions for selected repository
-Please check if it still exists or changed visiblity
-Try adding it again using:
-rit add repo`)
-
 type RepoManager struct {
 	client *http.Client
 }
@@ -67,7 +61,7 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 	defer res.Body.Close()
 	if res.StatusCode == http.StatusNotFound {
-		return git.Tags{}, ErrRepoNotFound
+		return git.Tags{}, git.ErrRepoNotFound
 	} else if res.StatusCode != http.StatusOK {
 		all, _ := ioutil.ReadAll(res.Body)
 		return git.Tags{}, errors.New(res.Status + "-" + string(all))
