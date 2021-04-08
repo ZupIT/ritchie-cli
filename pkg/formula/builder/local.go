@@ -63,12 +63,13 @@ func (m LocalManager) Init(workspaceDir string, repoName string) (string, error)
 	dest := filepath.Join(m.ritHome, "repos", repoNameStandard.String())
 
 	repo := formula.Repo{
-		Provider: "Local",
-		Name:     repoNameStandard,
-		Version:  "0.0.0",
-		Url:      "local repository",
-		Priority: 0,
-		IsLocal:  true,
+		Provider:      "Local",
+		Name:          repoNameStandard,
+		Version:       "0.0.0",
+		Url:           "local repository",
+		Priority:      0,
+		IsLocal:       true,
+		LatestVersion: "0.0.0",
 	}
 
 	if err := m.dir.Create(dest); err != nil {

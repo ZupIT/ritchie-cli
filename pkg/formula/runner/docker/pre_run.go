@@ -29,6 +29,7 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -63,6 +64,7 @@ type PreRunManager struct {
 	docker      formula.Builder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
+	checker     runner.PreRunCheckerManager
 }
 
 func NewPreRun(
@@ -70,12 +72,14 @@ func NewPreRun(
 	docker formula.Builder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
+	checker runner.PreRunCheckerManager,
 ) PreRunManager {
 	return PreRunManager{
 		ritchieHome: ritchieHome,
 		docker:      docker,
 		dir:         dir,
 		file:        file,
+		checker:     checker,
 	}
 }
 
@@ -85,6 +89,10 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 
 	config, err := pr.loadConfig(formulaPath, def)
 	if err != nil {
+		return formula.Setup{}, err
+	}
+
+	if err := pr.checker.CheckVersionCompliance(def.RepoName, config.RequireLatestVersion); err != nil {
 		return formula.Setup{}, err
 	}
 
