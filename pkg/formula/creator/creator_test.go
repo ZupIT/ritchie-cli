@@ -24,14 +24,14 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -59,21 +59,8 @@ func TestCreator(t *testing.T) {
 	_ = dirManager.Remove(resultDir)
 	_ = dirManager.Create(resultDir)
 
-	var defaultGitRepositoryMock = GitRepositoryMock{
-		latestTag: func(info git.RepoInfo) (git.Tag, error) {
-			return git.Tag{}, nil
-		},
-		tags: func(info git.RepoInfo) (git.Tags, error) {
-			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
-		},
-		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
-			return nil, nil
-		},
-	}
-	repoProviders := formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
-
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.CoreCmds, FileReadExisterMock{}, repoProviders)
+	treeMan := &mocks.TreeManager{}
+	treeMan.On("MergedTree", mock.Anything).Return(formula.Tree{})
 
 	tplM := template.NewManager("../../../testdata", dirManager)
 

@@ -31,6 +31,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
@@ -85,7 +86,10 @@ func TestRun(t *testing.T) {
 	cs := credential.NewSetter(ritHome, envFinder, dirManager)
 	cred := credential.NewResolver(cf, cs, iPass)
 
-	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
+	repoLister := repo.NewLister(ritHome, fileManager)
+	preRunChecker := runner.NewPreRunBuilderChecker(repoLister)
+
+	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager, preRunChecker)
 	pInputRunner := prompt.NewInputManager(cred, iList, iText, iTextValidator, iTextDefault,
 		iBool, iPass, iMultselect, inPath)
 	sInputRunner := stdin.NewInputManager(cred)

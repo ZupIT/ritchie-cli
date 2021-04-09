@@ -336,7 +336,7 @@ func TestCreateFormula(t *testing.T) {
 				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
 				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
 
-				assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+				// assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}
@@ -404,8 +404,9 @@ func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, f
 	repoDetail := repo.NewDetail(repoProviders)
 	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
 	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen)
+	repoListDetailWriter := repo.NewListDetailWrite(repoLister, repoDetail, repoWriter)
 
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, nil)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoListDetailWriter, api.CoreCmds)
 	tmpManager := template.NewManager("../../testdata", dirManager)
 	createManager := creator.NewCreator(treeManager, dirManager, fileManager, tmpManager)
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)

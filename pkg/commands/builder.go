@@ -116,6 +116,7 @@ func Build() *cobra.Command {
 	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen)
 	repoAddLister := repo.NewListAdder(repoLister, repoAdder)
 	repoPrioritySetter := repo.NewPrioritySetter(repoListWriter)
+	repoListDetailWriter := repo.NewListDetailWrite(repoLister, repoDetail, repoWriter)
 
 	tplManager := template.NewManager(api.RitchieHomeDir(), dirManager)
 	envFinder := env.NewFinder(ritchieHomeDir, fileManager)
@@ -128,7 +129,7 @@ func Build() *cobra.Command {
 	credDeleter := credential.NewCredDelete(ritchieHomeDir, envFinder)
 	credSettings := credential.NewSettings(fileManager, dirManager, userHomeDir)
 
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, repoProviders)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoListDetailWriter, api.CoreCmds)
 	treeChecker := tree.NewChecker(treeManager)
 	autocompleteGen := autocomplete.NewGenerator(treeManager)
 	credResolver := credential.NewResolver(credFinder, credSetter, inputPassword)
@@ -155,10 +156,11 @@ func Build() *cobra.Command {
 
 	inputResolver := runner.NewInputResolver(termInputTypes)
 
-	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager)
+	preRunChecker := runner.NewPreRunBuilderChecker(repoLister)
+	formulaLocalPreRun := local.NewPreRun(ritchieHomeDir, formBuildMake, formBuildBat, formBuildSh, dirManager, fileManager, preRunChecker)
 	formulaLocalRun := local.NewRunner(postRunner, inputResolver, formulaLocalPreRun, fileManager, envFinder, userHomeDir)
 
-	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager)
+	formulaDockerPreRun := docker.NewPreRun(ritchieHomeDir, formBuildDocker, dirManager, fileManager, preRunChecker)
 	formulaDockerRun := docker.NewRunner(postRunner, inputResolver, formulaDockerPreRun, fileManager, envFinder, userHomeDir)
 
 	runners := formula.Runners{
