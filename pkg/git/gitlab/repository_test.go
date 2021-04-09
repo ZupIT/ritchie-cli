@@ -33,6 +33,9 @@ func TestTags(t *testing.T) {
 	mockServerThatFail := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusBadRequest)
 	}))
+	mockServerNotFound := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.WriteHeader(http.StatusNotFound)
+	}))
 
 	tests := []struct {
 		name    string
@@ -73,6 +76,15 @@ func TestTags(t *testing.T) {
 			},
 			want:    git.Tags{},
 			wantErr: "Get \"htttp://yourhost.com/username/repo/\": unsupported protocol scheme \"htttp\"",
+		},
+		{
+			name:   "Return err when repo not found",
+			client: mockServerNotFound.Client(),
+			info: info{
+				tagsUrl: mockServerNotFound.URL,
+			},
+			want:    git.Tags{},
+			wantErr: git.ErrRepoNotFound.Error(),
 		},
 	}
 	for _, tt := range tests {
