@@ -15,7 +15,18 @@
  */
 package git
 
-import "io"
+import (
+	"errors"
+	"io"
+	"io/ioutil"
+	"net/http"
+)
+
+var ErrRepoNotFound = errors.New(
+	`could not retrieve new versions for selected repository
+Please check if it still exists or changed visiblity
+Try adding it again using:
+rit add repo`)
 
 type Tag struct {
 	Name        string `json:"tag_name"`
@@ -31,6 +42,17 @@ func (t Tags) Names() []string {
 	}
 
 	return tags
+}
+
+func CheckStatusCode(res *http.Response) (err error) {
+	if res.StatusCode == http.StatusNotFound || res.StatusCode == http.StatusForbidden {
+		return ErrRepoNotFound
+	} else if res.StatusCode != http.StatusOK {
+		all, _ := ioutil.ReadAll(res.Body)
+		return errors.New(res.Status + "-" + string(all))
+	}
+
+	return nil
 }
 
 type RepoInfo interface {
