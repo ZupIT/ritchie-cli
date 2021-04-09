@@ -24,6 +24,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
@@ -33,6 +34,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestRun(t *testing.T) {
@@ -55,12 +58,38 @@ func TestRun(t *testing.T) {
 	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 
+	iList := &mocks.InputListMock{}
+	iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("toils", nil)
+
+	iText := &mocks.InputTextMock{}
+	iText.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("Test", nil)
+
+	iBool := &mocks.InputBoolMock{}
+	iBool.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+
+	iPass := &mocks.InputPasswordMock{}
+	iPass.On("Password", mock.Anything, mock.Anything, mock.Anything).Return("12345", nil)
+
+	iMultselect := &mocks.InputMultiselectMock{}
+	iMultselect.On("Multiselect", mock.Anything).Return([]string{"test", "test"}, nil)
+
+	iTextValidator := &mocks.InputTextValidatorMock{}
+	iTextValidator.On("Text")
+
+	iTextDefault := &mocks.InputDefaultTextMock{}
+	iTextDefault.On("Text", mock.Anything).Return("test", nil)
+
 	envFinder := env.NewFinder(ritHome, fileManager)
+
+	cf := credential.NewFinder(ritHome, envFinder)
+	cs := credential.NewSetter(ritHome, envFinder, dirManager)
+	cred := credential.NewResolver(cf, cs, iPass)
+
 	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager)
-	postRunner := runner.NewPostRunner(fileManager, dirManager)
-	pInputRunner := prompt.NewInputManager(envResolverMock{in: "test"}, inputMock{}, inputMock{}, inputTextValidatorMock{}, inputTextDefaultMock{}, inputMock{}, inputMock{}, inputMock{}, inPath)
-	sInputRunner := stdin.NewInputManager(envResolverMock{in: "test"})
-	fInputRunner := flag.NewInputManager(envResolverMock{in: "test"})
+	pInputRunner := prompt.NewInputManager(cred, iList, iText, iTextValidator, iTextDefault,
+		iBool, iPass, iMultselect, inPath)
+	sInputRunner := stdin.NewInputManager(cred)
+	fInputRunner := flag.NewInputManager(cred)
 
 	types := formula.TermInputTypes{
 		api.Prompt: pInputRunner,
@@ -69,208 +98,68 @@ func TestRun(t *testing.T) {
 	}
 	inputResolver := runner.NewInputResolver(types)
 
-	type in struct {
-		def           formula.Definition
-		preRun        formula.PreRunner
-		postRun       formula.PostRunner
-		inputResolver formula.InputResolver
-		fileManager   stream.FileWriteExistAppender
-		env           env.Finder
-	}
-
-	type out struct {
-		err error
-	}
-
 	tests := []struct {
-		name string
-		in   in
-		out  out
+		name       string
+		def        formula.Definition
+		inputType  int
+		postRunErr error
+		envData    env.Holder
+		want       error
 	}{
 		{
-			name: "run local success",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				postRun:       postRunner,
-				inputResolver: inputResolver,
-				fileManager:   fileManager,
-				env:           envFinder,
-			},
-			out: out{
-				err: nil,
-			},
+			name:      "run local success",
+			def:       formula.Definition{Path: "testing/formula", RepoName: "commons"},
+			inputType: 0,
+			want:      nil,
 		},
 		{
-			name: "Input error local",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				postRun:       postRunner,
-				inputResolver: inputResolverMock{err: runner.ErrInputNotRecognized},
-				fileManager:   fileManager,
-				env:           envFinder,
-			},
-			out: out{
-				err: runner.ErrInputNotRecognized,
-			},
+			name:      "Input error local",
+			def:       formula.Definition{Path: "testing/formula", RepoName: "commons"},
+			inputType: 3,
+			want:      runner.ErrInputNotRecognized,
 		},
 		{
-			name: "Pre run error",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunnerMock{err: errors.New("pre runner error")},
-				postRun:       postRunner,
-				inputResolver: inputResolver,
-				fileManager:   fileManager,
-				env:           envFinder,
-			},
-			out: out{
-				err: errors.New("pre runner error"),
-			},
+			name:      "Pre run error",
+			def:       formula.Definition{Path: "testing/without-config", RepoName: "commons"},
+			inputType: 0,
+			want:      errors.New("Failed to load formula config file\nTry running rit update repo\nConfig file path not found: /tmp/.rit-runner-local/repos/commons/testing/without-config/config.json"),
 		},
 		{
-			name: "Post run error",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				postRun:       postRunnerMock{err: errors.New("post runner error")},
-				inputResolver: inputResolver,
-				fileManager:   fileManager,
-				env:           envFinder,
-			},
-			out: out{
-				err: errors.New("post runner error"),
-			},
+			name:       "Post run error",
+			def:        formula.Definition{Path: "testing/formula", RepoName: "commons"},
+			postRunErr: errors.New("post runner error"),
+			inputType:  0,
+			want:       errors.New("post runner error"),
 		},
 		{
-			name: "env find error",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				postRun:       postRunner,
-				inputResolver: inputResolver,
-				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				env:           envFinderMock{err: errors.New("env not found")},
-			},
-			out: out{
-				err: errors.New("env not found"),
-			},
+			name:      "env find error",
+			def:       formula.Definition{Path: "testing/formula", RepoName: "commons"},
+			inputType: 0,
+			envData:   env.Holder{},
+			want:      errors.New("env not found"),
 		},
 		{
-			name: "success with a non default env",
-			in: in{
-				def:           formula.Definition{Path: "testing/formula", RepoName: "commons"},
-				preRun:        preRunner,
-				postRun:       postRunner,
-				inputResolver: inputResolver,
-				fileManager:   fileManagerMock{exist: true, aErr: errors.New("error to append env file")},
-				env: envFinderMock{env: env.Holder{
-					Current: "prod",
-				}},
-			},
-			out: out{
-				err: nil,
-			},
+			name:      "success with a non default env",
+			def:       formula.Definition{Path: "testing/formula", RepoName: "commons"},
+			inputType: 0,
+			envData:   env.Holder{Current: "prd"},
+			want:      nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			in := tt.in
-			local := NewRunner(in.postRun, in.inputResolver, in.preRun, in.fileManager, in.env, homeDir)
-			got := local.Run(in.def, api.Prompt, false, nil)
+			eMock := &mocks.EnvFinderMock{}
+			eMock.On("Find").Return(tt.envData, tt.want)
 
-			if tt.out.err != nil && got != nil && tt.out.err.Error() != got.Error() {
-				t.Errorf("Run(%s) got %v, want %v", tt.name, got, tt.out.err)
-			}
+			pr := &mocks.PostRunner{}
+			pr.On("PostRun", mock.Anything, mock.Anything).Return(tt.postRunErr)
+
+			local := NewRunner(pr, inputResolver, preRunner, fileManager, eMock, homeDir)
+			got := local.Run(tt.def, api.TermInputType(tt.inputType), false, nil)
+
+			assert.Equal(t, tt.want, got)
 		})
 	}
 
-}
-
-type preRunnerMock struct {
-	setup formula.Setup
-	err   error
-}
-
-func (pr preRunnerMock) PreRun(def formula.Definition) (formula.Setup, error) {
-	return pr.setup, pr.err
-}
-
-type postRunnerMock struct {
-	err error
-}
-
-func (po postRunnerMock) PostRun(p formula.Setup, docker bool) error {
-	return po.err
-}
-
-type envResolverMock struct {
-	in  string
-	err error
-}
-
-func (e envResolverMock) Resolve(string) (string, error) {
-	return e.in, e.err
-}
-
-type inputTextValidatorMock struct{}
-
-func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return "mocked text", nil
-}
-
-type inputMock struct {
-	text    string
-	boolean bool
-	items   []string
-	err     error
-}
-
-func (i inputMock) List(string, []string, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Text(string, bool, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Bool(string, []string, ...string) (bool, error) {
-	return i.boolean, i.err
-}
-
-func (i inputMock) Password(string, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Multiselect(formula.Input) ([]string, error) {
-	return i.items, i.err
-}
-
-type inputTextDefaultMock struct {
-	text string
-	err  error
-}
-
-func (i inputTextDefaultMock) Text(formula.Input) (string, error) {
-	return i.text, i.err
-}
-
-type envFinderMock struct {
-	env env.Holder
-	err error
-}
-
-func (c envFinderMock) Find() (env.Holder, error) {
-	return c.env, c.err
-}
-
-type inputResolverMock struct {
-	inRunner formula.InputRunner
-	err      error
-}
-
-func (i inputResolverMock) Resolve(inType api.TermInputType) (formula.InputRunner, error) {
-	return i.inRunner, i.err
 }
