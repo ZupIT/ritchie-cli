@@ -60,11 +60,8 @@ func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 
 	defer res.Body.Close()
 
-	if res.StatusCode == http.StatusNotFound {
-		return git.Tags{}, git.ErrRepoNotFound
-	} else if res.StatusCode != http.StatusOK {
-		all, _ := ioutil.ReadAll(res.Body)
-		return git.Tags{}, errors.New(res.Status + "-" + string(all))
+	if err := git.CheckStatusCode(res); err != nil {
+		return git.Tags{}, err
 	}
 
 	var tags git.Tags
