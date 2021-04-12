@@ -129,18 +129,12 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	}
 	<-done
 
-	sanitizeOutput := sanitizeData(output)
-	flattenOutput := flattenData(sanitizeOutput)
-	transformOutput := transformData(flattenOutput)
-	if len(transformOutput) > 0 {
-		output := filepath.Join(setup.BinPath, "output.json")
+	if len(output) > 0 {
+		sanitizeOutput := sanitizeData(output)
+		flattenOutput := flattenData(sanitizeOutput)
+		transformOutput := transformData(flattenOutput)
 
-		data, err := json.MarshalIndent(transformOutput, "", "\t")
-		if err != nil {
-			return err
-		}
-
-		if err := ioutil.WriteFile(output, data, os.ModePerm); err != nil {
+		if err := writeOutput(setup, transformOutput); err != nil {
 			return err
 		}
 	}
@@ -206,4 +200,19 @@ func transformData(data []string) map[string]string {
 	}
 
 	return transformData
+}
+
+func writeOutput(setup formula.Setup, data map[string]string) error {
+	output := filepath.Join(setup.BinPath, "output.json")
+
+	dataJSON, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	if err := ioutil.WriteFile(output, dataJSON, os.ModePerm); err != nil {
+		return err
+	}
+
+	return nil
 }
