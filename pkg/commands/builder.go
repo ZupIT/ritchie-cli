@@ -207,6 +207,7 @@ func Build() *cobra.Command {
 	)
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(inputList, tutorialFindSetter)
+	renameCmd := cmd.NewRenameCmd()
 
 	// level 2
 	setCredentialCmd := cmd.NewSetCredentialCmd(
@@ -248,6 +249,7 @@ func Build() *cobra.Command {
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
+	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete, dirManager)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)
@@ -260,6 +262,7 @@ func Build() *cobra.Command {
 	setCmd.AddCommand(setCredentialCmd, setEnvCmd, setPriorityCmd, setFormulaRunnerCmd)
 	showCmd.AddCommand(showEnvCmd, showFormulaRunnerCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
+	renameCmd.AddCommand(renameFormulaCmd)
 
 	formulaCmd := cmd.NewFormulaCommand(api.CoreCmds, treeManager, formulaExec, fileManager)
 	if err := formulaCmd.Add(rootCmd); err != nil {
@@ -283,6 +286,7 @@ func Build() *cobra.Command {
 				upgradeCmd,
 				tutorialCmd,
 				metricsCmd,
+				renameCmd,
 			},
 		},
 	}

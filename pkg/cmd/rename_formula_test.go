@@ -17,6 +17,9 @@
 package cmd
 
 import (
+	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,18 +27,65 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
 
 func TestRenameFormulaCmd(t *testing.T) {
+	tmp := os.TempDir()
+	home := filepath.Join(tmp, "rit_test-renameFormula")
+	ritHome := filepath.Join(home, ".rit")
+
+	defer os.RemoveAll(home)
+
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+
+	githubRepo := github.NewRepoManager(http.DefaultClient)
+	repoProviders := formula.NewRepoProviders()
+	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
+
+	repoCreator := repo.NewCreator(ritHome, repoProviders, dirManager, fileManager)
+	repoLister := repo.NewLister(ritHome, fileManager)
+	repoWriter := repo.NewWriter(ritHome, fileManager)
+	repoDetail := repo.NewDetail(repoProviders)
+	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
+	repoDeleter := repo.NewDeleter(ritHome, repoListWriter, dirManager)
+	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+
+	treeGen := tree.NewGenerator(dirManager, fileManager)
+	repoAdder := repo.NewAdder(ritHome, repoListWriteCreator, treeGen)
+	formBuildLocal := builder.NewBuildLocal(ritHome, dirManager, repoAdder)
+
+	formulaWorkspace := workspace.New(ritHome, home, dirManager, formBuildLocal)
+
+	reposPath := filepath.Join(ritHome, "repos")
+	repoPath := filepath.Join(reposPath, "commons")
+	_ = dirManager.Remove(ritHome)
+
+	createSaved := func(path string) {
+		_ = dirManager.Remove(path)
+		_ = dirManager.Create(path)
+	}
+	createSaved(repoPath)
+
+	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
+	_ = streams.Unzip(zipFile, repoPath)
+	_ = streams.Unzip(zipRepositories, reposPath)
+
 	type in struct {
-		inputText     string
-		inputTextErr  error
-		inputTextVal  string
-		inputList     string
-		inputListErr  error
-		wspaceList    formula.Workspaces
-		wspaceListErr error
-		wspaceAddErr  error
+		inputText    string
+		inputTextErr error
+		inputTextVal string
+		inputList    string
+		inputListErr error
+		args         []string
 	}
 
 	tests := []struct {
@@ -47,19 +97,13 @@ func TestRenameFormulaCmd(t *testing.T) {
 			name: "success",
 			in: in{
 				inputTextVal: "rit test test",
-				inputList:    "go",
+				inputList:    "default",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			workspaceMock := new(mocks.WorkspaceForm)
-			workspaceMock.On("List").Return(tt.in.wspaceList, tt.in.wspaceListErr)
-			workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr)
-			workspaceMock.On("CurrentHash", mock.Anything).Return("48d47029-2abf-4a2e-b5f2-f5b60471423e", nil)
-			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
-
 			inputTextMock := new(mocks.InputTextMock)
 			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, tt.in.inputTextErr)
 
@@ -69,14 +113,18 @@ func TestRenameFormulaCmd(t *testing.T) {
 			inPath := &mocks.InputPathMock{}
 			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
 
-			renameFormulaCmd := NewRenameFormulaCmd(
-				workspaceMock,
+			cmd := NewRenameFormulaCmd(
+				formulaWorkspace,
 				inputTextMock,
 				inputListMock,
 				inPath,
+				dirManager,
 			)
+			// TODO: remove stdin flag after  deprecation
+			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+			cmd.SetArgs(tt.in.args)
 
-			got := renameFormulaCmd.Execute()
+			got := cmd.Execute()
 
 			assert.Equal(t, tt.want, got)
 		})

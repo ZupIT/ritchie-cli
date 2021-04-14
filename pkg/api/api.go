@@ -67,6 +67,8 @@ var (
 		"root_upgrade":               {Parent: "root", Usage: "upgrade"},
 		"root_tutorial":              {Parent: "root", Usage: "tutorial"},
 		"root_metrics":               {Parent: "root", Usage: "metrics"},
+		"root_rename":                {Parent: "root", Usage: "rename"},
+		"root_rename_formula":        {Parent: "root_rename", Usage: "formula"},
 	}
 )
 
