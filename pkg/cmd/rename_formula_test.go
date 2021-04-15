@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,6 +67,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 
 	reposPath := filepath.Join(ritHome, "repos")
 	repoPath := filepath.Join(reposPath, "commons")
+	repoPathLocal := filepath.Join(home, "ritchie-formulas-local")
 	_ = dirManager.Remove(ritHome)
 
 	createSaved := func(path string) {
@@ -73,19 +75,18 @@ func TestRenameFormulaCmd(t *testing.T) {
 		_ = dirManager.Create(path)
 	}
 	createSaved(repoPath)
+	createSaved(repoPathLocal)
 
-	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
-	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
+	zipFile := filepath.Join("..", "..", "testdata", "ritchie-formulas-test.zip")
+	zipRepositories := filepath.Join("..", "..", "testdata", "repositories.zip")
 	_ = streams.Unzip(zipFile, repoPath)
 	_ = streams.Unzip(zipRepositories, reposPath)
+	_ = streams.Unzip(zipFile, repoPathLocal)
 
 	type in struct {
-		inputText    string
-		inputTextErr error
-		inputTextVal string
-		inputList    string
-		inputListErr error
-		args         []string
+		inputText         string
+		workspaceSelected string
+		formulaSelected   string
 	}
 
 	tests := []struct {
@@ -96,8 +97,9 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "success",
 			in: in{
-				inputTextVal: "rit test test",
-				inputList:    "default",
+				inputText:         "rit testing formula",
+				workspaceSelected: "Default (" + repoPathLocal + ")",
+				formulaSelected:   "rit testing formula",
 			},
 		},
 	}
@@ -105,13 +107,10 @@ func TestRenameFormulaCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inputTextMock := new(mocks.InputTextMock)
-			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, tt.in.inputTextErr)
-
-			inputListMock := new(mocks.InputListMock)
-			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
-
+			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, nil)
 			inPath := &mocks.InputPathMock{}
 			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
+			inputListMock := insertListMock(tt.in.workspaceSelected, tt.in.formulaSelected)
 
 			cmd := NewRenameFormulaCmd(
 				formulaWorkspace,
@@ -119,10 +118,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 				inputListMock,
 				inPath,
 				dirManager,
+				home,
 			)
-			// TODO: remove stdin flag after  deprecation
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			cmd.SetArgs(tt.in.args)
 
 			got := cmd.Execute()
 
@@ -130,4 +127,19 @@ func TestRenameFormulaCmd(t *testing.T) {
 		})
 	}
 
+}
+
+func insertListMock(workspace, formula string) *mocks.InputListMock {
+	firstGroupFormulas := []string{"testing"}
+	secondGroupFormulas := []string{"formula", "invalid-volumes-config", "withLatestVersionRequired", "without-build-files", "without-build-sh", "without-dockerfile", "without-dockerimg"}
+
+	formulaSplited := strings.Split(formula, " ")
+
+	inputListMock := new(mocks.InputListMock)
+	inputListMock.On("List", "Select a formula workspace: ", mock.Anything, mock.Anything).Return(workspace, nil)
+	inputListMock.On("List", "Select a formula or group: ", firstGroupFormulas, mock.Anything).Return(formulaSplited[1], nil)
+	inputListMock.On("List", "Select a formula or group: ", secondGroupFormulas, mock.Anything).Return(formulaSplited[2], nil)
+	inputListMock.On("List", foundFormulaRenamedQuestion, mock.Anything, mock.Anything).Return(formula, nil)
+
+	return inputListMock
 }
