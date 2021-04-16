@@ -30,7 +30,6 @@ import (
 const (
 	deleteSuccessMsg    = "Repository %q was deleted with success"
 	repoFlagDescription = "Repository name to delete"
-	repoNotFoundMsg     = "repository %q was not found"
 )
 
 var deleteRepoFlags = flags{
@@ -107,7 +106,7 @@ func (dr *deleteRepoCmd) resolvePrompt() (string, error) {
 		return "", nil
 	}
 
-	var reposNames []string
+	reposNames := make([]string, 0, len(repos))
 	for _, r := range repos {
 		reposNames = append(reposNames, r.Name.String())
 	}
