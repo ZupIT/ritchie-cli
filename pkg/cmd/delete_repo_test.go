@@ -18,23 +18,35 @@ package cmd
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestNewDeleteRepo(t *testing.T) {
+	tmpDir := os.TempDir()
+	ritHomeName := ".rit"
+	ritHome := filepath.Join(tmpDir, ritHomeName)
+	reposPath := filepath.Join(ritHome, "repos")
+	repoName := "repoName"
+	repoPath := filepath.Join(reposPath, repoName)
+
 	type in struct {
 		args            []string
 		repoList        formula.Repos
 		repoListErr     error
 		inputListString string
 		inputListErr    error
-		repoDeleteErr   error
+		inputBool       bool
+		inputBoolErr    error
 	}
 
 	tests := []struct {
@@ -43,7 +55,7 @@ func TestNewDeleteRepo(t *testing.T) {
 		want error
 	}{
 		{
-			name: "success",
+			name: "success prompt",
 			in: in{
 				args: []string{},
 				repoList: formula.Repos{
@@ -53,6 +65,19 @@ func TestNewDeleteRepo(t *testing.T) {
 					},
 				},
 				inputListString: "repoName",
+				inputBool:       true,
+			},
+		},
+		{
+			name: "success flag",
+			in: in{
+				args: []string{"--name=repoName"},
+				repoList: formula.Repos{
+					{
+						Name:     "repoName",
+						Priority: 0,
+					},
+				},
 			},
 		},
 		{
@@ -78,7 +103,7 @@ func TestNewDeleteRepo(t *testing.T) {
 			want: errors.New("error to input list"),
 		},
 		{
-			name: "error to delete repo",
+			name: "error to input bool",
 			in: in{
 				args: []string{},
 				repoList: formula.Repos{
@@ -88,30 +113,77 @@ func TestNewDeleteRepo(t *testing.T) {
 					},
 				},
 				inputListString: "repoName",
-				repoDeleteErr:   errors.New("error to delete repo"),
+				inputBoolErr:    errors.New("error to input bool"),
 			},
-			want: errors.New("error to delete repo"),
+			want: errors.New("error to input bool"),
+		},
+		{
+			name: "do not accept delete selected repo",
+			in: in{
+				args: []string{},
+				repoList: formula.Repos{
+					{
+						Name:     "repoName",
+						Priority: 0,
+					},
+				},
+				inputListString: "repoName",
+				inputBool:       false,
+			},
+		},
+		{
+			name: "error on empty flag",
+			in: in{
+				args: []string{"--name="},
+			},
+			want: errors.New("please provide a value for 'name'"),
+		},
+		{
+			name: "error to delete repo with wrong name",
+			in: in{
+				args: []string{"--name=wrongName"},
+				repoList: formula.Repos{
+					{
+						Name:     "repoName",
+						Priority: 0,
+					},
+				},
+			},
+			want: errors.New("no repository with this name"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			_ = os.MkdirAll(repoPath, os.ModePerm)
+			defer os.RemoveAll(ritHome)
+			fileManager := stream.NewFileManager()
+			dirManager := stream.NewDirManager(fileManager)
+
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputListString, tt.in.inputListErr)
+			inputBoolMock := new(mocks.InputBoolMock)
+			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
 			repoManagerMock := new(mocks.RepoManager)
-			repoManagerMock.On("Delete", mock.Anything).Return(tt.in.repoDeleteErr)
 			repoManagerMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.repoList, tt.in.repoListErr)
+			repoManagerMock.On("Write", mock.Anything).Return(nil)
+
+			repoDeleter := repo.NewDeleter(ritHome, repoManagerMock, dirManager)
 
 			cmd := NewDeleteRepoCmd(
 				repoManagerMock,
 				inputListMock,
-				repoManagerMock,
+				inputBoolMock,
+				repoDeleter,
 			)
-			// TODO: remove stdin flag after  deprecation
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.in.args)
 
 			got := cmd.Execute()
+			if got != nil || tt.name == "do not accept delete selected repo" {
+				assert.DirExists(t, repoPath)
+			} else {
+				assert.NoDirExists(t, repoPath)
+			}
 			assert.Equal(t, tt.want, got)
 		})
 	}

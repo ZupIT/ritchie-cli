@@ -17,85 +17,124 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"os"
+	"reflect"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
-	deleteSuccessMsg = "Repository %q was deleted with success"
+	deleteSuccessMsg    = "Repository %q was deleted with success"
+	repoFlagDescription = "Repository name to delete"
+	repoNotFoundMsg     = "repository %q was not found"
 )
+
+var deleteRepoFlags = flags{
+	{
+		name:        nameFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: repoFlagDescription,
+	},
+}
 
 type deleteRepoCmd struct {
 	formula.RepositoryLister
 	prompt.InputList
+	prompt.InputBool
 	formula.RepositoryDeleter
 }
 
-func NewDeleteRepoCmd(rl formula.RepositoryLister, il prompt.InputList, rd formula.RepositoryDeleter) *cobra.Command {
-	dr := deleteRepoCmd{rl, il, rd}
+func NewDeleteRepoCmd(
+	rl formula.RepositoryLister,
+	il prompt.InputList,
+	ib prompt.InputBool,
+	rd formula.RepositoryDeleter,
+) *cobra.Command {
+	dr := deleteRepoCmd{rl, il, ib, rd}
+
 	cmd := &cobra.Command{
 		Use:       "repo",
 		Short:     "Delete a repository",
 		Example:   "rit delete repo",
-		RunE:      RunFuncE(dr.runStdin(), dr.runFunc()),
+		RunE:      dr.runFormula(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
+
+	addReservedFlags(cmd.Flags(), deleteRepoFlags)
+
 	return cmd
 }
 
-func (dr deleteRepoCmd) runFunc() CommandRunnerFunc {
+func (dr deleteRepoCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		repos, err := dr.RepositoryLister.List()
+		name, err := dr.resolveInput(cmd)
 		if err != nil {
 			return err
-		}
-
-		if len(repos) == 0 {
-			prompt.Warning("You don't have any repositories")
+		} else if name == "" {
 			return nil
 		}
 
-		var reposNames []string
-		for _, r := range repos {
-			reposNames = append(reposNames, r.Name.String())
-		}
-
-		repo, err := dr.InputList.List("Repository:", reposNames)
-		if err != nil {
+		if err := dr.Delete(formula.RepoName(name)); err != nil {
 			return err
 		}
 
-		if err = dr.Delete(formula.RepoName(repo)); err != nil {
-			return err
-		}
-
-		prompt.Success(fmt.Sprintf(deleteSuccessMsg, repo))
+		prompt.Success(fmt.Sprintf(deleteSuccessMsg, name))
 		return nil
 	}
 }
 
-func (dr deleteRepoCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-
-		repo := formula.Repo{}
-
-		err := stdin.ReadJson(os.Stdin, &repo)
-		if err != nil {
-			return err
-		}
-
-		if err := dr.Delete(repo.Name); err != nil {
-			return err
-		}
-
-		prompt.Success(fmt.Sprintf(deleteSuccessMsg, repo.Name))
-		return nil
+func (dr *deleteRepoCmd) resolveInput(cmd *cobra.Command) (string, error) {
+	if IsFlagInput(cmd) {
+		return dr.resolveFlags(cmd)
 	}
+	return dr.resolvePrompt()
+}
+
+func (dr *deleteRepoCmd) resolvePrompt() (string, error) {
+	repos, err := dr.RepositoryLister.List()
+	if err != nil {
+		return "", err
+	}
+
+	if len(repos) == 0 {
+		prompt.Warning("You don't have any repositories")
+		return "", nil
+	}
+
+	var reposNames []string
+	for _, r := range repos {
+		reposNames = append(reposNames, r.Name.String())
+	}
+
+	repo, err := dr.InputList.List("Repository:", reposNames)
+	if err != nil {
+		return "", err
+	}
+
+	question := "Are you sure you want to delete this repo?"
+	ans, err := dr.InputBool.Bool(question, []string{"no", "yes"})
+	if err != nil {
+		return "", err
+	}
+	if !ans {
+		return "", nil
+	}
+	return repo, nil
+}
+
+func (dr *deleteRepoCmd) resolveFlags(cmd *cobra.Command) (string, error) {
+	name, err := cmd.Flags().GetString(nameFlagName)
+	if err != nil {
+		return "", err
+	} else if name == "" {
+		return "", errors.New("please provide a value for 'name'")
+	}
+
+	return name, nil
 }
