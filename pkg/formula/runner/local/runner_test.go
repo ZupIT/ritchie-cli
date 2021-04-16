@@ -151,13 +151,6 @@ func TestRun(t *testing.T) {
 			envData:   env.Holder{Current: "prd"},
 			want:      nil,
 		},
-		{
-			name:       "success with a output",
-			def:        formula.Definition{Path: "testing/output", RepoName: "commons"},
-			inputType:  0,
-			want:       nil,
-			outputFile: true,
-		},
 	}
 
 	for _, tt := range tests {
@@ -180,16 +173,9 @@ func TestRun(t *testing.T) {
 			out, _ := ioutil.ReadAll(r)
 			os.Stdout = rescueStdout
 
-			outputFile := filepath.Join(repoPath, tt.def.Path, "bin", "output.json")
-
 			assert.Equal(t, tt.want, got)
 			assert.NotContains(t, string(out), "::output")
 
-			if tt.outputFile {
-				assert.FileExists(t, outputFile)
-			} else {
-				assert.NoFileExists(t, outputFile)
-			}
 		})
 	}
 }

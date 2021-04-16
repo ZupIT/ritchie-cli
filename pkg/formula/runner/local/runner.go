@@ -18,9 +18,7 @@ package local
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -129,16 +127,6 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	}
 	<-done
 
-	if len(output) > 0 {
-		sanitizeOutput := sanitizeData(output)
-		flattenOutput := flattenData(sanitizeOutput)
-		transformOutput := transformData(flattenOutput)
-
-		if err := writeOutput(setup, transformOutput); err != nil {
-			return err
-		}
-	}
-
 	metric.RepoName = def.RepoName
 
 	return nil
@@ -163,56 +151,6 @@ func (ru RunManager) setEnvs(cmd *exec.Cmd, pwd string, verbose bool) error {
 	env := fmt.Sprintf(formula.EnvPattern, formula.Env, envHolder.Current)
 	verboseEnv := fmt.Sprintf(formula.EnvPattern, formula.VerboseEnv, strconv.FormatBool(verbose))
 	cmd.Env = append(cmd.Env, pwdEnv, ctxEnv, verboseEnv, dockerEnv, env)
-
-	return nil
-}
-
-func sanitizeData(data []string) []string {
-	sanitizeData := []string{}
-	for i := range data {
-		output := strings.Split(data[i], " ")[1:]
-		newOutput := strings.Join(output, " ")
-		sanitizeData = append(sanitizeData, newOutput)
-	}
-
-	return sanitizeData
-}
-
-func flattenData(data []string) []string {
-	flattenData := []string{}
-	for i := range data {
-		element := strings.Split(data[i], " ")
-		for j := range element {
-			flattenData = append(flattenData, element[j])
-		}
-	}
-
-	return flattenData
-}
-
-func transformData(data []string) map[string]string {
-	transformData := make(map[string]string)
-	for i := range data {
-		test := strings.Split(data[i], "=")
-		key := test[0]
-		value := test[1]
-		transformData[key] = value
-	}
-
-	return transformData
-}
-
-func writeOutput(setup formula.Setup, data map[string]string) error {
-	output := filepath.Join(setup.BinPath, "output.json")
-
-	dataJSON, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		return err
-	}
-
-	if err := ioutil.WriteFile(output, dataJSON, os.ModePerm); err != nil {
-		return err
-	}
 
 	return nil
 }
