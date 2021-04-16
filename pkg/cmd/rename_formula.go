@@ -32,10 +32,12 @@ import (
 
 const (
 	workspaceFlagName           = "workspace"
-	workspaceFlagDescription    = "Workspace to rename"
+	workspaceFlagDescription    = "name of workspace to rename"
 	formulaFlagName             = "formula"
 	formulaFlagDescription      = "formula to rename"
 	foundFormulaRenamedQuestion = "we found a formula, which one do you want to rename: "
+
+	ErrFormula = "This formula '%s' dont's exists on this workspace = '%s'"
 )
 
 var renameWorkspaceFlags = flags{
@@ -120,6 +122,8 @@ func (r *renameFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Workspace, 
 }
 
 func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, workspaces formula.Workspaces) (formula.Workspace, string, error) {
+	// Default (/home/bruna/ritchie-formulas-local)
+	// rit test sandokan
 	workspaceCleaned, formulaCleaned := formula.Workspace{}, ""
 	flagError := "please provide a value for '%s'"
 
@@ -142,6 +146,10 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, workspaces formula.W
 		return workspaceCleaned, formulaCleaned, err
 	} else if formula == "" {
 		return workspaceCleaned, formulaCleaned, fmt.Errorf(flagError, formulaFlagName)
+	}
+
+	if !r.formulaExistsInWorkspace(workspaceCleaned.Dir, formula) {
+		return workspaceCleaned, formulaCleaned, fmt.Errorf(ErrFormula, formula, workspaceCleaned.Dir)
 	}
 
 	return workspaceCleaned, formulaCleaned, nil
@@ -213,4 +221,18 @@ func (r *renameFormulaCmd) readFormulas(dir string, currentFormula string) ([]st
 	groups = append(groups, aux...)
 
 	return groups, nil
+}
+
+func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string) bool {
+	fc := cleanFormula(formula)
+	for _, group := range fc {
+		path = filepath.Join(path, group)
+	}
+
+	return r.directory.Exists(path)
+}
+
+func cleanFormula(formula string) []string {
+	formulaSplited := strings.Split(formula, " ")
+	return formulaSplited[1:]
 }
