@@ -30,9 +30,8 @@ import (
 
 const (
 	buildBat       = "build.bat"
-	msgBatBuildErr = "failed building formula with build.bat, verify your repository"
-	errMsgFmt      = `%s
-More about error: %s`
+	msgBatBuildErr = "Check if you have all the requirements to execute this formula."
+	errMsgFmt      = "\nError building formula: "
 )
 
 var (
@@ -64,7 +63,11 @@ func (ba BatManager) Build(info formula.BuildInfo) error {
 	cmd := exec.Command(buildBat)
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf(errMsgFmt, ErrBuildFormulaBuildBat, stderr.String())
+		return errors.New(
+			fmt.Sprint(
+				prompt.Red(ErrBuildFormulaBuildBat.Error()),
+				errMsgFmt+ prompt.Red(stderr.String()),
+		))
 	}
 
 	return nil
