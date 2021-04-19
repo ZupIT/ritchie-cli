@@ -381,6 +381,10 @@ func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree
 }
 
+func (t treeMock) TreeByRepo(formula.RepoName) (formula.Tree, error) {
+	return t.tree, t.error
+}
+
 type treeGeneratorMock struct {
 	err error
 }

@@ -248,6 +248,7 @@ func Build() *cobra.Command {
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
+	listFormulaCmd := cmd.NewListFormulaCmd(repoLister, inputList, treeManager, tutorialFinder)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)
@@ -257,6 +258,7 @@ func Build() *cobra.Command {
 	listCmd.AddCommand(listRepoCmd)
 	listCmd.AddCommand(listCredentialCmd)
 	listCmd.AddCommand(listWorkspaceCmd)
+	listCmd.AddCommand(listFormulaCmd)
 	setCmd.AddCommand(setCredentialCmd, setEnvCmd, setPriorityCmd, setFormulaRunnerCmd)
 	showCmd.AddCommand(showEnvCmd, showFormulaRunnerCmd)
 	buildCmd.AddCommand(buildFormulaCmd)
