@@ -66,8 +66,8 @@ func (ba BatManager) Build(info formula.BuildInfo) error {
 		return errors.New(
 			fmt.Sprint(
 				prompt.Red(ErrBuildFormulaBuildBat.Error()),
-				errMsgFmt+ prompt.Red(stderr.String()),
-		))
+				errMsgFmt+prompt.Red(stderr.String()),
+			))
 	}
 
 	return nil

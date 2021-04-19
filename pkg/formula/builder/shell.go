@@ -56,7 +56,7 @@ func (sh ShellManager) Build(info formula.BuildInfo) error {
 		return errors.New(
 			fmt.Sprint(
 				prompt.Red(ErrBuildFormulaShell.Error()),
-				errMsgFmt+ prompt.Red(stderr.String()),
+				errMsgFmt+prompt.Red(stderr.String()),
 			))
 	}
 
