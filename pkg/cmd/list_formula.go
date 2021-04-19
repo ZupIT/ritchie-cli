@@ -163,21 +163,15 @@ func (lr listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 		return formula.Repos{}, errors.New("please provide a value for 'name'")
 	}
 
-	repos, err := lr.RepositoryLister.List()
-	if err != nil {
-		return formula.Repos{}, err
-	}
 	if name == listOptionAll {
+		repos, err := lr.RepositoryLister.List()
+		if err != nil {
+			return formula.Repos{}, err
+		}
 		return repos, nil
 	} else {
-		for _, r := range repos {
-			if r.Name.String() == name {
-				return formula.Repos{r}, nil
-			}
-		}
+		return formula.Repos{formula.Repo{Name: formula.RepoName(name)}}, nil
 	}
-
-	return formula.Repos{}, errors.New("no repository with this name")
 }
 
 func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, err error) {
@@ -207,6 +201,8 @@ func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDef
 	tree, err := lr.treeManager.TreeByRepo(repoName)
 	if err != nil {
 		return []formulaDefinition{}, err
+	} else if tree.Commands == nil {
+		return []formulaDefinition{}, errors.New("no repository with this name")
 	}
 
 	var repoFormulas []formulaDefinition
