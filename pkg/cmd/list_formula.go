@@ -17,7 +17,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -30,13 +32,23 @@ import (
 )
 
 const (
-	listOptionAll      = "ALL"
-	rootString         = "root"
-	rootCommand        = "rit"
-	commandSeparator   = "_"
-	totalFormulasMsg   = "There are %v formulas"
-	totalOneFormulaMsg = "There is 1 formula"
+	listOptionAll       = "ALL"
+	rootString          = "root"
+	rootCommand         = "rit"
+	commandSeparator    = "_"
+	totalFormulasMsg    = "There are %v formulas"
+	totalOneFormulaMsg  = "There is 1 formula"
+	repoFlagDescription = "Repository name to list formulas"
 )
+
+var listFormulaFlags = flags{
+	{
+		name:        nameFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: repoFlagDescription,
+	},
+}
 
 type formulaDefinition struct {
 	Cmd  string
@@ -67,47 +79,22 @@ func NewListFormulaCmd(
 		Use:     "formula",
 		Short:   "Show a list with available formulas from a specific repository",
 		Example: "rit list formula",
-		RunE:    lf.runFunc(),
+		RunE:    lf.runFormula(),
 	}
+
+	addReservedFlags(cmd.Flags(), listFormulaFlags)
+
 	return cmd
 }
 
-func (lr listFormulaCmd) runFunc() CommandRunnerFunc {
+func (lr listFormulaCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		repos, err := lr.RepositoryLister.List()
+		repos, err := lr.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
 
-		if len(repos) == 0 {
-			prompt.Warning("You don't have any repositories")
-			return nil
-		}
-
-		var reposNames []string
-		reposNames = append(reposNames, listOptionAll)
-		for _, r := range repos {
-			reposNames = append(reposNames, r.Name.String())
-		}
-
-		repoName, err := lr.InputList.List("Repository:", reposNames)
-		if err != nil {
-			return err
-		}
-
-		var repoToListFormulas []formula.Repo
-		if repoName == listOptionAll {
-			repoToListFormulas = repos
-		} else {
-			for i := range repos {
-				if repos[i].Name == formula.RepoName(repoName) {
-					repoToListFormulas = append(repoToListFormulas, repos[i])
-					break
-				}
-			}
-		}
-
-		formulaCount, err := lr.printFormulas(repoToListFormulas)
+		formulaCount, err := lr.printFormulas(repos)
 		if err != nil {
 			return err
 		} else if formulaCount != 1 {
@@ -123,6 +110,74 @@ func (lr listFormulaCmd) runFunc() CommandRunnerFunc {
 		tutorialListFormulas(tutorialHolder.Current)
 		return nil
 	}
+}
+
+func (lr *listFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Repos, error) {
+	if IsFlagInput(cmd) {
+		return lr.resolveFlags(cmd)
+	}
+	return lr.resolvePrompt()
+}
+
+func (lr *listFormulaCmd) resolvePrompt() (formula.Repos, error) {
+	repos, err := lr.RepositoryLister.List()
+	if err != nil {
+		return formula.Repos{}, err
+	}
+
+	if len(repos) == 0 {
+		prompt.Warning("You don't have any repositories")
+		return formula.Repos{}, nil
+	}
+
+	var reposNames []string
+	reposNames = append(reposNames, listOptionAll)
+	for _, r := range repos {
+		reposNames = append(reposNames, r.Name.String())
+	}
+
+	repoName, err := lr.InputList.List("Repository:", reposNames)
+	if err != nil {
+		return formula.Repos{}, err
+	}
+
+	var repoToListFormulas []formula.Repo
+	if repoName == listOptionAll {
+		repoToListFormulas = repos
+	} else {
+		for i := range repos {
+			if repos[i].Name == formula.RepoName(repoName) {
+				repoToListFormulas = append(repoToListFormulas, repos[i])
+				break
+			}
+		}
+	}
+	return repoToListFormulas, nil
+}
+
+func (lr listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error) {
+	name, err := cmd.Flags().GetString(nameFlagName)
+	if err != nil {
+		return formula.Repos{}, err
+	} else if name == "" {
+		return formula.Repos{}, errors.New("please provide a value for 'name'")
+	}
+
+	repos, err := lr.RepositoryLister.List()
+	if err != nil {
+		return formula.Repos{}, err
+	}
+	if name == listOptionAll {
+		return repos, nil
+	} else {
+		for _, r := range repos {
+			if r.Name.String() == name {
+				return formula.Repos{r}, nil
+			}
+		}
+	}
+
+	return formula.Repos{}, errors.New("no repo found with this name")
 }
 
 func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, err error) {
