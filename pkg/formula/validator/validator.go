@@ -29,6 +29,7 @@ var (
 	ErrFormulaCmdMustStartWithRit  = errors.New("rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	ErrInvalidFormulaCmdSize       = errors.New("rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 	ErrInvalidCharactersFormulaCmd = errors.New(`these characters are not allowed in the formula command [\ /,> <@ -]`)
+	MsgErrFormulaCanBeCoreCommand  = "core command verb %q after rit\n" + "Use your formula group before the verb\n" + "Example: rit aws list bucket\n"
 )
 
 type ValidatorManager struct {
@@ -41,6 +42,7 @@ func NewValidator() ValidatorManager {
 
 func (v *ValidatorManager) FormulaCommmandValidator(formula string) error {
 	v.formulaCMD = formula
+
 	if len(strings.TrimSpace(v.formulaCMD)) < 1 {
 		return ErrFormulaCmdNotBeEmpty
 	}
@@ -76,12 +78,7 @@ func (v *ValidatorManager) coreCmdValidator() error {
 	wordAfterCore := strings.Split(v.formulaCMD, " ")[1]
 	for i := range api.CoreCmds {
 		if wordAfterCore == api.CoreCmds[i].Usage {
-			errorString := fmt.Sprintf("core command verb %q after rit\n"+
-				"Use your formula group before the verb\n"+
-				"Example: rit aws list bucket\n",
-				api.CoreCmds[i].Usage)
-
-			return errors.New(errorString)
+			return fmt.Errorf(MsgErrFormulaCanBeCoreCommand, api.CoreCmds[i].Usage)
 		}
 	}
 	return nil
