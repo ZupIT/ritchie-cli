@@ -19,22 +19,25 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
 	deleteSuccessMsg    = "Repository %q was deleted with success"
 	repoFlagDescription = "Repository name to delete"
+	nameFlag            = "name"
 )
 
 var deleteRepoFlags = flags{
 	{
-		name:        nameFlagName,
+		name:        nameFlag,
 		kind:        reflect.String,
 		defValue:    "",
 		description: repoFlagDescription,
@@ -60,7 +63,7 @@ func NewDeleteRepoCmd(
 		Use:       "repo",
 		Short:     "Delete a repository",
 		Example:   "rit delete repo",
-		RunE:      dr.runFormula(),
+		RunE:      RunFuncE(dr.runStdin(), dr.runFormula()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -84,6 +87,25 @@ func (dr deleteRepoCmd) runFormula() CommandRunnerFunc {
 		}
 
 		prompt.Success(fmt.Sprintf(deleteSuccessMsg, name))
+		return nil
+	}
+}
+
+func (dr deleteRepoCmd) runStdin() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+
+		repo := formula.Repo{}
+
+		err := stdin.ReadJson(os.Stdin, &repo)
+		if err != nil {
+			return err
+		}
+
+		if err := dr.Delete(repo.Name); err != nil {
+			return err
+		}
+
+		prompt.Success(fmt.Sprintf(deleteSuccessMsg, repo.Name))
 		return nil
 	}
 }
@@ -128,7 +150,7 @@ func (dr *deleteRepoCmd) resolvePrompt() (string, error) {
 }
 
 func (dr *deleteRepoCmd) resolveFlags(cmd *cobra.Command) (string, error) {
-	name, err := cmd.Flags().GetString(nameFlagName)
+	name, err := cmd.Flags().GetString(nameFlag)
 	if err != nil {
 		return "", err
 	} else if name == "" {
