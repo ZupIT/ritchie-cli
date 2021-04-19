@@ -32,13 +32,12 @@ import (
 )
 
 const (
-	workspaceFlagName           = "workspace"
-	workspaceFlagDescription    = "name of workspace to rename"
-	oldFormulaFlagName          = "oldNameFormula"
-	oldFormulaFlagDescription   = "old name of formula to rename"
-	newFormulaFlagName          = "newNameFormula"
-	newFormulaFlagDescription   = "new name of formula to rename"
-	foundFormulaRenamedQuestion = "we found a formula, which one do you want to rename: "
+	workspaceFlagName         = "workspace"
+	workspaceFlagDescription  = "name of workspace to rename"
+	oldFormulaFlagName        = "oldNameFormula"
+	oldFormulaFlagDescription = "old name of formula to rename"
+	newFormulaFlagName        = "newNameFormula"
+	newFormulaFlagDescription = "new name of formula to rename"
 
 	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
@@ -81,6 +80,7 @@ type renameFormulaCmd struct {
 	directory       stream.DirListChecker
 	userHomeDir     string
 	validator       validator.ValidatorManager
+	inputFormula    prompt.InputFormula
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -93,6 +93,7 @@ func NewRenameFormulaCmd(
 	directory stream.DirListChecker,
 	userHomeDir string,
 	validator validator.ValidatorManager,
+	inputFormula prompt.InputFormula,
 ) *cobra.Command {
 	r := renameFormulaCmd{
 		workspace:       workspace,
@@ -103,6 +104,7 @@ func NewRenameFormulaCmd(
 		directory:       directory,
 		userHomeDir:     userHomeDir,
 		validator:       validator,
+		inputFormula:    inputFormula,
 	}
 
 	cmd := &cobra.Command{
@@ -209,16 +211,15 @@ func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) resultRe
 	}
 	result.workspace = wspace
 
-	oldFormula, err := r.readFormulas(wspace.Dir, "rit")
+	oldFormula, err := r.inputFormula.Select(wspace.Dir, "rit")
 	if err != nil {
 		result.err = err
 		return result
-	}
-	if oldFormula == nil {
+	} else if oldFormula == "" {
 		result.err = ErrCouldNotFindFormula
 		return result
 	}
-	result.oldFormula = strings.Join(oldFormula, " ")
+	result.oldFormula = oldFormula
 
 	newFormula, err := r.inTextValidator.Text(formulaCmdLabel, r.surveyCmdValidator, formulaCmdHelper)
 	if err != nil {
@@ -228,54 +229,6 @@ func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) resultRe
 	result.newFormula = newFormula
 
 	return result
-}
-
-func (r *renameFormulaCmd) readFormulas(dir string, currentFormula string) ([]string, error) {
-	dirs, err := r.directory.List(dir, false)
-	if err != nil {
-		return nil, err
-	}
-
-	dirs = removeFromArray(dirs, docsDir)
-
-	var groups []string
-	var formulaOptions []string
-	var response string
-
-	if isFormula(dirs) {
-		if !hasFormulaInDir(dirs) {
-			return groups, nil
-		}
-
-		formulaOptions = append(formulaOptions, currentFormula, optionOtherFormula)
-
-		response, err = r.inList.List(foundFormulaRenamedQuestion, formulaOptions)
-		if err != nil {
-			return nil, err
-		}
-		if response == currentFormula {
-			return groups, nil
-		}
-		dirs = removeFromArray(dirs, srcDir)
-	}
-
-	selected, err := r.inList.List(questionSelectFormulaGroup, dirs)
-	if err != nil {
-		return nil, err
-	}
-
-	newFormulaSelected := fmt.Sprintf("%s %s", currentFormula, selected)
-
-	var aux []string
-	aux, err = r.readFormulas(filepath.Join(dir, selected), newFormulaSelected)
-	if err != nil {
-		return nil, err
-	}
-
-	aux = append([]string{selected}, aux...)
-	groups = append(groups, aux...)
-
-	return groups, nil
 }
 
 func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string) bool {

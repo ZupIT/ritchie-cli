@@ -35,6 +35,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -200,6 +201,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
 			inputListMock := insertListMock(tt.in.workspaceSelected, tt.in.formulaSelected)
 
+			inputFormula := prompt.NewInputFormula(inputListMock, dirManager)
+
 			cmd := NewRenameFormulaCmd(
 				formulaWorkspace,
 				inputTextMock,
@@ -209,6 +212,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				dirManager,
 				home,
 				validator,
+				inputFormula,
 			)
 
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
@@ -235,7 +239,6 @@ func insertListMock(workspace, formula string) *mocks.InputListMock {
 	inputListMock.On("List", "Select a formula workspace: ", mock.Anything, mock.Anything).Return(workspace, nil)
 	inputListMock.On("List", "Select a formula or group: ", firstGroupFormulas, mock.Anything).Return(formulaSplited[1], nil)
 	inputListMock.On("List", "Select a formula or group: ", secondGroupFormulas, mock.Anything).Return(formulaSplited[2], nil)
-	inputListMock.On("List", foundFormulaRenamedQuestion, mock.Anything, mock.Anything).Return(formula, nil)
-
+	inputListMock.On("List", prompt.InputFormulaQuestionFoundedFormula, mock.Anything, mock.Anything).Return(formula, nil)
 	return inputListMock
 }

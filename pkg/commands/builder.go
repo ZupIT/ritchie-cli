@@ -188,6 +188,9 @@ func Build() *cobra.Command {
 	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager, treeGen, repoListWriter)
 	validator := validator.NewValidator()
 
+	// prompt with deps
+	inputFormula := prompt.NewInputFormula(inputList, dirManager)
+
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
 	addCmd := cmd.NewAddCmd()
@@ -251,7 +254,7 @@ func Build() *cobra.Command {
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
-	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete, inputTextValidator, dirManager, userHomeDir, validator)
+	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete, inputTextValidator, dirManager, userHomeDir, validator, inputFormula)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)
