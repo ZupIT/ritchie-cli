@@ -44,10 +44,12 @@ func TestNewListAdder(t *testing.T) {
 	repoCreator := NewCreator(ritHome, repoProviders, dirManager, fileManager)
 	repoLister := NewLister(ritHome, fileManager)
 	repoWriter := NewWriter(ritHome, fileManager)
-	repoListWriteCreator := NewListWriteCreator(repoLister, repoCreator, repoWriter)
+	repoDetail := NewDetail(repoProviders)
+	repoListWrite := NewListWriter(repoLister, repoWriter)
+	repoDeleter := NewDeleter(ritHome, repoListWrite, dirManager)
+	repoListWriteCreator := NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
-	repoDeleter := NewDeleter(ritHome, repoListWriteCreator, dirManager)
-	repoAdd := NewAdder(ritHome, repoListWriteCreator, repoDeleter, treeGenerator, fileManager)
+	repoAdd := NewAdder(ritHome, repoListWriteCreator, treeGenerator)
 
 	type in struct {
 		repoList formula.RepositoryLister

@@ -17,51 +17,15 @@
 package autocomplete
 
 import (
-	"io"
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
-	"github.com/ZupIT/ritchie-cli/pkg/git"
-	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 )
-
-type repoListerMock struct{}
-
-func (repoListerMock) List() (formula.Repos, error) {
-	return formula.Repos{}, nil
-}
-
-type FileReadExisterMock struct{}
-
-func (m FileReadExisterMock) Read(path string) ([]byte, error) {
-	return []byte("some data"), nil
-}
-
-func (m FileReadExisterMock) Exists(path string) bool {
-	return false
-}
-
-type GitRepositoryMock struct {
-	zipball   func(info git.RepoInfo, version string) (io.ReadCloser, error)
-	tags      func(info git.RepoInfo) (git.Tags, error)
-	latestTag func(info git.RepoInfo) (git.Tag, error)
-}
-
-func (m GitRepositoryMock) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
-	return m.zipball(info, version)
-}
-
-func (m GitRepositoryMock) Tags(info git.RepoInfo) (git.Tags, error) {
-	return m.tags(info)
-}
-
-func (m GitRepositoryMock) LatestTag(info git.RepoInfo) (git.Tag, error) {
-	return m.latestTag(info)
-}
 
 func TestGenerate(t *testing.T) {
 	type in struct {
@@ -72,21 +36,8 @@ func TestGenerate(t *testing.T) {
 		err error
 	}
 
-	var defaultGitRepositoryMock = GitRepositoryMock{
-		latestTag: func(info git.RepoInfo) (git.Tag, error) {
-			return git.Tag{}, nil
-		},
-		tags: func(info git.RepoInfo) (git.Tags, error) {
-			return git.Tags{git.Tag{Name: "1.0.0"}}, nil
-		},
-		zipball: func(info git.RepoInfo, version string) (io.ReadCloser, error) {
-			return nil, nil
-		},
-	}
-	repoProviders := formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: defaultGitRepositoryMock, NewRepoInfo: github.NewRepoInfo})
-
-	treeMan := tree.NewTreeManager("../../testdata", repoListerMock{}, api.Commands{}, FileReadExisterMock{}, repoProviders)
+	treeMan := &mocks.TreeManager{}
+	treeMan.On("MergedTree", mock.Anything).Return(formula.Tree{})
 	autocomplete := NewGenerator(treeMan)
 
 	tests := []struct {
@@ -145,12 +96,10 @@ func TestGenerate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := autocomplete.Generate(tt.in.shell, &cobra.Command{})
 
-			if err != tt.out.err {
-				t.Errorf("Generator(%s) got %v, want %v", tt.name, err, tt.out.err)
-			}
+			assert.Equal(t, tt.out.err, err)
 
-			if tt.out.err == nil && got == "" {
-				t.Errorf("Generator(%s) autocomplete is empty", tt.name)
+			if tt.out.err == nil {
+				assert.NotEmpty(t, got)
 			}
 		})
 	}

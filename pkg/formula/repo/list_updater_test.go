@@ -45,9 +45,12 @@ func TestNewListUpdater(t *testing.T) {
 	repoList := NewLister(ritHome, fileManager)
 	repoCreator := NewCreator(ritHome, repoProviders, dirManager, fileManager)
 	repoWriter := NewWriter(ritHome, fileManager)
-	repoListCreator := NewListWriteCreator(repoList, repoCreator, repoWriter)
+	repoDetail := NewDetail(repoProviders)
+	repoListWrite := NewListWriter(repoList, repoWriter)
+	repoDeleter := NewDeleter(ritHome, repoListWrite, dirManager)
+	repoListCreator := NewCreateWriteListDetailDeleter(repoList, repoCreator, repoWriter, repoDetail, repoDeleter)
 	treeGenerator := tree.NewGenerator(dirManager, fileManager)
-	repoUpdate := NewUpdater(ritHome, repoListCreator, treeGenerator, fileManager)
+	repoUpdate := NewUpdater(ritHome, repoListCreator, treeGenerator)
 
 	type in struct {
 		repoList   formula.RepositoryLister

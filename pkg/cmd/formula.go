@@ -31,11 +31,11 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
-	subCommand  = " SUBCOMMAND"
 	Group       = "group"
 	verboseFlag = "verbose"
 	rootCmdName = "root"
@@ -127,13 +127,18 @@ func newSubCmd(cmd api.Command) *cobra.Command {
 	var group string
 	if cmd.Parent == rootCmdName {
 		group = fmt.Sprintf("%s repo commands:", cmd.Repo)
+		if cmd.RepoNewVersion != "" {
+			group = fmt.Sprintf("%s repo commands: %s", cmd.Repo, prompt.Cyan("(New version available "+cmd.RepoNewVersion+")"))
+		}
 	}
 
 	c := &cobra.Command{
-		Use:         cmd.Usage + subCommand,
-		Short:       cmd.Help,
-		Long:        cmd.LongHelp,
-		Annotations: map[string]string{Group: group},
+		Use:   cmd.Usage,
+		Short: cmd.Help,
+		Long:  cmd.LongHelp,
+		Annotations: map[string]string{
+			Group: group,
+		},
 	}
 	c.LocalFlags()
 	return c

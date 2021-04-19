@@ -6,6 +6,9 @@ github.com/AlecAivazis/survey/v2/terminal
 # github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
 github.com/Azure/go-ansiterm
 github.com/Azure/go-ansiterm/winterm
+# github.com/JoaoDanielRufino/go-input-autocomplete v0.0.0-20210303185303-8a29eb5e8f8d
+## explicit
+github.com/JoaoDanielRufino/go-input-autocomplete
 # github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd
 github.com/MakeNowJust/heredoc
 # github.com/PaesslerAG/gval v1.0.0
@@ -24,6 +27,8 @@ github.com/docker/docker/pkg/term/windows
 # github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96
 github.com/docker/spdystream
 github.com/docker/spdystream/spdy
+# github.com/eiannone/keyboard v0.0.0-20200508000154-caf4b762e807
+github.com/eiannone/keyboard
 # github.com/fatih/color v1.9.0
 ## explicit
 github.com/fatih/color
@@ -167,7 +172,7 @@ golang.org/x/net/trace
 # golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20200806125547-5acd03effb82
+# golang.org/x/sys v0.0.0-20210304152209-afaa3650a925
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix

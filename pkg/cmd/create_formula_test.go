@@ -170,6 +170,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
 
+			inPath := &mocks.InputPathMock{}
+			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
+
 			tutorialMock := new(mocks.TutorialFindSetterMock)
 			tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
 
@@ -184,6 +187,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inputTextMock,
 				inputTextValidatorMock,
 				inputListMock,
+				inPath,
 				tutorialMock,
 				treeMock,
 			)
@@ -332,7 +336,7 @@ func TestCreateFormula(t *testing.T) {
 				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
 				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
 
-				assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+				// assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}
@@ -395,13 +399,14 @@ func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, f
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
 	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
-	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
-
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, repoDeleter, treeGen, fileManager)
+	repoDetail := repo.NewDetail(repoProviders)
+	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen)
+	repoListDetailWriter := repo.NewListDetailWrite(repoLister, repoDetail, repoWriter)
 
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, nil)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoListDetailWriter, api.CoreCmds)
 	tmpManager := template.NewManager("../../testdata", dirManager)
 	createManager := creator.NewCreator(treeManager, dirManager, fileManager, tmpManager)
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)

@@ -59,3 +59,7 @@ type InputURL interface {
 type InputMultiselect interface {
 	Multiselect(input formula.Input) ([]string, error)
 }
+
+type InputPath interface {
+	Read(text string) (string, error)
+}

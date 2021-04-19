@@ -229,6 +229,7 @@ jobs:
             sudo apt-get update -y
             sudo apt-get install -y osslsigncode
             osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecli.msi -out dist/installer/ritchiecli.msi
+            osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecli-user.msi -out dist/installer/ritchiecli-user.msi
       - persist_to_workspace:
           root: dist
           paths:

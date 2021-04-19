@@ -17,22 +17,37 @@
 package formula
 
 import (
+	"errors"
 	"sort"
+	"time"
 
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 )
 
-const RepoCommonsName = RepoName("commons")
+const (
+	RepoCacheTime   = 24 * time.Hour
+	RepoCommonsName = RepoName("commons")
+)
 
 type Repo struct {
-	Provider    RepoProvider `json:"provider"`
-	Name        RepoName     `json:"name"`
-	Version     RepoVersion  `json:"version"`
-	Url         string       `json:"url"`
-	Token       string       `json:"token,omitempty"`
-	Priority    int          `json:"priority"`
-	IsLocal     bool         `json:"isLocal"`
-	TreeVersion string       `json:"tree_version"`
+	Provider      RepoProvider `json:"provider"`
+	Name          RepoName     `json:"name"`
+	Version       RepoVersion  `json:"version"`
+	Url           string       `json:"url"`
+	Token         string       `json:"token,omitempty"`
+	Priority      int          `json:"priority"`
+	IsLocal       bool         `json:"isLocal"`
+	TreeVersion   string       `json:"tree_version"`
+	LatestVersion RepoVersion  `json:"latest_version"`
+	Cache         time.Time    `json:"cache"`
+}
+
+func (r Repo) CacheExpired() bool {
+	return r.Cache.Before(time.Now())
+}
+
+func (r *Repo) UpdateCache() {
+	r.Cache = time.Now().Add(RepoCacheTime)
 }
 
 func (r Repo) EmptyVersion() bool {
@@ -51,6 +66,15 @@ func (r Repos) Less(i, j int) bool {
 
 func (r Repos) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
+}
+
+func (r Repos) Get(name string) (Repo, error) {
+	for _, repo := range r {
+		if repo.Name.String() == name {
+			return repo, nil
+		}
+	}
+	return Repo{}, errors.New("Repo with name: " + name + " not found")
 }
 
 type RepoName string
@@ -142,10 +166,18 @@ type RepositoryListWriter interface {
 	RepositoryWriter
 }
 
-type RepositoryListWriteCreator interface {
+type RepositoryListDetailWriter interface {
 	RepositoryLister
+	RepositoryDetail
 	RepositoryWriter
+}
+
+type RepositoryCreateWriteListDetailDeleter interface {
 	RepositoryCreator
+	RepositoryWriter
+	RepositoryLister
+	RepositoryDetail
+	RepositoryDeleter
 }
 
 type RepositoryListUpdater interface {
