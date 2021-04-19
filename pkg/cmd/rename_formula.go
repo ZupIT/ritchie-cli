@@ -33,8 +33,10 @@ import (
 const (
 	workspaceFlagName           = "workspace"
 	workspaceFlagDescription    = "name of workspace to rename"
-	formulaFlagName             = "formula"
-	formulaFlagDescription      = "formula to rename"
+	oldFormulaFlagName          = "old-name-formula"
+	oldFormulaFlagDescription   = "old name of formula to rename"
+	newFormulaFlagName          = "new-name-formula"
+	newFormulaFlagDescription   = "new name of formula to rename"
 	foundFormulaRenamedQuestion = "we found a formula, which one do you want to rename: "
 
 	ErrFormula = "This formula '%s' dont's exists on this workspace = '%s'"
@@ -48,21 +50,34 @@ var renameWorkspaceFlags = flags{
 		description: workspaceFlagDescription,
 	},
 	{
-		name:        formulaFlagName,
+		name:        oldFormulaFlagName,
 		kind:        reflect.String,
 		defValue:    "",
-		description: formulaFlagDescription,
+		description: oldFormulaFlagDescription,
 	},
+	{
+		name:        newFormulaFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: newFormulaFlagDescription,
+	},
+}
+
+type resultRenameInput struct {
+	workspace              formula.Workspace
+	oldFormula, newFormula string
+	err                    error
 }
 
 // renameFormulaCmd type for add formula command.
 type renameFormulaCmd struct {
-	workspace   formula.WorkspaceAddListHasher
-	inText      prompt.InputText
-	inList      prompt.InputList
-	inPath      prompt.InputPath
-	directory   stream.DirListChecker
-	userHomeDir string
+	workspace       formula.WorkspaceAddListHasher
+	inText          prompt.InputText
+	inList          prompt.InputList
+	inPath          prompt.InputPath
+	inTextValidator prompt.InputTextValidator
+	directory       stream.DirListChecker
+	userHomeDir     string
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -71,16 +86,18 @@ func NewRenameFormulaCmd(
 	inText prompt.InputText,
 	inList prompt.InputList,
 	inPath prompt.InputPath,
+	inTextValidator prompt.InputTextValidator,
 	directory stream.DirListChecker,
 	userHomeDir string,
 ) *cobra.Command {
 	r := renameFormulaCmd{
-		workspace:   workspace,
-		inText:      inText,
-		inList:      inList,
-		inPath:      inPath,
-		directory:   directory,
-		userHomeDir: userHomeDir,
+		workspace:       workspace,
+		inText:          inText,
+		inList:          inList,
+		inPath:          inPath,
+		inTextValidator: inTextValidator,
+		directory:       directory,
+		userHomeDir:     userHomeDir,
 	}
 
 	cmd := &cobra.Command{
@@ -99,21 +116,23 @@ func NewRenameFormulaCmd(
 
 func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		wspace, formula, err := r.resolveInput(cmd)
-		if err != nil {
-			return err
+		result := r.resolveInput(cmd)
+		if result.err != nil {
+			return result.err
 		}
 
-		fmt.Println(wspace, formula)
+		fmt.Println(result.workspace, result.newFormula, result.oldFormula)
 
 		return nil
 	}
 }
 
-func (r *renameFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Workspace, string, error) {
+func (r *renameFormulaCmd) resolveInput(cmd *cobra.Command) resultRenameInput {
+	var result resultRenameInput
 	workspaces, err := r.workspace.List()
 	if err != nil {
-		return formula.Workspace{}, "", err
+		result.err = err
+		return result
 	}
 	if IsFlagInput(cmd) {
 		return r.resolveFlags(cmd, workspaces)
@@ -121,58 +140,89 @@ func (r *renameFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Workspace, 
 	return r.resolvePrompt(workspaces)
 }
 
-func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, workspaces formula.Workspaces) (formula.Workspace, string, error) {
+func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, workspaces formula.Workspaces) resultRenameInput {
 	// Default (/home/bruna/ritchie-formulas-local)
 	// rit test sandokan
-	workspaceCleaned, formulaCleaned := formula.Workspace{}, ""
+	var result resultRenameInput
 	flagError := "please provide a value for '%s'"
 
-	name, err := cmd.Flags().GetString(workspaceFlagName)
+	workspaceName, err := cmd.Flags().GetString(workspaceFlagName)
 	if err != nil {
-		return formula.Workspace{}, "", err
-	} else if name == "" {
-		return workspaceCleaned, formulaCleaned, fmt.Errorf(flagError, workspaceFlagName)
+		result.err = err
+		return result
+	} else if workspaceName == "" {
+		result.err = fmt.Errorf(flagError, workspaceFlagName)
+		return result
 	}
-
 	workspaces[formula.DefaultWorkspaceName] = filepath.Join(r.userHomeDir, formula.DefaultWorkspaceDir)
-	dir, exists := workspaces[name]
+	dir, exists := workspaces[workspaceName]
 	if !exists {
-		return workspaceCleaned, formulaCleaned, work.ErrInvalidWorkspace
+		result.err = work.ErrInvalidWorkspace
+		return result
 	}
-	workspaceCleaned = formula.Workspace{Name: name, Dir: dir}
+	result.workspace.Dir = dir
+	result.workspace.Name = workspaceName
 
-	formula, err := cmd.Flags().GetString(formulaFlagName)
+	oldFormula, err := cmd.Flags().GetString(oldFormulaFlagName)
 	if err != nil {
-		return workspaceCleaned, formulaCleaned, err
-	} else if formula == "" {
-		return workspaceCleaned, formulaCleaned, fmt.Errorf(flagError, formulaFlagName)
+		result.err = err
+		return result
+	} else if oldFormula == "" {
+		result.err = fmt.Errorf(flagError, oldFormulaFlagName)
+		return result
 	}
-
-	if !r.formulaExistsInWorkspace(workspaceCleaned.Dir, formula) {
-		return workspaceCleaned, formulaCleaned, fmt.Errorf(ErrFormula, formula, workspaceCleaned.Dir)
+	if !r.formulaExistsInWorkspace(result.workspace.Dir, oldFormula) {
+		result.err = fmt.Errorf(ErrFormula, oldFormula, result.workspace.Dir)
+		return result
 	}
+	result.oldFormula = oldFormula
 
-	return workspaceCleaned, formulaCleaned, nil
+	newFormula, err := cmd.Flags().GetString(newFormulaFlagName)
+	if err != nil {
+		result.err = err
+		return result
+	} else if newFormula == "" {
+		result.err = fmt.Errorf(flagError, newFormulaFlagName)
+		return result
+	}
+	if !r.formulaExistsInWorkspace(result.workspace.Dir, newFormula) {
+		result.err = fmt.Errorf(ErrFormula, newFormula, result.workspace.Dir)
+		return result
+	}
+	result.newFormula = newFormula
+
+	return result
 }
 
-func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) (formula.Workspace, string, error) {
-	workspaceCleaned, formulaCleaned := formula.Workspace{}, ""
+func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) resultRenameInput {
+	var result resultRenameInput
 
 	wspace, err := FormulaWorkspaceInput(workspaces, r.inList, r.inText, r.inPath)
 	if err != nil {
-		return workspaceCleaned, formulaCleaned, err
+		result.err = err
+		return result
 	}
+	result.workspace = wspace
 
-	groups, err := r.readFormulas(wspace.Dir, "rit")
+	oldFormula, err := r.readFormulas(wspace.Dir, "rit")
 	if err != nil {
-		return workspaceCleaned, formulaCleaned, err
+		result.err = err
+		return result
 	}
-
-	if groups == nil {
-		return workspaceCleaned, formulaCleaned, ErrCouldNotFindFormula
+	if oldFormula == nil {
+		result.err = ErrCouldNotFindFormula
+		return result
 	}
+	result.oldFormula = strings.Join(oldFormula, " ")
 
-	return wspace, strings.Join(groups, " "), nil
+	newFormula, err := r.inTextValidator.Text(formulaCmdLabel, r.surveyCmdValidator, formulaCmdHelper)
+	if err != nil {
+		result.err = err
+		return result
+	}
+	result.newFormula = newFormula
+
+	return result
 }
 
 func (r *renameFormulaCmd) readFormulas(dir string, currentFormula string) ([]string, error) {
@@ -235,4 +285,12 @@ func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string)
 func cleanFormula(formula string) []string {
 	formulaSplited := strings.Split(formula, " ")
 	return formulaSplited[1:]
+}
+
+func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
+	if err := formulaCommandValidator(cmd.(string)); err != nil {
+		return err
+	}
+
+	return nil
 }

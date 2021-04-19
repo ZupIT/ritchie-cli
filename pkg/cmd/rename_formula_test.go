@@ -84,9 +84,14 @@ func TestRenameFormulaCmd(t *testing.T) {
 	_ = streams.Unzip(zipFile, repoPathLocal)
 
 	type in struct {
-		inputText         string
+		inputText       string
+		inputTextErr    error
+		inputTextVal    string
+		inputTextValErr error
+
 		workspaceSelected string
 		formulaSelected   string
+		args              []string
 	}
 
 	tests := []struct {
@@ -98,16 +103,37 @@ func TestRenameFormulaCmd(t *testing.T) {
 			name: "success",
 			in: in{
 				inputText:         "rit testing formula",
+				inputTextVal:      "rit testing formula new",
 				workspaceSelected: "Default (" + repoPathLocal + ")",
 				formulaSelected:   "rit testing formula",
 			},
 		},
+		// {
+		// 	name: "error in input flag",
+		// 	in: in{
+		// 		inputText:         "rit testing formula",
+		// 		workspaceSelected: "Default (" + repoPathLocal + ")",
+		// 		formulaSelected:   "rit testing formula",
+		// 	},
+		// },
+		// {
+		// 	name: "error in input prompt",
+		// 	in: in{
+		// 		inputText:         "rit testing formula",
+		// 		workspaceSelected: "Default (" + repoPathLocal + ")",
+		// 		formulaSelected:   "rit testing formula",
+		// 	},
+		// },
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inputTextMock := new(mocks.InputTextMock)
 			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, nil)
+
+			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
+			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputTextVal, tt.in.inputTextValErr)
+
 			inPath := &mocks.InputPathMock{}
 			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
 			inputListMock := insertListMock(tt.in.workspaceSelected, tt.in.formulaSelected)
@@ -117,6 +143,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				inputTextMock,
 				inputListMock,
 				inPath,
+				inputTextValidatorMock,
 				dirManager,
 				home,
 			)
