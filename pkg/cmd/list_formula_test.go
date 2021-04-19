@@ -17,26 +17,41 @@
 package cmd
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestNewListFormula(t *testing.T) {
+	finderTutorial := TutorialFinderMock{}
+	tmpDir := os.TempDir()
+	ritHomeName := ".rit"
+	ritHome := filepath.Join(tmpDir, ritHomeName)
+	reposPath := filepath.Join(ritHome, "repos")
+
+	repos := formula.Repos{
+		{
+			Name: "repoName",
+		},
+		{
+			Name: "repoOtherName",
+		},
+	}
 	type in struct {
 		args            []string
 		repoList        formula.Repos
 		repoListErr     error
 		inputListString string
 		inputListErr    error
-		tree            formula.Tree
-		treeErr         error
-		tutorial        rtutorial.Finder
-		listFormulaErr  error
 	}
 
 	tests := []struct {
@@ -45,16 +60,59 @@ func TestNewListFormula(t *testing.T) {
 		want error
 	}{
 		{
-			name: "success",
+			name: "success prompt",
 			in: in{
-				args: []string{},
-				repoList: formula.Repos{
-					{
-						Name: "repoName",
-					},
-				},
+				args:            []string{},
+				repoList:        repos,
 				inputListString: "repoName",
 			},
+		},
+		{
+			name: "sucess prompt option all",
+			in: in{
+				args:            []string{},
+				repoList:        repos,
+				inputListString: "ALL",
+			},
+		},
+		{
+			name: "success flag",
+			in: in{
+				args:     []string{"--name=repoName"},
+				repoList: repos,
+			},
+		},
+		{
+			name: "error to list repos",
+			in: in{
+				args:        []string{},
+				repoListErr: errors.New("error to list repos"),
+			},
+			want: errors.New("error to list repos"),
+		},
+		{
+			name: "error to input list",
+			in: in{
+				args:         []string{},
+				repoList:     repos,
+				inputListErr: errors.New("error to input list"),
+			},
+			want: errors.New("error to input list"),
+		},
+		{
+			name: "error on empty flag",
+			in: in{
+				args: []string{"--name="},
+			},
+			want: errors.New("please provide a value for 'name'"),
+		},
+		{
+			name: "error to list formulas from repo with wrong name",
+			in: in{
+				args:     []string{"--name=wrongName"},
+				repoList: repos,
+			},
+			want: errors.New("no repository with this name"),
 		},
 	}
 
@@ -64,14 +122,22 @@ func TestNewListFormula(t *testing.T) {
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputListString, tt.in.inputListErr)
 			repoManagerMock := new(mocks.RepoManager)
 			repoManagerMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.repoList, tt.in.repoListErr)
-			treeManagerMock := new(mocks.TreeManager)
-			treeManagerMock.On("TreeByRepo").Return(tt.in.tree, tt.in.treeErr)
+			repoManagerMock.On("Write", mock.Anything).Return(nil)
+
+			for _, r := range tt.in.repoList {
+				repoName := r.Name.String()
+				repoPath := filepath.Join(reposPath, repoName)
+				_ = os.MkdirAll(repoPath, os.ModePerm)
+				_ = streams.Unzip("../../testdata/tree.zip", repoPath)
+			}
+			defer os.RemoveAll(ritHome)
+			treeManager := tree.NewTreeManager(ritHome, repoManagerMock, api.CoreCmds)
 
 			cmd := NewListFormulaCmd(
 				repoManagerMock,
 				inputListMock,
-				treeManagerMock,
-				tt.in.tutorial,
+				treeManager,
+				finderTutorial,
 			)
 			cmd.SetArgs(tt.in.args)
 

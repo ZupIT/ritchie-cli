@@ -177,7 +177,7 @@ func (lr listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 		}
 	}
 
-	return formula.Repos{}, errors.New("no repo found with this name")
+	return formula.Repos{}, errors.New("no repository with this name")
 }
 
 func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, err error) {
