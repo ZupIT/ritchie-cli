@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -154,7 +153,7 @@ func (dr *deleteRepoCmd) resolveFlags(cmd *cobra.Command) (string, error) {
 	if err != nil {
 		return "", err
 	} else if name == "" {
-		return "", errors.New("please provide a value for 'name'")
+		return "", fmt.Errorf("please provide a value for '%s'", nameFlag)
 	}
 
 	return name, nil
