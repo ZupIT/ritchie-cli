@@ -31,6 +31,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -82,6 +83,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 	_ = streams.Unzip(zipFile, repoPath)
 	_ = streams.Unzip(zipRepositories, reposPath)
 	_ = streams.Unzip(zipFile, repoPathLocal)
+
+	validator := validator.NewValidator()
 
 	type in struct {
 		inputText       string
@@ -146,6 +149,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				inputTextValidatorMock,
 				dirManager,
 				home,
+				validator,
 			)
 
 			got := cmd.Execute()

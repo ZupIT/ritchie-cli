@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	work "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -78,6 +79,7 @@ type renameFormulaCmd struct {
 	inTextValidator prompt.InputTextValidator
 	directory       stream.DirListChecker
 	userHomeDir     string
+	validator       validator.ValidatorManager
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -89,6 +91,7 @@ func NewRenameFormulaCmd(
 	inTextValidator prompt.InputTextValidator,
 	directory stream.DirListChecker,
 	userHomeDir string,
+	validator validator.ValidatorManager,
 ) *cobra.Command {
 	r := renameFormulaCmd{
 		workspace:       workspace,
@@ -98,6 +101,7 @@ func NewRenameFormulaCmd(
 		inTextValidator: inTextValidator,
 		directory:       directory,
 		userHomeDir:     userHomeDir,
+		validator:       validator,
 	}
 
 	cmd := &cobra.Command{
@@ -288,7 +292,7 @@ func cleanFormula(formula string) []string {
 }
 
 func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
-	if err := formulaCommandValidator(cmd.(string)); err != nil {
+	if err := r.validator.FormulaCommmandValidator(cmd.(string)); err != nil {
 		return err
 	}
 

@@ -40,6 +40,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/docker"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/local"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	fworkspace "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/bitbucket"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
@@ -185,6 +186,7 @@ func Build() *cobra.Command {
 	upgradeManager := upgrade.NewDefaultManager(upgradeDefaultUpdater)
 	defaultUrlFinder := upgrade.NewDefaultUrlFinder(versionManager)
 	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager, treeGen, repoListWriter)
+	validator := validator.NewValidator()
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -245,11 +247,11 @@ func Build() *cobra.Command {
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, inputAutocomplete, treeGen, fileManager)
 	addWorkspaceCmd := cmd.NewAddWorkspaceCmd(formulaWorkspace, inputText, inputAutocomplete)
 
-	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, inputAutocomplete, tutorialFinder, treeChecker)
+	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, inputAutocomplete, tutorialFinder, treeChecker, validator)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
-	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete, dirManager, userHomeDir)
+	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete, inputTextValidator, dirManager, userHomeDir, validator)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)

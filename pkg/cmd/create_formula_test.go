@@ -34,6 +34,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
@@ -42,6 +43,8 @@ import (
 )
 
 func TestCreateFormulaCmd(t *testing.T) {
+	validator := validator.NewValidator()
+
 	type in struct {
 		inputText        string
 		inputTextErr     error
@@ -190,6 +193,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inPath,
 				tutorialMock,
 				treeMock,
+				validator,
 			)
 			createFormulaCmd.SetArgs([]string{})
 			// TODO: remove it after being deprecated
@@ -340,50 +344,6 @@ func TestCreateFormula(t *testing.T) {
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}
-		})
-	}
-}
-
-func TestFormulaCommandValidator(t *testing.T) {
-	tests := []struct {
-		name       string
-		formulaCmd string
-		want       error
-	}{
-		{
-			name:       "success",
-			formulaCmd: "rit test test",
-		},
-		{
-			name: "error empty command",
-			want: ErrFormulaCmdNotBeEmpty,
-		},
-		{
-			name:       "invalid start formula command",
-			formulaCmd: "richie test test",
-			want:       ErrFormulaCmdMustStartWithRit,
-		},
-		{
-			name:       "invalid formula command size",
-			formulaCmd: "rit test",
-			want:       ErrInvalidFormulaCmdSize,
-		},
-		{
-			name:       "invalid characters in formula command",
-			formulaCmd: "rit test test@test",
-			want:       ErrInvalidCharactersFormulaCmd,
-		},
-		{
-			name:       "invalid formula command with core command",
-			formulaCmd: "rit add test",
-			want:       errors.New("core command verb \"add\" after rit\nUse your formula group before the verb\nExample: rit aws list bucket\n"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := formulaCommandValidator(tt.formulaCmd)
-			assert.Equal(t, tt.want, got)
 		})
 	}
 }
