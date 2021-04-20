@@ -30,7 +30,7 @@ func NewListCmd() *cobra.Command {
 		Use:       "list SUBCOMMAND",
 		Short:     "List repositories, credentials, workspaces, formulas",
 		Long:      descListLong,
-		Example:   "rit list repo, rit list credential, rit list workspace, rit list fomrula",
+		Example:   "rit list repo, rit list credential, rit list workspace, rit list formula",
 		ValidArgs: []string{"credential", "repo", "workspace", "formula"},
 		Args:      cobra.OnlyValidArgs,
 	}
