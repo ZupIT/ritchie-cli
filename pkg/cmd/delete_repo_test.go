@@ -40,13 +40,14 @@ func TestNewDeleteRepo(t *testing.T) {
 	repoPath := filepath.Join(reposPath, repoName)
 
 	type in struct {
-		args            []string
-		repoList        formula.Repos
-		repoListErr     error
-		inputListString string
-		inputListErr    error
-		inputBool       bool
-		inputBoolErr    error
+		args                  []string
+		repoList              formula.Repos
+		repoListErr           error
+		inputListString       string
+		inputListErr          error
+		inputBool             bool
+		existingRepoIsDeleted bool
+		inputBoolErr          error
 	}
 
 	tests := []struct {
@@ -64,8 +65,9 @@ func TestNewDeleteRepo(t *testing.T) {
 						Priority: 0,
 					},
 				},
-				inputListString: "repoName",
-				inputBool:       true,
+				inputListString:       "repoName",
+				inputBool:             true,
+				existingRepoIsDeleted: true,
 			},
 		},
 		{
@@ -78,13 +80,15 @@ func TestNewDeleteRepo(t *testing.T) {
 						Priority: 0,
 					},
 				},
+				existingRepoIsDeleted: true,
 			},
 		},
 		{
 			name: "error to list repos",
 			in: in{
-				args:        []string{},
-				repoListErr: errors.New("error to list repos"),
+				args:                  []string{},
+				repoListErr:           errors.New("error to list repos"),
+				existingRepoIsDeleted: false,
 			},
 			want: errors.New("error to list repos"),
 		},
@@ -98,7 +102,8 @@ func TestNewDeleteRepo(t *testing.T) {
 						Priority: 0,
 					},
 				},
-				inputListErr: errors.New("error to input list"),
+				inputListErr:          errors.New("error to input list"),
+				existingRepoIsDeleted: false,
 			},
 			want: errors.New("error to input list"),
 		},
@@ -112,8 +117,9 @@ func TestNewDeleteRepo(t *testing.T) {
 						Priority: 0,
 					},
 				},
-				inputListString: "repoName",
-				inputBoolErr:    errors.New("error to input bool"),
+				inputListString:       "repoName",
+				inputBoolErr:          errors.New("error to input bool"),
+				existingRepoIsDeleted: false,
 			},
 			want: errors.New("error to input bool"),
 		},
@@ -127,14 +133,16 @@ func TestNewDeleteRepo(t *testing.T) {
 						Priority: 0,
 					},
 				},
-				inputListString: "repoName",
-				inputBool:       false,
+				inputListString:       "repoName",
+				inputBool:             false,
+				existingRepoIsDeleted: false,
 			},
 		},
 		{
 			name: "error on empty flag",
 			in: in{
-				args: []string{"--name="},
+				args:                  []string{"--name="},
+				existingRepoIsDeleted: false,
 			},
 			want: errors.New("please provide a value for 'name'"),
 		},
@@ -148,6 +156,7 @@ func TestNewDeleteRepo(t *testing.T) {
 						Priority: 0,
 					},
 				},
+				existingRepoIsDeleted: false,
 			},
 			want: errors.New("no repository with this name"),
 		},
@@ -180,10 +189,10 @@ func TestNewDeleteRepo(t *testing.T) {
 			cmd.SetArgs(tt.in.args)
 
 			got := cmd.Execute()
-			if got != nil || tt.name == "do not accept delete selected repo" {
-				assert.DirExists(t, repoPath)
-			} else {
+			if tt.in.existingRepoIsDeleted {
 				assert.NoDirExists(t, repoPath)
+			} else {
+				assert.DirExists(t, repoPath)
 			}
 			assert.Equal(t, tt.want, got)
 		})
