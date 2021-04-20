@@ -27,7 +27,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-const msgMakeBuildErr = "failed building formula with Makefile, verify your repository"
+const msgMakeBuildErr = "Check if you have all the requirements to execute this formula."
 
 var ErrBuildFormulaMakefile = errors.New(msgMakeBuildErr)
 
@@ -49,7 +49,7 @@ func (ma MakeManager) Build(info formula.BuildInfo) error {
 	if err := cmd.Run(); err != nil {
 		return errors.New(
 			fmt.Sprint(
-				prompt.Red(ErrBuildFormulaShell.Error()),
+				prompt.Red(ErrBuildFormulaMakefile.Error()),
 				errMsgFmt+prompt.Red(stderr.String()),
 			))
 	}
