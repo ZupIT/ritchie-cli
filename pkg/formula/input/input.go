@@ -35,7 +35,7 @@ func AddEnv(cmd *exec.Cmd, inName, inValue string) {
 
 func IsRequired(input formula.Input) bool {
 	if input.Required == nil {
-		return input.Default == ""
+		return false
 	}
 
 	return *input.Required
