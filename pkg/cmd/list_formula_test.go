@@ -68,7 +68,7 @@ func TestNewListFormula(t *testing.T) {
 			},
 		},
 		{
-			name: "sucess prompt option all",
+			name: "success prompt option all",
 			in: in{
 				args:            []string{},
 				repoList:        repos,

@@ -130,7 +130,7 @@ func (lr *listFormulaCmd) resolvePrompt() (formula.Repos, error) {
 		return formula.Repos{}, nil
 	}
 
-	var reposNames []string
+	reposNames := make([]string, 0, len(repos)+1)
 	reposNames = append(reposNames, listOptionAll)
 	for _, r := range repos {
 		reposNames = append(reposNames, r.Name.String())
