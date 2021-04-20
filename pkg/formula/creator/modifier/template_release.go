@@ -16,24 +16,24 @@
 
 package modifier
 
-import "github.com/ZupIT/ritchie-cli/pkg/formula"
+import (
+	"net/http"
+	"strings"
 
-type Modifier interface {
-	modify(b []byte) []byte
-}
+	"github.com/ZupIT/ritchie-cli/pkg/git/github"
+)
 
-func NewModifiers(create formula.Create) []Modifier {
-	return []Modifier{
-		FormulaCmd{cf: create},
-		FormulaTags{cf: create},
-		TemplateRelease{},
+const TemplateFormulasRepoURL = "https://github.com/ZupIT/ritchie-formulas"
+
+type TemplateRelease struct{}
+
+func (tr TemplateRelease) modify(b []byte) []byte {
+	content := string(b)
+	repoInfo := github.NewRepoInfo(TemplateFormulasRepoURL, "")
+	githubRepo := github.NewRepoManager(http.DefaultClient)
+	tag, err := githubRepo.LatestTag(repoInfo)
+	if err == nil {
+		content = strings.ReplaceAll(content, "{tag}", tag.Name)
 	}
-}
-
-func Modify(b []byte, modifiers []Modifier) []byte {
-	result := b
-	for _, m := range modifiers {
-		result = m.modify(result)
-	}
-	return result
+	return []byte(content)
 }
