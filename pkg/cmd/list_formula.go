@@ -177,7 +177,7 @@ func (lr listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, err error) {
 	table := uitable.New()
 	table.AddRow("COMMAND", "DESCRIPTION")
-	var allFormulas []formulaDefinition
+	allFormulas := make([]formulaDefinition, 0)
 	for _, r := range repos {
 		repoFormulas, err := lr.formulasByRepo(r.Name)
 		if err != nil {
