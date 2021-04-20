@@ -226,6 +226,10 @@ func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) resultRe
 		result.err = err
 		return result
 	}
+	if r.formulaExistsInWorkspace(result.workspace.Dir, newFormula) {
+		result.err = fmt.Errorf(ErrFormulaExists, newFormula, result.workspace.Name)
+		return result
+	}
 	result.newFormula = newFormula
 
 	return result
@@ -249,6 +253,11 @@ func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 	if err := r.validator.FormulaCommmandValidator(cmd.(string)); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (r *renameFormulaCmd) rename(result resultRenameInput) error {
 
 	return nil
 }

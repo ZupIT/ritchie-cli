@@ -172,6 +172,28 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 			want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
 		},
+		{
+			name: "error on flag input when old formula dont exists in workspace",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit other formula",
+					"--newNameFormula=rit testing formula new",
+				},
+			},
+			want: errors.New("This formula 'rit other formula' dont's exists on this workspace = 'Default'"),
+		},
+		{
+			name: "error on flag input when new formula exists in workspace",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit testing formula",
+					"--newNameFormula=rit testing formula",
+				},
+			},
+			want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
+		},
 	}
 
 	for _, tt := range tests {
