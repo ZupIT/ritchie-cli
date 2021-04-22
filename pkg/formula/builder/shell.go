@@ -25,11 +25,12 @@ import (
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
 	buildSh          = "build.sh"
-	msgShellBuildErr = "failed building formula with shell script, verify your repository"
+	msgShellBuildErr = "Check if you have all the requirements to execute this formula."
 )
 
 var ErrBuildFormulaShell = errors.New(msgShellBuildErr)
@@ -52,7 +53,11 @@ func (sh ShellManager) Build(info formula.BuildInfo) error {
 	cmd := exec.Command(execFile) //nolint:gosec
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf(errMsgFmt, ErrBuildFormulaShell, stderr.String())
+		return errors.New(
+			fmt.Sprint(
+				prompt.Red(ErrBuildFormulaShell.Error()),
+				errMsgFmt+prompt.Red(stderr.String()),
+			))
 	}
 
 	return nil
