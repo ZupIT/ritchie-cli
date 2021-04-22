@@ -41,6 +41,7 @@ const (
 	repoFlagDescription = "Repository name to list formulas"
 	noRepoFoundMsg      = "You don't have any repositories"
 	emptyTreeErrMsg     = "no formula found in selected repo"
+	repoNotFoundMsg     = "no repository with this name"
 )
 
 var listFormulaFlags = flags{
@@ -205,6 +206,8 @@ func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDef
 	tree, err := lr.treeManager.TreeByRepo(repoName)
 	if err != nil {
 		return []formulaDefinition{}, err
+	} else if tree.Commands == nil {
+		return []formulaDefinition{}, errors.New(repoNotFoundMsg)
 	} else if len(tree.Commands) == 0 {
 		return []formulaDefinition{}, errors.New(emptyTreeErrMsg)
 	}
