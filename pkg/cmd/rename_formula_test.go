@@ -30,6 +30,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/renamer"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
@@ -73,6 +74,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 	repoPathLocal := filepath.Join(home, "ritchie-formulas-local")
 
 	validator := validator.NewValidator()
+	renamer := renamer.NewRenamer(dirManager)
 
 	type in struct {
 		inputText         string
@@ -235,6 +237,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				home,
 				validator,
 				inputFormula,
+				renamer,
 			)
 
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
