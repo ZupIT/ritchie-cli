@@ -91,7 +91,7 @@ func TestNewListFormula(t *testing.T) {
 			},
 		},
 		{
-			name: "sucess flag option all",
+			name: "success flag option all",
 			in: in{
 				args:     []string{"--name=ALL"},
 				repoList: repos,
