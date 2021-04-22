@@ -18,6 +18,7 @@ package tree
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -120,12 +121,13 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 }
 
 func (d Manager) TreeByRepo(repoName formula.RepoName) (formula.Tree, error) {
-	treeFilePath := filepath.Join(d.ritchieHome, "repos", repoName.String(), FileName)
-	treeFile, err := ioutil.ReadFile(treeFilePath)
-	if os.IsNotExist(err) {
-		return formula.Tree{}, nil
+	repoPath := filepath.Join(d.ritchieHome, "repos", repoName.String())
+	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+		return formula.Tree{}, errors.New("no repository with this name")
 	}
 
+	treeFilePath := filepath.Join(repoPath, FileName)
+	treeFile, err := ioutil.ReadFile(treeFilePath)
 	if err != nil {
 		return formula.Tree{}, err
 	}

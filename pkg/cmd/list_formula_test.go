@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -46,6 +47,13 @@ func TestNewListFormula(t *testing.T) {
 			Name: "repoOtherName",
 		},
 	}
+
+	emptyTree := `{
+		"version": "v2",
+		"commands": {}
+	}
+	`
+
 	type in struct {
 		args            []string
 		repoList        formula.Repos
@@ -114,6 +122,14 @@ func TestNewListFormula(t *testing.T) {
 			},
 			want: errors.New("no repository with this name"),
 		},
+		{
+			name: "error tree with no commands",
+			in: in{
+				args:     []string{"--name=repoOtherName"},
+				repoList: repos,
+			},
+			want: errors.New("no formula found in selected repo"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -129,6 +145,10 @@ func TestNewListFormula(t *testing.T) {
 				repoPath := filepath.Join(reposPath, repoName)
 				_ = os.MkdirAll(repoPath, os.ModePerm)
 				_ = streams.Unzip("../../testdata/tree.zip", repoPath)
+				if tt.want != nil {
+					emptyTreeData := []byte(emptyTree)
+					_ = ioutil.WriteFile(filepath.Join(repoPath, "tree.json"), emptyTreeData, 0666)
+				}
 			}
 			defer os.RemoveAll(ritHome)
 			treeManager := tree.NewTreeManager(ritHome, repoManagerMock, api.CoreCmds)
