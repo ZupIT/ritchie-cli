@@ -83,7 +83,7 @@ func (i *Input) RemoveLastSlashIfNeeded() {
 		slash = '\\'
 	}
 
-	if i.currentText[size-1] == slash {
+	if size > 0 && i.currentText[size-1] == slash {
 		i.currentText = i.currentText[:size-1]
 	}
 }
