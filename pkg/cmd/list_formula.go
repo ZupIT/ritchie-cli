@@ -39,6 +39,7 @@ const (
 	totalFormulasMsg    = "There are %v formulas"
 	totalOneFormulaMsg  = "There is 1 formula"
 	repoFlagDescription = "Repository name to list formulas"
+	noRepoFoundMsg      = "You don't have any repositories"
 )
 
 var listFormulaFlags = flags{
@@ -87,11 +88,13 @@ func NewListFormulaCmd(
 	return cmd
 }
 
-func (lr listFormulaCmd) runFormula() CommandRunnerFunc {
+func (lr *listFormulaCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repos, err := lr.resolveInput(cmd)
 		if err != nil {
 			return err
+		} else if len(repos) == 0 {
+			return nil
 		}
 
 		formulaCount, err := lr.printFormulas(repos)
@@ -126,7 +129,7 @@ func (lr *listFormulaCmd) resolvePrompt() (formula.Repos, error) {
 	}
 
 	if len(repos) == 0 {
-		prompt.Warning("You don't have any repositories")
+		prompt.Warning(noRepoFoundMsg)
 		return formula.Repos{}, nil
 	}
 
@@ -155,7 +158,7 @@ func (lr *listFormulaCmd) resolvePrompt() (formula.Repos, error) {
 	return repoToListFormulas, nil
 }
 
-func (lr listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error) {
+func (lr *listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error) {
 	name, err := cmd.Flags().GetString(nameFlagName)
 	if err != nil {
 		return formula.Repos{}, err

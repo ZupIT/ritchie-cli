@@ -363,8 +363,8 @@ func (t *TreeManager) MergedTree(core bool) formula.Tree {
 	return args.Get(0).(formula.Tree)
 }
 
-func (t *TreeManager) TreeByRepo(formula.RepoName) (formula.Tree, error) {
-	args := t.Called()
+func (t *TreeManager) TreeByRepo(repoName formula.RepoName) (formula.Tree, error) {
+	args := t.Called(repoName)
 	return args.Get(0).(formula.Tree), args.Error(1)
 }
 
