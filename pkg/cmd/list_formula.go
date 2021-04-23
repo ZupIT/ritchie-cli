@@ -38,7 +38,7 @@ const (
 	commandSeparator    = "_"
 	totalFormulasMsg    = "There are %v formulas"
 	totalOneFormulaMsg  = "There is 1 formula"
-	repoFlagDescription = "Repository name to list formulas"
+	repoFlagDescription = "Repository name to list formulas, use 'ALL' to list formulas from all repositories."
 	noRepoFoundMsg      = "You don't have any repositories"
 	emptyTreeErrMsg     = "no formula found in selected repo"
 	repoNotFoundMsg     = "no repository with this name"
@@ -164,7 +164,7 @@ func (lr *listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error
 	if err != nil {
 		return formula.Repos{}, err
 	} else if name == "" {
-		return formula.Repos{}, errors.New("please provide a value for 'name'")
+		return formula.Repos{}, errors.New(missingFlagText(nameFlagName))
 	}
 
 	if name == listOptionAll {
@@ -217,9 +217,10 @@ func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDef
 			replacer := strings.NewReplacer(rootString, rootCommand, commandSeparator, " ")
 			parentFormula := replacer.Replace(cmd.Parent)
 
-			var fd formulaDefinition
-			fd.Cmd = strings.Join([]string{parentFormula, cmd.Usage}, " ")
-			fd.Desc = cmd.Help
+			fd := formulaDefinition{
+				Cmd:  strings.Join([]string{parentFormula, cmd.Usage}, " "),
+				Desc: cmd.Help,
+			}
 			repoFormulas = append(repoFormulas, fd)
 		}
 	}
