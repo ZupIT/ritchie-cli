@@ -189,7 +189,7 @@ func Build() *cobra.Command {
 	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager, treeGen, repoListWriter)
 
 	validator := validator.NewValidator()
-	renamer := renamer.NewRenamer(dirManager)
+	renamer := renamer.NewRenamer(dirManager, fileManager)
 
 	// prompt with deps
 	inputFormula := prompt.NewInputFormula(inputList, dirManager)
