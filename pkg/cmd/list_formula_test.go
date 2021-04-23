@@ -53,6 +53,9 @@ func TestNewListFormula(t *testing.T) {
 		"commands": {}
 	}
 	`
+	expectedOut :=
+		`COMMAND                      	DESCRIPTION               
+rit http generate http-config	Creates http-load template`
 
 	type in struct {
 		args            []string
@@ -168,8 +171,24 @@ func TestNewListFormula(t *testing.T) {
 			)
 			cmd.SetArgs(tt.in.args)
 
+			rescueStdout := os.Stdout
+			r, w, err := os.Pipe()
+			assert.NoError(t, err)
+			os.Stdout = w
+
 			got := cmd.Execute()
 			assert.Equal(t, tt.want, got)
+
+			_ = w.Close()
+			out, err := ioutil.ReadAll(r)
+			assert.NoError(t, err)
+			capturedOut := string(out)
+			os.Stdout = rescueStdout
+			if tt.want == nil {
+				assert.Contains(t, capturedOut, expectedOut)
+			} else {
+				assert.NotContains(t, capturedOut, expectedOut)
+			}
 		})
 	}
 }
