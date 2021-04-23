@@ -56,5 +56,6 @@ var _ = Describe("RitStdin", func() {
 		Entry(scenariosStdin[8].Entry, scenariosStdin[8]),
 		Entry(scenariosStdin[9].Entry, scenariosStdin[9]),
 		Entry(scenariosStdin[10].Entry, scenariosStdin[10]),
+		Entry(scenariosStdin[10].Entry, scenariosStdin[11]),
 	)
 })
