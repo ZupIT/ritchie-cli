@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -25,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/renamer"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	work "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
@@ -77,6 +79,7 @@ type renameFormulaCmd struct {
 	validator       validator.ValidatorManager
 	inputFormula    prompt.InputFormula
 	renamer         renamer.RenameManager
+	deleter         deleter.DeleteManager
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -91,19 +94,10 @@ func NewRenameFormulaCmd(
 	validator validator.ValidatorManager,
 	inputFormula prompt.InputFormula,
 	renamer renamer.RenameManager,
+	deleter deleter.DeleteManager,
 ) *cobra.Command {
-	r := renameFormulaCmd{
-		workspace:       workspace,
-		inText:          inText,
-		inList:          inList,
-		inPath:          inPath,
-		inTextValidator: inTextValidator,
-		directory:       directory,
-		userHomeDir:     userHomeDir,
-		validator:       validator,
-		inputFormula:    inputFormula,
-		renamer:         renamer,
-	}
+	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, directory, userHomeDir, validator,
+		inputFormula, renamer, deleter}
 
 	cmd := &cobra.Command{
 		Use:       "formula",
@@ -131,20 +125,6 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 		if err := r.renamer.Rename(result); err != nil {
 			return err
 		}
-
-		// info := formula.BuildInfo{FormulaPath: cf.FormulaPath, Workspace: cf.Workspace}
-		// if err := c.formula.Build(info); err != nil {
-		// 	return err
-		// }
-
-		// hash, err := c.workspace.CurrentHash(cf.FormulaPath)
-		// if err != nil {
-		// 	return err
-		// }
-
-		// if err := c.workspace.UpdateHash(cf.FormulaPath, hash); err != nil {
-		// 	return err
-		// }
 
 		fmt.Println(result.Workspace, result.NewFormulaCmd, result.OldFormulaCmd)
 
@@ -174,7 +154,7 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, wspaces formula.Work
 	if err != nil {
 		return result, err
 	} else if wsName == "" {
-		return result, fmt.Errorf(flagError, wsFlagName)
+		return result, errors.New(missingFlagText(wsFlagName))
 	}
 	wspaces[formula.DefaultWorkspaceName] = filepath.Join(r.userHomeDir, formula.DefaultWorkspaceDir)
 	dir, exists := wspaces[wsName]
@@ -188,7 +168,7 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, wspaces formula.Work
 	if err != nil {
 		return result, err
 	} else if oldFormula == "" {
-		return result, fmt.Errorf(flagError, oldFormulaFlagName)
+		return result, errors.New(missingFlagText(oldFormulaFlagName))
 	}
 	if !r.formulaExistsInWorkspace(result.Workspace.Dir, oldFormula) {
 		return result, fmt.Errorf(ErrFormulaDontExists, oldFormula, result.Workspace.Name)
@@ -253,9 +233,5 @@ func cleanFormula(formula string) []string {
 }
 
 func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
-	if err := r.validator.FormulaCommmandValidator(cmd.(string)); err != nil {
-		return err
-	}
-
-	return nil
+	return r.validator.FormulaCommmandValidator(cmd.(string))
 }

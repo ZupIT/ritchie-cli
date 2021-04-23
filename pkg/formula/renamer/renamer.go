@@ -17,7 +17,6 @@
 package renamer
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -34,15 +33,19 @@ var (
 )
 
 type RenameManager struct {
-	dir  stream.DirCreateCheckerCopy
-	file stream.FileWriteRemover
+	dir       stream.DirCreateCheckerCopy
+	file      stream.FileWriteRemover
+	formula   formula.CreateBuilder
+	workspace formula.WorkspaceHasher
 }
 
 func NewRenamer(
 	dir stream.DirCreateCheckerCopy,
 	file stream.FileWriteRemover,
+	formula formula.CreateBuilder,
+	workspace formula.WorkspaceHasher,
 ) RenameManager {
-	return RenameManager{dir, file}
+	return RenameManager{dir, file, formula, workspace}
 }
 
 func (r *RenameManager) Rename(fr formula.Rename) error {
@@ -51,8 +54,21 @@ func (r *RenameManager) Rename(fr formula.Rename) error {
 	}
 
 	groups := strings.Split(fr.OldFormulaCmd, " ")[1:]
-	fmt.Println(fr.Workspace.Dir, groups, 0)
 	if err := r.deleteFormula(fr.Workspace.Dir, groups, 0); err != nil {
+		return err
+	}
+
+	info := formula.BuildInfo{FormulaPath: fr.FNewPath, Workspace: fr.Workspace}
+	if err := r.formula.Build(info); err != nil {
+		return err
+	}
+
+	hash, err := r.workspace.CurrentHash(fr.FNewPath)
+	if err != nil {
+		return err
+	}
+
+	if err := r.workspace.UpdateHash(fr.FNewPath, hash); err != nil {
 		return err
 	}
 
