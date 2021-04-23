@@ -93,6 +93,10 @@ type (
 		FOldPath      string    `json:"fOldPath"`
 		FNewPath      string    `json:"fNewPath"`
 	}
+	Delete struct {
+		GroupsFormula []string  `json:"groups"`
+		Workspace     Workspace `json:"workspace"`
+	}
 
 	Inputs []Input
 

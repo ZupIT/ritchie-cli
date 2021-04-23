@@ -32,6 +32,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
 	fprompt "github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
@@ -111,7 +112,8 @@ func Build() *cobra.Command {
 	repoDetail := repo.NewDetail(repoProviders)
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
-	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail,
+		repoDeleter)
 	repoUpdater := repo.NewUpdater(ritchieHomeDir, repoListWriteCreator, treeGen)
 	repoListUpdater := repo.NewListUpdater(repoLister, repoUpdater)
 
@@ -189,7 +191,8 @@ func Build() *cobra.Command {
 	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager, treeGen, repoListWriter)
 
 	validator := validator.NewValidator()
-	renamer := renamer.NewRenamer(dirManager, fileManager)
+	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace)
+	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritchieHomeDir)
 
 	// prompt with deps
 	inputFormula := prompt.NewInputFormula(inputList, dirManager)
@@ -257,7 +260,8 @@ func Build() *cobra.Command {
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
-	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete, inputTextValidator, dirManager, userHomeDir, validator, inputFormula, renamer)
+	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete,
+		inputTextValidator, dirManager, userHomeDir, validator, inputFormula, renamer, deleter)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)
