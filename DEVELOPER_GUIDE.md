@@ -208,7 +208,7 @@ var helloWorldMsg = i18n.T("hello.world") // [hello.world] is the message ID.
 
 ```
 
-> :warning: Attention: For new languages you must add the full name of the language and its locale on a map called `i18n.Langs`.
+:warning: Attention: For new languages you must add the full name of the language and its locale on a map called `i18n.Langs`.
 
 Example:
 
