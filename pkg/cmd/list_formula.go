@@ -40,8 +40,12 @@ const (
 	totalOneFormulaMsg  = "There is 1 formula"
 	repoFlagDescription = "Repository name to list formulas, use 'ALL' to list formulas from all repositories."
 	noRepoFoundMsg      = "You don't have any repositories"
-	emptyTreeErrMsg     = "no formula found in selected repo"
-	repoNotFoundMsg     = "no repository with this name"
+	failedRepoMsg       = "Formulas from %q could not be retrieved."
+)
+
+var (
+	errEmptyTree    = errors.New("no formula found in selected repo")
+	errRepoNotFound = errors.New("no repository with this name")
 )
 
 var listFormulaFlags = flags{
@@ -182,10 +186,15 @@ func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, e
 	table := uitable.New()
 	table.AddRow("COMMAND", "DESCRIPTION")
 	allFormulas := make([]formulaDefinition, 0)
+	failedRepos := make([]string, 0)
 	for _, r := range repos {
 		repoFormulas, err := lr.formulasByRepo(r.Name)
 		if err != nil {
-			return 0, err
+			if len(repos) > 1 {
+				failedRepos = append(failedRepos, r.Name.String())
+			} else {
+				return 0, err
+			}
 		}
 		allFormulas = append(allFormulas, repoFormulas...)
 	}
@@ -198,6 +207,10 @@ func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, e
 	raw = append(raw, []byte("\n")...)
 	fmt.Println(string(raw))
 
+	for _, r := range failedRepos {
+		prompt.Warning(fmt.Sprintf(failedRepoMsg, r))
+	}
+
 	return len(table.Rows) - 1, nil
 }
 
@@ -206,9 +219,9 @@ func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDef
 	if err != nil {
 		return []formulaDefinition{}, err
 	} else if tree.Commands == nil {
-		return []formulaDefinition{}, errors.New(repoNotFoundMsg)
+		return []formulaDefinition{}, errRepoNotFound
 	} else if len(tree.Commands) == 0 {
-		return []formulaDefinition{}, errors.New(emptyTreeErrMsg)
+		return []formulaDefinition{}, errEmptyTree
 	}
 
 	var repoFormulas []formulaDefinition
