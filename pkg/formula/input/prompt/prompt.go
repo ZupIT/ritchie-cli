@@ -35,8 +35,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
-
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -45,11 +43,11 @@ const (
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
+	TypeSuffix           = "__type"
 )
 
 type InputManager struct {
 	cred credential.Resolver
-	file stream.FileWriteReadExister
 	prompt.InputList
 	prompt.InputText
 	input.InputTextDefault
@@ -57,11 +55,11 @@ type InputManager struct {
 	prompt.InputBool
 	prompt.InputPassword
 	prompt.InputMultiselect
+	prompt.InputPath
 }
 
 func NewInputManager(
 	cred credential.Resolver,
-	file stream.FileWriteReadExister,
 	inList prompt.InputList,
 	inText prompt.InputText,
 	inTextValidator prompt.InputTextValidator,
@@ -69,10 +67,10 @@ func NewInputManager(
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 	inMultiselect prompt.InputMultiselect,
+	inPath prompt.InputPath,
 ) formula.InputRunner {
 	return InputManager{
 		cred:               cred,
-		file:               file,
 		InputList:          inList,
 		InputText:          inText,
 		InputTextValidator: inTextValidator,
@@ -80,6 +78,7 @@ func NewInputManager(
 		InputBool:          inBool,
 		InputPassword:      inPass,
 		InputMultiselect:   inMultiselect,
+		InputPath:          inPath,
 	}
 }
 
@@ -94,7 +93,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 		if err != nil {
 			return err
 		}
-		conditionPass, err := input.VerifyConditional(cmd, i)
+		conditionPass, err := input.VerifyConditional(cmd, i, config.Inputs)
 		if err != nil {
 			return err
 		}
@@ -115,8 +114,12 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 			in.persistCache(setup.FormulaPath, inputVal, i, items)
 			checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
+			checkForSameEnv(i.Name + TypeSuffix)
+			input.AddEnv(cmd, i.Name+TypeSuffix, i.Type)
 		}
+
 	}
+
 	return nil
 }
 
@@ -135,13 +138,23 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return in.loadInputValList(items, i)
 		}
 		return in.textValidator(i)
+	case input.ListType:
+		if len(items) == 0 {
+			return "", fmt.Errorf(EmptyItems, i.Name)
+		}
+		return in.loadInputValList(items, i)
 	case input.DynamicType:
 		dl, err := in.dynamicList(i.RequestInfo)
 		if err != nil {
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
-	case input.Multiselect:
+	case input.PathType:
+		if items != nil {
+			return in.loadInputValList(items, i)
+		}
+		return in.InputPath.Read(i.Label)
+	case input.MultiselectType:
 		if len(items) == 0 {
 			return "", fmt.Errorf(EmptyItems, i.Name)
 		}
@@ -149,7 +162,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		if err != nil {
 			return "", err
 		}
-		return strings.Join(sl, "|"), nil
+		return strings.Join(sl, input.MultiselectSeparator), nil
 	default:
 		return in.cred.Resolve(i.Type)
 	}
@@ -196,58 +209,54 @@ func (in InputManager) persistCache(formulaPath, inputVal string, input formula.
 			items = items[0:qtd]
 		}
 		itemsBytes, _ := json.Marshal(items)
-		if err := in.file.Write(cachePath, itemsBytes); err != nil {
-			fmt.Sprintln("Write file error")
-			return
+		if err := ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
+			fmt.Println("Write cache error")
 		}
-
 	}
 }
 
-func (in InputManager) loadInputValList(items []string, input formula.Input) (string, error) {
+func (in InputManager) loadInputValList(items []string, i formula.Input) (string, error) {
 	newLabel := DefaultCacheNewLabel
-	if input.Cache.Active {
-		if input.Cache.NewLabel != "" {
-			newLabel = input.Cache.NewLabel
+	if i.Cache.Active {
+		if i.Cache.NewLabel != "" {
+			newLabel = i.Cache.NewLabel
 		}
 		items = append(items, newLabel)
 	}
 
-	inputVal, err := in.List(input.Label, items, input.Tutorial)
+	inputVal, err := in.List(i.Label, items, i.Tutorial)
 	if inputVal == newLabel {
-		return in.textValidator(input)
+		if i.Type == input.PathType {
+			return in.InputPath.Read(i.Label)
+		}
+		return in.textValidator(i)
 	}
 
 	return inputVal, err
 }
 
 func (in InputManager) loadItems(input formula.Input, formulaPath string) ([]string, error) {
-	if input.Cache.Active {
-		cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
-		if in.file.Exists(cachePath) {
-			fileBytes, err := in.file.Read(cachePath)
-			if err != nil {
-				return nil, err
-			}
-			var items []string
-			err = json.Unmarshal(fileBytes, &items)
-			if err != nil {
-				return nil, err
-			}
-			return items, nil
-		} else {
-			itemsBytes, err := json.Marshal(input.Items)
-			if err != nil {
-				return nil, err
-			}
-			if err = in.file.Write(cachePath, itemsBytes); err != nil {
-				return nil, err
-			}
-			return input.Items, nil
-		}
-	} else {
+	if !input.Cache.Active {
 		return input.Items, nil
 	}
+	cachePath := fmt.Sprintf(CachePattern, formulaPath, strings.ToUpper(input.Name))
+	fileBytes, err := ioutil.ReadFile(cachePath)
+	if err != nil {
+		itemsBytes, err := json.Marshal(input.Items)
+		if err != nil {
+			return nil, err
+		}
+		if err = ioutil.WriteFile(cachePath, itemsBytes, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return input.Items, nil
+	}
+	var items []string
+	err = json.Unmarshal(fileBytes, &items)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 func (in InputManager) textValidator(i formula.Input) (string, error) {

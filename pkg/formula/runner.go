@@ -35,7 +35,11 @@ type Executor interface {
 }
 
 type PreRunBuilder interface {
-	Build(string)
+	Build(string) error
+}
+
+type PreRunChecker interface {
+	CheckVersionCompliance() error
 }
 
 type PreRunner interface {

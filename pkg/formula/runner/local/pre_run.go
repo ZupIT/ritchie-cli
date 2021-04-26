@@ -27,14 +27,15 @@ import (
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
-const loadConfigErrMsg = `Failed to load formula config file
-Try running rit update repo
-Config file path not found: %s`
+const (
+	loadConfigErrMsg = "Failed to load formula config file\nTry running rit update repo\nConfig file path not found: %s"
+)
 
 var _ formula.PreRunner = PreRunManager{}
 
@@ -45,6 +46,7 @@ type PreRunManager struct {
 	shell       formula.Builder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
+	checker     runner.PreRunCheckerManager
 }
 
 func NewPreRun(
@@ -54,6 +56,7 @@ func NewPreRun(
 	shell formula.Builder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
+	checker runner.PreRunCheckerManager,
 ) PreRunManager {
 	return PreRunManager{
 		ritchieHome: ritchieHome,
@@ -62,6 +65,7 @@ func NewPreRun(
 		shell:       shell,
 		dir:         dir,
 		file:        file,
+		checker:     checker,
 	}
 }
 
@@ -71,6 +75,10 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 
 	config, err := pr.loadConfig(formulaPath, def)
 	if err != nil {
+		return formula.Setup{}, err
+	}
+
+	if err := pr.checker.CheckVersionCompliance(def.RepoName, config.RequireLatestVersion); err != nil {
 		return formula.Setup{}, err
 	}
 
@@ -128,9 +136,7 @@ func (pr PreRunManager) buildFormula(formulaPath string) error {
 		if err := pr.shell.Build(info); err != nil {
 			return err
 		}
-	}
-
-	if err := pr.make.Build(info); err != nil { // Build formula with Makefile
+	} else if err := pr.make.Build(info); err != nil { // Build formula with Makefile
 		return err
 	}
 

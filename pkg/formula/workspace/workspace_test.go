@@ -18,7 +18,6 @@ package workspace
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -26,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -64,6 +64,14 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 			},
 		},
 		{
+			name:          "success create with trailing separator",
+			workspacePath: tmpDir,
+			workspace: formula.Workspace{
+				Name: "zup2",
+				Dir:  fullDir + string(filepath.Separator),
+			},
+		},
+		{
 			name:          "success edit",
 			workspacePath: tmpDir,
 			workspace: formula.Workspace{
@@ -96,17 +104,14 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 				Name: "commons",
 				Dir:  fullDir,
 			},
-			outErr: fmt.Sprintf(
-				"open %s: no such file or directory",
-				filepath.Join(workspaceNonExistingPath, formula.WorkspacesFile),
-			),
+			outErr: mocks.FileNotFoundError(filepath.Join(workspaceNonExistingPath, formula.WorkspacesFile)),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			localBuilder := &mocks.LocalBuilderMock{}
-			localBuilder.On("Init", tt.workspace.Dir, tt.workspace.Name).Return("", nil)
+			localBuilder.On("Init", mock.AnythingOfType("string"), tt.workspace.Name).Return("", nil)
 
 			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
 			got := workspace.Add(tt.workspace)
@@ -122,7 +127,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 				err = json.Unmarshal(file, &workspaces)
 				assert.NoError(t, err)
 				pathName := workspaces[tt.workspace.Name]
-				assert.Equal(t, tt.workspace.Dir, pathName)
+				assert.Contains(t, tt.workspace.Dir, pathName)
 			}
 		})
 	}
@@ -170,10 +175,7 @@ func TestManagerDelete(t *testing.T) {
 				Name: "Default",
 				Dir:  fullDir,
 			},
-			outErr: fmt.Sprintf(
-				"open %s: no such file or directory",
-				filepath.Join(fileNonExistentPath, formula.WorkspacesFile),
-			),
+			outErr: mocks.FileNotFoundError(filepath.Join(fileNonExistentPath, formula.WorkspacesFile)),
 		},
 	}
 
@@ -286,10 +288,7 @@ func TestPreviousHash(t *testing.T) {
 		{
 			name:     "shoud fail when file doesn't exist",
 			homePath: formulaNonExistentPath,
-			outErr: fmt.Sprintf(
-				"open %s: no such file or directory",
-				path.Join(formulaNonExistentPath, "hashes", "my-formula.txt"),
-			),
+			outErr:   mocks.FileNotFoundError(path.Join(formulaNonExistentPath, "hashes", "my-formula.txt")),
 		},
 	}
 

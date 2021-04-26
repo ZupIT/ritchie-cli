@@ -25,6 +25,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -325,6 +326,9 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				t.Errorf("TestNewDeleteFormulaCmd got error %v", err)
 			}
 
+			inPath := &mocks.InputPathMock{}
+			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
+
 			cmd := NewDeleteFormulaCmd(
 				userHomeDir,
 				ritchieHomeDir,
@@ -333,6 +337,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				fields.inBool,
 				inputTextMock{},
 				fields.inList,
+				inPath,
 				treeGeneratorMock{},
 				fields.fileManager,
 			)
@@ -394,6 +399,9 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 	dirManager := stream.NewDirManager(fileManager)
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
+
 	cmd := NewDeleteFormulaCmd(
 		os.TempDir(),
 		filepath.Join(os.TempDir(), ".rit"),
@@ -402,6 +410,7 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 		inputTrueMock{},
 		inputTextMock{},
 		inputListMock{},
+		inPath,
 		treeGen,
 		stream.FileManager{},
 	)
@@ -443,6 +452,7 @@ func TestNewDeleteFormulaStdin(t *testing.T) {
 		inputTrueMock{},
 		inputTextMock{},
 		inputListMock{},
+		inPath,
 		treeGen,
 		FileManagerMock{},
 	)

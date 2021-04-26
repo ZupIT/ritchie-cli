@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -38,54 +37,31 @@ func NewRepoManager(client *http.Client) RepoManager {
 
 func (re RepoManager) Zipball(info git.RepoInfo, version string) (io.ReadCloser, error) {
 	zipUrl := info.ZipUrl(version)
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, zipUrl, nil)
+	res, err := re.performRequest(info, zipUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.GitlabToken, authToken)
+	if res.StatusCode != http.StatusOK {
+		defer res.Body.Close()
+		all, _ := ioutil.ReadAll(res.Body)
+		return nil, errors.New(res.Status + "-" + string(all))
 	}
 
-	resp, err := re.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != 200 {
-		defer resp.Body.Close()
-
-		all, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(all)
-		return nil, errors.New(resp.Status)
-	}
-
-	return resp.Body, nil
+	return res.Body, nil
 }
 
 func (re RepoManager) Tags(info git.RepoInfo) (git.Tags, error) {
 	apiUrl := info.TagsUrl()
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, apiUrl, nil)
-	if err != nil {
-		return git.Tags{}, err
-	}
-
-	if info.Token() != "" {
-		authToken := info.TokenHeader()
-		req.Header.Add(headers.GitlabToken, authToken)
-	}
-
-	res, err := re.client.Do(req)
+	res, err := re.performRequest(info, apiUrl)
 	if err != nil {
 		return git.Tags{}, err
 	}
 
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		errorMessage := fmt.Sprintf("There was an error adding the repository, status: %d - %s.", res.StatusCode, http.StatusText(res.StatusCode))
-		return git.Tags{}, errors.New(errorMessage)
+	if err := git.CheckStatusCode(res); err != nil {
+		return git.Tags{}, err
 	}
 
 	var tags git.Tags
@@ -116,11 +92,8 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		b, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return git.Tag{}, err
-		}
-		return git.Tag{}, errors.New(string(b))
+		all, _ := ioutil.ReadAll(res.Body)
+		return git.Tag{}, errors.New(res.Status + "-" + string(all))
 	}
 
 	var tags git.Tags
@@ -133,4 +106,22 @@ func (re RepoManager) LatestTag(info git.RepoInfo) (git.Tag, error) {
 	}
 
 	return tags[0], nil
+}
+
+func (re RepoManager) performRequest(info git.RepoInfo, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if info.Token() != "" {
+		req.Header.Add(headers.GitlabToken, info.Token())
+	}
+
+	res, err := re.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

@@ -73,7 +73,7 @@ func TestUpdateRepoRun(t *testing.T) {
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
-						return formula.Repos{*repoTest, *repoTest2}, nil
+						return formula.Repos{*repoTest2, *repoTest}, nil
 					},
 					update: func(name formula.RepoName, version formula.RepoVersion) error {
 						return nil
@@ -275,6 +275,9 @@ func TestUpdateRepoRun(t *testing.T) {
 
 			newReader := strings.NewReader(tt.inputStdin)
 			newUpdateRepoStdin.SetIn(newReader)
+			newUpdateRepoStdin.SetArgs([]string{})
+
+			newUpdateRepoPrompt.SetArgs([]string{})
 
 			if err := newUpdateRepoPrompt.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("Prompt command error = %v, wantErr %v", err, tt.wantErr)

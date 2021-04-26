@@ -32,7 +32,8 @@ import (
 )
 
 const (
-	errInvalidInputItemsMsg = "only these input items [%s] are accepted in the %q flag"
+	errInvalidInputItemsMsg = "the value [%v] is not valid, only these input items [%s] are accepted in the %q flag"
+	TypeSuffix              = "__type"
 )
 
 type InputManager struct {
@@ -50,7 +51,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		var inputVal string
 		var err error
 
-		conditionPass, err := input.VerifyConditional(cmd, i)
+		conditionPass, err := input.VerifyConditional(cmd, i, inputs)
 		if err != nil {
 			return err
 		}
@@ -59,13 +60,19 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		}
 
 		switch i.Type {
-		case input.TextType, input.PassType, input.DynamicType:
+		case input.TextType, input.PassType, input.DynamicType, input.ListType, input.PathType:
 			inputVal, err = flags.GetString(i.Name)
 			if err := validateItem(i, inputVal); err != nil {
 				return err
 			}
 
 			if err := matchWithRegex(i, inputVal); err != nil {
+				return err
+			}
+
+		case input.MultiselectType:
+			inputVal, err = flags.GetString(i.Name)
+			if err := validateMultiselect(i, inputVal); err != nil {
 				return err
 			}
 
@@ -83,6 +90,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 
 		if len(inputVal) != 0 {
 			input.AddEnv(cmd, i.Name, inputVal)
+			input.AddEnv(cmd, i.Name+TypeSuffix, i.Type)
 		} else {
 			emptyInputs = append(emptyInputs, i)
 		}
@@ -95,7 +103,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, flags *pflag.F
 		}
 	}
 
-	if len(emptyInputs) > 0 {
+	if len(emptyFlags) > 0 {
 		return fmt.Errorf("these flags cannot be empty [%s]", strings.Join(emptyFlags, ", "))
 	}
 
@@ -119,7 +127,20 @@ func validateItem(i formula.Input, inputVal string) error {
 	if len(i.Items) > 0 && !i.Items.Contains(inputVal) {
 		items := strings.Join(i.Items, ", ")
 		formattedName := fmt.Sprintf("--%s", i.Name)
-		return fmt.Errorf(errInvalidInputItemsMsg, items, formattedName)
+		return fmt.Errorf(errInvalidInputItemsMsg, inputVal, items, formattedName)
+	}
+
+	return nil
+}
+
+func validateMultiselect(i formula.Input, inputVal string) error {
+	allValues := strings.Split(inputVal, input.MultiselectSeparator)
+	for _, value := range allValues {
+		if !i.Items.Contains(value) {
+			items := strings.Join(i.Items, ", ")
+			formattedName := fmt.Sprintf("--%s", i.Name)
+			return fmt.Errorf(errInvalidInputItemsMsg, value, items, formattedName)
+		}
 	}
 
 	return nil

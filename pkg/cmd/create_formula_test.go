@@ -77,7 +77,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inputTextValErr: errors.New("error on input text"),
 			},
-			want: errors.New("error on input text"),
+			want: ErrFormulaCmdNotBeEmpty,
 		},
 		{
 			name: "error on template manager Validate func",
@@ -171,6 +171,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
 
+			inPath := &mocks.InputPathMock{}
+			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
+
 			tutorialMock := new(mocks.TutorialFindSetterMock)
 			tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
 
@@ -185,9 +188,11 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inputTextMock,
 				inputTextValidatorMock,
 				inputListMock,
+				inPath,
 				tutorialMock,
 				treeMock,
 			)
+			createFormulaCmd.SetArgs([]string{})
 			// TODO: remove it after being deprecated
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			got := createFormulaCmd.Execute()
@@ -397,20 +402,21 @@ func createFormulaCmdDeps(tmpDir, ritchieHomeDir string, dirManager stream.DirMa
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
 	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
-	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
-
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, repoDeleter, treeGen, fileManager)
+	repoDetail := repo.NewDetail(repoProviders)
+	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen)
+	repoListDetailWriter := repo.NewListDetailWrite(repoLister, repoDetail, repoWriter)
 
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, nil)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoListDetailWriter, api.CoreCmds)
 	tmpManager := template.NewManager("../../testdata", dirManager)
 	createManager := creator.NewCreator(treeManager, dirManager, fileManager, tmpManager)
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 	createBuilder := formula.NewCreateBuilder(createManager, formBuildLocal)
 	buildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 	wspaceManager := workspace.New(ritchieHomeDir, os.TempDir(), dirManager, buildLocal)
-	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir, fileManager)
+	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
 
 	return createFormulaCmd{
 		formula:   createBuilder,

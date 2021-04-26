@@ -23,18 +23,20 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
 
-func TestInputManager_Inputs(t *testing.T) {
+func TestInputManager(t *testing.T) {
 
 	inputJson := `[
     {
@@ -59,7 +61,24 @@ func TestInputManager_Inputs(t *testing.T) {
         "type": "text",
         "label": "Type : ",
 		"required": true
-    },
+		},
+		{
+			"name": "sample_text_3",
+			"type": "path",
+			"label": "Type : ",
+	"required": true
+	},
+	{
+		"name": "sample_text_4",
+		"type": "path",
+		"label": "Type : ",
+		"cache": {
+				"active": true,
+				"qty": 6,
+				"newLabel": "Type new value. "
+			},
+	"tutorial": "Add a text for this field."
+	},
     {
         "name": "sample_list",
         "type": "text",
@@ -77,6 +96,18 @@ func TestInputManager_Inputs(t *testing.T) {
         },
         "label": "Pick your : ",
 		"tutorial": "Select an item for this field."
+    },
+	{
+        "name": "sample_list2",
+        "type": "list",
+        "default": "in1",
+        "items": [
+            "in_list1",
+            "in_list2",
+            "in_list3",
+            "in_listN"
+        ],
+        "label": "Pick your : "
     },
     {
         "name": "sample_bool",
@@ -103,160 +134,111 @@ func TestInputManager_Inputs(t *testing.T) {
 	var inputs []formula.Input
 	_ = json.Unmarshal([]byte(inputJson), &inputs)
 	_ = os.Setenv("SAMPLE_TEXT", "someValue")
-
-	setup := formula.Setup{
-		Config: formula.Config{
-			Inputs: inputs,
-		},
-		FormulaPath: os.TempDir(),
-	}
-	fileManager := stream.NewFileManager()
-
-	type in struct {
-		iText          inputMock
-		iTextValidator inputTextValidatorMock
-		iTextDefault   inputTextDefaultMock
-		iList          inputMock
-		iBool          inputMock
-		iPass          inputMock
-		inType         api.TermInputType
-		creResolver    credential.Resolver
-		file           stream.FileWriteReadExister
-	}
+	ritHome := filepath.Join(os.TempDir(), "inputs")
+	ritInvalidHome := filepath.Join(ritHome, "invalid")
+	_ = os.Mkdir(ritHome, os.ModePerm)
+	defer os.RemoveAll(ritHome)
 
 	tests := []struct {
-		name          string
-		in            in
-		want          error
-		expectedError string
+		name            string
+		ritHome         string
+		cacheContents   string
+		credResolverErr error
+		inputBoolErr    error
+		inputPassErr    error
+		inputTextErr    error
+		inputListErr    error
+		expectedError   string
 	}{
 		{
-			name: "success prompt",
-			in: in{
-				iText:          inputMock{text: ""},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "Type new value?"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManager,
-			},
-			want:          nil,
-			expectedError: "",
+			name:    "success prompt",
+			ritHome: ritHome,
 		},
 		{
-			name: "error read file load items",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{rErr: errors.New("error to read file"), exist: true},
-			},
-			want:          errors.New(""),
-			expectedError: "error to read file",
-		},
-		{
-			name: "error unmarshal load items",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{rBytes: []byte("error"), exist: true},
-			},
-			want:          errors.New(""),
+			name:          "error unmarshal load items",
+			ritHome:       ritHome,
+			cacheContents: "error",
 			expectedError: "invalid character 'e' looking for beginning of value",
 		},
 		{
-			name: "cache file doesn't exist success",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{exist: false},
-			},
-			want:          nil,
-			expectedError: "",
+			name:    "cache file doesn't exist success",
+			ritHome: ritHome,
 		},
 		{
-			name: "cache file doesn't exist error file write",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{wErr: errors.New("error to write file"), exist: false},
-			},
-			want:          errors.New(""),
-			expectedError: "error to write file",
+			name:          "persist cache file write error",
+			ritHome:       ritInvalidHome,
+			expectedError: mocks.FileNotFoundError(fmt.Sprintf(CachePattern, ritInvalidHome, strings.ToUpper("SAMPLE_TEXT"))),
 		},
 		{
-			name: "persist cache file write error",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test"},
-				file:           fileManagerMock{wErr: errors.New("error to write file"), rBytes: []byte(`["in_list1","in_list2"]`), exist: true},
-			},
-			want:          nil,
-			expectedError: "",
+			name:            "error env resolver prompt",
+			ritHome:         ritHome,
+			credResolverErr: errors.New("credential not found"),
+			expectedError:   "credential not found",
 		},
 		{
-			name: "error env resolver prompt",
-			in: in{
-				iText:          inputMock{text: DefaultCacheNewLabel},
-				iTextValidator: inputTextValidatorMock{},
-				iTextDefault:   inputTextDefaultMock{"test", nil},
-				iList:          inputMock{text: "test"},
-				iBool:          inputMock{boolean: false},
-				iPass:          inputMock{text: "******"},
-				inType:         api.Prompt,
-				creResolver:    envResolverMock{in: "test", err: errors.New("credential not found")},
-				file:           fileManager,
-			},
-			want:          errors.New(""),
-			expectedError: "credential not found",
+			name:          "error input bool",
+			ritHome:       ritHome,
+			inputBoolErr:  errors.New("bool error"),
+			expectedError: "bool error",
+		},
+		{
+			name:          "error input pass",
+			ritHome:       ritHome,
+			inputPassErr:  errors.New("pass error"),
+			expectedError: "pass error",
+		},
+		{
+			name:          "error input text",
+			ritHome:       ritHome,
+			inputTextErr:  errors.New("text error"),
+			expectedError: "text error",
+		},
+		{
+			name:          "error input list",
+			ritHome:       ritHome,
+			inputListErr:  errors.New("list error"),
+			expectedError: "list error",
 		},
 	}
 
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			iText := tt.in.iText
-			iTextValidator := tt.in.iTextValidator
-			iTextDefault := tt.in.iTextDefault
-			iList := tt.in.iList
-			iBool := tt.in.iBool
-			iPass := tt.in.iPass
-			iMultiselect := inputMock{}
+			cacheFile := fmt.Sprintf(CachePattern, tt.ritHome, strings.ToUpper("SAMPLE_TEXT"))
+			if tt.cacheContents == "" {
+				_ = os.Remove(cacheFile)
+			} else {
+				_ = ioutil.WriteFile(cacheFile, []byte(tt.cacheContents), os.ModePerm)
+			}
+
+			iText := &mocks.InputTextMock{}
+			iText.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("text value", nil)
+			iTextValidator := &mocks.InputTextValidatorMock{}
+			iTextValidator.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("validator value", nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", tt.inputListErr)
+			iBool := &mocks.InputBoolMock{}
+			iBool.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(true, tt.inputBoolErr)
+			iPass := &mocks.InputPasswordMock{}
+			iPass.On("Password", mock.Anything, mock.Anything, mock.Anything).Return("pass value", tt.inputPassErr)
+			iMultiselect := &mocks.InputMultiselectMock{}
+			iMultiselect.On("Multiselect", mock.Anything).Return([]string{"multiselect value"}, nil)
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("default value", tt.inputTextErr)
+			credResover := &mocks.CredResolverMock{}
+			credResover.On("Resolve", mock.Anything).Return("resolver value", tt.credResolverErr)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: tt.ritHome,
+			}
 
 			inputManager := NewInputManager(
-				tt.in.creResolver,
-				tt.in.file,
+				credResover,
 				iList,
 				iText,
 				iTextValidator,
@@ -264,22 +246,40 @@ func TestInputManager_Inputs(t *testing.T) {
 				iBool,
 				iPass,
 				iMultiselect,
+				inPath,
 			)
 			cmd := &exec.Cmd{}
 			got := inputManager.Inputs(cmd, setup, nil)
 
-			if tt.expectedError != "" {
+			if got != nil {
 				assert.EqualError(t, got, tt.expectedError)
-			}
-
-			if tt.want == nil {
-				assert.Equal(t, tt.want, got)
+			} else {
+				assert.Empty(t, tt.expectedError)
+				expected := []string{
+					"SAMPLE_TEXT=default value",
+					"SAMPLE_TEXT__TYPE=text",
+					"SAMPLE_TEXT=default value",
+					"SAMPLE_TEXT__TYPE=text",
+					"SAMPLE_TEXT_2=default value",
+					"SAMPLE_TEXT_2__TYPE=text",
+					"SAMPLE_LIST=list value",
+					"SAMPLE_LIST__TYPE=text",
+					"SAMPLE_LIST2=list value",
+					"SAMPLE_LIST2__TYPE=list",
+					"SAMPLE_BOOL=true",
+					"SAMPLE_BOOL__TYPE=bool",
+					"SAMPLE_PASSWORD=pass value",
+					"SAMPLE_PASSWORD__TYPE=password",
+					"TEST_RESOLVER=resolver value",
+					"TEST_RESOLVER__TYPE=CREDENTIAL_TEST",
+				}
+				assert.Equal(t, expected, cmd.Env)
 			}
 		})
 	}
 }
 
-func TestInputManager_ConditionalInputs(t *testing.T) {
+func TestConditionalInputs(t *testing.T) {
 
 	inputJson := `[
 	{
@@ -292,11 +292,6 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
             "in_list3",
             "in_listN"
         ],
- 		"cache": {
-            "active": true,
-            "qty": 3,
-            "newLabel": "Type new value?"
-        },
         "label": "Pick your : "
     },
  	{
@@ -309,10 +304,35 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			"operator": "%s",
 			"value":    "in_list1"
 		}
+    },
+    {
+        "name": "sample_bool",
+        "type": "bool",
+        "default": "false",
+        "items": [
+            "false",
+            "true"
+        ],
+		"condition": {
+			"variable": "sample_list",
+			"operator": "==",
+			"value":    "in_list2"
+		},
+        "label": "Pick: ",
+		"tutorial": "Select true or false for this field."
+    },
+    {
+        "name": "sample_password",
+        "type": "password",
+		"condition": {
+			"variable": "sample_bool",
+			"operator": "==",
+			"value":    "true"
+		},
+        "label": "Pick: ",
+		"tutorial": "Add a secret password for this field."
     }
 ]`
-
-	fileManager := stream.NewFileManager()
 
 	type in struct {
 		variable string
@@ -378,7 +398,7 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				variable: "sample_list",
 				operator: "eq",
 			},
-			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
+			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=, containsAny, containsAll, containsOnly, notContainsAny, notContainsAll)"),
 		},
 		{
 			name: "non-existing variable conditional",
@@ -389,6 +409,9 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 			want: errors.New("config.json: conditional variable non_existing not found"),
 		},
 	}
+
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -402,24 +425,21 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 				FormulaPath: os.TempDir(),
 			}
 
-			iText := inputMock{text: DefaultCacheNewLabel}
-			iTextValidator := inputTextValidatorMock{}
-			iTextDefault := inputTextDefaultMock{}
-			iList := inputMock{text: "in_list1"}
-			iBool := inputMock{boolean: false}
-			iPass := inputMock{text: "******"}
-			iMultiselect := inputMock{}
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("default", nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("in_list1", nil)
 
 			inputManager := NewInputManager(
-				envResolverMock{},
-				fileManager,
+				&mocks.CredResolverMock{},
 				iList,
-				iText,
-				iTextValidator,
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
 				iTextDefault,
-				iBool,
-				iPass,
-				iMultiselect,
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -430,23 +450,16 @@ func TestInputManager_ConditionalInputs(t *testing.T) {
 	}
 }
 
-func TestInputManager_RegexType(t *testing.T) {
-	type in struct {
-		inputJson      string
-		inText         inputMock
-		iTextValidator inputTextValidatorMock
-		iTextDefault   inputTextDefaultMock
-	}
-
+func TestRegexType(t *testing.T) {
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name      string
+		inputJson string
+		inText    string
+		want      error
 	}{
 		{
 			name: "Success regex test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					    {
 					        "name": "sample_text",
 					        "type": "text",
@@ -457,15 +470,12 @@ func TestInputManager_RegexType(t *testing.T) {
 									}
 					    }
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
-			want: nil,
+			inText: "a",
+			want:   nil,
 		},
 		{
 			name: "Failed regex test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					    {
 					        "name": "sample_text",
 					        "type": "text",
@@ -476,15 +486,12 @@ func TestInputManager_RegexType(t *testing.T) {
 									}
 					    }
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
-			want: errors.New("mismatch"),
+			inText: "a",
+			want:   errors.New("mismatch"),
 		},
 		{
 			name: "Success regex test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					    {
 					        "name": "sample_text",
 					        "type": "text",
@@ -495,18 +502,18 @@ func TestInputManager_RegexType(t *testing.T) {
 									}
 					    }
 					]`,
-				inText:         inputMock{text: "abcc"},
-				iTextValidator: inputTextValidatorMock{str: "abcc"},
-			},
-			want: nil,
+			inText: "abcc",
+			want:   nil,
 		},
 	}
 
-	fileManager := stream.NewFileManager()
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
-			_ = json.Unmarshal([]byte(tt.in.inputJson), &inputs)
+			_ = json.Unmarshal([]byte(tt.inputJson), &inputs)
 
 			setup := formula.Setup{
 				Config: formula.Config{
@@ -515,24 +522,21 @@ func TestInputManager_RegexType(t *testing.T) {
 				FormulaPath: os.TempDir(),
 			}
 
-			iText := tt.in.inText
-			iTextValidator := tt.in.iTextValidator
-			iTextDefault := tt.in.iTextDefault
-			iList := inputMock{text: "in_list1"}
-			iBool := inputMock{boolean: false}
-			iPass := inputMock{text: "******"}
-			iMultiselect := inputMock{}
+			iText := &mocks.InputTextMock{}
+			iText.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.inText, nil)
+			iTextValidator := &mocks.InputTextValidatorMock{}
+			iTextValidator.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.inText, nil)
 
 			inputManager := NewInputManager(
-				envResolverMock{},
-				fileManager,
-				iList,
+				&mocks.CredResolverMock{},
+				&mocks.InputListMock{},
 				iText,
 				iTextValidator,
-				iTextDefault,
-				iBool,
-				iPass,
-				iMultiselect,
+				&mocks.InputDefaultTextMock{},
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -543,22 +547,15 @@ func TestInputManager_RegexType(t *testing.T) {
 	}
 }
 
-func TestInputManager_DynamicInputs(t *testing.T) {
-	type in struct {
-		inputJson      string
-		inText         inputMock
-		iTextValidator inputTextValidatorMock
-	}
-
+func TestDynamicInputs(t *testing.T) {
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name      string
+		inputJson string
+		want      error
 	}{
 		{
 			name: "Success dynamic input test",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -569,15 +566,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
 			want: nil,
 		},
 		{
 			name: "fail dynamic input when http status is not ok",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -588,15 +581,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
 			want: errors.New("dynamic list request got http status 404 expecting some 2xx range"),
 		},
 		{
 			name: "fail dynamic input when jsonpath is wrong",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -607,15 +596,11 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
 			want: errors.New(`unexpected "[" while scanning JSON select expected Ident, "." or "*"`),
 		},
 		{
 			name: "fail dynamic input when config.json url is empty",
-			in: in{
-				inputJson: `[
+			inputJson: `[
 					     {
       						"label": "Choose your repository ",
       						"name": "repo_list",
@@ -626,18 +611,17 @@ func TestInputManager_DynamicInputs(t *testing.T) {
       					 	}
     					}
 					]`,
-				inText:         inputMock{text: "a"},
-				iTextValidator: inputTextValidatorMock{str: "a"},
-			},
 			want: errors.New(`unsupported protocol scheme ""`),
 		},
 	}
 
-	fileManager := stream.NewFileManager()
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
-			_ = json.Unmarshal([]byte(tt.in.inputJson), &inputs)
+			_ = json.Unmarshal([]byte(tt.inputJson), &inputs)
 
 			setup := formula.Setup{
 				Config: formula.Config{
@@ -646,24 +630,23 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 				FormulaPath: os.TempDir(),
 			}
 
-			iText := tt.in.inText
-			iTextValidator := tt.in.iTextValidator
-			iTextDefault := inputTextDefaultMock{}
-			iList := inputMock{text: "in_list1"}
-			iBool := inputMock{boolean: false}
-			iPass := inputMock{text: "******"}
-			iMultiselect := inputMock{}
+			iText := &mocks.InputTextMock{}
+			iText.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("a", nil)
+			iTextValidator := &mocks.InputTextValidatorMock{}
+			iTextValidator.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("a", nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", nil)
 
 			inputManager := NewInputManager(
-				envResolverMock{},
-				fileManager,
+				&mocks.CredResolverMock{},
 				iList,
 				iText,
 				iTextValidator,
-				iTextDefault,
-				iBool,
-				iPass,
-				iMultiselect,
+				&mocks.InputDefaultTextMock{},
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -671,30 +654,23 @@ func TestInputManager_DynamicInputs(t *testing.T) {
 
 			if tt.want != nil {
 				assert.NotNil(t, got)
-			}
-
-			if tt.want == nil {
+			} else {
 				assert.Equal(t, tt.want, got)
 			}
 		})
 	}
 }
 
-func TestInputManager_Multiselect(t *testing.T) {
-	type in struct {
-		inputJSON     string
-		inMultiselect inputMock
-	}
-
+func TestMultiselect(t *testing.T) {
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name             string
+		inputJSON        string
+		multiselectValue []string
+		want             error
 	}{
 		{
 			name: "success multiselect input test",
-			in: in{
-				inputJSON: `[
+			inputJSON: `[
 					{
 						"name": "sample_multiselect",
 						"type": "multiselect",
@@ -709,14 +685,31 @@ func TestInputManager_Multiselect(t *testing.T) {
 						"tutorial": "Select one or more items for this field."
 					}
 				]`,
-				inMultiselect: inputMock{items: []string{"item_1", "item_2"}},
-			},
-			want: nil,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
+		},
+		{
+			name: "success multiselect input test when the required field is not sent",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"tutorial": "Select one or more items for this field."
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             nil,
 		},
 		{
 			name: "fail multiselect input test",
-			in: in{
-				inputJSON: `[
+			inputJSON: `[
 					{
 						"name": "sample_multiselect",
 						"type": "multiselect",
@@ -726,17 +719,18 @@ func TestInputManager_Multiselect(t *testing.T) {
 						"tutorial": "Select one or more items for this field."
 					}
 				]`,
-				inMultiselect: inputMock{items: []string{}},
-			},
-			want: fmt.Errorf(EmptyItems, "sample_multiselect"),
+			multiselectValue: []string{},
+			want:             fmt.Errorf(EmptyItems, "sample_multiselect"),
 		},
 	}
 
-	fileManager := stream.NewFileManager()
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var inputs []formula.Input
-			_ = json.Unmarshal([]byte(tt.in.inputJSON), &inputs)
+			_ = json.Unmarshal([]byte(tt.inputJSON), &inputs)
 
 			setup := formula.Setup{
 				Config: formula.Config{
@@ -745,24 +739,19 @@ func TestInputManager_Multiselect(t *testing.T) {
 				FormulaPath: os.TempDir(),
 			}
 
-			iText := tt.in.inMultiselect
-			iTextValidator := inputTextValidatorMock{}
-			iTextDefault := inputTextDefaultMock{}
-			iList := inputMock{text: "in_list1"}
-			iBool := inputMock{boolean: false}
-			iPass := inputMock{text: "******"}
-			iMultiselect := inputMock{items: []string{}}
+			iMultiselect := &mocks.InputMultiselectMock{}
+			iMultiselect.On("Multiselect", mock.Anything).Return(tt.multiselectValue, nil)
 
 			inputManager := NewInputManager(
-				envResolverMock{},
-				fileManager,
-				iList,
-				iText,
-				iTextValidator,
-				iTextDefault,
-				iBool,
-				iPass,
+				&mocks.CredResolverMock{},
+				&mocks.InputListMock{},
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
+				&mocks.InputDefaultTextMock{},
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
 				iMultiselect,
+				inPath,
 			)
 
 			cmd := &exec.Cmd{}
@@ -773,7 +762,844 @@ func TestInputManager_Multiselect(t *testing.T) {
 	}
 }
 
-func TestInputManager_DefaultFlag(t *testing.T) {
+func TestContainsConditionalInputsMultiselect(t *testing.T) {
+	tests := []struct {
+		name             string
+		inputJSON        string
+		multiselectValue []string
+		want             bool
+	}{
+		{
+			name: "[containsAny] SUCCESS: multiselect input contains the conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAny",
+							"value":    "item_2|item_3"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3"},
+			want:             true,
+		},
+		{
+			name: "[containsAny] FAIL: multiselect input does not contain any the conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAny",
+							"value":    "item_2|item_3"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_4"},
+			want:             false,
+		},
+		{
+			name: "[containsAll] SUCCESS: multiselect input contains all conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAll",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3", "item_4"},
+			want:             true,
+		},
+		{
+			name: "[containsAll] FAIL: multiselect input does not contain all conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsAll",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3"},
+			want:             false,
+		},
+		{
+			name: "[containsOnly] SUCCESS: multiselect input contains only conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsOnly",
+							"value":    "item_1|item_2"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             true,
+		},
+		{
+			name: "[containsOnly] FAIL: multiselect input does not contain only conditional values and they are not the same size",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsOnly",
+							"value":    "item_1|item_2"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2", "item_3"},
+			want:             false,
+		},
+		{
+			name: "[containsOnly] FAIL: multiselect input does not contain only conditional values and they are the same size",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "containsOnly",
+							"value":    "item_1|item_2"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_3"},
+			want:             false,
+		},
+		{
+			name: "[notContainsAny] SUCCESS: multiselect input does not contain any of the conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContainsAny",
+							"value":    "item_3|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_1", "item_2"},
+			want:             true,
+		},
+		{
+			name: "[notContainsAny] FAIL: multiselect input contains any of the conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContainsAny",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_3", "item_4"},
+			want:             false,
+		},
+		{
+			name: "[notContainsAll] SUCCESS: multiselect input only contains one of the conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContainsAll",
+							"value":    "item_1|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_2", "item_3", "item_4"},
+			want:             true,
+		},
+		{
+			name: "[notContainsAll] SUCCESS: multiselect input does not contain any of the conditional values",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContainsAll",
+							"value":    "item_1|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_2", "item_3"},
+			want:             true,
+		},
+		{
+			name: "[notContainsAll] FAIL: multiselect input contains all the conditional values and they are the same size",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContainsAll",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_2", "item_3", "item_4"},
+			want:             false,
+		},
+		{
+			name: "[notContainsAll] FAIL: multiselect input contains all the conditional values and they are not the same size",
+			inputJSON: `[
+					{
+						"name": "sample_multiselect",
+						"type": "multiselect",
+						"items": [
+							"item_1",
+							"item_2",
+							"item_3",
+							"item_4"
+						],
+						"label": "Choose one or more items: ",
+						"required": false,
+						"tutorial": "Select one or more items for this field."
+					},
+ 					{
+						"name": "sample_text",
+						"type": "text",
+						"label": "Type : ",
+						"default": "test",
+						"condition": {
+							"variable": "sample_multiselect",
+							"operator": "notContainsAll",
+							"value":    "item_2|item_4"
+						}
+					}
+				]`,
+			multiselectValue: []string{"item_2", "item_4"},
+			want:             false,
+		},
+	}
+
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(tt.inputJSON), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return("sample_text", nil)
+			iMultiselect := &mocks.InputMultiselectMock{}
+			iMultiselect.On("Multiselect", mock.Anything).Return(tt.multiselectValue, nil)
+
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				&mocks.InputListMock{},
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
+				iTextDefault,
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				iMultiselect,
+				inPath,
+			)
+
+			cmd := &exec.Cmd{}
+
+			got := inputManager.Inputs(cmd, setup, nil)
+			result, _ := input.VerifyConditional(cmd, inputs[1], inputs)
+
+			assert.Equal(t, nil, got)
+			assert.Equal(t, tt.want, result)
+		})
+	}
+}
+
+func TestContainsConditionalInputsString(t *testing.T) {
+	tests := []struct {
+		name      string
+		inputJSON string
+		textValue string
+		want      bool
+	}{
+		{
+			name: "[containsAny] SUCCESS: text input contains the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAny",
+							"value":    "input_2|input_3"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      true,
+			textValue: "input_1,input_2,input_3",
+		},
+		{
+			name: "[containsAny] FAIL: text input does not contain any the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAny",
+							"value":    "input_2|input_3"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      false,
+			textValue: "input_1,input_4",
+		},
+		{
+			name: "[containsAll] SUCCESS: text input contains all conditional substrings values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAll",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      true,
+			textValue: "input_1,input_2,input_3,input_4",
+		},
+		{
+			name: "[containsAll] FAIL: text input does not contain all conditional sbustring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsAll",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      false,
+			textValue: "input_1,input_2,input_3",
+		},
+		{
+			name: "[containsOnly] SUCCESS: text input contains only conditional substring value",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsOnly",
+							"value":    "input_1"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      true,
+			textValue: "input_1",
+		},
+		{
+			name: "[containsOnly] FAIL: text input does not contain only conditional substring value",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "containsOnly",
+							"value":    "input_1"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      false,
+			textValue: "input_1,input_2",
+		},
+		{
+			name: "[notContainsAny] SUCCESS: text input does not contain any of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAny",
+							"value":    "input_3|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      true,
+			textValue: "input_1,input_2",
+		},
+		{
+			name: "[notContainsAny] FAIL: text input contains any of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAny",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      false,
+			textValue: "input_3,input_4",
+		},
+		{
+			name: "[notContainsAll] SUCCESS: text input only contains one of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAll",
+							"value":    "input_1|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      true,
+			textValue: "input_2,input_3,input_4",
+		},
+		{
+			name: "[notContainsAll] SUCCESS: text input does not contain any of the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAll",
+							"value":    "input_1|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      true,
+			textValue: "input_2,input_3",
+		},
+		{
+			name: "[notContainsAll] FAIL: text input contains all the conditional substring values",
+			inputJSON: `[
+					{
+						"name": "sample_text1",
+						"type": "text",
+						"label": "Type: ",
+				        "default": "text1"
+					},
+ 					{
+				        "name": "sample_list1",
+				        "type": "list",
+				        "default": "in1",
+				        "items": [
+				            "in_list1",
+				            "in_list2",
+				            "in_list3",
+				            "in_listN"
+				        ],
+						"condition": {
+							"variable": "sample_text1",
+							"operator": "notContainsAll",
+							"value":    "input_2|input_4"
+						},
+        				"label": "Pick your : "
+    				}
+				]`,
+			want:      false,
+			textValue: "input_2,input_3,input_4",
+		},
+	}
+
+	inPath := &mocks.InputPathMock{}
+	inPath.On("Read", "Type : ").Return("", nil)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var inputs []formula.Input
+			_ = json.Unmarshal([]byte(tt.inputJSON), &inputs)
+
+			setup := formula.Setup{
+				Config: formula.Config{
+					Inputs: inputs,
+				},
+				FormulaPath: os.TempDir(),
+			}
+
+			iTextDefault := &mocks.InputDefaultTextMock{}
+			iTextDefault.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.textValue, nil)
+			iList := &mocks.InputListMock{}
+			iList.On("List", mock.Anything, mock.Anything, mock.Anything).Return("list value", nil)
+
+			inputManager := NewInputManager(
+				&mocks.CredResolverMock{},
+				iList,
+				&mocks.InputTextMock{},
+				&mocks.InputTextValidatorMock{},
+				iTextDefault,
+				&mocks.InputBoolMock{},
+				&mocks.InputPasswordMock{},
+				&mocks.InputMultiselectMock{},
+				inPath,
+			)
+
+			cmd := &exec.Cmd{}
+
+			got := inputManager.Inputs(cmd, setup, nil)
+			result, _ := input.VerifyConditional(cmd, inputs[1], inputs)
+
+			assert.Equal(t, nil, got)
+			assert.Equal(t, tt.want, result)
+		})
+	}
+}
+
+func TestDefaultFlag(t *testing.T) {
 	inputJson := `[
 		{
 			"name": "sample_text",
@@ -791,151 +1617,74 @@ func TestInputManager_DefaultFlag(t *testing.T) {
 		},
 		FormulaPath: os.TempDir(),
 	}
-	fileManager := stream.NewFileManager()
 
-	type in struct {
-		inType      api.TermInputType
-		creResolver credential.Resolver
-		file        stream.FileWriteReadExister
-	}
+	t.Run("success prompt", func(t *testing.T) {
+		inputManager := NewInputManager(
+			&mocks.CredResolverMock{},
+			&mocks.InputListMock{},
+			&mocks.InputTextMock{},
+			&mocks.InputTextValidatorMock{},
+			&mocks.InputDefaultTextMock{},
+			&mocks.InputBoolMock{},
+			&mocks.InputPasswordMock{},
+			&mocks.InputMultiselectMock{},
+			&mocks.InputPathMock{},
+		)
 
-	tests := []struct {
-		name string
-		in   in
-	}{
+		cmd := &exec.Cmd{}
+		flags := pflag.NewFlagSet("default", 0)
+		flags.Bool("default", true, "default")
+
+		rescueStdout := os.Stdout
+		r, w, _ := os.Pipe()
+		os.Stdout = w
+
+		err := inputManager.Inputs(cmd, setup, flags)
+
+		_ = w.Close()
+		out, _ := ioutil.ReadAll(r)
+		os.Stdout = rescueStdout
+
+		assert.Nil(t, err)
+		assert.Contains(t, string(out), "Added sample_text by default: test")
+	})
+}
+
+func TestEmptyList(t *testing.T) {
+	inputJson := `[
 		{
-			name: "success prompt",
-			in: in{
-				inType:      api.Prompt,
-				creResolver: envResolverMock{in: "test"},
-				file:        fileManager,
-			},
+			"name": "sample_list",
+			"type": "list",
+			"label": "Type : ",
+			"default": "test"
+		}
+	]`
+	var inputs []formula.Input
+	_ = json.Unmarshal([]byte(inputJson), &inputs)
+
+	setup := formula.Setup{
+		Config: formula.Config{
+			Inputs: inputs,
 		},
+		FormulaPath: os.TempDir(),
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			inputManager := NewInputManager(
-				tt.in.creResolver,
-				tt.in.file,
-				inputMock{},
-				inputMock{},
-				inputTextValidatorMock{},
-				inputTextDefaultMock{},
-				inputMock{},
-				inputMock{},
-				inputMock{},
-			)
+	t.Run("success prompt", func(t *testing.T) {
+		inputManager := NewInputManager(
+			&mocks.CredResolverMock{},
+			&mocks.InputListMock{},
+			&mocks.InputTextMock{},
+			&mocks.InputTextValidatorMock{},
+			&mocks.InputDefaultTextMock{},
+			&mocks.InputBoolMock{},
+			&mocks.InputPasswordMock{},
+			&mocks.InputMultiselectMock{},
+			&mocks.InputPathMock{},
+		)
 
-			cmd := &exec.Cmd{}
-			flags := pflag.NewFlagSet("default", 0)
-			flags.Bool("default", true, "default")
+		cmd := &exec.Cmd{}
+		got := inputManager.Inputs(cmd, setup, nil)
 
-			rescueStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			err := inputManager.Inputs(cmd, setup, flags)
-
-			_ = w.Close()
-			out, _ := ioutil.ReadAll(r)
-			os.Stdout = rescueStdout
-
-			assert.Nil(t, err)
-			assert.Contains(t, string(out), "Added sample_text by default: test")
-		})
-	}
-}
-
-type inputTextValidatorMock struct {
-	str string
-}
-
-func (i inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return i.str, validate(i.str)
-}
-
-type inputMock struct {
-	text    string
-	boolean bool
-	items   []string
-	err     error
-}
-
-func (i inputMock) List(string, []string, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Text(string, bool, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Bool(string, []string, ...string) (bool, error) {
-	return i.boolean, i.err
-}
-
-func (i inputMock) Password(string, ...string) (string, error) {
-	return i.text, i.err
-}
-
-func (i inputMock) Multiselect(formula.Input) ([]string, error) {
-	return i.items, i.err
-}
-
-type inputTextDefaultMock struct {
-	text string
-	err  error
-}
-
-func (i inputTextDefaultMock) Text(formula.Input) (string, error) {
-	return i.text, i.err
-}
-
-type envResolverMock struct {
-	in  string
-	err error
-}
-
-func (e envResolverMock) Resolve(string) (string, error) {
-	return e.in, e.err
-}
-
-type fileManagerMock struct {
-	rBytes   []byte
-	rErr     error
-	wErr     error
-	aErr     error
-	mErr     error
-	rmErr    error
-	lErr     error
-	exist    bool
-	listNews []string
-}
-
-func (fi fileManagerMock) Write(string, []byte) error {
-	return fi.wErr
-}
-
-func (fi fileManagerMock) Read(string) ([]byte, error) {
-	return fi.rBytes, fi.rErr
-}
-
-func (fi fileManagerMock) Exists(string) bool {
-	return fi.exist
-}
-
-func (fi fileManagerMock) Append(path string, content []byte) error {
-	return fi.aErr
-}
-
-func (fi fileManagerMock) Move(oldPath, newPath string, files []string) error {
-	return fi.mErr
-}
-
-func (fi fileManagerMock) Remove(path string) error {
-	return fi.rmErr
-}
-
-func (fi fileManagerMock) ListNews(oldPath, newPath string) ([]string, error) {
-	return fi.listNews, fi.lErr
+		assert.Equal(t, fmt.Errorf(EmptyItems, "sample_list"), got)
+	})
 }

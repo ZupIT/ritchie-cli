@@ -17,16 +17,16 @@
 package runner
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
 const (
-	messageChangeError = "Failed to detect formula changes, executing the last build"
-	messageBuildError  = "Failed to build formula"
+	messageChangeError = "Failed to detect formula changes, executing the last build: %s"
+	messageBuildError  = "Failed to build formula: %s"
 )
 
 type PreRunBuilderManager struct {
@@ -44,22 +44,24 @@ func NewPreRunBuilder(
 	}
 }
 
-func (b PreRunBuilderManager) Build(relativePath string) {
+func (b PreRunBuilderManager) Build(relativePath string) error {
 	workspace, err := b.modifiedWorkspace(relativePath)
 	if err != nil {
-		fmt.Println(prompt.Yellow(messageChangeError))
-		return
+		msg := fmt.Sprintf(messageChangeError, err.Error())
+		return errors.New(msg)
 	}
 
 	// No modifications on any workspace, skip
 	if workspace == nil {
-		return
+		return nil
 	}
 
 	if err = b.buildOnWorkspace(*workspace, relativePath); err != nil {
-		fmt.Println(prompt.Red(messageBuildError))
-		return
+		msg := fmt.Sprintf(messageBuildError, err.Error())
+		return errors.New(msg)
 	}
+
+	return nil
 }
 
 func (b PreRunBuilderManager) modifiedWorkspace(relativePath string) (*formula.Workspace, error) {
