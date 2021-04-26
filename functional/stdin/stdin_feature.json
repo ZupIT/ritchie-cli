@@ -52,7 +52,7 @@
         "steps": [
             {
                 "key": "",
-                "value": "{\"provider\":\"Github\", \"name\":\"Leonidas\", \"url\":\"https://github.com/ZupIT/ritchie-formulas\", \"version\":\"2.15.1\",\"priority\":999}",
+                "value": "{\"provider\":\"Github\", \"name\":\"Leonidas\", \"url\":\"https://github.com/ZupIT/ritchie-formulas\", \"version\":\"2.14.2\",\"priority\":999}",
                 "action": "echo"
             },
             {
