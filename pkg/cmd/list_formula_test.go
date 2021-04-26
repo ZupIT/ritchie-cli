@@ -28,6 +28,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
+	"github.com/gookit/color"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -56,6 +57,7 @@ func TestNewListFormula(t *testing.T) {
 	expectedOut :=
 		`COMMAND                      	DESCRIPTION               
 rit http generate http-config	Creates http-load template`
+	warningMsg := "could not be retrieved."
 
 	type in struct {
 		args            []string
@@ -63,6 +65,7 @@ rit http generate http-config	Creates http-load template`
 		repoListErr     error
 		inputListString string
 		inputListErr    error
+		warning         bool
 	}
 
 	tests := []struct {
@@ -140,6 +143,14 @@ rit http generate http-config	Creates http-load template`
 			},
 			want: errors.New("no formula found in selected repo"),
 		},
+		{
+			name: "error when ALL flag and 1 repo fail",
+			in: in{
+				args:     []string{"--name=ALL"},
+				repoList: repos,
+				warning:  true,
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -150,12 +161,12 @@ rit http generate http-config	Creates http-load template`
 			repoManagerMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.repoList, tt.in.repoListErr)
 			repoManagerMock.On("Write", mock.Anything).Return(nil)
 
-			for _, r := range tt.in.repoList {
+			for i, r := range tt.in.repoList {
 				repoName := r.Name.String()
 				repoPath := filepath.Join(reposPath, repoName)
 				_ = os.MkdirAll(repoPath, os.ModePerm)
 				_ = streams.Unzip("../../testdata/tree.zip", repoPath)
-				if tt.want != nil {
+				if (tt.want != nil || tt.in.warning) && i == 1 {
 					emptyTreeData := []byte(emptyTree)
 					_ = ioutil.WriteFile(filepath.Join(repoPath, "tree.json"), emptyTreeData, 0666)
 				}
@@ -175,7 +186,7 @@ rit http generate http-config	Creates http-load template`
 			r, w, err := os.Pipe()
 			assert.NoError(t, err)
 			os.Stdout = w
-
+			color.SetOutput(w)
 			got := cmd.Execute()
 			assert.Equal(t, tt.want, got)
 
@@ -188,6 +199,13 @@ rit http generate http-config	Creates http-load template`
 				assert.Contains(t, capturedOut, expectedOut)
 			} else {
 				assert.NotContains(t, capturedOut, expectedOut)
+			}
+
+			assert.NoError(t, err)
+			if tt.in.warning {
+				assert.Contains(t, capturedOut, warningMsg)
+			} else {
+				assert.NotContains(t, capturedOut, warningMsg)
 			}
 		})
 	}
