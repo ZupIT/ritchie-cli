@@ -162,30 +162,31 @@ A typical test has the following structure
 > Note: we are currently reviewing how our tests are written, we are trying to make a more assertive test framework
 >on Ritchie cli, such as simulating the user input via stdin instead of mocking it, so these practices might change.
 
-#### Translation
+
+## Translation
 
 - All translation files are inside the `/resources/i18n` folder.
 - Translation files follow a convention, must start with your locale, and have the extension `.toml`. For example: `en.toml`
 - Any phrase or word that does not exist in `en.toml` must be added to it to avoid mistakes.
 - The convention for translation IDs is to start with the name of the specific package or command followed by a clear identifier for your word or phrase. For example: `[init.welcome]`
 
-##### See some examples below:
+### See some examples below:
 
-###### English file (`en.toml`)
+#### English file (`en.toml`)
 
 ```toml
 [init.hello.world]
 other = "Hello World!"
 ```  
 
-###### Portuguese file (`pt_BR.toml`)
+#### Portuguese file (`pt_BR.toml`)
 
 ```toml
 [init.hello.world]
 other = "Olá Mundo!"
 ```  
 
-###### Other locale example (`ge_GE.toml`)
+#### Other locale example (`ge_GE.toml`)
 
 ```toml
 [init.hello.world]
@@ -195,7 +196,7 @@ other = "Hallo Welt!"
 > Note: you must run the `make generate-translation` command to update the `translations.go` file whenever you create 
 > or update a translation. 
 
-###### How to use translation in your Golang code?
+### How to use translation in your Golang code?
 
 You will use the `i18n` package located inside `internal/pkg/i18n`. See an example below:
 
