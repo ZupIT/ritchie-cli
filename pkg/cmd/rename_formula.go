@@ -121,12 +121,13 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 		}
 		result.FOldPath = formulaPath(result.Workspace.Dir, result.OldFormulaCmd)
 		result.FNewPath = formulaPath(result.Workspace.Dir, result.NewFormulaCmd)
+		fmt.Println(result)
 
 		if err := r.renamer.Rename(result); err != nil {
 			return err
 		}
 
-		fmt.Println(result.Workspace, result.NewFormulaCmd, result.OldFormulaCmd)
+		fmt.Println(result)
 
 		return nil
 	}
@@ -148,7 +149,6 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, wspaces formula.Work
 	// Default (/home/bruna/ritchie-formulas-local)
 	// rit test sandokan
 	var result formula.Rename
-	flagError := "please provide a value for '%s'"
 
 	wsName, err := cmd.Flags().GetString(wsFlagName)
 	if err != nil {
@@ -179,7 +179,7 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, wspaces formula.Work
 	if err != nil {
 		return result, err
 	} else if newFormula == "" {
-		return result, fmt.Errorf(flagError, newFormulaFlagName)
+		return result, errors.New(missingFlagText(newFormulaFlagName))
 	}
 	if r.formulaExistsInWorkspace(result.Workspace.Dir, newFormula) {
 		return result, fmt.Errorf(ErrFormulaExists, newFormula, result.Workspace.Name)
@@ -204,7 +204,7 @@ func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) (formula
 	} else if oldFormula == "" {
 		return result, ErrCouldNotFindFormula
 	}
-	result.OldFormulaCmd = oldFormula
+	result.OldFormulaCmd = "rit " + oldFormula
 
 	newFormula, err := r.inTextValidator.Text(formulaCmdLabel, r.surveyCmdValidator, formulaCmdHelper)
 	if err != nil {

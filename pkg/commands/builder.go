@@ -191,7 +191,7 @@ func Build() *cobra.Command {
 	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager, treeGen, repoListWriter)
 
 	validator := validator.NewValidator()
-	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace)
+	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace, ritchieHomeDir, treeGen)
 	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritchieHomeDir)
 
 	// prompt with deps
