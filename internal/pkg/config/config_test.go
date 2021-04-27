@@ -65,9 +65,7 @@ func TestWrite(t *testing.T) {
 			got := config.Write(tt.in.configs)
 			if tt.want != nil {
 				assert.Equal(t, tt.want.Error(), got.Error())
-			}
-
-			if tt.want == nil {
+			} else {
 				filePath := filepath.Join(os.TempDir(), File)
 				assert.FileExists(t, filePath)
 
