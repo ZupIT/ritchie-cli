@@ -17,14 +17,13 @@
 package renamer
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -41,6 +40,7 @@ type RenameManager struct {
 	workspace  formula.WorkspaceHasher
 	ritHomeDir string
 	treeGen    formula.TreeGenerator
+	deleter    deleter.DeleteManager
 }
 
 func NewRenamer(
@@ -50,58 +50,51 @@ func NewRenamer(
 	workspace formula.WorkspaceHasher,
 	ritHomeDir string,
 	treeGen formula.TreeGenerator,
+	deleter deleter.DeleteManager,
 ) RenameManager {
-	return RenameManager{dir, file, formula, workspace, ritHomeDir, treeGen}
+	return RenameManager{dir, file, formula, workspace, ritHomeDir, treeGen, deleter}
 }
 
 func (r *RenameManager) Rename(fr formula.Rename) error {
-	fmt.Println("criando nova formula ->")
+	fr.NewFormulaCmd = cleanSuffix(fr.NewFormulaCmd)
+	fr.OldFormulaCmd = cleanSuffix(fr.OldFormulaCmd)
+
+	fmt.Println("----1----")
 	if err := r.createNewFormula(fr); err != nil {
 		return err
 	}
-	fmt.Println("<- criando nova formula")
+	fmt.Println("----1----")
 
-	fmt.Println("deletando formula antiga formula ->")
+	fmt.Println("----2----")
 	groupsOld := strings.Split(fr.OldFormulaCmd, " ")[1:]
-	if err := r.deleteFormula(fr.Workspace.Dir, groupsOld, 0); err != nil {
+	delOld := formula.Delete{
+		GroupsFormula: groupsOld,
+		Workspace:     fr.Workspace,
+	}
+	if err := r.deleter.Delete(delOld); err != nil {
 		return err
 	}
+	fmt.Println("----2----")
 
-	fmt.Println(1)
-	ritchieLocalWorkspace := filepath.Join(r.ritHomeDir, "repos", "local-default")
-	if r.formulaExistsInWorkspace(ritchieLocalWorkspace, groupsOld) {
-		fmt.Println(2)
-		if err := r.deleteFormula(ritchieLocalWorkspace, groupsOld, 0); err != nil {
-			return err
-		}
-		fmt.Println(3)
-
-		if err := r.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
-			return err
-		}
-	}
-
-	fmt.Println("<- deletando formula antiga formula")
-
-	fmt.Println("buildando nova formula ->")
+	fmt.Println("----3----")
 	info := formula.BuildInfo{FormulaPath: fr.FNewPath, Workspace: fr.Workspace}
 	if err := r.formula.Build(info); err != nil {
 		return err
 	}
-	fmt.Println("<- buildando nova formula")
+	fmt.Println("----3----")
 
-	fmt.Println("hasheando nova formula ->")
+	fmt.Println("----4----")
 	hashNew, err := r.workspace.CurrentHash(fr.FNewPath)
 	if err != nil {
 		return err
 	}
-	fmt.Println("<- hasheando nova formula")
+	fmt.Println("----4----")
 
-	fmt.Println("updtando nova formula ->")
+	fmt.Println("----5----")
 	if err := r.workspace.UpdateHash(fr.FNewPath, hashNew); err != nil {
 		return err
 	}
-	fmt.Println("<- updtando nova formula")
+	fmt.Println("----5----")
 
 	return nil
 }
@@ -139,115 +132,9 @@ func formulaPath(workspacePath, cmd string) string {
 	return filepath.Join(workspacePath, formulaPath)
 }
 
-func (r *RenameManager) deleteFormula(path string, groups []string, index int) error {
-	if index == len(groups) {
-		nested, err := nestedFormula(path)
-		if err != nil {
-			return err
-		}
-
-		if nested {
-			return r.safeRemoveFormula(path)
-		}
-
-		return os.RemoveAll(path)
+func cleanSuffix(cmd string) string {
+	if strings.HasSuffix(cmd, "rit") {
+		return cmd[4:]
 	}
-
-	newPath := filepath.Join(path, groups[index])
-	if err := r.deleteFormula(newPath, groups, index+1); err != nil {
-		return err
-	}
-
-	if index == 0 {
-		return nil
-	}
-
-	ok, err := canDelete(path)
-	if err != nil {
-		return err
-	}
-
-	if ok {
-		if err := os.RemoveAll(path); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (r *RenameManager) safeRemoveFormula(path string) error {
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		return err
-	}
-
-	for _, file := range files {
-		if file.IsDir() && (file.Name() == "src" || file.Name() == "bin") {
-			pathToDelete := filepath.Join(path, file.Name())
-			if err := os.RemoveAll(pathToDelete); err != nil {
-				return err
-			}
-		} else if !file.IsDir() {
-			pathToDelete := filepath.Join(path, file.Name())
-			if err := r.file.Remove(pathToDelete); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func (r *RenameManager) formulaExistsInWorkspace(path string, groups []string) bool {
-	for _, group := range groups {
-		path = filepath.Join(path, group)
-	}
-
-	return r.dir.Exists(path)
-}
-
-func (r *RenameManager) recreateTreeJSON(workspace string) error {
-	localTree, err := r.treeGen.Generate(workspace)
-	if err != nil {
-		return err
-	}
-
-	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	pathLocalTreeJSON := filepath.Join(r.ritHomeDir, "repos", "local-default", "tree.json")
-	if err = r.file.Write(pathLocalTreeJSON, jsonString); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func nestedFormula(path string) (bool, error) {
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		return false, err
-	}
-
-	for _, file := range files {
-		if file.IsDir() && file.Name() != "src" && file.Name() != "bin" {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func canDelete(path string) (bool, error) {
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		return false, err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			return false, nil
-		}
-	}
-
-	return true, nil
+	return cmd
 }

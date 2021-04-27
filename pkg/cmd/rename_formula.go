@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/renamer"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	work "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
@@ -41,6 +40,9 @@ const (
 	oldFormulaFlagDesc = "old name of formula to rename"
 	newFormulaFlagName = "newNameFormula"
 	newFormulaFlagDesc = "new name of formula to rename"
+
+	formulaOldCmdLabel  = "Enter the formula command to rename:"
+	formulaOldCmdHelper = "Enter the existing formula in the informed workspace to rename it"
 
 	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
@@ -79,7 +81,6 @@ type renameFormulaCmd struct {
 	validator       validator.ValidatorManager
 	inputFormula    prompt.InputFormula
 	renamer         renamer.RenameManager
-	deleter         deleter.DeleteManager
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -94,10 +95,9 @@ func NewRenameFormulaCmd(
 	validator validator.ValidatorManager,
 	inputFormula prompt.InputFormula,
 	renamer renamer.RenameManager,
-	deleter deleter.DeleteManager,
 ) *cobra.Command {
 	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, directory, userHomeDir, validator,
-		inputFormula, renamer, deleter}
+		inputFormula, renamer}
 
 	cmd := &cobra.Command{
 		Use:       "formula",
@@ -198,13 +198,14 @@ func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) (formula
 	}
 	result.Workspace = ws
 
-	oldFormula, err := r.inputFormula.Select(ws.Dir, "rit")
+	oldFormula, err := r.inTextValidator.Text(formulaOldCmdLabel, r.surveyCmdValidator, formulaOldCmdHelper)
 	if err != nil {
 		return result, err
-	} else if oldFormula == "" {
-		return result, ErrCouldNotFindFormula
 	}
-	result.OldFormulaCmd = "rit " + oldFormula
+	if !r.formulaExistsInWorkspace(result.Workspace.Dir, oldFormula) {
+		return result, fmt.Errorf(ErrFormulaDontExists, oldFormula, result.Workspace.Name)
+	}
+	result.OldFormulaCmd = oldFormula
 
 	newFormula, err := r.inTextValidator.Text(formulaCmdLabel, r.surveyCmdValidator, formulaCmdHelper)
 	if err != nil {
