@@ -53,7 +53,7 @@ func (d *DeleteManager) Delete(fr formula.Delete) error {
 		return err
 	}
 
-	ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local")
+	ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local-default")
 	if d.formulaExistsInWorkspace(ritchieLocalWorkspace, fr.GroupsFormula) {
 		if err := d.deleteFormula(ritchieLocalWorkspace, fr.GroupsFormula, 0); err != nil {
 			return err
@@ -142,7 +142,7 @@ func (d *DeleteManager) recreateTreeJSON(workspace string) error {
 	}
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	pathLocalTreeJSON := filepath.Join(d.ritchieHomeDir, "repos", "local", "tree.json")
+	pathLocalTreeJSON := filepath.Join(d.ritchieHomeDir, "repos", "local-default", "tree.json")
 	if err = d.file.Write(pathLocalTreeJSON, jsonString); err != nil {
 		return err
 	}

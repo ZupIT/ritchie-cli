@@ -83,7 +83,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
 
 	validator := validator.NewValidator()
-	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace)
+	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace, ritHome, treeGen)
 	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritHome)
 
 	type in struct {

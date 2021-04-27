@@ -67,11 +67,14 @@ func (r *RenameManager) Rename(fr formula.Rename) error {
 		return err
 	}
 
-	ritchieLocalWorkspace := filepath.Join(r.ritHomeDir, "repos", "local")
+	fmt.Println(1)
+	ritchieLocalWorkspace := filepath.Join(r.ritHomeDir, "repos", "local-default")
 	if r.formulaExistsInWorkspace(ritchieLocalWorkspace, groupsOld) {
+		fmt.Println(2)
 		if err := r.deleteFormula(ritchieLocalWorkspace, groupsOld, 0); err != nil {
 			return err
 		}
+		fmt.Println(3)
 
 		if err := r.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
 			return err
@@ -211,7 +214,7 @@ func (r *RenameManager) recreateTreeJSON(workspace string) error {
 	}
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	pathLocalTreeJSON := filepath.Join(r.ritHomeDir, "repos", "local", "tree.json")
+	pathLocalTreeJSON := filepath.Join(r.ritHomeDir, "repos", "local-default", "tree.json")
 	if err = r.file.Write(pathLocalTreeJSON, jsonString); err != nil {
 		return err
 	}
