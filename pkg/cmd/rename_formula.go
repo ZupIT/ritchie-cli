@@ -43,6 +43,8 @@ const (
 
 	formulaOldCmdLabel  = "Enter the formula command to rename:"
 	formulaOldCmdHelper = "Enter the existing formula in the informed workspace to rename it"
+	formulaNewCmdLabel  = "Enter the new formula command:"
+	formulaNewCmdHelper = "You must create your command based in this example [rit group verb noun]"
 
 	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
@@ -76,10 +78,10 @@ type renameFormulaCmd struct {
 	inList          prompt.InputList
 	inPath          prompt.InputPath
 	inTextValidator prompt.InputTextValidator
+	inputFormula    prompt.InputFormula
 	directory       stream.DirListChecker
 	userHomeDir     string
 	validator       validator.ValidatorManager
-	inputFormula    prompt.InputFormula
 	renamer         renamer.RenameManager
 }
 
@@ -90,14 +92,14 @@ func NewRenameFormulaCmd(
 	inList prompt.InputList,
 	inPath prompt.InputPath,
 	inTextValidator prompt.InputTextValidator,
+	inputFormula prompt.InputFormula,
 	directory stream.DirListChecker,
 	userHomeDir string,
 	validator validator.ValidatorManager,
-	inputFormula prompt.InputFormula,
 	renamer renamer.RenameManager,
 ) *cobra.Command {
-	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, directory, userHomeDir, validator,
-		inputFormula, renamer}
+	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, inputFormula, directory, userHomeDir, validator,
+		renamer}
 
 	cmd := &cobra.Command{
 		Use:       "formula",
@@ -134,21 +136,18 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 }
 
 func (r *renameFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Rename, error) {
+	if IsFlagInput(cmd) {
+		return r.resolveFlags(cmd)
+	}
+	return r.resolvePrompt()
+}
+
+func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, error) {
 	var result formula.Rename
-	ws, err := r.workspace.List()
+	wspaces, err := r.workspace.List()
 	if err != nil {
 		return result, err
 	}
-	if IsFlagInput(cmd) {
-		return r.resolveFlags(cmd, ws)
-	}
-	return r.resolvePrompt(ws)
-}
-
-func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, wspaces formula.Workspaces) (formula.Rename, error) {
-	// Default (/home/bruna/ritchie-formulas-local)
-	// rit test sandokan
-	var result formula.Rename
 
 	wsName, err := cmd.Flags().GetString(wsFlagName)
 	if err != nil {
@@ -189,10 +188,14 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command, wspaces formula.Work
 	return result, nil
 }
 
-func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) (formula.Rename, error) {
+func (r *renameFormulaCmd) resolvePrompt() (formula.Rename, error) {
 	var result formula.Rename
+	wspaces, err := r.workspace.List()
+	if err != nil {
+		return result, err
+	}
 
-	ws, err := FormulaWorkspaceInput(workspaces, r.inList, r.inText, r.inPath)
+	ws, err := FormulaWorkspaceInput(wspaces, r.inList, r.inText, r.inPath)
 	if err != nil {
 		return result, err
 	}
@@ -207,7 +210,7 @@ func (r *renameFormulaCmd) resolvePrompt(workspaces formula.Workspaces) (formula
 	}
 	result.OldFormulaCmd = oldFormula
 
-	newFormula, err := r.inTextValidator.Text(formulaCmdLabel, r.surveyCmdValidator, formulaCmdHelper)
+	newFormula, err := r.inTextValidator.Text(formulaNewCmdLabel, r.surveyCmdValidator, formulaNewCmdHelper)
 	if err != nil {
 		return result, err
 	}

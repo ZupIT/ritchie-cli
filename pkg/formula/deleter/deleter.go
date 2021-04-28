@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -53,17 +54,31 @@ func (d *DeleteManager) Delete(fr formula.Delete) error {
 		return err
 	}
 
-	ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local-default")
-	if d.formulaExistsInWorkspace(ritchieLocalWorkspace, fr.GroupsFormula) {
-		if err := d.deleteFormula(ritchieLocalWorkspace, fr.GroupsFormula, 0); err != nil {
-			return err
-		}
-
-		if err := d.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
-			return err
-		}
+	repoNameStandard := repoutil.LocalName(fr.Workspace.Name)
+	repoNameStandardPath := filepath.Join(d.ritchieHomeDir, "repos", repoNameStandard.String())
+	if err := d.checkAndDeleteFormulaInRepoLocal(repoNameStandardPath, fr.GroupsFormula); err != nil {
+		return err
 	}
 
+	ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", "local-default")
+	if err := d.checkAndDeleteFormulaInRepoLocal(ritchieLocalWorkspace, fr.GroupsFormula); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DeleteManager) checkAndDeleteFormulaInRepoLocal(ws string, groups []string) error {
+	if d.formulaExistsInWorkspace(ws, groups) {
+		if err := d.deleteFormula(ws, groups, 0); err != nil {
+			return err
+		}
+
+		if err := d.recreateTreeJSON(ws); err != nil {
+			return err
+
+		}
+	}
 	return nil
 }
 
