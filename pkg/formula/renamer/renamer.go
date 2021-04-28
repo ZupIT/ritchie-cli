@@ -17,12 +17,14 @@
 package renamer
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -59,6 +61,12 @@ func (r *RenameManager) Rename(fr formula.Rename) error {
 	fr.OldFormulaCmd = cleanSuffix(fr.OldFormulaCmd)
 
 	if err := r.renameFormula(fr); err != nil {
+		return err
+	}
+
+	repoNameStandard := repoutil.LocalName(fr.Workspace.Name)
+	repoNameStandardPath := filepath.Join(r.ritHomeDir, "repos", repoNameStandard.String())
+	if err := r.recreateTreeJSON(repoNameStandardPath); err != nil {
 		return err
 	}
 
@@ -121,8 +129,24 @@ func (r *RenameManager) renameFormula(fr formula.Rename) error {
 }
 
 func (r *RenameManager) isAvailableCmd(fPath string) error {
+	fPath = filepath.Join(fPath, "src")
 	if r.dir.Exists(fPath) {
 		return ErrRepeatedCommand
+	}
+
+	return nil
+}
+
+func (r *RenameManager) recreateTreeJSON(pathLocalWS string) error {
+	localTree, err := r.treeGen.Generate(pathLocalWS)
+	if err != nil {
+		return err
+	}
+
+	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
+	pathLocalTreeJSON := filepath.Join(pathLocalWS, "tree.json")
+	if err = r.file.Write(pathLocalTreeJSON, jsonString); err != nil {
+		return err
 	}
 
 	return nil
