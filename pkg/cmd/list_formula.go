@@ -41,6 +41,7 @@ const (
 	repoFlagDescription = "Repository name to list formulas, use 'ALL' to list formulas from all repositories."
 	noRepoFoundMsg      = "You don't have any repositories"
 	failedRepoMsg       = "Formulas from %q could not be retrieved."
+	emptyRepoMsg        = "Repo %q has no formulas."
 )
 
 var (
@@ -86,7 +87,7 @@ func NewListFormulaCmd(
 		Use:     "formula",
 		Short:   "Show a list with available formulas from a specific repository",
 		Example: "rit list formula",
-		RunE:    lf.runFormula(),
+		RunE:    lf.runCmd(),
 	}
 
 	addReservedFlags(cmd.Flags(), listFormulaFlags)
@@ -94,7 +95,7 @@ func NewListFormulaCmd(
 	return cmd
 }
 
-func (lr *listFormulaCmd) runFormula() CommandRunnerFunc {
+func (lr *listFormulaCmd) runCmd() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		repos, err := lr.resolveInput(cmd)
 		if err != nil {
@@ -103,11 +104,14 @@ func (lr *listFormulaCmd) runFormula() CommandRunnerFunc {
 			return nil
 		}
 
+		noFormula := false
 		formulaCount, err := lr.printFormulas(repos)
 		if err != nil {
 			return err
-		} else if formulaCount != 1 {
+		} else if formulaCount > 1 {
 			prompt.Info(fmt.Sprintf(totalFormulasMsg, formulaCount))
+		} else if formulaCount == 0 {
+			noFormula = true
 		} else {
 			prompt.Info(totalOneFormulaMsg)
 		}
@@ -116,7 +120,7 @@ func (lr *listFormulaCmd) runFormula() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
-		tutorialListFormulas(tutorialHolder.Current)
+		tutorialListFormulas(tutorialHolder.Current, noFormula)
 		return nil
 	}
 }
@@ -149,18 +153,15 @@ func (lr *listFormulaCmd) resolvePrompt() (formula.Repos, error) {
 		return formula.Repos{}, err
 	}
 
-	var repoToListFormulas []formula.Repo
-	if repoName == listOptionAll {
-		repoToListFormulas = repos
-	} else {
+	if repoName != listOptionAll {
 		for i := range repos {
 			if repos[i].Name == formula.RepoName(repoName) {
-				repoToListFormulas = append(repoToListFormulas, repos[i])
-				break
+				return formula.Repos{repos[i]}, nil
 			}
 		}
 	}
-	return repoToListFormulas, nil
+
+	return repos, nil
 }
 
 func (lr *listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error) {
@@ -187,16 +188,28 @@ func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, e
 	table.AddRow("COMMAND", "DESCRIPTION")
 	allFormulas := make([]formulaDefinition, 0)
 	failedRepos := make([]string, 0)
+	emptyRepos := make([]string, 0)
 	for _, r := range repos {
 		repoFormulas, err := lr.formulasByRepo(r.Name)
 		if err != nil {
-			if len(repos) > 1 {
-				failedRepos = append(failedRepos, r.Name.String())
-			} else {
-				return 0, err
+			if len(repos) == 1 {
+				if err != errEmptyTree {
+					return 0, err
+				}
+				prompt.Warning(fmt.Sprintf(emptyRepoMsg, r.Name.String()))
 			}
+
+			if err != errEmptyTree {
+				failedRepos = append(failedRepos, r.Name.String())
+				continue
+			}
+			emptyRepos = append(emptyRepos, r.Name.String())
 		}
 		allFormulas = append(allFormulas, repoFormulas...)
+	}
+
+	if len(allFormulas) == 0 {
+		return 0, nil
 	}
 
 	sort.Sort(ByCmd(allFormulas))
@@ -209,6 +222,10 @@ func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, e
 
 	for _, r := range failedRepos {
 		prompt.Warning(fmt.Sprintf(failedRepoMsg, r))
+	}
+
+	for _, r := range emptyRepos {
+		prompt.Warning(fmt.Sprintf(emptyRepoMsg, r))
 	}
 
 	return len(table.Rows) - 1, nil
@@ -225,13 +242,11 @@ func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDef
 	}
 
 	var repoFormulas []formulaDefinition
-	for _, cmd := range tree.Commands {
+	replacer := strings.NewReplacer(rootString, rootCommand, commandSeparator, " ")
+	for key, cmd := range tree.Commands {
 		if cmd.Formula {
-			replacer := strings.NewReplacer(rootString, rootCommand, commandSeparator, " ")
-			parentFormula := replacer.Replace(cmd.Parent)
-
 			fd := formulaDefinition{
-				Cmd:  strings.Join([]string{parentFormula, cmd.Usage}, " "),
+				Cmd:  replacer.Replace(key.String()),
 				Desc: cmd.Help,
 			}
 			repoFormulas = append(repoFormulas, fd)
@@ -241,10 +256,16 @@ func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDef
 	return repoFormulas, nil
 }
 
-func tutorialListFormulas(tutorialStatus string) {
+func tutorialListFormulas(tutorialStatus string, emptyRepo bool) {
 	const tagTutorial = "\n[TUTORIAL]"
-	const MessageTitle = "To delete a formula repository:"
-	const MessageBody = ` ∙ Run "rit delete repo"`
+	var MessageTitle, MessageBody string
+	if emptyRepo {
+		MessageTitle = "To create a formula:"
+		MessageBody = ` ∙ Run "rit create formula"`
+	} else {
+		MessageTitle = "To delete a formula repository:"
+		MessageBody = ` ∙ Run "rit delete repo"`
+	}
 
 	if tutorialStatus == tutorialStatusEnabled {
 		prompt.Info(tagTutorial)

@@ -49,6 +49,10 @@ func TestNewListFormula(t *testing.T) {
 		},
 	}
 
+	faultyRepo := formula.Repo{
+		Name: "faultyRepo",
+	}
+
 	emptyTree := `{
 		"version": "v2",
 		"commands": {}
@@ -57,7 +61,8 @@ func TestNewListFormula(t *testing.T) {
 	expectedOut :=
 		`COMMAND                      	DESCRIPTION               
 rit http generate http-config	Creates http-load template`
-	warningMsg := "could not be retrieved."
+	warningRepoFailMsg := "could not be retrieved."
+	warningEmptyRepoMsg := "has no formulas."
 
 	type in struct {
 		args            []string
@@ -66,6 +71,7 @@ rit http generate http-config	Creates http-load template`
 		inputListString string
 		inputListErr    error
 		warning         bool
+		warningMsg      string
 	}
 
 	tests := []struct {
@@ -138,17 +144,19 @@ rit http generate http-config	Creates http-load template`
 		{
 			name: "error tree with no commands",
 			in: in{
-				args:     []string{"--name=repoOtherName"},
-				repoList: repos,
+				args:       []string{"--name=repoOtherName"},
+				repoList:   repos,
+				warning:    true,
+				warningMsg: warningEmptyRepoMsg,
 			},
-			want: errors.New("no formula found in selected repo"),
 		},
 		{
 			name: "error when ALL flag and 1 repo fail",
 			in: in{
-				args:     []string{"--name=ALL"},
-				repoList: repos,
-				warning:  true,
+				args:       []string{"--name=ALL"},
+				repoList:   repos,
+				warning:    true,
+				warningMsg: warningRepoFailMsg,
 			},
 		},
 	}
@@ -157,9 +165,6 @@ rit http generate http-config	Creates http-load template`
 		t.Run(tt.name, func(t *testing.T) {
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputListString, tt.in.inputListErr)
-			repoManagerMock := new(mocks.RepoManager)
-			repoManagerMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.repoList, tt.in.repoListErr)
-			repoManagerMock.On("Write", mock.Anything).Return(nil)
 
 			for i, r := range tt.in.repoList {
 				repoName := r.Name.String()
@@ -172,6 +177,13 @@ rit http generate http-config	Creates http-load template`
 				}
 			}
 			defer os.RemoveAll(ritHome)
+			if tt.in.warning {
+				tt.in.repoList = append(repos, faultyRepo)
+			}
+			repoManagerMock := new(mocks.RepoManager)
+			repoManagerMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.repoList, tt.in.repoListErr)
+			repoManagerMock.On("Write", mock.Anything).Return(nil)
+
 			treeManager := tree.NewTreeManager(ritHome, repoManagerMock, api.CoreCmds)
 
 			cmd := NewListFormulaCmd(
@@ -195,7 +207,7 @@ rit http generate http-config	Creates http-load template`
 			assert.NoError(t, err)
 			capturedOut := string(out)
 			os.Stdout = rescueStdout
-			if tt.want == nil {
+			if tt.want == nil && tt.in.warningMsg != warningEmptyRepoMsg {
 				assert.Contains(t, capturedOut, expectedOut)
 			} else {
 				assert.NotContains(t, capturedOut, expectedOut)
@@ -203,9 +215,10 @@ rit http generate http-config	Creates http-load template`
 
 			assert.NoError(t, err)
 			if tt.in.warning {
-				assert.Contains(t, capturedOut, warningMsg)
+				assert.Contains(t, capturedOut, tt.in.warningMsg)
 			} else {
-				assert.NotContains(t, capturedOut, warningMsg)
+				assert.NotContains(t, capturedOut, warningRepoFailMsg)
+				assert.NotContains(t, capturedOut, warningEmptyRepoMsg)
 			}
 		})
 	}
