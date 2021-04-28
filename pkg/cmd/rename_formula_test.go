@@ -17,10 +17,11 @@
 package cmd
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,8 +46,7 @@ import (
 )
 
 func TestRenameFormulaCmd(t *testing.T) {
-	tmp := os.TempDir()
-	home := filepath.Join(tmp, "rit_test-renameFormula")
+	home := filepath.Join(os.TempDir(), "rit_test-renameFormula")
 	ritHome := filepath.Join(home, ".rit")
 
 	defer os.RemoveAll(home)
@@ -73,8 +73,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 	formulaWorkspace := workspace.New(ritHome, home, dirManager, formBuildLocal)
 
 	reposPath := filepath.Join(ritHome, "repos")
-	repoPath := filepath.Join(reposPath, "commons")
-	repoPathLocal := filepath.Join(home, "ritchie-formulas-local")
+	repoPathLocalDefault := filepath.Join(reposPath, "local-default")
+	repoPathWS := filepath.Join(home, "ritchie-formulas-local")
 
 	repoListDetailWriter := repo.NewListDetailWrite(repoLister, repoDetail, repoWriter)
 	treeManager := tree.NewTreeManager(ritHome, repoListDetailWriter, api.CoreCmds)
@@ -83,129 +83,136 @@ func TestRenameFormulaCmd(t *testing.T) {
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
 
 	validator := validator.NewValidator()
-	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace, ritHome, treeGen)
 	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritHome)
+	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace, ritHome, treeGen, deleter)
+
+	fileInfo := func(path string) (string, error) {
+		fileManager := stream.NewFileManager()
+		b, err := fileManager.Read(path)
+		return string(b), err
+	}
 
 	type in struct {
-		inputText         string
-		inputTextVal      string
+		inputOldFormula   string
+		inputNewFormula   string
 		workspaceSelected string
-		formulaSelected   string
 		args              []string
 	}
 
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name                string
+		in                  in
+		formulaPathExpected string
+		want                error
 	}{
 		{
 			name: "success on prompt input",
 			in: in{
-				inputText:         "rit testing formula",
-				inputTextVal:      "rit testing formula new",
-				workspaceSelected: "Default (" + repoPathLocal + ")",
-				formulaSelected:   "rit testing formula",
+				inputOldFormula:   "rit testing formula",
+				inputNewFormula:   "rit testing new-formula",
+				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
+			formulaPathExpected: filepath.Join("testing", "new-formula"),
 		},
-		// {
-		// 	name: "success on flag input",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=Default",
-		// 			"--oldNameFormula=rit testing formula",
-		// 			"--newNameFormula=rit testing formula new",
-		// 		},
-		// 	},
-		// },
-		// {
-		// 	name: "error on flag input when workspace flag is nil",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=",
-		// 			"--oldNameFormula=rit testing formula",
-		// 			"--newNameFormula=rit testing formula new",
-		// 		},
-		// 	},
-		// 	want: errors.New("please provide a value for 'workspace'"),
-		// },
-		// {
-		// 	name: "error on flag input when oldName flag is nil",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=Default",
-		// 			"--oldNameFormula=",
-		// 			"--newNameFormula=rit testing formula new",
-		// 		},
-		// 	},
-		// 	want: errors.New("please provide a value for 'oldNameFormula'"),
-		// },
-		// {
-		// 	name: "error on flag input when newNameFormula flag is nil",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=Default",
-		// 			"--oldNameFormula=rit testing formula",
-		// 			"--newNameFormula=",
-		// 		},
-		// 	},
-		// 	want: errors.New("please provide a value for 'newNameFormula'"),
-		// },
-		// {
-		// 	name: "error on flag input when workspace flag dont exists",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=other",
-		// 			"--oldNameFormula=rit testing formula",
-		// 			"--newNameFormula=rit testing formula new",
-		// 		},
-		// 	},
-		// 	want: errors.New("the formula workspace does not exist, please enter a valid workspace"),
-		// },
-		// {
-		// 	name: "error on flag input when oldName flag dont exists in workspace",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=Default",
-		// 			"--oldNameFormula=rit testing other",
-		// 			"--newNameFormula=rit testing formula new",
-		// 		},
-		// 	},
-		// 	want: errors.New("This formula 'rit testing other' dont's exists on this workspace = 'Default'"),
-		// },
-		// {
-		// 	name: "error on flag input when newName flag exists in workspace",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=Default",
-		// 			"--oldNameFormula=rit testing formula",
-		// 			"--newNameFormula=rit testing formula",
-		// 		},
-		// 	},
-		// 	want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
-		// },
-		// {
-		// 	name: "error on flag input when old formula dont exists in workspace",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=Default",
-		// 			"--oldNameFormula=rit other formula",
-		// 			"--newNameFormula=rit testing formula new",
-		// 		},
-		// 	},
-		// 	want: errors.New("This formula 'rit other formula' dont's exists on this workspace = 'Default'"),
-		// },
-		// {
-		// 	name: "error on flag input when new formula exists in workspace",
-		// 	in: in{
-		// 		args: []string{
-		// 			"--workspace=Default",
-		// 			"--oldNameFormula=rit testing formula",
-		// 			"--newNameFormula=rit testing formula",
-		// 		},
-		// 	},
-		// 	want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
-		// },
+		{
+			name: "success on flag input",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit testing formula",
+					"--newNameFormula=rit testing new-formula",
+				},
+			},
+			formulaPathExpected: filepath.Join("testing", "new-formula"),
+		},
+		{
+			name: "error on flag input when workspace flag is nil",
+			in: in{
+				args: []string{
+					"--workspace=",
+					"--oldNameFormula=rit testing formula",
+					"--newNameFormula=rit testing formula new",
+				},
+			},
+			want: errors.New("please provide a value for 'workspace'"),
+		},
+		{
+			name: "error on flag input when oldName flag is nil",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=",
+					"--newNameFormula=rit testing formula new",
+				},
+			},
+			want: errors.New("please provide a value for 'oldNameFormula'"),
+		},
+		{
+			name: "error on flag input when newNameFormula flag is nil",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit testing formula",
+					"--newNameFormula=",
+				},
+			},
+			want: errors.New("please provide a value for 'newNameFormula'"),
+		},
+		{
+			name: "error on flag input when workspace flag dont exists",
+			in: in{
+				args: []string{
+					"--workspace=other",
+					"--oldNameFormula=rit testing formula",
+					"--newNameFormula=rit testing formula new",
+				},
+			},
+			want: errors.New("the formula workspace does not exist, please enter a valid workspace"),
+		},
+		{
+			name: "error on flag input when oldName flag dont exists in workspace",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit testing other",
+					"--newNameFormula=rit testing formula new",
+				},
+			},
+			want: errors.New("This formula 'rit testing other' dont's exists on this workspace = 'Default'"),
+		},
+		{
+			name: "error on flag input when newName flag exists in workspace",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit testing formula",
+					"--newNameFormula=rit testing formula",
+				},
+			},
+			want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
+		},
+		{
+			name: "error on flag input when old formula dont exists in workspace",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit other formula",
+					"--newNameFormula=rit testing formula new",
+				},
+			},
+			want: errors.New("This formula 'rit other formula' dont's exists on this workspace = 'Default'"),
+		},
+		{
+			name: "error on flag input when new formula exists in workspace",
+			in: in{
+				args: []string{
+					"--workspace=Default",
+					"--oldNameFormula=rit testing formula",
+					"--newNameFormula=rit testing formula",
+				},
+			},
+			want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -216,63 +223,83 @@ func TestRenameFormulaCmd(t *testing.T) {
 				_ = dirManager.Remove(path)
 				_ = dirManager.Create(path)
 			}
-			createSaved(repoPath)
-			createSaved(repoPathLocal)
+			createSaved(repoPathLocalDefault)
+			createSaved(repoPathWS)
 
 			zipFile := filepath.Join("..", "..", "testdata", "ritchie-formulas-test.zip")
 			zipRepositories := filepath.Join("..", "..", "testdata", "repositories.zip")
-			_ = streams.Unzip(zipFile, repoPath)
+			zipTree := filepath.Join("..", "..", "testdata", "tree.zip")
 			_ = streams.Unzip(zipRepositories, reposPath)
-			_ = streams.Unzip(zipFile, repoPathLocal)
+			_ = streams.Unzip(zipFile, repoPathLocalDefault)
+			_ = streams.Unzip(zipTree, repoPathLocalDefault)
+			_ = streams.Unzip(zipFile, repoPathWS)
+
+			createTree(ritHome, repoPathWS, treeGen, fileManager)
 
 			inputTextMock := new(mocks.InputTextMock)
-			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, nil)
 
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
-			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(
-				tt.in.inputTextVal, nil,
+			inputTextValidatorMock.On("Text", formulaOldCmdLabel, mock.Anything, mock.Anything).Return(
+				tt.in.inputOldFormula, nil,
+			)
+			inputTextValidatorMock.On("Text", formulaNewCmdLabel, mock.Anything, mock.Anything).Return(
+				tt.in.inputNewFormula, nil,
 			)
 
 			inPath := &mocks.InputPathMock{}
 			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
-			inputListMock := insertListMock(tt.in.workspaceSelected, tt.in.formulaSelected)
+
+			inputListMock := new(mocks.InputListMock)
+			inputListMock.On("List", "Select a formula workspace: ", mock.Anything, mock.Anything).Return(
+				tt.in.workspaceSelected, nil,
+			)
 
 			inputFormula := prompt.NewInputFormula(inputListMock, dirManager)
 
 			cmd := NewRenameFormulaCmd(formulaWorkspace, inputTextMock, inputListMock, inPath, inputTextValidatorMock,
-				dirManager, home, validator, inputFormula, renamer, deleter)
+				inputFormula, dirManager, home, validator, renamer)
 
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.in.args)
+
 			got := cmd.Execute()
 
 			assert.Equal(t, tt.want, got)
+
+			if tt.want == nil {
+				pathWSDir := filepath.Join(repoPathWS, tt.formulaPathExpected, "src")
+				pathLocalDir := filepath.Join(repoPathLocalDefault, tt.formulaPathExpected, "src")
+				treePath := filepath.Join(repoPathLocalDefault, "tree.json")
+
+				bTree, err := fileInfo(treePath)
+				assert.Nil(t, err)
+				tree, err := getTree([]byte(bTree))
+				assert.Nil(t, err)
+
+				assert.DirExists(t, pathWSDir)
+				assert.DirExists(t, pathLocalDir)
+
+				assert.Equal(t, tree.Commands["root_testing_new-formula"].Usage, "new-formula")
+				assert.Equal(t, tree.Commands["root_testing_new-formula"].Formula, true)
+				assert.Empty(t, tree.Commands["root_testing_formula"])
+			}
 		})
 	}
 
 }
 
-func insertListMock(workspace, formula string) *mocks.InputListMock {
-	if workspace == "" || formula == "" {
-		return new(mocks.InputListMock)
+func createTree(ritHome, ws string, tg formula.TreeGenerator, fm stream.FileWriteRemover) {
+	localTree, _ := tg.Generate(ws)
+
+	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
+	pathLocalTreeJSON := filepath.Join(ritHome, "repos", "local-default", "tree.json")
+	_ = fm.Write(pathLocalTreeJSON, jsonString)
+}
+
+func getTree(f []byte) (formula.Tree, error) {
+	tree := formula.Tree{}
+	if err := json.Unmarshal(f, &tree); err != nil {
+		return formula.Tree{}, err
 	}
-
-	firstGroupFormulas := []string{"testing"}
-	secondGroupFormulas := []string{"formula", "invalid-volumes-config", "withLatestVersionRequired",
-		"without-build-files", "without-build-sh", "without-dockerfile", "without-dockerimg"}
-
-	formulaSplited := strings.Split(formula, " ")
-
-	inputListMock := new(mocks.InputListMock)
-	inputListMock.On("List", "Select a formula workspace: ", mock.Anything, mock.Anything).Return(workspace, nil)
-	inputListMock.On("List", "Select a formula or group: ", firstGroupFormulas, mock.Anything).Return(
-		formulaSplited[1], nil,
-	)
-	inputListMock.On("List", "Select a formula or group: ", secondGroupFormulas, mock.Anything).Return(
-		formulaSplited[2], nil,
-	)
-	inputListMock.On("List", prompt.InputFormulaQuestionFoundedFormula, mock.Anything, mock.Anything).Return(
-		formula, nil,
-	)
-	return inputListMock
+	return tree, nil
 }

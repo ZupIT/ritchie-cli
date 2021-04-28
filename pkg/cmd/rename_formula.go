@@ -228,6 +228,8 @@ func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string)
 		path = filepath.Join(path, group)
 	}
 
+	path = filepath.Join(path, "src")
+
 	return r.directory.Exists(path)
 }
 
