@@ -78,7 +78,6 @@ type renameFormulaCmd struct {
 	inList          prompt.InputList
 	inPath          prompt.InputPath
 	inTextValidator prompt.InputTextValidator
-	inputFormula    prompt.InputFormula
 	directory       stream.DirListChecker
 	userHomeDir     string
 	validator       validator.ValidatorManager
@@ -92,13 +91,12 @@ func NewRenameFormulaCmd(
 	inList prompt.InputList,
 	inPath prompt.InputPath,
 	inTextValidator prompt.InputTextValidator,
-	inputFormula prompt.InputFormula,
 	directory stream.DirListChecker,
 	userHomeDir string,
 	validator validator.ValidatorManager,
 	renamer renamer.RenameManager,
 ) *cobra.Command {
-	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, inputFormula, directory, userHomeDir, validator,
+	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, directory, userHomeDir, validator,
 		renamer}
 
 	cmd := &cobra.Command{

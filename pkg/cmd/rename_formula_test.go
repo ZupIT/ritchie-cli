@@ -40,7 +40,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 )
@@ -254,10 +253,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 				tt.in.workspaceSelected, nil,
 			)
 
-			inputFormula := prompt.NewInputFormula(inputListMock, dirManager)
-
 			cmd := NewRenameFormulaCmd(formulaWorkspace, inputTextMock, inputListMock, inPath, inputTextValidatorMock,
-				inputFormula, dirManager, home, validator, renamer)
+				dirManager, home, validator, renamer)
 
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.in.args)
