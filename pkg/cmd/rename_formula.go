@@ -46,6 +46,8 @@ const (
 	formulaNewCmdLabel  = "Enter the new formula command:"
 	formulaNewCmdHelper = "You must create your command based in this example [rit group verb noun]"
 
+	questionConfirmation = "Are you sure you want to rename the formula from %s to %s?"
+
 	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
 )
@@ -82,6 +84,7 @@ type renameFormulaCmd struct {
 	userHomeDir     string
 	validator       validator.ValidatorManager
 	renamer         renamer.RenameManager
+	inBool          prompt.InputBool
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -95,9 +98,10 @@ func NewRenameFormulaCmd(
 	userHomeDir string,
 	validator validator.ValidatorManager,
 	renamer renamer.RenameManager,
+	inBool prompt.InputBool,
 ) *cobra.Command {
 	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, directory, userHomeDir, validator,
-		renamer}
+		renamer, inBool}
 
 	cmd := &cobra.Command{
 		Use:       "formula",
@@ -119,15 +123,22 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
+
+		question := fmt.Sprintf(questionConfirmation, result.OldFormulaCmd, result.NewFormulaCmd)
+		ans, err := r.inBool.Bool(question, []string{"no", "yes"})
+		if err != nil {
+			return err
+		}
+		if !ans {
+			return nil
+		}
+
 		result.FOldPath = formulaPath(result.Workspace.Dir, result.OldFormulaCmd)
 		result.FNewPath = formulaPath(result.Workspace.Dir, result.NewFormulaCmd)
-		fmt.Println(result)
 
 		if err := r.renamer.Rename(result); err != nil {
 			return err
 		}
-
-		fmt.Println(result)
 
 		return nil
 	}
@@ -221,19 +232,18 @@ func (r *renameFormulaCmd) resolvePrompt() (formula.Rename, error) {
 }
 
 func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string) bool {
-	fc := cleanFormula(formula)
-	for _, group := range fc {
+	formulaSplited := strings.Split(formula, " ")
+	if formulaSplited[0] == "rit" {
+		formulaSplited = formulaSplited[1:]
+	}
+
+	for _, group := range formulaSplited {
 		path = filepath.Join(path, group)
 	}
 
 	path = filepath.Join(path, "src")
 
 	return r.directory.Exists(path)
-}
-
-func cleanFormula(formula string) []string {
-	formulaSplited := strings.Split(formula, " ")
-	return formulaSplited[1:]
 }
 
 func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
