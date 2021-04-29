@@ -36,7 +36,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
 	fprompt "github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/renamer"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/docker"
@@ -192,7 +191,6 @@ func Build() *cobra.Command {
 
 	validator := validator.NewValidator()
 	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritchieHomeDir)
-	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace, ritchieHomeDir, treeGen, deleter)
 
 	// level 1
 	autocompleteCmd := cmd.NewAutocompleteCmd()
@@ -258,7 +256,8 @@ func Build() *cobra.Command {
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
 	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete,
-		inputTextValidator, dirManager, userHomeDir, validator, renamer, inputBool)
+		inputTextValidator, inputBool, dirManager, validator, createBuilder, treeGen, deleter, userHomeDir,
+		ritchieHomeDir, fileManager)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)

@@ -34,7 +34,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/renamer"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
@@ -83,7 +82,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 
 	validator := validator.NewValidator()
 	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritHome)
-	renamer := renamer.NewRenamer(dirManager, fileManager, createBuilder, formulaWorkspace, ritHome, treeGen, deleter)
 
 	fileInfo := func(path string) (string, error) {
 		fileManager := stream.NewFileManager()
@@ -246,7 +244,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 
 			cmd := NewRenameFormulaCmd(formulaWorkspace, inputTextMock, inputListMock, inPath, inputTextValidatorMock,
-				dirManager, home, validator, renamer, inputBoolMock)
+				inputBoolMock, dirManager, validator, createBuilder, treeGen, deleter, home, ritHome, fileManager)
 
 			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.in.args)

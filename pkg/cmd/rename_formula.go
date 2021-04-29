@@ -17,8 +17,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -26,7 +28,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/renamer"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	work "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -50,6 +53,7 @@ const (
 
 	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
+	ErrRepeatedCommand   = "this command already exists"
 )
 
 var renameWorkspaceFlags = flags{
@@ -80,11 +84,15 @@ type renameFormulaCmd struct {
 	inList          prompt.InputList
 	inPath          prompt.InputPath
 	inTextValidator prompt.InputTextValidator
-	directory       stream.DirListChecker
-	userHomeDir     string
-	validator       validator.ValidatorManager
-	renamer         renamer.RenameManager
 	inBool          prompt.InputBool
+	directory       stream.DirManager
+	validator       validator.ValidatorManager
+	formula         formula.CreateBuilder
+	treeGen         formula.TreeGenerator
+	deleter         deleter.DeleteManager
+	userHomeDir     string
+	ritHomeDir      string
+	file            stream.FileWriteRemover
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -94,14 +102,33 @@ func NewRenameFormulaCmd(
 	inList prompt.InputList,
 	inPath prompt.InputPath,
 	inTextValidator prompt.InputTextValidator,
-	directory stream.DirListChecker,
-	userHomeDir string,
-	validator validator.ValidatorManager,
-	renamer renamer.RenameManager,
 	inBool prompt.InputBool,
+	directory stream.DirManager,
+	validator validator.ValidatorManager,
+	formula formula.CreateBuilder,
+	treeGen formula.TreeGenerator,
+	deleter deleter.DeleteManager,
+	userHomeDir string,
+	ritHomeDir string,
+	file stream.FileWriteRemover,
+
 ) *cobra.Command {
-	r := renameFormulaCmd{workspace, inText, inList, inPath, inTextValidator, directory, userHomeDir, validator,
-		renamer, inBool}
+	r := renameFormulaCmd{
+		workspace:       workspace,
+		inText:          inText,
+		inList:          inList,
+		inPath:          inPath,
+		inTextValidator: inTextValidator,
+		inBool:          inBool,
+		directory:       directory,
+		validator:       validator,
+		formula:         formula,
+		treeGen:         treeGen,
+		deleter:         deleter,
+		userHomeDir:     userHomeDir,
+		ritHomeDir:      ritHomeDir,
+		file:            file,
+	}
 
 	cmd := &cobra.Command{
 		Use:       "formula",
@@ -133,10 +160,10 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 			return nil
 		}
 
-		result.FOldPath = formulaPath(result.Workspace.Dir, result.OldFormulaCmd)
-		result.FNewPath = formulaPath(result.Workspace.Dir, result.NewFormulaCmd)
+		result.FOldPath = fPath(result.Workspace.Dir, result.OldFormulaCmd)
+		result.FNewPath = fPath(result.Workspace.Dir, result.NewFormulaCmd)
 
-		if err := r.renamer.Rename(result); err != nil {
+		if err := r.Rename(result); err != nil {
 			return err
 		}
 
@@ -248,4 +275,113 @@ func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string)
 
 func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 	return r.validator.FormulaCommmandValidator(cmd.(string))
+}
+
+func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
+	fr.NewFormulaCmd = cleanSuffix(fr.NewFormulaCmd)
+	fr.OldFormulaCmd = cleanSuffix(fr.OldFormulaCmd)
+
+	if err := r.renameFormula(fr); err != nil {
+		return err
+	}
+
+	repoNameStandard := repoutil.LocalName(fr.Workspace.Name)
+	repoNameStandardPath := filepath.Join(r.ritHomeDir, "repos", repoNameStandard.String())
+	if err := r.recreateTreeJSON(repoNameStandardPath); err != nil {
+		return err
+	}
+
+	info := formula.BuildInfo{FormulaPath: fr.FNewPath, Workspace: fr.Workspace}
+	if err := r.formula.Build(info); err != nil {
+		return err
+	}
+
+	hashNew, err := r.workspace.CurrentHash(fr.FNewPath)
+	if err != nil {
+		return err
+	}
+
+	if err := r.workspace.UpdateHash(fr.FNewPath, hashNew); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *renameFormulaCmd) renameFormula(fr formula.Rename) error {
+	fOldPath := fPath(fr.Workspace.Dir, fr.OldFormulaCmd)
+	fNewPath := fPath(fr.Workspace.Dir, fr.NewFormulaCmd)
+
+	if err := r.isAvailableCmd(fNewPath); err != nil {
+		return err
+	}
+
+	tmp := filepath.Join(os.TempDir(), "rit_oldFormula")
+	if err := r.directory.Create(tmp); err != nil {
+		return err
+	}
+
+	if err := r.directory.Copy(fOldPath, tmp); err != nil {
+		return err
+	}
+
+	groupsOld := strings.Split(fr.OldFormulaCmd, " ")[1:]
+	delOld := formula.Delete{
+		GroupsFormula: groupsOld,
+		Workspace:     fr.Workspace,
+	}
+	if err := r.deleter.Delete(delOld); err != nil {
+		return err
+	}
+
+	if err := r.directory.Create(fNewPath); err != nil {
+		return err
+	}
+
+	if err := r.directory.Copy(tmp, fNewPath); err != nil {
+		return err
+	}
+
+	if err := os.RemoveAll(tmp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *renameFormulaCmd) isAvailableCmd(fPath string) error {
+	fPath = filepath.Join(fPath, "src")
+	if r.directory.Exists(fPath) {
+		return errors.New(ErrRepeatedCommand)
+	}
+
+	return nil
+}
+
+func (r *renameFormulaCmd) recreateTreeJSON(pathLocalWS string) error {
+	localTree, err := r.treeGen.Generate(pathLocalWS)
+	if err != nil {
+		return err
+	}
+
+	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
+	pathLocalTreeJSON := filepath.Join(pathLocalWS, "tree.json")
+	if err = r.file.Write(pathLocalTreeJSON, jsonString); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func fPath(workspacePath, cmd string) string {
+	cc := strings.Split(cmd, " ")
+	path := strings.Join(cc[1:], string(os.PathSeparator))
+	return filepath.Join(workspacePath, path)
+}
+
+func cleanSuffix(cmd string) string {
+	if strings.HasSuffix(cmd, "rit") {
+		return cmd[4:]
+	}
+	return cmd
 }
