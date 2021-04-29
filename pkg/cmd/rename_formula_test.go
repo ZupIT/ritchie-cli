@@ -117,8 +117,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "new-formula"),
-				formulaToBeCreated:  "rit_testing_new-formula",
-				formulaToBeEmpty:    "rit_testing_formula",
+				formulaToBeCreated:  "root_testing_new-formula",
+				formulaToBeEmpty:    "root_testing_formula",
 			},
 		},
 		{
@@ -165,8 +165,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "new-formula"),
-				formulaToBeCreated:  "rit_testing_new-formula",
-				formulaToBeEmpty:    "rit_testing_formula",
+				formulaToBeCreated:  "root_testing_new-formula",
+				formulaToBeEmpty:    "root_testing_formula",
 			},
 		},
 		{
@@ -269,8 +269,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "formula", "new"),
-				formulaToBeCreated:  "rit_testing_new-formula",
-				formulaToBeEmpty:    "rit_testing_formula",
+				formulaToBeCreated:  "root_testing_new_formula",
+				formulaToBeEmpty:    "root_testing_formula",
 			},
 		},
 		{
@@ -282,8 +282,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "leaf"),
-				formulaToBeCreated:  "rit_testing_leaf",
-				formulaToBeEmpty:    "rit_testing_withOneMoreLevel_level",
+				formulaToBeCreated:  "root_testing_leaf",
+				formulaToBeEmpty:    "root_testing_withOneMoreLevel_level",
 			},
 		},
 	}
@@ -352,7 +352,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				assert.DirExists(t, pathWSDir)
 				assert.DirExists(t, pathLocalDir)
 
-				assert.Equal(t, tree.Commands[api.CommandID(tt.out.formulaToBeCreated)].Formula, true)
+				assert.True(t, tree.Commands[api.CommandID(tt.out.formulaToBeCreated)].Formula)
 				assert.Empty(t, tree.Commands[api.CommandID(tt.out.formulaToBeEmpty)])
 			} else {
 				assert.Equal(t, tt.out.want.Error(), got.Error())

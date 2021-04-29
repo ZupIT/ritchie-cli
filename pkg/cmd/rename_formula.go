@@ -281,7 +281,7 @@ func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
 	fr.NewFormulaCmd = cleanSuffix(fr.NewFormulaCmd)
 	fr.OldFormulaCmd = cleanSuffix(fr.OldFormulaCmd)
 
-	if err := r.renameFormula(fr); err != nil {
+	if err := r.changeFormulaToNewDir(fr); err != nil {
 		return err
 	}
 
@@ -308,7 +308,7 @@ func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
 	return nil
 }
 
-func (r *renameFormulaCmd) renameFormula(fr formula.Rename) error {
+func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
 	fOldPath := fPath(fr.Workspace.Dir, fr.OldFormulaCmd)
 	fNewPath := fPath(fr.Workspace.Dir, fr.NewFormulaCmd)
 
