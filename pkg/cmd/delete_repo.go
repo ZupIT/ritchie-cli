@@ -63,7 +63,7 @@ func NewDeleteRepoCmd(
 		Use:       "repo",
 		Short:     "Delete a repository",
 		Example:   "rit delete repo",
-		RunE:      RunFuncE(dr.runStdin(), dr.runFormula()),
+		RunE:      RunFuncE(dr.runStdin(), dr.runCmd()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -73,7 +73,7 @@ func NewDeleteRepoCmd(
 	return cmd
 }
 
-func (dr deleteRepoCmd) runFormula() CommandRunnerFunc {
+func (dr deleteRepoCmd) runCmd() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		name, err := dr.resolveInput(cmd)
 		if err != nil {
