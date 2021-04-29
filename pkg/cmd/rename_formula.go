@@ -31,18 +31,17 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
-	work "github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
 const (
 	wsFlagName         = "workspace"
-	wsFlagDesc         = "name of workspace to rename"
+	wsFlagDesc         = "Name of workspace to rename"
 	oldFormulaFlagName = "oldNameFormula"
-	oldFormulaFlagDesc = "old name of formula to rename"
+	oldFormulaFlagDesc = "Old name of formula to rename"
 	newFormulaFlagName = "newNameFormula"
-	newFormulaFlagDesc = "new name of formula to rename"
+	newFormulaFlagDesc = "New name of formula to rename"
 
 	formulaOldCmdLabel  = "Enter the formula command to rename:"
 	formulaOldCmdHelper = "Enter the existing formula in the informed workspace to rename it"
@@ -53,7 +52,8 @@ const (
 
 	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
-	ErrRepeatedCommand   = "this command already exists"
+	ErrRepeatedCommand   = "This command '%s' already exists"
+	ErrNonExistWorkspace = "The formula workspace '%s' does not exist, please enter a valid workspace"
 )
 
 var renameWorkspaceFlags = flags{
@@ -194,7 +194,7 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, err
 	wspaces[formula.DefaultWorkspaceName] = filepath.Join(r.userHomeDir, formula.DefaultWorkspaceDir)
 	dir, exists := wspaces[wsName]
 	if !exists {
-		return result, work.ErrInvalidWorkspace
+		return result, fmt.Errorf(ErrNonExistWorkspace, wsName)
 	}
 	result.Workspace.Dir = dir
 	result.Workspace.Name = wsName
@@ -312,10 +312,6 @@ func (r *renameFormulaCmd) renameFormula(fr formula.Rename) error {
 	fOldPath := fPath(fr.Workspace.Dir, fr.OldFormulaCmd)
 	fNewPath := fPath(fr.Workspace.Dir, fr.NewFormulaCmd)
 
-	if err := r.isAvailableCmd(fNewPath); err != nil {
-		return err
-	}
-
 	tmp := filepath.Join(os.TempDir(), "rit_oldFormula")
 	if err := r.directory.Create(tmp); err != nil {
 		return err
@@ -344,15 +340,6 @@ func (r *renameFormulaCmd) renameFormula(fr formula.Rename) error {
 
 	if err := os.RemoveAll(tmp); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (r *renameFormulaCmd) isAvailableCmd(fPath string) error {
-	fPath = filepath.Join(fPath, "src")
-	if r.directory.Exists(fPath) {
-		return errors.New(ErrRepeatedCommand)
 	}
 
 	return nil
