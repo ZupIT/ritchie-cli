@@ -167,7 +167,7 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 			return err
 		}
 
-		prompt.Success(fmt.Sprintf(renameSuccessMsg))
+		prompt.Success(renameSuccessMsg)
 
 		return nil
 	}
