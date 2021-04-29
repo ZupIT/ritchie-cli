@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/kubectl/pkg/util/templates"
 
+	"github.com/ZupIT/ritchie-cli/internal/pkg/config"
 	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/autocomplete"
 	"github.com/ZupIT/ritchie-cli/pkg/cmd"
@@ -72,6 +73,7 @@ func SendMetric(commandExecutionTime float64, err ...string) {
 func Build() *cobra.Command {
 	userHomeDir := api.UserHomeDir()
 	ritchieHomeDir := api.RitchieHomeDir()
+	ritConfigManager := config.NewManager(ritchieHomeDir)
 
 	// prompt
 	inputText := prompt.NewSurveyText()
@@ -191,7 +193,7 @@ func Build() *cobra.Command {
 	addCmd := cmd.NewAddCmd()
 	createCmd := cmd.NewCreateCmd()
 	deleteCmd := cmd.NewDeleteCmd()
-	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, configManager, fileManager, inputList, inputBool, MetricSender)
+	initCmd := cmd.NewInitCmd(repoAdder, githubRepo, tutorialFinder, configManager, fileManager, inputList, inputBool, MetricSender, ritConfigManager)
 	listCmd := cmd.NewListCmd()
 	setCmd := cmd.NewSetCmd()
 	showCmd := cmd.NewShowCmd()
@@ -201,7 +203,7 @@ func Build() *cobra.Command {
 		versionManager,
 		upgradeManager,
 		defaultUrlFinder,
-		inputList,
+		inputBool,
 		fileManager,
 		githubRepo,
 	)
