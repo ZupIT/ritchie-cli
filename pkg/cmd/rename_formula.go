@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -48,7 +49,7 @@ const (
 	formulaNewCmdLabel  = "Enter the new formula command:"
 	formulaNewCmdHelper = "You must create your command based in this example [rit group verb noun]"
 
-	questionConfirmation = "Are you sure you want to rename the formula from %s to %s?"
+	questionConfirmation = "Are you sure you want to rename the formula from '%s' to '%s'?"
 
 	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
@@ -94,7 +95,6 @@ type renameFormulaCmd struct {
 	deleter         deleter.DeleteManager
 	userHomeDir     string
 	ritHomeDir      string
-	file            stream.FileWriteRemover
 }
 
 // New renameFormulaCmd rename a cmd instance.
@@ -112,7 +112,6 @@ func NewRenameFormulaCmd(
 	deleter deleter.DeleteManager,
 	userHomeDir string,
 	ritHomeDir string,
-	file stream.FileWriteRemover,
 
 ) *cobra.Command {
 	r := renameFormulaCmd{
@@ -129,7 +128,6 @@ func NewRenameFormulaCmd(
 		deleter:         deleter,
 		userHomeDir:     userHomeDir,
 		ritHomeDir:      ritHomeDir,
-		file:            file,
 	}
 
 	cmd := &cobra.Command{
@@ -356,7 +354,7 @@ func (r *renameFormulaCmd) recreateTreeJSON(pathLocalWS string) error {
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
 	pathLocalTreeJSON := filepath.Join(pathLocalWS, "tree.json")
-	if err = r.file.Write(pathLocalTreeJSON, jsonString); err != nil {
+	if err := ioutil.WriteFile(pathLocalTreeJSON, jsonString, os.ModePerm); err != nil {
 		return err
 	}
 

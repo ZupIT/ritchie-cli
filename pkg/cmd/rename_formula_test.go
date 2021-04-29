@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -270,7 +271,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "formula", "new"),
 				formulaToBeCreated:  "root_testing_formula_new",
-				formulaToBeEmpty:    "root_testing_formula",
 			},
 		},
 		{
@@ -331,7 +331,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 
 			cmd := NewRenameFormulaCmd(formulaWorkspace, inputTextMock, inputListMock, inPath, inputTextValidatorMock,
-				inputBoolMock, dirManager, validator, createBuilder, treeGen, deleter, home, ritHome, fileManager)
+				inputBoolMock, dirManager, validator, createBuilder, treeGen, deleter, home, ritHome)
 
 			cmd.SetArgs(tt.in.args)
 
@@ -367,7 +367,7 @@ func createTree(ritHome, ws string, tg formula.TreeGenerator, fm stream.FileWrit
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
 	pathLocalTreeJSON := filepath.Join(ritHome, "repos", "local-default", "tree.json")
-	_ = fm.Write(pathLocalTreeJSON, jsonString)
+	_ = ioutil.WriteFile(pathLocalTreeJSON, jsonString, os.ModePerm)
 }
 
 func getTree(f []byte) (formula.Tree, error) {
