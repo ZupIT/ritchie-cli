@@ -54,6 +54,8 @@ const (
 	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
 	ErrRepeatedCommand   = "This command '%s' already exists"
 	ErrNonExistWorkspace = "The formula workspace '%s' does not exist, please enter a valid workspace"
+
+	renameSuccessMsg = "The formula was renamed with success"
 )
 
 var renameWorkspaceFlags = flags{
@@ -166,6 +168,8 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 		if err := r.Rename(result); err != nil {
 			return err
 		}
+
+		prompt.Success(fmt.Sprintf(renameSuccessMsg))
 
 		return nil
 	}
@@ -285,12 +289,6 @@ func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
 		return err
 	}
 
-	repoNameStandard := repoutil.LocalName(fr.Workspace.Name)
-	repoNameStandardPath := filepath.Join(r.ritHomeDir, "repos", repoNameStandard.String())
-	if err := r.recreateTreeJSON(repoNameStandardPath); err != nil {
-		return err
-	}
-
 	info := formula.BuildInfo{FormulaPath: fr.FNewPath, Workspace: fr.Workspace}
 	if err := r.formula.Build(info); err != nil {
 		return err
@@ -305,6 +303,11 @@ func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
 		return err
 	}
 
+	repoNameStandard := repoutil.LocalName(fr.Workspace.Name)
+	repoNameStandardPath := filepath.Join(r.ritHomeDir, "repos", repoNameStandard.String())
+	if err := r.recreateTreeJSON(repoNameStandardPath); err != nil {
+		return err
+	}
 	return nil
 }
 

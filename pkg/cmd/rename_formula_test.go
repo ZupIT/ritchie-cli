@@ -269,7 +269,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "formula", "new"),
-				formulaToBeCreated:  "root_testing_new_formula",
+				formulaToBeCreated:  "root_testing_formula_new",
 				formulaToBeEmpty:    "root_testing_formula",
 			},
 		},
