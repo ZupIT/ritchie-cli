@@ -105,10 +105,8 @@ func (lr *listFormulaCmd) runCmd() CommandRunnerFunc {
 		}
 
 		noFormula := false
-		formulaCount, err := lr.printFormulas(repos)
-		if err != nil {
-			return err
-		} else if formulaCount > 1 {
+		formulaCount := lr.printFormulas(repos)
+		if formulaCount > 1 {
 			prompt.Info(fmt.Sprintf(totalFormulasMsg, formulaCount))
 		} else if formulaCount == 0 {
 			noFormula = true
@@ -183,7 +181,7 @@ func (lr *listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error
 	}
 }
 
-func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, err error) {
+func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int) {
 	allFormulas := make([]formulaDefinition, 0)
 	failedRepos := make([]string, 0)
 	emptyRepos := make([]string, 0)
@@ -219,7 +217,7 @@ func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, e
 		prompt.Warning(fmt.Sprintf(emptyRepoMsg, r))
 	}
 
-	return len(allFormulas), nil
+	return len(allFormulas)
 }
 
 func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDefinition, error) {
