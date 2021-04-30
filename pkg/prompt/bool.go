@@ -21,7 +21,16 @@ import (
 )
 
 var (
-	boolOpts = map[string]bool{"yes": true, "no": false, "true": true, "false": false}
+	boolOpts = map[string]bool{
+		"yes":   true,
+		"no":    false,
+		"true":  true,
+		"false": false,
+		"Yes":   true,
+		"False": false,
+		"✅ Yes": true,
+		"❌ No":  false,
+	}
 )
 
 type SurveyBool struct{}

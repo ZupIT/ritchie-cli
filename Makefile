@@ -174,3 +174,8 @@ ifeq "$(GONNA_RELEASE)" "RELEASE"
 else
 	echo "NOT GONNA RELEASE"
 endif
+
+generate-translation:
+	go get github.com/go-bindata/go-bindata/v3/...
+	~/go/bin/go-bindata -pkg i18n -o ./internal/pkg/i18n/translations.go ./resources/i18n/...
+	go mod tidy

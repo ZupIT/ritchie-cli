@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -206,8 +207,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 }
 
 func TestCreateFormula(t *testing.T) {
-	ritchieHomeDir := filepath.Join(os.TempDir(), ".rit_create_formula")
-	workDir := filepath.Join(os.TempDir(), ".ritchie-formulas-local")
+	tmpDir := os.TempDir()
+	ritchieHomeDir := filepath.Join(tmpDir, ".rit_create_formula")
+	workDir := filepath.Join(tmpDir, ".ritchie-formulas-local")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
@@ -340,7 +342,8 @@ func TestCreateFormula(t *testing.T) {
 				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
 				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
 
-				// assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+				fileName := strings.ReplaceAll(cf.FormulaPath, string(os.PathSeparator), "-") + ".txt"
+				assert.FileExists(t, filepath.Join(hashesDir, fileName))
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}

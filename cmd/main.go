@@ -21,6 +21,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/ZupIT/ritchie-cli/internal/pkg/i18n"
 	"github.com/ZupIT/ritchie-cli/pkg/commands"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
