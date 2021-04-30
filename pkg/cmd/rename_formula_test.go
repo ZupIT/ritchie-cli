@@ -277,12 +277,12 @@ func TestRenameFormulaCmd(t *testing.T) {
 			name: "success when new formula is added a lower level of the tree",
 			in: in{
 				inputOldFormula:   "rit testing withOneMoreLevel level",
-				inputNewFormula:   "rit testing leaft",
+				inputNewFormula:   "rit testing level",
 				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
 			out: out{
-				formulaPathExpected: filepath.Join("testing", "leaf"),
-				formulaToBeCreated:  "root_testing_leaf",
+				formulaPathExpected: filepath.Join("testing", "level"),
+				formulaToBeCreated:  "root_testing_level",
 				formulaToBeEmpty:    "root_testing_withOneMoreLevel_level",
 			},
 		},
