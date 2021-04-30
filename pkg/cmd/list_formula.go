@@ -184,21 +184,12 @@ func (lr *listFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error
 }
 
 func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, err error) {
-	table := uitable.New()
-	table.AddRow("COMMAND", "DESCRIPTION")
 	allFormulas := make([]formulaDefinition, 0)
 	failedRepos := make([]string, 0)
 	emptyRepos := make([]string, 0)
 	for _, r := range repos {
 		repoFormulas, err := lr.formulasByRepo(r.Name)
 		if err != nil {
-			if len(repos) == 1 {
-				if err != errEmptyTree {
-					return 0, err
-				}
-				prompt.Warning(fmt.Sprintf(emptyRepoMsg, r.Name.String()))
-			}
-
 			if err != errEmptyTree {
 				failedRepos = append(failedRepos, r.Name.String())
 				continue
@@ -208,17 +199,17 @@ func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, e
 		allFormulas = append(allFormulas, repoFormulas...)
 	}
 
-	if len(allFormulas) == 0 {
-		return 0, nil
+	if len(allFormulas) != 0 {
+		table := uitable.New()
+		table.AddRow("COMMAND", "DESCRIPTION")
+		sort.Sort(ByCmd(allFormulas))
+		for _, fm := range allFormulas {
+			table.AddRow(fm.Cmd, fm.Desc)
+		}
+		raw := table.Bytes()
+		raw = append(raw, []byte("\n")...)
+		fmt.Println(string(raw))
 	}
-
-	sort.Sort(ByCmd(allFormulas))
-	for _, fm := range allFormulas {
-		table.AddRow(fm.Cmd, fm.Desc)
-	}
-	raw := table.Bytes()
-	raw = append(raw, []byte("\n")...)
-	fmt.Println(string(raw))
 
 	for _, r := range failedRepos {
 		prompt.Warning(fmt.Sprintf(failedRepoMsg, r))
@@ -228,7 +219,7 @@ func (lr listFormulaCmd) printFormulas(repos formula.Repos) (formulaCount int, e
 		prompt.Warning(fmt.Sprintf(emptyRepoMsg, r))
 	}
 
-	return len(table.Rows) - 1, nil
+	return len(allFormulas), nil
 }
 
 func (lr listFormulaCmd) formulasByRepo(repoName formula.RepoName) ([]formulaDefinition, error) {

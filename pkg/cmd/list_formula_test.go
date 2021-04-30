@@ -72,6 +72,7 @@ rit http generate http-config	Creates http-load template`
 		inputListErr    error
 		warning         bool
 		warningMsg      string
+		noTable         bool
 	}
 
 	tests := []struct {
@@ -136,10 +137,12 @@ rit http generate http-config	Creates http-load template`
 		{
 			name: "error to list formulas from repo with wrong name",
 			in: in{
-				args:     []string{"--name=wrongName"},
-				repoList: repos,
+				args:       []string{"--name=wrongName"},
+				repoList:   repos,
+				warning:    true,
+				warningMsg: warningRepoFailMsg,
+				noTable:    true,
 			},
-			want: errors.New("no repository with this name"),
 		},
 		{
 			name: "error tree with no commands",
@@ -207,7 +210,7 @@ rit http generate http-config	Creates http-load template`
 			assert.NoError(t, err)
 			capturedOut := string(out)
 			os.Stdout = rescueStdout
-			if tt.want == nil && tt.in.warningMsg != warningEmptyRepoMsg {
+			if tt.want == nil && tt.in.warningMsg != warningEmptyRepoMsg && !tt.in.noTable {
 				assert.Contains(t, capturedOut, expectedOut)
 			} else {
 				assert.NotContains(t, capturedOut, expectedOut)
