@@ -17,11 +17,13 @@
 package local
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 
@@ -79,7 +81,6 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := ru.setEnvs(cmd, setup.Pwd, verbose); err != nil {
@@ -95,9 +96,36 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 		return err
 	}
 
+	out, _ := cmd.StdoutPipe()
+	done := make(chan struct{})
+	scanner := bufio.NewScanner(out)
+
+	output := []string{}
+	if out != nil {
+		go func() {
+			if scanner != nil {
+				for scanner.Scan() {
+					line := scanner.Text()
+
+					if strings.Contains(line,
+						"::output") {
+						output = append(output, line)
+					} else {
+						fmt.Println(line)
+					}
+				}
+			}
+
+			done <- struct{}{}
+		}()
+	} else {
+		close(done)
+	}
+
 	if err := cmd.Run(); err != nil {
 		return err
 	}
+	<-done
 
 	metric.RepoName = def.RepoName
 

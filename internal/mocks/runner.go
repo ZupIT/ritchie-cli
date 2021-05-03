@@ -16,7 +16,10 @@
 
 package mocks
 
-import "github.com/stretchr/testify/mock"
+import (
+	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/stretchr/testify/mock"
+)
 
 type PreRunBuilder struct {
 	mock.Mock
@@ -24,5 +27,14 @@ type PreRunBuilder struct {
 
 func (prb *PreRunBuilder) Build(relativePath string) error {
 	args := prb.Called(relativePath)
+	return args.Error(0)
+}
+
+type PostRunner struct {
+	mock.Mock
+}
+
+func (po *PostRunner) PostRun(p formula.Setup, docker bool) error {
+	args := po.Called(p, docker)
 	return args.Error(0)
 }
