@@ -86,6 +86,25 @@ func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
 	}
 }
 
+func RunFuncEF(stdinFunc, flagFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
+		if err != nil {
+			return err
+		}
+		flag := isInputFlag(cmd)
+		if flag {
+			fmt.Println("Running with flags")
+			return flagFunc(cmd, args)
+		}
+		if stdin {
+			prompt.Warning(stdinWarning)
+			return stdinFunc(cmd, args)
+		}
+		return promptFunc(cmd, args)
+	}
+}
+
 func IsFlagInput(cmd *cobra.Command) bool {
 	return cmd.Flags().NFlag() > 0
 }

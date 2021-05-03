@@ -17,8 +17,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/spf13/cobra"
 
@@ -30,7 +32,26 @@ import (
 const (
 	questionSelectARepo = "Select a repository to update: "
 	updateOptionAll     = "ALL"
+	repoName            = "name"
+	repoVersion         = "version"
 )
+
+// var ErrEmptyRepos = errors.New("there are no repos to delete")
+
+var updateRepoFlags = flags{
+	{
+		name:        repoName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "repository name",
+	},
+	{
+		name:        repoVersion,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "repository version",
+	},
+}
 
 type updateRepoCmd struct {
 	client        *http.Client
@@ -71,11 +92,12 @@ func NewUpdateRepoCmd(
 		Use:       "repo",
 		Short:     "Update a repository.",
 		Example:   "rit update repo",
-		RunE:      RunFuncE(updateRepo.runStdin(), updateRepo.runPrompt()),
+		RunE:      RunFuncEF(updateRepo.runStdin(), updateRepo.runFlags(), updateRepo.runPrompt()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.LocalFlags()
+	addReservedFlags(cmd.Flags(), updateRepoFlags)
 
 	return cmd
 }
@@ -120,17 +142,15 @@ func (up updateRepoCmd) runPrompt() CommandRunnerFunc {
 
 		for _, currRepo := range repoToUpdate {
 
-			git := up.repoProviders.Resolve(currRepo.Provider)
+			repoInfo, err := up.getRepoInfo(currRepo)
 
-			repoInfo := git.NewRepoInfo(currRepo.Url, currRepo.Token)
-			tags, err := git.Repos.Tags(repoInfo)
 			if err != nil {
 				return err
 			}
 
 			currRepoVersion := fmt.Sprintf("Select your new version for %q:", currRepo.Name.String())
 
-			version, err := up.List(currRepoVersion, tags.Names())
+			version, err := up.List(currRepoVersion, repoInfo)
 			if err != nil {
 				return err
 			}
@@ -166,4 +186,64 @@ func (up updateRepoCmd) runStdin() CommandRunnerFunc {
 
 		return nil
 	}
+}
+
+func (up *updateRepoCmd) runFlags() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		repository, err := up.resolveFlags(cmd)
+		if err != nil {
+			return err
+		}
+		if err := up.repo.Update(repository.Name, repository.Version); err != nil {
+			return nil
+		}
+		successMsg := fmt.Sprintf("The %q repository was updated with success to version %q", repository.Name, repository.Version)
+		prompt.Success(successMsg)
+		return nil
+	}
+}
+
+func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repo, error) {
+	name, err := cmd.Flags().GetString(repoName)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+	version, err := cmd.Flags().GetString(repoVersion)
+	if err != nil {
+		return formula.Repo{}, err
+	}
+
+	if name == "" {
+		return formula.Repo{}, errors.New("please provide a value for 'name'")
+	} else if version == "" {
+		return formula.Repo{}, errors.New("please provide a value for 'version'")
+	} else {
+		repositoryList, err := up.repo.List()
+		if err != nil {
+			return formula.Repo{}, err
+		}
+
+		for index := range repositoryList {
+			if repositoryList[index].Name.String() == name {
+				tagsx, err := up.getRepoInfo(repositoryList[index])
+				for idx := range tagsx {
+					if tagsx[idx] == version {
+						return formula.Repo{Name: formula.RepoName(name), Version: formula.RepoVersion(version)}, err
+					}
+				}
+			}
+		}
+	}
+	return formula.Repo{}, err
+}
+
+func (up *updateRepoCmd) getRepoInfo(repoToUpdate formula.Repo) ([]string, error) {
+	gitResp := up.repoProviders.Resolve(repoToUpdate.Provider)
+	repoInfo := gitResp.NewRepoInfo(repoToUpdate.Url, repoToUpdate.Token)
+	tags, err := gitResp.Repos.Tags(repoInfo)
+	if err != nil {
+		return nil, err
+	}
+	stringTags := tags.Names()
+	return stringTags, err
 }
