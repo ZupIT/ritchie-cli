@@ -17,6 +17,8 @@
 package repo
 
 import (
+	"errors"
+	"os"
 	"path/filepath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -53,6 +55,10 @@ func (dm DeleteManager) Delete(repoName formula.RepoName) error {
 
 func (dm DeleteManager) deleteRepoDir(repoName formula.RepoName) error {
 	repoPath := filepath.Join(dm.ritHome, reposDirName, repoName.String())
+	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+		return errors.New("no repository with this name")
+	}
+
 	if err := dm.dir.Remove(repoPath); err != nil {
 		return err
 	}
