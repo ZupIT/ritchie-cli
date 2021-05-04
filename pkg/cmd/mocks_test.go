@@ -44,18 +44,6 @@ func (inputTextMock) TextWithValidate(name string, validate func(interface{}) er
 	return "mocked text", nil
 }
 
-type inputTextValidatorMock struct{}
-
-func (inputTextValidatorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return "mocked text", nil
-}
-
-type inputTextValidatorErrorMock struct{}
-
-func (inputTextValidatorErrorMock) Text(name string, validate func(interface{}) error, helper ...string) (string, error) {
-	return "mocked text", errors.New("error on input text")
-}
-
 type inputTextErrorMock struct{}
 
 func (inputTextErrorMock) Text(name string, required bool, helper ...string) (string, error) {
@@ -89,12 +77,6 @@ type inputURLMock struct{}
 
 func (inputURLMock) URL(name, defaultValue string) (string, error) {
 	return "http://localhost/mocked", nil
-}
-
-type inputURLErrorMock struct{}
-
-func (inputURLErrorMock) URL(name, defaultValue string) (string, error) {
-	return "http://localhost/mocked", errors.New("error on input url")
 }
 
 type inputIntMock struct{}
@@ -165,29 +147,6 @@ func (inputListErrorMock) List(name string, items []string, helper ...string) (s
 	return "item-mocked", errors.New("some error")
 }
 
-type repoListerAdderCustomMock struct {
-	list func() (formula.Repos, error)
-	add  func(d formula.Repo) error
-}
-
-func (a repoListerAdderCustomMock) List() (formula.Repos, error) {
-	return a.list()
-}
-
-func (a repoListerAdderCustomMock) Add(d formula.Repo) error {
-	return a.add(d)
-}
-
-type formCreator struct{}
-
-func (formCreator) Create(cf formula.Create) error {
-	return nil
-}
-
-func (formCreator) Build(info formula.BuildInfo) error {
-	return nil
-}
-
 type workspaceForm struct{}
 
 func (workspaceForm) Add(workspace formula.Workspace) error {
@@ -223,19 +182,6 @@ func (e envFinderCustomMock) Find() (env.Holder, error) {
 type envFinderMock struct{}
 
 func (envFinderMock) Find() (env.Holder, error) {
-	return env.Holder{}, nil
-}
-
-type envFindRemoverMock struct {
-	holder env.Holder
-	err    error
-}
-
-func (e envFindRemoverMock) Find() (env.Holder, error) {
-	return e.holder, e.err
-}
-
-func (envFindRemoverMock) Remove(_ string) (env.Holder, error) {
 	return env.Holder{}, nil
 }
 
@@ -437,12 +383,6 @@ func (TutorialFinderMock) Find() (rtutorial.TutorialHolder, error) {
 	return rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial}, nil
 }
 
-type TutorialFinderErrorMock struct{}
-
-func (TutorialFinderErrorMock) Find() (rtutorial.TutorialHolder, error) {
-	return rtutorial.TutorialHolder{}, errors.New("tutorial finder error")
-}
-
 type TutorialFindSetterMock struct{}
 
 func (TutorialFindSetterMock) Find() (rtutorial.TutorialHolder, error) {
@@ -497,14 +437,6 @@ func (d DirManagerCustomMock) Create(dir string) error {
 	return d.create(dir)
 }
 
-type LocalBuilderMock struct {
-	build func(workspacePath, formulaPath string) error
-}
-
-func (l LocalBuilderMock) Build(info formula.BuildInfo) error {
-	return l.build(info.Workspace.Dir, info.FormulaPath)
-}
-
 type WorkspaceAddListerCustomMock struct {
 	add  func(workspace formula.Workspace) error
 	list func() (formula.Workspaces, error)
@@ -518,44 +450,7 @@ func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
 	return w.list()
 }
 
-type WorkspaceAddListHasherCustomMock struct {
-	add          func(workspace formula.Workspace) error
-	list         func() (formula.Workspaces, error)
-	currentHash  func(path string) (string, error)
-	previousHash func(path string) (string, error)
-	updateHash   func(path, hash string) error
-}
-
-func (w WorkspaceAddListHasherCustomMock) Add(workspace formula.Workspace) error {
-	return w.add(workspace)
-}
-
-func (w WorkspaceAddListHasherCustomMock) List() (formula.Workspaces, error) {
-	return w.list()
-}
-
-func (w WorkspaceAddListHasherCustomMock) CurrentHash(path string) (string, error) {
-	return w.currentHash(path)
-}
-
-func (w WorkspaceAddListHasherCustomMock) PreviousHash(path string) (string, error) {
-	return w.previousHash(path)
-}
-
-func (w WorkspaceAddListHasherCustomMock) UpdateHash(path string, hash string) error {
-	return w.updateHash(path, hash)
-}
-
 var (
-	defaultRepoAdderMock = repoListerAdderCustomMock{
-		add: func(d formula.Repo) error {
-			return nil
-		},
-		list: func() (formula.Repos, error) {
-			return formula.Repos{}, nil
-		},
-	}
-
 	defaultGitRepositoryMock = GitRepositoryMock{
 		latestTag: func(info git.RepoInfo) (git.Tag, error) {
 			return git.Tag{}, nil

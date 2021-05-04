@@ -22,6 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/internal/pkg/i18n"
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
@@ -35,7 +36,7 @@ type UpgradeCmd struct {
 	upgrade.Manager
 	resolver version.Resolver
 	upgrade.UrlFinder
-	input  prompt.InputList
+	input  prompt.InputBool
 	file   stream.FileWriteReadExister
 	github git.Repositories
 }
@@ -44,7 +45,7 @@ func NewUpgradeCmd(
 	r version.Resolver,
 	m upgrade.Manager,
 	uf upgrade.UrlFinder,
-	input prompt.InputList,
+	input prompt.InputBool,
 	file stream.FileWriteReadExister,
 	github git.Repositories,
 ) *cobra.Command {
@@ -70,15 +71,17 @@ func NewUpgradeCmd(
 func (u UpgradeCmd) runFunc() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		if !u.file.Exists(metric.FilePath) {
+			header := i18n.T("init.metric.header")
+			prompt.Info(header)
+			fmt.Println(i18n.T("init.add.metric.info"))
 
-			options := []string{AcceptMetrics, DoNotAcceptMetrics}
-			choose, err := u.input.List(AddMetricsQuestion, options)
+			choose, err := u.input.Bool(AgreeSendMetrics, AcceptDeclineOpts)
 			if err != nil {
 				return err
 			}
 
 			responseToWrite := "yes"
-			if choose == DoNotAcceptMetrics {
+			if !choose {
 				responseToWrite = "no"
 			}
 

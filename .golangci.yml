@@ -40,7 +40,6 @@ linters:
     - dupl
     - exhaustive
     - exportloopref
-    - gochecknoinits
     - gocyclo
     - gofmt
     - goheader
