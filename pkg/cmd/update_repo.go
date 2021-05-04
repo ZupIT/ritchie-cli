@@ -36,7 +36,6 @@ const (
 	repoVersion         = "version"
 )
 
-// var ErrEmptyRepos = errors.New("there are no repos to delete")
 
 var updateRepoFlags = flags{
 	{
