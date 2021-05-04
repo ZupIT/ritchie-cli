@@ -30,9 +30,9 @@ import (
 )
 
 const (
-	deleteSuccessMsg    = "Repository %q was deleted with success"
-	repoFlagDescription = "Repository name to delete"
-	nameFlag            = "name"
+	deleteSuccessMsg          = "Repository %q was deleted with success"
+	deleteRepoFlagDescription = "Repository name to delete"
+	nameFlag                  = "name"
 )
 
 var deleteRepoFlags = flags{
@@ -40,7 +40,7 @@ var deleteRepoFlags = flags{
 		name:        nameFlag,
 		kind:        reflect.String,
 		defValue:    "",
-		description: repoFlagDescription,
+		description: deleteRepoFlagDescription,
 	},
 }
 
