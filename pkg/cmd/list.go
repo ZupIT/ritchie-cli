@@ -21,17 +21,17 @@ import "github.com/spf13/cobra"
 const descListLong = `
 This command consists of multiple subcommands to interact with ritchie.
 
-It can be used to list repositories, credentials, or workspaces.
+It can be used to list repositories, credentials, workspaces, or formulas.
 `
 
 // NewListCmd create a new list instance.
 func NewListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:       "list SUBCOMMAND",
-		Short:     "List repositories, credentials, or workspaces",
+		Short:     "List repositories, credentials, workspaces, formulas",
 		Long:      descListLong,
-		Example:   "rit list repo, rit list credential, rit list workspace",
-		ValidArgs: []string{"credential", "repo"},
+		Example:   "rit list repo, rit list credential, rit list workspace, rit list formula",
+		ValidArgs: []string{"credential", "repo", "workspace", "formula"},
 		Args:      cobra.OnlyValidArgs,
 	}
 }
