@@ -49,6 +49,7 @@ var (
 		"root_list":                  {Parent: "root", Usage: "list"},
 		"root_list_repo":             {Parent: "root_list", Usage: "repo"},
 		"root_list_credential":       {Parent: "root_list", Usage: "credential"},
+		"root_list_formula":          {Parent: "root_list", Usage: "formula"},
 		"root_list_workspace":        {Parent: "root_list", Usage: "workspace"},
 		"root_set":                   {Parent: "root", Usage: "set"},
 		"root_set_env":               {Parent: "root_set", Usage: "env"},
