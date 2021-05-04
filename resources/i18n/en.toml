@@ -2,7 +2,7 @@
 other = "Initialize rit configuration"
 
 [init.welcome]
-other = "Ritchie is a platform that helps you and your team to save time by\ngiving you the power to create powerful templates to execute important\ntasks across your team and organization with minimum time and with standards,\ndelivering autonomy to developers with security.\n\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.\n\n"
+other = "Ritchie CLI is an open source product that allows you to create,\nstore and share any kind of automations, executing them through command lines,\nto run operations or start workflows.\n\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.\n\n"
 
 [init.successful]
 other = "\n✅ Initialization successful!\n"
@@ -32,7 +32,7 @@ other = "Commons repository added successfully!\n"
 other = "\nRun \"rit add repo\" to add a new repository manually.\n"
 
 [init.add.commons.repo.info]
-other = "\nYou can keep the configuration without adding the community repository,\nbut you will need to provide a git repo with the formulas templates and add them with\n\"rit add repo\" command, naming this repository obligatorily as \"commons\".\n\nSee how to do this on the example:\n[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]\n"
+other = "\nYou can keep the configuration without adding the community repository,\nbut you will need to provide a git repo with the formulas templates and add them with\n\"rit add repo\" command, naming this repository obligatorily as \"commons\", if you want to create new formulas.\n\nSee how to do this on the example:\n[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]\n"
 
 [init.add.commons.repo.question]
 other = "Would you like to add the community repository?"
@@ -56,7 +56,7 @@ other = "How to create new formulas:"
 other = "\n∙ Run \"rit create formula\"\n∙ Open the project with your favorite text editor.\n"
 
 [init.tutorial.commons]
-other = "Take a look at the formulas you can run and test to see what you can with Ritchie using \"rit\"\n"
+other = "Take a look at the formulas you can run and test with Ritchie using \"rit\"\n"
 
 [init.metric.header]
 other = "📊 Metrics 📊\n"
@@ -65,7 +65,7 @@ other = "📊 Metrics 📊\n"
 other = "Metrics\n"
 
 [init.add.metric.info]
-other = "To help us improve and deliver more value to the community,\nwe will collect anonymous data about product and feature\nuse statistics and crash reports."
+other = "To help us improve and deliver more value to the community,\nwe will collect anonymous data about the product use\n and crash reports."
 
 [init.add.metric.question]
 other = "Do you agree?"
@@ -81,13 +81,13 @@ other = "🏃 FORMULA RUN TYPE 🏃\n"
 other = "FORMULA RUN TYPE\n"
 
 [init.run.type.local.warning]
-other = "\nIn order to run formulas locally, you must have the formula language installed on your machine,\nif you don't want to install choose to run the formulas inside the docker.\n"
+other = "\nIn order to run formulas locally, you must have the formula programming language installed on your machine,\nif you don't want to install it, choose to run the formulas using Docker.\n"
 
 [init.run.type.question]
 other = "Select a default formula run type:"
 
 [init.invalid.run.type.error]
-other = "invalid formula run type, these run types are enabled [%v]"
+other = "invalid formula run type. Run types available: [%v]"
 
 [input.accept.opt]
 other = "✅ Yes"
