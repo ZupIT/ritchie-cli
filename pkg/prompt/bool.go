@@ -22,12 +22,14 @@ import (
 
 var (
 	boolOpts = map[string]bool{
-		"yes":   true,
-		"no":    false,
-		"true":  true,
-		"false": false,
-		"Yes":   true,
-		"False": false,
+		"yes":    true,
+		"no":     false,
+		"true":   true,
+		"false":  false,
+		"Yes":    true,
+		"No":     false,
+		"True":   true,
+		"False":  false,		
 		"✅ Yes": true,
 		"❌ No":  false,
 	}
