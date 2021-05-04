@@ -159,6 +159,9 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 			return nil
 		}
 
+		result.NewFormulaCmd = cleanPreffix(result.NewFormulaCmd)
+		result.OldFormulaCmd = cleanPreffix(result.OldFormulaCmd)
+
 		result.FOldPath = fPath(result.Workspace.Dir, result.OldFormulaCmd)
 		result.FNewPath = fPath(result.Workspace.Dir, result.NewFormulaCmd)
 
@@ -279,9 +282,6 @@ func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 }
 
 func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
-	fr.NewFormulaCmd = cleanSuffix(fr.NewFormulaCmd)
-	fr.OldFormulaCmd = cleanSuffix(fr.OldFormulaCmd)
-
 	if err := r.changeFormulaToNewDir(fr); err != nil {
 		return err
 	}
@@ -309,19 +309,17 @@ func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
 }
 
 func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
-	fOldPath := fPath(fr.Workspace.Dir, fr.OldFormulaCmd)
-	fNewPath := fPath(fr.Workspace.Dir, fr.NewFormulaCmd)
-
 	tmp := filepath.Join(os.TempDir(), "rit_oldFormula")
 	if err := r.directory.Create(tmp); err != nil {
 		return err
 	}
+	defer os.RemoveAll(tmp)
 
-	if err := r.directory.Copy(fOldPath, tmp); err != nil {
+	if err := r.directory.Copy(fr.FOldPath, tmp); err != nil {
 		return err
 	}
 
-	groupsOld := strings.Split(fr.OldFormulaCmd, " ")[1:]
+	groupsOld := strings.Split(fr.FOldPath, " ")[1:]
 	delOld := formula.Delete{
 		GroupsFormula: groupsOld,
 		Workspace:     fr.Workspace,
@@ -330,15 +328,11 @@ func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
 		return err
 	}
 
-	if err := r.directory.Create(fNewPath); err != nil {
+	if err := r.directory.Create(fr.FNewPath); err != nil {
 		return err
 	}
 
-	if err := r.directory.Copy(tmp, fNewPath); err != nil {
-		return err
-	}
-
-	if err := os.RemoveAll(tmp); err != nil {
+	if err := r.directory.Copy(tmp, fr.FNewPath); err != nil {
 		return err
 	}
 
@@ -362,12 +356,12 @@ func (r *renameFormulaCmd) recreateTreeJSON(pathLocalWS string) error {
 
 func fPath(workspacePath, cmd string) string {
 	cc := strings.Split(cmd, " ")
-	path := strings.Join(cc[1:], string(os.PathSeparator))
+	path := strings.Join(cc, string(os.PathSeparator))
 	return filepath.Join(workspacePath, path)
 }
 
-func cleanSuffix(cmd string) string {
-	if strings.HasSuffix(cmd, "rit") {
+func cleanPreffix(cmd string) string {
+	if strings.HasPrefix(cmd, "rit") {
 		return cmd[4:]
 	}
 	return cmd
