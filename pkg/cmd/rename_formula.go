@@ -39,9 +39,9 @@ import (
 const (
 	wsFlagName         = "workspace"
 	wsFlagDesc         = "Name of workspace to rename"
-	oldFormulaFlagName = "oldNameFormula"
+	oldFormulaFlagName = "oldName"
 	oldFormulaFlagDesc = "Old name of formula to rename"
-	newFormulaFlagName = "newNameFormula"
+	newFormulaFlagName = "newName"
 	newFormulaFlagDesc = "New name of formula to rename"
 
 	formulaOldCmdLabel  = "Enter the formula command to rename:"
@@ -51,10 +51,9 @@ const (
 
 	questionConfirmation = "Are you sure you want to rename the formula from '%s' to '%s'?"
 
-	ErrFormulaDontExists = "This formula '%s' dont's exists on this workspace = '%s'"
-	ErrFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
-	ErrRepeatedCommand   = "This command '%s' already exists"
-	ErrNonExistWorkspace = "The formula workspace '%s' does not exist, please enter a valid workspace"
+	errNonExistFormula   = "This formula '%s' does not exist on this workspace = '%s'"
+	errFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
+	errNonExistWorkspace = "The formula workspace '%s' does not exist, please enter a valid workspace"
 
 	renameSuccessMsg = "The formula was renamed with success"
 )
@@ -63,7 +62,7 @@ var renameWorkspaceFlags = flags{
 	{
 		name:        wsFlagName,
 		kind:        reflect.String,
-		defValue:    "",
+		defValue:    formula.DefaultWorkspaceName,
 		description: wsFlagDesc,
 	},
 	{
@@ -191,12 +190,12 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, err
 	if err != nil {
 		return result, err
 	} else if wsName == "" {
-		return result, errors.New(missingFlagText(wsFlagName))
+		wsName = formula.DefaultWorkspaceName
 	}
 	wspaces[formula.DefaultWorkspaceName] = filepath.Join(r.userHomeDir, formula.DefaultWorkspaceDir)
 	dir, exists := wspaces[wsName]
 	if !exists {
-		return result, fmt.Errorf(ErrNonExistWorkspace, wsName)
+		return result, fmt.Errorf(errNonExistWorkspace, wsName)
 	}
 	result.Workspace.Dir = dir
 	result.Workspace.Name = wsName
@@ -208,7 +207,7 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, err
 		return result, errors.New(missingFlagText(oldFormulaFlagName))
 	}
 	if !r.formulaExistsInWorkspace(result.Workspace.Dir, oldFormula) {
-		return result, fmt.Errorf(ErrFormulaDontExists, oldFormula, result.Workspace.Name)
+		return result, fmt.Errorf(errNonExistFormula, oldFormula, result.Workspace.Name)
 	}
 	result.OldFormulaCmd = oldFormula
 
@@ -219,7 +218,7 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, err
 		return result, errors.New(missingFlagText(newFormulaFlagName))
 	}
 	if r.formulaExistsInWorkspace(result.Workspace.Dir, newFormula) {
-		return result, fmt.Errorf(ErrFormulaExists, newFormula, result.Workspace.Name)
+		return result, fmt.Errorf(errFormulaExists, newFormula, result.Workspace.Name)
 	}
 	result.NewFormulaCmd = newFormula
 
@@ -244,7 +243,7 @@ func (r *renameFormulaCmd) resolvePrompt() (formula.Rename, error) {
 		return result, err
 	}
 	if !r.formulaExistsInWorkspace(result.Workspace.Dir, oldFormula) {
-		return result, fmt.Errorf(ErrFormulaDontExists, oldFormula, result.Workspace.Name)
+		return result, fmt.Errorf(errNonExistFormula, oldFormula, result.Workspace.Name)
 	}
 	result.OldFormulaCmd = oldFormula
 
@@ -253,7 +252,7 @@ func (r *renameFormulaCmd) resolvePrompt() (formula.Rename, error) {
 		return result, err
 	}
 	if r.formulaExistsInWorkspace(result.Workspace.Dir, newFormula) {
-		return result, fmt.Errorf(ErrFormulaExists, newFormula, result.Workspace.Name)
+		return result, fmt.Errorf(errFormulaExists, newFormula, result.Workspace.Name)
 	}
 	result.NewFormulaCmd = newFormula
 

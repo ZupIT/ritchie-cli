@@ -141,7 +141,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing other' dont's exists on this workspace = 'Default'"),
+				want: errors.New("This formula 'rit testing other' does not exist on this workspace = 'Default'"),
 			},
 		},
 		{
@@ -160,8 +160,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			in: in{
 				args: []string{
 					"--workspace=Default",
-					"--oldNameFormula=rit testing formula",
-					"--newNameFormula=rit testing new-formula",
+					"--oldName=rit testing formula",
+					"--newName=rit testing new-formula",
 				},
 			},
 			out: out{
@@ -171,16 +171,18 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 		},
 		{
-			name: "error on flag input when workspace flag is nil",
+			name: "success on flag input when workspace flag is nil",
 			in: in{
 				args: []string{
 					"--workspace=",
-					"--oldNameFormula=rit testing formula",
-					"--newNameFormula=rit testing formula new",
+					"--oldName=rit testing formula",
+					"--newName=rit testing other",
 				},
 			},
 			out: out{
-				want: errors.New("please provide a value for 'workspace'"),
+				formulaPathExpected: filepath.Join("testing", "other"),
+				formulaToBeCreated:  "root_testing_other",
+				formulaToBeEmpty:    "root_testing_formula",
 			},
 		},
 		{
@@ -188,25 +190,25 @@ func TestRenameFormulaCmd(t *testing.T) {
 			in: in{
 				args: []string{
 					"--workspace=Default",
-					"--oldNameFormula=",
-					"--newNameFormula=rit testing formula new",
+					"--oldName=",
+					"--newName=rit testing formula new",
 				},
 			},
 			out: out{
-				want: errors.New("please provide a value for 'oldNameFormula'"),
+				want: errors.New("please provide a value for 'oldName'"),
 			},
 		},
 		{
-			name: "error on flag input when newNameFormula flag is nil",
+			name: "error on flag input when newName flag is nil",
 			in: in{
 				args: []string{
 					"--workspace=Default",
-					"--oldNameFormula=rit testing formula",
-					"--newNameFormula=",
+					"--oldName=rit testing formula",
+					"--newName=",
 				},
 			},
 			out: out{
-				want: errors.New("please provide a value for 'newNameFormula'"),
+				want: errors.New("please provide a value for 'newName'"),
 			},
 		},
 		{
@@ -214,8 +216,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			in: in{
 				args: []string{
 					"--workspace=other",
-					"--oldNameFormula=rit testing formula",
-					"--newNameFormula=rit testing formula new",
+					"--oldName=rit testing formula",
+					"--newName=rit testing formula new",
 				},
 			},
 			out: out{
@@ -227,12 +229,12 @@ func TestRenameFormulaCmd(t *testing.T) {
 			in: in{
 				args: []string{
 					"--workspace=Default",
-					"--oldNameFormula=rit testing other",
-					"--newNameFormula=rit testing formula new",
+					"--oldName=rit testing other",
+					"--newName=rit testing formula new",
 				},
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing other' dont's exists on this workspace = 'Default'"),
+				want: errors.New("This formula 'rit testing other' does not exist on this workspace = 'Default'"),
 			},
 		},
 		{
@@ -240,8 +242,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 			in: in{
 				args: []string{
 					"--workspace=Default",
-					"--oldNameFormula=rit testing formula",
-					"--newNameFormula=rit testing formula",
+					"--oldName=rit testing formula",
+					"--newName=rit testing formula",
 				},
 			},
 			out: out{
@@ -253,12 +255,12 @@ func TestRenameFormulaCmd(t *testing.T) {
 			in: in{
 				args: []string{
 					"--workspace=Default",
-					"--oldNameFormula=rit other formula",
-					"--newNameFormula=rit testing formula new",
+					"--oldName=rit other formula",
+					"--newName=rit testing formula new",
 				},
 			},
 			out: out{
-				want: errors.New("This formula 'rit other formula' dont's exists on this workspace = 'Default'"),
+				want: errors.New("This formula 'rit other formula' does not exist on this workspace = 'Default'"),
 			},
 		},
 		{
