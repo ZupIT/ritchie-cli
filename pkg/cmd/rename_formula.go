@@ -313,6 +313,7 @@ func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
 	if err := r.directory.Create(tmp); err != nil {
 		return err
 	}
+	//nolint:errcheck
 	defer os.RemoveAll(tmp)
 
 	if err := r.directory.Copy(fr.FOldPath, tmp); err != nil {
