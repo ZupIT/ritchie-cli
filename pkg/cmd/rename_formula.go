@@ -319,7 +319,7 @@ func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
 		return err
 	}
 
-	groupsOld := strings.Split(fr.FOldPath, " ")[1:]
+	groupsOld := strings.Split(fr.OldFormulaCmd, " ")
 	delOld := formula.Delete{
 		GroupsFormula: groupsOld,
 		Workspace:     fr.Workspace,

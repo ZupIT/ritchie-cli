@@ -97,6 +97,30 @@ func TestDeleterCmd(t *testing.T) {
 				formulaToBeEmpty: "root_testing_formula",
 			},
 		},
+		{
+			name: "success with two formulas nested",
+			in: formula.Delete{
+				GroupsFormula: []string{"testing", "withTwoFormulasNested", "formulaA"},
+				Workspace:     wsDefault,
+			},
+			out: out{
+				want:             nil,
+				wantPathDeleted:  filepath.Join("testing", "withTwoFormulasNested", "formulaA"),
+				formulaToBeEmpty: "root_testing, withTwoFormulasNested_formulaA",
+			},
+		},
+		{
+			name: "success with more levels in formula",
+			in: formula.Delete{
+				GroupsFormula: []string{"testing", "withOneMoreLevel", "level"},
+				Workspace:     wsDefault,
+			},
+			out: out{
+				want:             nil,
+				wantPathDeleted:  filepath.Join("testing", "withOneMoreLevel", "level"),
+				formulaToBeEmpty: "root_testing, withOneMoreLevel_level",
+			},
+		},
 	}
 
 	for _, tt := range tests {
