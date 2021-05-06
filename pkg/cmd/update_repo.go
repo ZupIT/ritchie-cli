@@ -36,7 +36,6 @@ const (
 	repoVersion         = "version"
 )
 
-
 var updateRepoFlags = flags{
 	{
 		name:        repoName,
@@ -47,7 +46,7 @@ var updateRepoFlags = flags{
 	{
 		name:        repoVersion,
 		kind:        reflect.String,
-		defValue:    "",
+		defValue:    "latest",
 		description: "repository version",
 	},
 }
@@ -100,11 +99,21 @@ func NewUpdateRepoCmd(
 
 	return cmd
 }
+
 func (up updateRepoCmd) runCmd() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		_, err := up.resolveInput(cmd)
+		reposToUp, err := up.resolveInput(cmd)
 		if err != nil {
 			return err
+		}
+
+		for _, value := range reposToUp {
+			err := up.repo.Update(value.Name, value.Version)
+			if err != nil {
+				return err
+			}
+			successMsg := fmt.Sprintf("The %q repository was updated with success to version %q\n", value.Name, value.Version)
+			prompt.Success(successMsg)
 		}
 		return nil
 	}
@@ -129,17 +138,17 @@ func (up updateRepoCmd) runStdin() CommandRunnerFunc {
 	}
 }
 
-func (up updateRepoCmd) resolveInput(cmd *cobra.Command) (updateRepoCmd, error) {
+func (up updateRepoCmd) resolveInput(cmd *cobra.Command) (formula.Repos, error) {
 	if IsFlagInput(cmd) {
 		return up.resolveFlags(cmd)
 	}
 	return up.resolvePrompt()
 }
 
-func (up updateRepoCmd) resolvePrompt() (updateRepoCmd, error) {
+func (up updateRepoCmd) resolvePrompt() (formula.Repos, error) {
 	repos, err := up.repo.List()
 	if err != nil {
-		return updateRepoCmd{}, err
+		return formula.Repos{}, err
 	}
 
 	var reposName []string
@@ -155,7 +164,7 @@ func (up updateRepoCmd) resolvePrompt() (updateRepoCmd, error) {
 	helper := "Select a repository to update your version. P.S. Local repositories cannot be updated."
 	name, err := up.List(questionSelectARepo, reposName, helper)
 	if err != nil {
-		return updateRepoCmd{}, err
+		return formula.Repos{}, err
 	}
 
 	flagAll := name == updateOptionAll
@@ -174,86 +183,82 @@ func (up updateRepoCmd) resolvePrompt() (updateRepoCmd, error) {
 	}
 
 	for _, currRepo := range repoToUpdate {
-
 		repoInfo, err := up.getRepoInfo(currRepo)
-
 		if err != nil {
-			return updateRepoCmd{}, err
+			return formula.Repos{}, err
 		}
 
 		currRepoVersion := fmt.Sprintf("Select your new version for %q:", currRepo.Name.String())
 
-		version, err := up.List(currRepoVersion, repoInfo)
+		_, err = up.List(currRepoVersion, repoInfo)
 		if err != nil {
-			return updateRepoCmd{}, err
+			return formula.Repos{}, err
 		}
-
-		currRepoName := string(currRepo.Name)
-
-		if err := up.repo.Update(formula.RepoName(currRepoName), formula.RepoVersion(version)); err != nil {
-			return updateRepoCmd{}, err
-		}
-
-		successMsg := fmt.Sprintf("The %q repository was updated with success to version %q\n", currRepo.Name, version)
-		prompt.Success(successMsg)
 	}
-
-
-	// 	repositoryList, err := up.repo.List()
-	// 	if err != nil {
-	// 		return formula.Repo{}, err
-	// 	}
-	//
-	// 	for index := range repositoryList {
-	// 		if repositoryList[index].Name.String() == name {
-	// 			tagsx, err := up.getRepoInfo(repositoryList[index])
-	// 			for idx := range tagsx {
-	// 				if tagsx[idx] == version {
-	// 					return formula.Repo{Name: formula.RepoName(name), Version: formula.RepoVersion(version)}, err
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-	return updateRepoCmd{}, nil
-
+	return repoToUpdate, nil
 }
 
-func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (updateRepoCmd, error) {
+func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error) {
 	name, err := cmd.Flags().GetString(repoName)
 	if err != nil {
-		return updateRepoCmd{}, err
-	}
-	version, err := cmd.Flags().GetString(repoVersion)
-	if err != nil {
-		return updateRepoCmd{}, err
+		return formula.Repos{}, err
 	}
 
 	if name == "" {
-		return updateRepoCmd{}, errors.New("please provide a value for 'name'")
-	} else if version == "" {
-		return updateRepoCmd{}, errors.New("please provide a value for 'version'")
+		return formula.Repos{}, errors.New("please provide a value for 'name'")
 	}
+
+	version, err := cmd.Flags().GetString(repoVersion)
+	if err != nil {
+		return formula.Repos{}, err
+	}
+	if version == "" {
+		return formula.Repos{}, errors.New("please provide a value for 'version'")
+	}
+
 	repoTarget := formula.Repo{Name: formula.RepoName(name), Version: formula.RepoVersion(version)}
+	var repoToUpdate []formula.Repo
 
-	updateStart := up.repo.Update(repoTarget.Name, repoTarget.Version)
-	if updateStart != nil {
-		return updateRepoCmd{}, updateStart
+	repos, err := up.repo.List()
+	if err != nil {
+		return formula.Repos{}, err
 	}
-	successMsg := fmt.Sprintf("The %q repository was updated with success to version %q",repoTarget.Name, repoTarget.Version)
-	prompt.Success(successMsg)
-	return updateRepoCmd{}, err
 
+	for _, currRepo := range repos {
+		if repoTarget.Name == currRepo.Name {
+			info, _ := up.getRepoInfo(currRepo)
+			if version == "latest" {
+				repoTarget.Version = currRepo.LatestVersion
+				repoToUpdate = append(repoToUpdate, repoTarget)
+				return repoToUpdate, err
+			} else if findVersion(info, repoTarget.Version) {
+				repoToUpdate = append(repoToUpdate, repoTarget)
+				return repoToUpdate, err
+			} else {
+				errorMsg := fmt.Sprintf("The version %q of repository %q was not found.\n", repoTarget.Version, repoTarget.Name)
+				return repoToUpdate, errors.New(errorMsg)
+			}
+		}
+	}
+	return repoToUpdate, err
 }
 
 func (up *updateRepoCmd) getRepoInfo(repoToUpdate formula.Repo) ([]string, error) {
 	gitResp := up.repoProviders.Resolve(repoToUpdate.Provider)
 	repoInfo := gitResp.NewRepoInfo(repoToUpdate.Url, repoToUpdate.Token)
 	tags, err := gitResp.Repos.Tags(repoInfo)
-	fmt.Printf("%v", repoInfo)
 	if err != nil {
 		return nil, err
 	}
 	stringTags := tags.Names()
 	return stringTags, err
+}
+
+func findVersion(source []string, value formula.RepoVersion) bool {
+	for _, item := range source {
+		if item == string(value) {
+			return true
+		}
+	}
+	return false
 }
