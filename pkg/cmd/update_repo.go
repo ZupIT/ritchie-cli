@@ -102,12 +102,12 @@ func NewUpdateRepoCmd(
 
 func (up updateRepoCmd) runCmd() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		reposToUp, err := up.resolveInput(cmd)
+		reposToUpdate, err := up.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
 
-		for _, value := range reposToUp {
+		for _, value := range reposToUpdate {
 			err := up.repo.Update(value.Name, value.Version)
 			if err != nil {
 				return err
