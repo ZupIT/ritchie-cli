@@ -48,10 +48,10 @@ const (
 	formulaNewCmdLabel  = "Enter the new formula command:"
 	formulaNewCmdHelper = "You must create your command based in this example [rit group verb noun]"
 
-	questionConfirmation = "Are you sure you want to rename the formula from '%s' to '%s'?"
+	questionConfirmation = "Are you sure you want to rename the formula from %q to %q?"
 
-	errNonExistFormula = "This formula '%s' wasn't found in the workspaces"
-	errFormulaExists   = "This formula '%s' already exists on this workspace = '%s'"
+	errNonExistFormula = "This formula %q wasn't found in the workspaces"
+	errFormulaExists   = "This formula %q already exists on this workspace = %q"
 
 	renameSuccessMsg = "The formula was renamed with success"
 )
@@ -270,7 +270,7 @@ func (r *renameFormulaCmd) cleanWorkspace(
 			items = append(items, kv)
 		}
 
-		question := fmt.Sprintf("We found the old formula '%s' in %s workspaces. Select the workspace:",
+		question := fmt.Sprintf("We found the old formula %q in %q workspaces. Select the workspace:",
 			result.OldFormulaCmd, strconv.Itoa(len(workspacesOld)),
 		)
 		selected, err := r.inList.List(question, items)
@@ -297,7 +297,7 @@ func (r *renameFormulaCmd) cleanWorkspace(
 }
 
 func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
-	if err := r.changeFormulaToNewDir(fr); err != nil {
+	if err := r.moveFormulaToNewDir(fr); err != nil {
 		return err
 	}
 
@@ -323,7 +323,7 @@ func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
 	return nil
 }
 
-func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
+func (r *renameFormulaCmd) moveFormulaToNewDir(fr formula.Rename) error {
 	tmp := filepath.Join(os.TempDir(), "rit_oldFormula")
 	if err := r.directory.Create(tmp); err != nil {
 		return err

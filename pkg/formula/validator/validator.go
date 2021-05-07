@@ -32,23 +32,19 @@ var (
 	MsgErrFormulaCanBeCoreCommand  = "core command verb %q after rit\n" + "Use your formula group before the verb\n" + "Example: rit aws list bucket\n"
 )
 
-type ValidatorManager struct {
-	formulaCMD string
+type Manager struct{}
+
+func New() Manager {
+	return Manager{}
 }
 
-func NewValidator() ValidatorManager {
-	return ValidatorManager{}
-}
-
-func (v *ValidatorManager) FormulaCommmandValidator(formula string) error {
-	v.formulaCMD = formula
-
-	if len(strings.TrimSpace(v.formulaCMD)) < 1 {
+func (v *Manager) FormulaCommmandValidator(formula string) error {
+	if len(strings.TrimSpace(formula)) < 1 {
 		return ErrFormulaCmdNotBeEmpty
 	}
 
-	s := strings.Split(v.formulaCMD, " ")
-	if s[0] != "rit" {
+	s := strings.Split(formula, " ")
+	if s[0] != api.RitchieHomeName {
 		return ErrFormulaCmdMustStartWithRit
 	}
 
@@ -56,26 +52,26 @@ func (v *ValidatorManager) FormulaCommmandValidator(formula string) error {
 		return ErrInvalidFormulaCmdSize
 	}
 
-	if err := v.characterValidator(); err != nil {
+	if err := v.characterValidator(formula); err != nil {
 		return err
 	}
 
-	if err := v.coreCmdValidator(); err != nil {
+	if err := v.coreCmdValidator(formula); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (v *ValidatorManager) characterValidator() error {
-	if strings.ContainsAny(v.formulaCMD, `\/><,@`) {
+func (v *Manager) characterValidator(formula string) error {
+	if strings.ContainsAny(formula, `\/><,@`) {
 		return ErrInvalidCharactersFormulaCmd
 	}
 	return nil
 }
 
-func (v *ValidatorManager) coreCmdValidator() error {
-	wordAfterCore := strings.Split(v.formulaCMD, " ")[1]
+func (v *Manager) coreCmdValidator(formula string) error {
+	wordAfterCore := strings.Split(formula, " ")[1]
 	for i := range api.CoreCmds {
 		if wordAfterCore == api.CoreCmds[i].Usage {
 			return fmt.Errorf(MsgErrFormulaCanBeCoreCommand, api.CoreCmds[i].Usage)
