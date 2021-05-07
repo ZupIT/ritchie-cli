@@ -257,9 +257,8 @@ func Build() *cobra.Command {
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
 	showFormulaRunnerCmd := cmd.NewShowFormulaRunnerCmd(configManager)
 	setFormulaRunnerCmd := cmd.NewSetFormulaRunnerCmd(configManager, inputList)
-	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputText, inputList, inputAutocomplete,
-		inputTextValidator, inputBool, dirManager, validator, createBuilder, treeGen, deleter, userHomeDir,
-		ritchieHomeDir)
+	renameFormulaCmd := cmd.NewRenameFormulaCmd(formulaWorkspace, inputList, inputTextValidator, inputBool, dirManager,
+		validator, createBuilder, treeGen, deleter, userHomeDir, ritchieHomeDir)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)

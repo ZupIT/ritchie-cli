@@ -63,7 +63,9 @@ func TestRenameFormulaCmd(t *testing.T) {
 	repoDetail := repo.NewDetail(repoProviders)
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritHome, repoListWriter, dirManager)
-	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(
+		repoLister, repoCreator, repoWriter, repoDetail, repoDeleter,
+	)
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 	repoAdder := repo.NewAdder(ritHome, repoListWriteCreator, treeGen)
@@ -74,6 +76,8 @@ func TestRenameFormulaCmd(t *testing.T) {
 	reposPath := filepath.Join(ritHome, "repos")
 	repoPathLocalDefault := filepath.Join(reposPath, "local-default")
 	repoPathWS := filepath.Join(home, "ritchie-formulas-local")
+	repoPathWSCustom := filepath.Join(home, "custom")
+	repoPathLocalCustom := filepath.Join(reposPath, "local-custom")
 
 	repoListDetailWriter := repo.NewListDetailWrite(repoLister, repoDetail, repoWriter)
 	treeManager := tree.NewTreeManager(ritHome, repoListDetailWriter, api.CoreCmds)
@@ -91,10 +95,11 @@ func TestRenameFormulaCmd(t *testing.T) {
 	}
 
 	type in struct {
-		inputOldFormula   string
-		inputNewFormula   string
-		workspaceSelected string
-		args              []string
+		inputOldFormula         string
+		inputNewFormula         string
+		workspaceSelected       string
+		customWorkspaceSelected bool
+		args                    []string
 	}
 
 	type out struct {
@@ -141,7 +146,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing other' does not exist on this workspace = 'Default'"),
+				want: errors.New("This formula 'rit testing other' wasn't found in the workspaces"),
 			},
 		},
 		{
@@ -159,7 +164,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 			name: "success on flag input",
 			in: in{
 				args: []string{
-					"--workspace=Default",
 					"--oldName=rit testing formula",
 					"--newName=rit testing new-formula",
 				},
@@ -174,7 +178,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 			name: "success on flag input when workspace flag is nil",
 			in: in{
 				args: []string{
-					"--workspace=",
 					"--oldName=rit testing formula",
 					"--newName=rit testing other",
 				},
@@ -189,7 +192,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 			name: "error on flag input when oldName flag is nil",
 			in: in{
 				args: []string{
-					"--workspace=Default",
 					"--oldName=",
 					"--newName=rit testing formula new",
 				},
@@ -202,7 +204,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 			name: "error on flag input when newNameFormula flag is nil",
 			in: in{
 				args: []string{
-					"--workspace=Default",
 					"--oldName=rit testing formula",
 					"--newName=",
 				},
@@ -212,36 +213,21 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 		},
 		{
-			name: "error on flag input when workspace flag dont exists",
-			in: in{
-				args: []string{
-					"--workspace=other",
-					"--oldName=rit testing formula",
-					"--newName=rit testing formula new",
-				},
-			},
-			out: out{
-				want: errors.New("The formula workspace 'other' does not exist, please enter a valid workspace"),
-			},
-		},
-		{
 			name: "error on flag input when oldName flag dont exists in workspace",
 			in: in{
 				args: []string{
-					"--workspace=Default",
 					"--oldName=rit testing other",
 					"--newName=rit testing formula new",
 				},
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing other' does not exist on this workspace = 'Default'"),
+				want: errors.New("This formula 'rit testing other' wasn't found in the workspaces"),
 			},
 		},
 		{
 			name: "error on flag input when newName flag exists in workspace",
 			in: in{
 				args: []string{
-					"--workspace=Default",
 					"--oldName=rit testing formula",
 					"--newName=rit testing formula",
 				},
@@ -251,24 +237,10 @@ func TestRenameFormulaCmd(t *testing.T) {
 			},
 		},
 		{
-			name: "error on flag input when old formula dont exists in workspace",
-			in: in{
-				args: []string{
-					"--workspace=Default",
-					"--oldName=rit other formula",
-					"--newName=rit testing formula new",
-				},
-			},
-			out: out{
-				want: errors.New("This formula 'rit other formula' does not exist on this workspace = 'Default'"),
-			},
-		},
-		{
 			name: "success when new formula is added a higher level of the tree",
 			in: in{
-				inputOldFormula:   "rit testing formula",
-				inputNewFormula:   "rit testing formula new",
-				workspaceSelected: "Default (" + repoPathWS + ")",
+				inputOldFormula: "rit testing formula",
+				inputNewFormula: "rit testing formula new",
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "formula", "new"),
@@ -278,14 +250,27 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "success when new formula is added a lower level of the tree",
 			in: in{
-				inputOldFormula:   "rit testing withOneMoreLevel level",
-				inputNewFormula:   "rit testing level",
-				workspaceSelected: "Default (" + repoPathWS + ")",
+				inputOldFormula: "rit testing withOneMoreLevel level",
+				inputNewFormula: "rit testing level",
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "level"),
 				formulaToBeCreated:  "root_testing_level",
 				formulaToBeEmpty:    "root_testing_withOneMoreLevel_level",
+			},
+		},
+		{
+			name: "success when new formula exists in two workspaces",
+			in: in{
+				inputOldFormula:         "rit testing formula",
+				inputNewFormula:         "rit testing formulaCustom",
+				workspaceSelected:       "Custom (" + repoPathWSCustom + ")",
+				customWorkspaceSelected: true,
+			},
+			out: out{
+				formulaPathExpected: filepath.Join("testing", "formulaCustom"),
+				formulaToBeCreated:  "root_testing_formulaCustom",
+				formulaToBeEmpty:    "root_testing_formula",
 			},
 		},
 	}
@@ -306,12 +291,26 @@ func TestRenameFormulaCmd(t *testing.T) {
 			zipTree := filepath.Join("..", "..", "testdata", "tree.zip")
 			_ = streams.Unzip(zipRepositories, reposPath)
 			_ = streams.Unzip(zipFile, repoPathLocalDefault)
-			_ = streams.Unzip(zipTree, repoPathLocalDefault)
 			_ = streams.Unzip(zipFile, repoPathWS)
+			_ = streams.Unzip(zipTree, repoPathLocalDefault)
 
-			createTree(ritHome, repoPathWS, treeGen, fileManager)
+			createTree(repoPathWS, repoPathLocalDefault, treeGen, fileManager)
 
-			inputTextMock := new(mocks.InputTextMock)
+			if tt.in.customWorkspaceSelected {
+				createSaved(repoPathWSCustom)
+				createSaved(repoPathLocalCustom)
+				_ = streams.Unzip(zipFile, repoPathWSCustom)
+				_ = streams.Unzip(zipFile, repoPathLocalCustom)
+				_ = streams.Unzip(zipTree, repoPathLocalCustom)
+
+				createTree(repoPathWSCustom, repoPathLocalCustom, treeGen, fileManager)
+
+				workspaces := formula.Workspaces{}
+				workspaces["Default"] = repoPathWS
+				workspaces["Custom"] = repoPathWSCustom
+
+				setWorkspace(workspaces, ritHome)
+			}
 
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
 			inputTextValidatorMock.On("Text", formulaOldCmdLabel, mock.Anything, mock.Anything).Return(
@@ -321,54 +320,60 @@ func TestRenameFormulaCmd(t *testing.T) {
 				tt.in.inputNewFormula, nil,
 			)
 
-			inPath := &mocks.InputPathMock{}
-			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
-
 			inputListMock := new(mocks.InputListMock)
-			inputListMock.On("List", "Select a formula workspace: ", mock.Anything, mock.Anything).Return(
-				tt.in.workspaceSelected, nil,
-			)
+			inputListMock.On(
+				"List", "We found the old formula 'rit testing formula' in 2 workspaces. Select the workspace:",
+				mock.Anything,
+				mock.Anything,
+			).Return(tt.in.workspaceSelected, nil)
 
 			inputBoolMock := new(mocks.InputBoolMock)
 			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
 
-			cmd := NewRenameFormulaCmd(formulaWorkspace, inputTextMock, inputListMock, inPath, inputTextValidatorMock,
-				inputBoolMock, dirManager, validator, createBuilder, treeGen, deleter, home, ritHome)
+			cmd := NewRenameFormulaCmd(formulaWorkspace, inputListMock, inputTextValidatorMock, inputBoolMock,
+				dirManager, validator, createBuilder, treeGen, deleter, home, ritHome)
 
 			cmd.SetArgs(tt.in.args)
 
 			got := cmd.Execute()
 
-			if tt.out.want == nil {
-				pathWSDir := filepath.Join(repoPathWS, tt.out.formulaPathExpected, "src")
-				pathLocalDir := filepath.Join(repoPathLocalDefault, tt.out.formulaPathExpected, "src")
-				treePath := filepath.Join(repoPathLocalDefault, "tree.json")
+			if tt.out.want != nil {
+				assert.Equal(t, tt.out.want.Error(), got.Error())
+			} else {
+				assert.Nil(t, got)
+
+				pathWSDir, pathLocalDir, treePath := "", "", ""
+				if tt.in.customWorkspaceSelected {
+					pathWSDir = filepath.Join(repoPathWSCustom, tt.out.formulaPathExpected, "src")
+					pathLocalDir = filepath.Join(repoPathLocalCustom, tt.out.formulaPathExpected, "src")
+					treePath = filepath.Join(repoPathLocalCustom, "tree.json")
+				} else {
+					pathWSDir = filepath.Join(repoPathWS, tt.out.formulaPathExpected, "src")
+					pathLocalDir = filepath.Join(repoPathLocalDefault, tt.out.formulaPathExpected, "src")
+					treePath = filepath.Join(repoPathLocalDefault, "tree.json")
+				}
 
 				bTree, err := fileInfo(treePath)
 				assert.Nil(t, err)
 				tree, err := getTree([]byte(bTree))
 				assert.Nil(t, err)
 
-				assert.Nil(t, got)
-
 				assert.DirExists(t, pathWSDir)
 				assert.DirExists(t, pathLocalDir)
 
 				assert.True(t, tree.Commands[api.CommandID(tt.out.formulaToBeCreated)].Formula)
 				assert.Empty(t, tree.Commands[api.CommandID(tt.out.formulaToBeEmpty)])
-			} else {
-				assert.Equal(t, tt.out.want.Error(), got.Error())
 			}
 		})
 	}
 
 }
 
-func createTree(ritHome, ws string, tg formula.TreeGenerator, fm stream.FileWriteRemover) {
+func createTree(ws, pathLocal string, tg formula.TreeGenerator, fm stream.FileWriteRemover) {
 	localTree, _ := tg.Generate(ws)
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	pathLocalTreeJSON := filepath.Join(ritHome, "repos", "local-default", "tree.json")
+	pathLocalTreeJSON := filepath.Join(pathLocal, "tree.json")
 	_ = ioutil.WriteFile(pathLocalTreeJSON, jsonString, os.ModePerm)
 }
 
@@ -378,4 +383,11 @@ func getTree(f []byte) (formula.Tree, error) {
 		return formula.Tree{}, err
 	}
 	return tree, nil
+}
+
+func setWorkspace(workspaces formula.Workspaces, ritHome string) {
+	wsFile := filepath.Join(ritHome, formula.WorkspacesFile)
+
+	content, _ := json.MarshalIndent(workspaces, "", "\t")
+	_ = ioutil.WriteFile(wsFile, content, os.ModePerm)
 }

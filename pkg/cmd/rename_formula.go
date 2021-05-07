@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -37,8 +38,6 @@ import (
 )
 
 const (
-	wsFlagName         = "workspace"
-	wsFlagDesc         = "Name of workspace to rename"
 	oldFormulaFlagName = "oldName"
 	oldFormulaFlagDesc = "Old name of formula to rename"
 	newFormulaFlagName = "newName"
@@ -51,20 +50,13 @@ const (
 
 	questionConfirmation = "Are you sure you want to rename the formula from '%s' to '%s'?"
 
-	errNonExistFormula   = "This formula '%s' does not exist on this workspace = '%s'"
-	errFormulaExists     = "This formula '%s' already exists on this workspace = '%s'"
-	errNonExistWorkspace = "The formula workspace '%s' does not exist, please enter a valid workspace"
+	errNonExistFormula = "This formula '%s' wasn't found in the workspaces"
+	errFormulaExists   = "This formula '%s' already exists on this workspace = '%s'"
 
 	renameSuccessMsg = "The formula was renamed with success"
 )
 
 var renameWorkspaceFlags = flags{
-	{
-		name:        wsFlagName,
-		kind:        reflect.String,
-		defValue:    formula.DefaultWorkspaceName,
-		description: wsFlagDesc,
-	},
 	{
 		name:        oldFormulaFlagName,
 		kind:        reflect.String,
@@ -82,9 +74,7 @@ var renameWorkspaceFlags = flags{
 // renameFormulaCmd type for add formula command.
 type renameFormulaCmd struct {
 	workspace       formula.WorkspaceAddListHasher
-	inText          prompt.InputText
 	inList          prompt.InputList
-	inPath          prompt.InputPath
 	inTextValidator prompt.InputTextValidator
 	inBool          prompt.InputBool
 	directory       stream.DirManager
@@ -99,9 +89,7 @@ type renameFormulaCmd struct {
 // New renameFormulaCmd rename a cmd instance.
 func NewRenameFormulaCmd(
 	workspace formula.WorkspaceAddListHasher,
-	inText prompt.InputText,
 	inList prompt.InputList,
-	inPath prompt.InputPath,
 	inTextValidator prompt.InputTextValidator,
 	inBool prompt.InputBool,
 	directory stream.DirManager,
@@ -115,9 +103,7 @@ func NewRenameFormulaCmd(
 ) *cobra.Command {
 	r := renameFormulaCmd{
 		workspace:       workspace,
-		inText:          inText,
 		inList:          inList,
-		inPath:          inPath,
 		inTextValidator: inTextValidator,
 		inBool:          inBool,
 		directory:       directory,
@@ -149,6 +135,16 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 		if err != nil {
 			return err
 		}
+
+		wsOldFormula := r.getWorkspace(result.OldFormulaCmd)
+		wsNewFormula := r.getWorkspace(result.NewFormulaCmd)
+
+		ws, err := r.cleanWorkspace(wsOldFormula, wsNewFormula, result)
+		if err != nil {
+			return err
+		}
+		result.Workspace.Dir = ws.Dir
+		result.Workspace.Name = ws.Name
 
 		question := fmt.Sprintf(questionConfirmation, result.OldFormulaCmd, result.NewFormulaCmd)
 		ans, err := r.inBool.Bool(question, []string{"no", "yes"})
@@ -184,33 +180,12 @@ func (r *renameFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Rename, err
 
 func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, error) {
 	var result formula.Rename
-	wspaces, err := r.workspace.List()
-	if err != nil {
-		return result, err
-	}
-
-	wsName, err := cmd.Flags().GetString(wsFlagName)
-	if err != nil {
-		return result, err
-	} else if wsName == "" {
-		wsName = formula.DefaultWorkspaceName
-	}
-	wspaces[formula.DefaultWorkspaceName] = filepath.Join(r.userHomeDir, formula.DefaultWorkspaceDir)
-	dir, exists := wspaces[wsName]
-	if !exists {
-		return result, fmt.Errorf(errNonExistWorkspace, wsName)
-	}
-	result.Workspace.Dir = dir
-	result.Workspace.Name = wsName
 
 	oldFormula, err := cmd.Flags().GetString(oldFormulaFlagName)
 	if err != nil {
 		return result, err
 	} else if oldFormula == "" {
 		return result, errors.New(missingFlagText(oldFormulaFlagName))
-	}
-	if !r.formulaExistsInWorkspace(result.Workspace.Dir, oldFormula) {
-		return result, fmt.Errorf(errNonExistFormula, oldFormula, result.Workspace.Name)
 	}
 	result.OldFormulaCmd = oldFormula
 
@@ -220,9 +195,6 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, err
 	} else if newFormula == "" {
 		return result, errors.New(missingFlagText(newFormulaFlagName))
 	}
-	if r.formulaExistsInWorkspace(result.Workspace.Dir, newFormula) {
-		return result, fmt.Errorf(errFormulaExists, newFormula, result.Workspace.Name)
-	}
 	result.NewFormulaCmd = newFormula
 
 	return result, nil
@@ -230,32 +202,16 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, err
 
 func (r *renameFormulaCmd) resolvePrompt() (formula.Rename, error) {
 	var result formula.Rename
-	wspaces, err := r.workspace.List()
-	if err != nil {
-		return result, err
-	}
-
-	ws, err := FormulaWorkspaceInput(wspaces, r.inList, r.inText, r.inPath)
-	if err != nil {
-		return result, err
-	}
-	result.Workspace = ws
 
 	oldFormula, err := r.inTextValidator.Text(formulaOldCmdLabel, r.surveyCmdValidator, formulaOldCmdHelper)
 	if err != nil {
 		return result, err
-	}
-	if !r.formulaExistsInWorkspace(result.Workspace.Dir, oldFormula) {
-		return result, fmt.Errorf(errNonExistFormula, oldFormula, result.Workspace.Name)
 	}
 	result.OldFormulaCmd = oldFormula
 
 	newFormula, err := r.inTextValidator.Text(formulaNewCmdLabel, r.surveyCmdValidator, formulaNewCmdHelper)
 	if err != nil {
 		return result, err
-	}
-	if r.formulaExistsInWorkspace(result.Workspace.Dir, newFormula) {
-		return result, fmt.Errorf(errFormulaExists, newFormula, result.Workspace.Name)
 	}
 	result.NewFormulaCmd = newFormula
 
@@ -279,6 +235,65 @@ func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string)
 
 func (r *renameFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 	return r.validator.FormulaCommmandValidator(cmd.(string))
+}
+
+func (r *renameFormulaCmd) getWorkspace(cmd string) formula.Workspaces {
+	wsWithFormula := formula.Workspaces{}
+	wspaces, err := r.workspace.List()
+	if err != nil {
+		return wsWithFormula
+	}
+	wspaces[formula.DefaultWorkspaceName] = filepath.Join(r.userHomeDir, formula.DefaultWorkspaceDir)
+
+	for name := range wspaces {
+		dir := wspaces[name]
+		if r.formulaExistsInWorkspace(dir, cmd) {
+			wsWithFormula[name] = dir
+		}
+	}
+	return wsWithFormula
+}
+
+func (r *renameFormulaCmd) cleanWorkspace(
+	workspacesOld, workspacesNew formula.Workspaces,
+	result formula.Rename,
+) (formula.Workspace, error) {
+	wsCleaned := formula.Workspace{}
+
+	if len(workspacesOld) == 0 {
+		return formula.Workspace{}, fmt.Errorf(errNonExistFormula, result.OldFormulaCmd)
+	}
+	if len(workspacesOld) > 1 {
+		var items []string
+		for k, v := range workspacesOld {
+			kv := fmt.Sprintf("%s (%s)", k, v)
+			items = append(items, kv)
+		}
+
+		question := fmt.Sprintf("We found the old formula '%s' in %s workspaces. Select the workspace:",
+			result.OldFormulaCmd, strconv.Itoa(len(workspacesOld)),
+		)
+		selected, err := r.inList.List(question, items)
+		if err != nil {
+			return formula.Workspace{}, err
+		}
+		name := strings.Split(selected, " (")[0]
+		wsCleaned.Name = strings.Title(name)
+		wsCleaned.Dir = workspacesOld[name]
+	} else {
+		for n, d := range workspacesOld {
+			wsCleaned.Name = n
+			wsCleaned.Dir = d
+		}
+	}
+
+	for n := range workspacesNew {
+		if n == wsCleaned.Name {
+			return formula.Workspace{}, fmt.Errorf(errFormulaExists, result.NewFormulaCmd, wsCleaned.Name)
+		}
+	}
+
+	return wsCleaned, nil
 }
 
 func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
@@ -313,6 +328,7 @@ func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
 	if err := r.directory.Create(tmp); err != nil {
 		return err
 	}
+
 	//nolint:errcheck
 	defer os.RemoveAll(tmp)
 
@@ -325,6 +341,7 @@ func (r *renameFormulaCmd) changeFormulaToNewDir(fr formula.Rename) error {
 		GroupsFormula: groupsOld,
 		Workspace:     fr.Workspace,
 	}
+
 	if err := r.deleter.Delete(delOld); err != nil {
 		return err
 	}
@@ -358,6 +375,7 @@ func (r *renameFormulaCmd) recreateTreeJSON(pathLocalWS string) error {
 func fPath(workspacePath, cmd string) string {
 	cc := strings.Split(cmd, " ")
 	path := strings.Join(cc, string(os.PathSeparator))
+
 	return filepath.Join(workspacePath, path)
 }
 
