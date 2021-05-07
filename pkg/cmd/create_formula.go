@@ -58,7 +58,7 @@ type createFormulaCmd struct {
 	template        template.Manager
 	tutorial        rtutorial.Finder
 	tree            formula.TreeChecker
-	validator       validator.ValidatorManager
+	validator       validator.Manager
 }
 
 // CreateFormulaCmd creates a new cmd instance.
@@ -73,7 +73,7 @@ func NewCreateFormulaCmd(
 	inPath prompt.InputPath,
 	rtf rtutorial.Finder,
 	treeChecker formula.TreeChecker,
-	validator validator.ValidatorManager,
+	validator validator.Manager,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,

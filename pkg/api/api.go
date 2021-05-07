@@ -24,7 +24,8 @@ import (
 )
 
 const (
-	RitchieHomeName = ".rit"
+	RootName        = "rit"
+	ritchieHomeName = ".rit"
 	CoreCmdsDesc    = "core commands:"
 )
 
@@ -148,5 +149,5 @@ func UserHomeDir() string {
 
 // RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
-	return filepath.Join(UserHomeDir(), RitchieHomeName)
+	return filepath.Join(UserHomeDir(), ritchieHomeName)
 }

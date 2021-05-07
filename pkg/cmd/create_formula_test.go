@@ -44,7 +44,7 @@ import (
 )
 
 func TestCreateFormulaCmd(t *testing.T) {
-	validator := validator.NewValidator()
+	validator := validator.New()
 
 	type in struct {
 		inputText        string

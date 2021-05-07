@@ -85,7 +85,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
 	createBuilder := formula.NewCreateBuilder(formulaCreator, formBuildLocal)
 
-	validator := validator.NewValidator()
+	validator := validator.New()
 	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritHome)
 
 	fileInfo := func(path string) (string, error) {
@@ -146,7 +146,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing other' wasn't found in the workspaces"),
+				want: errors.New("This formula \"rit testing other\" wasn't found in the workspaces"),
 			},
 		},
 		{
@@ -157,7 +157,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
+				want: errors.New("This formula \"rit testing formula\" already exists on this workspace = \"Default\""),
 			},
 		},
 		{
@@ -221,7 +221,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				},
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing other' wasn't found in the workspaces"),
+				want: errors.New("This formula \"rit testing other\" wasn't found in the workspaces"),
 			},
 		},
 		{
@@ -233,7 +233,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				},
 			},
 			out: out{
-				want: errors.New("This formula 'rit testing formula' already exists on this workspace = 'Default'"),
+				want: errors.New("This formula \"rit testing formula\" already exists on this workspace = \"Default\""),
 			},
 		},
 		{
@@ -322,7 +322,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On(
-				"List", "We found the old formula 'rit testing formula' in 2 workspaces. Select the workspace:",
+				"List", "We found the old formula \"rit testing formula\" in 2 workspaces. Select the workspace:",
 				mock.Anything,
 				mock.Anything,
 			).Return(tt.in.workspaceSelected, nil)

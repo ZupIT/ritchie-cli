@@ -31,7 +31,7 @@ type DeleteManager struct {
 	dir     stream.DirRemover
 }
 
-func New(
+func NewDeleter(
 	ritHome string,
 	repo formula.RepositoryListWriter,
 	dir stream.DirRemover,

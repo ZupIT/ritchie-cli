@@ -24,11 +24,11 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
@@ -78,7 +78,7 @@ type renameFormulaCmd struct {
 	inTextValidator prompt.InputTextValidator
 	inBool          prompt.InputBool
 	directory       stream.DirManager
-	validator       validator.ValidatorManager
+	validator       validator.Manager
 	formula         formula.CreateBuilder
 	treeGen         formula.TreeGenerator
 	deleter         deleter.DeleteManager
@@ -93,7 +93,7 @@ func NewRenameFormulaCmd(
 	inTextValidator prompt.InputTextValidator,
 	inBool prompt.InputBool,
 	directory stream.DirManager,
-	validator validator.ValidatorManager,
+	validator validator.Manager,
 	formula formula.CreateBuilder,
 	treeGen formula.TreeGenerator,
 	deleter deleter.DeleteManager,
@@ -220,7 +220,7 @@ func (r *renameFormulaCmd) resolvePrompt() (formula.Rename, error) {
 
 func (r *renameFormulaCmd) formulaExistsInWorkspace(path string, formula string) bool {
 	formulaSplited := strings.Split(formula, " ")
-	if formulaSplited[0] == "rit" {
+	if formulaSplited[0] == api.RootName {
 		formulaSplited = formulaSplited[1:]
 	}
 
@@ -270,8 +270,8 @@ func (r *renameFormulaCmd) cleanWorkspace(
 			items = append(items, kv)
 		}
 
-		question := fmt.Sprintf("We found the old formula %q in %q workspaces. Select the workspace:",
-			result.OldFormulaCmd, strconv.Itoa(len(workspacesOld)),
+		question := fmt.Sprintf("We found the old formula %q in %d workspaces. Select the workspace:",
+			result.OldFormulaCmd, len(workspacesOld),
 		)
 		selected, err := r.inList.List(question, items)
 		if err != nil {
@@ -324,7 +324,8 @@ func (r *renameFormulaCmd) Rename(fr formula.Rename) error {
 }
 
 func (r *renameFormulaCmd) moveFormulaToNewDir(fr formula.Rename) error {
-	tmp := filepath.Join(os.TempDir(), "rit_oldFormula")
+	tmpName := api.RootName + "_oldFormula"
+	tmp := filepath.Join(os.TempDir(), tmpName)
 	if err := r.directory.Create(tmp); err != nil {
 		return err
 	}
@@ -380,7 +381,7 @@ func fPath(workspacePath, cmd string) string {
 }
 
 func cleanPreffix(cmd string) string {
-	if strings.HasPrefix(cmd, "rit") {
+	if strings.HasPrefix(cmd, api.RootName) {
 		return cmd[4:]
 	}
 	return cmd

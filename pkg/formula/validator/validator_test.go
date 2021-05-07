@@ -62,7 +62,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			validator := NewValidator()
+			validator := New()
 
 			err := validator.FormulaCommmandValidator(tt.formula)
 

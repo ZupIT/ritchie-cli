@@ -44,7 +44,7 @@ func (v *Manager) FormulaCommmandValidator(formula string) error {
 	}
 
 	s := strings.Split(formula, " ")
-	if s[0] != api.RitchieHomeName {
+	if s[0] != api.RootName {
 		return ErrFormulaCmdMustStartWithRit
 	}
 

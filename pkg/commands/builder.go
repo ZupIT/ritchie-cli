@@ -191,7 +191,7 @@ func Build() *cobra.Command {
 	defaultUrlFinder := upgrade.NewDefaultUrlFinder(versionManager)
 	rootCmd := cmd.NewRootCmd(ritchieHomeDir, dirManager, fileManager, tutorialFinder, versionManager, treeGen, repoListWriter)
 
-	validator := validator.NewValidator()
+	validator := validator.New()
 	deleter := deleter.NewDeleter(dirManager, fileManager, treeGen, ritchieHomeDir)
 
 	// level 1
