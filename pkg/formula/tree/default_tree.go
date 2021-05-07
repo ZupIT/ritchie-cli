@@ -58,7 +58,7 @@ func (d Manager) Tree() (map[formula.RepoName]formula.Tree, error) {
 	}
 
 	for _, v := range rr {
-		treeRepo, err := d.treeByRepo(v.Name)
+		treeRepo, err := d.TreeByRepo(v.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -85,7 +85,7 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	}
 
 	for i := rr.Len() - 1; i >= 0; i-- {
-		tree, err := d.treeByRepo(rr[i].Name)
+		tree, err := d.TreeByRepo(rr[i].Name)
 		if err != nil {
 			continue
 		}
@@ -119,10 +119,10 @@ func (d Manager) MergedTree(core bool) formula.Tree {
 	}
 }
 
-func (d Manager) treeByRepo(repoName formula.RepoName) (formula.Tree, error) {
+func (d Manager) TreeByRepo(repoName formula.RepoName) (formula.Tree, error) {
 	treeFilePath := filepath.Join(d.ritchieHome, "repos", repoName.String(), FileName)
 	treeFile, err := ioutil.ReadFile(treeFilePath)
-	if os.IsNotExist(err) {
+	if _, err := os.Stat(treeFilePath); os.IsNotExist(err) {
 		return formula.Tree{}, nil
 	}
 

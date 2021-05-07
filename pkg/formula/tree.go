@@ -27,6 +27,7 @@ type Tree struct {
 type TreeManager interface {
 	Tree() (map[RepoName]Tree, error)
 	MergedTree(core bool) Tree
+	TreeByRepo(RepoName) (Tree, error)
 }
 
 type TreeGenerator interface {
