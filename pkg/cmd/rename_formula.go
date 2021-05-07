@@ -50,8 +50,8 @@ const (
 
 	questionConfirmation = "Are you sure you want to rename the formula from %q to %q?"
 
-	errNonExistFormula = "This formula %q wasn't found in the workspaces"
-	errFormulaExists   = "This formula %q already exists on this workspace = %q"
+	errNonExistFormula = "Formula %q wasn't found in the workspaces"
+	errFormulaExists   = "Formula %q already exists on this workspace = %q"
 
 	renameSuccessMsg = "The formula was renamed with success"
 )

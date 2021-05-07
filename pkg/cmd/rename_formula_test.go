@@ -146,7 +146,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
 			out: out{
-				want: errors.New("This formula \"rit testing other\" wasn't found in the workspaces"),
+				want: errors.New("Formula \"rit testing other\" wasn't found in the workspaces"),
 			},
 		},
 		{
@@ -157,7 +157,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				workspaceSelected: "Default (" + repoPathWS + ")",
 			},
 			out: out{
-				want: errors.New("This formula \"rit testing formula\" already exists on this workspace = \"Default\""),
+				want: errors.New("Formula \"rit testing formula\" already exists on this workspace = \"Default\""),
 			},
 		},
 		{
@@ -221,7 +221,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				},
 			},
 			out: out{
-				want: errors.New("This formula \"rit testing other\" wasn't found in the workspaces"),
+				want: errors.New("Formula \"rit testing other\" wasn't found in the workspaces"),
 			},
 		},
 		{
@@ -233,7 +233,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				},
 			},
 			out: out{
-				want: errors.New("This formula \"rit testing formula\" already exists on this workspace = \"Default\""),
+				want: errors.New("Formula \"rit testing formula\" already exists on this workspace = \"Default\""),
 			},
 		},
 		{
