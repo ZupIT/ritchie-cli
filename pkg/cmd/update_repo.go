@@ -182,7 +182,7 @@ func (up updateRepoCmd) resolvePrompt() (formula.Repos, error) {
 		}
 	}
 
-	for _, currRepo := range repoToUpdate {
+	for i, currRepo := range repoToUpdate {
 		repoInfo, err := up.getRepoInfo(currRepo)
 		if err != nil {
 			return formula.Repos{}, err
@@ -190,10 +190,11 @@ func (up updateRepoCmd) resolvePrompt() (formula.Repos, error) {
 
 		currRepoVersion := fmt.Sprintf("Select your new version for %q:", currRepo.Name.String())
 
-		_, err = up.List(currRepoVersion, repoInfo)
+		version, err := up.List(currRepoVersion, repoInfo)
 		if err != nil {
 			return formula.Repos{}, err
 		}
+		repoToUpdate[i].Version = formula.RepoVersion(version)
 	}
 	return repoToUpdate, nil
 }
@@ -240,6 +241,12 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 			}
 		}
 	}
+
+	if len(repoToUpdate) <= 0 {
+		errorMsg := fmt.Sprintf("The repository %q was not found.\n", repoTarget.Name)
+		return formula.Repos{}, errors.New(errorMsg)
+	}
+
 	return repoToUpdate, err
 }
 
