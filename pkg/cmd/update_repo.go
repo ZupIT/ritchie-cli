@@ -206,7 +206,7 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 	}
 
 	if name == "" {
-		return formula.Repos{}, errors.New("please provide a value for 'name'")
+		return formula.Repos{}, errors.New(missingFlagText(repoName))
 	}
 
 	version, err := cmd.Flags().GetString(repoVersion)
@@ -214,7 +214,7 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 		return formula.Repos{}, err
 	}
 	if version == "" {
-		return formula.Repos{}, errors.New("please provide a value for 'version'")
+		return formula.Repos{}, errors.New(missingFlagText(repoVersion))
 	}
 
 	repoTarget := formula.Repo{Name: formula.RepoName(name), Version: formula.RepoVersion(version)}
