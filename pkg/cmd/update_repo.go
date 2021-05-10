@@ -231,10 +231,10 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 			if version == "latest" {
 				repoTarget.Version = currRepo.LatestVersion
 				repoToUpdate = append(repoToUpdate, repoTarget)
-				return repoToUpdate, err
+				return repoToUpdate, nil
 			} else if findVersion(info, repoTarget.Version) {
 				repoToUpdate = append(repoToUpdate, repoTarget)
-				return repoToUpdate, err
+				return repoToUpdate, nil
 			} else {
 				errorMsg := fmt.Sprintf("The version %q of repository %q was not found.\n", repoTarget.Version, repoTarget.Name)
 				return repoToUpdate, errors.New(errorMsg)
