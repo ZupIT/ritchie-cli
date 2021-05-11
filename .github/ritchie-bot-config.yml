@@ -3,7 +3,6 @@ merge_branch:
   branches: ['qa'] # Branches enabled to merge with comment
   users: [
     'brunasilvazup',
-    'ernelio',
     'fabianofernandeszup',
     'fernandobelettizup',
     'guillaumefalourd',
@@ -11,9 +10,7 @@ merge_branch:
     'kaduartur',
     'lucasdittrichzup',
     'maurineimirandazup',
-    'rodrigomedeirosf',
-    'viniciusramosdefaria',
-    'victor-schumacher'
+    'rodrigomedeirosf'
   ] # Users enabled to merge with comment
 
 issue_project:
