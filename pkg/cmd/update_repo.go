@@ -225,7 +225,14 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 		return formula.Repos{}, err
 	}
 
-	for _, currRepo := range repos {
+	var externalRepos formula.Repos
+	for i := range repos {
+		if !repos[i].IsLocal {
+			externalRepos = append(externalRepos, repos[i])
+		}
+	}
+
+	for _, currRepo := range externalRepos {
 		if repoTarget.Name == currRepo.Name {
 			info, _ := up.getRepoInfo(currRepo)
 			if version == "latest" {
