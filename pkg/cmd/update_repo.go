@@ -254,7 +254,7 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 		return formula.Repos{}, errors.New(errorMsg)
 	}
 
-	return repoToUpdate, err
+	return repoToUpdate, nil
 }
 
 func (up *updateRepoCmd) getRepoInfo(repoToUpdate formula.Repo) ([]string, error) {
@@ -265,7 +265,7 @@ func (up *updateRepoCmd) getRepoInfo(repoToUpdate formula.Repo) ([]string, error
 		return nil, err
 	}
 	stringTags := tags.Names()
-	return stringTags, err
+	return stringTags, nil
 }
 
 func findVersion(source []string, value formula.RepoVersion) bool {
