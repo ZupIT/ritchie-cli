@@ -82,15 +82,13 @@ and deleting resources here. For simple implementations they are enough, but the
 to perform certain actions.
 * credential: contains logic related to credential manipulation, such as the files they are saved and how to manage
 them.
-* env: helper to resolve credential from input runners.
+* env: manages user environments. Helper to resolve credential from input runners, using different sets of credentials (i.e.: development, staging, production)
 * formula: contains all formula manipulation implementations, such as building, resolving, creating, 
 and running formulas
 * git: module to add, remove, or manage other formula repos.
 * http: header definitions
 * metric: sends collected anonymous metrics via http requests.
 * prompt: Ritchie's adaptations on the `survey` module for user input.
-* rcontext: manages user contexts. Handles files modifications and context activation so users can run formulas
-using different sets of credentials (i.e.: development, staging, production)
 * rtutorial: basic implementation of tutorial texts. Tutorial are helper texts that can be added to each command
 to provide the user with more context on that action.
 * stdin: JSON stdin parser
