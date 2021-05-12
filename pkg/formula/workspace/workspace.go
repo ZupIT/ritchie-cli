@@ -25,6 +25,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
@@ -42,6 +43,7 @@ type Manager struct {
 	defaultWorkspaceDir string
 	dir                 stream.DirCreateHasher
 	local               builder.Initializer
+	tree                formula.TreeGenerator
 }
 
 func New(
@@ -49,6 +51,7 @@ func New(
 	userHome string,
 	dirManager stream.DirCreateHasher,
 	local builder.Initializer,
+	tree formula.TreeGenerator,
 ) Manager {
 	workspaceFile := filepath.Join(ritchieHome, formula.WorkspacesFile)
 	workspaceHome := filepath.Join(userHome, formula.DefaultWorkspaceDir)
@@ -58,6 +61,7 @@ func New(
 		defaultWorkspaceDir: workspaceHome,
 		dir:                 dirManager,
 		local:               local,
+		tree:                tree,
 	}
 }
 
@@ -120,6 +124,35 @@ func (m Manager) Delete(workspace formula.Workspace) error {
 	}
 
 	if err := ioutil.WriteFile(m.workspaceFile, content, os.ModePerm); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m Manager) Update(workspace formula.Workspace) error {
+	workspaces, err := m.List()
+	if err != nil {
+		return err
+	}
+
+	if _, exists := workspaces[workspace.Name]; !exists {
+		return ErrInvalidWorkspace
+	}
+
+	workflowPath := filepath.Join(m.ritchieHome, m.defaultWorkspaceDir, workspace.Name)
+	treeData, err := m.tree.Generate(workflowPath)
+	if err != nil {
+		return err
+	}
+
+	treeFilePath := filepath.Join(workflowPath, tree.FileName)
+	bytes, err := json.MarshalIndent(treeData, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	if err := ioutil.WriteFile(treeFilePath, bytes, os.ModePerm); err != nil {
 		return err
 	}
 
