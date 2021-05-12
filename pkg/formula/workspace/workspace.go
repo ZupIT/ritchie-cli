@@ -25,6 +25,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -140,7 +141,8 @@ func (m Manager) Update(workspace formula.Workspace) error {
 		return ErrInvalidWorkspace
 	}
 
-	workflowPath := filepath.Join(m.ritchieHome, m.defaultWorkspaceDir, workspace.Name)
+	workspaceLocalName := repoutil.LocalName(workspace.Name)
+	workflowPath := filepath.Join(m.ritchieHome, formula.ReposDir, workspaceLocalName.String())
 	treeData, err := m.tree.Generate(workflowPath)
 	if err != nil {
 		return err
