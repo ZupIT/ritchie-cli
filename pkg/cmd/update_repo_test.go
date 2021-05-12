@@ -67,6 +67,7 @@ func TestUpdateRepoRun(t *testing.T) {
 		in         in
 		wantErr    bool
 		inputStdin string
+		inputFlag  []string
 	}{
 		{
 			name: "success case update someRepo1",
@@ -257,6 +258,68 @@ func TestUpdateRepoRun(t *testing.T) {
 			wantErr:    true,
 			inputStdin: createJSONEntry(repoTest),
 		},
+		{
+			name: "success with flags",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest2, *repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == repoName {
+							return "someRepo1", nil
+						}
+						if name == questionAVersion {
+							return "1.0.0", nil
+						}
+						return "any", nil
+					},
+				},
+				Repos: defaultGitRepositoryMock,
+			},
+			wantErr:   false,
+			inputFlag: []string{"--name=someRepo1", "--version=1.0.0"},
+		},
+		{
+			name: "fail with flags, flag name empty",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, errors.New(missingFlagText(repoName))
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListMock{},
+				Repos:  defaultGitRepositoryMock,
+			},
+			wantErr:   true,
+			inputFlag: []string{"--name=", "--version=1.0.0"},
+		},
+		{
+			name: "fail with flags, flag version empty",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, errors.New(missingFlagText(repoVersion))
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListMock{},
+				Repos:  defaultGitRepositoryMock,
+			},
+			wantErr:   true,
+			inputFlag: []string{"--name=someRepo1", "--version="},
+		},
+
 	}
 
 	for _, tt := range tests {
@@ -269,15 +332,18 @@ func TestUpdateRepoRun(t *testing.T) {
 
 			newUpdateRepoPrompt := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
 			newUpdateRepoStdin := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
+			newUpdateRepoFlag := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
 
 			newUpdateRepoPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 			newUpdateRepoStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+			newUpdateRepoFlag.PersistentFlags().Bool("stdin", false, "input by stdin")
 
 			newReader := strings.NewReader(tt.inputStdin)
 			newUpdateRepoStdin.SetIn(newReader)
 			newUpdateRepoStdin.SetArgs([]string{})
 
 			newUpdateRepoPrompt.SetArgs([]string{})
+			newUpdateRepoFlag.SetArgs(tt.inputFlag)
 
 			if err := newUpdateRepoPrompt.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("Prompt command error = %v, wantErr %v", err, tt.wantErr)
@@ -286,6 +352,11 @@ func TestUpdateRepoRun(t *testing.T) {
 			itsTestCaseWithStdin := tt.inputStdin != ""
 			if err := newUpdateRepoStdin.Execute(); (err != nil) != tt.wantErr && itsTestCaseWithStdin {
 				t.Errorf("Stdin command error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			itsTestCaseWithFlag := len(tt.inputFlag) != 0
+			if err := newUpdateRepoFlag.Execute(); (err != nil) != tt.wantErr && itsTestCaseWithFlag {
+				t.Errorf("Flag command error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
