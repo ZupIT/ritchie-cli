@@ -171,7 +171,7 @@ func Build() *cobra.Command {
 	}
 
 	formulaCreator := creator.NewCreator(treeManager, dirManager, fileManager, tplManager)
-	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, formBuildLocal)
+	formulaWorkspace := fworkspace.New(ritchieHomeDir, userHomeDir, dirManager, formBuildLocal, treeGen)
 
 	preRunBuilder := runner.NewPreRunBuilder(formulaWorkspace, formBuildLocal)
 	configManager := runner.NewConfigManager(ritchieHomeDir)
@@ -245,6 +245,7 @@ func Build() *cobra.Command {
 	deleteWorkspaceCmd := cmd.NewDeleteWorkspaceCmd(userHomeDir, formulaWorkspace, repoDeleter, inputList, inputBool)
 	deleteFormulaCmd := cmd.NewDeleteFormulaCmd(userHomeDir, ritchieHomeDir, formulaWorkspace, dirManager, inputBool, inputText, inputList, inputAutocomplete, treeGen, fileManager)
 	addWorkspaceCmd := cmd.NewAddWorkspaceCmd(formulaWorkspace, inputText, inputAutocomplete)
+	updateWorkspaceCmd := cmd.NewUpdateWorkspaceCmd(formulaWorkspace, inputList)
 
 	createFormulaCmd := cmd.NewCreateFormulaCmd(userHomeDir, createBuilder, tplManager, formulaWorkspace, inputText, inputTextValidator, inputList, inputAutocomplete, tutorialFinder, treeChecker)
 	buildFormulaCmd := cmd.NewBuildFormulaCmd()
@@ -254,7 +255,7 @@ func Build() *cobra.Command {
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)
-	updateCmd.AddCommand(updateRepoCmd)
+	updateCmd.AddCommand(updateRepoCmd, updateWorkspaceCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteEnvCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)
 	listCmd.AddCommand(listRepoCmd)
