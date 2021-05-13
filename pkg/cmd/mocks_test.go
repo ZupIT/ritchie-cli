@@ -450,6 +450,19 @@ func (w WorkspaceAddListerCustomMock) List() (formula.Workspaces, error) {
 	return w.list()
 }
 
+type WorkspaceListUpdaterCustomMock struct {
+	list   func() (formula.Workspaces, error)
+	update func(workspace formula.Workspace) error
+}
+
+func (m WorkspaceListUpdaterCustomMock) List() (formula.Workspaces, error) {
+	return m.list()
+}
+
+func (m WorkspaceListUpdaterCustomMock) Update(workspace formula.Workspace) error {
+	return m.update(workspace)
+}
+
 var (
 	defaultGitRepositoryMock = GitRepositoryMock{
 		latestTag: func(info git.RepoInfo) (git.Tag, error) {
