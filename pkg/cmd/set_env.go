@@ -85,8 +85,6 @@ func (s setEnvCmd) runCmd() CommandRunnerFunc {
 		env, err := s.resolveInput(cmd)
 		if err != nil {
 			return err
-		} else if env == "" {
-			return nil
 		}
 
 		if _, err := s.env.Set(env); err != nil {
