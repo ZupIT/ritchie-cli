@@ -142,13 +142,13 @@ func (m Manager) Update(workspace formula.Workspace) error {
 	}
 
 	workspaceLocalName := repoutil.LocalName(workspace.Name)
-	workflowPath := filepath.Join(m.ritchieHome, formula.ReposDir, workspaceLocalName.String())
-	treeData, err := m.tree.Generate(workflowPath)
+	workflowRitFolderPath := filepath.Join(m.ritchieHome, formula.ReposDir, workspaceLocalName.String())
+	treeData, err := m.tree.Generate(workflowRitFolderPath)
 	if err != nil {
 		return err
 	}
 
-	treeFilePath := filepath.Join(workflowPath, tree.FileName)
+	treeFilePath := filepath.Join(workflowRitFolderPath, tree.FileName)
 	bytes, err := json.MarshalIndent(treeData, "", "\t")
 	if err != nil {
 		return err
