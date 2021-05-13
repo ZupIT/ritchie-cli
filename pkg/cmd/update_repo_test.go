@@ -319,7 +319,6 @@ func TestUpdateRepoRun(t *testing.T) {
 			wantErr:   true,
 			inputFlag: []string{"--name=someRepo1", "--version="},
 		},
-
 	}
 
 	for _, tt := range tests {
