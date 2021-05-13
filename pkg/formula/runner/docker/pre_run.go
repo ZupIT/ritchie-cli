@@ -39,7 +39,7 @@ const (
 	loadConfigErrMsg = `Failed to load formula config file
 Try running rit update repo
 Config file path not found: %s`
-	dockerCmd = "docker"
+	dockerCmd = "com.docker.cli"
 )
 
 var (
