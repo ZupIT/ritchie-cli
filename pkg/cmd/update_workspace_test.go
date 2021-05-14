@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
@@ -29,12 +30,12 @@ func TestUpdateWorkspaceRun(t *testing.T) {
 	// someError := errors.New("some error")
 
 	workspaceTest := &formula.Workspace{
-		Name: "Teste",
+		Name: "Test",
 		Dir:  "/Users/dennis/workspaces",
 	}
 
 	workspaceTest2 := &formula.Workspace{
-		Name: "Teste2",
+		Name: "Test2",
 		Dir:  "/Users/dennis/workspaces",
 	}
 
@@ -52,14 +53,83 @@ func TestUpdateWorkspaceRun(t *testing.T) {
 		want error
 	}{
 		{
-			name: "success",
+			name: "update workspace success",
 			in: in{
 				args: []string{},
 				wspaceList: formula.Workspaces{
 					workspaceTest.Name:  workspaceTest.Dir,
 					workspaceTest2.Name: workspaceTest2.Dir,
 				},
-				inputList: workspaceTest.Name,
+				inputList: convertToInputFormat(workspaceTest),
+			},
+		},
+		{
+			name: "update workspace error (listing workspace)",
+			in: in{
+				args:          []string{},
+				wspaceListErr: errors.New("error to list workspace"),
+			},
+			want: errors.New("error to list workspace"),
+		},
+		{
+			name: "update workspace error (empty workspace)",
+			in: in{
+				args:       []string{},
+				wspaceList: formula.Workspaces{},
+			},
+			want: ErrEmptyWorkspace,
+		},
+		{
+			name: "update workspace error (input list)",
+			in: in{
+				args: []string{},
+				wspaceList: formula.Workspaces{
+					workspaceTest.Name:  workspaceTest.Dir,
+					workspaceTest2.Name: workspaceTest2.Dir,
+				},
+				inputListErr: errors.New("error to input list"),
+			},
+			want: errors.New("error to input list"),
+		},
+		{
+			name: "update workspace error (update workspace)",
+			in: in{
+				args: []string{},
+				wspaceList: formula.Workspaces{
+					workspaceTest.Name:  workspaceTest.Dir,
+					workspaceTest2.Name: workspaceTest2.Dir,
+				},
+				inputList:       convertToInputFormat(workspaceTest),
+				wspaceUpdateErr: errors.New("error to update workspace"),
+			},
+			want: errors.New("error to update workspace"),
+		},
+		{
+			name: "update workspace error (empty flag name)",
+			in: in{
+				args: []string{"--name="},
+			},
+			want: errors.New("please provide a value for 'name'"),
+		},
+		{
+			name: "update workspace error (wrong workspace name)",
+			in: in{
+				args: []string{"--name=Unexpected"},
+				wspaceList: formula.Workspaces{
+					workspaceTest.Name:  workspaceTest.Dir,
+					workspaceTest2.Name: workspaceTest2.Dir,
+				},
+			},
+			want: errors.New("no workspace found with this name"),
+		},
+		{
+			name: "update workspace success (input flag)",
+			in: in{
+				args: []string{"--name=Test"},
+				wspaceList: formula.Workspaces{
+					workspaceTest.Name:  workspaceTest.Dir,
+					workspaceTest2.Name: workspaceTest2.Dir,
+				},
 			},
 		},
 	}
@@ -70,7 +140,7 @@ func TestUpdateWorkspaceRun(t *testing.T) {
 			workspaceMock.On("List").Return(tt.in.wspaceList, tt.in.wspaceListErr)
 			workspaceMock.On("Update", mock.Anything).Return(tt.in.wspaceUpdateErr)
 			inListMock := new(mocks.InputListMock)
-			inListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.wspaceList, tt.in.inputListErr)
+			inListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
 
 			cmd := NewUpdateWorkspaceCmd(
 				workspaceMock,
@@ -82,4 +152,8 @@ func TestUpdateWorkspaceRun(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func convertToInputFormat(workspace *formula.Workspace) string {
+	return workspace.Name + " (" + workspace.Dir + ")"
 }

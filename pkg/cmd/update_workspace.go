@@ -28,6 +28,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
+var ErrEmptyWorkspace = errors.New("there is no workspace to update")
+
 type updateWorkspaceCmd struct {
 	workspace formula.WorkspaceListUpdater
 	inList    prompt.InputList
@@ -96,7 +98,7 @@ func (u *updateWorkspaceCmd) resolvePrompt() (formula.Workspace, error) {
 	}
 
 	if len(workspaces) == 0 {
-		return formula.Workspace{}, ErrEmptyWorkspaces
+		return formula.Workspace{}, ErrEmptyWorkspace
 	}
 
 	items := make([]string, 0, len(workspaces))
