@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -39,7 +40,6 @@ const (
 	loadConfigErrMsg = `Failed to load formula config file
 Try running rit update repo
 Config file path not found: %s`
-	dockerCmd = "docker"
 )
 
 var (
@@ -208,7 +208,7 @@ func buildRunImg(def formula.Definition) (string, error) {
 	containerId = strings.ToLower(containerId)
 	args := []string{"build", "-t", containerId, "."}
 	//nolint:gosec
-	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
+	cmd := exec.Command(getDockerCmd(), args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
@@ -223,7 +223,7 @@ func buildRunImg(def formula.Definition) (string, error) {
 // validate checks if able to run inside docker
 func validateDocker(dockerImg string) error {
 	args := []string{"version", "--format", "'{{.Server.Version}}'"}
-	cmd := exec.Command(dockerCmd, args...)
+	cmd := exec.Command(getDockerCmd(), args...)
 	output, err := cmd.CombinedOutput()
 	if output == nil || err != nil {
 		return ErrDockerNotInstalled
@@ -244,4 +244,12 @@ func validateVolumes(dockerVolumes []string) error {
 		}
 	}
 	return nil
+}
+
+func getDockerCmd() string {
+	if runtime.GOOS == "linux" {
+		return "docker"
+	} else {
+		return "com.docker.cli"
+	}
 }
