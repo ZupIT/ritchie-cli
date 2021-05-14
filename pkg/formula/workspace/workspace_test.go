@@ -29,6 +29,7 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -40,7 +41,9 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 	_ = os.Mkdir(tmpDir, os.ModePerm)
 	defer os.RemoveAll(tmpDir)
 
-	dirManager := stream.NewDirManager(stream.NewFileManager())
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	treeGen := tree.NewGenerator(dirManager, fileManager)
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	workspaceBrokenPath := path.Join(tmpDir, "broken")
 	workspaceNonExistingPath := filepath.Join(tmpDir, "non-existing-dir")
@@ -113,7 +116,7 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 			localBuilder := &mocks.LocalBuilderMock{}
 			localBuilder.On("Init", mock.AnythingOfType("string"), tt.workspace.Name).Return("", nil)
 
-			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
+			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder, treeGen)
 			got := workspace.Add(tt.workspace)
 
 			if got != nil {
@@ -143,7 +146,9 @@ func TestManagerDelete(t *testing.T) {
 
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	fileNonExistentPath := path.Join(tmpDir, "non-existent")
-	dirManager := stream.NewDirManager(stream.NewFileManager())
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	treeGen := tree.NewGenerator(dirManager, fileManager)
 
 	tests := []struct {
 		name          string
@@ -186,7 +191,7 @@ func TestManagerDelete(t *testing.T) {
 
 			localBuilder := &mocks.LocalBuilderMock{}
 
-			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
+			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder, treeGen)
 			got := workspace.Delete(tt.workspace)
 
 			if got != nil {
@@ -211,7 +216,9 @@ func TestManagerList(t *testing.T) {
 	_ = os.Mkdir(tmpDir, os.ModePerm)
 	defer os.RemoveAll(tmpDir)
 
-	dirManager := stream.NewDirManager(stream.NewFileManager())
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	treeGen := tree.NewGenerator(dirManager, fileManager)
 
 	workspaceFile := path.Join(tmpDir, formula.WorkspacesFile)
 	err := ioutil.WriteFile(workspaceFile, []byte(`{"zup": "/some/path"}`), os.ModePerm)
@@ -248,7 +255,7 @@ func TestManagerList(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			localBuilder := &mocks.LocalBuilderMock{}
 
-			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder)
+			workspace := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder, treeGen)
 			got, err := workspace.List()
 
 			if err != nil {
@@ -262,7 +269,9 @@ func TestManagerList(t *testing.T) {
 }
 
 func TestPreviousHash(t *testing.T) {
-	dirManager := stream.NewDirManager(stream.NewFileManager())
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	treeGen := tree.NewGenerator(dirManager, fileManager)
 	tmpDir := os.TempDir()
 	ritHome := path.Join(tmpDir, ".rit")
 	defer os.RemoveAll(ritHome)
@@ -296,7 +305,7 @@ func TestPreviousHash(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			localBuilder := &mocks.LocalBuilderMock{}
 
-			workspace := New(tt.homePath, tt.homePath, dirManager, localBuilder)
+			workspace := New(tt.homePath, tt.homePath, dirManager, localBuilder, treeGen)
 			hash, err := workspace.PreviousHash(formulaPath)
 
 			if err != nil {
@@ -310,7 +319,9 @@ func TestPreviousHash(t *testing.T) {
 }
 
 func TestUpdateHash(t *testing.T) {
-	dirManager := stream.NewDirManager(stream.NewFileManager())
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	treeGen := tree.NewGenerator(dirManager, fileManager)
 	ritHome := path.Join(os.TempDir(), "update-hash")
 	_ = os.Mkdir(ritHome, os.ModePerm)
 	defer os.RemoveAll(ritHome)
@@ -333,7 +344,7 @@ func TestUpdateHash(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			localBuilder := &mocks.LocalBuilderMock{}
 
-			workspace := New(tt.homePath, tt.homePath, dirManager, localBuilder)
+			workspace := New(tt.homePath, tt.homePath, dirManager, localBuilder, treeGen)
 			err := workspace.UpdateHash("my/formula", "hash")
 			assert.NoError(t, err)
 
