@@ -202,16 +202,16 @@ func (up updateRepoCmd) resolvePrompt() (formula.Repos, error) {
 func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error) {
 	name, err := cmd.Flags().GetString(repoName)
 	if err != nil {
-		return formula.Repos{}, err
+		return nil, err
 	}
 
 	if name == "" {
-		return formula.Repos{}, errors.New(missingFlagText(repoName))
+		return nil, errors.New(missingFlagText(repoName))
 	}
 
 	version, err := cmd.Flags().GetString(repoVersion)
 	if err != nil {
-		return formula.Repos{}, err
+		return nil, err
 	}
 	if version == "" {
 		return formula.Repos{}, errors.New(missingFlagText(repoVersion))
@@ -222,7 +222,7 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 
 	repos, err := up.repo.List()
 	if err != nil {
-		return formula.Repos{}, err
+		return nil, err
 	}
 
 	var externalRepos formula.Repos
@@ -249,7 +249,7 @@ func (up *updateRepoCmd) resolveFlags(cmd *cobra.Command) (formula.Repos, error)
 		}
 	}
 
-	if len(repoToUpdate) <= 0 {
+	if len(repoToUpdate) == 0 {
 		errorMsg := fmt.Sprintf("The repository %q was not found.\n", repoTarget.Name)
 		return formula.Repos{}, errors.New(errorMsg)
 	}

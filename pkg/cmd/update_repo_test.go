@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -45,6 +46,7 @@ func TestUpdateRepoRun(t *testing.T) {
 		Url:      "https://github.com/owner/repo",
 		Token:    "token",
 		Priority: 2,
+		LatestVersion: "2.0.0",
 	}
 
 	repoTest2 := &formula.Repo{
@@ -286,11 +288,38 @@ func TestUpdateRepoRun(t *testing.T) {
 			inputFlag: []string{"--name=someRepo1", "--version=1.0.0"},
 		},
 		{
+			name:       "success flags with 'latest' version",
+			in:         in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest2, *repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						return nil
+					},
+				},
+				inList: inputListCustomMock{
+					list: func(name string, items []string) (string, error) {
+						if name == repoName {
+							return "someRepo1", nil
+						}
+						if name == questionAVersion {
+							return "2.0.0", nil
+						}
+						return "any", nil
+					},
+				},
+				Repos:  defaultGitRepositoryMock,
+			},
+			wantErr:    false,
+			inputFlag:  []string{"--name=someRepo1", "--version=latest"},
+		},
+		{
 			name: "fail with flags, flag name empty",
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
-						return formula.Repos{}, errors.New(missingFlagText(repoName))
+						return nil, errors.New(missingFlagText(repoName))
 					},
 					update: func(name formula.RepoName, version formula.RepoVersion) error {
 						return nil
@@ -303,7 +332,7 @@ func TestUpdateRepoRun(t *testing.T) {
 			inputFlag: []string{"--name=", "--version=1.0.0"},
 		},
 		{
-			name: "fail with flags, flag version empty",
+			name: "fail with flags, missing value to version",
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
