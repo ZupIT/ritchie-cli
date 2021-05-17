@@ -280,7 +280,7 @@ func TestManagerUpdate(t *testing.T) {
 		name          string
 		workspacePath string
 		workspace     formula.Workspace
-		outErr        error
+		outErr        string
 		treeGenErr    error
 		setup         bool
 	}{
@@ -296,7 +296,7 @@ func TestManagerUpdate(t *testing.T) {
 		{
 			name:          "error update (list workspace)",
 			workspacePath: "broken",
-			outErr:        ErrInvalidWorkspace,
+			outErr:        ErrInvalidWorkspace.Error(),
 			setup:         false,
 		},
 		{
@@ -306,7 +306,7 @@ func TestManagerUpdate(t *testing.T) {
 				Name: "unexpected",
 				Dir:  fullDir,
 			},
-			outErr: ErrInvalidWorkspace,
+			outErr: ErrInvalidWorkspace.Error(),
 			setup:  false,
 		},
 		{
@@ -317,7 +317,7 @@ func TestManagerUpdate(t *testing.T) {
 				Dir:  fullDir,
 			},
 			treeGenErr: errors.New("error to generate tree.json"),
-			outErr:     errors.New("error to generate tree.json"),
+			outErr:     "error to generate tree.json",
 			setup:      false,
 		},
 		{
@@ -327,11 +327,9 @@ func TestManagerUpdate(t *testing.T) {
 				Name: "test",
 				Dir:  fullDir,
 			},
-			outErr: errors.New(
-				fmt.Sprintf(
-					"open %s: no such file or directory",
-					filepath.Join(userHome, formula.ReposDir, "local-test", tree.FileName),
-				),
+			outErr: fmt.Sprintf(
+				"open %s: no such file or directory",
+				filepath.Join(userHome, formula.ReposDir, "local-test", tree.FileName),
 			),
 			setup: false,
 		},
@@ -357,7 +355,7 @@ func TestManagerUpdate(t *testing.T) {
 			got := workspaceManager.Update(tt.workspace)
 
 			if got != nil {
-				assert.EqualError(t, got, tt.outErr.Error())
+				assert.EqualError(t, got, tt.outErr)
 			} else {
 				assert.Empty(t, tt.outErr)
 				file, err := ioutil.ReadFile(path.Join(tt.workspacePath, formula.WorkspacesFile))
