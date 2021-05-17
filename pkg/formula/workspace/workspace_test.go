@@ -299,7 +299,7 @@ func TestManagerUpdate(t *testing.T) {
 			setup:   false,
 		},
 		{
-			name:    "error update (non existant workspace)",
+			name:    "error update (non existent workspace)",
 			ritHome: ritHome,
 			workspace: formula.Workspace{
 				Name: "unexpected",
