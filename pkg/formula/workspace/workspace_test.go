@@ -346,7 +346,7 @@ func TestManagerUpdate(t *testing.T) {
 			treeGen := &mocks.TreeManager{}
 			treeGen.On("Generate", mock.Anything).Return(formula.Tree{}, tt.treeGenErr)
 
-			workspaceManager := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder, treeGen)
+			workspaceManager := New(tt.workspacePath, userHome, dirManager, localBuilder, treeGen)
 
 			if tt.setup {
 				workspaceManager.Add(tt.workspace)
