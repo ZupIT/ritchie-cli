@@ -18,6 +18,7 @@ package workspace
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path"
@@ -263,6 +264,87 @@ func TestManagerList(t *testing.T) {
 			} else {
 				assert.Empty(t, tt.outErr)
 				assert.Equal(t, tt.listSize, len(got))
+			}
+		})
+	}
+}
+
+func TestManagerUpdate(t *testing.T) {
+	cleanForm()
+	userHome := os.TempDir()
+	ritHome := filepath.Join(userHome, ".rit_update_workspace")
+	fullDir := createFullDir()
+
+	tests := []struct {
+		name       string
+		ritHome    string
+		workspace  formula.Workspace
+		outErr     error
+		treeGenErr error
+		setup      bool
+	}{
+		{
+			name:    "success update",
+			ritHome: ritHome,
+			workspace: formula.Workspace{
+				Name: "test",
+				Dir:  fullDir,
+			},
+			setup: true,
+		},
+		{
+			name:    "error update (list workspace)",
+			ritHome: "broken",
+			outErr:  ErrInvalidWorkspace,
+			setup:   false,
+		},
+		{
+			name:    "error update (non existant workspace)",
+			ritHome: ritHome,
+			workspace: formula.Workspace{
+				Name: "unexpected",
+				Dir:  fullDir,
+			},
+			outErr: ErrInvalidWorkspace,
+			setup:  false,
+		},
+		{
+			name:    "error update (tree error)",
+			ritHome: ritHome,
+			workspace: formula.Workspace{
+				Name: "test",
+				Dir:  fullDir,
+			},
+			treeGenErr: errors.New("error to generate tree.json"),
+			outErr:     errors.New("error to generate tree.json"),
+			setup:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fileManager := stream.NewFileManager()
+			dirManager := stream.NewDirManager(fileManager)
+
+			localBuilder := &mocks.LocalBuilderMock{}
+			localBuilder.On("Init", mock.AnythingOfType("string"), tt.workspace.Name).Return("", nil)
+
+			treeGen := &mocks.TreeManager{}
+			treeGen.On("Generate", mock.Anything).Return(formula.Tree{}, tt.treeGenErr)
+
+			workspaceManager := New(tt.ritHome, userHome, dirManager, localBuilder, treeGen)
+
+			if tt.setup {
+				workspaceManager.Add(tt.workspace)
+			}
+
+			got := workspaceManager.Update(tt.workspace)
+
+			if got != nil {
+				assert.EqualError(t, got, tt.outErr.Error())
+			} else {
+				assert.Empty(t, tt.outErr)
+				assert.Equal(t, got, tt.outErr)
 			}
 		})
 	}

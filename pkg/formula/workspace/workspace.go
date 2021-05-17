@@ -148,12 +148,12 @@ func (m Manager) Update(workspace formula.Workspace) error {
 		return err
 	}
 
-	treeFilePath := filepath.Join(workflowRitFolderPath, tree.FileName)
 	bytes, err := json.MarshalIndent(treeData, "", "\t")
 	if err != nil {
 		return err
 	}
 
+	treeFilePath := filepath.Join(workflowRitFolderPath, tree.FileName)
 	if err := ioutil.WriteFile(treeFilePath, bytes, os.ModePerm); err != nil {
 		return err
 	}
