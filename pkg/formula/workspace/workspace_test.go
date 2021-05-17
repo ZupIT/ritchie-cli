@@ -19,6 +19,7 @@ package workspace
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -276,16 +277,16 @@ func TestManagerUpdate(t *testing.T) {
 	fullDir := createFullDir()
 
 	tests := []struct {
-		name       string
-		ritHome    string
-		workspace  formula.Workspace
-		outErr     error
-		treeGenErr error
-		setup      bool
+		name          string
+		workspacePath string
+		workspace     formula.Workspace
+		outErr        error
+		treeGenErr    error
+		setup         bool
 	}{
 		{
-			name:    "success update",
-			ritHome: ritHome,
+			name:          "success update",
+			workspacePath: ritHome,
 			workspace: formula.Workspace{
 				Name: "test",
 				Dir:  fullDir,
@@ -293,14 +294,14 @@ func TestManagerUpdate(t *testing.T) {
 			setup: true,
 		},
 		{
-			name:    "error update (list workspace)",
-			ritHome: "broken",
-			outErr:  ErrInvalidWorkspace,
-			setup:   false,
+			name:          "error update (list workspace)",
+			workspacePath: "broken",
+			outErr:        ErrInvalidWorkspace,
+			setup:         false,
 		},
 		{
-			name:    "error update (non existent workspace)",
-			ritHome: ritHome,
+			name:          "error update (non existent workspace)",
+			workspacePath: userHome,
 			workspace: formula.Workspace{
 				Name: "unexpected",
 				Dir:  fullDir,
@@ -309,8 +310,8 @@ func TestManagerUpdate(t *testing.T) {
 			setup:  false,
 		},
 		{
-			name:    "error update (tree error)",
-			ritHome: ritHome,
+			name:          "error update (tree generation)",
+			workspacePath: ritHome,
 			workspace: formula.Workspace{
 				Name: "test",
 				Dir:  fullDir,
@@ -318,6 +319,21 @@ func TestManagerUpdate(t *testing.T) {
 			treeGenErr: errors.New("error to generate tree.json"),
 			outErr:     errors.New("error to generate tree.json"),
 			setup:      false,
+		},
+		{
+			name:          "error update (write file)",
+			workspacePath: userHome,
+			workspace: formula.Workspace{
+				Name: "test",
+				Dir:  fullDir,
+			},
+			outErr: errors.New(
+				fmt.Sprintf(
+					"open %s: no such file or directory",
+					filepath.Join(userHome, formula.ReposDir, "local-test", tree.FileName),
+				),
+			),
+			setup: false,
 		},
 	}
 
@@ -332,7 +348,7 @@ func TestManagerUpdate(t *testing.T) {
 			treeGen := &mocks.TreeManager{}
 			treeGen.On("Generate", mock.Anything).Return(formula.Tree{}, tt.treeGenErr)
 
-			workspaceManager := New(tt.ritHome, userHome, dirManager, localBuilder, treeGen)
+			workspaceManager := New(tt.workspacePath, tt.workspacePath, dirManager, localBuilder, treeGen)
 
 			if tt.setup {
 				workspaceManager.Add(tt.workspace)
@@ -344,7 +360,13 @@ func TestManagerUpdate(t *testing.T) {
 				assert.EqualError(t, got, tt.outErr.Error())
 			} else {
 				assert.Empty(t, tt.outErr)
-				assert.Equal(t, got, tt.outErr)
+				file, err := ioutil.ReadFile(path.Join(tt.workspacePath, formula.WorkspacesFile))
+				assert.NoError(t, err)
+				workspaces := formula.Workspaces{}
+				err = json.Unmarshal(file, &workspaces)
+				assert.NoError(t, err)
+				pathName := workspaces[tt.workspace.Name]
+				assert.Contains(t, tt.workspace.Dir, pathName)
 			}
 		})
 	}
