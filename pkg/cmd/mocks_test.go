@@ -437,10 +437,6 @@ func (d DirManagerCustomMock) Create(dir string) error {
 	return d.create(dir)
 }
 
-type WorkspaceManagerAddCustomMock struct {
-	add func(workspace formula.Workspace) error
-}
-
 type WorkspaceAddListerCustomMock struct {
 	add  func(workspace formula.Workspace) error
 	list func() (formula.Workspaces, error)
