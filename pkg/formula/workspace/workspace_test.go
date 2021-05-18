@@ -270,11 +270,13 @@ func TestManagerList(t *testing.T) {
 	}
 }
 
-func TestManagerUpdate(t *testing.T) {
+func TestWorkspaceManagerUpdate(t *testing.T) {
 	cleanForm()
-	userHome := os.TempDir()
-	ritHome := filepath.Join(userHome, ".rit_update_workspace")
 	fullDir := createFullDir()
+	userHome := os.TempDir()
+	ritHome := path.Join(userHome, ".rit-workspace-update")
+
+	workspaceFile := path.Join(userHome, formula.WorkspacesFile)
 
 	tests := []struct {
 		name          string
@@ -282,75 +284,84 @@ func TestManagerUpdate(t *testing.T) {
 		workspace     formula.Workspace
 		outErr        string
 		treeGenErr    error
-		setup         bool
+		setup         string
 	}{
 		{
 			name:          "success update",
 			workspacePath: ritHome,
 			workspace: formula.Workspace{
-				Name: "test",
+				Name: "zup",
 				Dir:  fullDir,
 			},
-			setup: true,
+			setup: "success update",
 		},
 		{
-			name:          "error update (list workspace)",
-			workspacePath: "broken",
-			outErr:        ErrInvalidWorkspace.Error(),
-			setup:         false,
+			name:          "list workspace error",
+			workspacePath: ritHome,
+			outErr:        "unexpected end of JSON input",
+			setup:         "list workspace error",
 		},
 		{
-			name:          "error update (non existent workspace)",
-			workspacePath: userHome,
+			name:          "invalid workspace",
+			workspacePath: workspaceFile,
 			workspace: formula.Workspace{
-				Name: "unexpected",
-				Dir:  fullDir,
+				Name: "commons",
+				Dir:  "home/user/go/src/github.com/ZupIT/ritchie-formulas-commons",
 			},
 			outErr: ErrInvalidWorkspace.Error(),
-			setup:  false,
 		},
 		{
-			name:          "error update (tree generation)",
+			name:          "tree generation error",
 			workspacePath: ritHome,
 			workspace: formula.Workspace{
-				Name: "test",
+				Name: "zup",
 				Dir:  fullDir,
 			},
 			treeGenErr: errors.New("error to generate tree.json"),
 			outErr:     "error to generate tree.json",
-			setup:      false,
 		},
 		{
-			name:          "error update (write file)",
-			workspacePath: userHome,
+			name:          "write error",
+			workspacePath: ritHome,
 			workspace: formula.Workspace{
-				Name: "test",
+				Name: "commons",
 				Dir:  fullDir,
 			},
 			outErr: fmt.Sprintf(
 				"open %s: no such file or directory",
-				filepath.Join(userHome, formula.ReposDir, "local-test", tree.FileName),
+				filepath.Join(ritHome, formula.ReposDir, "local-commons", tree.FileName),
 			),
-			setup: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			_ = os.Mkdir(ritHome, os.ModePerm)
+			defer os.RemoveAll(ritHome)
+
+			switch tt.setup {
+			case "success update":
+				_ = os.Mkdir(path.Join(ritHome, formula.ReposDir), os.ModePerm)
+				_ = os.Mkdir(path.Join(ritHome, formula.ReposDir, "local-"+tt.workspace.Name), os.ModePerm)
+				err := ioutil.WriteFile(path.Join(ritHome, formula.ReposDir, "local-"+tt.workspace.Name, tree.FileName), []byte(`{"zup": "some/dir/path"}`), os.ModePerm)
+				assert.NoError(t, err)
+
+			case "list workspace error":
+				err := ioutil.WriteFile(path.Join(ritHome, formula.WorkspacesFile), []byte(``), os.ModePerm)
+				assert.NoError(t, err)
+			}
+
 			fileManager := stream.NewFileManager()
 			dirManager := stream.NewDirManager(fileManager)
 
 			localBuilder := &mocks.LocalBuilderMock{}
-			localBuilder.On("Init", mock.AnythingOfType("string"), tt.workspace.Name).Return("", nil)
+			localBuilder.On("Init", mock.Anything, tt.workspace.Name).Return("", nil)
 
 			treeGen := &mocks.TreeManager{}
 			treeGen.On("Generate", mock.Anything).Return(formula.Tree{}, tt.treeGenErr)
 
 			workspaceManager := New(tt.workspacePath, userHome, dirManager, localBuilder, treeGen)
-
-			if tt.setup {
-				workspaceManager.Add(tt.workspace)
-			}
+			workspaceManager.Add(tt.workspace)
 
 			got := workspaceManager.Update(tt.workspace)
 
@@ -358,6 +369,7 @@ func TestManagerUpdate(t *testing.T) {
 				assert.EqualError(t, got, tt.outErr)
 			} else {
 				assert.Empty(t, tt.outErr)
+
 				file, err := ioutil.ReadFile(path.Join(tt.workspacePath, formula.WorkspacesFile))
 				assert.NoError(t, err)
 				workspaces := formula.Workspaces{}
