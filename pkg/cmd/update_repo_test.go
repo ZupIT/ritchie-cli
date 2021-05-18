@@ -19,7 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io"
+	"io" 
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -29,6 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -67,7 +68,7 @@ func TestUpdateRepoRun(t *testing.T) {
 	var tests = []struct {
 		name       string
 		in         in
-		wantErr    bool
+		wantErr    error
 		inputStdin string
 		inputFlag  []string
 	}{
@@ -95,7 +96,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    false,
+			wantErr:    nil,
 			inputStdin: createJSONEntry(repoTest),
 		},
 		{
@@ -125,7 +126,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    false,
+			wantErr:    nil,
 			inputStdin: "",
 		},
 		{
@@ -142,7 +143,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				inList: inputListMock{},
 				Repos:  defaultGitRepositoryMock,
 			},
-			wantErr:    true,
+			wantErr:    someError,
 			inputStdin: "",
 		},
 		{
@@ -166,7 +167,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    true,
+			wantErr:    someError,
 			inputStdin: "",
 		},
 		{
@@ -203,7 +204,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 			},
-			wantErr:    true,
+			wantErr:    someError,
 			inputStdin: "",
 		},
 		{
@@ -230,7 +231,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    true,
+			wantErr:    someError,
 			inputStdin: "",
 		},
 		{
@@ -257,7 +258,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    true,
+			wantErr:    someError,
 			inputStdin: createJSONEntry(repoTest),
 		},
 		{
@@ -284,7 +285,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:   false,
+			wantErr:   nil,
 			inputFlag: []string{"--name=someRepo1", "--version=1.0.0"},
 		},
 		{
@@ -311,7 +312,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos:  defaultGitRepositoryMock,
 			},
-			wantErr:    false,
+			wantErr:    nil,
 			inputFlag:  []string{"--name=someRepo1", "--version=latest"},
 		},
 		{
@@ -319,7 +320,7 @@ func TestUpdateRepoRun(t *testing.T) {
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
-						return nil, errors.New(missingFlagText(repoName))
+						return formula.Repos{}, errors.New(missingFlagText(repoName))
 					},
 					update: func(name formula.RepoName, version formula.RepoVersion) error {
 						return nil
@@ -328,7 +329,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				inList: inputListMock{},
 				Repos:  defaultGitRepositoryMock,
 			},
-			wantErr:   true,
+			wantErr:   errors.New(missingFlagText(repoName)),
 			inputFlag: []string{"--name=", "--version=1.0.0"},
 		},
 		{
@@ -336,7 +337,7 @@ func TestUpdateRepoRun(t *testing.T) {
 			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
-						return formula.Repos{}, errors.New(missingFlagText(repoVersion))
+						return nil, errors.New(missingFlagText(repoVersion))
 					},
 					update: func(name formula.RepoName, version formula.RepoVersion) error {
 						return nil
@@ -345,8 +346,32 @@ func TestUpdateRepoRun(t *testing.T) {
 				inList: inputListMock{},
 				Repos:  defaultGitRepositoryMock,
 			},
-			wantErr:   true,
+			wantErr:   errors.New(missingFlagText(repoVersion)),
 			inputFlag: []string{"--name=someRepo1", "--version="},
+		},
+		{
+			name: "fail with flags, invalid version value",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{*repoTest}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						var errorMsg = fmt.Sprintf("The version %q of repository %q was not found.\n", version, name)
+						return errors.New(errorMsg)
+					},
+				},
+				inList: inputListMock{},
+				Repos:  GitRepositoryMock{
+					tags: func(info git.RepoInfo) (git.Tags, error) {
+						return git.Tags{
+							git.Tag{Name: "1.0.0"},
+						}, nil
+					},
+				},
+			},
+			wantErr:   errors.New(fmt.Sprintf("The version %q of repository %q was not found.\n", "3.0.0", repoTest.Name)),
+			inputFlag: []string{"--name=someRepo1", "--version=3.0.0"},
 		},
 	}
 
@@ -373,19 +398,32 @@ func TestUpdateRepoRun(t *testing.T) {
 			newUpdateRepoPrompt.SetArgs([]string{})
 			newUpdateRepoFlag.SetArgs(tt.inputFlag)
 
-			if err := newUpdateRepoPrompt.Execute(); (err != nil) != tt.wantErr {
-				t.Errorf("Prompt command error = %v, wantErr %v", err, tt.wantErr)
+			if len(tt.inputFlag) != 0 {
+				newUpdateRepoPrompt.SetArgs(tt.inputFlag)
+			}
+
+			itsTestCaseWithPrompt := len(tt.inputFlag) == 0
+			if out := newUpdateRepoPrompt.Execute(); out != tt.wantErr && itsTestCaseWithPrompt {
+				t.Errorf("Prompt command error = %v, wantErr %v", out, tt.wantErr)
 			}
 
 			itsTestCaseWithStdin := tt.inputStdin != ""
-			if err := newUpdateRepoStdin.Execute(); (err != nil) != tt.wantErr && itsTestCaseWithStdin {
-				t.Errorf("Stdin command error = %v, wantErr %v", err, tt.wantErr)
+			if out := newUpdateRepoStdin.Execute(); out != tt.wantErr && itsTestCaseWithStdin {
+				t.Errorf("Stdin command error = %v, wantErr %v", out, tt.wantErr)
 			}
 
-			itsTestCaseWithFlag := len(tt.inputFlag) != 0
-			if err := newUpdateRepoFlag.Execute(); (err != nil) != tt.wantErr && itsTestCaseWithFlag {
-				t.Errorf("Flag command error = %v, wantErr %v", err, tt.wantErr)
+			// itsTestCaseWithFlag := len(tt.inputFlag) != 0
+			// if out := newUpdateRepoFlag.Execute(); (out == tt.wantErr) && itsTestCaseWithFlag {
+			// 	fmt.Println(out)
+			// 	fmt.Println(tt.wantErr)
+			// 	t.Errorf("Flag command error = %q, wantErr %q", out, tt.wantErr)
+			// }
+
+			flagOut := newUpdateRepoFlag.Execute()
+			if len(tt.inputFlag) != 0 {
+				assert.Equal(t, tt.wantErr, flagOut)
 			}
+
 		})
 	}
 }
