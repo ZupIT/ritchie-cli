@@ -1,0 +1,20 @@
+name: Open Issue Doc
+
+on:
+  issues: 
+    types: [opened, labeled]
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Open new ISSUE on ZupIT/docs-ritchie repository
+      if: contains(github.event.label.name , 'documentation')
+      uses: GuillaumeFalourd/open-issue-action@main
+      with:
+        access-token: ${{ secrets.ACCESS_TOKEN }}
+        repo-owner: ZupIT
+        repo-name: docs-ritchie
+        issue-title: ${{ github.event.issue.title }}
+        issue-body: New ISSUE referring to ${{ github.event.issue.html_url }} opened from https://github.com/ZupIT/ritchie-cli/issues through the open-issue-action.
