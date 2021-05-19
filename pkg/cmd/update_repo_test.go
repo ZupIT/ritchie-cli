@@ -19,7 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io" 
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -41,12 +41,12 @@ func TestUpdateRepoRun(t *testing.T) {
 	someError := errors.New("some error")
 
 	repoTest := &formula.Repo{
-		Provider: "Github",
-		Name:     "someRepo1",
-		Version:  "1.0.0",
-		Url:      "https://github.com/owner/repo",
-		Token:    "token",
-		Priority: 2,
+		Provider:      "Github",
+		Name:          "someRepo1",
+		Version:       "1.0.0",
+		Url:           "https://github.com/owner/repo",
+		Token:         "token",
+		Priority:      2,
 		LatestVersion: "2.0.0",
 	}
 
@@ -289,8 +289,8 @@ func TestUpdateRepoRun(t *testing.T) {
 			inputFlag: []string{"--name=someRepo1", "--version=1.0.0"},
 		},
 		{
-			name:       "success flags with 'latest' version",
-			in:         in{
+			name: "success flags with 'latest' version",
+			in: in{
 				repo: RepositoryListUpdaterCustomMock{
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest2, *repoTest}, nil
@@ -310,10 +310,10 @@ func TestUpdateRepoRun(t *testing.T) {
 						return "any", nil
 					},
 				},
-				Repos:  defaultGitRepositoryMock,
+				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    nil,
-			inputFlag:  []string{"--name=someRepo1", "--version=latest"},
+			wantErr:   nil,
+			inputFlag: []string{"--name=someRepo1", "--version=latest"},
 		},
 		{
 			name: "fail with flags, flag name empty",
@@ -362,7 +362,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 				inList: inputListMock{},
-				Repos:  GitRepositoryMock{
+				Repos: GitRepositoryMock{
 					tags: func(info git.RepoInfo) (git.Tags, error) {
 						return git.Tags{
 							git.Tag{Name: "1.0.0"},
@@ -372,6 +372,24 @@ func TestUpdateRepoRun(t *testing.T) {
 			},
 			wantErr:   errors.New(fmt.Sprintf("The version %q of repository %q was not found.\n", "3.0.0", repoTest.Name)),
 			inputFlag: []string{"--name=someRepo1", "--version=3.0.0"},
+		},
+		{
+			name: "fail with flags, repo not found",
+			in: in{
+				repo: RepositoryListUpdaterCustomMock{
+					list: func() (formula.Repos, error) {
+						return formula.Repos{}, nil
+					},
+					update: func(name formula.RepoName, version formula.RepoVersion) error {
+						var errorMsg = fmt.Sprintf("The repository %q was not found.\n", name)
+						return errors.New(errorMsg)
+					},
+				},
+				inList: inputListMock{},
+				Repos:  GitRepositoryMock{},
+			},
+			wantErr:   errors.New(fmt.Sprintf("The repository %q was not found.\n", "someRepo3")),
+			inputFlag: []string{"--name=someRepo3", "--version=1.0.0"},
 		},
 	}
 
