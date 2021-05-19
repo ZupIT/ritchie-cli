@@ -370,7 +370,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 			},
-			wantErr:   errors.New(fmt.Sprintf("The version %q of repository %q was not found.\n", "3.0.0", repoTest.Name)),
+			wantErr:   fmt.Errorf("The version %q of repository %q was not found.\n", "3.0.0", repoTest.Name),
 			inputFlag: []string{"--name=someRepo1", "--version=3.0.0"},
 		},
 		{
@@ -388,7 +388,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				inList: inputListMock{},
 				Repos:  GitRepositoryMock{},
 			},
-			wantErr:   errors.New(fmt.Sprintf("The repository %q was not found.\n", "someRepo3")),
+			wantErr:   fmt.Errorf("The repository %q was not found.\n", "someRepo3"),
 			inputFlag: []string{"--name=someRepo3", "--version=1.0.0"},
 		},
 	}
