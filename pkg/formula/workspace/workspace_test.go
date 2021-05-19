@@ -284,7 +284,6 @@ func TestWorkspaceManagerUpdate(t *testing.T) {
 		workspace     formula.Workspace
 		outErr        string
 		treeGenErr    error
-		setup         string
 	}{
 		{
 			name:          "success update",
@@ -293,13 +292,11 @@ func TestWorkspaceManagerUpdate(t *testing.T) {
 				Name: "zup",
 				Dir:  fullDir,
 			},
-			setup: "success update",
 		},
 		{
 			name:          "list workspace error",
 			workspacePath: ritHome,
 			outErr:        "unexpected end of JSON input",
-			setup:         "list workspace error",
 		},
 		{
 			name:          "invalid workspace",
@@ -339,7 +336,7 @@ func TestWorkspaceManagerUpdate(t *testing.T) {
 			_ = os.Mkdir(ritHome, os.ModePerm)
 			defer os.RemoveAll(ritHome)
 
-			switch tt.setup {
+			switch tt.name {
 			case "success update":
 				_ = os.Mkdir(path.Join(ritHome, formula.ReposDir), os.ModePerm)
 				_ = os.Mkdir(path.Join(ritHome, formula.ReposDir, "local-"+tt.workspace.Name), os.ModePerm)
@@ -369,7 +366,6 @@ func TestWorkspaceManagerUpdate(t *testing.T) {
 				assert.EqualError(t, got, tt.outErr)
 			} else {
 				assert.Empty(t, tt.outErr)
-
 				file, err := ioutil.ReadFile(path.Join(tt.workspacePath, formula.WorkspacesFile))
 				assert.NoError(t, err)
 				workspaces := formula.Workspaces{}
