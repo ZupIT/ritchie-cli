@@ -21,6 +21,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -33,6 +34,7 @@ var (
 	_                Collector = DataCollectorManager{}
 	CommonsRepoAdded           = ""
 	RepoName                   = ""
+	regexFlag                  = regexp.MustCompile(`--docker|--local|--stdin|--version|--verbose|--default|--help`)
 )
 
 type DataCollectorManager struct {
@@ -101,5 +103,11 @@ func (d DataCollectorManager) repoData() formula.Repo {
 func metricID() string {
 	args := os.Args
 	args[0] = "rit"
-	return strings.Join(args, "_")
+	var metricID []string
+	for _, element := range args {
+		if !strings.Contains(element, "--") || regexFlag.MatchString(element) {
+			metricID = append(metricID, element)
+		}
+	}
+	return strings.Join(metricID, "_")
 }

@@ -18,10 +18,12 @@ package metric
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Collector(t *testing.T) {
@@ -36,12 +38,14 @@ func Test_Collector(t *testing.T) {
 	type in struct {
 		userIdGen UserIdGenerator
 		file      stream.FileReader
+		args      []string
 	}
 
 	var tests = []struct {
 		name    string
 		wantErr bool
 		in
+		out string
 	}{
 		{
 			name:    "success case",
@@ -56,6 +60,54 @@ func Test_Collector(t *testing.T) {
 						return []byte(repoJson), nil
 					}},
 			},
+		},
+		{
+			name:    "success case input flags formula with docker flag",
+			wantErr: false,
+			in: in{
+				userIdGen: UserIdGeneratorMock{
+					GenerateMock: func() (UserId, error) {
+						return "", nil
+					}},
+				file: sMocks.FileReaderCustomMock{
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte(repoJson), nil
+					}},
+				args: []string{"cmd", "test", "login", "--username=dennis", "--password=123456", "--docker"},
+			},
+			out: "rit_test_login_--docker",
+		},
+		{
+			name:    "success case input flags credential",
+			wantErr: false,
+			in: in{
+				userIdGen: UserIdGeneratorMock{
+					GenerateMock: func() (UserId, error) {
+						return "", nil
+					}},
+				file: sMocks.FileReaderCustomMock{
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte(repoJson), nil
+					}},
+				args: []string{"cmd", "set", "credential", "--provider=github", "--fields=username,token", "--values=\"$USERNAME_CREDENTIAL\",\"$GITHUB_TOKEN\""},
+			},
+			out: "rit_set_credential",
+		},
+		{
+			name:    "success case input flags core command",
+			wantErr: false,
+			in: in{
+				userIdGen: UserIdGeneratorMock{
+					GenerateMock: func() (UserId, error) {
+						return "", nil
+					}},
+				file: sMocks.FileReaderCustomMock{
+					ReadMock: func(path string) ([]byte, error) {
+						return []byte(repoJson), nil
+					}},
+				args: []string{"cmd", "add", "repo", "--provider=\"Github\"", "--name=\"formulas-insights\"", "--repoUrl=\"https://github.com/ZupIT/ritchie-formulas\"", "--priority=1"},
+			},
+			out: "rit_add_repo",
 		},
 		{
 			name:    "fails when generator returns an error",
@@ -85,10 +137,18 @@ func Test_Collector(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.in.args != nil {
+				oldArgs := os.Args
+				os.Args = tt.in.args
+				defer func() { os.Args = oldArgs }()
+			}
 			collector := NewDataCollector(tt.in.userIdGen, "", tt.in.file)
-			_, err := collector.Collect(1, "2.0.0")
+			got, err := collector.Collect(1, "2.0.0")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("execution test failed: %s\nwant error: %t | got: %s", tt.name, tt.wantErr, err)
+			}
+			if tt.in.args != nil {
+				assert.Equal(t, got.Id.String(), tt.out)
 			}
 		})
 	}
