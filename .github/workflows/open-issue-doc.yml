@@ -11,7 +11,7 @@ jobs:
 
     - name: Open new ISSUE on ZupIT/docs-ritchie repository
       if: contains(github.event.label.name , 'documentation')
-      uses: GuillaumeFalourd/open-issue-action@main
+      uses: GuillaumeFalourd/open-issue-action@v1
       with:
         access-token: ${{ secrets.ACCESS_TOKEN }}
         repo-owner: ZupIT
