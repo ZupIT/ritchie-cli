@@ -383,45 +383,24 @@ func TestUpdateRepoRun(t *testing.T) {
 			repoProviders := formula.NewRepoProviders()
 			repoProviders.Add("Github", formula.Git{Repos: tt.in.Repos, NewRepoInfo: github.NewRepoInfo})
 
-			newUpdateRepoPrompt := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
-			newUpdateRepoStdin := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
-			newUpdateRepoFlag := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
+			newUpdateRepo := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
+			newUpdateRepo.SetArgs([]string{})
 
-			newUpdateRepoPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
-			newUpdateRepoStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
-			newUpdateRepoFlag.PersistentFlags().Bool("stdin", false, "input by stdin")
+			if len(tt.inputStdin) != 0 {
+				newUpdateRepo.PersistentFlags().Bool("stdin", true, "input by stdin")
+				newReader := strings.NewReader(tt.inputStdin)
+				newUpdateRepo.SetIn(newReader)
+			} else if len(tt.inputFlag) > 0 {
+				newUpdateRepo.PersistentFlags().Bool("stdin", false, "input by stdin")
+				newUpdateRepo.SetArgs(tt.inputFlag)
+			} else {
+				newUpdateRepo.PersistentFlags().Bool("stdin", false, "input by stdin")
+				newUpdateRepo.SetArgs([]string{})
+			}
 
-			newReader := strings.NewReader(tt.inputStdin)
-			newUpdateRepoStdin.SetIn(newReader)
-			newUpdateRepoStdin.SetArgs([]string{})
-
-			newUpdateRepoPrompt.SetArgs([]string{})
-			newUpdateRepoFlag.SetArgs(tt.inputFlag)
-
+			out := newUpdateRepo.Execute()
 			if len(tt.inputFlag) != 0 {
-				newUpdateRepoPrompt.SetArgs(tt.inputFlag)
-			}
-
-			itsTestCaseWithPrompt := len(tt.inputFlag) == 0
-			if out := newUpdateRepoPrompt.Execute(); out != tt.wantErr && itsTestCaseWithPrompt {
-				t.Errorf("Prompt command error = %v, wantErr %v", out, tt.wantErr)
-			}
-
-			itsTestCaseWithStdin := tt.inputStdin != ""
-			if out := newUpdateRepoStdin.Execute(); out != tt.wantErr && itsTestCaseWithStdin {
-				t.Errorf("Stdin command error = %v, wantErr %v", out, tt.wantErr)
-			}
-
-			// itsTestCaseWithFlag := len(tt.inputFlag) != 0
-			// if out := newUpdateRepoFlag.Execute(); (out == tt.wantErr) && itsTestCaseWithFlag {
-			// 	fmt.Println(out)
-			// 	fmt.Println(tt.wantErr)
-			// 	t.Errorf("Flag command error = %q, wantErr %q", out, tt.wantErr)
-			// }
-
-			flagOut := newUpdateRepoFlag.Execute()
-			if len(tt.inputFlag) != 0 {
-				assert.Equal(t, tt.wantErr, flagOut)
+				assert.Equal(t, tt.wantErr, out)
 			}
 
 		})
