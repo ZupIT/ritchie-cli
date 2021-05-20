@@ -35,7 +35,7 @@ var (
 	CommonsRepoAdded           = ""
 	RepoName                   = ""
 	regexCoreFlag              = regexp.MustCompile(`--docker|--local|--stdin|--version|--verbose|--default|--help`)
-	regexFlag                  = regexp.MustCompile("--(.*)=")
+	//regexFlag                  = regexp.MustCompile("--(.*)=")
 )
 
 type DataCollectorManager struct {
