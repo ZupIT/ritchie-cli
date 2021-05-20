@@ -167,11 +167,9 @@ func (up updateRepoCmd) resolvePrompt() (formula.Repos, error) {
 		return formula.Repos{}, err
 	}
 
-	flagAll := name == updateOptionAll
-
 	var repoToUpdate []formula.Repo
 
-	if flagAll {
+	if name == updateOptionAll {
 		repoToUpdate = externalRepos
 	} else {
 		for i := range externalRepos {
