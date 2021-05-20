@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -57,7 +58,31 @@ var (
 	errMsg                    = prompt.Yellow(i18n.T("init.add.commons.repo.error"))
 	ErrInitCommonsRepo        = errors.New(errMsg)
 	ErrInvalidRunType         = errors.New(i18n.T("init.invalid.run.type.error", strings.Join(formula.RunnerTypes, ", ")))
+	metricsFlag               = "sendmetrics"
+	commonsFlag               = "downcommons"
+	runnerFlag                = "runner"
 )
+
+var initFlags = flags{
+	{
+		name:        metricsFlag,
+		kind:        reflect.String,
+		defValue:    "yes",
+		description: "Send metrics",
+	},
+	{
+		name:        commonsFlag,
+		kind:        reflect.String,
+		defValue:    "yes",
+		description: "Download commons",
+	},
+	{
+		name:        runnerFlag,
+		kind:        reflect.String,
+		defValue:    "yes",
+		description: "Set runner type",
+	},
+}
 
 type initStdin struct {
 	AddCommons  bool   `json:"addCommons"`
@@ -402,4 +427,31 @@ func (in initCmd) warning() {
 func (in initCmd) initSuccess() {
 	success := i18n.T("init.successful")
 	prompt.Success(success)
+}
+
+func (in *initCmd) resolveFlags(cmd *cobra.Command) error {
+	metrics, err := cmd.Flags().GetString(metricsFlag)
+	if err != nil {
+		return err
+	}
+	common, err := cmd.Flags().GetString(commonsFlag)
+	if err != nil {
+		return err
+	}
+	runner, err := cmd.Flags().GetString(runnerFlag)
+	if err != nil {
+		return err
+	}
+
+	if metrics == "" {
+		return errors.New(missingFlagText(metricsFlag))
+	} else if common == "" {
+		return errors.New(missingFlagText(commonsFlag))
+	} else if runner == "" {
+		return errors.New(missingFlagText(runnerFlag))
+	}
+
+
+
+	return nil
 }
