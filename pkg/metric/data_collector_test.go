@@ -38,14 +38,12 @@ func Test_Collector(t *testing.T) {
 	type in struct {
 		userIdGen UserIdGenerator
 		file      stream.FileReader
-		args      []string
 	}
 
 	var tests = []struct {
 		name    string
 		wantErr bool
 		in
-		out string
 	}{
 		{
 			name:    "success case",
@@ -60,54 +58,6 @@ func Test_Collector(t *testing.T) {
 						return []byte(repoJson), nil
 					}},
 			},
-		},
-		{
-			name:    "success case input flags formula with docker flag",
-			wantErr: false,
-			in: in{
-				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() (UserId, error) {
-						return "", nil
-					}},
-				file: sMocks.FileReaderCustomMock{
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte(repoJson), nil
-					}},
-				args: []string{"cmd", "test", "login", "--username=dennis", "--password=123456", "--docker"},
-			},
-			out: "rit_test_login_--docker",
-		},
-		{
-			name:    "success case input flags credential",
-			wantErr: false,
-			in: in{
-				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() (UserId, error) {
-						return "", nil
-					}},
-				file: sMocks.FileReaderCustomMock{
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte(repoJson), nil
-					}},
-				args: []string{"cmd", "set", "credential", "--provider=github", "--fields=username,token", "--values=\"$USERNAME_CREDENTIAL\",\"$GITHUB_TOKEN\""},
-			},
-			out: "rit_set_credential",
-		},
-		{
-			name:    "success case input flags core command",
-			wantErr: false,
-			in: in{
-				userIdGen: UserIdGeneratorMock{
-					GenerateMock: func() (UserId, error) {
-						return "", nil
-					}},
-				file: sMocks.FileReaderCustomMock{
-					ReadMock: func(path string) ([]byte, error) {
-						return []byte(repoJson), nil
-					}},
-				args: []string{"cmd", "add", "repo", "--provider=\"Github\"", "--name=\"formulas-insights\"", "--repoUrl=\"https://github.com/ZupIT/ritchie-formulas\"", "--priority=1"},
-			},
-			out: "rit_add_repo",
 		},
 		{
 			name:    "fails when generator returns an error",
@@ -137,18 +87,10 @@ func Test_Collector(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.in.args != nil {
-				oldArgs := os.Args
-				os.Args = tt.in.args
-				defer func() { os.Args = oldArgs }()
-			}
 			collector := NewDataCollector(tt.in.userIdGen, "", tt.in.file)
-			got, err := collector.Collect(1, "2.0.0")
+			_, err := collector.Collect(1, "2.0.0")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("execution test failed: %s\nwant error: %t | got: %s", tt.name, tt.wantErr, err)
-			}
-			if tt.in.args != nil {
-				assert.Equal(t, got.Id.String(), tt.out)
 			}
 		})
 	}
@@ -161,4 +103,90 @@ type UserIdGeneratorMock struct {
 
 func (us UserIdGeneratorMock) Generate() (UserId, error) {
 	return us.GenerateMock()
+}
+
+func TestMetricId(t *testing.T) {
+
+	tests := []struct {
+		name string
+		in   []string
+		out  string
+	}{
+		{
+			name: "success filter input flag with docker flag",
+			in:   []string{"cmd", "test", "login", "--username=dennis", "--password=123456", "--docker"},
+			out:  "rit_test_login",
+		},
+		{
+			name: "success filter input flag for credential",
+			in:   []string{"cmd", "set", "credential", "--provider=github", "--fields=username,token", "--values=\"$USERNAME_CREDENTIAL\",\"$GITHUB_TOKEN\""},
+			out:  "rit_set_credential",
+		},
+		{
+			name: "success filter input flag for core command",
+			in:   []string{"cmd", "add", "repo", "--provider=\"Github\"", "--name=\"formulas-insights\"", "--repoUrl=\"https://github.com/ZupIT/ritchie-formulas\"", "--priority=1"},
+			out:  "rit_add_repo",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oldArgs := os.Args
+			os.Args = tt.in
+			defer func() { os.Args = oldArgs }()
+
+			got := metricId()
+			if got != tt.out {
+				t.Errorf("Unexpected return: got %v want %v", got, tt.out)
+			}
+
+			assert.Equal(t, got, tt.out)
+		})
+	}
+}
+
+func TestFlags(t *testing.T) {
+
+	tests := []struct {
+		name string
+		in   []string
+		out  []string
+	}{
+		{
+			name: "success filter input flag",
+			in:   []string{"cmd", "create", "formula"},
+			out:  nil,
+			//out:  []string{"username", "password", "docker"},
+		},
+		{
+			name: "success filter input flag with docker flag",
+			in:   []string{"cmd", "test", "login", "--username=dennis", "--password=123456", "--docker"},
+			out:  []string{"docker"},
+			//out:  []string{"username", "password", "docker"},
+		},
+		{
+			name: "success filter input flag for credential",
+			in:   []string{"cmd", "set", "credential", "--provider=github", "--fields=username,token", "--values=\"$USERNAME_CREDENTIAL\",\"$GITHUB_TOKEN\""},
+			out:  nil,
+			//out:  []string{"provider", "fields", "values"},
+		},
+		{
+			name: "success filter input flag for core command",
+			in:   []string{"cmd", "add", "repo", "--provider=\"Github\"", "--name=\"formulas-insights\"", "--repoUrl=\"https://github.com/ZupIT/ritchie-formulas\"", "--priority=1"},
+			out:  nil,
+			//out:  []string{"provider", "name", "repoUrl", "priority"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oldArgs := os.Args
+			os.Args = tt.in
+			defer func() { os.Args = oldArgs }()
+
+			got := flags()
+
+			assert.Equal(t, got, tt.out)
+		})
+	}
 }
