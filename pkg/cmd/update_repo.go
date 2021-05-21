@@ -162,7 +162,7 @@ func (up updateRepoCmd) resolvePrompt() (formula.Repos, error) {
 		}
 	}
 
-	helper := "Select a repository to update your version. P.S. Local repositories cannot be updated."
+	helper := "Select a repository to update your version. PS: To update local repositories (workspaces), use the *rit update workspace* command."
 	name, err := up.List(questionSelectARepo, reposName, helper)
 	if err != nil {
 		return formula.Repos{}, err
