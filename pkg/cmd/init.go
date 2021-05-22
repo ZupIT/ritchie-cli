@@ -68,19 +68,19 @@ var initFlags = flags{
 		name:        metricsFlag,
 		kind:        reflect.String,
 		defValue:    "yes",
-		description: "Send metrics",
+		description: "Send metrics (ie: yes, no)",
 	},
 	{
 		name:        commonsFlag,
 		kind:        reflect.String,
 		defValue:    "yes",
-		description: "Download commons",
+		description: "Download commons repository (ie: yes, no)",
 	},
 	{
 		name:        runnerFlag,
 		kind:        reflect.String,
-		defValue:    "yes",
-		description: "Set runner type",
+		defValue:    "local",
+		description: "Set runner type (ie: local, docker)",
 	},
 }
 
@@ -129,52 +129,39 @@ func NewInitCmd(
 		Use:       "init",
 		Short:     i18n.T("init.cmd.description"),
 		Long:      i18n.T("init.cmd.description"),
-		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
+		RunE:      RunFuncE(o.runStdin(), o.runCmd()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
-
+	cmd.LocalFlags()
+	addReservedFlags(cmd.Flags(), initFlags)
 	return cmd
 }
 
-func (in initCmd) runPrompt() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
+func (in initCmd) runPrompt() (config.Configs, error) {
 
-		in.welcome()
-
-		metrics, err := in.metricsAuthorization()
-		if err != nil {
-			return err
-		}
-
-		if err := in.addCommonsRepo(); err != nil {
-			return err
-		}
-
-		runType, err := in.setRunnerType()
-		if err != nil {
-			return err
-		}
-
-		configs := config.Configs{
-			Language: config.DefaultLang,
-			Metrics:  metrics,
-			RunType:  runType,
-			Tutorial: tutorialStatusEnabled,
-		}
-
-		if err := in.ritConfig.Write(configs); err != nil {
-			return err
-		}
-
-		in.initSuccess()
-
-		if err := in.tutorialInit(); err != nil {
-			return err
-		}
-
-		return nil
+	metrics, err := in.metricsAuthorization()
+	if err != nil {
+		return config.Configs{}, err
 	}
+
+	if err := in.addCommonsRepo(); err != nil {
+		return config.Configs{}, err
+	}
+
+	runType, err := in.setRunnerType()
+	if err != nil {
+		return config.Configs{}, err
+	}
+
+	configs := config.Configs{
+		Language: config.DefaultLang,
+		Metrics:  metrics,
+		RunType:  runType,
+		Tutorial: tutorialStatusEnabled,
+	}
+
+	return configs, nil
 }
 
 func (in initCmd) runStdin() CommandRunnerFunc {
@@ -429,29 +416,80 @@ func (in initCmd) initSuccess() {
 	prompt.Success(success)
 }
 
-func (in *initCmd) resolveFlags(cmd *cobra.Command) error {
+func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 	metrics, err := cmd.Flags().GetString(metricsFlag)
 	if err != nil {
-		return err
+		return config.Configs{}, err
 	}
 	common, err := cmd.Flags().GetString(commonsFlag)
 	if err != nil {
-		return err
+		return config.Configs{}, err
 	}
 	runner, err := cmd.Flags().GetString(runnerFlag)
 	if err != nil {
-		return err
+		return config.Configs{}, err
 	}
 
 	if metrics == "" {
-		return errors.New(missingFlagText(metricsFlag))
+		return config.Configs{}, errors.New(missingFlagText(metricsFlag))
 	} else if common == "" {
-		return errors.New(missingFlagText(commonsFlag))
+		return config.Configs{}, errors.New(missingFlagText(commonsFlag))
 	} else if runner == "" {
-		return errors.New(missingFlagText(runnerFlag))
+		return config.Configs{}, errors.New(missingFlagText(runnerFlag))
+	}
+	// Send Metrics
+
+
+	// Download  Commons
+	if common == "yes" {
+		if err := in.addCommonsRepo(); err != nil {
+			return config.Configs{}, err
+		}
 	}
 
+	// Set Runnertype
+	var runType formula.RunnerType
+	for i, v := range formula.RunnerTypes {
+		if v == runner {
+			runType = formula.RunnerType(i)
+		}
+	}
 
+	configs := config.Configs{
+		Language: config.DefaultLang,
+		Metrics:  metrics,
+		RunType:  runType,
+		Tutorial: tutorialStatusEnabled,
+	}
 
-	return nil
+	return configs, nil
+}
+
+func (in initCmd) resolveInput(cmd *cobra.Command) (config.Configs, error) {
+	if IsFlagInput(cmd) {
+		return in.runFlags(cmd)
+	}
+	return in.runPrompt()
+}
+
+func (in initCmd) runCmd() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		in.welcome()
+
+		configs, err := in.resolveInput(cmd)
+		if err != nil {
+			return err
+		}
+
+		if err := in.ritConfig.Write(configs); err != nil {
+			return err
+		}
+
+		in.initSuccess()
+
+		if err := in.tutorialInit(); err != nil {
+			return err
+		}
+		return nil
+	}
 }
