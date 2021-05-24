@@ -27,6 +27,11 @@ func (d *DirManagerMock) Remove(dir string) error {
 	return args.Error(0)
 }
 
+func (d *DirManagerMock) List(dir string, hiddenDir bool) ([]string, error) {
+	args := d.Called(dir, hiddenDir)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 type FileManagerMock struct {
 	mock.Mock
 }
