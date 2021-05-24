@@ -52,9 +52,13 @@ jobs:
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
         - name: RIT LIST REPO command (1)
-          run: rit list repo > log.txt
+          run:  |
+            rit list repo > log.txt
+            cat log.txt
         - name: ASSERT LOG
-          run: diff log.txt testdata/gha_workflows/assert.txt
+          run: |
+            cat testdata/gha_workflows/assert.txt
+            diff log.txt testdata/gha_workflows/assert.txt
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         - name: RIT LIST REPO command (2)
