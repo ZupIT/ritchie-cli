@@ -13,6 +13,7 @@ jobs:
             curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
         - name: Create binary from branch
+          run: |
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
         - name: RIT ADD REPO command
@@ -33,6 +34,7 @@ jobs:
             curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
         - name: Create binary from branch
+          run: |
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
         - name: RIT ADD REPO command
