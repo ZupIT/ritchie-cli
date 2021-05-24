@@ -27,7 +27,7 @@ jobs:
         - name: RIT LIST REPO command (1)
           run: rit list repo
         - name: RIT ADD REPO command
-          run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag=2.2.0
+          run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         - name: RIT LIST REPO command (2)
           run: rit list repo
         - name: RIT UPDATE REPO command
@@ -52,9 +52,10 @@ jobs:
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
         - name: RIT LIST REPO command (1)
-          run: rit list repo
+          run: rit list repo > log.txt
+        - run: cat log.txt
         - name: RIT ADD REPO command
-          run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag=2.2.0
+          run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         - name: RIT LIST REPO command (2)
           run: rit list repo
         - name: RIT UPDATE REPO command
