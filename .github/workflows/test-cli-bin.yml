@@ -12,7 +12,7 @@ jobs:
           run: |
             curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
-        - name: Check Installation
+        - name: Check RIT binary Installation
           run: |
             cd /usr/local/bin
             stat rit -c %y
@@ -20,7 +20,7 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
-        - name: Check Binary Substitution
+        - name: Check RIT Binary Substitution
           run: |
             cd /usr/local/bin
             stat rit -c %y
