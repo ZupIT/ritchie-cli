@@ -15,7 +15,7 @@ jobs:
         - name: Check Installation
           run: |
             cd /usr/local/bin
-            ls -lha
+            stat rit -c %y
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
@@ -23,7 +23,7 @@ jobs:
         - name: Check Binary Substitution
           run: |
             cd /usr/local/bin
-            ls -lha
+            stat rit -c %y
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
         - name: RIT LIST REPO command
@@ -44,15 +44,15 @@ jobs:
         - name: Check Installation
           run: |
             cd /usr/local/bin
-            ls -lha
+            stat rit -c %y
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
-            make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
         - name: Check Binary Substitution
           run: |
             cd /usr/local/bin
-            ls -lha
+            stat rit -c %y
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
         - name: RIT LIST REPO command
