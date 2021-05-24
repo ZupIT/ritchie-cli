@@ -1,0 +1,45 @@
+name: Test CLI binary
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ubuntu:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Ritchie Installation & Initialization
+          run: |
+            curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
+        - name: Create binary from branch
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+        - name: RIT ADD REPO command
+          run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
+        - name: RIT LIST REPO command
+          run: rit list repo
+        - name: RIT UPDATE REPO command
+          run: rit update repo --name="demo" --version="2.3.0"
+        - name: RIT DELETE REPO command
+          run: rit delete repo --name="demo"
+
+  macos:
+      runs-on: macos-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Ritchie Installation & Initialization
+          run: |
+            curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
+        - name: Create binary from branch
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+        - name: RIT ADD REPO command
+          run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
+        - name: RIT LIST REPO command
+          run: rit list repo
+        - name: RIT UPDATE REPO command
+          run: rit update repo --name="demo" --version="2.3.0"
+        - name: RIT DELETE REPO command
+          run: rit delete repo --name="demo"
