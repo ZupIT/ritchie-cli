@@ -48,7 +48,7 @@ jobs:
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
-            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+            make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
         - name: Check Binary Substitution
           run: |
             cd /usr/local/bin
