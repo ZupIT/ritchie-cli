@@ -54,7 +54,7 @@ jobs:
         - name: RIT LIST REPO command (1)
           run: rit list repo > log.txt
         - name: ASSERT LOG
-          run: diff log.txt testdata/gha_workflows/assert.txt --color
+          run: diff log.txt testdata/gha_workflows/assert.txt
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         - name: RIT LIST REPO command (2)
