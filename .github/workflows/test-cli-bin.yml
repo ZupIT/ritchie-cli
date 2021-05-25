@@ -100,32 +100,31 @@ jobs:
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | .\rit.exe init --stdin
         - name: RIT LIST REPO command (1)
           run:  |
-            rit.exe list repo
-          # rit list repo > check1.txt
-          # cat check1.txt
-          # cat testdata/gha_workflows/repo_workflow/assert1.txt
-          # diff check1.txt testdata/gha_workflows/repo_workflow/assert1.txt
-        # - name: RIT ADD REPO command
-        #   run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
-        # - name: RIT LIST REPO command (2)
-        #   run:  |
-        #     rit list repo > check2.txt
-        #     cat check2.txt
-        #     cat testdata/gha_workflows/repo_workflow/assert2.txt
-        #     diff check2.txt testdata/gha_workflows/repo_workflow/assert2.txt
-        # - name: RIT UPDATE REPO command
-        #   run: rit update repo --name="demo" --version="2.3.0"
-        # - name: RIT LIST REPO command (3)
-        #   run:  |
-        #     rit list repo > check3.txt
-        #     cat check3.txt
-        #     cat testdata/gha_workflows/repo_workflow/assert3.txt
-        #     diff check3.txt testdata/gha_workflows/repo_workflow/assert3.txt
-        # - name: RIT DELETE REPO command
-        #   run: rit delete repo --name="demo"
-        # - name: RIT LIST REPO command (4)
-        #   run:  |
-        #     rit list repo > check4.txt
-        #     cat check4.txt
-        #     cat testdata/gha_workflows/repo_workflow/assert1.txt
-        #     diff check4.txt testdata/gha_workflows/repo_workflow/assert1.txt
+            .\rit.exe list repo > check1.txt
+            cat check1.txt
+            cat testdata/gha_workflows/repo_workflow/assert1.txt
+            diff check1.txt testdata/gha_workflows/repo_workflow/assert1.txt
+        - name: RIT ADD REPO command
+          run: .\rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
+        - name: RIT LIST REPO command (2)
+          run:  |
+            .\rit.exe list repo > check2.txt
+            cat check2.txt
+            cat testdata/gha_workflows/repo_workflow/assert2.txt
+            diff check2.txt testdata/gha_workflows/repo_workflow/assert2.txt
+        - name: RIT UPDATE REPO command
+          run: .\rit.exe update repo --name="demo" --version="2.3.0"
+        - name: RIT LIST REPO command (3)
+          run:  |
+            .\rit.exe list repo > check3.txt
+            cat check3.txt
+            cat testdata/gha_workflows/repo_workflow/assert3.txt
+            diff check3.txt testdata/gha_workflows/repo_workflow/assert3.txt
+        - name: RIT DELETE REPO command
+          run: .\rit.exe delete repo --name="demo"
+        - name: RIT LIST REPO command (4)
+          run:  |
+            .\rit.exe list repo > check4.txt
+            cat check4.txt
+            cat testdata/gha_workflows/repo_workflow/assert1.txt
+            diff check4.txt testdata/gha_workflows/repo_workflow/assert1.txt
