@@ -106,6 +106,7 @@ jobs:
           run: |
             Invoke-WebRequest -uri "https://commons-repo.ritchiecli.io/latest/ritchiecli.msi" -OutFile "ritchie.msi"
             Start-Process ritchie.msi
+            ls
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
         # - name: Create binary from branch
         #   run: |
