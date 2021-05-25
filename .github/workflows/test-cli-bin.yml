@@ -95,8 +95,9 @@ jobs:
         - name: Create binary from branch
           run: |
             choco install make
-            make build-windows && runas \user:administrator move .\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
+            make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls
+            ls D:\a\ritchie-cli\ritchie-cli\dist\windows\
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit.exe init --stdin
         - name: RIT LIST REPO command (1)
           run:  |
