@@ -8,18 +8,11 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2.3.4
-        - name: Ritchie Installation & Initialization
-          run: |
-            curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
-            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
-        - name: Check RIT binary Installation
-          run: |
-            cd /usr/local/bin
-            stat rit -c %y
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
         - name: Check RIT Binary Substitution
           run: |
             cd /usr/local/bin
@@ -59,14 +52,11 @@ jobs:
       runs-on: macos-latest
       steps:
         - uses: actions/checkout@v2.3.4
-        - name: Ritchie Installation & Initialization
-          run: |
-            curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
-            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
         - name: RIT LIST REPO command (1)
           run:  |
             rit list repo > check1.txt
@@ -102,22 +92,18 @@ jobs:
       runs-on: windows-latest
       steps:
         - uses: actions/checkout@v2.3.4
-        - name: Ritchie Installation & Initialization
-          run: |
-            Invoke-WebRequest -uri "https://commons-repo.ritchiecli.io/latest/ritchiecli.msi" -OutFile "ritchie.msi"
-            Start-Process ritchie.msi -ArgumentList '/quiet' -Wait
-            ls
-            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
             make build-windows && runas \user:administrator move .\dist\windows\rit.exe "\Program Files (x86)\rit"
-        # - name: RIT LIST REPO command (1)
-        #   run:  |
-        #     rit list repo > check1.txt
-        #     cat check1.txt
-        #     cat testdata/gha_workflows/repo_workflow/assert1.txt
-        #     diff check1.txt testdata/gha_workflows/repo_workflow/assert1.txt
+            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit.exe init --stdin
+        - name: RIT LIST REPO command (1)
+          run:  |
+            rit.exe list repo
+          # rit list repo > check1.txt
+          # cat check1.txt
+          # cat testdata/gha_workflows/repo_workflow/assert1.txt
+          # diff check1.txt testdata/gha_workflows/repo_workflow/assert1.txt
         # - name: RIT ADD REPO command
         #   run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         # - name: RIT LIST REPO command (2)
