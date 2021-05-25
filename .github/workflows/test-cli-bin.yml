@@ -67,6 +67,7 @@ jobs:
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         - name: RIT LIST REPO command (2)
           run:  |
+            rit list repo
             rit list repo > check2.txt
             cat check2.txt
             cat testdata/gha_workflows/repo_workflow/assert2.txt
