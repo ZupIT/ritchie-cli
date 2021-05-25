@@ -95,11 +95,10 @@ jobs:
         - name: Create binary from branch
           run: |
             choco install make
-            ls
-            cd $GITHUB_WORKSPACE
+            # ls
+            # cd $GITHUB_WORKSPACE
             ls
             make build-windows && runas \user:administrator move .\dist\windows\rit.exe ".\"
-            ls
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit.exe init --stdin
         - name: RIT LIST REPO command (1)
           run:  |
