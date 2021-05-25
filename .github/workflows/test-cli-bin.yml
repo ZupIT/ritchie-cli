@@ -105,13 +105,13 @@ jobs:
         - name: Ritchie Installation & Initialization
           run: |
             Invoke-WebRequest -uri "https://commons-repo.ritchiecli.io/latest/ritchiecli.msi" -OutFile "ritchie.msi"
-            Start-Process ritchie.msi
+            Start-Process ritchie.msi -ArgumentList '/quiet' -Wait
             ls
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
-        # - name: Create binary from branch
-        #   run: |
-        #     cd $GITHUB_WORKSPACE
-        #     make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-windows && runas \user:administrator move .\dist\windows\rit.exe "\Program Files (x86)\rit"
         # - name: RIT LIST REPO command (1)
         #   run:  |
         #     rit list repo > check1.txt
