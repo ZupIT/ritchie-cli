@@ -96,6 +96,7 @@ jobs:
           run: |
             choco install make
             cd $GITHUB_WORKSPACE
+            ls
             make build-windows && runas \user:administrator move .\dist\windows\rit.exe "\Program Files (x86)\rit"
             echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit.exe init --stdin
         - name: RIT LIST REPO command (1)
