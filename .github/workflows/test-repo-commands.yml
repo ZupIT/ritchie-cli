@@ -2,7 +2,7 @@ name: Test Repo Commands
 
 # TXT files used for ASSERT are located on the /testdata/gha_workflows directory.
 
-# To help you coding your workflow tests, you can use CAT commands to show each file you will compare.
+# To help you coding your workflow tests, you can use CAT commands to show each file you will compare on the workflow window on Github.
 
 # EXAMPLE:
 #   rit list repo > check1.txt
