@@ -128,7 +128,7 @@ func TestRun(t *testing.T) {
 			name:      "Pre run error",
 			def:       formula.Definition{Path: "testing/without-config", RepoName: "commons"},
 			inputType: 0,
-			want:      errors.New("Failed to load formula config file\nTry running rit update repo\nConfig file path not found: /var/folders/9y/9fb90c311tscdd4347mpmpxc0000gp/T/.rit-runner-local/repos/commons/testing/without-config/config.json"),
+			want:      errors.New("Failed to load formula config file\nTry running rit update repo\nConfig file path not found: /tmp/.rit-runner-local/repos/commons/testing/without-config/config.json"),
 		},
 		{
 			name:       "Post run error",
