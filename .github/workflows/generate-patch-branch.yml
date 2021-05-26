@@ -1,4 +1,4 @@
-name: Generate Patch Tag
+name: Generate patch branch with Cherry Pick
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
         required: true
 
 jobs:
-  generate-patch-tag:
+  generate-patch-release-branch:
     runs-on: ubuntu-latest
     steps:
       
@@ -30,6 +30,5 @@ jobs:
           git config user.email github-actions@github.com
           git fetch -a
           git checkout tags/${{ github.event.inputs.reference-tag }} -b release-${{ github.event.inputs.new-tag }}
-          git cherry-pick ${{ github.event.inputs.commit-hash }}
-          git tag ${{ github.event.inputs.new-tag }}
-          git push --tags
+          git cherry-pick ${{ github.event.inputs.commit-hash }} --strategy-option=ours 
+          git push --set-upstream origin release-${{ github.event.inputs.new-tag }}
