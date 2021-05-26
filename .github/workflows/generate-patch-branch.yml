@@ -14,7 +14,7 @@ on:
         required: true
 
 jobs:
-  cherry-pick:
+  generate-patch-release-branch:
     runs-on: ubuntu-latest
     steps:
       
