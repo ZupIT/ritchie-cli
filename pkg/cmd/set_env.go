@@ -17,7 +17,9 @@
 package cmd
 
 import (
+	"errors"
 	"os"
+	"reflect"
 
 	renv "github.com/ZupIT/ritchie-cli/pkg/env"
 
@@ -28,9 +30,20 @@ import (
 )
 
 const (
-	newEnv     = "Type the new env?"
-	successMsg = "Set env successful!"
+	newEnv                = "Type the new env?"
+	successMsg            = "Set env successful!"
+	setEnvFlagName        = "env"
+	setEnvFlagDescription = "Env name to set"
 )
+
+var setEnvFlags = flags{
+	{
+		name:        setEnvFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: setEnvFlagDescription,
+	},
+}
 
 // setEnvCmd type for clean repo command.
 type setEnvCmd struct {
@@ -55,35 +68,23 @@ func NewSetEnvCmd(
 		Use:       "env",
 		Short:     "Set env",
 		Example:   "rit set env",
-		RunE:      RunFuncE(s.runStdin(), s.runPrompt()),
+		RunE:      RunFuncE(s.runStdin(), s.runCmd()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
 
 	cmd.LocalFlags()
 
+	addReservedFlags(cmd.Flags(), setEnvFlags)
+
 	return cmd
 }
 
-func (s setEnvCmd) runPrompt() CommandRunnerFunc {
+func (s setEnvCmd) runCmd() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		envHolder, err := s.env.Find()
+		env, err := s.resolveInput(cmd)
 		if err != nil {
 			return err
-		}
-
-		envHolder.All = append(envHolder.All, renv.Default)
-		envHolder.All = append(envHolder.All, newEnv)
-		env, err := s.List("All:", envHolder.All)
-		if err != nil {
-			return err
-		}
-
-		if env == newEnv {
-			env, err = s.Text("New env: ", true)
-			if err != nil {
-				return err
-			}
 		}
 
 		if _, err := s.env.Set(env); err != nil {
@@ -113,4 +114,45 @@ func (s setEnvCmd) runStdin() CommandRunnerFunc {
 		prompt.Success(successMsg)
 		return nil
 	}
+}
+
+func (s *setEnvCmd) resolveInput(cmd *cobra.Command) (string, error) {
+	if IsFlagInput(cmd) {
+		return s.resolveFlags(cmd)
+	}
+	return s.resolvePrompt()
+}
+
+func (s *setEnvCmd) resolvePrompt() (string, error) {
+	envHolder, err := s.env.Find()
+	if err != nil {
+		return "", err
+	}
+
+	envHolder.All = append(envHolder.All, renv.Default)
+	envHolder.All = append(envHolder.All, newEnv)
+	env, err := s.List("All:", envHolder.All)
+	if err != nil {
+		return "", err
+	}
+
+	if env == newEnv {
+		env, err = s.Text("New env: ", true)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return env, nil
+}
+
+func (s *setEnvCmd) resolveFlags(cmd *cobra.Command) (string, error) {
+	env, err := cmd.Flags().GetString(setEnvFlagName)
+	if err != nil {
+		return "", err
+	} else if env == "" {
+		return "", errors.New(missingFlagText(setEnvFlagName))
+	}
+
+	return env, nil
 }

@@ -1,0 +1,114 @@
+[init.cmd.description]
+other = "Configuration initiale de rit"
+
+[init.welcome]
+other = "Ritchie CLI est un produit open source qui vous permet de créer,\nstocker et partager tout type d'automatisations, en les exécutant via des lignes de commande,\n pour exécuter des opérations ou démarrer des flux de travail.\n\nVous pouvez consulter notre politique de confidentialité (http://insights.zup.com.br/politica-privacidade) pour mieux comprendre notre engagement.\n\n"
+
+[init.successful]
+other = "\n✅ Initialisation réalisée avec succès!\n"
+
+[init.successful_windows]
+other = "\n Initialisation réalisée avec succès!\n"
+
+[init.warning]
+other = "\n\t\t\t⚠️  AVERTISSEMENT ⚠️"
+
+[init.warning_windows]
+other = "\n\t\t\t AVERTISSEMENT"
+
+[init.commons.header]
+other = "⭐ Dépôt commun ⭐\n"
+
+[init.commons.header_windows]
+other = "Dépôt commun \n"
+
+[init.commons.repo.success]
+other = "✅ Dépôt commun ajouté avec succès!\n"
+
+[init.commons.repo.success_windows]
+other = "Dépôt commun ajouté avec succès!\n"
+
+[init.add.commons.repo.help]
+other = "\nUtilisez \"rit add repo\" pour ajouter un nouveau dépôt manuellement.\n"
+
+[init.add.commons.repo.info]
+other = "\nVous pouvez maintenir la configuration sans ajouter the dépôt commun,\nmais vous devrez ajouter un dépôt de modèles avec la commande\n\"rit add repo\" sous le nom de \"commons\" si vous souhaiter créer de nouvelles formules.\n\Pour en savoir plus, suivez cet exemple:\n[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]\n"
+
+[init.add.commons.repo.question]
+other = "Souhaitez-vous ajouter le dépôt de la communauté?"
+
+[init.add.commons.repo.error]
+other = "Il n'a pas été possible d'ajouter le dépôt de la communauté pour le moment, réessayez plus tard."
+
+[init.adding.commons.repo]
+other = "Ajout du dépôt commun..."
+
+[init.tutorial.header]
+other = "\n📖 DIDACTICIEL 📖\n"
+
+[init.tutorial.header_windows]
+other = "\n DIDACTICIEL\n"
+
+[init.tutorial.title]
+other = "Comment créer de nouvelles formulas:"
+
+[init.tutorial.body]
+other = "\n∙ Utilisez \"rit create formula\"\n∙ Ouvrez votre projet avec votre éditeur préféré.\n"
+
+[init.tutorial.commons]
+other = "Jetez un œil aux formules que vous pouvez exécuter et tester avec Ritchie en utilisant \"rit\"\n"
+
+[init.metric.header]
+other = "📊 Données 📊\n"
+
+[init.metric.header_windows]
+other = "Données\n"
+
+[init.add.metric.info]
+other = "To help us improve and deliver more value to the community,\nwe will collect anonymous data about product and feature\nuse statistics and crash reports."
+other = "Pour nous aider à nous améliorer et à offrir plus de valeur à la communauté,\nnous collecterons des données anonymes sur les statistiques du produit\n et son utilisation."
+
+[init.add.metric.question]
+other = "Êtes-vous d'accord?"
+
+[init.metric.footer]
+other = "\nVous pouvez toujours modifier votre choix à l'aide de la commande \"rit metrics\" command.\n"
+
+[init.run.type.header]
+other = "🏃 UTILISATION DES FORMULES 🏃\n"
+
+[init.run.type.header_windows]
+other = "UTILISATION DES FORMULES \n"
+
+[init.run.type.local.warning]
+other = "\nAfin d'exécuter les formules localement, vous devez avoir le langage informatique de la formule installé sur votre machine,\nsi vous ne souhaitez pas l'installer, choisissez d'exécuter les formules avec Docker.\n"
+
+[init.run.type.question]
+other = "Selectionnez le type d'éxécution de formule par défaut:"
+
+[init.invalid.run.type.error]
+other = "type d'exécution de formules non valide. Types d'exécution disponibles: [%v]"
+
+[input.accept.opt]
+other = "✅ Oui"
+
+[input.accept.opt_windows]
+other = "Oui"
+
+[input.decline.opt]
+other = "❌ Non"
+
+[input.decline.opt_windows]
+other = "Non"
+
+[input.run.type.local]
+other = "🏠 locale"
+
+[input.run.type.local_windows]
+other = "locale"
+
+[input.run.type.docker]
+other = "🐳 docker"
+
+[input.run.type.docker_windows]
+other = "docker"

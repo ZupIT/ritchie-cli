@@ -25,9 +25,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
@@ -58,6 +58,7 @@ type createFormulaCmd struct {
 	template        template.Manager
 	tutorial        rtutorial.Finder
 	tree            formula.TreeChecker
+	validator       validator.Manager
 }
 
 // CreateFormulaCmd creates a new cmd instance.
@@ -72,6 +73,7 @@ func NewCreateFormulaCmd(
 	inPath prompt.InputPath,
 	rtf rtutorial.Finder,
 	treeChecker formula.TreeChecker,
+	validator validator.Manager,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,
@@ -84,6 +86,7 @@ func NewCreateFormulaCmd(
 		template:        tplM,
 		tutorial:        rtf,
 		tree:            treeChecker,
+		validator:       validator,
 	}
 
 	cmd := &cobra.Command{
@@ -165,7 +168,7 @@ func (c createFormulaCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err := formulaCommandValidator(cf.FormulaCmd); err != nil {
+		if err := c.validator.FormulaCommmandValidator(cf.FormulaCmd); err != nil {
 			return err
 		}
 
@@ -227,57 +230,10 @@ func formulaPath(workspacePath, cmd string) string {
 }
 
 func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
-	if err := formulaCommandValidator(cmd.(string)); err != nil {
+	if err := c.validator.FormulaCommmandValidator(cmd.(string)); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func formulaCommandValidator(formulaCmd string) error {
-	if len(strings.TrimSpace(formulaCmd)) < 1 {
-		return ErrFormulaCmdNotBeEmpty
-	}
-
-	s := strings.Split(formulaCmd, " ")
-	if s[0] != "rit" {
-		return ErrFormulaCmdMustStartWithRit
-	}
-
-	if len(s) <= 2 {
-		return ErrInvalidFormulaCmdSize
-	}
-
-	if err := characterValidator(formulaCmd); err != nil {
-		return err
-	}
-
-	if err := coreCmdValidator(formulaCmd); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func coreCmdValidator(formulaCmd string) error {
-	wordAfterCore := strings.Split(formulaCmd, " ")[1]
-	for i := range api.CoreCmds {
-		if wordAfterCore == api.CoreCmds[i].Usage {
-			errorString := fmt.Sprintf("core command verb %q after rit\n"+
-				"Use your formula group before the verb\n"+
-				"Example: rit aws list bucket\n",
-				api.CoreCmds[i].Usage)
-
-			return errors.New(errorString)
-		}
-	}
-	return nil
-}
-
-func characterValidator(formula string) error {
-	if strings.ContainsAny(formula, `\/><,@`) {
-		return ErrInvalidCharactersFormulaCmd
-	}
 	return nil
 }
 

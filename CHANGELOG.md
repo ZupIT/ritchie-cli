@@ -1,34 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/zupit/ritchie-cli/tree/HEAD)
-
-[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.11.3...HEAD)
-
-**Merged pull requests:**
-
-- Update generate patch branch workflow [\#936](https://github.com/ZupIT/ritchie-cli/pull/936) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
-- FIX stdout cmd on local runner [\#935](https://github.com/ZupIT/ritchie-cli/pull/935) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
-- Update metrics for input flags [\#930](https://github.com/ZupIT/ritchie-cli/pull/930) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
-- Add `Open Issue Doc` workflow on Github Actions [\#929](https://github.com/ZupIT/ritchie-cli/pull/929) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
-- Add `Generate Patch Tag` workflow on Github Actions [\#928](https://github.com/ZupIT/ritchie-cli/pull/928) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
-- Update CHANGELOG.md with Release Patch 2.11.1 [\#927](https://github.com/ZupIT/ritchie-cli/pull/927) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
-- Improvement/tests with testify set env [\#926](https://github.com/ZupIT/ritchie-cli/pull/926) ([fernandobelettizup](https://github.com/fernandobelettizup))
-- Fixes \#914 by changing Docker's invocation command [\#925](https://github.com/ZupIT/ritchie-cli/pull/925) ([dcominottim](https://github.com/dcominottim))
-- Enhancements and Updates [\#918](https://github.com/ZupIT/ritchie-cli/pull/918) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
-- Release 2.11.0 merge [\#917](https://github.com/ZupIT/ritchie-cli/pull/917) ([zup-ci](https://github.com/zup-ci))
-- Support flags for the rit update repo command. [\#916](https://github.com/ZupIT/ritchie-cli/pull/916) ([maurineimirandazup](https://github.com/maurineimirandazup))
-- Create rename formula command [\#907](https://github.com/ZupIT/ritchie-cli/pull/907) ([brunasilvazup](https://github.com/brunasilvazup))
-
 ## [2.11.3](https://github.com/zupit/ritchie-cli/tree/2.11.3) (2021-05-26)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.11.2...2.11.3)
 
 **Closed issues:**
 
-- Update Generate Patch workflow [\#937](https://github.com/ZupIT/ritchie-cli/issues/937)
 - Bug with formula's outputs [\#934](https://github.com/ZupIT/ritchie-cli/issues/934)
-- Add command rit rename formula [\#817](https://github.com/ZupIT/ritchie-cli/issues/817)
-- Support flags for rit update repo [\#722](https://github.com/ZupIT/ritchie-cli/issues/722)
 
 ## [2.11.2](https://github.com/zupit/ritchie-cli/tree/2.11.2) (2021-05-21)
 
@@ -37,7 +15,6 @@
 **Closed issues:**
 
 - Improve metrics extracted by input flags [\#919](https://github.com/ZupIT/ritchie-cli/issues/919)
-- Support flags for rit set env [\#719](https://github.com/ZupIT/ritchie-cli/issues/719)
 
 ## [2.11.1](https://github.com/zupit/ritchie-cli/tree/2.11.1) (2021-05-14)
 
@@ -53,14 +30,14 @@
 
 **Closed issues:**
 
-- Save and reuse repo credentials for private repos [\#800](https://github.com/ZupIT/ritchie-cli/issues/800)
-- \[BUG\] Files created by the formula belonging to the root user [\#626](https://github.com/ZupIT/ritchie-cli/issues/626)
 - Turn off stale bot [\#909](https://github.com/ZupIT/ritchie-cli/issues/909)
 - Friendlier error message on update repo [\#902](https://github.com/ZupIT/ritchie-cli/issues/902)
 - Add command 'rit list formulas' [\#857](https://github.com/ZupIT/ritchie-cli/issues/857)
 - Add a force-update option to execute the last formula version when enabled [\#849](https://github.com/ZupIT/ritchie-cli/issues/849)
+- Save and reuse repo credentials for private repos [\#800](https://github.com/ZupIT/ritchie-cli/issues/800)
 - Add lib to support internationalization [\#775](https://github.com/ZupIT/ritchie-cli/issues/775)
 - Add tests and Support flags for rit delete repo [\#718](https://github.com/ZupIT/ritchie-cli/issues/718)
+- \[BUG\] Files created by the formula belonging to the root user [\#626](https://github.com/ZupIT/ritchie-cli/issues/626)
 
 **Merged pull requests:**
 
@@ -68,6 +45,8 @@
 - New error message. [\#912](https://github.com/ZupIT/ritchie-cli/pull/912) ([maurineimirandazup](https://github.com/maurineimirandazup))
 - Feature/stale remotion [\#910](https://github.com/ZupIT/ritchie-cli/pull/910) ([GuillaumeFalourd](https://github.com/GuillaumeFalourd))
 - Adding flags, delete confirmation and new tests to delete repo [\#908](https://github.com/ZupIT/ritchie-cli/pull/908) ([fernandobelettizup](https://github.com/fernandobelettizup))
+- Add tests with testify for delete repo [\#906](https://github.com/ZupIT/ritchie-cli/pull/906) ([fernandobelettizup](https://github.com/fernandobelettizup))
+- Testify flag refactor [\#904](https://github.com/ZupIT/ritchie-cli/pull/904) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 - Friendlier error message on update repo [\#903](https://github.com/ZupIT/ritchie-cli/pull/903) ([fernandobelettizup](https://github.com/fernandobelettizup))
 - feat: capture formula output [\#900](https://github.com/ZupIT/ritchie-cli/pull/900) ([lucasdittrichzup](https://github.com/lucasdittrichzup))
 - Release 2.10.3 merge [\#899](https://github.com/ZupIT/ritchie-cli/pull/899) ([zup-ci](https://github.com/zup-ci))
@@ -77,8 +56,6 @@
 - Detect new repository version [\#888](https://github.com/ZupIT/ritchie-cli/pull/888) ([kaduartur](https://github.com/kaduartur))
 - Create configuration for force execution of formula in latest version [\#883](https://github.com/ZupIT/ritchie-cli/pull/883) ([brunasilvazup](https://github.com/brunasilvazup))
 - Internationalization Ritchie-cli [\#847](https://github.com/ZupIT/ritchie-cli/pull/847) ([kaduartur](https://github.com/kaduartur))
-- Add tests with testify for delete repo [\#906](https://github.com/ZupIT/ritchie-cli/pull/906) ([fernandobelettizup](https://github.com/fernandobelettizup))
-- Testify flag refactor [\#904](https://github.com/ZupIT/ritchie-cli/pull/904) ([henriquemoraeszup](https://github.com/henriquemoraeszup))
 
 ## [2.10.3](https://github.com/zupit/ritchie-cli/tree/2.10.3) (2021-03-23)
 

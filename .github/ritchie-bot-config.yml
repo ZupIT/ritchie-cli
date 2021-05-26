@@ -2,15 +2,15 @@ merge_branch:
   enable: true # Enable merge branch with comment
   branches: ['qa'] # Branches enabled to merge with comment
   users: [
-    'kaduartur',
-    'ernelio',
-    'viniciusramosdefaria',
-    'rodrigomedeirosf',
-    'victor-schumacher',
     'brunasilvazup',
+    'fabianofernandeszup',
+    'fernandobelettizup',
+    'guillaumefalourd',
+    'henriquemoraeszup',
+    'kaduartur',
     'lucasdittrichzup',
-    'victorschumacherzup',
-    'henriquemoraeszup'
+    'maurineimirandazup',
+    'rodrigomedeirosf'
   ] # Users enabled to merge with comment
 
 issue_project:
