@@ -86,7 +86,7 @@ func printWorkspaces(workspaces formula.Workspaces) {
 }
 
 func existsPath(path string) string {
-	if _, err := os.Stat(path); os.IsNotExist(err){
+	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return "Path not found"
 	}
 	return "Ok"
