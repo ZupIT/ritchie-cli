@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       reference-tag:
-        description: 'Tag from which we want to create the patch (ex: v1.2.3)'
+        description: 'Tag from which we want to create the patch (e.g: 1.2.3)'
         required: true
       new-tag:
-        description: 'New tag that will be created (ex: v1.2.4)'
+        description: 'New tag that will be created (e.g: 1.2.4)'
         required: true
       commit-hash:
-        description: 'Commit Hash to add to the reference-tag to generate the new-tag (ex: abc123ce79159e628371a06d3b7e0d757abc123)'
+        description: 'Commit Hash to add to the reference tag to generate the new tag' # e.g: abc123ce79159e628371a06d3b7e0d757abc123
         required: true
 
 jobs:
