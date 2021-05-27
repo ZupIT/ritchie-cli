@@ -1,0 +1,9 @@
+PROVIDER	NAME	CURRENT VERSION	PRIORITY	URL	LATEST VERSION
+
+There are 0 repos
+
+[TUTORIAL]
+To update all repositories or delete an repository:
+ ∙ Run "rit update repo"
+ ∙ Run "rit delete repo"
+
