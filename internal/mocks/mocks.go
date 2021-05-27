@@ -217,6 +217,11 @@ func (w *WorkspaceForm) List() (formula.Workspaces, error) {
 	return args.Get(0).(formula.Workspaces), args.Error(1)
 }
 
+func (w *WorkspaceForm) Update(workspace formula.Workspace) error {
+	args := w.Called(workspace)
+	return args.Error(0)
+}
+
 func (w *WorkspaceForm) Validate(workspace formula.Workspace) error {
 	args := w.Called(workspace)
 	return args.Error(0)
