@@ -71,7 +71,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 	repoAdder := repo.NewAdder(ritHome, repoListWriteCreator, treeGen)
 	formBuildLocal := builder.NewBuildLocal(ritHome, dirManager, repoAdder)
 
-	formulaWorkspace := workspace.New(ritHome, home, dirManager, formBuildLocal)
+	formulaWorkspace := workspace.New(ritHome, home, dirManager, formBuildLocal, treeGen)
 
 	reposPath := filepath.Join(ritHome, "repos")
 	repoPathLocalDefault := filepath.Join(reposPath, "local-default")
