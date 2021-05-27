@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.11.3](https://github.com/zupit/ritchie-cli/tree/2.11.3) (2021-05-26)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.11.2...2.11.3)
+
+**Closed issues:**
+
+- Bug with formula's outputs [\#934](https://github.com/ZupIT/ritchie-cli/issues/934)
+
+## [2.11.2](https://github.com/zupit/ritchie-cli/tree/2.11.2) (2021-05-21)
+
+[Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.11.1...2.11.2)
+
+**Closed issues:**
+
+- Improve metrics extracted by input flags [\#919](https://github.com/ZupIT/ritchie-cli/issues/919)
+
 ## [2.11.1](https://github.com/zupit/ritchie-cli/tree/2.11.1) (2021-05-14)
 
 [Full Changelog](https://github.com/zupit/ritchie-cli/compare/2.11.0...2.11.1)
