@@ -1,0 +1,47 @@
+name: Build PR to QA
+
+on: [push, pull_request]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Create binary from branch
+        run: |
+          cd $GITHUB_WORKSPACE
+          make build-linux
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: rit
+          path: ./dist/linux/rit
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Create binary from branch
+        run: |
+          cd $GITHUB_WORKSPACE
+          make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: rit
+          path: ./dist/darwin/rit
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Create binary from branch
+        run: |
+          choco install make
+          make build-windowsbthjiy3351
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: rit.exe
+          path: D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe
