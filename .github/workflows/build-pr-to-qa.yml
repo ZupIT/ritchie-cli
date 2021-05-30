@@ -14,7 +14,7 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v2
         with:
-          name: rit
+          name: rit-linux
           path: ./dist/linux/rit
 
   macos:
@@ -28,7 +28,7 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v2
         with:
-          name: rit
+          name: rit-macos
           path: ./dist/darwin/rit
 
   windows:
@@ -43,5 +43,5 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v2
         with:
-          name: rit.exe
+          name: rit-windows
           path: D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe
