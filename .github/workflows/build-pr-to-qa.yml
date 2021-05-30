@@ -24,7 +24,7 @@ jobs:
       - name: Create binary from branch
         run: |
           cd $GITHUB_WORKSPACE
-          make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+          make build-mac
       - name: Upload binary
         uses: actions/upload-artifact@v2
         with:
