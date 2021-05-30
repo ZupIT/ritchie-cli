@@ -38,7 +38,7 @@ jobs:
       - name: Create binary from branch
         run: |
           choco install make
-          make build-windowsbthjiy3351
+          make build-windows
 
       - name: Upload binary
         uses: actions/upload-artifact@v2
