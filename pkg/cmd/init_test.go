@@ -105,7 +105,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList:         LocalRunType,
 			},
 			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
-			inputFlag: []string{"--sendMetrics=yes", "--addCommons=yes", "--runType=local"},
+			inputFlag:  []string{"--sendMetrics=yes", "--addCommons=yes", "--runType=local"},
 		},
 		{
 			name: "find tutorial error",
@@ -222,12 +222,11 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		{
 			name: "error with flags, invalid metrics value",
 			in: in{
-				fileWriteErr:   errors.New("please provide a valid value to the flag 'sendmetrics'"),
-				inList:         LocalRunType,
-
+				fileWriteErr: errors.New("please provide a valid value to the flag 'sendmetrics'"),
+				inList:       LocalRunType,
 			},
 			inputFlag: []string{"--sendMetrics=invalidValue", "--addCommons=no", "--runType=local"},
-			wantErr: errors.New("please provide a valid value to the flag 'sendmetrics'"),
+			wantErr:   errors.New("please provide a valid value to the flag 'sendmetrics'"),
 		},
 		{
 			name: "error with flags, invalid commons value",
@@ -235,7 +234,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				fileWriteErr: errors.New("please provide a valid value to the flag 'addCommons'"),
 			},
 			inputFlag: []string{"--sendMetrics=no", "--addCommons=invalidValue", "--runType=local"},
-			wantErr: errors.New("please provide a valid value to the flag 'addCommons'"),
+			wantErr:   errors.New("please provide a valid value to the flag 'addCommons'"),
 		},
 		{
 			name: "error with flags, error to write metric file",
@@ -245,7 +244,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				fileWriteErr:   errors.New("error to write metric file"),
 			},
 			inputFlag: []string{"--sendMetrics=yes", "--addCommons=no", "--runType=local"},
-			wantErr: errors.New("error to write metric file"),
+			wantErr:   errors.New("error to write metric file"),
 		},
 		{
 			name: "error with flags, error to write metric file",
@@ -255,7 +254,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				fileWriteErr:   errors.New("error to write metric file"),
 			},
 			inputFlag: []string{"--sendMetrics=yes", "--addCommons=no", "--runType=local"},
-			wantErr: errors.New("error to write metric file"),
+			wantErr:   errors.New("error to write metric file"),
 		},
 	}
 
