@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -46,6 +47,24 @@ var (
 	ErrInvalidCharactersFormulaCmd = errors.New(`these characters are not allowed in the formula command [\ /,> <@ -]`)
 )
 
+var createFormulaFlags = flags {
+	{
+		name:        "name",
+		kind:        reflect.String,
+		description: formulaCmdHelper,
+	},
+	{
+		name:        "language",
+		kind:        reflect.String,
+		description: "",
+	},
+	{
+		name:        "workspace",
+		kind:        reflect.String,
+		defValue:    nil,
+		description: "",
+	},
+}
 // createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
@@ -99,8 +118,45 @@ func NewCreateFormulaCmd(
 	}
 
 	cmd.LocalFlags()
-
+	addReservedFlags(cmd.Flags(), createFormulaFlags)
 	return cmd
+}
+func (c createFormulaCmd) runFlag() CommandRunnerFunc  {
+	return func(cmd *cobra.Command, args []string) error {
+		formulaCmd, err := cmd.Flags().GetString("name")
+		if err != nil {
+			return err
+		}
+
+		language, err := cmd.Flags().GetString("language")
+		if err != nil {
+			return err
+		}
+
+		langList, err  := c.template.Languages()
+		if err != nil {
+			return err
+		}
+
+		workspace, err := cmd.Flags().GetString("workspace")
+		if err != nil {
+			return err
+		}
+
+		wslist, err := c.workspace.List()
+		if err != nil {
+			return err
+		}
+
+		for i := range langList {
+			if workspace == langList[i] {
+				break
+			}
+		}
+
+
+		return nil
+	}
 }
 
 func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
