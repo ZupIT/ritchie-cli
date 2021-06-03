@@ -24,6 +24,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -35,9 +36,10 @@ import (
 )
 
 const (
-	newWorkspace     = "Type new formula workspace?"
-	formulaCmdLabel  = "Enter the new formula command: "
-	formulaCmdHelper = "You must create your command based in this example [rit group verb noun]"
+	newWorkspace       = "Type new formula workspace?"
+	formulaCmdLabel    = "Enter the new formula command: "
+	formulaCmdHelper   = "You must create your command based in this example [rit group verb noun]"
+	workspaceFolderErr = "the formula workspace does not exist, do you want create?"
 )
 
 var (
@@ -47,24 +49,27 @@ var (
 	ErrInvalidCharactersFormulaCmd = errors.New(`these characters are not allowed in the formula command [\ /,> <@ -]`)
 )
 
-var createFormulaFlags = flags {
+var createFormulaFlags = flags{
 	{
 		name:        "name",
 		kind:        reflect.String,
+		defValue:    "rit group verb noun",
 		description: formulaCmdHelper,
 	},
 	{
 		name:        "language",
 		kind:        reflect.String,
-		description: "",
+		defValue:    "go",
+		description: "Select language of formula",
 	},
 	{
 		name:        "workspace",
 		kind:        reflect.String,
-		defValue:    nil,
-		description: "",
+		defValue:    "ritchie-formulas",
+		description: "Select workspace",
 	},
 }
+
 // createFormulaCmd type for add formula command.
 type createFormulaCmd struct {
 	homeDir         string
@@ -74,10 +79,12 @@ type createFormulaCmd struct {
 	inTextValidator prompt.InputTextValidator
 	inList          prompt.InputList
 	inPath          prompt.InputPath
+	inBool          prompt.InputBool
 	template        template.Manager
 	tutorial        rtutorial.Finder
 	tree            formula.TreeChecker
 	validator       validator.Manager
+	dirCreate       stream.DirCreater
 }
 
 // CreateFormulaCmd creates a new cmd instance.
@@ -112,7 +119,7 @@ func NewCreateFormulaCmd(
 		Use:       "formula",
 		Short:     "Create a new formula",
 		Example:   "rit create formula",
-		RunE:      RunFuncE(c.runStdin(), c.runPrompt()),
+		RunE:      RunFuncE(c.runStdin(), c.runCmd()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -120,99 +127,127 @@ func NewCreateFormulaCmd(
 	cmd.LocalFlags()
 	addReservedFlags(cmd.Flags(), createFormulaFlags)
 	return cmd
+
 }
-func (c createFormulaCmd) runFlag() CommandRunnerFunc  {
+func (c createFormulaCmd) runCmd() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := cmd.Flags().GetString("name")
+		createFormula, err := c.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
 
-		language, err := cmd.Flags().GetString("language")
-		if err != nil {
-			return err
+		createErr := c.create(createFormula)
+		if createErr != nil {
+			return createErr
 		}
-
-		langList, err  := c.template.Languages()
-		if err != nil {
-			return err
-		}
-
-		workspace, err := cmd.Flags().GetString("workspace")
-		if err != nil {
-			return err
-		}
-
-		wslist, err := c.workspace.List()
-		if err != nil {
-			return err
-		}
-
-		for i := range langList {
-			if workspace == langList[i] {
-				break
-			}
-		}
-
 
 		return nil
 	}
 }
 
-func (c createFormulaCmd) runPrompt() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		formulaCmd, err := c.inTextValidator.Text(formulaCmdLabel, c.surveyCmdValidator, formulaCmdHelper)
-		if err != nil {
-			return err
-		}
-
-		if err := c.template.Validate(); err != nil {
-			return err
-		}
-
-		languages, err := c.template.Languages()
-		if err != nil {
-			return err
-		}
-
-		lang, err := c.inList.List("Choose the language: ", languages)
-		if err != nil {
-			return err
-		}
-
-		workspaces, err := c.workspace.List()
-		if err != nil {
-			return err
-		}
-
-		wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText, c.inPath)
-		if err != nil {
-			return err
-		}
-
-		if err := c.workspace.Add(wspace); err != nil {
-			return err
-		}
-
-		formulaPath := formulaPath(wspace.Dir, formulaCmd)
-
-		cf := formula.Create{
-			FormulaCmd:  formulaCmd,
-			Lang:        lang,
-			Workspace:   wspace,
-			FormulaPath: formulaPath,
-		}
-
-		check := c.tree.Check()
-
-		printConflictingCommandsWarning(check)
-
-		if err := c.create(cf); err != nil {
-			return err
-		}
-
-		return nil
+func (c createFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Create, error) {
+	if IsFlagInput(cmd) {
+		return c.runFlag(cmd)
 	}
+	return c.runPrompt()
+}
+func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
+	formulaCmd, err := cmd.Flags().GetString("name")
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	language, err := cmd.Flags().GetString("language")
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	langList, err := c.template.Languages()
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	for i, v := range langList {
+		fmt.Println(i, v)
+	}
+
+	var workspace formula.Workspace
+	workspace.Name, err = cmd.Flags().GetString("workspace")
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	workspacelist, err := c.workspace.List()
+
+	for workspaceName, workspaceDir := range workspacelist {
+		if strings.EqualFold(workspaceName, workspace.Name) {
+			workspace = formula.Workspace{Name: workspaceName, Dir: workspaceDir}
+			break
+		}
+	}
+
+	formulaPath := formulaPath(workspace.Dir, formulaCmd)
+
+	cf := formula.Create{
+		FormulaCmd:  formulaCmd,
+		Lang:        language,
+		Workspace:   workspace,
+		FormulaPath: formulaPath,
+	}
+
+	check := c.tree.Check()
+	printConflictingCommandsWarning(check)
+
+	return cf, nil
+}
+
+func (c createFormulaCmd) runPrompt() (formula.Create, error) {
+	formulaCmd, err := c.inTextValidator.Text(formulaCmdLabel, c.surveyCmdValidator, formulaCmdHelper)
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	if err := c.template.Validate(); err != nil {
+		return formula.Create{}, err
+	}
+
+	languages, err := c.template.Languages()
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	lang, err := c.inList.List("Choose the language: ", languages)
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	workspaces, err := c.workspace.List()
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText, c.inPath)
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	if err := c.workspace.Add(wspace); err != nil {
+		return formula.Create{}, err
+	}
+
+	formulaPath := formulaPath(wspace.Dir, formulaCmd)
+
+	cf := formula.Create{
+		FormulaCmd:  formulaCmd,
+		Lang:        lang,
+		Workspace:   wspace,
+		FormulaPath: formulaPath,
+	}
+
+	check := c.tree.Check()
+
+	printConflictingCommandsWarning(check)
+	return cf, err
 }
 
 func (c createFormulaCmd) runStdin() CommandRunnerFunc {
