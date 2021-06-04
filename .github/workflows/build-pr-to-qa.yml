@@ -45,3 +45,41 @@ jobs:
         with:
           name: rit-windows
           path: D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe
+
+  edit-pr:
+    runs-on: ubuntu-latest
+    needs: [ubuntu, macos, windows]
+    steps:
+      - name: Pull Request Number
+        id: pull-request-number
+        run: echo "::set-output name=pull-request-number::$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")"
+
+      - name: Update PR Body
+        uses: chiaretto/github-action-concat-pr-body@branch1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          message: "
+      ### This pull request generated the following artifacts.
+
+To test the health and quality of this implementation, download the respective binary
+for your operating system, unzip and directly run the binary like the examples below.
+
+- **Windows**\r
+Download the file: **[rit-windows.zip](url)**\r
+Unzip to some folder like `C:\\home\\user\\downloads\\pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+Access the folder: `cd C:\\home\\user\\downloads\\pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+Directly call the binary: `.\\rit.exe --version` or `.\\rit.exe name of formula`\r
+\r\r
+- **Linux**\r
+Download the file: **[rit-linux.zip](url)**\r
+Unzip to some folder like /home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+Access the folder: cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+Directly call the binary: ./rit --version` or `./rit.exe name of formula`\r
+\r\r
+- **MacOS**\r
+Download the file: **[rit-macos.zip](url)**\r
+Unzip to some folder like: `/home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+Access the folder: `cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+Directly call the binary: `./rit --version` or `./rit.exe name of formula`\r
+      "
+          replace-last-message: true
