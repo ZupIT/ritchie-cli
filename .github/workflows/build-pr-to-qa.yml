@@ -1,6 +1,6 @@
 name: Build PR to QA
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   ubuntu:
