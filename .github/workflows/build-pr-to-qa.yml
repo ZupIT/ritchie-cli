@@ -17,6 +17,7 @@ jobs:
           path: ./dist/linux/rit
 
   artifacts-url-comments:
+    needs: [ubuntu]
     name: add artifact links to pull request and related issues job
     runs-on: windows-2019
     steps:
