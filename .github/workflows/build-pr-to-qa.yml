@@ -1,5 +1,4 @@
 name: Build PR to QA
-
 on: [pull_request]
 
 jobs:
