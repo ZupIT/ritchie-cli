@@ -1,7 +1,7 @@
 name: add artifact links to pull request and related issues
 on:
   workflow_run:
-    workflows: [Pull request or push run that uploads artifacts]
+    workflows: [Build PR to QA]
     types: [completed]
 
 jobs:
