@@ -111,7 +111,7 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 		"run",
 		"--rm",
 		"-u",
-		currentUser.Uid+":"+currentUser.Uid,
+		currentUser.Uid + ":" + currentUser.Uid,
 		"--env-file",
 		envFile,
 	}

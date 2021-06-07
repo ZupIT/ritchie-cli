@@ -60,7 +60,7 @@ func (do DockerManager) Build(info formula.BuildInfo) error {
 
 	currentUser, _ := user.Current()
 
-	args := []string{"run", "--rm", "-u", currentUser.Uid+":"+currentUser.Uid, "-v", volume, "--entrypoint", "/bin/sh", info.DockerImg, "-c", containerCmd}
+	args := []string{"run", "--rm", "-u", currentUser.Uid + ":" + currentUser.Uid, "-v", volume, "--entrypoint", "/bin/sh", info.DockerImg, "-c", containerCmd}
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", args...)
