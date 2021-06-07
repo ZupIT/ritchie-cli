@@ -24,7 +24,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -47,26 +46,30 @@ var (
 	ErrFormulaCmdMustStartWithRit  = errors.New("rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	ErrInvalidFormulaCmdSize       = errors.New("rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 	ErrInvalidCharactersFormulaCmd = errors.New(`these characters are not allowed in the formula command [\ /,> <@ -]`)
+	InvalidWorkspace               = "the formula workspace does not exist, please enter a valid workspace"
+	flagName                       = "name"
+	flagLanguage                   = "language"
+	flagWorkspace                  = "workspace"
 )
 
 var createFormulaFlags = flags{
 	{
-		name:        "name",
+		name:        flagName,
 		kind:        reflect.String,
-		defValue:    "rit group verb noun",
+		defValue:    "",
 		description: formulaCmdHelper,
 	},
 	{
-		name:        "language",
+		name:        flagLanguage,
 		kind:        reflect.String,
-		defValue:    "go",
-		description: "Select language of formula",
+		defValue:    "",
+		description: "Select language of formula (i.e: go, java, pyhon [...])",
 	},
 	{
-		name:        "workspace",
+		name:        flagWorkspace,
 		kind:        reflect.String,
-		defValue:    "ritchie-formulas",
-		description: "Select workspace",
+		defValue:    "",
+		description: "Provide workspace name",
 	},
 }
 
@@ -84,10 +87,9 @@ type createFormulaCmd struct {
 	tutorial        rtutorial.Finder
 	tree            formula.TreeChecker
 	validator       validator.Manager
-	dirCreate       stream.DirCreater
 }
 
-// CreateFormulaCmd creates a new cmd instance.
+// NewCreateFormulaCmd creates a new cmd instance.
 func NewCreateFormulaCmd(
 	homeDir string,
 	formula formula.CreateBuilder,
@@ -100,6 +102,7 @@ func NewCreateFormulaCmd(
 	rtf rtutorial.Finder,
 	treeChecker formula.TreeChecker,
 	validator validator.Manager,
+	inputBool prompt.InputBool,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,
@@ -113,6 +116,7 @@ func NewCreateFormulaCmd(
 		tutorial:        rtf,
 		tree:            treeChecker,
 		validator:       validator,
+		inBool:          inputBool,
 	}
 
 	cmd := &cobra.Command{
@@ -167,8 +171,13 @@ func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 		return formula.Create{}, err
 	}
 
-	for i, v := range langList {
-		fmt.Println(i, v)
+	for i := range langList {
+		if strings.EqualFold(language, langList[i]) {
+			language = langList[i]
+			break
+		} else if i == len(langList) {
+			return formula.Create{}, errors.New("language not found")
+		}
 	}
 
 	var workspace formula.Workspace
@@ -179,11 +188,10 @@ func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 
 	workspacelist, err := c.workspace.List()
 
-	for workspaceName, workspaceDir := range workspacelist {
-		if strings.EqualFold(workspaceName, workspace.Name) {
-			workspace = formula.Workspace{Name: workspaceName, Dir: workspaceDir}
-			break
-		}
+	if workspacelist[workspace.Name] != "" {
+		workspace.Dir = workspacelist[workspace.Name]
+	} else {
+		return formula.Create{}, errors.New("the formula workspace does not exist, select one before")
 	}
 
 	formulaPath := formulaPath(workspace.Dir, formulaCmd)
@@ -232,6 +240,22 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 	}
 
 	if err := c.workspace.Add(wspace); err != nil {
+		if err.Error() == InvalidWorkspace {
+			ans, err := c.inBool.Bool(workspaceFolderErr, []string{"no", "yes"})
+			if err != nil {
+				return formula.Create{}, err
+			}
+
+			if ans {
+				err := os.Mkdir(wspace.Dir, 0755)
+				if err != nil {
+					return formula.Create{}, err
+				}
+				if err := c.workspace.Add(wspace); err != nil {
+					return formula.Create{}, err
+				}
+			}
+		}
 		return formula.Create{}, err
 	}
 
