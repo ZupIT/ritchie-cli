@@ -15,7 +15,7 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Update PR Body
-        uses: chiaretto/github-action-concat-pr-body@branch1
+        uses: chiaretto/github-action-concat-pr-body@master
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           message: "
