@@ -1,0 +1,31 @@
+name: Test Env Commands
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ubuntu:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
+        - name: RIT SHOW ENV command (1)
+          run:  |
+            rit show env > check1.txt
+            diff check1.txt testdata/gha_workflows/env_workflow/assert1.txt
+        - name: RIT SET ENV command
+          run: rit set env --env=test
+        - name: RIT SHOW ENV command (2)
+          run:  |
+            rit show env > check2.txt
+            diff check2.txt testdata/gha_workflows/env_workflow/assert2.txt
+        - name: RIT DELETE ENV command
+          run: rit delete env --env=test
+        - name: RIT SHOW ENV command (3)
+          run:  |
+            rit show env > check3.txt
+            diff check3.txt testdata/gha_workflows/env_workflow/assert1.txt
