@@ -1,4 +1,4 @@
-name: Build PR to QA
+name: Build Binary Ritchie When PR Opens
 on: [pull_request]
 
 jobs:

@@ -1,7 +1,7 @@
 name: List Artifacts And Edit Pull Request
 on:
   workflow_run:
-    workflows: ["Build PR to QA"]
+    workflows: ["Build Binary Ritchie When PR Opens"]
     types: [completed]
 
 jobs:
@@ -26,20 +26,22 @@ jobs:
 
   - **Windows**\r
   Download the file: **[rit-windows.zip](${{ steps.list-artifacts.outputs.rit-windows}})**\r
-  Unzip to some folder like `C:\\home\\user\\downloads\\pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+  Unzip to some folder like: `C:\\home\\user\\downloads\\pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
   Access the folder: `cd C:\\home\\user\\downloads\\pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
   Directly call the binary: `.\\rit.exe --version` or `.\\rit.exe name of formula`\r
   \r\r
   - **Linux**\r
   Download the file: **[rit-linux.zip](${{ steps.list-artifacts.outputs.rit-linux}})**\r
-  Unzip to some folder like /home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
-  Access the folder: cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
-  Directly call the binary: ./rit --version` or `./rit.exe name of formula`\r
+  Unzip to some folder like: `/home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+  Access the folder: `cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+  Assign execute permission to binary: `chmod +x ./rit`\r
+  Directly call the binary: `./rit --version` or `./rit.exe name of formula`\r
   \r\r
   - **MacOS**\r
   Download the file: **[rit-macos.zip](${{ steps.list-artifacts.outputs.rit-macos}})**\r
   Unzip to some folder like: `/home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
   Access the folder: `cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pull-request-number }}`\r
+  Assign execute permission to binary: `chmod +x ./rit`\r
   Directly call the binary: `./rit --version` or `./rit.exe name of formula`\r
         "
           replace-last-message: true
