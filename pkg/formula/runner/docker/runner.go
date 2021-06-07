@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"strconv"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -104,9 +105,13 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 		)
 	}
 
+	currentUser, _ := user.Current()
+
 	args := []string{
 		"run",
 		"--rm",
+		"-u",
+		currentUser.Uid+":"+currentUser.Uid,
 		"--env-file",
 		envFile,
 	}
