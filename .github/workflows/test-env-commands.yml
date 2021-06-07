@@ -55,3 +55,30 @@ jobs:
           run:  |
             rit show env > check3.txt
             diff check3.txt testdata/gha_workflows/env_workflow/assert1.txt
+
+  windows:
+      runs-on: windows-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Create binary from branch
+          run: |
+            choco install make
+            make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
+            ls
+            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | .\rit.exe init --stdin
+        - name: RIT SHOW ENV command (1)
+          run:  |
+            .\rit.exe show env > check1.txt
+            diff check1.txt testdata/gha_workflows/env_workflow/assert1.txt
+        - name: RIT SET ENV command
+          run: .\rit.exe set env --env=test
+        - name: RIT SHOW ENV command (2)
+          run:  |
+            .\rit.exe show env > check2.txt
+            diff check2.txt testdata/gha_workflows/env_workflow/assert2.txt
+        - name: RIT DELETE ENV command
+          run: .\rit.exe delete env --env=test
+        - name: RIT SHOW ENV command (3)
+          run:  |
+            .\rit.exe show env > check3.txt
+            diff check3.txt testdata/gha_workflows/env_workflow/assert1.txt
