@@ -86,6 +86,17 @@ type (
 		Workspace   Workspace `json:"workspace"`
 		FormulaPath string    `json:"formulaPath"`
 	}
+	Rename struct {
+		OldFormulaCmd string
+		NewFormulaCmd string
+		Workspace     Workspace
+		FOldPath      string
+		FNewPath      string
+	}
+	Delete struct {
+		GroupsFormula []string
+		Workspace     Workspace
+	}
 
 	Inputs []Input
 

@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	containerCmdFmt   = "%s && chown -R %s bin"
+	containerCmdFmt   = "%s && chown -R %s:%s bin"
 	makeContainerCmd  = "cd /app && /usr/bin/make build"
 	shellContainerCmd = "cd /app && ./build.sh"
 	volumePattern     = "%s:/app"
@@ -58,7 +58,9 @@ func (do DockerManager) Build(info formula.BuildInfo) error {
 		return err
 	}
 
-	args := []string{"run", "--rm", "-u", "0:0", "-v", volume, "--entrypoint", "/bin/sh", info.DockerImg, "-c", containerCmd}
+	currentUser, _ := user.Current()
+
+	args := []string{"run", "--rm", "-u", currentUser.Uid+":"+currentUser.Uid, "-v", volume, "--entrypoint", "/bin/sh", info.DockerImg, "-c", containerCmd}
 
 	var stderr bytes.Buffer
 	cmd := exec.Command("docker", args...)
@@ -86,9 +88,9 @@ func (do DockerManager) containerCmd(formulaPath string) (string, error) {
 
 		execFile := filepath.Join(formulaPath, buildSh)
 		if do.file.Exists(execFile) {
-			return fmt.Sprintf(containerCmdFmt, shellContainerCmd, currentUser.Uid), nil
+			return fmt.Sprintf(containerCmdFmt, shellContainerCmd, currentUser.Uid, currentUser.Uid), nil
 		}
 
-		return fmt.Sprintf(containerCmdFmt, makeContainerCmd, currentUser.Uid), nil
+		return fmt.Sprintf(containerCmdFmt, makeContainerCmd, currentUser.Uid, currentUser.Uid), nil
 	}
 }

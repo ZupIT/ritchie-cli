@@ -74,6 +74,12 @@ type DirCreateChecker interface {
 	DirChecker
 }
 
+type DirCreateCheckerCopy interface {
+	DirCreater
+	DirChecker
+	DirCopier
+}
+
 type DirCreateHasher interface {
 	DirCreater
 	DirHasher
