@@ -21,7 +21,9 @@ jobs:
         run: echo "::set-output name=pull-request-number::$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")"
 
       - name: Cat GIT HUB EVENT
-        run: cat $GITHUB_EVENT_PATH
+        run: |
+        echo $GITHUB_EVENT_PATH
+        cat $GITHUB_EVENT_PATH
 
 #  macos:
 #    runs-on: macos-latest
