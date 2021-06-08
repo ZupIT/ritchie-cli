@@ -8,6 +8,13 @@ jobs:
   list-artifacts-edit-pr-body:
     runs-on: ubuntu-latest
     steps:
+      - name: Pull Request Number
+        id: pull-request-number
+        run: echo "::set-output name=pull-request-number::$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")"
+
+      - name: Cat GIT HUB EVENT
+        run: cat $GITHUB_EVENT_PATH
+
       - name: List artifacts
         id: list-artifacts
         uses: chiaretto/github-action-list-artifacts-pr@master
