@@ -1,2 +1,2 @@
-PROVIDER        ENV     CREDENTIAL                                       
-github          default {"email":"te**","token":"te**","username":"te**"}
+PROVIDER	ENV    	CREDENTIAL                                       
+github  	default	{"email":"te**","token":"te**","username":"te**"}
