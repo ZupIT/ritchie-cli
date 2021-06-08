@@ -22,8 +22,8 @@ jobs:
 
       - name: Cat GIT HUB EVENT
         run: |
-        echo $GITHUB_EVENT_PATH
-        cat $GITHUB_EVENT_PATH
+          echo $GITHUB_EVENT_PATH
+          cat $GITHUB_EVENT_PATH
 
 #  macos:
 #    runs-on: macos-latest
