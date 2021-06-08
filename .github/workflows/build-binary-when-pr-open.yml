@@ -1,0 +1,46 @@
+name: Build Binary Ritchie When PR Opens
+on: [pull_request]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Create binary from branch
+        run: |
+          cd $GITHUB_WORKSPACE
+          make build-linux
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: rit-linux
+          path: ./dist/linux/rit
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Create binary from branch
+        run: |
+          cd $GITHUB_WORKSPACE
+          make build-mac
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: rit-macos
+          path: ./dist/darwin/rit
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Create binary from branch
+        run: |
+          choco install make
+          make build-windows
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: rit-windows
+          path: D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe
