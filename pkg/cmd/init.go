@@ -61,6 +61,7 @@ var (
 	metricsFlag               = "sendMetrics"
 	commonsFlag               = "addCommons"
 	runnerFlag                = "runType"
+	provideValidValue         = "provide a valid value to the flag %q"
 )
 
 var initFlags = flags{
@@ -298,7 +299,7 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 		}
 	default:
 		{
-			return config.Configs{}, errors.New("please provide a valid value to the flag 'sendmetrics'")
+			return config.Configs{}, errors.New(fmt.Sprintf(provideValidValue, metricsFlag))
 		}
 
 	}
@@ -333,15 +334,16 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 			in.commonsSuccess(s)
 		}
 	default:
-		return config.Configs{}, errors.New("please provide a valid value to the flag 'addCommons'")
+		return config.Configs{}, errors.New(fmt.Sprintf(provideValidValue, commonsFlag))
 	}
 
 	runType := formula.DefaultRun
-	for i := range formula.RunnerTypes {
-		if RunTypes[i] == runner {
-			runType = formula.RunnerType(i)
-			break
-		}
+	if runner == "local" {
+		runType = formula.LocalRun
+	} else if runner == "docker" {
+		runType = formula.DockerRun
+	} else {
+		return config.Configs{}, errors.New(fmt.Sprintf(provideValidValue, runnerFlag))
 	}
 
 	configs := config.Configs{
