@@ -299,7 +299,7 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 		}
 	default:
 		{
-			return config.Configs{}, errors.New(fmt.Sprintf(provideValidValue, metricsFlag))
+			return config.Configs{}, fmt.Errorf(provideValidValue, metricsFlag)
 		}
 
 	}
@@ -334,7 +334,7 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 			in.commonsSuccess(s)
 		}
 	default:
-		return config.Configs{}, errors.New(fmt.Sprintf(provideValidValue, commonsFlag))
+		return config.Configs{}, fmt.Errorf(provideValidValue, commonsFlag)
 	}
 
 	runType := formula.DefaultRun
@@ -343,7 +343,7 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 	} else if runner == "docker" {
 		runType = formula.DockerRun
 	} else {
-		return config.Configs{}, errors.New(fmt.Sprintf(provideValidValue, runnerFlag))
+		return config.Configs{}, fmt.Errorf(provideValidValue, runnerFlag)
 	}
 
 	configs := config.Configs{
