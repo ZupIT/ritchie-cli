@@ -30,9 +30,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -68,20 +66,20 @@ var initFlags = flags{
 	{
 		name:        metricsFlag,
 		kind:        reflect.String,
-		defValue:    "yes",
-		description: "Send metrics (ie: yes, no)",
+		defValue:    "",
+		description: "Do you accept to submit anonymous metrics? (ie: yes, no)",
 	},
 	{
 		name:        commonsFlag,
 		kind:        reflect.String,
-		defValue:    "yes",
-		description: "Download commons repository (ie: yes, no)",
+		defValue:    "",
+		description: "Do you want to download the commons repository? (ie: yes, no)",
 	},
 	{
 		name:        runnerFlag,
 		kind:        reflect.String,
 		defValue:    "local",
-		description: "Set runner type (ie: local, docker)",
+		description: "Which default runner do you want to use? (ie: local, docker)",
 	},
 }
 
@@ -279,8 +277,17 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 		return config.Configs{}, errors.New(missingFlagText(runnerFlag))
 	}
 
-	switch metrics {
-	case "no":
+	metricBool, err := flagToBool(metrics, metricsFlag)
+	if err != nil {
+		return config.Configs{}, err
+	}
+	commonsBool, err := flagToBool(commons, commonsFlag)
+	if err != nil {
+		return config.Configs{}, err
+	}
+
+	switch metricBool {
+	case false:
 		{
 			in.metricSender.Send(metric.APIData{
 				Id:        "rit_init",
@@ -291,25 +298,21 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 				},
 			})
 		}
-	case "yes":
+	case true:
 		{
 			if err = in.file.Write(metric.FilePath, []byte(metrics)); err != nil {
 				return config.Configs{}, err
 			}
 		}
-	default:
-		{
-			return config.Configs{}, fmt.Errorf(provideValidValue, metricsFlag)
-		}
-
 	}
-	switch commons {
-	case "no":
+
+	switch commonsBool {
+	case false:
 		{
 			in.commonsWarning()
 			metric.CommonsRepoAdded = "no"
 		}
-	case "yes":
+	case true:
 		{
 			repo := formula.Repo{
 				Provider: "Github",
@@ -333,16 +336,13 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 			}
 			in.commonsSuccess(s)
 		}
-	default:
-		return config.Configs{}, fmt.Errorf(provideValidValue, commonsFlag)
 	}
 
 	runType := formula.DefaultRun
-	if runner == "local" {
-		runType = formula.LocalRun
-	} else if runner == "docker" {
-		runType = formula.DockerRun
-	} else {
+	switch runner {
+	case "local": runType = formula.LocalRun
+	case "docker": runType = formula.DockerRun
+	default:
 		return config.Configs{}, fmt.Errorf(provideValidValue, runnerFlag)
 	}
 
@@ -541,4 +541,22 @@ func (in initCmd) warning() {
 func (in initCmd) initSuccess() {
 	success := i18n.T("init.successful")
 	prompt.Success(success)
+}
+
+func flagToBool(f string, fn string) (bool, error) {
+	boolOpts := map[string]bool{
+		"yes":   true,
+		"no":    false,
+		"true":  true,
+		"false": false,
+		"Yes":   true,
+		"No":    false,
+		"True":  true,
+		"False": false,
+	}
+	if result, found := boolOpts[f]; found {
+		return result, nil
+	} else {
+		return false, fmt.Errorf(provideValidValue, fn)
+	}
 }
