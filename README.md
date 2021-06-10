@@ -59,7 +59,7 @@ rit init
 ***Note**: You need to import the **commons** repository to be able to create formulas.*
 
 ***Sharing metrics anonymously** will help us improving the tool.
-For any question, check our [privacy policy](https://www.zup.com.br/politica-de-privacidade).*
+For any question, check our [privacy policy](https://www.zup.com.br/politica-de-privacidade/politica-ritchie#politicas).*
 
 ### 3️⃣ Add your first formulas repository
 
