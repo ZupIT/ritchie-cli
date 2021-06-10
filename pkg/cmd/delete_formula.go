@@ -142,6 +142,10 @@ func (d deleteFormulaCmd) runFormula() CommandRunnerFunc {
 		wspacePath := deleteFormula.Workspace.Dir
 		groups := deleteFormula.Formula
 
+		if len(groups) == 0 {
+			return nil
+		}
+
 		// Delete formula on user workspace
 		if err := d.deleteFormula(wspacePath, groups, 0); err != nil {
 			return err
@@ -152,7 +156,6 @@ func (d deleteFormulaCmd) runFormula() CommandRunnerFunc {
 			if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
 				return err
 			}
-
 			if err := d.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
 				return err
 			}
@@ -166,7 +169,6 @@ func (d deleteFormulaCmd) runFormula() CommandRunnerFunc {
 
 func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-
 		deleteStdin := deleteFormulaStdin{}
 
 		if err := stdin.ReadJson(cmd.InOrStdin(), &deleteStdin); err != nil {
@@ -195,14 +197,13 @@ func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
 				wspace = workspaceName
 			}
 		}
-		wspaceName := repoutil.LocalName(wspace)
 
+		wspaceName := repoutil.LocalName(wspace)
 		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", wspaceName.String())
 		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, groups) {
 			if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
 				return err
 			}
-
 			if err := d.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
 				return err
 			}
