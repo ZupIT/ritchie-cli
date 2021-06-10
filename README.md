@@ -18,11 +18,11 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 
 <img class="special-img-class" src="/docs/img/formulas-explanation.png" alt="Formulas explanation"/>
 
-## Full Documentation
+## 📚 [Full Documentation](https://docs.ritchiecli.io)
 
 [![Documentation](/docs/img/documentation-ritchie.png)](https://docs.ritchiecli.io)
 
-## Quick start
+## 🚀 Quick start 🤖
 
 ### Install latest rit version
 
@@ -81,7 +81,7 @@ rit demo hello-world
 rit demo hello-world --docker
 ```
 
-## Contributing to Ritchie
+## 🤝 Contributing to Ritchie
 
 - [Guidelines](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
 
