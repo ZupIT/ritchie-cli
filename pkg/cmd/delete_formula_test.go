@@ -17,9 +17,7 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,7 +71,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		want           error
 	}{
 		{
-			name:           "run with success",
+			name:           "run with success when the execution type is prompt",
 			workspaces:     workspaces,
 			selectedWspace: "Default (" + repoPathWS + ")",
 			group:          "testing",
@@ -82,49 +80,49 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			want:           nil,
 		},
 		{
-			name:       "run with success - stdin",
+			name:       "run with success when the execution type is stdin",
 			workspaces: workspaces,
 			stdin:      `{"workspace_path":"/tmp/ritchie-formulas-local","formula":"rit testing delete-formula"}`,
 			delete:     true,
 			want:       nil,
 		},
 		{
-			name:       "run with success - flag",
+			name:       "run with success when the execution type is flag",
 			workspaces: workspaces,
 			args:       []string{"--workspace=default", "--formula=rit testing delete-formula"},
 			delete:     true,
 			want:       nil,
 		},
 		{
-			name:       "run with error - formula flag",
+			name:       "run with an error when the formula flag contains an incorrect value",
 			workspaces: workspaces,
 			args:       []string{"--workspace=default", "--formula=\"rit testing delete-formula\""},
 			delete:     true,
 			want:       errors.New("formula name is incorrect"),
 		},
 		{
-			name:       "run with empty formula flag",
+			name:       "run with an error when empty formula flag",
 			workspaces: workspaces,
 			args:       []string{"--workspace=default", "--formula="},
 			delete:     true,
 			want:       errors.New("please provide a value for 'formula'"),
 		},
 		{
-			name:       "run with error - workspace flag",
+			name:       "run with an error when the workspace flag contains the nonexistent value",
 			workspaces: workspaces,
 			args:       []string{"--workspace=personal", "--formula=rit testing delete-formula"},
 			delete:     true,
 			want:       errors.New("no workspace found with this name"),
 		},
 		{
-			name:       "run with empty workspace flag",
+			name:       "run with an error when the workspace flag is empty",
 			workspaces: workspaces,
 			args:       []string{"--workspace=", "--formula=rit testing delete-formula"},
 			delete:     true,
 			want:       errors.New("please provide a value for 'workspace'"),
 		},
 		{
-			name:      "run with error when workspace list returns err - flags",
+			name:      "run with error when workspace list returns err",
 			args:      []string{"--workspace=default", "--formula=rit testing delete-formula"},
 			wspaceErr: errors.New("workspace list error"),
 			want:      errors.New("workspace list error"),
@@ -259,27 +257,4 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			}
 		})
 	}
-}
-
-func createTree(ws, pathLocal string, tg formula.TreeGenerator, fm stream.FileWriteRemover) {
-	localTree, _ := tg.Generate(ws)
-
-	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	pathLocalTreeJSON := filepath.Join(pathLocal, "tree.json")
-	_ = ioutil.WriteFile(pathLocalTreeJSON, jsonString, os.ModePerm)
-}
-
-func getTree(f []byte) (formula.Tree, error) {
-	tree := formula.Tree{}
-	if err := json.Unmarshal(f, &tree); err != nil {
-		return formula.Tree{}, err
-	}
-	return tree, nil
-}
-
-func setWorkspace(workspaces formula.Workspaces, ritHome string) {
-	wsFile := filepath.Join(ritHome, formula.WorkspacesFile)
-
-	content, _ := json.MarshalIndent(workspaces, "", "\t")
-	_ = ioutil.WriteFile(wsFile, content, os.ModePerm)
 }
