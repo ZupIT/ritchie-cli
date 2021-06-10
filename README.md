@@ -89,10 +89,10 @@ rit demo hello-world --docker
 
 - [Documentation repository](https://github.com/ZupIT/docs-ritchie)
 
-### Zup Open Source Projects
+### [Zup Open Source Projects](https://opensource.zup.com.br)
 
 [![Zup open source](/docs/img/zup-open-source.png)](https://opensource.zup.com.br)
 
-### Zup Open Source Forum
+### [Zup Open Source Forum](https://forum.zup.com.br/c/en/9)
 
 [![Zup forum](/docs/img/zup-forum-topics.png)](https://forum.zup.com.br/c/en/9)
