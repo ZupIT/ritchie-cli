@@ -88,7 +88,7 @@ var deleteFormulas = flags{
 		name:        formulaFlagName,
 		kind:        reflect.String,
 		defValue:    "",
-		description: "formula/group to remove (e.g.: rit test delete)",
+		description: "formula to remove (e.g.: rit test delete)",
 	},
 }
 
@@ -121,7 +121,7 @@ func NewDeleteFormulaCmd(
 		Use:       "formula",
 		Short:     "Delete specific formula",
 		Example:   "rit delete formula",
-		RunE:      RunFuncE(d.runStdin(), d.runFormula()),
+		RunE:      RunFuncE(d.runStdin(), d.runCmd()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -131,7 +131,7 @@ func NewDeleteFormulaCmd(
 	return cmd
 }
 
-func (d deleteFormulaCmd) runFormula() CommandRunnerFunc {
+func (d deleteFormulaCmd) runCmd() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
 		deleteFormula, err := d.resolveInput(cmd)
 		if err != nil {
