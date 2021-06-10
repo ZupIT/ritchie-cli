@@ -58,7 +58,7 @@ rit init
 
 ***Note**: You need to import the **commons** repository to be able to create formulas.*
 
-***Sharing metrics anonymously** will help us improving the tool. 
+***Sharing metrics anonymously** will help us improving the tool.
 For any question, check our [privacy policy](https://insights.zup.com.br/politica-privacidade).*
 
 ### 3️⃣ Run your first formula
@@ -78,7 +78,7 @@ Then, you'll be able to execute the "hello-world" formula through the command li
 rit demo hello-world
 ```
 
-*Note: This formula has been implemented using **Golang**, so to use it **locally** you'll need Golang to be installed on your machine. If you don't have or don't want to install Golang, you can use the same command with **Docker**:*
+***Note**: This formula has been implemented using **Golang**, so to use it **locally** you'll need Golang to be installed on your machine. If you don't have or don't want to install Golang, you can use the same command with **Docker**:*
 
 ```bash
 rit demo hello-world --docker
