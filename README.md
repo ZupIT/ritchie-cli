@@ -61,7 +61,7 @@ rit init
 ***Sharing metrics anonymously** will help us improving the tool.
 For any question, check our [privacy policy](https://insights.zup.com.br/politica-privacidade).*
 
-### 3️⃣ Run your first formula
+### 3️⃣ Add your first formulas repository
 
 To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally.
 
@@ -69,10 +69,11 @@ To do so, you can use the `rit add repo` command **manually** on your terminal, 
 
 ```bash
 rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
-
 ```
 
-Then, you'll be able to execute the "hello-world" formula through the command line below:
+### 4️⃣ Run your first formula
+
+Execute the "hello-world" formula through the command line below:
 
 ```bash
 rit demo hello-world
