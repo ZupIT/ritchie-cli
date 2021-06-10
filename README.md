@@ -24,7 +24,7 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 
 ## 🚀 Quick start 🤖
 
-### Install latest rit version
+### 1️⃣ Install latest rit version
 
 #### Linux
 
@@ -50,19 +50,22 @@ winget install Ritchie-CLI
 
 You can also download rit **packages** or **specific versions** according to the OS [on the documentation](https://docs.ritchiecli.io/getting-started/install-cli)
 
-### Initialize rit
+### 2️⃣ Initialize rit locally
 
 ```bash
 rit init
 ```
 
-*Note: You need to import the **commons** repository to be able to create formulas.*
+***Note**: You need to import the **commons** repository to be able to create formulas.*
 
-### Run your first formula
+***Sharing metrics anonymously** will help us improving the tool. 
+For any question, check our [privacy policy](https://insights.zup.com.br/politica-privacidade).*
 
-To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you'll need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally.
+### 3️⃣ Run your first formula
 
-To do so, you can use the `rit add repo` command, or execute the command line below:
+To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally.
+
+To do so, you can use the `rit add repo` command **manually** on your terminal, or execute the command line below with **input flags**:
 
 ```bash
 rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
