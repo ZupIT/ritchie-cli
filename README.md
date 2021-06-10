@@ -71,7 +71,7 @@ To do so, you can use the `rit add repo` command **manually** on your terminal, 
 rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
 ```
 
-### 4️⃣ Run your first formula
+### 4️⃣ Run the Hello World formula
 
 Execute the "hello-world" formula through the command line below:
 
