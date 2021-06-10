@@ -20,7 +20,7 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 
 ## Full Documentation
 
-[![Documentation](/docs/img/doc-overview.png)](https://docs.ritchiecli.io)
+[![Documentation](/docs/img/documentation-ritchie.png)](https://docs.ritchiecli.io)
 
 ## Quick start
 
@@ -89,8 +89,10 @@ rit demo hello-world --docker
 
 - [Documentation repository](https://github.com/ZupIT/docs-ritchie)
 
-## Zup Products
+### Zup Open Source Projects
 
 [![Zup open source](/docs/img/zup-open-source.png)](https://opensource.zup.com.br)
 
-[![Zup forum](/docs/img/zup-forum.png)](https://forum.zup.com.br/c/en/9)
+### Zup Open Source Forum
+
+[![Zup forum](/docs/img/zup-forum-topics.png)](https://forum.zup.com.br/c/en/9)
