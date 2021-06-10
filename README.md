@@ -8,20 +8,6 @@
 
 **Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, and execute them through command lines.
 
-**No more:**
-
-- it works on my machine!
-- what is the correct input parameter?
-- where is my script?
-- ...
-
-**More:**
-
-- usability
-- customization
-- flexibility
-- ...
-
 * * *
 
 This repository contains the CLI core, which can execute **formulas** stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas) or [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo)
@@ -34,7 +20,7 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 
 ## Full Documentation
 
-[![Documentation]("/docs/img/doc-overview.png")](https://docs.ritchiecli.io)
+[![Documentation](/docs/img/doc-overview.png)](https://docs.ritchiecli.io)
 
 ## Quick start
 
@@ -101,8 +87,10 @@ rit demo hello-world --docker
 
 - [Developer Guide](https://github.com/ZupIT/ritchie-cli/blob/master/DEVELOPER_GUIDE.md)
 
+- [Documentation repository](https://github.com/ZupIT/docs-ritchie)
+
 ## Zup Products
 
-[![Zup open source]("/docs/img/zup-open-source.png")](https://opensource.zup.com.br)
+[![Zup open source](/docs/img/zup-open-source.png)](https://opensource.zup.com.br)
 
-[![Zup forum]("/docs/img/zup-forum.png")](https://forum.zup.com.br/c/en/9)
+[![Zup forum](/docs/img/zup-forum.png)](https://forum.zup.com.br/c/en/9)
