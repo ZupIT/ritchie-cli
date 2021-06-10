@@ -18,10 +18,12 @@ package metric
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Collector(t *testing.T) {
@@ -101,4 +103,90 @@ type UserIdGeneratorMock struct {
 
 func (us UserIdGeneratorMock) Generate() (UserId, error) {
 	return us.GenerateMock()
+}
+
+func TestMetricId(t *testing.T) {
+
+	tests := []struct {
+		name string
+		in   []string
+		out  string
+	}{
+		{
+			name: "success filter input flag with docker flag",
+			in:   []string{"cmd", "test", "login", "--username=dennis", "--password=123456", "--docker"},
+			out:  "rit_test_login",
+		},
+		{
+			name: "success filter input flag for credential",
+			in:   []string{"cmd", "set", "credential", "--provider=github", "--fields=username,token", "--values=\"$USERNAME_CREDENTIAL\",\"$GITHUB_TOKEN\""},
+			out:  "rit_set_credential",
+		},
+		{
+			name: "success filter input flag for core command",
+			in:   []string{"cmd", "add", "repo", "--provider=\"Github\"", "--name=\"formulas-insights\"", "--repoUrl=\"https://github.com/ZupIT/ritchie-formulas\"", "--priority=1"},
+			out:  "rit_add_repo",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oldArgs := os.Args
+			os.Args = tt.in
+			defer func() { os.Args = oldArgs }()
+
+			got := metricId()
+			if got != tt.out {
+				t.Errorf("Unexpected return: got %v want %v", got, tt.out)
+			}
+
+			assert.Equal(t, got, tt.out)
+		})
+	}
+}
+
+func TestFlags(t *testing.T) {
+
+	tests := []struct {
+		name string
+		in   []string
+		out  []string
+	}{
+		{
+			name: "success filter input flag",
+			in:   []string{"cmd", "create", "formula"},
+			out:  nil,
+			//out:  []string{"username", "password", "docker"},
+		},
+		{
+			name: "success filter input flag with docker flag",
+			in:   []string{"cmd", "test", "login", "--username=dennis", "--password=123456", "--docker"},
+			out:  []string{"docker"},
+			//out:  []string{"username", "password", "docker"},
+		},
+		{
+			name: "success filter input flag for credential",
+			in:   []string{"cmd", "set", "credential", "--provider=github", "--fields=username,token", "--values=\"$USERNAME_CREDENTIAL\",\"$GITHUB_TOKEN\""},
+			out:  nil,
+			//out:  []string{"provider", "fields", "values"},
+		},
+		{
+			name: "success filter input flag for core command",
+			in:   []string{"cmd", "add", "repo", "--provider=\"Github\"", "--name=\"formulas-insights\"", "--repoUrl=\"https://github.com/ZupIT/ritchie-formulas\"", "--priority=1"},
+			out:  nil,
+			//out:  []string{"provider", "name", "repoUrl", "priority"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oldArgs := os.Args
+			os.Args = tt.in
+			defer func() { os.Args = oldArgs }()
+
+			got := flags()
+
+			assert.Equal(t, got, tt.out)
+		})
+	}
 }
