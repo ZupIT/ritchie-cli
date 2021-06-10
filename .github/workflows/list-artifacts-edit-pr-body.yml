@@ -19,7 +19,7 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           message: "
-        ### This pull request generated the following artifacts.
+        ### This pull request generated the following artifacts
 
   To test the health and quality of this implementation, download the respective binary
   for your operating system, unzip and directly run the binary like the examples below.
