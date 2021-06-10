@@ -290,9 +290,19 @@ func (d *DirManager) Exists(path string) bool {
 	return args.Bool(0)
 }
 
+func (d *DirManager) List(dir string, hiddenDir bool) ([]string, error) {
+	args := d.Called(dir, hiddenDir)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 func (d *DirManager) IsDir(dir string) bool {
 	args := d.Called(dir)
 	return args.Bool(0)
+}
+
+func (d *DirManager) Create(dir string) error {
+	args := d.Called(dir)
+	return args.Error(0)
 }
 
 type FileManager struct {
