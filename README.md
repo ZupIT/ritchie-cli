@@ -7,6 +7,7 @@
 # Summary
 
 - [All your automations in one place](https://github.com/ZupIT/ritchie-cli#all-your-automations-in-one-place)
+  - [Usage](https://github.com/ZupIT/ritchie-cli#usage)
   - [A customizable CLI automation tool](https://github.com/ZupIT/ritchie-cli#a-customizable-cli-automation-tool)
 - [Full Documentation](https://github.com/ZupIT/ritchie-cli#-full-documentation)
 - [Quick Start](https://github.com/ZupIT/ritchie-cli#-quick-start-)
@@ -22,7 +23,7 @@
 
 **Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, executing them through command lines.
 
-### Example
+### Usage
 
 https://user-images.githubusercontent.com/22433243/121697460-78cb4700-caa3-11eb-92f7-ff9934ff6330.mp4
 
