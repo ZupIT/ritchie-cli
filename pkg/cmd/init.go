@@ -345,7 +345,6 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 	case "docker":
 		runType = formula.DockerRun
 	default:
-		runType = formula.DefaultRun
 		return config.Configs{}, fmt.Errorf(provideValidValue, runnerFlag)
 	}
 
