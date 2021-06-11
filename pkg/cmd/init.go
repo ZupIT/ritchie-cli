@@ -277,11 +277,11 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 		return config.Configs{}, errors.New(missingFlagText(runnerFlag))
 	}
 
-	metricBool, err := flagToBool(metrics, metricsFlag)
+	metricBool, err := in.flagToBool(metrics, metricsFlag)
 	if err != nil {
 		return config.Configs{}, err
 	}
-	commonsBool, err := flagToBool(commons, commonsFlag)
+	commonsBool, err := in.flagToBool(commons, commonsFlag)
 	if err != nil {
 		return config.Configs{}, err
 	}
@@ -545,18 +545,8 @@ func (in initCmd) initSuccess() {
 	prompt.Success(success)
 }
 
-func flagToBool(f string, fn string) (bool, error) {
-	boolOpts := map[string]bool{
-		"yes":   true,
-		"no":    false,
-		"true":  true,
-		"false": false,
-		"Yes":   true,
-		"No":    false,
-		"True":  true,
-		"False": false,
-	}
-	if result, found := boolOpts[f]; found {
+func (in initCmd) flagToBool(f string, fn string) (bool, error) {
+	if result, found := prompt.BoolOpts[f]; found {
 		return result, nil
 	} else {
 		return false, fmt.Errorf(provideValidValue, fn)
