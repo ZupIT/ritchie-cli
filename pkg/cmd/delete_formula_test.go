@@ -34,7 +34,7 @@ import (
 )
 
 func TestNewDeleteFormulaCmd(t *testing.T) {
-	home := os.TempDir()
+	home := filepath.Join(os.TempDir(), "rit-delete-formula")
 	ritHome := filepath.Join(home, ".rit")
 
 	defer os.RemoveAll(home)
@@ -82,7 +82,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		{
 			name:       "run with success when the execution type is stdin",
 			workspaces: workspaces,
-			stdin:      `{"workspace_path":"/tmp/ritchie-formulas-local","formula":"rit testing delete-formula"}`,
+			stdin:      `{"workspace_path":"/tmp/rit-delete-formula/ritchie-formulas-local","formula":"rit testing delete-formula"}`,
 			delete:     true,
 			want:       nil,
 		},
