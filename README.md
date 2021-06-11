@@ -6,16 +6,16 @@
 
 # Summary
 
-- [All your automations in one place](readme#all-your-automations-in-one-place)
-- [Full Documentation](readme#-full-documentation)
-- [Quick Start](readme#-quick-start-)
-  - [Install rit latest version](readme#1%EF%B8%8F⃣-install-rit-latest-version)
-  - [Initialize rit locally](readme#2%EF%B8%8F⃣-initialize-rit-locally)
-  - [Add your first formulas repository](readme#3%EF%B8%8F⃣-add-your-first-formulas-repository)
-  - [Run the Hello World formula](readme#4%EF%B8%8F⃣-run-the-hello-world-formula)
-- [Contributing](readme#-contributing-to-ritchie)
-  - [Zup Open Source projects](readme#zup-open-source-projects)
-  - [Zup Open Source forum](readme#zup-open-source-forum)
+- [All your automations in one place](https://github.com/ZupIT/ritchie-cli#all-your-automations-in-one-place)
+- [Full Documentation](https://github.com/ZupIT/ritchie-cli#-full-documentation)
+- [Quick Start](https://github.com/ZupIT/ritchie-cli#-quick-start-)
+  - [Install rit latest version](https://github.com/ZupIT/ritchie-cli#1%EF%B8%8F⃣-install-rit-latest-version)
+  - [Initialize rit locally](https://github.com/ZupIT/ritchie-cli#2%EF%B8%8F⃣-initialize-rit-locally)
+  - [Add your first formulas repository](https://github.com/ZupIT/ritchie-cli#3%EF%B8%8F⃣-add-your-first-formulas-repository)
+  - [Run the Hello World formula](https://github.com/ZupIT/ritchie-cli#4%EF%B8%8F⃣-run-the-hello-world-formula)
+- [Contributing](https://github.com/ZupIT/ritchie-cli#-contributing-to-ritchie)
+  - [Zup Open Source projects](https://github.com/ZupIT/ritchie-cli#zup-open-source-projects)
+  - [Zup Open Source forum](https://github.com/ZupIT/ritchie-cli#zup-open-source-forum)
 
 ## All your automations in one place
 
