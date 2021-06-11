@@ -22,6 +22,10 @@
 
 **Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, executing them through command lines.
 
+### Example
+
+https://user-images.githubusercontent.com/22433243/121697460-78cb4700-caa3-11eb-92f7-ff9934ff6330.mp4
+
 ### A customizable CLI automation tool
 
 This repository contains the CLI core, which can execute **formulas** stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas) or [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo).
