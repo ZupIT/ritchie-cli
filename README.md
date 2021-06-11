@@ -4,6 +4,19 @@
 
 <img class="special-img-class" src="/docs/img/ritchie-banner.png"  alt="Ritchie logo with the phrase: Keep it simple"/>
 
+# Summary
+
+- [All your automations in one place](readme#all-your-automations-in-one-place)
+- [Full Documentation](readme#-full-documentation)
+- [Quick Start](readme#-quick-start-)
+  - [Install rit latest version](readme#1%EF%B8%8F⃣-install-rit-latest-version)
+  - [Initialize rit locally](readme#2%EF%B8%8F⃣-initialize-rit-locally)
+  - [Add your first formulas repository](readme#3%EF%B8%8F⃣-add-your-first-formulas-repository)
+  - [Run the Hello World formula](readme#4%EF%B8%8F⃣-run-the-hello-world-formula)
+- [Contributing](readme#-contributing-to-ritchie)
+  - [Zup Open Source projects](readme#zup-open-source-projects)
+  - [Zup Open Source forum](readme#zup-open-source-forum)
+
 ## All your automations in one place
 
 **Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, and execute them through command lines.
@@ -24,7 +37,7 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 
 ## 🚀 Quick start 🤖
 
-### 1️⃣ Install latest rit version
+### 1️⃣ Install rit latest version
 
 #### Linux
 
