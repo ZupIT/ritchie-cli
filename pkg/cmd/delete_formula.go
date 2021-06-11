@@ -404,14 +404,14 @@ func (d deleteFormulaCmd) safeRemoveFormula(path string) error {
 	return nil
 }
 
-func (d deleteFormulaCmd) recreateTreeJSON(workspace string) error {
-	localTree, err := d.treeGen.Generate(workspace)
+func (d deleteFormulaCmd) recreateTreeJSON(ritchieLocalWorkspace string) error {
+	localTree, err := d.treeGen.Generate(ritchieLocalWorkspace)
 	if err != nil {
 		return err
 	}
 
 	jsonString, _ := json.MarshalIndent(localTree, "", "\t")
-	pathLocalTreeJSON := filepath.Join(workspace, "tree.json")
+	pathLocalTreeJSON := filepath.Join(ritchieLocalWorkspace, "tree.json")
 	if err = d.fileManager.Write(pathLocalTreeJSON, jsonString); err != nil {
 		return err
 	}
