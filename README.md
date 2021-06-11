@@ -20,7 +20,7 @@
 
 ## All your automations in one place
 
-**Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, and execute them through command lines.
+**Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, executing them through command lines.
 
 ### A customizable CLI automation tool
 
