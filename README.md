@@ -25,7 +25,7 @@
 
 ### Usage
 
-https://user-images.githubusercontent.com/22433243/121697460-78cb4700-caa3-11eb-92f7-ff9934ff6330.mp4
+![](https://user-images.githubusercontent.com/22433243/121697854-d95a8400-caa3-11eb-9fd3-a3776f6e5e12.mp4 =100x50)
 
 ### A customizable CLI automation tool
 
