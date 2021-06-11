@@ -222,19 +222,19 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		{
 			name: "error with flags, invalid metrics value",
 			in: in{
-				fileWriteErr: errors.New("please provide a valid value to the flag 'sendmetrics'"),
+				fileWriteErr: errors.New("provide a valid value to the flag \"sendMetrics\""),
 				inList:       LocalRunType,
 			},
 			inputFlag: []string{"--sendMetrics=invalidValue", "--addCommons=no", "--runType=local"},
-			wantErr:   errors.New("please provide a valid value to the flag 'sendmetrics'"),
+			wantErr:   errors.New("provide a valid value to the flag \"sendMetrics\""),
 		},
 		{
 			name: "error with flags, invalid commons value",
 			in: in{
-				fileWriteErr: errors.New("please provide a valid value to the flag 'addCommons'"),
+				fileWriteErr: errors.New("provide a valid value to the flag \"addCommons\""),
 			},
 			inputFlag: []string{"--sendMetrics=no", "--addCommons=invalidValue", "--runType=local"},
-			wantErr:   errors.New("please provide a valid value to the flag 'addCommons'"),
+			wantErr:   errors.New("provide a valid value to the flag \"addCommons\""),
 		},
 		{
 			name: "error with flags, error to write metric file",
