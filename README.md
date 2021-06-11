@@ -26,7 +26,7 @@
 ### Usage
 
 <p align="center">
-  <a rel="noopener" target="_blank"><img width="600px" src="https://user-images.githubusercontent.com/22433243/121697854-d95a8400-caa3-11eb-9fd3-a3776f6e5e12.mp4" alt="video containing the command demonstration"></a>
+  <a rel="noopener" target="_blank"><img width="600px" src="https://user-images.githubusercontent.com/22433243/121724504-54c92f00-cabe-11eb-9add-9750a107721c.gif" alt="gif containing the command demonstration"></a>
 </p>
 
 ### A customizable CLI automation tool
