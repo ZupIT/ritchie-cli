@@ -37,21 +37,8 @@ jobs:
             rit --version > check6.txt
             cat check6.txt
             cat testdata/gha_workflows/global_workflow/assert6.txt
-            if [[ $(head -1 check6.txt) = $(head -1 testdata/gha_workflows/global_workflow/assert6.txt) ]]; then
-              echo "Same 1st line"
-            else
-              exit 1 #Error
-            fi
-            # if [[ $(head -4 check6.txt) = $(head -4 testdata/gha_workflows/global_workflow/assert6.txt) ]]; then
-            #   echo "Same 4th line"
-            # else
-            #   exit 1 #Error
-            # fi               
+            diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)         
         - name: RIT UPGRADE command (6)
           run:  |
             rit upgrade > check7.txt
-            if [[ $(head -1 check7.txt) = $(head -1 testdata/gha_workflows/global_workflow/assert7.txt) ]]; then
-              echo "Same first line"
-            else
-              exit 1 #Error
-            fi   
+            diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt)         
