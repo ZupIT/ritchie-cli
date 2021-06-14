@@ -1,0 +1,3 @@
+Rit upgraded with success
+Release 2.11.3 description:
+- Fix bug with formula's outputs #934
