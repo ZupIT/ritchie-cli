@@ -38,7 +38,7 @@ const (
 	newWorkspace       = "Type new formula workspace?"
 	formulaCmdLabel    = "Enter the new formula command: "
 	formulaCmdHelper   = "You must create your command based in this example [rit group verb noun]"
-	workspaceFolderErr = "the formula workspace does not exist, do you want create?"
+	workspaceFolderErr = "The workspace path informed doesn't exist. Do you want to create it?"
 )
 
 var (
@@ -46,7 +46,7 @@ var (
 	ErrFormulaCmdMustStartWithRit  = errors.New("rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	ErrInvalidFormulaCmdSize       = errors.New("rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 	ErrInvalidCharactersFormulaCmd = errors.New(`these characters are not allowed in the formula command [\ /,> <@ -]`)
-	InvalidWorkspace               = "the formula workspace does not exist, please enter a valid workspace"
+	InvalidWorkspace               = "the workspace path informed doesn't exist. Please, enter a valid workspace path"
 	flagName                       = "name"
 	flagLanguage                   = "language"
 	flagWorkspace                  = "workspace"
@@ -63,7 +63,7 @@ var createFormulaFlags = flags{
 		name:        flagLanguage,
 		kind:        reflect.String,
 		defValue:    "",
-		description: "Select language of formula (i.e: go, java, pyhon [...])",
+		description: "Select formula's language (i.e: go, java, python [...])",
 	},
 	{
 		name:        flagWorkspace,
@@ -191,7 +191,7 @@ func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 	if workspacelist[workspace.Name] != "" {
 		workspace.Dir = workspacelist[workspace.Name]
 	} else {
-		return formula.Create{}, errors.New("the formula workspace does not exist, select one before")
+		return formula.Create{}, errors.New(InvalidWorkspace)
 	}
 
 	formulaPath := formulaPath(workspace.Dir, formulaCmd)
