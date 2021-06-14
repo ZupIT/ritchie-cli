@@ -60,7 +60,7 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
-            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
+            rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT LIST REPO command (1)
           run:  |
             rit list repo > check1.txt
@@ -92,7 +92,7 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
-            echo '{"addCommons":false, "sendMetrics":false, "runType":"local"}' | rit init --stdin
+            rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT LIST REPO command (1)
           run:  |
             rit list repo > check1.txt
@@ -126,7 +126,7 @@ jobs:
             choco install make
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls
-            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | .\rit.exe init --stdin
+            .\rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT LIST REPO command (1)
           run:  |
             .\rit.exe list repo > check1.txt
