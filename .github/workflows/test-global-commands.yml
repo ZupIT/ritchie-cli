@@ -31,9 +31,25 @@ jobs:
         - name: RIT SET FORMULA-RUNNER command (5)
           run:  |
             rit set formula-runner --runner="docker" > check5.txt
-            diff check5.txt testdata/gha_workflows/global_workflow/assert5.txt                  
+            diff check5.txt testdata/gha_workflows/global_workflow/assert5.txt
+        - name: RIT --VERSION command (6)
+          run: |
+            rit --version > check6.txt
+            if [[ $(head -1 check6.txt) = $(head -1 testdata/gha_workflows/global_workflow/assert6.txt) ]]; then
+              echo "Same 1st line"
+            else
+              exit 1 #Error
+            fi
+            if [[ $(head -4 check6.txt) = $(head -4 testdata/gha_workflows/global_workflow/assert6.txt) ]]; then
+              echo "Same 4th line"
+            else
+              exit 1 #Error
+            fi               
         - name: RIT UPGRADE command (6)
           run:  |
-            rit --version
-            rit upgrade > check6.txt
-            diff check6.txt testdata/gha_workflows/global_workflow/assert6.txt
+            rit upgrade > check7.txt
+            if [[ $(head -1 check7.txt) = $(head -1 testdata/gha_workflows/global_workflow/assert7.txt) ]]; then
+              echo "Same first line"
+            else
+              exit 1 #Error
+            fi   
