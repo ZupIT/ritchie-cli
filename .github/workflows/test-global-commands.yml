@@ -38,7 +38,7 @@ jobs:
             diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)         
         - name: RIT UPGRADE command (6)
           run:  |
-            sudo rit upgrade > check7.txt
+            sudo rit upgrade >> check7.txt
             cat check7.txt
             cat testdata/gha_workflows/global_workflow/assert7.txt
             diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt)         
