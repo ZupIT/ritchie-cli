@@ -1,5 +1,5 @@
 name: Build Binary Ritchie When PR Opens
-on: [pull_request]
+on: [pull_request_target]
 
 jobs:
   ubuntu:
