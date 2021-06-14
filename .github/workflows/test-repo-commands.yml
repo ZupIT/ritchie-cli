@@ -92,7 +92,7 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
-            echo '{"addCommons":false, "sendMetrics":true, "runType":"local"}' | rit init --stdin
+            echo '{"addCommons":false, "sendMetrics":false, "runType":"local"}' | rit init --stdin
         - name: RIT LIST REPO command (1)
           run:  |
             rit list repo > check1.txt
