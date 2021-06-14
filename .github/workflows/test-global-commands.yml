@@ -34,5 +34,6 @@ jobs:
             diff check5.txt testdata/gha_workflows/global_workflow/assert5.txt                  
         - name: RIT UPGRADE command (6)
           run:  |
+            rit --version
             rit upgrade > check6.txt
             diff check6.txt testdata/gha_workflows/global_workflow/assert6.txt
