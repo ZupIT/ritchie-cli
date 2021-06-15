@@ -51,6 +51,7 @@ jobs:
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
         - name: RIT INIT command (1)
           run:  |
+            rit init --sendMetrics="yes" --addCommons="no" --runType="local"
             rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
             diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
         - name: RIT TUTORIAL command (2)
