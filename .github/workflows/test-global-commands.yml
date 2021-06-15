@@ -109,9 +109,11 @@ jobs:
         - name: RIT --VERSION command (6)
           run: |
             .\rit.exe --version > check6.txt
-            cmd /c 'diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)'        
+            $ch6 = Get-Content .\check6.txt)[0]
+            $as6 = Get-Content .\testdata/gha_workflows/global_workflow/assert6.txt)[0]
+            if ( $ch6 -cne $as6 ) { Exit }
+            # diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)      
         - name: RIT UPGRADE command (7)
           run:  |
             .\rit.exe rit upgrade > check7.txt
-            cmd /c 'diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt)'
-            
+            diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt)
