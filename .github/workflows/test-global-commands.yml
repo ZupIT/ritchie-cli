@@ -89,7 +89,7 @@ jobs:
         - name: RIT INIT command (1)
           run:  |
             .\rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
-            diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
+            diff check1.txt testdata/gha_workflows/global_workflow/assert1_win.txt
         - name: RIT TUTORIAL command (2)
           run:  |
             .\rit.exe tutorial --enabled=false > check2.txt
