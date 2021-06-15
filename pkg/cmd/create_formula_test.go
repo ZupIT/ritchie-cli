@@ -47,6 +47,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 	validator := validator.New()
 
 	type in struct {
+		inputBool        bool
+		inputBoolErr     error
 		inputText        string
 		inputTextErr     error
 		inputTextVal     string
@@ -63,9 +65,10 @@ func TestCreateFormulaCmd(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name       string
+		in         in
+		want       error
+		inputFlags []string
 	}{
 		{
 			name: "success",
@@ -147,6 +150,25 @@ func TestCreateFormulaCmd(t *testing.T) {
 			},
 			want: errors.New("error to create formula"),
 		},
+		{
+			name: "success with flags",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"Default":"C:\\Users\\mauri\\ritchie-formulas-local",
+				},
+			},
+			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=Default"},
+		},
+		{
+			name: "err invalidWorkspace",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
+				},
+			},
+			want: errors.New("the workspace path informed doesn't exist. Please, enter a valid workspace path"),
+			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=invalidWorkspace"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -183,6 +205,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 			treeMock := new(mocks.TreeManager)
 			treeMock.On("Check").Return([]api.CommandID{})
 
+			inputBoolM := new(mocks.InputBoolMock)
+			inputBoolM.On("Bool", mock.Anything, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
+
 			createFormulaCmd := NewCreateFormulaCmd(
 				os.TempDir(),
 				formulaCreatorMock,
@@ -195,10 +220,12 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tutorialMock,
 				treeMock,
 				validator,
+				inputBoolM,
 			)
 			createFormulaCmd.SetArgs([]string{})
 			// TODO: remove it after being deprecated
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+			createFormulaCmd.SetArgs(tt.inputFlags)
 			got := createFormulaCmd.Execute()
 			assert.Equal(t, tt.want, got)
 		})
