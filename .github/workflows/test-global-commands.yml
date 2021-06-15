@@ -14,7 +14,7 @@ jobs:
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
         - name: RIT INIT command (1)
           run:  |
-            rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt
+            rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
             diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
         - name: RIT TUTORIAL command (2)
           run:  |
@@ -40,3 +40,40 @@ jobs:
           run:  |
             sudo rit upgrade > check7.txt
             diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt)         
+
+  macos:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+        - name: RIT INIT command (1)
+          run:  |
+            rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
+            diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
+        - name: RIT TUTORIAL command (2)
+          run:  |
+            rit tutorial --enabled=false > check2.txt
+            diff check2.txt testdata/gha_workflows/global_workflow/assert2.txt
+        - name: RIT TUTORIAL command (3)
+          run:  |
+            rit tutorial --enabled=true > check3.txt
+            diff check3.txt testdata/gha_workflows/global_workflow/assert3.txt      
+        - name: RIT SET FORMULA-RUNNER command (4)
+          run:  |
+            rit set formula-runner --runner="local" > check4.txt
+            diff check4.txt testdata/gha_workflows/global_workflow/assert4.txt
+        - name: RIT SET FORMULA-RUNNER command (5)
+          run:  |
+            rit set formula-runner --runner="docker" > check5.txt
+            diff check5.txt testdata/gha_workflows/global_workflow/assert5.txt
+        - name: RIT --VERSION command (6)
+          run: |
+            rit --version > check6.txt
+            diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)         
+        - name: RIT UPGRADE command (7)
+          run:  |
+            sudo rit upgrade > check7.txt
+            diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt) 
