@@ -187,6 +187,9 @@ func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 	}
 
 	workspacelist, err := c.workspace.List()
+	if err != nil {
+		return formula.Create{}, err
+	}
 
 	if workspacelist[workspace.Name] != "" {
 		workspace.Dir = workspacelist[workspace.Name]

@@ -154,7 +154,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			name: "success with flags",
 			in: in{
 				wspaceList: formula.Workspaces{
-					"Default":"C:\\Users\\mauri\\ritchie-formulas-local",
+					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
 				},
 			},
 			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=Default"},
@@ -166,7 +166,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
 				},
 			},
-			want: errors.New("the workspace path informed doesn't exist. Please, enter a valid workspace path"),
+			want:       errors.New("the workspace path informed doesn't exist. Please, enter a valid workspace path"),
 			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=invalidWorkspace"},
 		},
 		{
@@ -174,7 +174,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 			},
-			want: errors.New("language not found"),
+			want:       errors.New("language not found"),
 			inputFlags: []string{"--name=rit test test", "--language=invalidLanguage", "--workspace=Default"},
 		},
 	}
