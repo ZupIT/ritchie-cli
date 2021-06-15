@@ -42,14 +42,13 @@ jobs:
             diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt)         
 
   macos:
-      runs-on: ubuntu-latest
+      runs-on: macos-latest
       steps:
         - uses: actions/checkout@v2.3.4
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
-            rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT INIT command (1)
           run:  |
             rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
