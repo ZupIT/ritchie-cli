@@ -14,7 +14,7 @@ jobs:
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
         - name: RIT INIT command (1)
           run:  |
-            rit init --sendMetrics="no" --addCommons="no" --runType="local" > check1.txt
+            rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt
             diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
         - name: RIT TUTORIAL command (2)
           run:  |
@@ -36,7 +36,7 @@ jobs:
           run: |
             rit --version > check6.txt
             diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)         
-        - name: RIT UPGRADE command (6)
+        - name: RIT UPGRADE command (7)
           run:  |
             rit upgrade
             rit upgrade > check7.txt
