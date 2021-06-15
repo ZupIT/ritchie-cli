@@ -169,6 +169,14 @@ func TestCreateFormulaCmd(t *testing.T) {
 			want: errors.New("the workspace path informed doesn't exist. Please, enter a valid workspace path"),
 			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=invalidWorkspace"},
 		},
+		{
+			name: "err invalidLanguage",
+			in: in{
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+			},
+			want: errors.New("language not found"),
+			inputFlags: []string{"--name=rit test test", "--language=invalidLanguage", "--workspace=Default"},
+		},
 	}
 
 	for _, tt := range tests {
@@ -225,7 +233,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 			createFormulaCmd.SetArgs([]string{})
 			// TODO: remove it after being deprecated
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			createFormulaCmd.SetArgs(tt.inputFlags)
+			if len(tt.inputFlags) > 1 {
+				createFormulaCmd.SetArgs(tt.inputFlags)
+			}
 			got := createFormulaCmd.Execute()
 			assert.Equal(t, tt.want, got)
 		})

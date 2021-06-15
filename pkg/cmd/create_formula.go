@@ -175,7 +175,7 @@ func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 		if strings.EqualFold(language, langList[i]) {
 			language = langList[i]
 			break
-		} else if i == len(langList) {
+		} else if i == len(langList)-1 {
 			return formula.Create{}, errors.New("language not found")
 		}
 	}
