@@ -113,6 +113,7 @@ jobs:
             $as6 = (Get-Content .\testdata/gha_workflows/global_workflow/assert6.txt -First 1)
             Compare-Object $ch6 $as6
             if ( $ch6 -cne $as6 ) { Exit }
+            diff $ch6 $as6
             # diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)      
         - name: RIT UPGRADE command (7)
           run:  |
