@@ -114,7 +114,7 @@ jobs:
             Compare-Object $ch6 $as6
             if ( $ch6 -cne $as6 ) 
             { 
-            Throw 'Error' 
+            Throw "Error" 
             }
         - name: RIT UPGRADE command (7)
           run:  |
