@@ -197,7 +197,7 @@ jobs:
             specific_line: 1
         - name: RIT UPGRADE command (7)
           run:  |
-            .\rit.exe rit upgrade > check7.txt
+            .\rit.exe upgrade > check7.txt
         - uses: GuillaumeFalourd/diff-action@v1
           with:
             first_file_path: check7.txt
