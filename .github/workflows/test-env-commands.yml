@@ -55,21 +55,30 @@ jobs:
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT SHOW ENV command (1)
-          run:  |
-            rit show env > check1.txt
-            diff check1.txt testdata/gha_workflows/env_workflow/assert1.txt
+          run: rit show env > check1.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check1.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert1.txt
+            expected_result: PASSED
         - name: RIT SET ENV command
           run: rit set env --env=test
         - name: RIT SHOW ENV command (2)
-          run:  |
-            rit show env > check2.txt
-            diff check2.txt testdata/gha_workflows/env_workflow/assert2.txt
+          run: rit show env > check2.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check2.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert2.txt
+            expected_result: PASSED
         - name: RIT DELETE ENV command
           run: rit delete env --env=test
         - name: RIT SHOW ENV command (3)
-          run:  |
-            rit show env > check3.txt
-            diff check3.txt testdata/gha_workflows/env_workflow/assert1.txt
+          run: rit show env > check3.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check3.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert1.txt
+            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
@@ -81,21 +90,30 @@ jobs:
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT SHOW ENV command (1)
-          run:  |
-            rit show env > check1.txt
-            diff check1.txt testdata/gha_workflows/env_workflow/assert1.txt
+          run: rit show env > check1.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check1.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert1.txt
+            expected_result: PASSED
         - name: RIT SET ENV command
           run: rit set env --env=test
         - name: RIT SHOW ENV command (2)
-          run:  |
-            rit show env > check2.txt
-            diff check2.txt testdata/gha_workflows/env_workflow/assert2.txt
+          run: rit show env > check2.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check2.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert2.txt
+            expected_result: PASSED
         - name: RIT DELETE ENV command
           run: rit delete env --env=test
         - name: RIT SHOW ENV command (3)
-          run:  |
-            rit show env > check3.txt
-            diff check3.txt testdata/gha_workflows/env_workflow/assert1.txt
+          run: rit show env > check3.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check3.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert1.txt
+            expected_result: PASSED
 
   windows:
       runs-on: windows-latest
@@ -108,18 +126,27 @@ jobs:
             ls
             .\rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT SHOW ENV command (1)
-          run:  |
-            .\rit.exe show env > check1.txt
-            diff check1.txt testdata/gha_workflows/env_workflow/assert1.txt
+          run: .\rit.exe show env > check1.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check1.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert1.txt
+            expected_result: PASSED
         - name: RIT SET ENV command
           run: .\rit.exe set env --env=test
         - name: RIT SHOW ENV command (2)
-          run:  |
-            .\rit.exe show env > check2.txt
-            diff check2.txt testdata/gha_workflows/env_workflow/assert2.txt
+          run: .\rit.exe show env > check2.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check2.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert2.txt
+            expected_result: PASSED
         - name: RIT DELETE ENV command
           run: .\rit.exe delete env --env=test
         - name: RIT SHOW ENV command (3)
-          run:  |
-            .\rit.exe show env > check3.txt
-            diff check3.txt testdata/gha_workflows/env_workflow/assert1.txt
+          run: .\rit.exe show env > check3.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check3.txt
+            second_file_path: testdata/gha_workflows/env_workflow/assert1.txt
+            expected_result: PASSED
