@@ -15,31 +15,61 @@ jobs:
         - name: RIT INIT command (1)
           run:  |
             rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
-            diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check1.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert1.txt
+            expected_result: PASSED
         - name: RIT TUTORIAL command (2)
           run:  |
             rit tutorial --enabled=false > check2.txt
-            diff check2.txt testdata/gha_workflows/global_workflow/assert2.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check2.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert2.txt
+            expected_result: PASSED
         - name: RIT TUTORIAL command (3)
           run:  |
             rit tutorial --enabled=true > check3.txt
-            diff check3.txt testdata/gha_workflows/global_workflow/assert3.txt      
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check3.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert3.txt
+            expected_result: PASSED    
         - name: RIT SET FORMULA-RUNNER command (4)
           run:  |
             rit set formula-runner --runner="local" > check4.txt
-            diff check4.txt testdata/gha_workflows/global_workflow/assert4.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check4.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert4.txt
+            expected_result: PASSED
         - name: RIT SET FORMULA-RUNNER command (5)
           run:  |
             rit set formula-runner --runner="docker" > check5.txt
-            diff check5.txt testdata/gha_workflows/global_workflow/assert5.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check5.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert5.txt
+            expected_result: PASSED
         - name: RIT --VERSION command (6)
           run: |
             rit --version > check6.txt
-            diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)         
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check6.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert6.txt
+            expected_result: PASSED
+            specific_line: 1     
         - name: RIT UPGRADE command (7)
           run:  |
             sudo rit upgrade > check7.txt
-            diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt)         
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check7.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert7.txt
+            expected_result: PASSED
+            specific_line: 1
 
   macos:
       runs-on: macos-latest
@@ -52,31 +82,61 @@ jobs:
         - name: RIT INIT command (1)
           run:  |
             rit init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
-            diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check1.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert1.txt
+            expected_result: PASSED
         - name: RIT TUTORIAL command (2)
           run:  |
             rit tutorial --enabled=false > check2.txt
-            diff check2.txt testdata/gha_workflows/global_workflow/assert2.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check2.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert2.txt
+            expected_result: PASSED
         - name: RIT TUTORIAL command (3)
           run:  |
             rit tutorial --enabled=true > check3.txt
-            diff check3.txt testdata/gha_workflows/global_workflow/assert3.txt      
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check3.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert3.txt
+            expected_result: PASSED    
         - name: RIT SET FORMULA-RUNNER command (4)
           run:  |
             rit set formula-runner --runner="local" > check4.txt
-            diff check4.txt testdata/gha_workflows/global_workflow/assert4.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check4.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert4.txt
+            expected_result: PASSED
         - name: RIT SET FORMULA-RUNNER command (5)
           run:  |
             rit set formula-runner --runner="docker" > check5.txt
-            diff check5.txt testdata/gha_workflows/global_workflow/assert5.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check5.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert5.txt
+            expected_result: PASSED
         - name: RIT --VERSION command (6)
           run: |
             rit --version > check6.txt
-            diff <(head -n 1 check6.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert6.txt)         
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check6.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert6.txt
+            expected_result: PASSED
+            specific_line: 1     
         - name: RIT UPGRADE command (7)
           run:  |
             sudo rit upgrade > check7.txt
-            diff <(head -n 1 check7.txt) <(head -n 1 testdata/gha_workflows/global_workflow/assert7.txt) 
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check7.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert7.txt
+            expected_result: PASSED
+            specific_line: 1
 
   windows:
       runs-on: windows-latest
