@@ -112,10 +112,6 @@ jobs:
             $ch6 = (Get-Content .\check6.txt -First 1)
             $as6 = (Get-Content .\testdata/gha_workflows/global_workflow/assert6.txt -First 1)
             Compare-Object $ch6 $as6
-            if ( $ch6 -cne $as6 ) 
-            { 
-            Throw "Error" 
-            }
         - name: RIT UPGRADE command (7)
           run:  |
             .\rit.exe rit upgrade > check7.txt
