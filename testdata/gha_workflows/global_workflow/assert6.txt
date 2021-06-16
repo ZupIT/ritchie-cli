@@ -1,1 +1,4 @@
-rit version
+rit version 
+  Latest available version: 2.11.3
+  Build date: 06/16/21_17:22
+  Built with: go1.15.6
