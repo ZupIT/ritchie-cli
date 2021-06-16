@@ -1,1 +1,1 @@
-rit version 1
+rit version
