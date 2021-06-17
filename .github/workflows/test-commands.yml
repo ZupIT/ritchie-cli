@@ -19,8 +19,8 @@ jobs:
             output_file_name: check1.txt
             display_file_content: NO
         - run: cat check1.txt
-        # - run: set -e; rit upgrade &> check2.txt
-        - run: set -e; TEST=$(rit upgrade 2>&1 || true); echo $TEST
+        - run: set -e; rit upgrade &> check2.txt || true
+        #- run: set -e; TEST=$(rit upgrade 2>&1 || true); echo $TEST
         - run: cat check2.txt
         # - uses: GuillaumeFalourd/command-output-file-action@v1
         #   with:
