@@ -1,0 +1,20 @@
+name: Test Commands
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ubuntu:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+        - uses: GuillaumeFalourd/command-output-file-action@v1
+          with:
+            command_line: rit init --sendMetrics="yes" --addCommons="no" --runType="local"
+            output_file_name: check1.txt
+            display_file_content: YES
+        - run: cat check1.txt
