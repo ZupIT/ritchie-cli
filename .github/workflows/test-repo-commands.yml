@@ -31,6 +31,7 @@ on:
       - '**/update_repo.go'
       - '**/update_test.go'
       - '**/update.go'
+      - 'testdata/gha_workflows/repo_workflow/**'
   pull_request:
     paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
       - '**/add_test.go'
@@ -50,6 +51,7 @@ on:
       - '**/update_repo.go'
       - '**/update_test.go'
       - '**/update.go'
+      - 'testdata/gha_workflows/repo_workflow/**'
 
 jobs:
   ubuntu:

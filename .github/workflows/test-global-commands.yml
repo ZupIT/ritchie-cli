@@ -25,7 +25,7 @@ on:
       - '**/tutorial.go'
       - '**/upgrade_test.go'
       - '**/upgrade.go'
-
+      - 'testdata/gha_workflows/global_workflow/**'
   pull_request:
     paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
       - '**/cmd.go'
@@ -39,6 +39,7 @@ on:
       - '**/tutorial.go'
       - '**/upgrade_test.go'
       - '**/upgrade.go'
+      - 'testdata/gha_workflows/global_workflow/**'
 
 jobs:
   ubuntu:

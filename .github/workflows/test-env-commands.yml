@@ -27,7 +27,7 @@ on:
       - '**/show_env.go'
       - '**/show_test.go'
       - '**/show.go'
-
+      - 'testdata/gha_workflows/env_workflow/**'
   pull_request:
     paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
       - '**/cmd.go'
@@ -43,6 +43,7 @@ on:
       - '**/show_env.go'
       - '**/show_test.go'
       - '**/show.go'
+      - 'testdata/gha_workflows/env_workflow/**'
 
 jobs:
   ubuntu:
