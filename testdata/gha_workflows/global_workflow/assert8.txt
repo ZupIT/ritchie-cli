@@ -1,9 +1,9 @@
-📊 Metrics 📊 
+📊 Metrics 📊
  
-To help us improve and deliver more value to the community, 
-we will collect anonymous data about product and feature 
-use statistics and crash reports. 
-? Do you agree?  [Use arrows to move, type to filter] 
-> ✅ Yes 
-  ❌ No 
+To help us improve and deliver more value to the community,
+we will collect anonymous data about product and feature
+use statistics and crash reports.
+? Do you agree?  [Use arrows to move, type to filter]
+> ✅ Yes
+  ❌ No
 25l25hError: EOF 
