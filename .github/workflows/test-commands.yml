@@ -1,6 +1,7 @@
 name: Test Commands
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
