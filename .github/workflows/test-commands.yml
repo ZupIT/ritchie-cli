@@ -28,5 +28,10 @@ jobs:
           with:
             command_line: rit upgrade
             output_file_name: check2.txt
-            display_file_content: YES
+            display_file_content: NO
         - run: cat check2.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check2.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
