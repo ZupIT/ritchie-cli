@@ -23,5 +23,5 @@ jobs:
           with:
             command_line: rit upgrade
             output_file_name: check2.txt
-            display_file_content: NO
+            display_file_content: YES
         - run: cat check2.txt
