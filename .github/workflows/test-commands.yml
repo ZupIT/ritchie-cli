@@ -19,6 +19,11 @@ jobs:
             output_file_name: check1.txt
             display_file_content: NO
         - run: cat check1.txt
+        - uses: GuillaumeFalourd/diff-action@v1
+          with:
+            first_file_path: check1.txt
+            second_file_path: testdata/gha_workflows/global_workflow/assert1.txt
+            expected_result: PASSED
         - uses: GuillaumeFalourd/command-output-file-action@v1
           with:
             command_line: rit upgrade
