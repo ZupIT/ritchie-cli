@@ -1,5 +1,5 @@
 📊 Metrics 📊
-  
+
 To help us improve and deliver more value to the community,
 we will collect anonymous data about product and feature
 use statistics and crash reports.
