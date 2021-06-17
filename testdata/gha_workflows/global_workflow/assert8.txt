@@ -6,4 +6,4 @@ use statistics and crash reports.
 ? Do you agree?  [Use arrows to move, type to filter]
 > ✅ Yes
   ❌ No
-25l25hError: EOF
+25l25hError: EOF 
