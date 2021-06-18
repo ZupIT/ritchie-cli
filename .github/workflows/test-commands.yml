@@ -5,7 +5,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  ubuntu:
+  ubuntu-v1:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+        - name: RIT INIT command (1)
+          run:  |
+            rit init --sendMetrics="no" --addCommons="no" --runType="local" > check1.txt
+            diff check1.txt testdata/gha_workflows/global_workflow/assert1.txt
+        - name: RIT UPGRADE command (2)
+          run:  |
+            rit upgrade > check2.txt
+            diff check2.txt testdata/gha_workflows/global_workflow/assert8.txt
+
+  ubuntu-v2:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2.3.4
@@ -18,7 +35,6 @@ jobs:
             command_line: rit init --sendMetrics="no" --addCommons="no" --runType="local"
             output_file_name: check1.txt
             display_file_content: NO
-        - run: cat check1.txt
         - uses: GuillaumeFalourd/diff-action@v1
           with:
             first_file_path: check1.txt
@@ -29,11 +45,27 @@ jobs:
             command_line: rit upgrade
             output_file_name: check2.txt
             display_file_content: NO
-        - run: |
-            cat check2.txt
-        - run: diff check2.txt testdata/gha_workflows/global_workflow/assert8.txt
         - uses: GuillaumeFalourd/diff-action@v1
           with:
             first_file_path: check2.txt
             second_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+
+  ubuntu-v3:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+        - uses: GuillaumeFalourd/test-cli-commands-action@main
+          with:
+            command_line: rit init --sendMetrics="no" --addCommons="no" --runType="local"
+            assert_file_path: testdata/gha_workflows/global_workflow/assert1.txt
+            expected_result: PASSED
+        - uses: GuillaumeFalourd/test-cli-commands-action@main
+          with:
+            command_line: rit upgrade
+            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
             expected_result: PASSED
