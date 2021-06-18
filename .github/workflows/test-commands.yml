@@ -31,11 +31,6 @@ jobs:
             display_file_content: NO
         - run: |
             cat check2.txt
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add .
-            git commit -m "generated checkout workflow file"
-            git push
         - run: diff check2.txt testdata/gha_workflows/global_workflow/assert8.txt
         - uses: GuillaumeFalourd/diff-action@v1
           with:
