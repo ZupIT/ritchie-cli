@@ -24,6 +24,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -38,7 +39,6 @@ const (
 	newWorkspace       = "Type new formula workspace?"
 	formulaCmdLabel    = "Enter the new formula command: "
 	formulaCmdHelper   = "You must create your command based in this example [rit group verb noun]"
-	workspaceFolderErr = "The workspace path informed doesn't exist. Do you want to create it?"
 )
 
 var (
@@ -46,7 +46,7 @@ var (
 	ErrFormulaCmdMustStartWithRit  = errors.New("rit formula's command needs to start with \"rit\" [ex.: rit group verb <noun>]")
 	ErrInvalidFormulaCmdSize       = errors.New("rit formula's command needs at least 2 words following \"rit\" [ex.: rit group verb]")
 	ErrInvalidCharactersFormulaCmd = errors.New(`these characters are not allowed in the formula command [\ /,> <@ -]`)
-	InvalidWorkspace               = "the workspace path informed doesn't exist. Please, enter a valid workspace path"
+	InvalidWorkspace               = "the workspace path informed doesn't exist. Do you want to create it?"
 	flagName                       = "name"
 	flagLanguage                   = "language"
 	flagWorkspace                  = "workspace"
@@ -155,6 +155,7 @@ func (c createFormulaCmd) resolveInput(cmd *cobra.Command) (formula.Create, erro
 	}
 	return c.runPrompt()
 }
+
 func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 	formulaCmd, err := cmd.Flags().GetString("name")
 	if err != nil {
@@ -243,8 +244,8 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 	}
 
 	if err := c.workspace.Add(wspace); err != nil {
-		if err.Error() == InvalidWorkspace {
-			ans, err := c.inBool.Bool(workspaceFolderErr, []string{"no", "yes"})
+		if err == workspace.ErrInvalidWorkspace {
+			ans, err := c.inBool.Bool(InvalidWorkspace, []string{"no", "yes"})
 			if err != nil {
 				return formula.Create{}, err
 			}

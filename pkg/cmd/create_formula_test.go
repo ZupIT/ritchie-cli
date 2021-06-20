@@ -79,6 +79,15 @@ func TestCreateFormulaCmd(t *testing.T) {
 			},
 		},
 		{
+			name: "success workspace new",
+			in: in{
+				inputTextVal: "rit test test",
+				wspaceAddErr: workspace.ErrInvalidWorkspace,
+				inputBool:    true,
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+			},
+		},
+		{
 			name: "error on input text validator",
 			in: in{
 				inputTextValErr: errors.New("error on input text"),
@@ -214,7 +223,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			treeMock.On("Check").Return([]api.CommandID{})
 
 			inputBoolM := new(mocks.InputBoolMock)
-			inputBoolM.On("Bool", mock.Anything, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
+			inputBoolM.On("Bool", InvalidWorkspace, []string{"no", "yes"}, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
 
 			createFormulaCmd := NewCreateFormulaCmd(
 				os.TempDir(),
