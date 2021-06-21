@@ -1,0 +1,2 @@
+[1mPROVIDER[0m	[1mENV[0m    	[1mCREDENTIAL[0m                                       
+github  	default	{"email":"te**","token":"te**","username":"te**"}
