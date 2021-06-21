@@ -171,20 +171,20 @@ jobs:
         #     command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
         #     assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
         #     expected_result: PASSED 
-        # - name: RIT TUTORIAL command (2)
-        #   uses: GuillaumeFalourd/test-cli-commands-action@main
-        #   with:
-        #     command_line: ./rit.exe tutorial --enabled=false
-        #     assert_file_path: testdata/gha_workflows/global_workflow/assert2.txt
-        #     expected_result: PASSED  
-        - run: |
-            ./rit.exe tutorial --enabled=false &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
+        - name: RIT TUTORIAL command (2)
+          uses: GuillaumeFalourd/test-cli-commands-action@main
+          with:
+            command_line: ./rit.exe tutorial --enabled=false
+            assert_file_path: testdata/gha_workflows/global_workflow/assert2_win.txt
+            expected_result: PASSED  
+        # - run: |
+        #     ./rit.exe tutorial --enabled=false &> output.txt || true
+        #     git config user.name github-actions
+        #     git config user.email github-actions@github.com
+        #     git add output.txt
+        #     git commit -m "generated output.txt file"
+        #     git push
+        #  shell: bash
         - name: RIT TUTORIAL command (3)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
