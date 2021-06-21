@@ -1,9 +1,0 @@
-📊 Metrics 📊
-
-To help us improve and deliver more value to the community,
-we will collect anonymous data about product and feature
-use statistics and crash reports.
-[0G[2K[1;92m? [0m[1;99mDo you agree?[0m  [36m[Use arrows to move, type to filter][0m
-[1;36m> ✅ Yes[0m
-[39m  ❌ No[0m
-[?25l[?25hError: EOF

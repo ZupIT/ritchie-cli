@@ -187,14 +187,6 @@ jobs:
             command_line: ./rit.exe set formula-runner --runner="docker"
             assert_file_path: testdata/gha_workflows/global_workflow/assert5_win.txt
             expected_result: PASSED
-        - run: |
-            ./rit.exe --version &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
         - name: RIT --VERSION command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
@@ -202,18 +194,10 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
-        - run: |
-            ./rit.exe upgrade &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
         - name: RIT UPGRADE command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe upgrade
-            assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/assert7_win.txt
             expected_result: PASSED
             specific_line: 1
