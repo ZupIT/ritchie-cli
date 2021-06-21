@@ -177,6 +177,13 @@ jobs:
             command_line: ./rit.exe tutorial --enabled=false
             assert_file_path: testdata/gha_workflows/global_workflow/assert2.txt
             expected_result: PASSED  
+        - run: |
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add output.txt
+            git commit -m "generated output.txt file"
+            git push
+          shell: bash
         - name: RIT TUTORIAL command (3)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
