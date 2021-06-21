@@ -111,6 +111,7 @@ jobs:
             expected_result: PASSED  
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
+        - run: rit list repo #If not executed, the next step can break
         - name: RIT LIST REPO command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
@@ -152,19 +153,11 @@ jobs:
             expected_result: PASSED  
         - name: RIT ADD REPO command
           run: ./rit.exe add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
-        - run: |
-            ./rit.exe list repo &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
         - name: RIT LIST REPO command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list repo
-            assert_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert2_win.txt
             expected_result: PASSED  
         - name: RIT UPDATE REPO command
           run: ./rit.exe update repo --name="demo" --version="2.3.0"
