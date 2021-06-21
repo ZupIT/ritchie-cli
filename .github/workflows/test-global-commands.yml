@@ -164,6 +164,7 @@ jobs:
             git add check1.txt
             git commit -m "generated check1.txt file"
             git push
+          shell: bash
         - name: RIT INIT command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
