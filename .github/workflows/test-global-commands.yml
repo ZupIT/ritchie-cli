@@ -51,44 +51,44 @@ jobs:
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
         - name: RIT INIT command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit init --sendMetrics="yes" --addCommons="no" --runType="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert1.txt
             expected_result: PASSED  
         - name: RIT TUTORIAL command (2)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit tutorial --enabled=false
             assert_file_path: testdata/gha_workflows/global_workflow/assert2.txt
             expected_result: PASSED  
         - name: RIT TUTORIAL command (3)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit tutorial --enabled=true
             assert_file_path: testdata/gha_workflows/global_workflow/assert3.txt
             expected_result: PASSED
         - name: RIT SET FORMULA-RUNNER command (4)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit set formula-runner --runner="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert4.txt
             expected_result: PASSED
         - name: RIT SET FORMULA-RUNNER command (5)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit set formula-runner --runner="docker"
             assert_file_path: testdata/gha_workflows/global_workflow/assert5.txt
             expected_result: PASSED
         - name: RIT --VERSION command (6)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit --version
             assert_file_path: testdata/gha_workflows/global_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
         - name: RIT UPGRADE command (7)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: sudo rit upgrade
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
@@ -104,44 +104,44 @@ jobs:
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
         - name: RIT INIT command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit init --sendMetrics="yes" --addCommons="no" --runType="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert1.txt
             expected_result: PASSED  
         - name: RIT TUTORIAL command (2)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit tutorial --enabled=false
             assert_file_path: testdata/gha_workflows/global_workflow/assert2.txt
             expected_result: PASSED  
         - name: RIT TUTORIAL command (3)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit tutorial --enabled=true
             assert_file_path: testdata/gha_workflows/global_workflow/assert3.txt
             expected_result: PASSED
         - name: RIT SET FORMULA-RUNNER command (4)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit set formula-runner --runner="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert4.txt
             expected_result: PASSED
         - name: RIT SET FORMULA-RUNNER command (5)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit set formula-runner --runner="docker"
             assert_file_path: testdata/gha_workflows/global_workflow/assert5.txt
             expected_result: PASSED
         - name: RIT --VERSION command (6)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: rit --version
             assert_file_path: testdata/gha_workflows/global_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
         - name: RIT UPGRADE command (7)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: sudo rit upgrade
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
@@ -169,41 +169,41 @@ jobs:
             command_line: ./rit.exe tutorial --enabled=false
             assert_file_path: testdata/gha_workflows/global_workflow/assert2_win.txt
             expected_result: PASSED  
-        - run: |
-            ./rit.exe tutorial --enabled=true &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
         - name: RIT TUTORIAL command (3)
           uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe tutorial --enabled=true
             assert_file_path: testdata/gha_workflows/global_workflow/assert3.txt
             expected_result: PASSED
+        - run: |
+            ./rit.exe set formula-runner --runner="local" &> output.txt || true
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add output.txt
+            git commit -m "generated output.txt file"
+            git push
+          shell: bash
         - name: RIT SET FORMULA-RUNNER command (4)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe set formula-runner --runner="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert4.txt
             expected_result: PASSED
         - name: RIT SET FORMULA-RUNNER command (5)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe set formula-runner --runner="docker"
             assert_file_path: testdata/gha_workflows/global_workflow/assert5.txt
             expected_result: PASSED
         - name: RIT --VERSION command (6)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe --version
             assert_file_path: testdata/gha_workflows/global_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
         - name: RIT UPGRADE command (7)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe upgrade
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
