@@ -166,7 +166,7 @@ jobs:
         #     git push
         #   shell: bash
         - name: RIT INIT command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
@@ -178,7 +178,7 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert2_win.txt
             expected_result: PASSED  
         - name: RIT TUTORIAL command (3)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe tutorial --enabled=true
             assert_file_path: testdata/gha_workflows/global_workflow/assert3.txt
