@@ -31,10 +31,10 @@ Run "rit add repo" to add a new repository manually.
 
  TUTORIAL
 
-[1;99mHow to create new formulas: [0m
+How to create new formulas:
 
 ∙ Run "rit create formula"
 ∙ Open the project with your favorite text editor.
 
-[1;99mTake a look at the formulas you can run and test to see what you can with Ritchie using "rit" [0m
+Take a look at the formulas you can run and test to see what you can with Ritchie using "rit"
 
