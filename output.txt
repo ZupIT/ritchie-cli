@@ -1,1 +1,0 @@
-You dont have any credential, use [36mrit set credential[0m
