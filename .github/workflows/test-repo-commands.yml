@@ -160,14 +160,6 @@ jobs:
             expected_result: PASSED  
         - name: RIT UPDATE REPO command
           run: ./rit.exe update repo --name="demo" --version="2.3.0"
-        - run: |
-            ./rit.exe list repo &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
         - name: RIT LIST REPO command (3)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
@@ -176,17 +168,9 @@ jobs:
             expected_result: PASSED  
         - name: RIT DELETE REPO command
           run: ./rit.exe delete repo --name="demo"
-        - run: |
-            ./rit.exe list repo &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
         - name: RIT LIST REPO command (4)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list repo
-            assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert1_win.txt
             expected_result: PASSED  
