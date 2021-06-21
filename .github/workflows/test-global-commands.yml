@@ -175,19 +175,11 @@ jobs:
             command_line: ./rit.exe tutorial --enabled=true
             assert_file_path: testdata/gha_workflows/global_workflow/assert3_win.txt
             expected_result: PASSED
-        - run: |
-            ./rit.exe set formula-runner --runner="local" &> output.txt || true
-            git config user.name github-actions
-            git config user.email github-actions@github.com
-            git add output.txt
-            git commit -m "generated output.txt file"
-            git push
-          shell: bash
         - name: RIT SET FORMULA-RUNNER command (4)
           uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe set formula-runner --runner="local"
-            assert_file_path: testdata/gha_workflows/global_workflow/assert4.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/assert4_win.txt
             expected_result: PASSED
         - run: |
             ./rit.exe set formula-runner --runner="docker" &> output.txt || true
