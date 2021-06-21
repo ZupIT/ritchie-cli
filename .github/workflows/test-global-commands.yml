@@ -156,14 +156,11 @@ jobs:
           run: |
             choco install make
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
-            ls  
-        - run: .\rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" &> output.txt || true
-          shell: bash
-        - run: cat output.txt
+            ls
         - name: RIT INIT command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
-            command_line: .\rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
+            command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
             expected_result: PASSED  
         - name: RIT TUTORIAL command (2)
@@ -214,6 +211,7 @@ jobs:
             choco install make
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls  
-        - run: rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" &> output.txt || true
+        - run: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" &> output.txt || true
           shell: bash
         - run: cat output.txt
+
