@@ -58,6 +58,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 		tempLanguagesErr error
 		inputList        string
 		inputListErr     error
+		directory        error
 		wspaceList       formula.Workspaces
 		wspaceListErr    error
 		wspaceAddErr     error
@@ -81,9 +82,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 		{
 			name: "success workspace new",
 			in: in{
-				inputTextVal: "rit test test",
-				wspaceAddErr: workspace.ErrInvalidWorkspace,
-				inputBool:    true,
+				inputTextVal:  "rit test test",
+				wspaceAddErr:  workspace.ErrInvalidWorkspace,
+				inputBool:     true,
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 			},
 		},
@@ -192,7 +193,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			workspaceMock := new(mocks.WorkspaceForm)
 			workspaceMock.On("List").Return(tt.in.wspaceList, tt.in.wspaceListErr)
-			workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr)
+			workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr).Once()
+			workspaceMock.On("Add", mock.Anything).Return(nil)
 			workspaceMock.On("CurrentHash", mock.Anything).Return("48d47029-2abf-4a2e-b5f2-f5b60471423e", nil)
 			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
 
@@ -225,6 +227,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputBoolM := new(mocks.InputBoolMock)
 			inputBoolM.On("Bool", InvalidWorkspace, []string{"no", "yes"}, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
 
+			directoryMock := new(mocks.DirManagerMock)
+			directoryMock.On("Create", mock.Anything).Return(nil)
+
 			createFormulaCmd := NewCreateFormulaCmd(
 				os.TempDir(),
 				formulaCreatorMock,
@@ -238,6 +243,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				treeMock,
 				validator,
 				inputBoolM,
+				directoryMock,
 			)
 			createFormulaCmd.SetArgs([]string{})
 			// TODO: remove it after being deprecated

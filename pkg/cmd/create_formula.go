@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -36,9 +37,9 @@ import (
 )
 
 const (
-	newWorkspace       = "Type new formula workspace?"
-	formulaCmdLabel    = "Enter the new formula command: "
-	formulaCmdHelper   = "You must create your command based in this example [rit group verb noun]"
+	newWorkspace     = "Type new formula workspace?"
+	formulaCmdLabel  = "Enter the new formula command: "
+	formulaCmdHelper = "You must create your command based in this example [rit group verb noun]"
 )
 
 var (
@@ -87,6 +88,7 @@ type createFormulaCmd struct {
 	tutorial        rtutorial.Finder
 	tree            formula.TreeChecker
 	validator       validator.Manager
+	dirManager      stream.DirCreater
 }
 
 // NewCreateFormulaCmd creates a new cmd instance.
@@ -103,6 +105,7 @@ func NewCreateFormulaCmd(
 	treeChecker formula.TreeChecker,
 	validator validator.Manager,
 	inputBool prompt.InputBool,
+	dirMan stream.DirCreater,
 ) *cobra.Command {
 	c := createFormulaCmd{
 		homeDir:         homeDir,
@@ -117,6 +120,7 @@ func NewCreateFormulaCmd(
 		tree:            treeChecker,
 		validator:       validator,
 		inBool:          inputBool,
+		dirManager:      dirMan,
 	}
 
 	cmd := &cobra.Command{
@@ -251,7 +255,7 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 			}
 
 			if ans {
-				err := os.Mkdir(wspace.Dir, 0755)
+				err := c.dirManager.Create(wspace.Dir)
 				if err != nil {
 					return formula.Create{}, err
 				}
@@ -260,7 +264,7 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 				}
 			}
 		}
-		return formula.Create{}, err
+		return formula.Create{}, nil
 	}
 
 	formulaPath := formulaPath(wspace.Dir, formulaCmd)
