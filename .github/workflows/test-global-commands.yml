@@ -156,17 +156,10 @@ jobs:
           run: |
             choco install make
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
-        - name: RIT INIT command (0)
-          run:  .\rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt # Need to accept metrics here, otherwise RIT UPGRADE command ask for them through prompt.
-        - uses: GuillaumeFalourd/diff-action@v1
-          with:
-            first_file_path: check1.txt
-            second_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
-            expected_result: PASSED
         - name: RIT INIT command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
-            command_line: .\rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
+            command_line: rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
             expected_result: PASSED  
         - name: RIT TUTORIAL command (2)
