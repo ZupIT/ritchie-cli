@@ -64,39 +64,35 @@ jobs:
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT LIST REPO command (1)
-          run: rit list repo > check1.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check1.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED  
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         - name: RIT LIST REPO command (2)
-          run: rit list repo > check2.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check2.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
+            expected_result: PASSED  
         - name: RIT UPDATE REPO command
           run: rit update repo --name="demo" --version="2.3.0"
         - name: RIT LIST REPO command (3)
-          run: rit list repo > check3.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check3.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
+            expected_result: PASSED  
         - name: RIT DELETE REPO command
           run: rit delete repo --name="demo"
         - name: RIT LIST REPO command (4)
-          run: rit list repo > check4.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check4.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED  
 
   macos:
       runs-on: macos-latest
@@ -108,39 +104,35 @@ jobs:
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT LIST REPO command (1)
-          run: rit list repo > check1.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check1.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED  
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
         - name: RIT LIST REPO command (2)
-          run: rit list repo > check2.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check2.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
+            expected_result: PASSED  
         - name: RIT UPDATE REPO command
           run: rit update repo --name="demo" --version="2.3.0"
         - name: RIT LIST REPO command (3)
-          run: rit list repo > check3.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check3.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
+            expected_result: PASSED  
         - name: RIT DELETE REPO command
           run: rit delete repo --name="demo"
         - name: RIT LIST REPO command (4)
-          run: rit list repo > check4.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check4.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED  
 
   windows:
       runs-on: windows-latest
@@ -152,37 +144,65 @@ jobs:
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls
             .\rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
+        - run: |
+            ./rit.exe list repo &> output.txt || true
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add output.txt
+            git commit -m "generated output.txt file"
+            git push
+          shell: bash
         - name: RIT LIST REPO command (1)
-          run: .\rit.exe list repo > check1.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check1.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED
+            command_line: ./rit.exe list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED  
         - name: RIT ADD REPO command
-          run: .\rit.exe add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
+          run: ./rit.exe add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
+        - run: |
+            ./rit.exe list repo &> output.txt || true
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add output.txt
+            git commit -m "generated output.txt file"
+            git push
+          shell: bash
         - name: RIT LIST REPO command (2)
-          run: .\rit.exe list repo > check2.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check2.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
-            expected_result: PASSED
+            command_line: ./rit.exe list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
+            expected_result: PASSED  
         - name: RIT UPDATE REPO command
-          run: .\rit.exe update repo --name="demo" --version="2.3.0"
+          run: ./rit.exe update repo --name="demo" --version="2.3.0"
+        - run: |
+            ./rit.exe list repo &> output.txt || true
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add output.txt
+            git commit -m "generated output.txt file"
+            git push
+          shell: bash
         - name: RIT LIST REPO command (3)
-          run: .\rit.exe list repo > check3.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check3.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
-            expected_result: PASSED
+            command_line: ./rit.exe list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
+            expected_result: PASSED  
         - name: RIT DELETE REPO command
-          run: .\rit.exe delete repo --name="demo"
+          run: ./rit.exe delete repo --name="demo"
+        - run: |
+            ./rit.exe list repo &> output.txt || true
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add output.txt
+            git commit -m "generated output.txt file"
+            git push
+          shell: bash
         - name: RIT LIST REPO command (4)
-          run: .\rit.exe list repo > check4.txt
-        - uses: GuillaumeFalourd/diff-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            first_file_path: check4.txt
-            second_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED
+            command_line: ./rit.exe list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED  
