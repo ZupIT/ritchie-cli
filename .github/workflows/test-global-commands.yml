@@ -157,13 +157,13 @@ jobs:
             choco install make
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls
-        # - run: |
-        #     ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt
-        #     git config user.name github-actions
-        #     git config user.email github-actions@github.com
-        #     git add .
-        #     git commit -m "generated output.txt file"
-        #     git push
+        - run: |
+            ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" &> check1.txt || true
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add check1.txt
+            git commit -m "generated output.txt file"
+            git push
         - name: RIT INIT command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
