@@ -94,12 +94,6 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT METRICS command (8)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
-          with:
-            command_line: rit metrics
-            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
-            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
@@ -153,12 +147,6 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT METRICS command (8)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
-          with:
-            command_line: rit metrics
-            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
-            expected_result: PASSED
 
   windows:
       runs-on: windows-latest
@@ -171,7 +159,7 @@ jobs:
         - name:  RIT INIT command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
-            command_line: .\rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local" > check1.txt
+            command_line: .\rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
             assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
             expected_result: PASSED  
         - name:  RIT TUTORIAL command (2)
@@ -212,9 +200,3 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT METRICS command (8)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
-          with:
-            command_line: rit metrics
-            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
-            expected_result: PASSED
