@@ -162,13 +162,13 @@ jobs:
             git config user.name github-actions
             git config user.email github-actions@github.com
             git add check1.txt
-            git commit -m "generated output.txt file"
+            git commit -m "generated check1.txt file"
             git push
         - name: RIT INIT command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
             command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
-            assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/assert1.txt
             expected_result: PASSED 
         - name: RIT TUTORIAL command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@main
