@@ -165,12 +165,12 @@ jobs:
         #     git commit -m "generated check1.txt file"
         #     git push
         #   shell: bash
-        - name: RIT INIT command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@main
-          with:
-            command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
-            assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
-            expected_result: PASSED 
+        # - name: RIT INIT command (1)
+        #   uses: GuillaumeFalourd/test-cli-commands-action@main
+        #   with:
+        #     command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
+        #     assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
+        #     expected_result: PASSED 
         - name: RIT TUTORIAL command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@main
           with:
