@@ -1,11 +1,11 @@
- _______       _     _             __         _                           ______    _____      _____  
+[1m _______       _     _             __         _                           ______    _____      _____  
 |_   __ \     (_)   / |_          [  |       (_)                        .' ___  |  |_   _|    |_   _| 
   | |__) |    __   `| |-'  .---.   | |--.    __    .---.     ______    / .'   \_|    | |        | |   
   |  __ /    [  |   | |   / /'`\]  | .-. |  [  |  / /__\\   |______|   | |           | |   _    | |   
  _| |  \ \_   | |   | |,  | \__.   | | | |   | |  | \__.,              \ `.___.'\   _| |__/ |  _| |_  
 |____| |___| [___]  \__/  '.___.' [___]|__] [___]  '.__.'               `.____ .'  |________| |_____| 
 
-
+[0m
 Ritchie is a platform that helps you and your team to save time by
 giving you the power to create powerful templates to execute important
 tasks across your team and organization with minimum time and with standards,
@@ -13,8 +13,8 @@ delivering autonomy to developers with security.
 
 You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.
 
-
-			 WARNING
+[1;33m
+			 WARNING[0m
 
 You can keep the configuration without adding the community repository,
 but you will need to provide a git repo with the formulas templates and add them with
@@ -25,16 +25,16 @@ See how to do this on the example:
 
 Run "rit add repo" to add a new repository manually.
 
-
+[1;32m
  Initialization successful!
-
-
+[0m
+[1m
  TUTORIAL
-
-How to create new formulas:
+[0m
+[1mHow to create new formulas:[0m
 
 ∙ Run "rit create formula"
 ∙ Open the project with your favorite text editor.
 
-Take a look at the formulas you can run and test to see what you can with Ritchie using "rit"
-
+[1mTake a look at the formulas you can run and test to see what you can with Ritchie using "rit"
+[0m
