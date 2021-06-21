@@ -1,0 +1,5 @@
+[1;32mThe default formula runner has been successfully configured![0m
+[1;33m
+In order to run formulas locally, you must have the formula language installed on your machine,
+if you don't want to install choose to run the formulas inside the docker.
+[0m
