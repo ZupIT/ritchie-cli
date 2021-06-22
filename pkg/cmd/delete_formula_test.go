@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,9 +62,12 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		workspaces     formula.Workspaces
 		selectedWspace string
 		group          string
+		subgroup       string
 		groupErr       error
 		formula        string
+		treeCmd        string
 		delete         bool
+		nested         bool
 		stdin          string
 		args           []string
 		wspaceErr      error
@@ -75,14 +79,29 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			workspaces:     workspaces,
 			selectedWspace: "Default (" + repoPathWS + ")",
 			group:          "testing",
+			subgroup:       "delete-formula",
 			formula:        "rit testing delete-formula",
+			treeCmd:        "root_testing_delete-formula",
 			delete:         true,
+			want:           nil,
+		},
+		{
+			name:           "run with success when the execution type is prompt - nested",
+			workspaces:     workspaces,
+			selectedWspace: "Default (" + repoPathWS + ")",
+			group:          "testing",
+			subgroup:       "nested-formula",
+			formula:        "rit testing nested-formula",
+			treeCmd:        "root_testing_nested-formula",
+			delete:         true,
+			nested:         true,
 			want:           nil,
 		},
 		{
 			name:       "run with success when the execution type is stdin",
 			workspaces: workspaces,
 			stdin:      `{"workspace_path":"/tmp/rit-delete-formula/ritchie-formulas-local","formula":"rit testing delete-formula"}`,
+			treeCmd:    "root_testing_delete-formula",
 			delete:     true,
 			want:       nil,
 		},
@@ -90,6 +109,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name:       "run with success when the execution type is flag",
 			workspaces: workspaces,
 			args:       []string{"--workspace=default", "--formula=rit testing delete-formula"},
+			treeCmd:    "root_testing_delete-formula",
 			delete:     true,
 			want:       nil,
 		},
@@ -97,6 +117,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name:       "run with an error when the formula flag contains an incorrect value",
 			workspaces: workspaces,
 			args:       []string{"--workspace=default", "--formula=\"rit testing delete-formula\""},
+			treeCmd:    "root_testing_delete-formula",
 			delete:     true,
 			want:       errors.New("formula name is incorrect"),
 		},
@@ -104,6 +125,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name:       "run with an error when empty formula flag",
 			workspaces: workspaces,
 			args:       []string{"--workspace=default", "--formula="},
+			treeCmd:    "root_testing_delete-formula",
 			delete:     true,
 			want:       errors.New("please provide a value for 'formula'"),
 		},
@@ -111,6 +133,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name:       "run with an error when the workspace flag contains the nonexistent value",
 			workspaces: workspaces,
 			args:       []string{"--workspace=personal", "--formula=rit testing delete-formula"},
+			treeCmd:    "root_testing_delete-formula",
 			delete:     true,
 			want:       errors.New("no workspace found with this name"),
 		},
@@ -118,12 +141,14 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name:       "run with an error when the workspace flag is empty",
 			workspaces: workspaces,
 			args:       []string{"--workspace=", "--formula=rit testing delete-formula"},
+			treeCmd:    "root_testing_delete-formula",
 			delete:     true,
 			want:       errors.New("please provide a value for 'workspace'"),
 		},
 		{
 			name:      "run with error when workspace list returns err",
 			args:      []string{"--workspace=default", "--formula=rit testing delete-formula"},
+			treeCmd:   "root_testing_delete-formula",
 			wspaceErr: errors.New("workspace list error"),
 			want:      errors.New("workspace list error"),
 		},
@@ -131,6 +156,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name:           "run with error when readFormulas returns err",
 			workspaces:     workspaces,
 			selectedWspace: "Test (" + "/tmp/rit-delete-formula/" + ")",
+			treeCmd:        "root_testing_delete-formula",
 			iListWSErr:     errors.New("no such file or directory"),
 			want:           errors.New("no such file or directory"),
 		},
@@ -138,11 +164,13 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			name:           "run with error when question about select formula or group returns err",
 			workspaces:     workspaces,
 			selectedWspace: "Default (" + repoPathWS + ")",
+			treeCmd:        "root_testing_delete-formula",
 			groupErr:       errors.New("group error"),
 			want:           errors.New("group error"),
 		},
 		{
 			name:      "run with error when add new workspace",
+			treeCmd:   "root_testing_delete-formula",
 			wspaceErr: errors.New("workspace add error"),
 			want:      errors.New("workspace add error"),
 		},
@@ -151,6 +179,8 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			workspaces:     workspaces,
 			selectedWspace: "Default (" + repoPathWS + ")",
 			group:          "testing",
+			subgroup:       "delete-formula",
+			treeCmd:        "root_testing_delete-formula",
 			formula:        "rit testing delete-formula",
 			delete:         false,
 			want:           nil,
@@ -192,13 +222,16 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			pathWithFormulas := filepath.Join(pathWS, "testing")
 			formulasDir, _ := dirManager.List(pathWithFormulas, false)
 
+			question := fmt.Sprintf("Are you sure you want to delete the formula: %s", tt.formula)
+
 			inList := new(mocks.InputListMock)
 			inList.On("List", "Select a formula workspace: ", mock.Anything, mock.Anything).Return(tt.selectedWspace, tt.iListWSErr)
 			inList.On("List", mock.Anything, dir, mock.Anything).Return(tt.group, tt.groupErr)
-			inList.On("List", mock.Anything, formulasDir, mock.Anything).Return("delete-formula", tt.groupErr)
+			inList.On("List", mock.Anything, formulasDir, mock.Anything).Return(tt.subgroup, tt.groupErr)
 			inList.On("List", foundFormulaQuestion, mock.Anything, mock.Anything).Return(tt.formula, tt.groupErr)
+			inList.On("List", mock.Anything, []string{"test", "test"}, mock.Anything).Return("test", tt.groupErr)
 			inBool := new(mocks.InputBoolMock)
-			inBool.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.delete, nil)
+			inBool.On("Bool", question, mock.Anything, mock.Anything).Return(tt.delete, nil)
 
 			inPath := &mocks.InputPathMock{}
 			inText := &mocks.InputTextMock{}
@@ -228,11 +261,17 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			got := cmd.Execute()
 
 			pathWSDir, pathLocalDir, treePath := "", "", ""
-			pathWSDir = filepath.Join(repoPathWS, "testing", "delete-formula", "src")
-			pathLocalDir = filepath.Join(repoPathLocalDefault, "testing", "delete-formula", "src")
-			treePath = filepath.Join(repoPathLocalDefault, "tree.json")
+			if tt.formula == "rit testing nested-formula" {
+				pathWSDir = filepath.Join(repoPathWS, "testing", "nested-formula", "test")
+				pathLocalDir = filepath.Join(repoPathLocalDefault, "testing", "nested-formula", "test")
+				treePath = filepath.Join(repoPathLocalDefault, "tree.json")
+			} else {
+				pathWSDir = filepath.Join(repoPathWS, "testing", "delete-formula", "src")
+				pathLocalDir = filepath.Join(repoPathLocalDefault, "testing", "delete-formula", "src")
+				treePath = filepath.Join(repoPathLocalDefault, "tree.json")
+			}
 
-			if tt.want != nil || !tt.delete {
+			if tt.want != nil || !tt.delete || tt.nested {
 				assert.Equal(t, tt.want, got)
 
 				bTree, err := fileInfo(treePath)
@@ -242,7 +281,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 
 				assert.DirExists(t, pathWSDir)
 				assert.DirExists(t, pathLocalDir)
-				assert.NotEmpty(t, tree.Commands[api.CommandID("root_testing_delete-formula")])
+				assert.NotEmpty(t, tree.Commands[api.CommandID(tt.treeCmd)])
 			} else {
 				assert.Nil(t, got)
 
@@ -253,7 +292,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 
 				assert.NoDirExists(t, pathWSDir)
 				assert.NoDirExists(t, pathLocalDir)
-				assert.Empty(t, tree.Commands[api.CommandID("root_testing_delete-formula")])
+				assert.Empty(t, tree.Commands[api.CommandID(tt.treeCmd)])
 			}
 		})
 	}
