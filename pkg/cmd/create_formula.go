@@ -247,24 +247,23 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 		return formula.Create{}, err
 	}
 
-	if err := c.workspace.Add(wspace); err != nil {
-		if err == workspace.ErrInvalidWorkspace {
-			ans, err := c.inBool.Bool(InvalidWorkspace, []string{"no", "yes"})
+	if err := c.workspace.Add(wspace); err == workspace.ErrInvalidWorkspace {
+		ans, err := c.inBool.Bool(InvalidWorkspace, []string{"no", "yes"})
+		if err != nil {
+			return formula.Create{}, err
+		}
+
+		if ans {
+			err := c.dirManager.Create(wspace.Dir)
 			if err != nil {
 				return formula.Create{}, err
 			}
-
-			if ans {
-				err := c.dirManager.Create(wspace.Dir)
-				if err != nil {
-					return formula.Create{}, err
-				}
-				if err := c.workspace.Add(wspace); err != nil {
-					return formula.Create{}, err
-				}
+			if err := c.workspace.Add(wspace); err != nil {
+				return formula.Create{}, err
 			}
 		}
-		return formula.Create{}, nil
+	} else {
+		return formula.Create{}, err
 	}
 
 	formulaPath := formulaPath(wspace.Dir, formulaCmd)

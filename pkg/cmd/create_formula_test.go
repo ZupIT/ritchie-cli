@@ -62,6 +62,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 		wspaceList       formula.Workspaces
 		wspaceListErr    error
 		wspaceAddErr     error
+		dirCreate        error
 		createErr        error
 	}
 
@@ -80,13 +81,26 @@ func TestCreateFormulaCmd(t *testing.T) {
 			},
 		},
 		{
-			name: "success workspace new",
+			name: "success with new workspace dir",
 			in: in{
 				inputTextVal:  "rit test test",
 				wspaceAddErr:  workspace.ErrInvalidWorkspace,
 				inputBool:     true,
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				dirCreate: nil,
 			},
+		},
+		{
+			name: "add dir error",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				inputList:     "go",
+				inputBool: true,
+				wspaceAddErr: workspace.ErrInvalidWorkspace,
+				dirCreate: errors.New("failed to create dir"),
+			},
+			want: errors.New("failed to create dir"),
 		},
 		{
 			name: "error on input text validator",
@@ -176,7 +190,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
 				},
 			},
-			want:       errors.New("the workspace path informed doesn't exist. Please, enter a valid workspace path"),
+			want:       errors.New(InvalidWorkspace),
 			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=invalidWorkspace"},
 		},
 		{
@@ -192,9 +206,15 @@ func TestCreateFormulaCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			workspaceMock := new(mocks.WorkspaceForm)
+			if tt.name == "success with new workspace dir" {
+				workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr).Once()
+				workspaceMock.On("Add", mock.Anything).Return(nil).Once()
+
+			} else {
+				workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr)
+			}
+
 			workspaceMock.On("List").Return(tt.in.wspaceList, tt.in.wspaceListErr)
-			workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr).Once()
-			workspaceMock.On("Add", mock.Anything).Return(nil)
 			workspaceMock.On("CurrentHash", mock.Anything).Return("48d47029-2abf-4a2e-b5f2-f5b60471423e", nil)
 			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
 
@@ -228,7 +248,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputBoolM.On("Bool", InvalidWorkspace, []string{"no", "yes"}, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
 
 			directoryMock := new(mocks.DirManagerMock)
-			directoryMock.On("Create", mock.Anything).Return(nil)
+			directoryMock.On("Create", mock.Anything).Return(tt.in.dirCreate)
 
 			createFormulaCmd := NewCreateFormulaCmd(
 				os.TempDir(),
