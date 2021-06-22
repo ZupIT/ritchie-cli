@@ -1,3 +1,0 @@
-[1;32mRit upgraded with success[0m
-[1mRelease 2.11.3 description:[0m
-- Fix bug with formula's outputs #934 
