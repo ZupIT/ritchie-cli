@@ -28,6 +28,8 @@ on:
       - '**/show_test.go'
       - '**/show.go'
       - 'testdata/gha_workflows/env_workflow/**'
+      - '**/test-env-commands.yml'
+
   pull_request:
     paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
       - '**/cmd.go'
@@ -44,12 +46,16 @@ on:
       - '**/show_test.go'
       - '**/show.go'
       - 'testdata/gha_workflows/env_workflow/**'
+      - '**/test-env-commands.yml'
 
 jobs:
   ubuntu:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
