@@ -1,0 +1,5 @@
+The default formula runner has been successfully configured!
+
+In order to run formulas locally, you must have the formula language installed on your machine,
+if you don't want to install choose to run the formulas inside the docker.
+

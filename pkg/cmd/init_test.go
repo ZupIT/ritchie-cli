@@ -57,6 +57,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 		in         in
 		wantErr    error
 		inputStdin string
+		inputFlag  []string
 	}{
 		{
 			name: "success to add commons repo and accept to send metrics",
@@ -104,6 +105,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList:         LocalRunType,
 			},
 			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
+			inputFlag:  []string{"--sendMetrics=yes", "--addCommons=yes", "--runType=local"},
 		},
 		{
 			name: "find tutorial error",
@@ -199,6 +201,61 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			wantErr:    errors.New("error to write ritchie configs"),
 			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"local\"}\n",
 		},
+		{
+			name: "success with flags, add commons and send metrics",
+			in: in{
+				gitTag:         git.Tag{Name: "1.0.0"},
+				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
+				inList:         LocalRunType,
+			},
+			inputFlag: []string{"--sendMetrics=yes", "--addCommons=yes", "--runType=local"},
+		},
+		{
+			name: "success with flags, when not add commons and not send metrics",
+			in: in{
+				gitTag:         git.Tag{Name: "1.0.0"},
+				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
+				inList:         LocalRunType,
+			},
+			inputFlag: []string{"--sendMetrics=no", "--addCommons=no", "--runType=docker"},
+		},
+		{
+			name: "error with flags, invalid metrics value",
+			in: in{
+				fileWriteErr: errors.New("provide a valid value to the flag \"sendMetrics\""),
+				inList:       LocalRunType,
+			},
+			inputFlag: []string{"--sendMetrics=invalidValue", "--addCommons=no", "--runType=local"},
+			wantErr:   errors.New("provide a valid value to the flag \"sendMetrics\""),
+		},
+		{
+			name: "error with flags, invalid commons value",
+			in: in{
+				fileWriteErr: errors.New("provide a valid value to the flag \"addCommons\""),
+			},
+			inputFlag: []string{"--sendMetrics=no", "--addCommons=invalidValue", "--runType=local"},
+			wantErr:   errors.New("provide a valid value to the flag \"addCommons\""),
+		},
+		{
+			name: "error with flags, error to write metric file",
+			in: in{
+				gitTag:         git.Tag{Name: "1.0.0"},
+				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
+				fileWriteErr:   errors.New("error to write metric file"),
+			},
+			inputFlag: []string{"--sendMetrics=yes", "--addCommons=no", "--runType=local"},
+			wantErr:   errors.New("error to write metric file"),
+		},
+		{
+			name: "error with flags, error to write metric file",
+			in: in{
+				gitTag:         git.Tag{Name: "1.0.0"},
+				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
+				fileWriteErr:   errors.New("error to write metric file"),
+			},
+			inputFlag: []string{"--sendMetrics=yes", "--addCommons=no", "--runType=local"},
+			wantErr:   errors.New("error to write metric file"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -251,8 +308,22 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				ritConfigMock,
 			)
 
+			initFlag := NewInitCmd(
+				repoMock,
+				gitMock,
+				tutorialMock,
+				configRunnerMock,
+				fileMock,
+				inListMock,
+				inBoolMock,
+				metricSender,
+				ritConfigMock,
+			)
+
 			initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
 			initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
+			initFlag.PersistentFlags().Bool("stdin", false, "input by stdin")
+			initFlag.SetArgs(tt.inputFlag)
 
 			newReader := strings.NewReader(tt.inputStdin)
 			initStdin.SetIn(newReader)
@@ -263,6 +334,9 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			if tt.inputStdin != "" {
 				gotStdin := initStdin.Execute()
 				assert.Equal(t, tt.wantErr, gotStdin)
+			} else if len(tt.inputFlag) != 0 {
+				gotFlag := initFlag.Execute()
+				assert.Equal(t, tt.wantErr, gotFlag)
 			}
 		})
 	}
