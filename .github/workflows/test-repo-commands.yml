@@ -111,10 +111,11 @@ jobs:
             expected_result: PASSED  
         - name: RIT ADD REPO command
           run: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
+        - run: rit list repo 2> /dev/null && sleep 1
         - name: RIT LIST REPO command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit list repo 2> /dev/null && rit list repo
+            command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/unix/assert2.txt
             expected_result: PASSED  
         - name: RIT UPDATE REPO command
