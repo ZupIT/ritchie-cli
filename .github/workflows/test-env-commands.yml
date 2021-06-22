@@ -62,26 +62,26 @@ jobs:
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT SHOW ENV command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert1.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED  
         - name: RIT SET ENV command
           run: rit set env --env=test
         - name: RIT SHOW ENV command (2)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert2.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert2.txt
             expected_result: PASSED  
         - name: RIT DELETE ENV command
           run: rit delete env --env=test
         - name: RIT SHOW ENV command (3)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert1.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED  
 
   macos:
@@ -94,26 +94,26 @@ jobs:
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT SHOW ENV command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert1.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED  
         - name: RIT SET ENV command
           run: rit set env --env=test
         - name: RIT SHOW ENV command (2)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert2.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert2.txt
             expected_result: PASSED  
         - name: RIT DELETE ENV command
           run: rit delete env --env=test
         - name: RIT SHOW ENV command (3)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert1.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED  
 
   windows:
@@ -127,24 +127,24 @@ jobs:
             ls
             .\rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT SHOW ENV command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert1.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED  
         - name: RIT SET ENV command
           run: ./rit.exe set env --env=test
         - name: RIT SHOW ENV command (2)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert2.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert2.txt
             expected_result: PASSED  
         - name: RIT DELETE ENV command
           run: ./rit.exe delete env --env=test
         - name: RIT SHOW ENV command (3)
-          uses: GuillaumeFalourd/test-cli-commands-action@dev
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe show env
-            assert_file_path: testdata/gha_workflows/env_workflow/unix/assert1.txt
+            assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED  
