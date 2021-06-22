@@ -49,8 +49,6 @@ jobs:
       steps:
         - uses: actions/checkout@v2.3.4
         - uses: actions/setup-node@v2
-          with:
-            node-version: '14'
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
@@ -104,6 +102,7 @@ jobs:
       runs-on: macos-latest
       steps:
         - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
@@ -157,6 +156,7 @@ jobs:
       runs-on: windows-latest
       steps:
         - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
         - name: Create binary from branch
           run: |
             choco install make
