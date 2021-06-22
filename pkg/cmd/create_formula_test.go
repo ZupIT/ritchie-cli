@@ -58,7 +58,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 		tempLanguagesErr error
 		inputList        string
 		inputListErr     error
-		directory        error
 		wspaceList       formula.Workspaces
 		wspaceListErr    error
 		wspaceAddErr     error
@@ -87,7 +86,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				wspaceAddErr:  workspace.ErrInvalidWorkspace,
 				inputBool:     true,
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
-				dirCreate: nil,
+				dirCreate:     nil,
 			},
 		},
 		{
@@ -96,9 +95,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 				inputList:     "go",
-				inputBool: true,
-				wspaceAddErr: workspace.ErrInvalidWorkspace,
-				dirCreate: errors.New("failed to create dir"),
+				inputBool:     true,
+				wspaceAddErr:  workspace.ErrInvalidWorkspace,
+				dirCreate:     errors.New("failed to create dir"),
 			},
 			want: errors.New("failed to create dir"),
 		},
