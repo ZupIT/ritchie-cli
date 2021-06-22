@@ -179,6 +179,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				wspaceList: formula.Workspaces{
 					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
 				},
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 			},
 			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=Default"},
 		},
