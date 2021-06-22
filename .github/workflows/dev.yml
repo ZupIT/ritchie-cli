@@ -135,7 +135,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
-            assert_file_path: testdata/gha_workflows/global_workflow/unix/assert1.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/windows/assert1.txt
             expected_result: PASSED 
         - name: RIT TUTORIAL command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@dev
