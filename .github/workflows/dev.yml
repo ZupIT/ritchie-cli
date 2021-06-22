@@ -132,7 +132,7 @@ jobs:
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls
         - name: RIT INIT command (1)
-          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
             assert_file_path: testdata/gha_workflows/global_workflow/unix/assert1.txt
