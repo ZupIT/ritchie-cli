@@ -9,6 +9,9 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
@@ -63,6 +66,9 @@ jobs:
       runs-on: macos-latest
       steps:
         - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
@@ -117,6 +123,9 @@ jobs:
       runs-on: windows-latest
       steps:
         - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
         - name: Create binary from branch
           run: |
             choco install make
@@ -126,7 +135,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
-            assert_file_path: testdata/gha_workflows/global_workflow/windows/assert1.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/unix/assert1.txt
             expected_result: PASSED 
         - name: RIT TUTORIAL command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@dev
