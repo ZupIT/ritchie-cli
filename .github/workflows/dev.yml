@@ -132,7 +132,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@dev
           with:
             command_line: ./rit.exe tutorial --enabled=false
-            assert_file_path: testdata/gha_workflows/global_workflow/windows/assert2.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/unix/assert2.txt
             expected_result: PASSED
             shell_output_file: pwsh
         # - name: RIT TUTORIAL command (3)
