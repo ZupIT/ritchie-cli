@@ -144,6 +144,15 @@ func TestCreateFormulaCmd(t *testing.T) {
 			want: errors.New("error to list workspaces"),
 		},
 		{
+			name: "error on workspace list with flags",
+			in: in{
+				tempLanguages: []string{"go", "java", "c", "rust"},
+				wspaceListErr: errors.New("error to list workspaces"),
+			},
+			want: errors.New("error to list workspaces"),
+			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=default"},
+		},
+		{
 			name: "error function FormulaWorkspaceInput",
 			in: in{
 				inputTextVal:  "rit test test",
