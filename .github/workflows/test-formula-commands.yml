@@ -45,6 +45,13 @@ jobs:
             command_line: rit delete formula --workspace="Default" --formula="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
             expected_result: PASSED
+        - name: RIT LIST FORMULA command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list formula --name="commons"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            expected_result: PASSED
+            specific_line: 1
 
   macos:
       runs-on: macos-latest
@@ -88,6 +95,13 @@ jobs:
             command_line: rit delete formula --workspace="Default" --formula="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
             expected_result: PASSED
+        - name: RIT LIST FORMULA command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list formula --name="commons"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            expected_result: PASSED
+            specific_line: 1
 
   windows:
       runs-on: windows-latest
@@ -132,3 +146,10 @@ jobs:
             command_line: ./rit.exe delete formula --workspace="Default" --formula="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
             expected_result: PASSED
+        - name: RIT LIST FORMULA command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe list formula --name="commons"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            expected_result: PASSED
+            specific_line: 1            
