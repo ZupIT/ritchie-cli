@@ -14,7 +14,7 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
-            rit init --sendMetrics="no" --addCommons="no" --runType="local"
+            rit init --sendMetrics="no" --addCommons="yes" --runType="local"
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
@@ -34,11 +34,11 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
-            rit init --sendMetrics="no" --addCommons="no" --runType="local"
+            rit init --sendMetrics="no" --addCommons="yes" --runType="local"
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            command_line: rit create formula --name="rit functional test2" --language="python3" --workspace="Default"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert1.txt
             expected_result: PASSED
             specific_line: 1
@@ -55,7 +55,7 @@ jobs:
             choco install make
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls
-            .\rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
+            .\rit.exe init --sendMetrics="no" --addCommons="yes" --runType="local"
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
