@@ -52,6 +52,7 @@ const (
 
 	errNonExistFormula = "Formula %q wasn't found in the workspaces"
 	errFormulaExists   = "Formula %q already exists on this workspace = %q"
+	errCancelMsg       = "You cancelled the rename operation."
 
 	renameSuccessMsg = "The formula was renamed with success"
 )
@@ -136,6 +137,10 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 			return err
 		}
 
+		if isEmpty(result) {
+			return nil
+		}
+
 		wsOldFormula := r.getWorkspace(result.OldFormulaCmd)
 		wsNewFormula := r.getWorkspace(result.NewFormulaCmd)
 
@@ -145,15 +150,6 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 		}
 		result.Workspace.Dir = ws.Dir
 		result.Workspace.Name = ws.Name
-
-		question := fmt.Sprintf(questionConfirmation, result.OldFormulaCmd, result.NewFormulaCmd)
-		ans, err := r.inBool.Bool(question, []string{"no", "yes"})
-		if err != nil {
-			return err
-		}
-		if !ans {
-			return nil
-		}
 
 		result.NewFormulaCmd = cleanPreffix(result.NewFormulaCmd)
 		result.OldFormulaCmd = cleanPreffix(result.OldFormulaCmd)
@@ -214,6 +210,15 @@ func (r *renameFormulaCmd) resolvePrompt() (formula.Rename, error) {
 		return result, err
 	}
 	result.NewFormulaCmd = newFormula
+
+	question := fmt.Sprintf(questionConfirmation, result.OldFormulaCmd, result.NewFormulaCmd)
+	ans, err := r.inBool.Bool(question, []string{"no", "yes"})
+	if err != nil {
+		return result, err
+	}
+	if !ans {
+		return formula.Rename{}, nil
+	}
 
 	return result, nil
 }
@@ -371,6 +376,10 @@ func (r *renameFormulaCmd) recreateTreeJSON(pathLocalWS string) error {
 	}
 
 	return nil
+}
+
+func isEmpty(fr formula.Rename) bool {
+	return fr.OldFormulaCmd == "" || fr.NewFormulaCmd == ""
 }
 
 func fPath(workspacePath, cmd string) string {

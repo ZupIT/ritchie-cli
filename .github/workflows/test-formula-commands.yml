@@ -14,6 +14,8 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+        - name: RIT INIT without commons repo
+          run:
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -31,6 +33,12 @@ jobs:
             assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
             expected_result: PASSED
             specific_line: 1
+        - name: RIT RENAME FORMULA command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
@@ -43,6 +51,8 @@ jobs:
           run: |
             cd $GITHUB_WORKSPACE
             make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+        - name: RIT INIT without commons repo
+          run:
             rit init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -60,6 +70,12 @@ jobs:
             assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
             expected_result: PASSED
             specific_line: 1
+        - name: RIT RENAME FORMULA command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
 
   windows:
       runs-on: windows-latest
@@ -73,6 +89,8 @@ jobs:
             choco install make
             make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
             ls
+        - name: RIT INIT without commons repo
+          run:
             ./rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -90,3 +108,9 @@ jobs:
             assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
             expected_result: PASSED
             specific_line: 1
+        - name: RIT RENAME FORMULA command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe rename formula --oldName="rit functional test" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
