@@ -39,6 +39,12 @@ jobs:
             command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
             expected_result: PASSED
+        - name: RIT DELETE FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete formula --workspace="Default" --formula="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
@@ -75,6 +81,12 @@ jobs:
           with:
             command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete formula --workspace="Default" --formula="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
             expected_result: PASSED
 
   windows:
@@ -113,4 +125,10 @@ jobs:
           with:
             command_line: ./rit.exe rename formula --oldName="rit functional test" --newName="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete formula --workspace="Default" --formula="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
             expected_result: PASSED
