@@ -1,0 +1,7 @@
+python3 formula successfully created!
+Formula path is /Users/dennis-ritchie/ritchie-formulas-local/functional/test
+
+[TUTORIAL]
+In order to test your new formula:
+ ∙ Simply edit the formula files and run "rit functional test" again
+
