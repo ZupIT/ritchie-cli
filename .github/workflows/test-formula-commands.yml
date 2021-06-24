@@ -129,6 +129,6 @@ jobs:
         - name: RIT DELETE FORMULA command (4)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit delete formula --workspace="Default" --formula="rit demo test"
+            command_line: ./rit.exe delete formula --workspace="Default" --formula="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
             expected_result: PASSED
