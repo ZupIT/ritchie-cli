@@ -52,7 +52,6 @@ const (
 
 	errNonExistFormula = "Formula %q wasn't found in the workspaces"
 	errFormulaExists   = "Formula %q already exists on this workspace = %q"
-	errCancelMsg       = "You cancelled the rename operation."
 
 	renameSuccessMsg = "The formula was renamed with success"
 )
