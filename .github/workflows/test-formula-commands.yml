@@ -45,6 +45,13 @@ jobs:
             command_line: rit delete formula --workspace="Default" --formula="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
             expected_result: PASSED
+        - run: |
+            rit list formula --name="commons" > check1.txt
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add .
+            git commit -m "generated checkout workflow file"
+            git push
         - name: RIT LIST FORMULA command (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
