@@ -163,12 +163,16 @@ function createInstaller() {
     log_info "Application installer generation process started.(3 Steps)"
     buildPackage
     buildProduct ${PRODUCT}-macos-installer-x64-${VERSION}.pkg
-    while true; do
-        read -p "Do you wish to sign the installer (You should have Apple Developer Certificate) [y/N]?" answer
-        [[ $answer == "y" || $answer == "Y" ]] && FLAG=true && break
-        [[ $answer == "n" || $answer == "N" || $answer == "" ]] && log_info "Skiped signing process." && FLAG=false && break
-        echo "Please answer with 'y' or 'n'"
-    done
+    # TODO: No signing process at the moment, update this part when available.
+
+    # while true; do
+    #     read -p "Do you wish to sign the installer (You should have Apple Developer Certificate) [y/N]?" answer
+    #     [[ $answer == "y" || $answer == "Y" ]] && FLAG=true && break
+    #     [[ $answer == "n" || $answer == "N" || $answer == "" ]] && log_info "Skiped signing process." && FLAG=false && break
+    #     echo "Please answer with 'y' or 'n'"
+    # done
+    
+    log_info "Skiped signing process." && FLAG=false
     [[ $FLAG == "true" ]] && signProduct ${PRODUCT}-macos-installer-x64-${VERSION}.pkg
     log_info "Application installer generation steps finished."
 }
