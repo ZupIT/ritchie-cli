@@ -81,17 +81,23 @@ jobs:
             command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
             expected_result: PASSED
-        - name: RIT DELETE FORMULA command (4)
+        - name: RIT RENAME FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit unexistent formula" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete formula --workspace="Default" --formula="rit demo test"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
             expected_result: PASSED
-        - name: RIT LIST FORMULA command (5)
+        - name: RIT LIST FORMULA command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list formula --name="commons"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
 
@@ -130,17 +136,23 @@ jobs:
             command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
             expected_result: PASSED
-        - name: RIT DELETE FORMULA command (4)
+        - name: RIT RENAME FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit unexistent formula" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete formula --workspace="Default" --formula="rit demo test"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
             expected_result: PASSED
-        - name: RIT LIST FORMULA command (5)
+        - name: RIT LIST FORMULA command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list formula --name="commons"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
 
@@ -180,16 +192,22 @@ jobs:
             command_line: ./rit.exe rename formula --oldName="rit functional test" --newName="rit demo test"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
             expected_result: PASSED
-        - name: RIT DELETE FORMULA command (4)
+        - name: RIT RENAME FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe rename formula --oldName="rit unexistent formula" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe delete formula --workspace="Default" --formula="rit demo test"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
             expected_result: PASSED
-        - name: RIT LIST FORMULA command (5)
+        - name: RIT LIST FORMULA command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list formula --name="commons"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
-            specific_line: 1            
+            specific_line: 1          
