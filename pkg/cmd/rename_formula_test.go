@@ -100,7 +100,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 		workspaceSelected       string
 		customWorkspaceSelected bool
 		args                    []string
-		confirm                 bool
+		approveOnConfirmation   bool
 	}
 
 	type out struct {
@@ -118,10 +118,10 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "success on prompt input",
 			in: in{
-				inputOldFormula:   "rit testing formula",
-				inputNewFormula:   "rit testing new-formula",
-				workspaceSelected: "Default (" + repoPathWS + ")",
-				confirm:           true,
+				inputOldFormula:       "rit testing formula",
+				inputNewFormula:       "rit testing new-formula",
+				workspaceSelected:     "Default (" + repoPathWS + ")",
+				approveOnConfirmation: true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "new-formula"),
@@ -132,10 +132,10 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "error on prompt input when oldName flag is nil",
 			in: in{
-				inputOldFormula:   "",
-				inputNewFormula:   "rit testing new-formula",
-				workspaceSelected: "Default (" + repoPathWS + ")",
-				confirm:           true,
+				inputOldFormula:       "",
+				inputNewFormula:       "rit testing new-formula",
+				workspaceSelected:     "Default (" + repoPathWS + ")",
+				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("this input must not be empty"),
@@ -144,10 +144,10 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "error on prompt input when oldName flag dont exists in workspace",
 			in: in{
-				inputOldFormula:   "rit testing other",
-				inputNewFormula:   "rit testing new-formula",
-				workspaceSelected: "Default (" + repoPathWS + ")",
-				confirm:           true,
+				inputOldFormula:       "rit testing other",
+				inputNewFormula:       "rit testing new-formula",
+				workspaceSelected:     "Default (" + repoPathWS + ")",
+				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("Formula \"rit testing other\" wasn't found in the workspaces"),
@@ -156,10 +156,10 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "error on prompt input when newName flag exists in workspace",
 			in: in{
-				inputOldFormula:   "rit testing formula",
-				inputNewFormula:   "rit testing formula",
-				workspaceSelected: "Default (" + repoPathWS + ")",
-				confirm:           true,
+				inputOldFormula:       "rit testing formula",
+				inputNewFormula:       "rit testing formula",
+				workspaceSelected:     "Default (" + repoPathWS + ")",
+				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("Formula \"rit testing formula\" already exists on this workspace = \"Default\""),
@@ -168,9 +168,9 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "no confirmation on prompt",
 			in: in{
-				inputOldFormula: "rit testing formula",
-				inputNewFormula: "rit testing formula new",
-				confirm:         false,
+				inputOldFormula:       "rit testing formula",
+				inputNewFormula:       "rit testing formula new",
+				approveOnConfirmation: false,
 			},
 		},
 		{
@@ -180,7 +180,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=rit testing new-formula",
 				},
-				confirm: true,
+				approveOnConfirmation: true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "new-formula"),
@@ -195,7 +195,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=rit testing other",
 				},
-				confirm: true,
+				approveOnConfirmation: true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "other"),
@@ -210,7 +210,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=",
 					"--newName=rit testing formula new",
 				},
-				confirm: true,
+				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("please provide a value for 'oldName'"),
@@ -223,7 +223,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=",
 				},
-				confirm: true,
+				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("please provide a value for 'newName'"),
@@ -236,7 +236,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing other",
 					"--newName=rit testing formula new",
 				},
-				confirm: true,
+				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("Formula \"rit testing other\" wasn't found in the workspaces"),
@@ -249,7 +249,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=rit testing formula",
 				},
-				confirm: true,
+				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("Formula \"rit testing formula\" already exists on this workspace = \"Default\""),
@@ -258,9 +258,9 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "success when new formula is added a higher level of the tree",
 			in: in{
-				inputOldFormula: "rit testing formula",
-				inputNewFormula: "rit testing formula new",
-				confirm:         true,
+				inputOldFormula:       "rit testing formula",
+				inputNewFormula:       "rit testing formula new",
+				approveOnConfirmation: true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "formula", "new"),
@@ -270,9 +270,9 @@ func TestRenameFormulaCmd(t *testing.T) {
 		{
 			name: "success when new formula is added a lower level of the tree",
 			in: in{
-				inputOldFormula: "rit testing withOneMoreLevel level",
-				inputNewFormula: "rit testing level",
-				confirm:         true,
+				inputOldFormula:       "rit testing withOneMoreLevel level",
+				inputNewFormula:       "rit testing level",
+				approveOnConfirmation: true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "level"),
@@ -287,7 +287,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				inputNewFormula:         "rit testing formulaCustom",
 				workspaceSelected:       "Custom (" + repoPathWSCustom + ")",
 				customWorkspaceSelected: true,
-				confirm:                 true,
+				approveOnConfirmation:   true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "formulaCustom"),
@@ -350,7 +350,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 			).Return(tt.in.workspaceSelected, nil)
 
 			inputBoolMock := new(mocks.InputBoolMock)
-			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.confirm, nil)
+			inputBoolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.approveOnConfirmation, nil)
 
 			cmd := NewRenameFormulaCmd(formulaWorkspace, inputListMock, inputTextValidatorMock, inputBoolMock,
 				dirManager, validator, createBuilder, treeGen, deleter, home, ritHome)
@@ -361,32 +361,33 @@ func TestRenameFormulaCmd(t *testing.T) {
 
 			if tt.out.want != nil {
 				assert.Equal(t, tt.out.want.Error(), got.Error())
+			} else if tt.in.approveOnConfirmation == false {
+				assert.Nil(t, got)
 			} else {
 				assert.Nil(t, got)
 
-				if tt.in.confirm {
-					pathWSDir, pathLocalDir, treePath := "", "", ""
-					if tt.in.customWorkspaceSelected {
-						pathWSDir = filepath.Join(repoPathWSCustom, tt.out.formulaPathExpected, "src")
-						pathLocalDir = filepath.Join(repoPathLocalCustom, tt.out.formulaPathExpected, "src")
-						treePath = filepath.Join(repoPathLocalCustom, "tree.json")
-					} else {
-						pathWSDir = filepath.Join(repoPathWS, tt.out.formulaPathExpected, "src")
-						pathLocalDir = filepath.Join(repoPathLocalDefault, tt.out.formulaPathExpected, "src")
-						treePath = filepath.Join(repoPathLocalDefault, "tree.json")
-					}
-
-					bTree, err := fileInfo(treePath)
-					assert.Nil(t, err)
-					tree, err := getTree([]byte(bTree))
-					assert.Nil(t, err)
-
-					assert.DirExists(t, pathWSDir)
-					assert.DirExists(t, pathLocalDir)
-
-					assert.True(t, tree.Commands[api.CommandID(tt.out.formulaToBeCreated)].Formula)
-					assert.Empty(t, tree.Commands[api.CommandID(tt.out.formulaToBeEmpty)])
+				pathWSDir, pathLocalDir, treePath := "", "", ""
+				if tt.in.customWorkspaceSelected {
+					pathWSDir = filepath.Join(repoPathWSCustom, tt.out.formulaPathExpected, "src")
+					pathLocalDir = filepath.Join(repoPathLocalCustom, tt.out.formulaPathExpected, "src")
+					treePath = filepath.Join(repoPathLocalCustom, "tree.json")
+				} else {
+					pathWSDir = filepath.Join(repoPathWS, tt.out.formulaPathExpected, "src")
+					pathLocalDir = filepath.Join(repoPathLocalDefault, tt.out.formulaPathExpected, "src")
+					treePath = filepath.Join(repoPathLocalDefault, "tree.json")
 				}
+
+				bTree, err := fileInfo(treePath)
+				assert.Nil(t, err)
+				tree, err := getTree([]byte(bTree))
+				assert.Nil(t, err)
+
+				assert.DirExists(t, pathWSDir)
+				assert.DirExists(t, pathLocalDir)
+
+				assert.True(t, tree.Commands[api.CommandID(tt.out.formulaToBeCreated)].Formula)
+				assert.Empty(t, tree.Commands[api.CommandID(tt.out.formulaToBeEmpty)])
+
 			}
 		})
 	}
