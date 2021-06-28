@@ -48,14 +48,14 @@ jobs:
   Unzip to some folder like: `/home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
   Access the folder: `cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
   Assign execute permission to binary: `chmod +x ./rit`\r
-  Directly call the binary: `./rit --version` or `./rit.exe name of formula`\r
+  Directly call the binary: `./rit --version` or `./rit name of formula`\r
   \r\r
   - **MacOS**\r
   Download the file: **[rit-macos.zip](${{ steps.export-as-outpus-all-artifacts.outputs.rit-macos}})**\r
   Unzip to some folder like: `/home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
   Access the folder: `cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
   Assign execute permission to binary: `chmod +x ./rit`\r
-  Directly call the binary: `./rit --version` or `./rit.exe name of formula`\r
+  Directly call the binary: `./rit --version` or `./rit name of formula`\r
         "
           replace-last-message: true
           pr-number: ${{ steps.pull-request-number.outputs.pr-number }}
