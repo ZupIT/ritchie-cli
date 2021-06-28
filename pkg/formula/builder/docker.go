@@ -61,7 +61,7 @@ func (do DockerManager) Build(info formula.BuildInfo) error {
 	currentUser, _ := user.Current()
 	userId := "0:0"
 	if runtime.GOOS != osutil.Windows {
-		userId = currentUser.Uid+":"+currentUser.Uid
+		userId = currentUser.Uid + ":" + currentUser.Uid
 	}
 
 	args := []string{"run", "--rm", "-u", userId, "-v", volume, "--entrypoint", "/bin/sh", info.DockerImg, "-c", containerCmd}

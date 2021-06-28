@@ -110,7 +110,7 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 	currentUser, _ := user.Current()
 	userId := "0:0"
 	if runtime.GOOS != osutil.Windows {
-		userId = currentUser.Uid+":"+currentUser.Uid
+		userId = currentUser.Uid + ":" + currentUser.Uid
 	}
 	args := []string{
 		"run",
