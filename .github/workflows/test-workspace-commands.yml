@@ -23,15 +23,10 @@ jobs:
             command_line: rit list workspace
             contains: There is 1 workspace
             expected_result: PASSED 
-        - run: |
-            mkdir test # create forlder to use as workspace
-            rit add workspace --name="test" --path="/home/runner/work/ritchie-cli/ritchie-cli/test"
         - name: RIT ADD WORKSPACE command (2)
-          uses: GuillaumeFalourd/test-cli-commands-action@v1
-          with:
-            command_line: rit add workspace --name="test" --path="/home/runner/work/ritchie-cli/ritchie-cli/test"
-            assert_file_path: testdata/gha_workflows/workspace_workflow/assert1.txt
-            expected_result: PASSED 
+          run: |
+            mkdir test
+            rit add workspace --name="test" --path="/home/runner/work/ritchie-cli/ritchie-cli/test"
         - name: RIT LIST WORKSPACE command (3)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
@@ -42,13 +37,13 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update workspace --name="test"
-            assert_file_path: testdata/gha_workflows/workspace_workflow/assert2.txt
+            assert_file_path: testdata/gha_workflows/workspace_workflow/assert1.txt
             expected_result: PASSED 
         - name: RIT DELETE WORKSPACE command (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete workspace --name="test"
-            assert_file_path: testdata/gha_workflows/workspace_workflow/assert3.txt
+            assert_file_path: testdata/gha_workflows/workspace_workflow/assert2.txt
             expected_result: PASSED
         - name: RIT LIST WORKSPACE command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
