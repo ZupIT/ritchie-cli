@@ -163,8 +163,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list repo
-            assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
-            specific_line: 4
+            contains: There is 1 repo
             expected_result: PASSED
         - name: RIT UPDATE REPO command ERROR (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
