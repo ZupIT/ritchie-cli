@@ -1,0 +1,61 @@
+name: Get list Artifacts And Update Pull Request
+on:
+  workflow_run:
+    workflows: ["Build Binary Ritchie When PR Opens"]
+    types: [completed]
+
+jobs:
+  get-list-artifacts-edit-pr-body:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Pull Request Data
+        uses: dawidd6/action-download-artifact@v2.11.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build-binary-when-pr-open.yml
+          run_id: ${{ github.event.workflow_run.id }}
+
+      - name: Get Pull Request Number
+        id: pull-request-number
+        run: |
+          echo "::set-output name=pr-number::$(jq --raw-output .pull_request.number ./pull-request-event-json/event.json)"
+          echo "::steps.pull-request-number.outputs.pr-number: $(jq --raw-output .pull_request.number ./pull-request-event-json/event.json)"
+
+      - name: Export as output all artifacts
+        id: export-as-outpus-all-artifacts
+        uses: chiaretto/github-action-list-artifacts-pr@master
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Update PR Body
+        uses: chiaretto/github-action-concat-pr-body@master
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          message: "
+        ### This pull request generated the following artifacts.
+
+  To test the health and quality of this implementation, download the respective binary
+  for your operating system, unzip and directly run the binary like the examples below.
+
+  - **Windows**\r
+  Download the file: **[rit-windows.zip](${{ steps.export-as-outpus-all-artifacts.outputs.rit-windows}})**\r
+  Unzip to some folder like: `C:\\home\\user\\downloads\\pr${{ steps.pull-request-number.outputs.pr-number }}`\r
+  Access the folder: `cd C:\\home\\user\\downloads\\pr${{ steps.pull-request-number.outputs.pr-number }}`\r
+  Directly call the binary: `.\\rit.exe --version` or `.\\rit.exe name of formula`\r
+  \r\r
+  - **Linux**\r
+  Download the file: **[rit-linux.zip](${{ steps.export-as-outpus-all-artifacts.outputs.rit-linux}})**\r
+  Unzip to some folder like: `/home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
+  Access the folder: `cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
+  Assign execute permission to binary: `chmod +x ./rit`\r
+  Directly call the binary: `./rit --version` or `./rit.exe name of formula`\r
+  \r\r
+  - **MacOS**\r
+  Download the file: **[rit-macos.zip](${{ steps.export-as-outpus-all-artifacts.outputs.rit-macos}})**\r
+  Unzip to some folder like: `/home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
+  Access the folder: `cd /home/user/downloads/pr${{ steps.pull-request-number.outputs.pr-number }}`\r
+  Assign execute permission to binary: `chmod +x ./rit`\r
+  Directly call the binary: `./rit --version` or `./rit.exe name of formula`\r
+        "
+          replace-last-message: true
+          pr-number: ${{ steps.pull-request-number.outputs.pr-number }}
