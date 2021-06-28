@@ -151,9 +151,7 @@ jobs:
         - name: RIT ADD WORKSPACE command (3)
           run: |
             mkdir test
-            ls
-            pwd
-            ./rit.exe add workspace --name="test" --path="/Users/runner/work/ritchie-cli/ritchie-cli/test"
+            ./rit.exe add workspace --name="test" --path="/d/a/ritchie-cli/ritchie-cli/test"
           shell: bash
         - name: RIT LIST WORKSPACE command (4)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
