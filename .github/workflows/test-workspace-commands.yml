@@ -23,7 +23,9 @@ jobs:
             command_line: rit list workspace
             contains: There is 1 workspace
             expected_result: PASSED 
-        - run: mkdir test # create forlder to use as workspace
+        - run: |
+            mkdir test # create forlder to use as workspace
+            rit add workspace --name="test" --path="/home/runner/work/ritchie-cli/ritchie-cli/test"
         - name: RIT ADD WORKSPACE command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
