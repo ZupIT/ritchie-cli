@@ -27,6 +27,7 @@ jobs:
           run: |
             mkdir test
             rit add workspace --name="test" --path="/home/runner/work/ritchie-cli/ritchie-cli/test"
+            rit list workspace
         - name: RIT LIST WORKSPACE command (3)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
