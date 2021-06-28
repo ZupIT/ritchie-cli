@@ -32,7 +32,8 @@ import (
 )
 
 var (
-	ErrInvalidWorkspace = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
+	ErrInvalidWorkspace     = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
+	ErrInvalidWorkspaceName = prompt.NewError("the workspace name must not contain spaces")
 
 	hashesPath = "hashes"
 	hashesExt  = ".txt"
@@ -69,6 +70,11 @@ func New(
 func (m Manager) Add(workspace formula.Workspace) error {
 	if workspace.Dir == m.defaultWorkspaceDir {
 		return nil
+	}
+
+	err := WorkspaceNameValidator(workspace.Name)
+	if err != nil {
+		return err
 	}
 
 	// Avoid finishing separators
@@ -203,4 +209,11 @@ func (m Manager) UpdateHash(formulaPath string, hash string) error {
 func (m Manager) hashPath(formulaPath string) string {
 	fileName := strings.ReplaceAll(formulaPath, string(os.PathSeparator), "-") + hashesExt
 	return filepath.Join(m.ritchieHome, hashesPath, fileName)
+}
+
+func WorkspaceNameValidator(cmd interface{}) error {
+	if strings.Contains(cmd.(string), " ") {
+		return ErrInvalidWorkspaceName
+	}
+	return nil
 }
