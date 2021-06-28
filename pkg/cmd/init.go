@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -29,9 +30,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -57,7 +56,32 @@ var (
 	errMsg                    = prompt.Yellow(i18n.T("init.add.commons.repo.error"))
 	ErrInitCommonsRepo        = errors.New(errMsg)
 	ErrInvalidRunType         = errors.New(i18n.T("init.invalid.run.type.error", strings.Join(formula.RunnerTypes, ", ")))
+	metricsFlag               = "sendMetrics"
+	commonsFlag               = "addCommons"
+	runnerFlag                = "runType"
+	provideValidValue         = "provide a valid value to the flag %q"
 )
+
+var initFlags = flags{
+	{
+		name:        metricsFlag,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "Do you accept to submit anonymous metrics? (ie: yes, no)",
+	},
+	{
+		name:        commonsFlag,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "Do you want to download the commons repository? (ie: yes, no)",
+	},
+	{
+		name:        runnerFlag,
+		kind:        reflect.String,
+		defValue:    "local",
+		description: "Which default runner do you want to use? (ie: local, docker)",
+	},
+}
 
 type initStdin struct {
 	AddCommons  bool   `json:"addCommons"`
@@ -104,52 +128,13 @@ func NewInitCmd(
 		Use:       "init",
 		Short:     i18n.T("init.cmd.description"),
 		Long:      i18n.T("init.cmd.description"),
-		RunE:      RunFuncE(o.runStdin(), o.runPrompt()),
+		RunE:      RunFuncE(o.runStdin(), o.runCmd()),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
-
+	cmd.LocalFlags()
+	addReservedFlags(cmd.Flags(), initFlags)
 	return cmd
-}
-
-func (in initCmd) runPrompt() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-
-		in.welcome()
-
-		metrics, err := in.metricsAuthorization()
-		if err != nil {
-			return err
-		}
-
-		if err := in.addCommonsRepo(); err != nil {
-			return err
-		}
-
-		runType, err := in.setRunnerType()
-		if err != nil {
-			return err
-		}
-
-		configs := config.Configs{
-			Language: config.DefaultLang,
-			Metrics:  metrics,
-			RunType:  runType,
-			Tutorial: tutorialStatusEnabled,
-		}
-
-		if err := in.ritConfig.Write(configs); err != nil {
-			return err
-		}
-
-		in.initSuccess()
-
-		if err := in.tutorialInit(); err != nil {
-			return err
-		}
-
-		return nil
-	}
 }
 
 func (in initCmd) runStdin() CommandRunnerFunc {
@@ -241,6 +226,162 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 
 		return nil
 	}
+}
+
+func (in initCmd) runCmd() CommandRunnerFunc {
+	return func(cmd *cobra.Command, args []string) error {
+		in.welcome()
+
+		configs, err := in.resolveInput(cmd)
+		if err != nil {
+			return err
+		}
+
+		if err := in.ritConfig.Write(configs); err != nil {
+			return err
+		}
+
+		in.initSuccess()
+
+		if err := in.tutorialInit(); err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
+func (in initCmd) resolveInput(cmd *cobra.Command) (config.Configs, error) {
+	if IsFlagInput(cmd) {
+		return in.runFlags(cmd)
+	}
+	return in.runPrompt()
+}
+
+func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
+	metrics, err := cmd.Flags().GetString(metricsFlag)
+	if err != nil {
+		return config.Configs{}, err
+	} else if metrics == "" {
+		return config.Configs{}, errors.New(missingFlagText(metricsFlag))
+	}
+	commons, err := cmd.Flags().GetString(commonsFlag)
+	if err != nil {
+		return config.Configs{}, err
+	} else if commons == "" {
+		return config.Configs{}, errors.New(missingFlagText(commonsFlag))
+	}
+	runner, err := cmd.Flags().GetString(runnerFlag)
+	if err != nil {
+		return config.Configs{}, err
+	} else if runner == "" {
+		return config.Configs{}, errors.New(missingFlagText(runnerFlag))
+	}
+
+	metricBool, err := in.flagToBool(metrics, metricsFlag)
+	if err != nil {
+		return config.Configs{}, err
+	}
+	commonsBool, err := in.flagToBool(commons, commonsFlag)
+	if err != nil {
+		return config.Configs{}, err
+	}
+
+	switch metricBool {
+	case false:
+		{
+			in.metricSender.Send(metric.APIData{
+				Id:        "rit_init",
+				UserId:    "",
+				Timestamp: time.Now(),
+				Data: metric.Data{
+					MetricsAcceptance: metrics,
+				},
+			})
+		}
+	case true:
+		{
+			if err = in.file.Write(metric.FilePath, []byte(metrics)); err != nil {
+				return config.Configs{}, err
+			}
+		}
+	}
+
+	switch commonsBool {
+	case false:
+		{
+			in.commonsWarning()
+			metric.CommonsRepoAdded = "no"
+		}
+	case true:
+		{
+			repo := formula.Repo{
+				Provider: "Github",
+				Name:     "commons",
+				Url:      CommonsRepoURL,
+				Priority: 0,
+			}
+			s := spinner.StartNew(i18n.T("init.adding.commons.repo"))
+			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
+			tag, err := in.git.LatestTag(repoInfo)
+			if err != nil {
+				s.Error(ErrInitCommonsRepo)
+				fmt.Println(addRepoMsg)
+				return config.Configs{}, err
+			}
+			repo.Version = formula.RepoVersion(tag.Name)
+			if err := in.repo.Add(repo); err != nil {
+				s.Error(ErrInitCommonsRepo)
+				fmt.Println(addRepoMsg)
+				return config.Configs{}, err
+			}
+			in.commonsSuccess(s)
+		}
+	}
+
+	var runType formula.RunnerType
+	switch runner {
+	case "local":
+		runType = formula.LocalRun
+	case "docker":
+		runType = formula.DockerRun
+	default:
+		return config.Configs{}, fmt.Errorf(provideValidValue, runnerFlag)
+	}
+
+	configs := config.Configs{
+		Language: config.DefaultLang,
+		Metrics:  metrics,
+		RunType:  runType,
+		Tutorial: tutorialStatusEnabled,
+	}
+
+	return configs, nil
+}
+
+func (in initCmd) runPrompt() (config.Configs, error) {
+
+	metrics, err := in.metricsAuthorization()
+	if err != nil {
+		return config.Configs{}, err
+	}
+
+	if err := in.addCommonsRepo(); err != nil {
+		return config.Configs{}, err
+	}
+
+	runType, err := in.setRunnerType()
+	if err != nil {
+		return config.Configs{}, err
+	}
+
+	configs := config.Configs{
+		Language: config.DefaultLang,
+		Metrics:  metrics,
+		RunType:  runType,
+		Tutorial: tutorialStatusEnabled,
+	}
+
+	return configs, nil
 }
 
 func (in initCmd) metricsAuthorization() (string, error) {
@@ -402,4 +543,12 @@ func (in initCmd) warning() {
 func (in initCmd) initSuccess() {
 	success := i18n.T("init.successful")
 	prompt.Success(success)
+}
+
+func (in initCmd) flagToBool(f string, fn string) (bool, error) {
+	if result, found := prompt.BoolOpts[f]; found {
+		return result, nil
+	} else {
+		return false, fmt.Errorf(provideValidValue, fn)
+	}
 }

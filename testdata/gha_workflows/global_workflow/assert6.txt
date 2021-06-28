@@ -1,0 +1,4 @@
+rit version 
+  Latest available version: 2.XX.Y
+  Build date: MM/DD/YY_HH:MM
+  Built with: go1.XX.Y
