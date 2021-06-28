@@ -96,7 +96,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update repo --name="demo" --version="2.3.0"
-            contains: The \"demo\" repository was updated with success to version "2.3.0"
+            contains: The \"demo\" repository was updated with success to version \"2.3.0\"
             expected_result: PASSED
         - name: RIT LIST REPO command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -157,7 +157,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update repo --name="demo" --version="2.3.0"
-            contains: The \"demo\" repository was updated with success to version "2.3.0"
+            contains: The \"demo\" repository was updated with success to version \"2.3.0\"
             expected_result: PASSED
         - name: RIT LIST REPO command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
