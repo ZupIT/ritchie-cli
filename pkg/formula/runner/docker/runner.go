@@ -21,9 +21,11 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"runtime"
 	"strconv"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/pflag"
@@ -106,12 +108,15 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 	}
 
 	currentUser, _ := user.Current()
-
+	userId := "0:0"
+	if runtime.GOOS != osutil.Windows {
+		userId = currentUser.Uid+":"+currentUser.Uid
+	}
 	args := []string{
 		"run",
 		"--rm",
 		"-u",
-		currentUser.Uid + ":" + currentUser.Uid,
+		userId,
 		"--env-file",
 		envFile,
 	}
