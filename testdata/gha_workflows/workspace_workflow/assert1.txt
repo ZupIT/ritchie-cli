@@ -1,8 +1,0 @@
-NAME             	PATH
-Default          	/Users/guillaumefalourd/ritchie-formulas-local
-
-There are 1 workspace
-
-[TUTORIAL]
-To delete a workspace:
- ∙ Run "rit delete workspace"

@@ -21,7 +21,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list workspace
-            contains: There are 1 workspace
+            contains: There is 1 workspace
             expected_result: PASSED 
         - run: |
             ls -lha
