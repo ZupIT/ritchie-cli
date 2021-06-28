@@ -97,7 +97,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete formula --workspace="Default" --formula="rit unexistent formula"
-            contains: 'no such file or directory'
+            contains: no such file or directory
             expected_result: PASSED
         - name: RIT LIST FORMULA command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -157,7 +157,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete formula --workspace="Default" --formula="rit unexistent formula"
-            contains: 'no such file or directory'
+            contains: no such file or directory
             expected_result: PASSED
         - name: RIT LIST FORMULA command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -219,7 +219,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe delete formula --workspace="Default" --formula="rit unexistent formula"
-            contains: 'no such file or directory'
+            contains: no such file or directory
             expected_result: PASSED
         - name: RIT LIST FORMULA command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
