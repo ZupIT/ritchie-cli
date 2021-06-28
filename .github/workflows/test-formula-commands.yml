@@ -103,9 +103,10 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list formula --name="commons"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert7.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
+
   macos:
       runs-on: macos-latest
       steps:
@@ -163,7 +164,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list formula --name="commons"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert7.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
 
@@ -219,12 +220,12 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe delete formula --workspace="Default" --formula="rit unexistent formula"
-            contains: no such file or directory
+            contains: The system cannot find the path specified
             expected_result: PASSED
         - name: RIT LIST FORMULA command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list formula --name="commons"
-            assert_file_path: testdata/gha_workflows/formula_workflow/assert7.txt
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1          
