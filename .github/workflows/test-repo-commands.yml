@@ -108,7 +108,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete repo --name="demo"
-            contains: Repository "demo" was deleted with success
+            contains: Repository \"demo\" was deleted with success
             expected_result: PASSED        
         - name: RIT LIST REPO command (8)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -169,7 +169,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete repo --name="demo"
-            contains: Repository "demo" was deleted with success
+            contains: Repository \"demo\" was deleted with success
             expected_result: PASSED        
         - name: RIT LIST REPO command (8)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
