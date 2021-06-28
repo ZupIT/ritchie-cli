@@ -21,7 +21,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list workspace
-            assert_file_path: testdata/gha_workflows/workspace_workflow/assert1.txt
+            contains: There are 1 workspace
             expected_result: PASSED 
         - run: |
             ls -lha
@@ -60,8 +60,8 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list workspace
-            assert_file_path: testdata/gha_workflows/workspace_workflow/assert1.txt
-            expected_result: PASSED  
+            contains: There are 1 workspace
+            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
