@@ -84,7 +84,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
-            contains: The "demo" repository was added with success, now you can use your formulas with the Ritchie!
+            contains: The \"demo\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
         - name: RIT LIST REPO command (4)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -96,7 +96,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update repo --name="demo" --version="2.3.0"
-            contains: The "demo" repository was updated with success to version "2.3.0"
+            contains: The \"demo\" repository was updated with success to version "2.3.0"
             expected_result: PASSED
         - name: RIT LIST REPO command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -145,7 +145,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
-            contains: The "demo" repository was added with success, now you can use your formulas with the Ritchie!
+            contains: The \"demo\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
         - name: RIT LIST REPO command (4)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
@@ -157,7 +157,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update repo --name="demo" --version="2.3.0"
-            contains: The "demo" repository was updated with success to version "2.3.0"
+            contains: The \"demo\" repository was updated with success to version "2.3.0"
             expected_result: PASSED
         - name: RIT LIST REPO command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
