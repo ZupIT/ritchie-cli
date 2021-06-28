@@ -1,0 +1,231 @@
+name: Test Formula Commands
+
+on:
+  workflow_dispatch: # Can be triggered manually through the ACTIONS tab on Github GUI.
+  push:
+    paths: # Will trigger on PUSH event that update at least one of those files.
+      - '**/create_test.go'
+      - '**/create.go'
+      - '**/create_formula_test.go'
+      - '**/create_formula.go'
+      - '**/cmd.go'
+      - '**/delete_test.go'
+      - '**/delete.go'
+      - '**/delete_formula_test.go'
+      - '**/delete_formula.go'
+      - '**/list_formula_test.go'
+      - '**/list_formula.go'
+      - '**/list_test.go'
+      - '**/list.go'
+      - '**/rename_formula_test.go'
+      - '**/rename_formula.go'
+      - '**/rename_test.go'
+      - '**/rename.go'
+      - 'testdata/gha_workflows/formula_workflow/**'
+      - '**/test-formula-commands.yml'
+  pull_request:
+    paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
+      - '**/create_test.go'
+      - '**/create.go'
+      - '**/create_formula_test.go'
+      - '**/create_formula.go'
+      - '**/cmd.go'
+      - '**/delete_test.go'
+      - '**/delete.go'
+      - '**/delete_formula_test.go'
+      - '**/delete_formula.go'
+      - '**/list_formula_test.go'
+      - '**/list_formula.go'
+      - '**/list_test.go'
+      - '**/list.go'
+      - '**/rename_formula_test.go'
+      - '**/rename_formula.go'
+      - '**/rename_test.go'
+      - '**/rename.go'
+      - 'testdata/gha_workflows/formula_workflow/**'
+      - '**/test-formula-commands.yml'
+
+jobs:
+  ubuntu:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+        - name: RIT INIT without commons repo
+          run: rit init --sendMetrics="no" --addCommons="no" --runType="local"
+        - name: RIT CREATE FORMULA command (1)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert1.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT ADD REPO commons
+          run: rit add repo --provider="Github" --name="commons" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
+        - name: RIT CREATE FORMULA command (2)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT RENAME FORMULA command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT RENAME FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit unexistent formula" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete formula --workspace="Default" --formula="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (6)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete formula --workspace="Default" --formula="rit unexistent formula"
+            contains: no such file or directory
+            expected_result: PASSED
+        - name: RIT LIST FORMULA command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list formula --name="commons"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
+            expected_result: PASSED
+            specific_line: 1
+
+  macos:
+      runs-on: macos-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+        - name: RIT INIT without commons repo
+          run: rit init --sendMetrics="no" --addCommons="no" --runType="local"
+        - name: RIT CREATE FORMULA command (1)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert1.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT ADD REPO commons
+          run: rit add repo --provider="Github" --name="commons" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
+        - name: RIT CREATE FORMULA command (2)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT RENAME FORMULA command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit functional test" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT RENAME FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename formula --oldName="rit unexistent formula" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete formula --workspace="Default" --formula="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (6)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete formula --workspace="Default" --formula="rit unexistent formula"
+            contains: no such file or directory
+            expected_result: PASSED
+        - name: RIT LIST FORMULA command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list formula --name="commons"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
+            expected_result: PASSED
+            specific_line: 1
+
+  windows:
+      runs-on: windows-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'       
+        - name: Create binary from branch
+          run: |
+            choco install make
+            make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
+            ls
+        - name: RIT INIT without commons repo
+          run: ./rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
+        - name: RIT CREATE FORMULA command (1)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe create formula --name="rit functional test" --language="python3" --workspace="Default"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert1.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT ADD REPO commons
+          run: ./rit.exe add repo --provider="Github" --name="commons" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
+        - name: RIT CREATE FORMULA command (2)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe create formula --name="rit functional test" --language="python3" --workspace="Default"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT RENAME FORMULA command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe rename formula --oldName="rit functional test" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT RENAME FORMULA command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe rename formula --oldName="rit unexistent formula" --newName="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe delete formula --workspace="Default" --formula="rit demo test"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert5.txt
+            expected_result: PASSED
+        - name: RIT DELETE FORMULA command (6)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe delete formula --workspace="Default" --formula="rit unexistent formula"
+            contains: The system cannot find the path specified
+            expected_result: PASSED
+        - name: RIT LIST FORMULA command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe list formula --name="commons"
+            assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
+            expected_result: PASSED
+            specific_line: 1          
