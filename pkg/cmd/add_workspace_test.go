@@ -57,8 +57,8 @@ func TestNewAddWorkspaceCmd(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			textMock := &mocks.InputTextMock{}
-			textMock.On("Text", "Enter the name of workspace", true, mock.Anything).Return(tt.workspaceName, nil)
+			textMock := &mocks.InputTextValidatorMock{}
+			textMock.On("Text", "Enter the name of workspace", mock.Anything).Return(tt.workspaceName, nil)
 
 			wspace := formula.Workspace{
 				Name: tt.workspaceName,
