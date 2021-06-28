@@ -242,7 +242,7 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 		return formula.Create{}, err
 	}
 
-	wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inText, c.inPath)
+	wspace, err := FormulaWorkspaceInput(workspaces, c.inList, c.inTextValidator, c.inPath)
 	if err != nil {
 		return formula.Create{}, err
 	}
@@ -362,7 +362,7 @@ func (c createFormulaCmd) surveyCmdValidator(cmd interface{}) error {
 func FormulaWorkspaceInput(
 	workspaces formula.Workspaces,
 	inList prompt.InputList,
-	inText prompt.InputText,
+	inTextValidator prompt.InputTextValidator,
 	inPath prompt.InputPath,
 ) (formula.Workspace, error) {
 	items := make([]string, 0, len(workspaces))
@@ -381,7 +381,7 @@ func FormulaWorkspaceInput(
 	var workspacePath string
 	var wspace formula.Workspace
 	if selected == newWorkspace {
-		workspaceName, err = inText.Text("Workspace name: ", true)
+		workspaceName, err = inTextValidator.Text("Workspace name: ", workspace.WorkspaceNameValidator)
 		if err != nil {
 			return formula.Workspace{}, err
 		}
