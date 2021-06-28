@@ -1,0 +1,7 @@
+NAME             	PATH
+
+There are 0 workspaces
+
+[TUTORIAL]
+To delete a workspace:
+ ∙ Run "rit delete workspace"
