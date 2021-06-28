@@ -196,28 +196,46 @@ jobs:
           with:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED  
-        - name: RIT ADD REPO command
-          run: ./rit.exe add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
-        - name: RIT LIST REPO command (2)
+            expected_result: PASSED
+        - name: RIT ADD REPO command ERROR (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: ./rit.exe list repo
+            command_line: ./rit.exe add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie" --priority=1
             assert_file_path: testdata/gha_workflows/repo_workflow/assert2.txt
-            expected_result: PASSED  
-        - name: RIT UPDATE REPO command
-          run: ./rit.exe update repo --name="demo" --version="2.3.0"
-        - name: RIT LIST REPO command (3)
+            expected_result: PASSED
+        - name: RIT ADD REPO command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1 --tag="2.2.0"
+            contains: The \"demo\" repository was added with success, now you can use your formulas with the Ritchie!
+            expected_result: PASSED
+        - name: RIT LIST REPO command (4)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
             expected_result: PASSED  
-        - name: RIT DELETE REPO command
-          run: ./rit.exe delete repo --name="demo"
-        - name: RIT LIST REPO command (4)
+        - name: RIT UPDATE REPO command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe update repo --name="demo" --version="2.3.0"
+            contains: The \"demo\" repository was updated with success to version \"2.3.0\"
+            expected_result: PASSED
+        - name: RIT LIST REPO command (6)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert4.txt
+            expected_result: PASSED  
+        - name: RIT DELETE REPO command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe delete repo --name="demo"
+            contains: Repository \"demo\" was deleted with success
+            expected_result: PASSED        
+        - name: RIT LIST REPO command (8)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED  
+            expected_result: PASSED 
