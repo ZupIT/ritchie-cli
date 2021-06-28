@@ -91,26 +91,38 @@ jobs:
           with:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
-            expected_result: PASSED  
-        - name: RIT UPDATE REPO command (5)
+            expected_result: PASSED
+        - name: RIT UPDATE REPO command ERROR (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit update repo --name="demo" --version="0.0.1"
+            contains: The version \"0.0.1\" of repository \"demo\" was not found.
+            expected_result: PASSED
+        - name: RIT UPDATE REPO command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update repo --name="demo" --version="2.3.0"
             contains: The \"demo\" repository was updated with success to version \"2.3.0\"
             expected_result: PASSED
-        - name: RIT LIST REPO command (6)
+        - name: RIT LIST REPO command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert4.txt
-            expected_result: PASSED  
-        - name: RIT DELETE REPO command (7)
+            expected_result: PASSED
+        - name: RIT DELETE REPO command ERROR (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete repo --name="error"
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert5.txt
+            expected_result: PASSED    
+        - name: RIT DELETE REPO command (9)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete repo --name="demo"
             contains: Repository \"demo\" was deleted with success
             expected_result: PASSED        
-        - name: RIT LIST REPO command (8)
+        - name: RIT LIST REPO command (10)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list repo
@@ -153,26 +165,38 @@ jobs:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
             specific_line: 4
-            expected_result: PASSED  
-        - name: RIT UPDATE REPO command (5)
+            expected_result: PASSED
+        - name: RIT UPDATE REPO command ERROR (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit update repo --name="demo" --version="0.0.1"
+            contains: The version \"0.0.1\" of repository \"demo\" was not found.
+            expected_result: PASSED
+        - name: RIT UPDATE REPO command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update repo --name="demo" --version="2.3.0"
             contains: The \"demo\" repository was updated with success to version \"2.3.0\"
             expected_result: PASSED
-        - name: RIT LIST REPO command (6)
+        - name: RIT LIST REPO command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert4.txt
-            expected_result: PASSED  
-        - name: RIT DELETE REPO command (7)
+            expected_result: PASSED
+        - name: RIT DELETE REPO command ERROR (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete repo --name="error"
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert5.txt
+            expected_result: PASSED    
+        - name: RIT DELETE REPO command (9)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit delete repo --name="demo"
             contains: Repository \"demo\" was deleted with success
             expected_result: PASSED        
-        - name: RIT LIST REPO command (8)
+        - name: RIT LIST REPO command (10)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit list repo
@@ -215,28 +239,41 @@ jobs:
           with:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert3.txt
-            expected_result: PASSED  
-        - name: RIT UPDATE REPO command (5)
+            specific_line: 4
+            expected_result: PASSED
+        - name: RIT UPDATE REPO command ERROR (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe update repo --name="demo" --version="0.0.1"
+            contains: The version \"0.0.1\" of repository \"demo\" was not found.
+            expected_result: PASSED
+        - name: RIT UPDATE REPO command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe update repo --name="demo" --version="2.3.0"
             contains: The \"demo\" repository was updated with success to version \"2.3.0\"
             expected_result: PASSED
-        - name: RIT LIST REPO command (6)
+        - name: RIT LIST REPO command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert4.txt
-            expected_result: PASSED  
-        - name: RIT DELETE REPO command (7)
+            expected_result: PASSED
+        - name: RIT DELETE REPO command ERROR (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe delete repo --name="error"
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert5.txt
+            expected_result: PASSED    
+        - name: RIT DELETE REPO command (9)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe delete repo --name="demo"
             contains: Repository \"demo\" was deleted with success
             expected_result: PASSED        
-        - name: RIT LIST REPO command (8)
+        - name: RIT LIST REPO command (10)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
-            expected_result: PASSED 
+            expected_result: PASSED  
