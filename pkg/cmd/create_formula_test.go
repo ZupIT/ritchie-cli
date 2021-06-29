@@ -171,7 +171,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inputList:     newWorkspace,
 				inputWspace:   "Invalid workspace",
 			},
-			want: errors.New("the workspace name must not contain spaces"),
+			want: workspace.ErrInvalidWorkspaceName,
 		},
 		{
 			name: "add workspace error",
