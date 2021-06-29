@@ -1,0 +1,1 @@
+Error: Formula "rit unexistent formula" wasn't found in the workspaces

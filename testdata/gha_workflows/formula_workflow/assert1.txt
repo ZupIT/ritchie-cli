@@ -1,0 +1,1 @@
+To start using rit, you need to initialize rit first.
