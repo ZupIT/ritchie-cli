@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -9,7 +10,7 @@ import (
 	sMocks "github.com/ZupIT/ritchie-cli/pkg/stream/mocks"
 )
 
-func Test_metricsCmd_runPrompt(t *testing.T) {
+func Test_metricsCmd_runCmd(t *testing.T) {
 	type in struct {
 		file  stream.FileWriteReadExister
 		input prompt.InputList
@@ -112,6 +113,41 @@ func Test_metricsCmd_runPrompt(t *testing.T) {
 			if err := metricsCmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("metrics command error = %v | error wanted: %v", err, tt.wantErr)
 			}
+		})
+	}
+}
+
+func Test_RunFlag(t *testing.T) {
+	var runFlagCases = []struct {
+		fileMock  stream.FileWriteReadExister
+		inputMock prompt.InputList
+		choose    string
+		name      string
+		want      error
+	}{
+		{
+			name:   "success with yes",
+			choose: "yes",
+			want:   nil,
+		},
+		{
+			name:   "error invalid flag value",
+			choose: "invalid",
+			want:   errors.New("please provide a valid value to the flag metrics"),
+		},
+	}
+
+	for _, tt := range runFlagCases {
+		t.Run(tt.name, func(t *testing.T) {
+			newMetrics := metricsCmd{
+				file:  tt.fileMock,
+				input: tt.inputMock,
+			}
+			cobraCmd := NewMetricsCmd(tt.fileMock, tt.inputMock)
+			cobraCmd.Flags().Set(metricsFlagName, tt.choose)
+			got, err := newMetrics.runFlag(cobraCmd)
+			fmt.Println(got, err)
+
 		})
 	}
 }
