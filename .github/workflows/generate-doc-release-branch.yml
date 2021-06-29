@@ -1,0 +1,24 @@
+name: Generate Doc Release Branch
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - name: Generate release branch on documentation
+        run: |
+          git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/ZupIT/docs-ritchie.git
+          cd docs-ritchie/
+          git init
+          git checkout -b release-v${{ steps.vars.outputs.tag }}
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git push origin release-v${{ steps.vars.outputs.tag }}
