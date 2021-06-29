@@ -73,13 +73,13 @@ jobs:
           with:
             command_line: rit list workspace
             contains: There is 1 workspace
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT ADD WORKSPACE command ERROR (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit add workspace --name="test" --path="error"
             contains: the formula workspace does not exist, please enter a valid workspace
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT ADD WORKSPACE command (3)
           run: |
             mkdir test
@@ -89,19 +89,19 @@ jobs:
           with:
             command_line: rit list workspace
             contains: There are 2 workspaces
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT UPDATE WORKSPACE command ERROR (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update workspace --name="error"
             contains: no workspace found with this name
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT UPDATE WORKSPACE command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update workspace --name="Test"
             assert_file_path: testdata/gha_workflows/workspace_workflow/assert1.txt
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT DELETE WORKSPACE command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
@@ -121,7 +121,7 @@ jobs:
         - uses: actions/checkout@v2.3.4
         - uses: actions/setup-node@v2
           with:
-            node-version: '14'   
+            node-version: '14'
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
@@ -132,13 +132,13 @@ jobs:
           with:
             command_line: rit list workspace
             contains: There is 1 workspace
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT ADD WORKSPACE command ERROR (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit add workspace --name="test" --path="error"
             contains: the formula workspace does not exist, please enter a valid workspace
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT ADD WORKSPACE command (3)
           run: |
             mkdir test
@@ -148,19 +148,19 @@ jobs:
           with:
             command_line: rit list workspace
             contains: There are 2 workspaces
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT UPDATE WORKSPACE command ERROR (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update workspace --name="error"
             contains: no workspace found with this name
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT UPDATE WORKSPACE command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit update workspace --name="Test"
             assert_file_path: testdata/gha_workflows/workspace_workflow/assert1.txt
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT DELETE WORKSPACE command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
@@ -180,7 +180,7 @@ jobs:
         - uses: actions/checkout@v2.3.4
         - uses: actions/setup-node@v2
           with:
-            node-version: '14'       
+            node-version: '14'
         - name: Create binary from branch
           run: |
             choco install make
@@ -192,13 +192,13 @@ jobs:
           with:
             command_line: ./rit.exe list workspace
             contains: There is 1 workspace
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT ADD WORKSPACE command ERROR (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe add workspace --name="test" --path="error"
             contains: the formula workspace does not exist, please enter a valid workspace
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT ADD WORKSPACE command (3)
           run: |
             mkdir test
@@ -209,19 +209,19 @@ jobs:
           with:
             command_line: ./rit.exe list workspace
             contains: There are 2 workspaces
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT UPDATE WORKSPACE command ERROR (5)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe update workspace --name="error"
             contains: no workspace found with this name
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT UPDATE WORKSPACE command (6)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe update workspace --name="Test"
             assert_file_path: testdata/gha_workflows/workspace_workflow/assert1.txt
-            expected_result: PASSED 
+            expected_result: PASSED
         - name: RIT DELETE WORKSPACE command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
