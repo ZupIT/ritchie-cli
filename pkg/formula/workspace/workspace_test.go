@@ -111,6 +111,15 @@ func TestWorkspaceManagerAdd(t *testing.T) {
 			},
 			outErr: mocks.FileNotFoundError(filepath.Join(workspaceNonExistingPath, formula.WorkspacesFile)),
 		},
+		{
+			name:          "run with error when invalid workspace name",
+			workspacePath: tmpDir,
+			workspace: formula.Workspace{
+				Name: "zup test",
+				Dir:  fullDir,
+			},
+			outErr: ErrInvalidWorkspaceName.Error(),
+		},
 	}
 
 	for _, tt := range tests {
@@ -461,6 +470,38 @@ func TestUpdateHash(t *testing.T) {
 			file, err := ioutil.ReadFile(path.Join(tt.homePath, "hashes", "my-formula.txt"))
 			assert.NoError(t, err)
 			assert.Equal(t, "hash", string(file))
+		})
+	}
+}
+
+func TestWorkspaceNameValidator(t *testing.T) {
+	tests := []struct {
+		name          string
+		workspaceName interface{}
+		want          error
+	}{
+		{
+			name:          "run success",
+			workspaceName: "Test",
+			want:          nil,
+		},
+		{
+			name:          "run with error",
+			workspaceName: "Test Invalid Name",
+			want:          ErrInvalidWorkspaceName,
+		},
+		{
+			name:          "run with invalid value type",
+			workspaceName: 123,
+			want:          ErrInvalidWorkspaceNameType,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := WorkspaceNameValidator(tt.workspaceName)
+
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

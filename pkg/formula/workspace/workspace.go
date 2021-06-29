@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -32,8 +33,9 @@ import (
 )
 
 var (
-	ErrInvalidWorkspace     = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
-	ErrInvalidWorkspaceName = prompt.NewError("the workspace name must not contain spaces")
+	ErrInvalidWorkspace         = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
+	ErrInvalidWorkspaceName     = prompt.NewError("the workspace name must not contain spaces")
+	ErrInvalidWorkspaceNameType = prompt.NewError("the input type is invalid for the workspace name")
 
 	hashesPath = "hashes"
 	hashesExt  = ".txt"
@@ -212,6 +214,9 @@ func (m Manager) hashPath(formulaPath string) string {
 }
 
 func WorkspaceNameValidator(cmd interface{}) error {
+	if reflect.TypeOf(cmd).Kind() != reflect.String {
+		return ErrInvalidWorkspaceNameType
+	}
 	if strings.Contains(cmd.(string), " ") {
 		return ErrInvalidWorkspaceName
 	}
