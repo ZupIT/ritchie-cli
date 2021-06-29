@@ -97,7 +97,7 @@ to provide the user with more context on that action.
 
 #### Testdata
 
-Contains multiple dummy files used for tests.
+Contains multiple files used for unit and functional tests.
 
 ## Testing your code
 
@@ -160,6 +160,58 @@ A typical test has the following structure
 > Note: we are currently reviewing how our tests are written, we are trying to make a more assertive test framework
 >on Ritchie cli, such as simulating the user input via stdin instead of mocking it, so these practices might change.
 
+### Functional Tests
+
+#### How to do functional testing using Github Action
+
+Ritchie CLI uses Github Actions to perform functional tests in parallel on `ubuntu`, `macOs` and `windows`.
+
+To do so, the team created an action to check command lines outputs: [test-cli-commands-action](https://github.com/GuillaumeFalourd/test-cli-commands-action)
+
+The objective is to check if the command output is the same as expected according to the scenarios specified (success or failure).
+
+Those workflows will trigger on any pull request or push event updating files related to the commands being tested.
+
+This is the way the action works:
+
+![how does the action work](https://user-images.githubusercontent.com/22433243/123486342-39901080-d5e2-11eb-94f2-3f45b4ed6205.png)
+
+There are 3 ways to check a command line output using this action:
+
+* Comparing the command line output with an assert file.
+* Comparing a specific line of the command line output with an assert file.
+* Checking if a specific expression is present in the command line output.
+
+When possible, we tried as much as possible to compare command line outputs using assert files, but as the command line outputs files are created using different OS, or return specific datas depending on the date, we couldn't test all scenarios with this option alone, that's the reason why other features as been added to the action as well.
+
+_Note: TXT files used for ASSERT are located on the `/testdata/gha_workflows` directory._
+
+#### Implementing Functional Tests
+
+When testing new commands or scenarios, we suggest to use the `cat` commands to show each file you will compare on the workflow window on Github. Example:
+
+```shell
+   rit list credential > check1.txt
+   cat check1.txt
+   cat testdata/gha_workflows/credential_workflow/assert1.txt
+   diff check1.txt testdata/gha_workflows/credential_workflow/assert1.txt
+```
+
+Then, convert it to the action nomenclature:
+
+```yaml
+      - uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+           command_line: <command line to test>
+           assert_file_path: path/to/assert.txt
+           specific_line: 3
+           contains: <string expression>
+           expected_result: <PASSED or FAILED> (if you want to test Success or Error)
+```
+
+Check the [action documentation about those inputs](https://github.com/GuillaumeFalourd/test-cli-commands-action#%EF%B8%8F-action-inputs) to understand exactly how to use them.
+
+To test your workflows, create a branch on your **fork** and test your workflows there using the `workflow_dispatch` trigger.
 
 ## Translation
 
