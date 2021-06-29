@@ -210,6 +210,13 @@ func TestCreateFormulaCmd(t *testing.T) {
 			want:       errors.New("language not found"),
 			inputFlags: []string{"--name=rit test test", "--language=invalidLanguage", "--workspace=Default"},
 		},
+		{
+			name: "err empty formula command",
+			in: in{
+				inputTextVal: "",
+			},
+			want: errors.New("this input must not be empty"),
+		},
 	}
 
 	for _, tt := range tests {

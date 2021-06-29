@@ -262,12 +262,11 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 				return formula.Create{}, err
 			}
 		}
-	} else {
+	} else if err != nil {
 		return formula.Create{}, err
 	}
 
 	formulaPath := formulaPath(wspace.Dir, formulaCmd)
-
 	cf := formula.Create{
 		FormulaCmd:  formulaCmd,
 		Lang:        lang,
@@ -276,8 +275,8 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 	}
 
 	check := c.tree.Check()
-
 	printConflictingCommandsWarning(check)
+
 	return cf, err
 }
 
