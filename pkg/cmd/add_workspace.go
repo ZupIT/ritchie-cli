@@ -77,6 +77,11 @@ func (a *addWorkspaceCmd) resolveFlags(cmd *cobra.Command) (formula.Workspace, e
 		return formula.Workspace{}, errors.New("all flags need to be filled")
 	}
 
+	err := workspace.WorkspaceNameValidator(workspaceName)
+	if err != nil {
+		return formula.Workspace{}, err
+	}
+
 	wspace := formula.Workspace{
 		Name: strings.Title(workspaceName),
 		Dir:  workspacePath,
