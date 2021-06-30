@@ -38,7 +38,6 @@ done
 
 
 #Need to replace these with install preparation script
-VERSION=2.10.3
 PRODUCT=Ritchie
 
 echo "Application uninstalling process started"
@@ -52,7 +51,7 @@ else
 fi
 
 #forget from pkgutil
-pkgutil --forget "org.$PRODUCT.$VERSION" > /dev/null 2>&1
+pkgutil --forget "org.$PRODUCT" > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
   echo "[2/3] [DONE] Successfully deleted application informations"
@@ -61,7 +60,7 @@ else
 fi
 
 #remove application source distribution
-[ -e "/Library/${PRODUCT}/${VERSION}" ] && rm -rf "/Library/${PRODUCT}/${VERSION}"
+[ -e "/Library/${PRODUCT}" ] && rm -rf "/Library/${PRODUCT}"
 if [ $? -eq 0 ]
 then
   echo "[3/3] [DONE] Successfully deleted application"

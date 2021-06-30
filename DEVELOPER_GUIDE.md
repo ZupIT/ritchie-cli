@@ -272,3 +272,17 @@ var Langs = map[string]string{
 }
 
 ```
+
+### Generate Ritchie pkg installer
+
+We have a `packaging` directory that contains a `mac-pkg` subdirectory with a script (inspired from [KosalaHerath/macos-installer-builder](https://github.com/KosalaHerath/macos-installer-builder)) to generate a pkg install from rit darwin binary.
+
+Here is the step by step to follow to generate it:
+
+* Create an `Application` folder on `packaging/mac-pkg` folder.
+* At the repository root, run `make build-mac && sudo mv ./dist/darwin/rit ./packaging/mac-pkg/Application`.
+* Access the mac-pkg folder: `cd packaging/mac-pkg`
+* Run `bash build-macos-x64.sh rit <version>`
+* Your package file should be available at `packaging/mac-pkg/target/pkg`
+
+_Note: You need to have a `developer certificate` installed on `keychain` on the macOS computer that will run the command to sign the pkg. In that case, you'll need to run `bash build-macos-x64.sh rit <version> "<developer_installer_id>"`, and your package file should be available at `packaging/mac-pkg/target/pkg-signed`._
