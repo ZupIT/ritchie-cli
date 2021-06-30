@@ -48,14 +48,14 @@ if [ -z "$3" ]; then
     echo "No certificate informed, PKG file won't be assigned."
     echo
 else
-    echo "Certificate Developer ID : $3"
+    echo "Developer ID Installer: $3"
 fi
 
 #Parameters
 TARGET_DIRECTORY="target"
 PRODUCT=${1}
 VERSION=${2}
-CERTIFICATE=${3}
+APPLE_DEVELOPER_CERTIFICATE_ID=${3}
 DATE=`date +%Y-%m-%d`
 TIME=`date +%H:%M:%S`
 LOG_PREFIX="[$DATE $TIME]"
@@ -159,7 +159,7 @@ function signProduct() {
     mkdir -p ${TARGET_DIRECTORY}/pkg-signed
     chmod -R 755 ${TARGET_DIRECTORY}/pkg-signed
 
-    productsign --sign "Developer ID Installer: ${CERTIFICATE}" \
+    productsign --sign "Developer ID Installer: ${APPLE_DEVELOPER_CERTIFICATE_ID}" \
     ${TARGET_DIRECTORY}/pkg/$1 \
     ${TARGET_DIRECTORY}/pkg-signed/$1
 
@@ -170,11 +170,11 @@ function createInstaller() {
     log_info "Application installer generation process started.(3 Steps)"
     buildPackage
     buildProduct ${PRODUCT}-macos-installer-x64-${VERSION}.pkg
-    if [ -z "${CERTIFICATE}" ]; then
+    if [ -z "${APPLE_DEVELOPER_CERTIFICATE_ID}" ]; then
         echo "No certificate informed. Skiped signing process."
         echo
     else
-        echo "Certificate Name : ${CERTIFICATE}"
+        echo "Developer ID Installer : ${APPLE_DEVELOPER_CERTIFICATE_ID}"
         signProduct ${PRODUCT}-macos-installer-x64-${VERSION}.pkg
     fi
     log_info "Application installer generation steps finished."
