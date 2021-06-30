@@ -64,16 +64,16 @@ type (
 	}
 
 	deleteFormulaCmd struct {
-		userHomeDir    string
-		ritchieHomeDir string
-		workspace      formula.WorkspaceAddLister
-		directory      stream.DirListChecker
-		inBool         prompt.InputBool
-		inText         prompt.InputText
-		inList         prompt.InputList
-		inPath         prompt.InputPath
-		treeGen        formula.TreeGenerator
-		fileManager    stream.FileWriteRemover
+		userHomeDir     string
+		ritchieHomeDir  string
+		workspace       formula.WorkspaceAddLister
+		directory       stream.DirListChecker
+		inBool          prompt.InputBool
+		inTextValidator prompt.InputTextValidator
+		inList          prompt.InputList
+		inPath          prompt.InputPath
+		treeGen         formula.TreeGenerator
+		fileManager     stream.FileWriteRemover
 	}
 )
 
@@ -98,7 +98,7 @@ func NewDeleteFormulaCmd(
 	workspace formula.WorkspaceAddLister,
 	directory stream.DirListChecker,
 	inBool prompt.InputBool,
-	inText prompt.InputText,
+	inTextValidator prompt.InputTextValidator,
 	inList prompt.InputList,
 	inPath prompt.InputPath,
 	treeGen formula.TreeGenerator,
@@ -110,7 +110,7 @@ func NewDeleteFormulaCmd(
 		workspace,
 		directory,
 		inBool,
-		inText,
+		inTextValidator,
 		inList,
 		inPath,
 		treeGen,
@@ -227,7 +227,7 @@ func (d *deleteFormulaCmd) resolvePrompt() (deleteFormula, error) {
 		return deleteFormula{}, err
 	}
 
-	wspace, err := FormulaWorkspaceInput(workspaces, d.inList, d.inText, d.inPath)
+	wspace, err := FormulaWorkspaceInput(workspaces, d.inList, d.inTextValidator, d.inPath)
 	if err != nil {
 		return deleteFormula{}, err
 	}

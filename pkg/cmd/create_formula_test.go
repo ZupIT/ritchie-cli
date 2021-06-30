@@ -63,6 +63,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 		wspaceAddErr     error
 		dirCreate        error
 		createErr        error
+		inputPath        string
+		inputPathErr     error
+		inputWspace      string
 	}
 
 	tests := []struct {
@@ -153,14 +156,22 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=default"},
 		},
 		{
+			name: "success with new workspace in function FormulaWorkspaceInput",
+			in: in{
+				inputTextVal: "rit test test",
+				inputList:    newWorkspace,
+				inputWspace:  "Test",
+			},
+		},
+		{
 			name: "error function FormulaWorkspaceInput",
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 				inputList:     newWorkspace,
-				inputTextErr:  errors.New("error in formula workspace"),
+				inputWspace:   "Invalid workspace",
 			},
-			want: errors.New("error in formula workspace"),
+			want: workspace.ErrInvalidWorkspaceName,
 		},
 		{
 			name: "add workspace error",
@@ -217,6 +228,17 @@ func TestCreateFormulaCmd(t *testing.T) {
 			},
 			want: errors.New("this input must not be empty"),
 		},
+		{
+			name: "error with new workspace with wrong path",
+			in: in{
+				inputTextVal: "rit test test",
+				inputList:    newWorkspace,
+				inputWspace:  "Default",
+				inputPathErr: errors.New("invalid input path"),
+				dirCreate:    nil,
+			},
+			want: errors.New("invalid input path"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -246,13 +268,14 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, tt.in.inputTextErr)
 
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
-			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputTextVal, tt.in.inputTextValErr)
+			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputTextVal, tt.in.inputTextValErr).Once()
+			inputTextValidatorMock.On("Text", "Workspace name: ", mock.Anything).Return(tt.in.inputWspace, tt.in.inputTextValErr)
 
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
 
 			inPath := &mocks.InputPathMock{}
-			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return("", nil)
+			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return(tt.in.inputPath, tt.in.inputPathErr)
 
 			tutorialMock := new(mocks.TutorialFindSetterMock)
 			tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)

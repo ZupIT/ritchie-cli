@@ -300,7 +300,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			inBool.On("Bool", question, mock.Anything, mock.Anything).Return(tt.delete, tt.iBoolErr)
 
 			inPath := &mocks.InputPathMock{}
-			inText := &mocks.InputTextMock{}
+			inTextValidator := &mocks.InputTextValidatorMock{}
 
 			cmd := NewDeleteFormulaCmd(
 				home,
@@ -308,7 +308,7 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				workspaceMock,
 				dirManager,
 				inBool,
-				inText,
+				inTextValidator,
 				inList,
 				inPath,
 				treeGen,

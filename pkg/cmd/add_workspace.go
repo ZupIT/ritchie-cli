@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -19,13 +20,13 @@ const (
 
 type addWorkspaceCmd struct {
 	workspace formula.WorkspaceAddLister
-	input     prompt.InputText
+	input     prompt.InputTextValidator
 	inPath    prompt.InputPath
 }
 
 func NewAddWorkspaceCmd(
 	workspace formula.WorkspaceAddLister,
-	input prompt.InputText,
+	input prompt.InputTextValidator,
 	inPath prompt.InputPath,
 ) *cobra.Command {
 	a := addWorkspaceCmd{
@@ -76,6 +77,11 @@ func (a *addWorkspaceCmd) resolveFlags(cmd *cobra.Command) (formula.Workspace, e
 		return formula.Workspace{}, errors.New("all flags need to be filled")
 	}
 
+	err := workspace.WorkspaceNameValidator(workspaceName)
+	if err != nil {
+		return formula.Workspace{}, err
+	}
+
 	wspace := formula.Workspace{
 		Name: strings.Title(workspaceName),
 		Dir:  workspacePath,
@@ -85,7 +91,7 @@ func (a *addWorkspaceCmd) resolveFlags(cmd *cobra.Command) (formula.Workspace, e
 }
 
 func (a *addWorkspaceCmd) resolvePrompt() (formula.Workspace, error) {
-	workspaceName, err := a.input.Text("Enter the name of workspace", true)
+	workspaceName, err := a.input.Text("Enter the name of workspace", workspace.WorkspaceNameValidator)
 	if err != nil {
 		return formula.Workspace{}, err
 	}
