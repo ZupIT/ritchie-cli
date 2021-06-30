@@ -3,20 +3,19 @@
 #Configuration Variables and Parameters
 
 function printSignature() {
-  cat ./utils/ascii_art.txt
-  echo
+    cat ./utils/ascii_art.txt
+    echo
 }
 
 function printUsage() {
-  echo -e "\033[1mUsage:\033[0m"
-  echo "$0 [APPLICATION_NAME] [APPLICATION_VERSION]"
-  echo
-  echo -e "\033[1mOptions:\033[0m"
-  echo "  -h (--help)"
-  echo
-  echo -e "\033[1mExample::\033[0m"
-  echo "$0 wso2am 2.6.0"
-
+    echo -e "\033[1mUsage:\033[0m"
+    echo "$0 [APPLICATION_NAME] [APPLICATION_VERSION] [CERTIFICATE_DEVELOPER_ID]"
+    echo
+    echo -e "\033[1mOptions:\033[0m"
+    echo "  -h (--help)"
+    echo
+    echo -e "\033[1mExample::\033[0m"
+    echo "$0 wso2am 2.6.0"
 }
 
 #Start the generator
@@ -43,11 +42,18 @@ else
     printUsage
     exit 1
 fi
+if [ -z "$3" ]; then
+    echo "No certificate informed, PKG file won't be assigned."
+    echo
+else
+    echo "Certificate Developer ID : $3"
+fi
 
 #Parameters
 TARGET_DIRECTORY="target"
 PRODUCT=${1}
 VERSION=${2}
+CERTIFICATE=${3}
 DATE=`date +%Y-%m-%d`
 TIME=`date +%H:%M:%S`
 LOG_PREFIX="[$DATE $TIME]"
@@ -92,11 +98,11 @@ createInstallationDirectory() {
 }
 
 copyDarwinDirectory(){
-  createInstallationDirectory
-  cp -r darwin ${TARGET_DIRECTORY}/
-  chmod -R 755 ${TARGET_DIRECTORY}/darwin/scripts
-  chmod -R 755 ${TARGET_DIRECTORY}/darwin/Resources
-  chmod 755 ${TARGET_DIRECTORY}/darwin/Distribution
+    createInstallationDirectory
+    cp -r darwin ${TARGET_DIRECTORY}/
+    chmod -R 755 ${TARGET_DIRECTORY}/darwin/scripts
+    chmod -R 755 ${TARGET_DIRECTORY}/darwin/Resources
+    chmod 755 ${TARGET_DIRECTORY}/darwin/Distribution
 }
 
 copyBuildDirectory() {
@@ -151,8 +157,7 @@ function signProduct() {
     mkdir -p ${TARGET_DIRECTORY}/pkg-signed
     chmod -R 755 ${TARGET_DIRECTORY}/pkg-signed
 
-    read -p "Please enter the Apple Developer Installer Certificate ID:" APPLE_DEVELOPER_CERTIFICATE_ID
-    productsign --sign "Developer ID Installer: ${APPLE_DEVELOPER_CERTIFICATE_ID}" \
+    productsign --sign "Developer ID Installer: ${CERTIFICATE}" \
     ${TARGET_DIRECTORY}/pkg/$1 \
     ${TARGET_DIRECTORY}/pkg-signed/$1
 
@@ -163,24 +168,20 @@ function createInstaller() {
     log_info "Application installer generation process started.(3 Steps)"
     buildPackage
     buildProduct ${PRODUCT}-macos-installer-x64-${VERSION}.pkg
-    # TODO: No signing process at the moment, update this part when available.
-
-    # while true; do
-    #     read -p "Do you wish to sign the installer (You should have Apple Developer Certificate) [y/N]?" answer
-    #     [[ $answer == "y" || $answer == "Y" ]] && FLAG=true && break
-    #     [[ $answer == "n" || $answer == "N" || $answer == "" ]] && log_info "Skiped signing process." && FLAG=false && break
-    #     echo "Please answer with 'y' or 'n'"
-    # done
-    
-    log_info "Skiped signing process." && FLAG=false
-    [[ $FLAG == "true" ]] && signProduct ${PRODUCT}-macos-installer-x64-${VERSION}.pkg
+    if [ -z "${CERTIFICATE}" ]; then
+        echo "No certificate informed. Skiped signing process."
+        echo
+    else
+        echo "Certificate Name : ${CERTIFICATE}"
+        signProduct ${PRODUCT}-macos-installer-x64-${VERSION}.pkg
+    fi
     log_info "Application installer generation steps finished."
 }
 
 function createUninstaller(){
-    cp darwin/Resources/uninstall.sh ${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/${VERSION}
-    sed -i '' -e "s/__VERSION__/${VERSION}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/${VERSION}/uninstall.sh"
-    sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/${VERSION}/uninstall.sh"
+    cp darwin/Resources/uninstall.sh ${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}
+    sed -i '' -e "s/__VERSION__/${VERSION}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/uninstall.sh"
+    sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/${PRODUCT}/uninstall.sh"
 }
 
 #Pre-requisites
