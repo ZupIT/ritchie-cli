@@ -32,6 +32,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+const invalidCharacters = `\/><,@#%!&*()=+§£¢¬ªº°"^~;.?`
+
 var (
 	ErrInvalidWorkspace         = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
 	ErrInvalidWorkspaceName     = prompt.NewError(`the workspace name must not contain spaces or invalid characters (\/><,@#%!&*()=+§£¢¬ªº°"^~;.?)`)
@@ -220,7 +222,7 @@ func WorkspaceNameValidator(cmd interface{}) error {
 
 	workspaceName := cmd.(string)
 	isWithSpaces := strings.Contains(workspaceName, " ")
-	isWithInvalidCharacters := strings.ContainsAny(workspaceName, `\/><,@#%!&*()=+§£¢¬ªº°"^~;.?`)
+	isWithInvalidCharacters := strings.ContainsAny(workspaceName, invalidCharacters)
 	if isWithSpaces || isWithInvalidCharacters {
 		return ErrInvalidWorkspaceName
 	}
