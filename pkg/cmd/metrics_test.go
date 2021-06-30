@@ -29,10 +29,22 @@ func Test_RunCmd(t *testing.T) {
 			want:         nil,
 		},
 		{
+			name:         "failed  with prompt",
+			choose:       "yes",
+			inputFileErr: errors.New("failed to write file"),
+			want:         errors.New("failed to write file"),
+		},
+		{
 			name:         "success with flags",
-			inputFileErr: nil,
 			inputFlag:    []string{"--metrics=no"},
+			inputFileErr: nil,
 			want:         nil,
+		},
+		{
+			name:         "fail with flags",
+			inputFlag:    []string{"--metrics=no"},
+			inputFileErr: errors.New("failed to write file"),
+			want:         errors.New("failed to write file"),
 		},
 	}
 
