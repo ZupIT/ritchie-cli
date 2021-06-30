@@ -174,7 +174,7 @@ jobs:
         - uses: actions/checkout@v2.3.4
         - uses: actions/setup-node@v2
           with:
-            node-version: '14'       
+            node-version: '14'
         - name: Create binary from branch
           run: |
             choco install make
@@ -228,4 +228,4 @@ jobs:
             command_line: ./rit.exe list formula --name="commons"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
-            specific_line: 1          
+            specific_line: 1
