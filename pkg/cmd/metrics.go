@@ -87,7 +87,7 @@ func (m metricsCmd) runFlag(cmd *cobra.Command) (string, error) {
 	for i := range options {
 		if strings.EqualFold(choose, options[i]) {
 			break
-		} else if i == len(options)-1{
+		} else if i == len(options)-1 {
 			return "", errors.New("please provide a valid value to the flag metrics")
 		}
 
