@@ -146,11 +146,11 @@ func Test_RunPrompt(t *testing.T) {
 
 func Test_RunFlag(t *testing.T) {
 	var runFlagCases = []struct {
-		fileMock  stream.FileWriteReadExister
-		inputMock prompt.InputList
-		choose    string
-		name      string
-		want      error
+		writeFileMock stream.FileWriteReadExister
+		inputListMock prompt.InputList
+		choose        string
+		name          string
+		want          error
 	}{
 		{
 			name:   "success with yes",
@@ -167,13 +167,17 @@ func Test_RunFlag(t *testing.T) {
 	for _, tt := range runFlagCases {
 		t.Run(tt.name, func(t *testing.T) {
 			newMetrics := metricsCmd{
-				file:  tt.fileMock,
-				input: tt.inputMock,
+				file:  tt.writeFileMock,
+				input: tt.inputListMock,
 			}
-			cobraCmd := NewMetricsCmd(tt.fileMock, tt.inputMock)
-			cobraCmd.Flags().Set(metricsFlagName, tt.choose)
-			got, err := newMetrics.runFlag(cobraCmd)
-			fmt.Println(got, err)
+			metricsCmd := NewMetricsCmd(tt.writeFileMock, tt.inputListMock)
+			metricsCmd.Flags().Set(metricsFlagName, tt.choose)
+			got, err := newMetrics.runFlag(metricsCmd)
+
+			if err != nil {
+				assert.Equal(t, got, tt.choose)
+			}
+			assert.Equal(t, err, tt.want)
 
 		})
 	}
