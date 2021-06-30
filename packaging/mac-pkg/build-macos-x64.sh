@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Credits: https://github.com/KosalaHerath/macos-installer-builder
+
 #Configuration Variables and Parameters
 
 function printSignature() {
