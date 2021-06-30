@@ -12,113 +12,47 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// func Test_metricsCmd_runCmd(t *testing.T) {
-// 	type in struct {
-// 		file  stream.FileWriteReadExister
-// 		input prompt.InputList
-// 	}
-//
-// 	var tests = []struct {
-// 		name    string
-// 		wantErr bool
-// 		in      in
-// 	}{
-// 		{
-// 			name:    "success when metrics file dont exist",
-// 			wantErr: false,
-// 			in: in{
-// 				file: sMocks.FileWriteReadExisterCustomMock{
-// 					ExistsMock: func(path string) bool {
-// 						return false
-// 					},
-// 					ReadMock: func(path string) ([]byte, error) {
-// 						return []byte("some data"), nil
-// 					},
-// 					WriteMock: func(path string, content []byte) error {
-// 						return nil
-// 					},
-// 				},
-// 				input: inputListCustomMock{
-// 					list: func(name string, items []string) (string, error) {
-// 						return "yes", nil
-// 					},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			name:    "success when not accept send metrics",
-// 			wantErr: false,
-// 			in: in{
-// 				file: sMocks.FileWriteReadExisterCustomMock{
-// 					ExistsMock: func(path string) bool {
-// 						return false
-// 					},
-// 					ReadMock: func(path string) ([]byte, error) {
-// 						return []byte("some data"), nil
-// 					},
-// 					WriteMock: func(path string, content []byte) error {
-// 						return nil
-// 					},
-// 				},
-// 				input: inputListCustomMock{
-// 					list: func(name string, items []string) (string, error) {
-// 						return "no", nil
-// 					},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			name:    "fail on write file when metrics file dont exist",
-// 			wantErr: true,
-// 			in: in{
-// 				file: sMocks.FileWriteReadExisterCustomMock{
-// 					ExistsMock: func(path string) bool {
-// 						return false
-// 					},
-// 					ReadMock: func(path string) ([]byte, error) {
-// 						return []byte("some data"), nil
-// 					},
-// 					WriteMock: func(path string, content []byte) error {
-// 						return errors.New("reading file error")
-// 					},
-// 				},
-// 				input: inputListCustomMock{
-// 					list: func(name string, items []string) (string, error) {
-// 						return "yes", nil
-// 					},
-// 				},
-// 			},
-// 		},
-// 		{
-// 			name:    "fail on input list when metrics file dont exist",
-// 			wantErr: true,
-// 			in: in{
-// 				file: sMocks.FileWriteReadExisterCustomMock{
-// 					ExistsMock: func(path string) bool {
-// 						return false
-// 					},
-// 					ReadMock: func(path string) ([]byte, error) {
-// 						return []byte("some data"), nil
-// 					},
-// 					WriteMock: func(path string, content []byte) error {
-// 						return nil
-// 					},
-// 				},
-// 				input: inputListErrorMock{},
-// 			},
-// 		},
-// 	}
-//
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			metricsCmd := NewMetricsCmd(tt.in.file, tt.in.input)
-// 			if err := metricsCmd.Execute(); (err != nil) != tt.wantErr {
-// 				t.Errorf("metrics command error = %v | error wanted: %v", err, tt.wantErr)
-// 			}
-// 		})
-// 	}
-// }
+func Test_RunCmd(t *testing.T) {
+	var runCmdCases = []struct {
+		fileMock     stream.FileWriteReadExister
+		inputMock    prompt.InputList
+		name         string
+		choose       string
+		want         error
+		inputFileErr error
+		inputFlag    []string
+	}{
+		{
+			name:         "success with prompt",
+			choose:       "yes",
+			inputFileErr: nil,
+			want:         nil,
+		},
+		{
+			name:         "success with flags",
+			inputFileErr: nil,
+			inputFlag:    []string{"--metrics=no"},
+			want:         nil,
+		},
+	}
 
+	for _, tt := range runCmdCases {
+		t.Run(tt.name, func(t *testing.T) {
+			inputListMock := new(mocks.InputListMock)
+			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.choose, tt.want)
+
+			inputFileMock := new(mocks.FileManagerMock)
+			inputFileMock.On("Write", mock.Anything, mock.Anything).Return(tt.inputFileErr)
+
+			metricsCmd := NewMetricsCmd(inputFileMock, inputListMock)
+			metricsCmd.ParseFlags(tt.inputFlag)
+
+			got := metricsCmd.Execute()
+			assert.Equal(t, tt.want, got)
+
+		})
+	}
+}
 
 func Test_ResolveInput(t *testing.T) {
 
@@ -130,14 +64,14 @@ func Test_ResolveInput(t *testing.T) {
 		inputFlag []string
 	}{
 		{
-			name: "test run prompt",
+			name:   "test run prompt",
 			choose: "yes",
-			want: nil,
+			want:   nil,
 		},
 		{
 			name:      "test run flag",
-			inputFlag: []string{"--metrics=yes"},
-			want: nil,
+			inputFlag: []string{"--metrics=no"},
+			want:      nil,
 		},
 	}
 
