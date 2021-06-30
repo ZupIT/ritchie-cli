@@ -495,6 +495,11 @@ func TestWorkspaceNameValidator(t *testing.T) {
 			workspaceName: 123,
 			want:          ErrInvalidWorkspaceNameType,
 		},
+		{
+			name:          "run with invalid character",
+			workspaceName: "Test#123",
+			want:          ErrInvalidWorkspaceName,
+		},
 	}
 
 	for _, tt := range tests {

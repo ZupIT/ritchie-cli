@@ -34,7 +34,7 @@ import (
 
 var (
 	ErrInvalidWorkspace         = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
-	ErrInvalidWorkspaceName     = prompt.NewError("the workspace name must not contain spaces")
+	ErrInvalidWorkspaceName     = prompt.NewError(`the workspace name must not contain spaces or invalid characters (\/><,@#%!&*()=+§£¢¬ªº°"^~;.?)`)
 	ErrInvalidWorkspaceNameType = prompt.NewError("the input type is invalid for the workspace name")
 
 	hashesPath = "hashes"
@@ -217,7 +217,11 @@ func WorkspaceNameValidator(cmd interface{}) error {
 	if reflect.TypeOf(cmd).Kind() != reflect.String {
 		return ErrInvalidWorkspaceNameType
 	}
-	if strings.Contains(cmd.(string), " ") {
+
+	workspaceName := cmd.(string)
+	isWithSpaces := strings.Contains(workspaceName, " ")
+	isWithInvalidCharacters := strings.ContainsAny(workspaceName, `\/><,@#%!&*()=+§£¢¬ªº°"^~;.?`)
+	if isWithSpaces || isWithInvalidCharacters {
 		return ErrInvalidWorkspaceName
 	}
 	return nil
