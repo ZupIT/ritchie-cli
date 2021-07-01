@@ -21,7 +21,18 @@ import (
 )
 
 var (
-	boolOpts = map[string]bool{"yes": true, "no": false, "true": true, "false": false}
+	BoolOpts = map[string]bool{
+		"yes":   true,
+		"no":    false,
+		"true":  true,
+		"false": false,
+		"Yes":   true,
+		"No":    false,
+		"True":  true,
+		"False": false,
+		"✅ Yes": true,
+		"❌ No":  false,
+	}
 )
 
 type SurveyBool struct{}
@@ -45,5 +56,5 @@ func (SurveyBool) Bool(name string, items []string, helper ...string) (bool, err
 		return false, err
 	}
 
-	return boolOpts[choice], nil
+	return BoolOpts[choice], nil
 }

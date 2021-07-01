@@ -57,6 +57,7 @@ type Data struct {
 	CommandExecutionTime float64      `json:"commandExecutionTime"`
 	MetricsAcceptance    string       `json:"metricsAcceptance,omitempty"`
 	FormulaRepo          formula.Repo `json:"repo,omitempty"`
+	Flags                []string     `json:"flags,omitempty"`
 }
 
 type Sender interface {

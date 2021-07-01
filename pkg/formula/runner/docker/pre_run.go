@@ -23,12 +23,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -38,7 +40,6 @@ const (
 	loadConfigErrMsg = `Failed to load formula config file
 Try running rit update repo
 Config file path not found: %s`
-	dockerCmd = "docker"
 )
 
 var (
@@ -51,6 +52,9 @@ var (
 	ErrDockerfileNotFound = errors.New(
 		"the formula cannot be executed inside the docker, you must add a \"Dockerfile\" to execute the formula inside the docker",
 	)
+	ErrInvalidVolume = errors.New(
+		"config.json file does not contain a valid volume to be mounted",
+	)
 )
 
 var _ formula.PreRunner = PreRunManager{}
@@ -60,6 +64,7 @@ type PreRunManager struct {
 	docker      formula.Builder
 	dir         stream.DirCreateListCopyRemover
 	file        stream.FileReadExister
+	checker     runner.PreRunCheckerManager
 }
 
 func NewPreRun(
@@ -67,12 +72,14 @@ func NewPreRun(
 	docker formula.Builder,
 	dir stream.DirCreateListCopyRemover,
 	file stream.FileReadExister,
+	checker runner.PreRunCheckerManager,
 ) PreRunManager {
 	return PreRunManager{
 		ritchieHome: ritchieHome,
 		docker:      docker,
 		dir:         dir,
 		file:        file,
+		checker:     checker,
 	}
 }
 
@@ -85,12 +92,16 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 		return formula.Setup{}, err
 	}
 
+	if err := pr.checker.CheckVersionCompliance(def.RepoName, config.RequireLatestVersion); err != nil {
+		return formula.Setup{}, err
+	}
+
 	binFilePath := def.UnixBinFilePath(formulaPath)
 	if !pr.file.Exists(binFilePath) {
 		s := spinner.StartNew("Building formula...")
 		time.Sleep(2 * time.Second)
 
-		if err := pr.buildFormula(formulaPath, config.DockerIB); err != nil {
+		if err := pr.buildFormula(formulaPath, config.DockerIB, config.Volumes); err != nil {
 			s.Stop()
 
 			// Remove /bin dir to force formula rebuild in next execution
@@ -135,8 +146,12 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	return s, nil
 }
 
-func (pr PreRunManager) buildFormula(formulaPath, dockerImg string) error {
+func (pr PreRunManager) buildFormula(formulaPath, dockerImg string, dockerVolumes []string) error {
 	if err := validateDocker(dockerImg); err != nil {
+		return err
+	}
+
+	if err := validateVolumes(dockerVolumes); err != nil {
 		return err
 	}
 
@@ -193,7 +208,7 @@ func buildRunImg(def formula.Definition) (string, error) {
 	containerId = strings.ToLower(containerId)
 	args := []string{"build", "-t", containerId, "."}
 	//nolint:gosec
-	cmd := exec.Command(dockerCmd, args...) // Run command "docker build -t (randomId) ."
+	cmd := exec.Command(getDockerCmd(), args...) // Run command "docker build -t (randomId) ."
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
@@ -208,7 +223,7 @@ func buildRunImg(def formula.Definition) (string, error) {
 // validate checks if able to run inside docker
 func validateDocker(dockerImg string) error {
 	args := []string{"version", "--format", "'{{.Server.Version}}'"}
-	cmd := exec.Command(dockerCmd, args...)
+	cmd := exec.Command(getDockerCmd(), args...)
 	output, err := cmd.CombinedOutput()
 	if output == nil || err != nil {
 		return ErrDockerNotInstalled
@@ -219,4 +234,22 @@ func validateDocker(dockerImg string) error {
 	}
 
 	return nil
+}
+
+// validate checks if volumes is not null
+func validateVolumes(dockerVolumes []string) error {
+	for _, volume := range dockerVolumes {
+		if !strings.Contains(volume, ":") {
+			return ErrInvalidVolume
+		}
+	}
+	return nil
+}
+
+func getDockerCmd() string {
+	if runtime.GOOS == "linux" {
+		return "docker"
+	} else {
+		return "com.docker.cli"
+	}
 }

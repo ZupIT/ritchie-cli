@@ -175,6 +175,15 @@ func (i *InputTextValidatorMock) Text(name string, validate func(interface{}) er
 	return args.String(0), validate(args.String(0))
 }
 
+type InputPathMock struct {
+	mock.Mock
+}
+
+func (i *InputPathMock) Read(text string) (string, error) {
+	args := i.Called(text)
+	return args.String(0), args.Error(1)
+}
+
 type FormCreator struct {
 	mock.Mock
 }
@@ -206,6 +215,11 @@ func (w *WorkspaceForm) Delete(workspace formula.Workspace) error {
 func (w *WorkspaceForm) List() (formula.Workspaces, error) {
 	args := w.Called()
 	return args.Get(0).(formula.Workspaces), args.Error(1)
+}
+
+func (w *WorkspaceForm) Update(workspace formula.Workspace) error {
+	args := w.Called(workspace)
+	return args.Error(0)
 }
 
 func (w *WorkspaceForm) Validate(workspace formula.Workspace) error {
@@ -281,9 +295,19 @@ func (d *DirManager) Exists(path string) bool {
 	return args.Bool(0)
 }
 
+func (d *DirManager) List(dir string, hiddenDir bool) ([]string, error) {
+	args := d.Called(dir, hiddenDir)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 func (d *DirManager) IsDir(dir string) bool {
 	args := d.Called(dir)
 	return args.Bool(0)
+}
+
+func (d *DirManager) Create(dir string) error {
+	args := d.Called(dir)
+	return args.Error(0)
 }
 
 type FileManager struct {
@@ -352,6 +376,11 @@ func (t *TreeManager) Tree() (map[formula.RepoName]formula.Tree, error) {
 func (t *TreeManager) MergedTree(core bool) formula.Tree {
 	args := t.Called(core)
 	return args.Get(0).(formula.Tree)
+}
+
+func (t *TreeManager) TreeByRepo(repoName formula.RepoName) (formula.Tree, error) {
+	args := t.Called(repoName)
+	return args.Get(0).(formula.Tree), args.Error(1)
 }
 
 func (t *TreeManager) Generate(repoPath string) (formula.Tree, error) {

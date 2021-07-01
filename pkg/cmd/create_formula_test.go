@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,6 +35,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/creator/template"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
@@ -42,7 +44,11 @@ import (
 )
 
 func TestCreateFormulaCmd(t *testing.T) {
+	validator := validator.New()
+
 	type in struct {
+		inputBool        bool
+		inputBoolErr     error
 		inputText        string
 		inputTextErr     error
 		inputTextVal     string
@@ -55,13 +61,18 @@ func TestCreateFormulaCmd(t *testing.T) {
 		wspaceList       formula.Workspaces
 		wspaceListErr    error
 		wspaceAddErr     error
+		dirCreate        error
 		createErr        error
+		inputPath        string
+		inputPathErr     error
+		inputWspace      string
 	}
 
 	tests := []struct {
-		name string
-		in   in
-		want error
+		name       string
+		in         in
+		want       error
+		inputFlags []string
 	}{
 		{
 			name: "success",
@@ -70,6 +81,28 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 				inputList:     "go",
 			},
+		},
+		{
+			name: "success with new workspace dir",
+			in: in{
+				inputTextVal:  "rit test test",
+				wspaceAddErr:  workspace.ErrInvalidWorkspace,
+				inputBool:     true,
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				dirCreate:     nil,
+			},
+		},
+		{
+			name: "add dir error",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				inputList:     "go",
+				inputBool:     true,
+				wspaceAddErr:  workspace.ErrInvalidWorkspace,
+				dirCreate:     errors.New("failed to create dir"),
+			},
+			want: errors.New("failed to create dir"),
 		},
 		{
 			name: "error on input text validator",
@@ -114,14 +147,31 @@ func TestCreateFormulaCmd(t *testing.T) {
 			want: errors.New("error to list workspaces"),
 		},
 		{
+			name: "error on workspace list with flags",
+			in: in{
+				tempLanguages: []string{"go", "java", "c", "rust"},
+				wspaceListErr: errors.New("error to list workspaces"),
+			},
+			want:       errors.New("error to list workspaces"),
+			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=default"},
+		},
+		{
+			name: "success with new workspace in function FormulaWorkspaceInput",
+			in: in{
+				inputTextVal: "rit test test",
+				inputList:    newWorkspace,
+				inputWspace:  "Test",
+			},
+		},
+		{
 			name: "error function FormulaWorkspaceInput",
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 				inputList:     newWorkspace,
-				inputTextErr:  errors.New("error in formula workspace"),
+				inputWspace:   "Invalid workspace",
 			},
-			want: errors.New("error in formula workspace"),
+			want: workspace.ErrInvalidWorkspaceName,
 		},
 		{
 			name: "add workspace error",
@@ -143,13 +193,66 @@ func TestCreateFormulaCmd(t *testing.T) {
 			},
 			want: errors.New("error to create formula"),
 		},
+		{
+			name: "success with flags",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
+				},
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+			},
+			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=Default"},
+		},
+		{
+			name: "err invalidWorkspace",
+			in: in{
+				wspaceList: formula.Workspaces{
+					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
+				},
+			},
+			want:       errors.New(InvalidWorkspace),
+			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=invalidWorkspace"},
+		},
+		{
+			name: "err invalidLanguage",
+			in: in{
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+			},
+			want:       errors.New("language not found"),
+			inputFlags: []string{"--name=rit test test", "--language=invalidLanguage", "--workspace=Default"},
+		},
+		{
+			name: "err empty formula command",
+			in: in{
+				inputTextVal: "",
+			},
+			want: errors.New("this input must not be empty"),
+		},
+		{
+			name: "error with new workspace with wrong path",
+			in: in{
+				inputTextVal: "rit test test",
+				inputList:    newWorkspace,
+				inputWspace:  "Default",
+				inputPathErr: errors.New("invalid input path"),
+				dirCreate:    nil,
+			},
+			want: errors.New("invalid input path"),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			workspaceMock := new(mocks.WorkspaceForm)
+			if tt.name == "success with new workspace dir" {
+				workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr).Once()
+				workspaceMock.On("Add", mock.Anything).Return(nil).Once()
+
+			} else {
+				workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr)
+			}
+
 			workspaceMock.On("List").Return(tt.in.wspaceList, tt.in.wspaceListErr)
-			workspaceMock.On("Add", mock.Anything).Return(tt.in.wspaceAddErr)
 			workspaceMock.On("CurrentHash", mock.Anything).Return("48d47029-2abf-4a2e-b5f2-f5b60471423e", nil)
 			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
 
@@ -165,16 +268,26 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, tt.in.inputTextErr)
 
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
-			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputTextVal, tt.in.inputTextValErr)
+			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputTextVal, tt.in.inputTextValErr).Once()
+			inputTextValidatorMock.On("Text", "Workspace name: ", mock.Anything).Return(tt.in.inputWspace, tt.in.inputTextValErr)
 
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
+
+			inPath := &mocks.InputPathMock{}
+			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return(tt.in.inputPath, tt.in.inputPathErr)
 
 			tutorialMock := new(mocks.TutorialFindSetterMock)
 			tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
 
 			treeMock := new(mocks.TreeManager)
 			treeMock.On("Check").Return([]api.CommandID{})
+
+			inputBoolM := new(mocks.InputBoolMock)
+			inputBoolM.On("Bool", InvalidWorkspace, []string{"no", "yes"}, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
+
+			directoryMock := new(mocks.DirManagerMock)
+			directoryMock.On("Create", mock.Anything).Return(tt.in.dirCreate)
 
 			createFormulaCmd := NewCreateFormulaCmd(
 				os.TempDir(),
@@ -184,12 +297,19 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inputTextMock,
 				inputTextValidatorMock,
 				inputListMock,
+				inPath,
 				tutorialMock,
 				treeMock,
+				validator,
+				inputBoolM,
+				directoryMock,
 			)
 			createFormulaCmd.SetArgs([]string{})
 			// TODO: remove it after being deprecated
 			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
+			if len(tt.inputFlags) > 1 {
+				createFormulaCmd.SetArgs(tt.inputFlags)
+			}
 			got := createFormulaCmd.Execute()
 			assert.Equal(t, tt.want, got)
 		})
@@ -198,8 +318,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 }
 
 func TestCreateFormula(t *testing.T) {
-	ritchieHomeDir := filepath.Join(os.TempDir(), ".rit_create_formula")
-	workDir := filepath.Join(os.TempDir(), ".ritchie-formulas-local")
+	tmpDir := os.TempDir()
+	ritchieHomeDir := filepath.Join(tmpDir, ".rit_create_formula")
+	workDir := filepath.Join(tmpDir, ".ritchie-formulas-local")
 	fileManager := stream.NewFileManager()
 	dirManager := stream.NewDirManager(fileManager)
 
@@ -332,54 +453,11 @@ func TestCreateFormula(t *testing.T) {
 				assert.DirExists(t, filepath.Join(reposDir, "local-default"))
 				assert.FileExists(t, filepath.Join(reposDir, "local-default", "tree.json"))
 
-				assert.FileExists(t, filepath.Join(hashesDir, "-tmp-.ritchie-formulas-local-test-test.txt"))
+				fileName := strings.ReplaceAll(cf.FormulaPath, string(os.PathSeparator), "-") + ".txt"
+				assert.FileExists(t, filepath.Join(hashesDir, fileName))
 
 				assert.FileExists(t, filepath.Join(reposDir, "repositories.json"))
 			}
-		})
-	}
-}
-
-func TestFormulaCommandValidator(t *testing.T) {
-	tests := []struct {
-		name       string
-		formulaCmd string
-		want       error
-	}{
-		{
-			name:       "success",
-			formulaCmd: "rit test test",
-		},
-		{
-			name: "error empty command",
-			want: ErrFormulaCmdNotBeEmpty,
-		},
-		{
-			name:       "invalid start formula command",
-			formulaCmd: "richie test test",
-			want:       ErrFormulaCmdMustStartWithRit,
-		},
-		{
-			name:       "invalid formula command size",
-			formulaCmd: "rit test",
-			want:       ErrInvalidFormulaCmdSize,
-		},
-		{
-			name:       "invalid characters in formula command",
-			formulaCmd: "rit test test@test",
-			want:       ErrInvalidCharactersFormulaCmd,
-		},
-		{
-			name:       "invalid formula command with core command",
-			formulaCmd: "rit add test",
-			want:       errors.New("core command verb \"add\" after rit\nUse your formula group before the verb\nExample: rit aws list bucket\n"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := formulaCommandValidator(tt.formulaCmd)
-			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -395,19 +473,20 @@ func createFormulaCmdDeps(ritchieHomeDir string, dirManager stream.DirManager, f
 	repoCreator := repo.NewCreator(ritchieHomeDir, repoProviders, dirManager, fileManager)
 	repoLister := repo.NewLister(ritchieHomeDir, fileManager)
 	repoWriter := repo.NewWriter(ritchieHomeDir, fileManager)
-	repoListWriteCreator := repo.NewListWriteCreator(repoLister, repoCreator, repoWriter)
-
 	repoListWriter := repo.NewListWriter(repoLister, repoWriter)
 	repoDeleter := repo.NewDeleter(ritchieHomeDir, repoListWriter, dirManager)
-	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, repoDeleter, treeGen, fileManager)
+	repoDetail := repo.NewDetail(repoProviders)
+	repoListWriteCreator := repo.NewCreateWriteListDetailDeleter(repoLister, repoCreator, repoWriter, repoDetail, repoDeleter)
+	repoAdder := repo.NewAdder(ritchieHomeDir, repoListWriteCreator, treeGen)
+	repoListDetailWriter := repo.NewListDetailWrite(repoLister, repoDetail, repoWriter)
 
-	treeManager := tree.NewTreeManager(ritchieHomeDir, repoLister, api.CoreCmds, fileManager, nil)
+	treeManager := tree.NewTreeManager(ritchieHomeDir, repoListDetailWriter, api.CoreCmds)
 	tmpManager := template.NewManager("../../testdata", dirManager)
 	createManager := creator.NewCreator(treeManager, dirManager, fileManager, tmpManager)
 	formBuildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
 	createBuilder := formula.NewCreateBuilder(createManager, formBuildLocal)
 	buildLocal := builder.NewBuildLocal(ritchieHomeDir, dirManager, repoAdder)
-	wspaceManager := workspace.New(ritchieHomeDir, os.TempDir(), dirManager, buildLocal)
+	wspaceManager := workspace.New(ritchieHomeDir, os.TempDir(), dirManager, buildLocal, treeGen)
 	tutorialFinder := rtutorial.NewFinder(ritchieHomeDir)
 
 	return createFormulaCmd{

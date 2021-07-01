@@ -86,12 +86,25 @@ type (
 		Workspace   Workspace `json:"workspace"`
 		FormulaPath string    `json:"formulaPath"`
 	}
+	Rename struct {
+		OldFormulaCmd string
+		NewFormulaCmd string
+		Workspace     Workspace
+		FOldPath      string
+		FNewPath      string
+	}
+	Delete struct {
+		GroupsFormula []string
+		Workspace     Workspace
+	}
 
 	Inputs []Input
 
 	Config struct {
-		DockerIB string `json:"dockerImageBuilder"`
-		Inputs   Inputs `json:"inputs"`
+		DockerIB             string   `json:"dockerImageBuilder"`
+		Inputs               Inputs   `json:"inputs"`
+		Volumes              []string `json:"dockerVolumes"`
+		RequireLatestVersion bool     `json:"requireLatestVersion"`
 	}
 
 	// Definition type that represents a Formula

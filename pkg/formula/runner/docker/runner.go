@@ -20,9 +20,12 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
+	"runtime"
 	"strconv"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
+	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/pflag"
@@ -93,42 +96,48 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 }
 
 func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType, verbose bool, flags *pflag.FlagSet) (*exec.Cmd, error) {
-	volume := fmt.Sprintf("%s:/app", setup.Pwd)
-	homeDirVolume := fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir)
-	var args []string
-	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
-		args = []string{
-			"run",
-			"--rm",
-			"-it",
-			"--env-file",
-			envFile,
-			"-v",
-			volume,
-			"-v",
-			homeDirVolume,
-			"--name",
-			setup.ContainerId,
-			setup.ContainerId,
-		}
-	} else {
-		args = []string{
-			"run",
-			"--rm",
-			"--env-file",
-			envFile,
-			"-v",
-			volume,
-			"-v",
-			homeDirVolume,
-			"--name",
-			setup.ContainerId,
-			setup.ContainerId,
-		}
+	volumes := []string{
+		fmt.Sprintf("%s:/app", setup.Pwd),
+		fmt.Sprintf("%s/.rit:/root/.rit", ru.homeDir),
+	}
+	if setup.Config.Volumes != nil && len(setup.Config.Volumes) != 0 {
+		volumes = append(
+			volumes,
+			setup.Config.Volumes...,
+		)
 	}
 
+	currentUser, _ := user.Current()
+	userId := "0:0"
+	if runtime.GOOS != osutil.Windows {
+		userId = currentUser.Uid + ":" + currentUser.Uid
+	}
+	args := []string{
+		"run",
+		"--rm",
+		"-u",
+		userId,
+		"--env-file",
+		envFile,
+	}
+
+	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
+		args = append(args, "-it")
+	}
+
+	for _, volume := range volumes {
+		args = append(args, "-v", volume)
+	}
+
+	args = append(
+		args,
+		"--name",
+		setup.ContainerId,
+		setup.ContainerId,
+	)
+
 	//nolint:gosec,lll
-	cmd := exec.Command(dockerCmd, args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
+	cmd := exec.Command(getDockerCmd(), args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

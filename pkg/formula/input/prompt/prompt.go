@@ -43,6 +43,7 @@ const (
 	DefaultCacheNewLabel = "Type new value?"
 	DefaultCacheQty      = 5
 	EmptyItems           = "no items were provided. Please insert a list of items for the input %s in the config.json file of your formula"
+	TypeSuffix           = "__type"
 )
 
 type InputManager struct {
@@ -54,6 +55,7 @@ type InputManager struct {
 	prompt.InputBool
 	prompt.InputPassword
 	prompt.InputMultiselect
+	prompt.InputPath
 }
 
 func NewInputManager(
@@ -65,6 +67,7 @@ func NewInputManager(
 	inBool prompt.InputBool,
 	inPass prompt.InputPassword,
 	inMultiselect prompt.InputMultiselect,
+	inPath prompt.InputPath,
 ) formula.InputRunner {
 	return InputManager{
 		cred:               cred,
@@ -75,6 +78,7 @@ func NewInputManager(
 		InputBool:          inBool,
 		InputPassword:      inPass,
 		InputMultiselect:   inMultiselect,
+		InputPath:          inPath,
 	}
 }
 
@@ -89,7 +93,7 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 		if err != nil {
 			return err
 		}
-		conditionPass, err := input.VerifyConditional(cmd, i)
+		conditionPass, err := input.VerifyConditional(cmd, i, config.Inputs)
 		if err != nil {
 			return err
 		}
@@ -110,8 +114,12 @@ func (in InputManager) Inputs(cmd *exec.Cmd, setup formula.Setup, f *pflag.FlagS
 			in.persistCache(setup.FormulaPath, inputVal, i, items)
 			checkForSameEnv(i.Name)
 			input.AddEnv(cmd, i.Name, inputVal)
+			checkForSameEnv(i.Name + TypeSuffix)
+			input.AddEnv(cmd, i.Name+TypeSuffix, i.Type)
 		}
+
 	}
+
 	return nil
 }
 
@@ -141,7 +149,12 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return "", err
 		}
 		return in.List(i.Label, dl, i.Tutorial)
-	case input.Multiselect:
+	case input.PathType:
+		if items != nil {
+			return in.loadInputValList(items, i)
+		}
+		return in.InputPath.Read(i.Label)
+	case input.MultiselectType:
 		if len(items) == 0 {
 			return "", fmt.Errorf(EmptyItems, i.Name)
 		}
@@ -149,7 +162,7 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 		if err != nil {
 			return "", err
 		}
-		return strings.Join(sl, "|"), nil
+		return strings.Join(sl, input.MultiselectSeparator), nil
 	default:
 		return in.cred.Resolve(i.Type)
 	}
@@ -202,18 +215,21 @@ func (in InputManager) persistCache(formulaPath, inputVal string, input formula.
 	}
 }
 
-func (in InputManager) loadInputValList(items []string, input formula.Input) (string, error) {
+func (in InputManager) loadInputValList(items []string, i formula.Input) (string, error) {
 	newLabel := DefaultCacheNewLabel
-	if input.Cache.Active {
-		if input.Cache.NewLabel != "" {
-			newLabel = input.Cache.NewLabel
+	if i.Cache.Active {
+		if i.Cache.NewLabel != "" {
+			newLabel = i.Cache.NewLabel
 		}
 		items = append(items, newLabel)
 	}
 
-	inputVal, err := in.List(input.Label, items, input.Tutorial)
+	inputVal, err := in.List(i.Label, items, i.Tutorial)
 	if inputVal == newLabel {
-		return in.textValidator(input)
+		if i.Type == input.PathType {
+			return in.InputPath.Read(i.Label)
+		}
+		return in.textValidator(i)
 	}
 
 	return inputVal, err

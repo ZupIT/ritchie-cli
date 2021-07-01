@@ -97,9 +97,10 @@ var (
 )
 
 type treeMock struct {
-	tree  map[formula.RepoName]formula.Tree
-	repo  formula.RepoName
-	error error
+	tree     map[formula.RepoName]formula.Tree
+	repo     formula.RepoName
+	repoTree formula.Tree
+	error    error
 }
 
 func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
@@ -108,4 +109,8 @@ func (t treeMock) Tree() (map[formula.RepoName]formula.Tree, error) {
 
 func (t treeMock) MergedTree(bool) formula.Tree {
 	return t.tree[t.repo]
+}
+
+func (t treeMock) TreeByRepo(formula.RepoName) (formula.Tree, error) {
+	return t.repoTree, t.error
 }

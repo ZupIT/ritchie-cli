@@ -26,6 +26,7 @@ func NewModifiers(create formula.Create) []Modifier {
 	return []Modifier{
 		FormulaCmd{cf: create},
 		FormulaTags{cf: create},
+		TemplateRelease{},
 	}
 }
 

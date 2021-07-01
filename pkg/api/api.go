@@ -24,6 +24,7 @@ import (
 )
 
 const (
+	RootName        = "rit"
 	ritchieHomeName = ".rit"
 	CoreCmdsDesc    = "core commands:"
 )
@@ -49,6 +50,7 @@ var (
 		"root_list":                  {Parent: "root", Usage: "list"},
 		"root_list_repo":             {Parent: "root_list", Usage: "repo"},
 		"root_list_credential":       {Parent: "root_list", Usage: "credential"},
+		"root_list_formula":          {Parent: "root_list", Usage: "formula"},
 		"root_list_workspace":        {Parent: "root_list", Usage: "workspace"},
 		"root_set":                   {Parent: "root", Usage: "set"},
 		"root_set_env":               {Parent: "root_set", Usage: "env"},
@@ -62,11 +64,14 @@ var (
 		"root_create_formula":        {Parent: "root_create", Usage: "formula"},
 		"root_update":                {Parent: "root", Usage: "update"},
 		"root_update_repo":           {Parent: "root_update", Usage: "repo"},
+		"root_update_workspace":      {Parent: "root_update", Usage: "workspace"},
 		"root_build":                 {Parent: "root", Usage: "build"},
 		"root_build_formula":         {Parent: "root_build", Usage: "formula"},
 		"root_upgrade":               {Parent: "root", Usage: "upgrade"},
 		"root_tutorial":              {Parent: "root", Usage: "tutorial"},
 		"root_metrics":               {Parent: "root", Usage: "metrics"},
+		"root_rename":                {Parent: "root", Usage: "rename"},
+		"root_rename_formula":        {Parent: "root_rename", Usage: "formula"},
 	}
 )
 
@@ -92,12 +97,13 @@ func (a ByLen) Swap(i, j int) {
 
 // Command type
 type Command struct {
-	Parent   string `json:"parent"`
-	Usage    string `json:"usage"`
-	Help     string `json:"help,omitempty"`
-	LongHelp string `json:"longHelp,omitempty"`
-	Formula  bool   `json:"formula,omitempty"`
-	Repo     string `json:"-"`
+	Parent         string `json:"parent"`
+	Usage          string `json:"usage"`
+	Help           string `json:"help,omitempty"`
+	LongHelp       string `json:"longHelp,omitempty"`
+	Formula        bool   `json:"formula,omitempty"`
+	Repo           string `json:"-"`
+	RepoNewVersion string `json:"-"`
 }
 
 type Commands map[CommandID]Command

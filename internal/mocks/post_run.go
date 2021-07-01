@@ -22,9 +22,19 @@ type DirManagerMock struct {
 	mock.Mock
 }
 
+func (d *DirManagerMock) Create(dir string) error {
+	args := d.Called(dir)
+	return args.Error(0)
+}
+
 func (d *DirManagerMock) Remove(dir string) error {
 	args := d.Called(dir)
 	return args.Error(0)
+}
+
+func (d *DirManagerMock) List(dir string, hiddenDir bool) ([]string, error) {
+	args := d.Called(dir, hiddenDir)
+	return args.Get(0).([]string), args.Error(1)
 }
 
 type FileManagerMock struct {

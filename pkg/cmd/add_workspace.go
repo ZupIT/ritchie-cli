@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/workspace"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
@@ -19,16 +20,19 @@ const (
 
 type addWorkspaceCmd struct {
 	workspace formula.WorkspaceAddLister
-	input     prompt.InputText
+	input     prompt.InputTextValidator
+	inPath    prompt.InputPath
 }
 
 func NewAddWorkspaceCmd(
 	workspace formula.WorkspaceAddLister,
-	input prompt.InputText,
+	input prompt.InputTextValidator,
+	inPath prompt.InputPath,
 ) *cobra.Command {
 	a := addWorkspaceCmd{
 		workspace: workspace,
 		input:     input,
+		inPath:    inPath,
 	}
 
 	cmd := &cobra.Command{
@@ -47,18 +51,9 @@ func NewAddWorkspaceCmd(
 	return cmd
 }
 
-func (a addWorkspaceCmd) runFormula() CommandRunnerFunc {
+func (a *addWorkspaceCmd) runFormula() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		if cmd.Flags().NFlag() == 0 {
-			wspace, err := addWorkspaceFromPrompt(a)
-			if err != nil {
-				return err
-			}
-
-			return a.workspace.Add(wspace)
-		}
-
-		wspace, err := addWorkspaceFromFlags(cmd)
+		wspace, err := a.resolveInput(cmd)
 		if err != nil {
 			return err
 		}
@@ -67,12 +62,24 @@ func (a addWorkspaceCmd) runFormula() CommandRunnerFunc {
 	}
 }
 
-func addWorkspaceFromFlags(cmd *cobra.Command) (formula.Workspace, error) {
+func (a *addWorkspaceCmd) resolveInput(cmd *cobra.Command) (formula.Workspace, error) {
+	if IsFlagInput(cmd) {
+		return a.resolveFlags(cmd)
+	}
+	return a.resolvePrompt()
+}
+
+func (a *addWorkspaceCmd) resolveFlags(cmd *cobra.Command) (formula.Workspace, error) {
 	workspaceName, _ := cmd.Flags().GetString(workspaceNameFlag)
 	workspacePath, _ := cmd.Flags().GetString(workspacePathFlag)
 
 	if len(workspaceName) == 0 || len(workspacePath) == 0 {
 		return formula.Workspace{}, errors.New("all flags need to be filled")
+	}
+
+	err := workspace.WorkspaceNameValidator(workspaceName)
+	if err != nil {
+		return formula.Workspace{}, err
 	}
 
 	wspace := formula.Workspace{
@@ -83,13 +90,13 @@ func addWorkspaceFromFlags(cmd *cobra.Command) (formula.Workspace, error) {
 	return wspace, nil
 }
 
-func addWorkspaceFromPrompt(a addWorkspaceCmd) (formula.Workspace, error) {
-	workspaceName, err := a.input.Text("Enter the name of workspace", true)
+func (a *addWorkspaceCmd) resolvePrompt() (formula.Workspace, error) {
+	workspaceName, err := a.input.Text("Enter the name of workspace", workspace.WorkspaceNameValidator)
 	if err != nil {
 		return formula.Workspace{}, err
 	}
 
-	workspacePath, err := a.input.Text("Enter the path of workspace (e.g.: /home/user/github)", true)
+	workspacePath, err := a.inPath.Read("Enter the path of workspace (e.g.: /home/user/github) ")
 	if err != nil {
 		return formula.Workspace{}, err
 	}

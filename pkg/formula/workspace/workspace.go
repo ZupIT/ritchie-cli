@@ -21,16 +21,23 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
+	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+const invalidCharacters = `\/><,@#%!&*()=+§£¢¬ªº°"^~;.?`
+
 var (
-	ErrInvalidWorkspace = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
+	ErrInvalidWorkspace         = prompt.NewError("the formula workspace does not exist, please enter a valid workspace")
+	ErrInvalidWorkspaceName     = prompt.NewError(`the workspace name must not contain spaces or invalid characters (\/><,@#%!&*()=+§£¢¬ªº°"^~;.?)`)
+	ErrInvalidWorkspaceNameType = prompt.NewError("the input type is invalid for the workspace name")
 
 	hashesPath = "hashes"
 	hashesExt  = ".txt"
@@ -42,6 +49,7 @@ type Manager struct {
 	defaultWorkspaceDir string
 	dir                 stream.DirCreateHasher
 	local               builder.Initializer
+	tree                formula.TreeGenerator
 }
 
 func New(
@@ -49,6 +57,7 @@ func New(
 	userHome string,
 	dirManager stream.DirCreateHasher,
 	local builder.Initializer,
+	tree formula.TreeGenerator,
 ) Manager {
 	workspaceFile := filepath.Join(ritchieHome, formula.WorkspacesFile)
 	workspaceHome := filepath.Join(userHome, formula.DefaultWorkspaceDir)
@@ -58,12 +67,23 @@ func New(
 		defaultWorkspaceDir: workspaceHome,
 		dir:                 dirManager,
 		local:               local,
+		tree:                tree,
 	}
 }
 
 func (m Manager) Add(workspace formula.Workspace) error {
 	if workspace.Dir == m.defaultWorkspaceDir {
 		return nil
+	}
+
+	err := WorkspaceNameValidator(workspace.Name)
+	if err != nil {
+		return err
+	}
+
+	// Avoid finishing separators
+	if last := len(workspace.Dir) - 1; last >= 0 && workspace.Dir[last] == filepath.Separator {
+		workspace.Dir = workspace.Dir[:last]
 	}
 	if _, err := os.Stat(workspace.Dir); os.IsNotExist(err) {
 		return ErrInvalidWorkspace
@@ -121,6 +141,36 @@ func (m Manager) Delete(workspace formula.Workspace) error {
 	return nil
 }
 
+func (m Manager) Update(workspace formula.Workspace) error {
+	workspaces, err := m.List()
+	if err != nil {
+		return err
+	}
+
+	if _, exists := workspaces[workspace.Name]; !exists {
+		return ErrInvalidWorkspace
+	}
+
+	workspaceLocalName := repoutil.LocalName(workspace.Name)
+	workflowRitFolderPath := filepath.Join(m.ritchieHome, formula.ReposDir, workspaceLocalName.String())
+	treeData, err := m.tree.Generate(workflowRitFolderPath)
+	if err != nil {
+		return err
+	}
+
+	bytes, err := json.MarshalIndent(treeData, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	treeFilePath := filepath.Join(workflowRitFolderPath, tree.FileName)
+	if err := ioutil.WriteFile(treeFilePath, bytes, os.ModePerm); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m Manager) List() (formula.Workspaces, error) {
 	workspaces := formula.Workspaces{}
 	workspaces[formula.DefaultWorkspaceName] = m.defaultWorkspaceDir
@@ -163,4 +213,18 @@ func (m Manager) UpdateHash(formulaPath string, hash string) error {
 func (m Manager) hashPath(formulaPath string) string {
 	fileName := strings.ReplaceAll(formulaPath, string(os.PathSeparator), "-") + hashesExt
 	return filepath.Join(m.ritchieHome, hashesPath, fileName)
+}
+
+func WorkspaceNameValidator(cmd interface{}) error {
+	if reflect.TypeOf(cmd).Kind() != reflect.String {
+		return ErrInvalidWorkspaceNameType
+	}
+
+	workspaceName := cmd.(string)
+	isWithSpaces := strings.Contains(workspaceName, " ")
+	isWithInvalidCharacters := strings.ContainsAny(workspaceName, invalidCharacters)
+	if isWithSpaces || isWithInvalidCharacters {
+		return ErrInvalidWorkspaceName
+	}
+	return nil
 }

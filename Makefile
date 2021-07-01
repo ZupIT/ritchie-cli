@@ -102,22 +102,28 @@ ifneq "$(IS_RELEASE)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
+	cp dist/installer/ritchiecli-user.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli-user.msi"
 endif
 ifneq "$(IS_QA)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
+	cp dist/installer/ritchiecli-user.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli-user.msi"
 endif
 ifneq "$(IS_STG)" ""
 	echo -n "$(RELEASE_VERSION)" > stable.txt
 	mkdir latest
 	cp dist/installer/ritchiecli.msi latest/
+	cp dist/installer/ritchiecli-user.msi latest/
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "stable.txt"
 	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli.msi"
+	aws s3 sync . s3://$(BUCKET)/ --exclude "*" --include "latest/ritchiecli-user.msi"
 endif
 else
 	echo "NOT GONNA PUBLISH"
@@ -168,3 +174,8 @@ ifeq "$(GONNA_RELEASE)" "RELEASE"
 else
 	echo "NOT GONNA RELEASE"
 endif
+
+generate-translation:
+	go get github.com/go-bindata/go-bindata/v3/...
+	~/go/bin/go-bindata -pkg i18n -o ./internal/pkg/i18n/translations.go ./resources/i18n/...
+	go mod tidy

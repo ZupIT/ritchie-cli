@@ -1,0 +1,115 @@
+[init.cmd.description]
+other = "Inicializar as configurações do rit"
+
+[init.welcome]
+other = "Ritchie CLI is an open source product that allows you to create,\nstore and share any kind of automations, executing them through command lines,\nto run operations or start workflows.\n\nYou can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.\n\n"
+other = "Ritchie CLI é um produto open source que permite criar, armazenar e compartilhar qualquer tipo de automação, executando-as através de linhas de comando, para executar operações ou iniciar fluxos de trabalho.\n\nVocê pode consultar nossa Política de Privacidade (http://insights.zup.com.br/politica-privacidade) para entender melhor nosso compromisso.\n\n"
+
+[init.successful]
+other = "\n✅ Inicialização sucedida!\n"
+
+[init.successful_windows]
+other = "\n Inicialização sucedida!\n"
+
+[init.warning]
+other = "\n\t\t\t⚠️  AVISO ⚠️"
+
+[init.warning_windows]
+other = "\n\t\t\t AVISO"
+
+[init.commons.header]
+other = "⭐ Repositório Commons ⭐\n"
+
+[init.commons.header_windows]
+other = "Repositório Commons \n"
+
+[init.commons.repo.success]
+other = "✅ Repositório Commons repository adicionado com sucesso!\n"
+
+[init.commons.repo.success_windows]
+other = "Repositório Commons repository adicionado com sucesso!\n"
+
+[init.add.commons.repo.help]
+other = "\nExecute \"rit add repo\" para adicionar um novo repositório manualmente.\n"
+
+[init.add.commons.repo.info]
+other = "\nVocê pode manter a configuração sem adicionar o repositório da comunidade,\nmas você precisará fornecer um repositório git com os templates de fórmulas e adicioná-los com o comando\n\"rit add repo\", nomeando este repositório obrigatoriamente como \"commons\", se você deseja criar novas fórmulas.\n\nVeja como fazer isso no exemplo:\n[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]\n"
+
+[init.add.commons.repo.question]
+other = "Você gostaria de adicionar o repositório da comunidade?"
+
+[init.add.commons.repo.error]
+other = "Não foi possível adicionar o repositório comum neste momento, tente novamente mais tarde."
+
+[init.adding.commons.repo]
+other = "Adicionando o repositório da comunidade..."
+
+[init.tutorial.header]
+other = "\n📖 TUTORIAL 📖\n"
+
+[init.tutorial.header_windows]
+other = "\n TUTORIAL\n"
+
+[init.tutorial.title]
+other = "Como criar novas formulas:"
+
+[init.tutorial.body]
+other = "\n∙ Execute \"rit create formula\"\n∙ Abra o projeto com seu editor de texto favorito.\n"
+
+[init.tutorial.commons]
+other = "Dê uma olhada nas fórmulas que você pode executar e testar com Ritchie usando \"rit\"\n"
+
+[init.metric.header]
+other = "📊 Métricas 📊\n"
+
+[init.metric.header_windows]
+other = "Métricas\n"
+
+[init.add.metric.info]
+other = "Para nos ajudar a melhorar e agregar mais valor à comunidade,\ncoletaremos dados anônimos sobre o uso do produto\ne relatórios de falhas."
+
+[init.add.metric.question]
+other = "Você concorda?"
+
+[init.metric.footer]
+other = "\nVocê sempre pode modificar sua escolha usando o comando \"rit metrics\".\n"
+
+
+[init.run.type.header]
+other = "🏃 TIPO DE EXECUÇÃO DE FÓRMULA 🏃\n"
+
+[init.run.type.header_windows]
+other = "TIPO DE EXECUÇÃO DE FÓRMULA\n"
+
+[init.run.type.local.warning]
+other = "\nPara executar fórmulas localmente, você deve ter a linguagem de programação da fórmula instalada em sua máquina,\nse não quiser instalá-la, opte por executar as fórmulas usando Docker.\n"
+
+[init.run.type.question]
+other = "Selecione um tipo de execução de fórmula padrão:"
+
+[init.invalid.run.type.error]
+other = "tipo de execução de fórmula inválido. Tipos de execução disponíveis: [%v]"
+
+[input.accept.opt]
+other = "✅ Sim"
+
+[input.accept.opt_windows]
+other = "Sim"
+
+[input.decline.opt]
+other = "❌ Não"
+
+[input.decline.opt_windows]
+other = "Não"
+
+[input.run.type.local]
+other = "🏠 local"
+
+[input.run.type.local_windows]
+other = "local"
+
+[input.run.type.docker]
+other = "🐳 docker"
+
+[input.run.type.docker_windows]
+other = "docker"

@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gosuri/uitable"
 	"github.com/spf13/cobra"
@@ -74,14 +75,21 @@ func (lr listWorkspaceCmd) runFunc() CommandRunnerFunc {
 
 func printWorkspaces(workspaces formula.Workspaces) {
 	table := uitable.New()
-	table.AddRow("NAME", "PATH")
+	table.AddRow("NAME", "PATH", "STATUS")
 	for k, v := range workspaces {
-		table.AddRow(k, v)
+		table.AddRow(k, v, existsPath(v))
 	}
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
 	fmt.Println(string(raw))
 
+}
+
+func existsPath(path string) string {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return "Path not found"
+	}
+	return "Ok"
 }
 
 func tutorialListWorkspaces(tutorialStatus string) {

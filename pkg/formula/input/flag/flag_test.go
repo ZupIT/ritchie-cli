@@ -25,8 +25,10 @@ import (
 	"testing"
 
 	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
-	"github.com/ZupIT/ritchie-cli/pkg/credential"
+	"github.com/ZupIT/ritchie-cli/internal/mocks"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
 )
@@ -61,12 +63,12 @@ func TestInputs(t *testing.T) {
 			in: in{
 				defaultFlagValue: "",
 			},
-			want: errors.New("these flags cannot be empty [--sample_text_cache, --sample_text_2, --sample_password]"),
+			want: errors.New("these flags cannot be empty [--sample_text_cache, --sample_text_2]"),
 		},
 		{
 			name: "error env resolver",
 			in: in{
-				creResolver: envResolverMock{in: "test", err: errors.New("credential not found")},
+				creResolverErr: errors.New("credential not found"),
 			},
 			want: errors.New("credential not found"),
 		},
@@ -75,14 +77,21 @@ func TestInputs(t *testing.T) {
 			in: in{
 				valueForList: "invalid",
 			},
-			want: errors.New("only these input items [in_list1, in_list2, in_list3, in_listN] are accepted in the \"--sample_list\" flag"),
+			want: errors.New("the value [invalid] is not valid, only these input items [in_list1, in_list2, in_list3, in_listN] are accepted in the \"--sample_list\" flag"),
+		},
+		{
+			name: "invalid value for multiselect item",
+			in: in{
+				valueForMultiselect: "invalid",
+			},
+			want: errors.New("the value [invalid] is not valid, only these input items [multi1, multi2, multi3, multiN] are accepted in the \"--sample_multiselect\" flag"),
 		},
 		{
 			name: "invalid operator",
 			in: in{
 				operator: "eq",
 			},
-			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=)"),
+			want: errors.New("config.json: conditional operator eq not valid. Use any of (==, !=, >, >=, <, <=, containsAny, containsAll, containsOnly, notContainsAny, notContainsAll)"),
 		},
 		{
 			name: "mismatch error operator",
@@ -99,7 +108,9 @@ func TestInputs(t *testing.T) {
 			var inputs []formula.Input
 			_ = json.Unmarshal([]byte(fmt.Sprintf(inputJson, tt.in.regex, tt.in.operator)), &inputs)
 
-			inputManager := NewInputManager(tt.in.creResolver)
+			credResover := &mocks.CredResolverMock{}
+			credResover.On("Resolve", mock.Anything).Return("resolver value", tt.in.creResolverErr)
+			inputManager := NewInputManager(credResover)
 
 			cmd := &exec.Cmd{}
 			flags := pflag.NewFlagSet("test", 0)
@@ -116,6 +127,8 @@ func TestInputs(t *testing.T) {
 					}
 				case input.BoolType:
 					flags.Bool(in.Name, false, in.Tutorial)
+				case input.MultiselectType:
+					flags.String(in.Name, tt.in.valueForMultiselect, in.Tutorial)
 				}
 			}
 
@@ -125,34 +138,38 @@ func TestInputs(t *testing.T) {
 
 			got := inputManager.Inputs(cmd, setup, flags)
 
-			if (tt.want != nil && got == nil) || got != nil && got.Error() != tt.want.Error() {
-				t.Errorf("Inputs(%s) got %v, want %v", tt.name, got, tt.want)
+			if got == nil {
+				assert.Nil(t, tt.want)
+			} else {
+				assert.Equal(t, tt.want, got)
 			}
 		})
 	}
 }
 
 type in struct {
-	creResolver      credential.Resolver
-	defaultFlagValue string
-	valueForList     string
-	valueForRegex    string
-	regex            string
-	operator         string
+	creResolverErr      error
+	defaultFlagValue    string
+	valueForList        string
+	valueForMultiselect string
+	valueForRegex       string
+	regex               string
+	operator            string
 }
 
 func defaultFields(testFields in) in {
 	defaultFields := in{
-		creResolver:      envResolverMock{in: "test"},
-		defaultFlagValue: "text",
-		valueForList:     "in_list2",
-		valueForRegex:    "text_ok",
-		regex:            "text_ok",
-		operator:         "==",
+		creResolverErr:      nil,
+		defaultFlagValue:    "text",
+		valueForList:        "in_list2",
+		valueForMultiselect: "multi1",
+		valueForRegex:       "text_ok",
+		regex:               "text_ok",
+		operator:            "==",
 	}
 
-	if testFields.creResolver != nil {
-		defaultFields.creResolver = testFields.creResolver
+	if testFields.creResolverErr != nil {
+		defaultFields.creResolverErr = testFields.creResolverErr
 	}
 
 	if testFields.defaultFlagValue != defaultFields.defaultFlagValue {
@@ -167,6 +184,10 @@ func defaultFields(testFields in) in {
 		defaultFields.valueForList = testFields.valueForList
 	}
 
+	if testFields.valueForMultiselect != "" {
+		defaultFields.valueForMultiselect = testFields.valueForMultiselect
+	}
+
 	if testFields.regex != "" {
 		defaultFields.regex = testFields.regex
 	}
@@ -178,20 +199,12 @@ func defaultFields(testFields in) in {
 	return defaultFields
 }
 
-type envResolverMock struct {
-	in  string
-	err error
-}
-
-func (e envResolverMock) Resolve(string) (string, error) {
-	return e.in, e.err
-}
-
 const inputJson = `[
     {
         "name": "sample_text_cache",
         "type": "text",
         "label": "Type : ",
+		"required": true,
         "cache": {
             "active": true,
             "qty": 6,
@@ -265,6 +278,18 @@ const inputJson = `[
         "type": "password",
         "label": "Pick: ",
 		"tutorial": "Add a secret password for this field."
+    },
+	{
+        "name": "sample_multiselect",
+        "type": "multiselect",
+		"items": [
+            "multi1",
+            "multi2",
+            "multi3",
+            "multiN"
+        ],
+        "label": "Pick: ",
+		"tutorial": "Select any of the options."
     },
     {
         "name": "test_resolver",
