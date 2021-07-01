@@ -81,6 +81,7 @@ func (ru RunManager) Run(def formula.Definition, inputType api.TermInputType, ve
 	formulaRun := filepath.Join(setup.TmpDir, setup.BinName)
 	cmd := exec.Command(formulaRun)
 	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := ru.setEnvs(cmd, setup.Pwd, verbose); err != nil {

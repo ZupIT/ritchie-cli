@@ -4,73 +4,120 @@
 
 <img class="special-img-class" src="/docs/img/ritchie-banner.png"  alt="Ritchie logo with the phrase: Keep it simple"/>
 
-## Your customizable automation tool
+# Summary
 
-**Ritchie CLI** is an open source product that allows you to create, store and share any kind of automations, executing them through command lines, to run operations or start workflows.
+- [All your automations in one place](https://github.com/ZupIT/ritchie-cli#all-your-automations-in-one-place)
+  - [Usage](https://github.com/ZupIT/ritchie-cli#usage)
+  - [A customizable CLI automation tool](https://github.com/ZupIT/ritchie-cli#a-customizable-cli-automation-tool)
+- [Full Documentation](https://github.com/ZupIT/ritchie-cli#-full-documentation)
+- [Quick Start](https://github.com/ZupIT/ritchie-cli#-quick-start-)
+  - [Install rit latest version](https://github.com/ZupIT/ritchie-cli#1%EF%B8%8F⃣-install-rit-latest-version)
+  - [Initialize rit locally](https://github.com/ZupIT/ritchie-cli#2%EF%B8%8F⃣-initialize-rit-locally)
+  - [Add your first formulas repository](https://github.com/ZupIT/ritchie-cli#3%EF%B8%8F⃣-add-your-first-formulas-repository)
+  - [Run the Hello World formula](https://github.com/ZupIT/ritchie-cli#4%EF%B8%8F⃣-run-the-hello-world-formula)
+- [Contributing](https://github.com/ZupIT/ritchie-cli#-contributing-to-ritchie)
+  - [Zup Open Source projects](https://github.com/ZupIT/ritchie-cli#zup-open-source-projects)
+  - [Zup Open Source forum](https://github.com/ZupIT/ritchie-cli#zup-open-source-forum)
 
-This repository contains the CLI core, which can execute **formulas** stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas) or [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo)
+## All your automations in one place
+
+**Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, executing them through command lines.
+
+### Usage
+
+<p align="center">
+  <a rel="noopener" target="_blank"><img width="600px" src="https://user-images.githubusercontent.com/22433243/121724504-54c92f00-cabe-11eb-9add-9750a107721c.gif" alt="gif containing the command demonstration"></a>
+</p>
+
+### A customizable CLI automation tool
+
+This repository contains the CLI core, which can execute **formulas** stored inside other repositories such as [ritchie-formulas](https://github.com/ZupIT/ritchie-formulas) or [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo).
 
 In Ritchie's context, **a formula is a script** that can be executed automatically or interactively through a command line.
 
-Adapting an existing script to Ritchie structure allows you to run it **locally** or through **Docker**, and to share it on a **Github** or **Gitlab** repository.
+Adapting an existing script to Ritchie structure allows you to run it **locally** or through **Docker**, and to share it on a **Git** repository.
 
 <img class="special-img-class" src="/docs/img/formulas-explanation.png" alt="Formulas explanation"/>
 
-## Full Documentation
+## 📚 [Full Documentation](https://docs.ritchiecli.io)
 
-[Gitbook](https://docs.ritchiecli.io)
+[![Documentation](/docs/img/documentation-ritchie.png)](https://docs.ritchiecli.io)
 
-## Quick start
+## 🚀 Quick start 🤖
 
-### Install rit
+### 1️⃣ Install rit latest version
 
-- Linux|MacOS
+#### Linux
 
 ```bash
 curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
 ```
 
-- Windows
+#### MacOS
 
-Download the installer from (https://commons-repo.ritchiecli.io/latest/ritchiecli.msi)
+```bash
+curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+```
 
-### Initialize rit
+#### Windows
+
+- Download the installer from [ritchiecli.msi](https://commons-repo.ritchiecli.io/latest/ritchiecli.msi)
+
+- Using Winget:
+
+```bash
+winget install Ritchie-CLI
+```
+
+You can also download rit **packages** or **specific versions** according to the OS [on the documentation](https://docs.ritchiecli.io/getting-started/install-cli)
+
+### 2️⃣ Initialize rit locally
 
 ```bash
 rit init
 ```
 
-*Note: You need to import the **commons** repository to be able to create formulas.*
+***Note**: You need to import the **commons** repository to be able to create formulas.*
 
-### Run your first formula
+***Sharing metrics anonymously** will help us improving the tool.
+For any question, check our [privacy policy](https://www.zup.com.br/politica-de-privacidade/politica-ritchie#politicas).*
 
-To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you'll need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally. To do so, you can use the `rit add repo` command, or execute the command line below:
+### 3️⃣ Add your first formulas repository
+
+To access the ["hello-world" formula]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you need to add the [ritchie-formulas-demo](https://github.com/ZupIT/ritchie-formulas-demo) repository locally.
+
+To do so, you can use the `rit add repo` command **manually** on your terminal, or execute the command line below with **input flags**:
 
 ```bash
 rit add repo --provider="Github" --name="demo" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --priority=1
-
 ```
 
-Then, you'll be able to execute the "hello-world" formula through the command line below:
+### 4️⃣ Run the Hello World formula
+
+Execute the "hello-world" formula through the command line below:
 
 ```bash
 rit demo hello-world
 ```
 
-## Ritchie Legacy-1.x
+***Note**: This formula has been implemented using **Golang**, so to use it **locally** you'll need Golang to be installed on your machine. If you don't have or don't want to install Golang, you can use the same command with **Docker**:*
 
-With the release of version 2.0.0 of Ritchie, the previous version (Ritchie 1.x) has been deprecated. Therefore, only bugs fixes will be implemented in this version.
+```bash
+rit demo hello-world --docker
+```
 
-The legacy code is available at [Ritchie Legacy-1.0.0](https://github.com/ZupIT/ritchie-cli/tree/legacy-1.0.0).
+## 🤝 Contributing to Ritchie
 
-## Contributing
+- [Guidelines](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
 
-[Contribute to the Ritchie community](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
+- [Developer Guide](https://github.com/ZupIT/ritchie-cli/blob/master/DEVELOPER_GUIDE.md)
 
-## Developer Guide
+- [Documentation repository](https://github.com/ZupIT/docs-ritchie)
 
-[Check out the developer guide to understand where to start when doing a PR](https://github.com/ZupIT/ritchie-cli/blob/master/DEVELOPER_GUIDE.md)
+### [Zup Open Source Projects](https://opensource.zup.com.br)
 
-## Zup Products
+[![Zup open source](/docs/img/zup-open-source.png)](https://opensource.zup.com.br)
 
-[Zup open source](https://opensource.zup.com.br)
+### [Zup Open Source Forum](https://forum.zup.com.br/c/en/9)
+
+[![Zup forum](/docs/img/zup-forum-topics.png)](https://forum.zup.com.br/c/en/9)

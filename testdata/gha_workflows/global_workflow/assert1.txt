@@ -1,0 +1,40 @@
+ _______       _     _             __         _                           ______    _____      _____  
+|_   __ \     (_)   / |_          [  |       (_)                        .' ___  |  |_   _|    |_   _| 
+  | |__) |    __   `| |-'  .---.   | |--.    __    .---.     ______    / .'   \_|    | |        | |   
+  |  __ /    [  |   | |   / /'`\]  | .-. |  [  |  / /__\\   |______|   | |           | |   _    | |   
+ _| |  \ \_   | |   | |,  | \__.   | | | |   | |  | \__.,              \ `.___.'\   _| |__/ |  _| |_  
+|____| |___| [___]  \__/  '.___.' [___]|__] [___]  '.__.'               `.____ .'  |________| |_____| 
+
+
+Ritchie is a platform that helps you and your team to save time by
+giving you the power to create powerful templates to execute important
+tasks across your team and organization with minimum time and with standards,
+delivering autonomy to developers with security.
+
+You can view our Privacy Policy (http://insights.zup.com.br/politica-privacidade) to better understand our commitment.
+
+
+			⚠️  WARNING ⚠️
+
+You can keep the configuration without adding the community repository,
+but you will need to provide a git repo with the formulas templates and add them with
+"rit add repo" command, naming this repository obligatorily as "commons".
+
+See how to do this on the example:
+[https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]
+
+Run "rit add repo" to add a new repository manually.
+
+
+✅ Initialization successful!
+
+
+📖 TUTORIAL 📖
+
+How to create new formulas:
+
+∙ Run "rit create formula"
+∙ Open the project with your favorite text editor.
+
+Take a look at the formulas you can run and test to see what you can with Ritchie using "rit"
+

@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	boolOpts = map[string]bool{
+	BoolOpts = map[string]bool{
 		"yes":   true,
 		"no":    false,
 		"true":  true,
@@ -56,5 +56,5 @@ func (SurveyBool) Bool(name string, items []string, helper ...string) (bool, err
 		return false, err
 	}
 
-	return boolOpts[choice], nil
+	return BoolOpts[choice], nil
 }

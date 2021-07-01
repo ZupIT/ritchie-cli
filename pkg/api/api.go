@@ -24,6 +24,7 @@ import (
 )
 
 const (
+	RootName        = "rit"
 	ritchieHomeName = ".rit"
 	CoreCmdsDesc    = "core commands:"
 )
@@ -63,11 +64,14 @@ var (
 		"root_create_formula":        {Parent: "root_create", Usage: "formula"},
 		"root_update":                {Parent: "root", Usage: "update"},
 		"root_update_repo":           {Parent: "root_update", Usage: "repo"},
+		"root_update_workspace":      {Parent: "root_update", Usage: "workspace"},
 		"root_build":                 {Parent: "root", Usage: "build"},
 		"root_build_formula":         {Parent: "root_build", Usage: "formula"},
 		"root_upgrade":               {Parent: "root", Usage: "upgrade"},
 		"root_tutorial":              {Parent: "root", Usage: "tutorial"},
 		"root_metrics":               {Parent: "root", Usage: "metrics"},
+		"root_rename":                {Parent: "root", Usage: "rename"},
+		"root_rename_formula":        {Parent: "root_rename", Usage: "formula"},
 	}
 )
 

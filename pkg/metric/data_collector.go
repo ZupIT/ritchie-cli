@@ -21,6 +21,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -33,6 +34,8 @@ var (
 	_                Collector = DataCollectorManager{}
 	CommonsRepoAdded           = ""
 	RepoName                   = ""
+	regexCoreFlag              = regexp.MustCompile(`--docker|--local|--stdin|--version|--verbose|--default|--help`)
+	//regexFlag                  = regexp.MustCompile("--(.*)=")
 )
 
 type DataCollectorManager struct {
@@ -70,10 +73,11 @@ func (d DataCollectorManager) Collect(
 		CommonsRepoAdded:     CommonsRepoAdded,
 		CommandExecutionTime: commandExecutionTime,
 		FormulaRepo:          d.repoData(),
+		Flags:                flags(),
 	}
 
 	metric := APIData{
-		Id:         Id(metricID()),
+		Id:         Id(metricId()),
 		UserId:     userId,
 		Os:         runtime.GOOS,
 		RitVersion: ritVersion,
@@ -98,8 +102,31 @@ func (d DataCollectorManager) repoData() formula.Repo {
 	return formula.Repo{}
 }
 
-func metricID() string {
+func metricId() string {
 	args := os.Args
 	args[0] = "rit"
-	return strings.Join(args, "_")
+	var metricID []string
+	for _, element := range args {
+		if !strings.Contains(element, "--") {
+			metricID = append(metricID, element)
+		}
+	}
+	return strings.Join(metricID, "_")
+}
+
+func flags() []string {
+	args := os.Args
+	var flags []string
+	for _, element := range args {
+		switch {
+		case regexCoreFlag.MatchString(element):
+			element = strings.Replace(element, "--", "", -1)
+			flags = append(flags, element)
+			// Remove comment to keep input flags keys on datas
+			// case strings.Contains(element, "--"):
+			// 	flag := regexFlag.FindStringSubmatch(element)[1]
+			// 	flags = append(flags, flag)
+		}
+	}
+	return flags
 }
