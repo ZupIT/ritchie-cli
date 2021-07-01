@@ -316,7 +316,7 @@ func getDockerCmdBasedOnEngineVersion() string {
 	} else if engineMajorVersionInt <= 18 {
 		return dockerLegacyBinaryName
 	} else { // if 19.x.x
-		if engineMinorVersionInt >= 3 && enginePatchVersionInt >= 13 {
+		if engineMinorVersionInt > 3 || (engineMinorVersionInt == 3 && enginePatchVersionInt >= 13) {
 			return dockerModernBinaryName
 		} else {
 			return dockerLegacyBinaryName
