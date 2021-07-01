@@ -14,11 +14,9 @@ jobs:
         id: vars
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
       - name: Generate release branch on documentation
-        run: |
-          git clone https://${{ secrets.ACCESS_TOKEN }}@github.com/ZupIT/docs-ritchie.git
-          cd docs-ritchie/
-          git init
-          git checkout -b release-v${{ steps.vars.outputs.tag }}
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git push origin release-v${{ steps.vars.outputs.tag }}
+        uses: GuillaumeFalourd/create-other-repo-branch-action@main
+        with:
+          repository_owner: ZupIT
+          repository_name: docs-ritchie
+          new_branch_name: release-v${{ steps.vars.outputs.tag }}
+          access_token: ${{ secrets.ACCESS_TOKEN}}
