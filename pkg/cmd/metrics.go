@@ -97,7 +97,7 @@ func (m metricsCmd) runFlag(cmd *cobra.Command) (string, error) {
 
 func (m metricsCmd) runPrompt() (string, error) {
 	choose, err := m.input.List(
-		"You want to send anonymous data about the product, feature use, statistics and crash reports?",
+		"Do you want to send anonymous data about the product, feature use, statistics and crash reports?",
 		options,
 	)
 	if err != nil {
