@@ -175,9 +175,10 @@ func Test_RunFlag(t *testing.T) {
 			got, err := newMetrics.runFlag(metricsCmd)
 
 			if err != nil {
+				assert.Equal(t, err, tt.want)
+			} else {
 				assert.Equal(t, got, tt.choose)
 			}
-			assert.Equal(t, err, tt.want)
 
 		})
 	}
