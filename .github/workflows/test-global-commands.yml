@@ -17,6 +17,8 @@ on:
       - '**/cmd.go'
       - '**/init_test.go'
       - '**/init.go'
+      - '**/metrics.go'
+      - '**/metrics_test.go'
       - '**/root_test.go'
       - '**/root.go'
       - '**/set_formula_runner_test.go'
@@ -32,6 +34,8 @@ on:
       - '**/cmd.go'
       - '**/init_test.go'
       - '**/init.go'
+      - '**/metrics.go'
+      - '**/metrics_test.go'
       - '**/root_test.go'
       - '**/root.go'
       - '**/set_formula_runner_test.go'
@@ -99,6 +103,13 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
+        - name: RIT METRICS command (8)
+            uses: GuillaumeFalourd/test-cli-commands-action@v1
+            with:
+              command_line: rit metrics --metrics="yes"
+              assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+              expected_result: PASSED
+              specific_line: 1
 
   macos:
       runs-on: macos-latest
@@ -155,6 +166,13 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
+        - name: RIT METRICS command (8)
+            uses: GuillaumeFalourd/test-cli-commands-action@v1
+            with:
+              command_line: rit metrics --metrics="yes"
+              assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+              expected_result: PASSED
+              specific_line: 1
 
   windows:
       runs-on: windows-latest
@@ -212,3 +230,10 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
+        - name: RIT METRICS command (8)
+            uses: GuillaumeFalourd/test-cli-commands-action@v1
+            with:
+              command_line: ./rit.exe metrics --metrics="yes"
+              assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+              expected_result: PASSED
+              specific_line: 1
