@@ -17,14 +17,18 @@
 package docker
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
@@ -40,6 +44,8 @@ const (
 	loadConfigErrMsg = `Failed to load formula config file
 Try running rit update repo
 Config file path not found: %s`
+	dockerLegacyBinaryName = "docker"
+	dockerModernBinaryName = "com.docker.cli"
 )
 
 var (
@@ -55,6 +61,9 @@ var (
 	ErrInvalidVolume = errors.New(
 		"config.json file does not contain a valid volume to be mounted",
 	)
+
+	dockerVersionRegexp *regexp.Regexp
+	once sync.Once
 )
 
 var _ formula.PreRunner = PreRunManager{}
@@ -248,8 +257,69 @@ func validateVolumes(dockerVolumes []string) error {
 
 func getDockerCmd() string {
 	if runtime.GOOS == "linux" {
-		return "docker"
+		_, isRunningInWsl1 := os.LookupEnv("IS_WSL")
+		_, isRunningInWsl2 := os.LookupEnv("WSL_DISTRO_NAME")
+
+		if isRunningInWsl1 || isRunningInWsl2 {
+			return getDockerCmdBasedOnEngineVersion()
+		} else {
+			return dockerLegacyBinaryName
+		}
 	} else {
-		return "com.docker.cli"
+		return getDockerCmdBasedOnEngineVersion()
+	}
+}
+
+func getDockerEngineVersion() string {
+	once.Do(func() {
+		dockerVersionRegexp = regexp.MustCompile("[0-9]*\\.[0-9]*\\.[0-9]*")
+	})
+
+	cmd := exec.Command(dockerLegacyBinaryName, "--version")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+
+	if err == nil {
+		// we try invoking 'docker --version' with the legacy binary; if it fails, we can assume either Docker isn't
+		// installed or 'com.docker.cli' is the right binary; if it succeeds, we check the version instead of using
+		// 'docker' straight away because, according to previous testing, it seems some simple commands such as
+		// --version could function with some of the latest Docker Engine versions but 'com.docker.cli' is the only bin
+		// that works for actual interactions with containers and so on. in the future, we may perform more extensive
+		// testing and remove the elaborate regex and version checking if the invocation of 'docker --version' alone is
+		// a sufficient test to know which binary name to use.
+		return dockerVersionRegexp.FindString(out.String())
+	} else {
+		return ""
+	}
+}
+
+// starting with Docker Desktop 2.5.0 (engine 19.03.13), the 'docker' executable in Windows and MacOS
+// has been renamed to 'com.docker.cli'
+func getDockerCmdBasedOnEngineVersion() string {
+	engineVersion := getDockerEngineVersion()
+
+	if engineVersion == "" {
+		// ideally, we should not need a guard here; instead, we must not allow users to invoke the formula
+		// with the Docker runner in the first place, but that solution needs more planning
+		return dockerModernBinaryName
+	}
+
+	splitEngineVersion := strings.Split(engineVersion, ".")
+
+	engineMajorVersionInt, _ := strconv.Atoi(splitEngineVersion[0])
+	engineMinorVersionInt, _ := strconv.Atoi(splitEngineVersion[1])
+	enginePatchVersionInt, _ := strconv.Atoi(splitEngineVersion[2])
+
+	if engineMajorVersionInt >= 20 {
+		return dockerModernBinaryName
+	} else if engineMajorVersionInt <= 18 {
+		return dockerLegacyBinaryName
+	} else { // if 19.x.x
+		if engineMinorVersionInt >= 3 && enginePatchVersionInt >= 13 {
+			return dockerModernBinaryName
+		} else {
+			return dockerLegacyBinaryName
+		}
 	}
 }
