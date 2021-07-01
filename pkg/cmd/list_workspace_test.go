@@ -39,7 +39,7 @@ func TestListWorkspaceRunFunc(t *testing.T) {
 				WorkspaceLister: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{
-							"workspace1": "path/to/workspace1",
+							"workspace1": "/path/to/workspace1",
 						}, nil
 					},
 				},
@@ -52,8 +52,23 @@ func TestListWorkspaceRunFunc(t *testing.T) {
 				WorkspaceLister: WorkspaceAddListerCustomMock{
 					list: func() (formula.Workspaces, error) {
 						return formula.Workspaces{
-							"workspace1": "path/to/workspace1",
-							"workspace2": "path/to/workspace2",
+							"workspace1": "/path/to/workspace1",
+							"workspace2": "/path/to/workspace2",
+						}, nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Run with success with 1 workspace with path not found",
+			in: in{
+				WorkspaceLister: WorkspaceAddListerCustomMock{
+					list: func() (formula.Workspaces, error) {
+						return formula.Workspaces{
+							"workspace1": "/path/to/workspace1",
+							"workspace2": "/path/to/workspace2",
+							"workspace3": "/home/",
 						}, nil
 					},
 				},
