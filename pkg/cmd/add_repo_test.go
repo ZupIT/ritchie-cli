@@ -34,18 +34,12 @@ import (
 
 func TestAddRepoCmd(t *testing.T) {
 	someError := errors.New("some error")
-
-	gitRepo := new(mocks.GitRepositoryMock)
-	gitRepo.On("Zipball", mock.Anything, mock.Anything).Return(nil, nil)
-	gitRepo.On("Tags", mock.Anything).Return(git.Tags{git.Tag{Name: "1.0.0"}}, nil)
-	gitRepo.On("LatestTag", mock.Anything).Return(git.Tag{Name: "2.0.0"}, nil)
-
-	repoProviders := formula.NewRepoProviders()
-	repoProviders.Add("Github", formula.Git{Repos: gitRepo, NewRepoInfo: github.NewRepoInfo})
-	repoProviders.Add("GitLab", formula.Git{Repos: gitRepositoryWithoutTagsMock, NewRepoInfo: github.NewRepoInfo})
-	repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
-
-	repoList := repoProviders.List()
+	unauthorizedError := errors.New(`
+	permission error:
+	You must overwrite the current token (Github-add-repo) with command:
+		rit set credential
+	Or switch to a new environment with the command:
+		rit set env`)
 
 	repoTest := &formula.Repo{
 		Provider: "Github",
@@ -68,6 +62,8 @@ func TestAddRepoCmd(t *testing.T) {
 		}
 		return inputListMock
 	}
+
+	providers := []string{"Bitbucket", "GitLab", "Github"}
 
 	tests := []struct {
 		name   string
@@ -139,18 +135,19 @@ func TestAddRepoCmd(t *testing.T) {
 			want: someError,
 		},
 		{
+			name: "Fail when repo.Add return 401 err",
+			fields: fields{
+				repo:       returnOfRepoListerAdder{errAdd: someError, reposList: formula.Repos{}, errList: nil},
+				InputList:  []returnOfInputList{{response: "Github", err: nil}},
+				gitRepoTag: returnOfGitRepoTag{nil, errors.New("401 - Unauthorized")},
+			},
+			want: unauthorizedError,
+		},
+		{
 			name: "input bool error",
 			args: []string{},
 			fields: fields{
 				InputBool: returnOfInputBool{false, someError},
-			},
-			want: someError,
-		},
-		{
-			name: "input password error",
-			args: []string{},
-			fields: fields{
-				InputPassword: returnWithStringErr{"", someError},
 			},
 			want: someError,
 		},
@@ -249,7 +246,7 @@ func TestAddRepoCmd(t *testing.T) {
 			name:   "fail flags with wrong provider",
 			args:   []string{"--provider=github"},
 			fields: fields{},
-			want:   errors.New("please select a provider from " + strings.Join(repoList, ", ")),
+			want:   errors.New("please select a provider from " + strings.Join(providers, ", ")),
 		},
 		{
 			name:   "fail flags with empty name",
@@ -286,6 +283,16 @@ func TestAddRepoCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			fields := getFields(tt.fields)
 
+			gitRepo := new(mocks.GitRepositoryMock)
+			gitRepo.On("Zipball", mock.Anything, mock.Anything).Return(nil, nil)
+			gitRepo.On("Tags", mock.Anything).Return(fields.gitRepoTag.Tags, fields.gitRepoTag.error)
+			gitRepo.On("LatestTag", mock.Anything).Return(git.Tag{}, nil)
+
+			repoProviders := formula.NewRepoProviders()
+			repoProviders.Add("Github", formula.Git{Repos: gitRepo, NewRepoInfo: github.NewRepoInfo})
+			repoProviders.Add("GitLab", formula.Git{Repos: gitRepositoryWithoutTagsMock, NewRepoInfo: github.NewRepoInfo})
+			repoProviders.Add("Bitbucket", formula.Git{Repos: gitRepositoryErrorsMock, NewRepoInfo: github.NewRepoInfo})
+
 			detailMock := new(mocks.DetailManagerMock)
 			detailMock.On("LatestTag", mock.Anything).Return(fields.detailLatestTag)
 			inputURLMock := new(mocks.InputURLMock)
@@ -295,8 +302,6 @@ func TestAddRepoCmd(t *testing.T) {
 			inputListMock := addInputList(fields.InputList)
 			inputIntMock := new(mocks.InputIntMock)
 			inputIntMock.On("Int", mock.Anything, mock.Anything).Return(int64(0), nil)
-			inputPasswordMock := new(mocks.InputPasswordMock)
-			inputPasswordMock.On("Password", mock.Anything, mock.Anything).Return(fields.InputPassword.string, fields.InputPassword.error)
 			inputTextValidatorMock := new(mocks.InputTextValidatorMock)
 			inputTextValidatorMock.On("Text", mock.Anything, mock.Anything).Return(fields.InputTextValidator.string, nil)
 			tutorialFindMock := new(mocks.TutorialFindSetterMock)
@@ -304,12 +309,14 @@ func TestAddRepoCmd(t *testing.T) {
 			repoListerAdderMock := new(mocks.RepoManager)
 			repoListerAdderMock.On("Add", mock.Anything).Return(fields.repo.errAdd)
 			repoListerAdderMock.On("List").Return(fields.repo.reposList, fields.repo.errList)
+			credResolverMock := new(mocks.CredResolverMock)
+			credResolverMock.On("Resolve", mock.Anything).Return(fields.credResolver.string, fields.credResolver.error)
 
 			cmd := NewAddRepoCmd(
 				repoListerAdderMock,
 				repoProviders,
+				credResolverMock,
 				inputTextValidatorMock,
-				inputPasswordMock,
 				inputURLMock,
 				inputListMock,
 				inputBoolMock,
@@ -355,41 +362,49 @@ type returnOfRepoListerAdder struct {
 	reposList       formula.Repos
 }
 
+type returnOfGitRepoTag struct {
+	git.Tags
+	error
+}
+
 type fields struct {
 	repo               returnOfRepoListerAdder
 	InputTextValidator returnWithStringErr
-	InputPassword      returnWithStringErr
 	InputURL           returnWithStringErr
 	InputList          []returnOfInputList
 	InputBool          returnOfInputBool
 	stdin              string
 	detailLatestTag    string
 	tutorialStatus     returnWithStringErr
+	credResolver       returnWithStringErr
+	gitRepoTag         returnOfGitRepoTag
 }
 
 func getFields(testFields fields) fields {
 	fieldsNil := fields{
 		repo:               returnOfRepoListerAdder{},
 		InputTextValidator: returnWithStringErr{},
-		InputPassword:      returnWithStringErr{},
 		InputURL:           returnWithStringErr{},
 		InputBool:          returnOfInputBool{},
 		InputList:          []returnOfInputList{},
 		stdin:              "",
 		detailLatestTag:    "",
 		tutorialStatus:     returnWithStringErr{},
+		credResolver:       returnWithStringErr{},
+		gitRepoTag:         returnOfGitRepoTag{},
 	}
 
 	fields := fields{
 		repo:               returnOfRepoListerAdder{errAdd: nil, reposList: formula.Repos{}, errList: nil},
 		InputTextValidator: returnWithStringErr{"mocked text", nil},
-		InputPassword:      returnWithStringErr{"s3cr3t", nil},
 		InputURL:           returnWithStringErr{"http://localhost/mocked", nil},
 		InputBool:          returnOfInputBool{true, nil},
 		InputList:          []returnOfInputList{{response: "Github", err: nil}},
 		tutorialStatus:     returnWithStringErr{"disabled", nil},
 		stdin:              "",
 		detailLatestTag:    "",
+		credResolver:       returnWithStringErr{"token", nil},
+		gitRepoTag:         returnOfGitRepoTag{git.Tags{git.Tag{Name: "1.0.0"}}, nil},
 	}
 
 	if testFields.repo.reposList.Len() != fieldsNil.repo.reposList.Len() || testFields.repo.errAdd != fieldsNil.repo.errAdd || testFields.repo.errList != fieldsNil.repo.errList {
@@ -398,10 +413,6 @@ func getFields(testFields fields) fields {
 
 	if testFields.InputTextValidator != fieldsNil.InputTextValidator {
 		fields.InputTextValidator = testFields.InputTextValidator
-	}
-
-	if testFields.InputPassword != fieldsNil.InputPassword {
-		fields.InputPassword = testFields.InputPassword
 	}
 
 	if testFields.InputURL != fieldsNil.InputURL {
@@ -426,6 +437,14 @@ func getFields(testFields fields) fields {
 
 	if testFields.detailLatestTag != fieldsNil.detailLatestTag {
 		fields.detailLatestTag = testFields.detailLatestTag
+	}
+
+	if testFields.credResolver != fieldsNil.credResolver {
+		fields.credResolver = testFields.credResolver
+	}
+
+	if len(testFields.gitRepoTag.Tags) != len(fieldsNil.gitRepoTag.Tags) || testFields.gitRepoTag.error != fieldsNil.gitRepoTag.error {
+		fields.gitRepoTag = testFields.gitRepoTag
 	}
 
 	return fields
