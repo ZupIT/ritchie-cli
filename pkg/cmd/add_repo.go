@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/api"
+	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
@@ -39,6 +40,12 @@ const (
 	priorityFlagName = "priority"
 	tokenFlagName    = "token"
 	tagFlagName      = "tag"
+	permissionError  = `
+	permission error:
+	You must overwrite the current token (%s-add-repo) with command:
+		rit set credential
+	Or switch to a new environment with the command:
+		rit set env`
 )
 
 var ErrRepoNameNotEmpty = errors.New("the field repository name must not be empty")
@@ -85,8 +92,8 @@ var addRepoFlags = flags{
 type addRepoCmd struct {
 	repo          formula.RepositoryAddLister
 	repoProviders formula.RepoProviders
+	cred          credential.Resolver
 	prompt.InputTextValidator
-	prompt.InputPassword
 	prompt.InputURL
 	prompt.InputList
 	prompt.InputBool
@@ -99,8 +106,8 @@ type addRepoCmd struct {
 func NewAddRepoCmd(
 	repo formula.RepositoryAddLister,
 	repoProviders formula.RepoProviders,
+	resolver credential.Resolver,
 	inText prompt.InputTextValidator,
-	inPass prompt.InputPassword,
 	inURL prompt.InputURL,
 	inList prompt.InputList,
 	inBool prompt.InputBool,
@@ -117,10 +124,10 @@ func NewAddRepoCmd(
 		InputList:          inList,
 		InputBool:          inBool,
 		InputInt:           inInt,
-		InputPassword:      inPass,
 		tutorial:           rtf,
 		tree:               treeChecker,
 		detail:             rd,
+		cred:               resolver,
 	}
 	cmd := &cobra.Command{
 		Use:       "repo",
@@ -223,7 +230,7 @@ func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
 
 	var token string
 	if isPrivate {
-		token, err = ar.Password("Personal access tokens:")
+		token, err = ar.cred.Resolve("CREDENTIAL_" + provider + "-ADD-REPO_TOKEN")
 		if err != nil {
 			return formula.Repo{}, err
 		}
@@ -234,6 +241,10 @@ func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
 	gitRepoInfo := git.NewRepoInfo(url, token)
 	tags, err := git.Repos.Tags(gitRepoInfo)
 	if err != nil {
+		if strings.Contains(err.Error(), "401") {
+			errorString := fmt.Sprintf(permissionError, provider)
+			return formula.Repo{}, errors.New(errorString)
+		}
 		return formula.Repo{}, err
 	}
 
@@ -383,7 +394,7 @@ func (ar addRepoCmd) runStdin() CommandRunnerFunc {
 	}
 }
 
-func (ad addRepoCmd) repoNameValidator(text interface{}) error {
+func (ar addRepoCmd) repoNameValidator(text interface{}) error {
 	in := text.(string)
 	if in == "" {
 		return ErrRepoNameNotEmpty
