@@ -312,9 +312,14 @@ func (r *renameFormulaCmd) cleanWorkspace(
 			return formula.Workspace{}, fmt.Errorf(errFormulaInManyWS, result.OldFormulaCmd, len(workspacesOld))
 		}
 	} else {
-		for n, d := range workspacesOld {
-			wsCleaned.Name = n
-			wsCleaned.Dir = d
+		if wspaceName != "" {
+			wsCleaned.Name = strings.Title(wspaceName)
+			wsCleaned.Dir = workspacesOld[wspaceName]
+		} else {
+			for n, d := range workspacesOld {
+				wsCleaned.Name = n
+				wsCleaned.Dir = d
+			}
 		}
 	}
 
