@@ -312,7 +312,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				},
 			},
 			out: out{
-				want: errors.New("formula \"rit testing formula\" was found in 2 workspace. Please enter a value for the 'workspace' flag"),
+				want: errors.New("formula \"rit testing formula\" was found in 2 workspaces. Please enter a value for the 'workspace' flag"),
 			},
 		},
 		{
