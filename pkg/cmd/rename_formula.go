@@ -54,7 +54,7 @@ const (
 	errFormulaExists   = "formula %q already exists on this workspace = %q"
 	errFormulaInManyWS = "formula %q was found in %d workspaces. Please enter a value for the 'workspace' flag"
 	errInvalidWS       = "workspace %q was not found"
-	renameSuccessMsg   = "The formula was renamed with successfully"
+	renameSuccessMsg   = "The formula was successfully renamed"
 )
 
 var renameWorkspaceFlags = flags{
