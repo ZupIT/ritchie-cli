@@ -223,12 +223,10 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
-        - name: GetHash
-          run: Get-FileHash D:\a\ritchie-cli\ritchie-cli\rit.exe
         - name: RIT METRICS command (8)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: ./rit.exe metrics --metrics="yes"
+            command_line: ./rit.exe metrics --metricx="yes"
             assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
             expected_result: PASSED
             specific_line: 1
