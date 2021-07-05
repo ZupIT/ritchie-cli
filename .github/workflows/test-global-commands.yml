@@ -106,7 +106,7 @@ jobs:
         - name: RIT METRICS command (8)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit metrics --metrics="yes"
+            command_line: cat testdata/gha_workflows/global_workflow/assert8.txt
             assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
             expected_result: PASSED
             specific_line: 1
