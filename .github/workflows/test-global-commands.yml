@@ -55,10 +55,6 @@ jobs:
         - uses: actions/setup-node@v2
           with:
             node-version: '14'
-        - name: Cat metrics
-          run: |
-              cd $GITHUB_WORKSPACE
-              cat pkg/cmd/metrics.go
         - name: Create binary from branch
           run: |
             cd $GITHUB_WORKSPACE
