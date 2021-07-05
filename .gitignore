@@ -96,3 +96,5 @@ Temporary Items
 settings.xml
 /change.log
 /pkg-build/
+# Remove certificate
+packaging/windows/ZupIT.pfx
