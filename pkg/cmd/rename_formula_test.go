@@ -150,7 +150,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				approveOnConfirmation: true,
 			},
 			out: out{
-				want: errors.New("Formula \"rit testing other\" wasn't found in the workspaces"),
+				want: errors.New("formula \"rit testing other\" wasn't found in the workspaces"),
 			},
 		},
 		{
@@ -162,7 +162,7 @@ func TestRenameFormulaCmd(t *testing.T) {
 				approveOnConfirmation: true,
 			},
 			out: out{
-				want: errors.New("Formula \"rit testing formula\" already exists on this workspace = \"Default\""),
+				want: errors.New("formula \"rit testing formula\" already exists on this workspace = \"Default\""),
 			},
 		},
 		{
@@ -180,7 +180,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=rit testing new-formula",
 				},
-				approveOnConfirmation: true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "new-formula"),
@@ -195,7 +194,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=rit testing other",
 				},
-				approveOnConfirmation: true,
 			},
 			out: out{
 				formulaPathExpected: filepath.Join("testing", "other"),
@@ -210,7 +208,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=",
 					"--newName=rit testing formula new",
 				},
-				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("please provide a value for 'oldName'"),
@@ -223,7 +220,6 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=",
 				},
-				approveOnConfirmation: true,
 			},
 			out: out{
 				want: errors.New("please provide a value for 'newName'"),
@@ -236,10 +232,9 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing other",
 					"--newName=rit testing formula new",
 				},
-				approveOnConfirmation: true,
 			},
 			out: out{
-				want: errors.New("Formula \"rit testing other\" wasn't found in the workspaces"),
+				want: errors.New("formula \"rit testing other\" wasn't found in the workspaces"),
 			},
 		},
 		{
@@ -249,10 +244,9 @@ func TestRenameFormulaCmd(t *testing.T) {
 					"--oldName=rit testing formula",
 					"--newName=rit testing formula",
 				},
-				approveOnConfirmation: true,
 			},
 			out: out{
-				want: errors.New("Formula \"rit testing formula\" already exists on this workspace = \"Default\""),
+				want: errors.New("formula \"rit testing formula\" already exists on this workspace = \"Default\""),
 			},
 		},
 		{
@@ -293,6 +287,46 @@ func TestRenameFormulaCmd(t *testing.T) {
 				formulaPathExpected: filepath.Join("testing", "formulaCustom"),
 				formulaToBeCreated:  "root_testing_formulaCustom",
 				formulaToBeEmpty:    "root_testing_formula",
+			},
+		},
+		{
+			name: "err when invalid workspace flag",
+			in: in{
+				args: []string{
+					"--oldName=rit testing formula",
+					"--newName=rit testing other",
+					"--workspace=test",
+				},
+			},
+			out: out{
+				want: errors.New("workspace \"test\" was not found"),
+			},
+		},
+		{
+			name: "err when new formula exists in two workspaces and workspace flag is empty",
+			in: in{
+				customWorkspaceSelected: true,
+				args: []string{
+					"--oldName=rit testing formula",
+					"--newName=rit testing other",
+				},
+			},
+			out: out{
+				want: errors.New("formula \"rit testing formula\" was found in 2 workspaces. Please enter a value for the 'workspace' flag"),
+			},
+		},
+		{
+			name: "err when new formula exists in two workspaces and workspace flag is invalid",
+			in: in{
+				customWorkspaceSelected: true,
+				args: []string{
+					"--oldName=rit testing formula",
+					"--newName=rit testing other",
+					"--workspace=test",
+				},
+			},
+			out: out{
+				want: errors.New("workspace \"test\" was not found"),
 			},
 		},
 	}
