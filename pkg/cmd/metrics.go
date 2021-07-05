@@ -17,7 +17,7 @@ type metricsCmd struct {
 	input prompt.InputList
 }
 
-var metricsFlagName = "metricx"
+var metricsFlagName = "metrics"
 var metricsFlags = flags{
 	{
 		name:        metricsFlagName,
