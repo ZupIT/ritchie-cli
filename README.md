@@ -110,6 +110,8 @@ rit demo hello-world --docker
 
 - [Guidelines](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md)
 
+- [Security](https://github.com/ZupIT/ritchie-cli/blob/master/SECURITY.md)
+
 - [Developer Guide](https://github.com/ZupIT/ritchie-cli/blob/master/DEVELOPER_GUIDE.md)
 
 - [Documentation repository](https://github.com/ZupIT/docs-ritchie)
