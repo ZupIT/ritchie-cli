@@ -107,7 +107,7 @@ rit demo hello-world --docker
 ```
 ### Cheat Sheet 
 
-![Cheat Sheet](/shared/cheatsheet.PNG)
+<img class="special-img-class" src="/docs/img/cheatsheet.png"  alt="Ritchie CLI Cheat Sheet"/>
 
 ## 🤝 Contributing to Ritchie
 
