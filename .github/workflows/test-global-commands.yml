@@ -99,11 +99,25 @@ jobs:
         - name: RIT METRICS command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: cat testdata/gha_workflows/global_workflow/assert8.txt
+            command_line: rit metrics --metrics="yes"
             assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT UPGRADE command (8)
+        - name: RIT METRICS command (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit metrics --metrics="no"
+            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT METRICS command (9)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit metrics --metrics="invalid"
+            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT UPGRADE command (10)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: sudo rit upgrade
@@ -166,7 +180,21 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT UPGRADE command (8)
+        - name: RIT METRICS command (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit metrics --metrics="no"
+            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT METRICS command (9)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit metrics --metrics="invalid"
+            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT UPGRADE command (10)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: sudo rit upgrade
