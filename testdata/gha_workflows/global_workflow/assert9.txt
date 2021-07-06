@@ -1,0 +1,1 @@
+You are no longer sending anonymous metrics.
