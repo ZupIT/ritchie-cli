@@ -105,6 +105,9 @@ rit demo hello-world
 ```bash
 rit demo hello-world --docker
 ```
+### Cheat Sheet 
+
+![Cheat Sheet](/shared/cheatsheet.PNG)
 
 ## 🤝 Contributing to Ritchie
 
