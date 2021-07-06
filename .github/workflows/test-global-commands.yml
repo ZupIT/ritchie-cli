@@ -96,18 +96,18 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT UPGRADE command (7)
-          uses: GuillaumeFalourd/test-cli-commands-action@v1
-          with:
-            command_line: sudo rit upgrade
-            assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
-            expected_result: PASSED
-            specific_line: 1
-        - name: RIT METRICS command (8)
+        - name: RIT METRICS command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: cat testdata/gha_workflows/global_workflow/assert8.txt
             assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT UPGRADE command (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: sudo rit upgrade
+            assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
 
@@ -159,7 +159,14 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT UPGRADE command (7)
+        - name: RIT METRICS command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit metrics --metrics="yes"
+            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT UPGRADE command (8)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: sudo rit upgrade
@@ -216,17 +223,17 @@ jobs:
             assert_file_path: testdata/gha_workflows/global_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT UPGRADE command (7)
-          uses: GuillaumeFalourd/test-cli-commands-action@v1
-          with:
-            command_line: ./rit.exe upgrade
-            assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
-            expected_result: PASSED
-            specific_line: 1
-        - name: RIT METRICS command (8)
+        - name: RIT METRICS command (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: ./rit.exe metrics --metrics="yes"
             assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            expected_result: PASSED
+            specific_line: 1
+        - name: RIT UPGRADE command (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe upgrade
+            assert_file_path: testdata/gha_workflows/global_workflow/assert7.txt
             expected_result: PASSED
             specific_line: 1
