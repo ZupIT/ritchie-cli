@@ -114,7 +114,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit metrics --metrics="invalid"
-            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/assert10.txt
             expected_result: PASSED
             specific_line: 1
         - name: RIT UPGRADE command (10)
@@ -191,7 +191,7 @@ jobs:
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
             command_line: rit metrics --metrics="invalid"
-            assert_file_path: testdata/gha_workflows/global_workflow/assert8.txt
+            assert_file_path: testdata/gha_workflows/global_workflow/assert10.txt
             expected_result: PASSED
             specific_line: 1
         - name: RIT UPGRADE command (10)
