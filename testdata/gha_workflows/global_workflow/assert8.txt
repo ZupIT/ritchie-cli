@@ -1,2 +1,1 @@
 You are now sending anonymous metrics. Thank you!
-You are no longer sending anonymous metrics.
