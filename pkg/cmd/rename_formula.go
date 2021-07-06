@@ -50,10 +50,11 @@ const (
 
 	questionConfirmation = "Are you sure you want to rename the formula from %q to %q?"
 
-	errNonExistFormula = "Formula %q wasn't found in the workspaces"
-	errFormulaExists   = "Formula %q already exists on this workspace = %q"
-
-	renameSuccessMsg = "The formula was renamed with success"
+	errNonExistFormula = "formula %q wasn't found in the workspaces"
+	errFormulaExists   = "formula %q already exists on this workspace = %q"
+	errFormulaInManyWS = "formula %q was found in %d workspaces. Please enter a value for the 'workspace' flag"
+	errInvalidWS       = "workspace %q was not found"
+	renameSuccessMsg   = "The formula was successfully renamed"
 )
 
 var renameWorkspaceFlags = flags{
@@ -68,6 +69,12 @@ var renameWorkspaceFlags = flags{
 		kind:        reflect.String,
 		defValue:    "",
 		description: newFormulaFlagDesc,
+	},
+	{
+		name:        workspaceFlagName,
+		kind:        reflect.String,
+		defValue:    "",
+		description: workspaceFlagDesc,
 	},
 }
 
@@ -143,7 +150,8 @@ func (r *renameFormulaCmd) runFormula() CommandRunnerFunc {
 		wsOldFormula := r.getWorkspace(result.OldFormulaCmd)
 		wsNewFormula := r.getWorkspace(result.NewFormulaCmd)
 
-		ws, err := r.cleanWorkspace(wsOldFormula, wsNewFormula, result)
+		wspaceName := result.Workspace.Name
+		ws, err := r.cleanWorkspace(wsOldFormula, wsNewFormula, result, cmd, wspaceName)
 		if err != nil {
 			return err
 		}
@@ -191,6 +199,12 @@ func (r *renameFormulaCmd) resolveFlags(cmd *cobra.Command) (formula.Rename, err
 		return result, errors.New(missingFlagText(newFormulaFlagName))
 	}
 	result.NewFormulaCmd = newFormula
+
+	workspaceName, err := cmd.Flags().GetString(workspaceFlagName)
+	if err != nil {
+		return result, err
+	}
+	result.Workspace.Name = workspaceName
 
 	return result, nil
 }
@@ -261,6 +275,8 @@ func (r *renameFormulaCmd) getWorkspace(cmd string) formula.Workspaces {
 func (r *renameFormulaCmd) cleanWorkspace(
 	workspacesOld, workspacesNew formula.Workspaces,
 	result formula.Rename,
+	cmd *cobra.Command,
+	wspaceName string,
 ) (formula.Workspace, error) {
 	wsCleaned := formula.Workspace{}
 
@@ -274,20 +290,36 @@ func (r *renameFormulaCmd) cleanWorkspace(
 			items = append(items, kv)
 		}
 
-		question := fmt.Sprintf("We found the old formula %q in %d workspaces. Select the workspace:",
-			result.OldFormulaCmd, len(workspacesOld),
-		)
-		selected, err := r.inList.List(question, items)
-		if err != nil {
-			return formula.Workspace{}, err
+		var name string
+		if !isInputFlag(cmd) {
+			question := fmt.Sprintf("We found the old formula %q in %d workspaces. Select the workspace:",
+				result.OldFormulaCmd, len(workspacesOld),
+			)
+			selected, err := r.inList.List(question, items)
+			if err != nil {
+				return formula.Workspace{}, err
+			}
+			name = strings.Split(selected, " (")[0]
+		} else {
+			name = wspaceName
 		}
-		name := strings.Split(selected, " (")[0]
-		wsCleaned.Name = strings.Title(name)
-		wsCleaned.Dir = workspacesOld[name]
+
+		if name != "" {
+			name = strings.Title(name)
+			wsCleaned.Name = name
+			wsCleaned.Dir = workspacesOld[name]
+		} else {
+			return formula.Workspace{}, fmt.Errorf(errFormulaInManyWS, result.OldFormulaCmd, len(workspacesOld))
+		}
 	} else {
-		for n, d := range workspacesOld {
-			wsCleaned.Name = n
-			wsCleaned.Dir = d
+		if wspaceName != "" {
+			wsCleaned.Name = strings.Title(wspaceName)
+			wsCleaned.Dir = workspacesOld[wspaceName]
+		} else {
+			for n, d := range workspacesOld {
+				wsCleaned.Name = n
+				wsCleaned.Dir = d
+			}
 		}
 	}
 
@@ -295,6 +327,10 @@ func (r *renameFormulaCmd) cleanWorkspace(
 		if n == wsCleaned.Name {
 			return formula.Workspace{}, fmt.Errorf(errFormulaExists, result.NewFormulaCmd, wsCleaned.Name)
 		}
+	}
+
+	if wsCleaned.Dir == "" {
+		return formula.Workspace{}, fmt.Errorf(errInvalidWS, wspaceName)
 	}
 
 	return wsCleaned, nil

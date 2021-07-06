@@ -63,7 +63,7 @@ var (
 	)
 
 	dockerVersionRegexp *regexp.Regexp
-	once sync.Once
+	once                sync.Once
 )
 
 var _ formula.PreRunner = PreRunManager{}
@@ -272,7 +272,7 @@ func getDockerCmd() string {
 
 func getDockerEngineVersion() string {
 	once.Do(func() {
-		dockerVersionRegexp = regexp.MustCompile("[0-9]*\\.[0-9]*\\.[0-9]*")
+		dockerVersionRegexp = regexp.MustCompile(`[0-9]*\\.[0-9]*\\.[0-9]*`)
 	})
 
 	cmd := exec.Command(dockerLegacyBinaryName, "--version")

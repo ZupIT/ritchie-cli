@@ -44,6 +44,7 @@ const (
 	questionSelectFormulaGroup = "Select a formula or group: "
 	optionOtherFormula         = "Another formula"
 	workspaceFlagName          = "workspace"
+	workspaceFlagDesc          = "workspace name (e.g.: Default or default)"
 	formulaFlagName            = "formula"
 )
 
@@ -82,7 +83,7 @@ var deleteFormulas = flags{
 		name:        workspaceFlagName,
 		kind:        reflect.String,
 		defValue:    "",
-		description: "workspace name (e.g.: Default or default)",
+		description: workspaceFlagDesc,
 	},
 	{
 		name:        formulaFlagName,
