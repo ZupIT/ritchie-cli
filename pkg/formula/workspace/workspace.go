@@ -153,6 +153,17 @@ func (m Manager) Update(workspace formula.Workspace) error {
 
 	workspaceLocalName := repoutil.LocalName(workspace.Name)
 	workflowRitFolderPath := filepath.Join(m.ritchieHome, formula.ReposDir, workspaceLocalName.String())
+
+	err = m.Delete(workspace)
+	if err != nil {
+		return err
+	}
+
+	err = m.Add(workspace)
+	if err != nil {
+		return err
+	}
+
 	treeData, err := m.tree.Generate(workflowRitFolderPath)
 	if err != nil {
 		return err
