@@ -1,0 +1,15 @@
+name: SecurityPipeline
+
+on: [push]
+
+jobs:
+  horusec-security:
+    name: horusec-security
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Running Horusec Security
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
+        horusec start -p="./" -e="true"       
