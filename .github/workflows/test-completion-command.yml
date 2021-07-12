@@ -29,8 +29,8 @@ on:
       - '**/tutorial.go'
       - '**/upgrade_test.go'
       - '**/upgrade.go'
-      - 'testdata/gha_workflows/global_workflow/**'
-      - '**/test-global-commands.yml'
+      - 'testdata/gha_workflows/completion_workflow/**'
+      - '**/test-completion-command.yml'
   pull_request:
     paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
       - '**/autocomplete.go'
@@ -48,8 +48,8 @@ on:
       - '**/tutorial.go'
       - '**/upgrade_test.go'
       - '**/upgrade.go'
-      - 'testdata/gha_workflows/global_workflow/**'
-      - '**/test-global-commands.yml'
+      - 'testdata/gha_workflows/completion_workflow/**'
+      - '**/test-completion-command.yml'
 
 jobs:
   ubuntu:
