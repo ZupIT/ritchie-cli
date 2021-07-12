@@ -55,7 +55,7 @@ jobs:
           make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
           rit init --sendMetrics="no" --addCommons="no" --runType="local"
       - name: RIT COMPLETION command(1)
-
+        run: ls
   windows:
     runs-on: windows-latest
     steps:
