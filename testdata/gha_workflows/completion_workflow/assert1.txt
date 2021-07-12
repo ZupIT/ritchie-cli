@@ -1,0 +1,225 @@
+using namespace System.Management.Automation
+using namespace System.Management.Automation.Language
+Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
+    param($wordToComplete, $commandAst, $cursorPosition)
+    $commandElements = $commandAst.CommandElements
+    $command = @(
+        'rit'
+        for ($i = 1; $i -lt $commandElements.Count; $i++) {
+            $element = $commandElements[$i]
+            if ($element -isnot [StringConstantExpressionAst] -or
+                $element.StringConstantType -ne [StringConstantType]::BareWord -or
+                $element.Value.StartsWith('-')) {
+                break
+            }
+            $element.Value
+        }
+    ) -join ';'
+    $completions = @(switch ($command) {
+        'rit' {
+            [CompletionResult]::new('--stdin', 'stdin', [CompletionResultType]::ParameterName, 'input by stdin')
+            [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add repositories and workspaces')
+            [CompletionResult]::new('build', 'build', [CompletionResultType]::ParameterValue, 'Build formulas')
+            [CompletionResult]::new('completion', 'completion', [CompletionResultType]::ParameterValue, 'Add autocomplete for terminal (zsh, bash, fish, powershell)')
+            [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Create formulas')
+            [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'Delete env, repositories, formulas, workspaces and credentials')
+            [CompletionResult]::new('help', 'help', [CompletionResultType]::ParameterValue, 'Help about any command')
+            [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize rit configuration')
+            [CompletionResult]::new('list', 'list', [CompletionResultType]::ParameterValue, 'List repositories, credentials, workspaces, formulas')
+            [CompletionResult]::new('metrics', 'metrics', [CompletionResultType]::ParameterValue, 'Turn metrics on and off')
+            [CompletionResult]::new('rename', 'rename', [CompletionResultType]::ParameterValue, 'Rename formulas')
+            [CompletionResult]::new('set', 'set', [CompletionResultType]::ParameterValue, 'Set envs, credentials, repositories priorities and formulas runner defaults.')
+            [CompletionResult]::new('show', 'show', [CompletionResultType]::ParameterValue, 'Show env and formula-runner default')
+            [CompletionResult]::new('tutorial', 'tutorial', [CompletionResultType]::ParameterValue, 'Enable or disable the tutorial')
+            [CompletionResult]::new('update', 'update', [CompletionResultType]::ParameterValue, 'Update repositories')
+            [CompletionResult]::new('upgrade', 'upgrade', [CompletionResultType]::ParameterValue, 'Update rit version')
+            break
+        }
+        'rit;add' {
+            [CompletionResult]::new('repo', 'repo', [CompletionResultType]::ParameterValue, 'Add a repository')
+            [CompletionResult]::new('workspace', 'workspace', [CompletionResultType]::ParameterValue, 'Add new workspace')
+            break
+        }
+        'rit;add;repo' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'repository name')
+            [CompletionResult]::new('--priority', 'priority', [CompletionResultType]::ParameterName, 'repository priority (0 is highest)')
+            [CompletionResult]::new('--provider', 'provider', [CompletionResultType]::ParameterName, 'provider name (Github|Gitlab|Bitbucket)')
+            [CompletionResult]::new('--repoUrl', 'repoUrl', [CompletionResultType]::ParameterName, 'repository url')
+            [CompletionResult]::new('--tag', 'tag', [CompletionResultType]::ParameterName, 'repository tag version')
+            [CompletionResult]::new('--token', 'token', [CompletionResultType]::ParameterName, 'access token')
+            break
+        }
+        'rit;add;workspace' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Workspace name')
+            [CompletionResult]::new('--path', 'path', [CompletionResultType]::ParameterName, 'Workspace path')
+            break
+        }
+        'rit;build' {
+            [CompletionResult]::new('formula', 'formula', [CompletionResultType]::ParameterValue, '')
+            break
+        }
+        'rit;build;formula' {
+            break
+        }
+        'rit;completion' {
+            [CompletionResult]::new('--stdin', 'stdin', [CompletionResultType]::ParameterName, 'input by stdin')
+            [CompletionResult]::new('bash', 'bash', [CompletionResultType]::ParameterValue, 'Add bash autocomplete for terminal, --help to know how to use')
+            [CompletionResult]::new('fish', 'fish', [CompletionResultType]::ParameterValue, 'Add fish autocomplete for terminal, --help to know how to use')
+            [CompletionResult]::new('powershell', 'powershell', [CompletionResultType]::ParameterValue, 'Add powerShell autocomplete for terminal, --help to know how to use')
+            [CompletionResult]::new('zsh', 'zsh', [CompletionResultType]::ParameterValue, 'Add zsh autocomplete for terminal, --help to know how to use')
+            break
+        }
+        'rit;completion;bash' {
+            break
+        }
+        'rit;completion;fish' {
+            break
+        }
+        'rit;completion;powershell' {
+            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'help for powershell')
+            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'help for powershell')
+            [CompletionResult]::new('--stdin', 'stdin', [CompletionResultType]::ParameterName, 'input by stdin')
+            break
+        }
+        'rit;completion;zsh' {
+            break
+        }
+        'rit;create' {
+            [CompletionResult]::new('formula', 'formula', [CompletionResultType]::ParameterValue, 'Create a new formula')
+            break
+        }
+        'rit;create;formula' {
+            break
+        }
+        'rit;delete' {
+            [CompletionResult]::new('context', 'context', [CompletionResultType]::ParameterValue, '')
+            [CompletionResult]::new('credential', 'credential', [CompletionResultType]::ParameterValue, 'Delete credential')
+            [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'Delete env for credentials')
+            [CompletionResult]::new('formula', 'formula', [CompletionResultType]::ParameterValue, 'Delete specific formula')
+            [CompletionResult]::new('repo', 'repo', [CompletionResultType]::ParameterValue, 'Delete a repository')
+            [CompletionResult]::new('workspace', 'workspace', [CompletionResultType]::ParameterValue, 'Delete a workspace')
+            break
+        }
+        'rit;delete;context' {
+            break
+        }
+        'rit;delete;credential' {
+            [CompletionResult]::new('--provider', 'provider', [CompletionResultType]::ParameterName, 'Provider name to delete')
+            break
+        }
+        'rit;delete;env' {
+            [CompletionResult]::new('--env', 'env', [CompletionResultType]::ParameterName, 'Env name to delete')
+            break
+        }
+        'rit;delete;formula' {
+            break
+        }
+        'rit;delete;repo' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Repository name to delete')
+            break
+        }
+        'rit;delete;workspace' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'workspace name')
+            break
+        }
+        'rit;help' {
+            break
+        }
+        'rit;init' {
+            break
+        }
+        'rit;list' {
+            [CompletionResult]::new('credential', 'credential', [CompletionResultType]::ParameterValue, 'List credentials fields and part of values')
+            [CompletionResult]::new('formula', 'formula', [CompletionResultType]::ParameterValue, 'Show a list with available formulas from a specific repository')
+            [CompletionResult]::new('repo', 'repo', [CompletionResultType]::ParameterValue, 'Show a list with all your available repositories')
+            [CompletionResult]::new('workspace', 'workspace', [CompletionResultType]::ParameterValue, 'Show a list with all your available workspaces')
+            break
+        }
+        'rit;list;credential' {
+            break
+        }
+        'rit;list;formula' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'Repository name to list formulas, use ''ALL'' to list formulas from all repositories.')
+            break
+        }
+        'rit;list;repo' {
+            break
+        }
+        'rit;list;workspace' {
+            break
+        }
+        'rit;metrics' {
+            break
+        }
+        'rit;rename' {
+            [CompletionResult]::new('formula', 'formula', [CompletionResultType]::ParameterValue, 'Rename a formula')
+            break
+        }
+        'rit;rename;formula' {
+            [CompletionResult]::new('--newName', 'newName', [CompletionResultType]::ParameterName, 'New name of formula to rename')
+            [CompletionResult]::new('--oldName', 'oldName', [CompletionResultType]::ParameterName, 'Old name of formula to rename')
+            break
+        }
+        'rit;set' {
+            [CompletionResult]::new('context', 'context', [CompletionResultType]::ParameterValue, '')
+            [CompletionResult]::new('credential', 'credential', [CompletionResultType]::ParameterValue, 'Set credential')
+            [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'Set env')
+            [CompletionResult]::new('formula-runner', 'formula-runner', [CompletionResultType]::ParameterValue, 'Set the default formula runner')
+            [CompletionResult]::new('repo-priority', 'repo-priority', [CompletionResultType]::ParameterValue, 'Set a repository priority')
+            break
+        }
+        'rit;set;context' {
+            break
+        }
+        'rit;set;credential' {
+            [CompletionResult]::new('--fields', 'fields', [CompletionResultType]::ParameterName, 'comma separated list of field names')
+            [CompletionResult]::new('--provider', 'provider', [CompletionResultType]::ParameterName, 'provider name (i.e.: github)')
+            [CompletionResult]::new('--values', 'values', [CompletionResultType]::ParameterName, 'comma separated list of field values')
+            break
+        }
+        'rit;set;env' {
+            [CompletionResult]::new('--env', 'env', [CompletionResultType]::ParameterName, 'Env name to set')
+            break
+        }
+        'rit;set;formula-runner' {
+            [CompletionResult]::new('--runner', 'runner', [CompletionResultType]::ParameterName, 'runner name (local|docker)')
+            break
+        }
+        'rit;set;repo-priority' {
+            break
+        }
+        'rit;show' {
+            [CompletionResult]::new('context', 'context', [CompletionResultType]::ParameterValue, '')
+            [CompletionResult]::new('env', 'env', [CompletionResultType]::ParameterValue, 'Show current env')
+            [CompletionResult]::new('formula-runner', 'formula-runner', [CompletionResultType]::ParameterValue, 'Show the default formula runner')
+            break
+        }
+        'rit;show;context' {
+            break
+        }
+        'rit;show;env' {
+            break
+        }
+        'rit;show;formula-runner' {
+            break
+        }
+        'rit;tutorial' {
+            [CompletionResult]::new('--enabled', 'enabled', [CompletionResultType]::ParameterName, 'enable the tutorial')
+            break
+        }
+        'rit;update' {
+            [CompletionResult]::new('repo', 'repo', [CompletionResultType]::ParameterValue, 'Update a repository.')
+            break
+        }
+        'rit;update;repo' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'repository name')
+            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'repository version')
+            break
+        }
+        'rit;upgrade' {
+            break
+        }
+    })
+    $completions.Where{ $_.CompletionText -like "$wordToComplete*" } |
+        Sort-Object -Property ListItemText
+}
