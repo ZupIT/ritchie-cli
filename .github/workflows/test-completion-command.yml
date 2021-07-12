@@ -85,6 +85,10 @@ jobs:
           command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
           assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
           expected_result: PASSED
+      - name: list workspaces
+        run: |
+          ./rit.exe list workspace
+          ./rit.exe list formula
       - name: RIT COMPLETION command(2)
         uses: GuillaumeFalourd/test-cli-commands-action@v1
         with:
