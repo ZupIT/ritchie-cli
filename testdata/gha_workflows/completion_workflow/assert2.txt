@@ -1,0 +1,418 @@
+#!/bin/bash
+
+_delete_env()
+{
+    last_command="env"
+
+    commands=()
+
+}
+_root_metrics()
+{
+    last_command="metrics"
+
+    commands=()
+
+}
+_root_init()
+{
+    last_command="init"
+
+    commands=()
+
+}
+_create_formula()
+{
+    last_command="formula"
+
+    commands=()
+
+}
+_set_formula-runner()
+{
+    last_command="formula-runner"
+
+    commands=()
+
+}
+_delete_formula()
+{
+    last_command="formula"
+
+    commands=()
+
+}
+_list_credential()
+{
+    last_command="credential"
+
+    commands=()
+
+}
+_set_repo-priority()
+{
+    last_command="repo-priority"
+
+    commands=()
+
+}
+_add_workspace()
+{
+    last_command="workspace"
+
+    commands=()
+
+}
+_update_repo()
+{
+    last_command="repo"
+
+    commands=()
+
+}
+_delete_credential()
+{
+    last_command="credential"
+
+    commands=()
+
+}
+_delete_workspace()
+{
+    last_command="workspace"
+
+    commands=()
+
+}
+_root_upgrade()
+{
+    last_command="upgrade"
+
+    commands=()
+
+}
+_build_formula()
+{
+    last_command="formula"
+
+    commands=()
+
+}
+_root_list()
+{
+    last_command="list"
+
+    commands=()
+    commands+=("formula")
+    commands+=("workspace")
+    commands+=("credential")
+    commands+=("repo")
+
+}
+_list_formula()
+{
+    last_command="formula"
+
+    commands=()
+
+}
+_delete_repo()
+{
+    last_command="repo"
+
+    commands=()
+
+}
+_root_tutorial()
+{
+    last_command="tutorial"
+
+    commands=()
+
+}
+_list_workspace()
+{
+    last_command="workspace"
+
+    commands=()
+
+}
+_update_workspace()
+{
+    last_command="workspace"
+
+    commands=()
+
+}
+_root_build()
+{
+    last_command="build"
+
+    commands=()
+    commands+=("formula")
+
+}
+_completion_powershell()
+{
+    last_command="powershell"
+
+    commands=()
+
+}
+_show_env()
+{
+    last_command="env"
+
+    commands=()
+
+}
+_rit_root()
+{
+    last_command="root"
+
+    commands=()
+    commands+=("completion")
+    commands+=("create")
+    commands+=("list")
+    commands+=("set")
+    commands+=("show")
+    commands+=("add")
+    commands+=("metrics")
+    commands+=("upgrade")
+    commands+=("update")
+    commands+=("tutorial")
+    commands+=("build")
+    commands+=("init")
+    commands+=("delete")
+    commands+=("help")
+    commands+=("rename")
+
+}
+_completion_fish()
+{
+    last_command="fish"
+
+    commands=()
+
+}
+_root_set()
+{
+    last_command="set"
+
+    commands=()
+    commands+=("formula-runner")
+    commands+=("repo-priority")
+    commands+=("credential")
+    commands+=("env")
+
+}
+_set_credential()
+{
+    last_command="credential"
+
+    commands=()
+
+}
+_set_env()
+{
+    last_command="env"
+
+    commands=()
+
+}
+_root_add()
+{
+    last_command="add"
+
+    commands=()
+    commands+=("repo")
+    commands+=("workspace")
+
+}
+_root_delete()
+{
+    last_command="delete"
+
+    commands=()
+    commands+=("env")
+    commands+=("credential")
+    commands+=("workspace")
+    commands+=("repo")
+    commands+=("formula")
+
+}
+_root_help()
+{
+    last_command="help"
+
+    commands=()
+
+}
+_root_completion()
+{
+    last_command="completion"
+
+    commands=()
+    commands+=("fish")
+    commands+=("zsh")
+    commands+=("bash")
+    commands+=("powershell")
+
+}
+_completion_zsh()
+{
+    last_command="zsh"
+
+    commands=()
+
+}
+_root_show()
+{
+    last_command="show"
+
+    commands=()
+    commands+=("formula-runner")
+    commands+=("env")
+
+}
+_show_formula-runner()
+{
+    last_command="formula-runner"
+
+    commands=()
+
+}
+_list_repo()
+{
+    last_command="repo"
+
+    commands=()
+
+}
+_root_rename()
+{
+    last_command="rename"
+
+    commands=()
+    commands+=("formula")
+
+}
+_root_update()
+{
+    last_command="update"
+
+    commands=()
+    commands+=("workspace")
+    commands+=("repo")
+
+}
+_root_create()
+{
+    last_command="create"
+
+    commands=()
+    commands+=("formula")
+
+}
+_completion_bash()
+{
+    last_command="bash"
+
+    commands=()
+
+}
+_add_repo()
+{
+    last_command="repo"
+
+    commands=()
+
+}
+_rename_formula()
+{
+    last_command="formula"
+
+    commands=()
+
+}
+
+
+__rit_init_completion()
+{
+    COMPREPLY=()
+    _get_comp_words_by_ref "$@" cur prev words cword
+}
+
+__rit_index_of_word()
+{
+    local w word=$1
+    shift
+    index=0
+    for w in "$@"; do
+        [[ $w = "$word" ]] && return
+        index=$((index+1))
+    done
+    index=-1
+}
+
+__rit_contains_word()
+{
+    local w word=$1; shift
+    for w in "$@"; do
+        [[ $w = "$word" ]] && return
+    done
+    return 1
+}
+
+__rit_handle_command()
+{
+
+    local next_command
+    if [[ -n ${last_command} ]]; then
+        next_command="_${last_command}_${words[c]//:/__}"
+    else
+        if [[ $c -eq 0 ]]; then
+            next_command="_rit_root"
+        else
+            next_command="_${words[c]//:/__}"
+        fi
+    fi
+    c=$((c+1))
+    declare -F "$next_command" >/dev/null && $next_command
+}
+
+
+__rit_handle_reply()
+{
+    local completions
+    completions=("${commands[@]}")
+    COMPREPLY=( $(compgen -W "${completions[*]}" -- "$cur") )
+
+}
+
+__rit_handle_word()
+{
+    if [[ $c -ge $cword ]]; then
+        __rit_handle_reply
+        return
+    fi
+    if __rit_contains_word "${words[c]}" "${commands[@]}"; then
+        __rit_handle_command
+        fi
+
+    __rit_handle_word
+}
+
+__start_rit()
+{
+    local cur prev words cword
+    __rit_init_completion -n "=" || return
+
+    local c=0
+    local commands=("rit")
+    local last_command
+
+    __rit_handle_word
+}
+
+complete -F __start_rit rit
