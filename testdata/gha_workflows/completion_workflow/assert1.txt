@@ -89,6 +89,9 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
             break
         }
         'rit;create;formula' {
+            [CompletionResult]::new('--language', 'language', [CompletionResultType]::ParameterName, 'Select formula''s language (i.e: go, java, python [...])')
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'You must create your command based in this example [rit group verb noun]')
+            [CompletionResult]::new('--workspace', 'workspace', [CompletionResultType]::ParameterName, 'Provide workspace name')
             break
         }
         'rit;delete' {
@@ -112,6 +115,8 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
             break
         }
         'rit;delete;formula' {
+            [CompletionResult]::new('--formula', 'formula', [CompletionResultType]::ParameterName, 'formula to remove (e.g.: rit test delete)')
+            [CompletionResult]::new('--workspace', 'workspace', [CompletionResultType]::ParameterName, 'workspace name (e.g.: Default or default)')
             break
         }
         'rit;delete;repo' {
@@ -126,6 +131,9 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
             break
         }
         'rit;init' {
+            [CompletionResult]::new('--addCommons', 'addCommons', [CompletionResultType]::ParameterName, 'Do you want to download the commons repository? (ie: yes, no)')
+            [CompletionResult]::new('--runType', 'runType', [CompletionResultType]::ParameterName, 'Which default runner do you want to use? (ie: local, docker)')
+            [CompletionResult]::new('--sendMetrics', 'sendMetrics', [CompletionResultType]::ParameterName, 'Do you accept to submit anonymous metrics? (ie: yes, no)')
             break
         }
         'rit;list' {
@@ -149,6 +157,7 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
             break
         }
         'rit;metrics' {
+            [CompletionResult]::new('--metrics', 'metrics', [CompletionResultType]::ParameterName, '')
             break
         }
         'rit;rename' {
@@ -158,6 +167,7 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
         'rit;rename;formula' {
             [CompletionResult]::new('--newName', 'newName', [CompletionResultType]::ParameterName, 'New name of formula to rename')
             [CompletionResult]::new('--oldName', 'oldName', [CompletionResultType]::ParameterName, 'Old name of formula to rename')
+            [CompletionResult]::new('--workspace', 'workspace', [CompletionResultType]::ParameterName, 'workspace name (e.g.: Default or default)')
             break
         }
         'rit;set' {
@@ -209,11 +219,16 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
         }
         'rit;update' {
             [CompletionResult]::new('repo', 'repo', [CompletionResultType]::ParameterValue, 'Update a repository.')
+            [CompletionResult]::new('workspace', 'workspace', [CompletionResultType]::ParameterValue, 'Update a workspace')
             break
         }
         'rit;update;repo' {
             [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'repository name')
             [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'repository version')
+            break
+        }
+        'rit;update;workspace' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'workspace name')
             break
         }
         'rit;upgrade' {
