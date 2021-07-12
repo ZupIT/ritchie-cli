@@ -1,5 +1,15 @@
 name: Test Completion Command
 
+# TXT files used for ASSERT are located on the /testdata/gha_workflows directory.
+
+# To help you coding your workflow tests, you can use CAT commands to show each file you will compare on the workflow window on Github.
+
+# EXAMPLE:
+#   rit list workspace > check1.txt
+#   cat check1.txt
+#   cat testdata/gha_workflows/workspace_workflow/assert1.txt
+#   diff check1.txt testdata/gha_workflows/workspace_workflow/assert1.txt
+
 on:
   workflow_dispatch: # Can be triggered manually through the ACTIONS tab on Github GUI.
   push:
