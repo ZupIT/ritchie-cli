@@ -1,17 +1,2 @@
-merge_branch:
-  enable: true # Enable merge branch with comment
-  branches: ['qa'] # Branches enabled to merge with comment
-  users: [
-    'brunasilvazup',
-    'fabianofernandeszup',
-    'fernandobelettizup',
-    'guillaumefalourd',
-    'henriquemoraeszup',
-    'kaduartur',
-    'lucasdittrichzup',
-    'maurineimirandazup',
-    'rodrigomedeirosf'
-  ] # Users enabled to merge with comment
-
 issue_project:
   enable: false # Enable issue to project when opening a new issue
