@@ -70,6 +70,7 @@ jobs:
           command_line: rit completion bash
           assert_file_path:  testdata/gha_workflows/completion_workflow/assert2.txt
           expected_result: PASSED
+          specific_line: 1
 
   windows:
     runs-on: windows-latest
