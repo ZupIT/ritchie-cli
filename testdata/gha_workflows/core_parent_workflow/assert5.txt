@@ -1,0 +1,14 @@
+This command consists of multiple subcommands to interact with ritchie.
+
+It can be used to list repositories, credentials, workspaces, or formulas.
+
+Examples:
+rit list repo, rit list credential, rit list workspace, rit list formula
+
+Available Commands:
+  credential  List credentials fields and part of values
+  formula     Show a list with available formulas from a specific repository
+  repo        Show a list with all your available repositories
+  workspace   Show a list with all your available workspaces
+
+Use "rit <command> --help" for more information about a given command.

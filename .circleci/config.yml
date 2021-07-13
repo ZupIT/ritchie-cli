@@ -24,14 +24,6 @@ references:
     BUILD_IMAGE: *GOLANG_IMAGE
     VERSION_PLACEHOLDER: 2.0.0PLACEHOLDER
 
-  filters: &FILTERS_DELIVERY
-    branches:
-      only:
-        - qa
-        - staging
-        - nightly
-        - beta
-
   filters-release: &FILTERS_RELEASE
     branches:
       only:
@@ -201,26 +193,6 @@ jobs:
       - store_artifacts:
           path: *TEST_RESULTS_DIR
 
-  sign-bin:
-    executor: ubuntu-executor
-    environment:
-      <<: *ENVIRONMENT
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /workspace/dist
-      - run:
-          name: Install osslsigncode
-          command: |
-            sudo apt-get update -y
-            sudo apt-get install -y osslsigncode
-            osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecli.msi -out dist/installer/ritchiecli.msi
-            osslsigncode sign -pkcs12 packaging/windows/ZupIT.pfx -pass "$SIGN_CODE" -n "Ritchie CLI ZupIT" -h sha256 -t http://timestamp.digicert.com/ -in dist/installer/ritchiecli-user.msi -out dist/installer/ritchiecli-user.msi
-      - persist_to_workspace:
-          root: dist
-          paths:
-            - installer
-
   delivery:
     executor: delivery-executor
     environment:
@@ -313,28 +285,6 @@ jobs:
           command: |
             make release-creator
 
-  rebase_nightly:
-    environment:
-      <<: *ENVIRONMENT
-    executor: release-executor
-    steps:
-      - checkout
-      - run:
-          name: Rebase Nightly
-          command: |
-            make rebase-nightly
-
-  rebase_beta:
-    environment:
-      <<: *ENVIRONMENT
-    executor: release-executor
-    steps:
-      - checkout
-      - run:
-          name: Rebase Beta
-          command: |
-            make rebase-beta
-
   unix_smoke_test:
     executor: ritchie-tests-and-static-analisys-executor
     environment:
@@ -367,37 +317,6 @@ workflows:
                 - beta
     jobs:
       - release_creator
-
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 22 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - rebase_nightly
-
-  beta:
-    triggers:
-      - schedule:
-          cron: "0 11 * * 2,4"
-          filters:
-            branches:
-              only:
-                - nightly
-    jobs:
-      - build:
-          name: build-code
-      - windows_functional_test:
-          name: windows-functional-test-code
-          requires:
-            - build-code
-      - rebase_beta:
-          name: release-beta
-          requires:
-            - windows-functional-test-code
 
   build-for-requests:
     jobs:
@@ -444,19 +363,14 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - build-code
-      - sign-bin:
+      - delivery:
+          name: delivery
           filters:
             <<: *FILTERS_RELEASE
           requires:
             - win-package
             - deb-package
             - rpm-package
-      - delivery:
-          name: delivery
-          filters:
-            <<: *FILTERS_RELEASE
-          requires:
-            - sign-bin
       - release:
           name: release-publish
           filters:
@@ -469,38 +383,3 @@ workflows:
             <<: *FILTERS_RELEASE
           requires:
             - release-publish
-
-  delivery:
-    jobs:
-      - build:
-          name: build-code
-          filters:
-            <<: *FILTERS_DELIVERY
-      - delivery:
-          name: delivery
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - sign-bin
-      - deb-package:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - build-code
-      - rpm-package:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - build-code
-      - win-package:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - build-code
-      - sign-bin:
-          filters:
-            <<: *FILTERS_DELIVERY
-          requires:
-            - win-package
-            - rpm-package
-            - deb-package

@@ -143,26 +143,6 @@ functional-test:
 	mkdir -p $(BIN)
 	$(GO_TEST) -v -count=1 -p 1 `go list ./functional/... | grep -v vendor/ | sort -r `
 
-rebase-nightly:
-	git config --global user.email "$(GIT_EMAIL)"
-	git config --global user.name "$(GIT_NAME)"
-	git push $(GIT_REMOTE) --delete nightly | true
-	git checkout -b nightly
-	git reset --hard master
-	git add .
-	git commit --allow-empty -m "nightly"
-	git push $(GIT_REMOTE) HEAD:nightly
-
-rebase-beta:
-	git config --global user.email "$(GIT_EMAIL)"
-	git config --global user.name "$(GIT_NAME)"
-	git push $(GIT_REMOTE) --delete beta | true
-	git checkout -b beta
-	git reset --hard nightly
-	git add .
-	git commit --allow-empty -m "beta"
-	git push $(GIT_REMOTE) HEAD:beta
-
 release-creator:
 ifeq "$(GONNA_RELEASE)" "RELEASE"
 	git config --global user.email "$(GIT_EMAIL)"
