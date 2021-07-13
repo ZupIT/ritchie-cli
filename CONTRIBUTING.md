@@ -17,9 +17,7 @@ let you know so that you can rebase it.
 
 To contribute with new features or bug resolutions, please **fork the project**. 
 
-Then:
-
-**Always base your work on the project's `master` branch, naming your new branch according to the following guide :**
+Then: **Always base your work on the project's `master` branch, naming your new branch according to the following guide :**
 
 <img class="special-img-class" src="/docs/img/git-branchs.png" /> 
 
