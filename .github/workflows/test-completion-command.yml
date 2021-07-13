@@ -64,14 +64,16 @@ jobs:
           cd $GITHUB_WORKSPACE
           make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
           rit init --sendMetrics="no" --addCommons="no" --runType="local"
+      - name: cat output
+        run: |
+          rit completion bash
+          cat output.txt
       - name: RIT COMPLETION command(2)
         uses: GuillaumeFalourd/test-cli-commands-action@v1
         with:
           command_line: rit completion bash
           assert_file_path:  testdata/gha_workflows/completion_workflow/assert2.txt
           expected_result: PASSED
-      - name: cat output
-        run: cat output.txt
 
   windows:
     runs-on: windows-latest
