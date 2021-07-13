@@ -15,9 +15,9 @@ let you know so that you can rebase it.
 
 ## New features for the project
 
-Ritchie is composed of 3 projects which release at different timelines.
+To contribute with new features or bug resolutions, please **fork the project**. 
 
-**Always base your work on the project's `master` branch, naming your new branch according to the following guide :**
+Then: **Always base your work on the project's `master` branch, naming your new branch according to the following guide :**
 
 <img class="special-img-class" src="/docs/img/git-branchs.png" /> 
 
