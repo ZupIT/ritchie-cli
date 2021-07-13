@@ -143,7 +143,7 @@ jobs:
           command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
           assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
           expected_result: PASSED
-      - name: RIT COMPLETION command(2)
+      - name: RIT COMPLETION POWERSHELL(2)
         uses: GuillaumeFalourd/test-cli-commands-action@v1
         with:
           command_line: ./rit.exe completion powershell
