@@ -1,325 +1,30 @@
 #!/bin/bash
 
-_root_help()
-{
-    last_command="help"
-
-    commands=()
-
-}
-_root_completion()
-{
-    last_command="completion"
-
-    commands=()
-    commands+=("zsh")
-    commands+=("powershell")
-    commands+=("fish")
-    commands+=("bash")
-
-}
-_delete_workspace()
-{
-    last_command="workspace"
-
-    commands=()
-
-}
-_delete_credential()
-{
-    last_command="credential"
-
-    commands=()
-
-}
-_add_repo()
-{
-    last_command="repo"
-
-    commands=()
-
-}
-_root_build()
-{
-    last_command="build"
-
-    commands=()
-    commands+=("formula")
-
-}
-_root_show()
-{
-    last_command="show"
-
-    commands=()
-    commands+=("env")
-    commands+=("formula-runner")
-
-}
-_list_workspace()
-{
-    last_command="workspace"
-
-    commands=()
-
-}
-_update_workspace()
-{
-    last_command="workspace"
-
-    commands=()
-
-}
-_root_metrics()
-{
-    last_command="metrics"
-
-    commands=()
-
-}
-_root_tutorial()
-{
-    last_command="tutorial"
-
-    commands=()
-
-}
-_completion_zsh()
-{
-    last_command="zsh"
-
-    commands=()
-
-}
-_completion_fish()
-{
-    last_command="fish"
-
-    commands=()
-
-}
-_list_repo()
-{
-    last_command="repo"
-
-    commands=()
-
-}
-_delete_repo()
-{
-    last_command="repo"
-
-    commands=()
-
-}
-_root_create()
-{
-    last_command="create"
-
-    commands=()
-    commands+=("formula")
-
-}
-_root_init()
-{
-    last_command="init"
-
-    commands=()
-
-}
-_root_update()
-{
-    last_command="update"
-
-    commands=()
-    commands+=("workspace")
-    commands+=("repo")
-
-}
-_show_env()
-{
-    last_command="env"
-
-    commands=()
-
-}
-_delete_formula()
-{
-    last_command="formula"
-
-    commands=()
-
-}
-_rename_formula()
-{
-    last_command="formula"
-
-    commands=()
-
-}
-_root_upgrade()
-{
-    last_command="upgrade"
-
-    commands=()
-
-}
-_root_list()
-{
-    last_command="list"
-
-    commands=()
-    commands+=("formula")
-    commands+=("workspace")
-    commands+=("repo")
-    commands+=("credential")
-
-}
-_delete_env()
-{
-    last_command="env"
-
-    commands=()
-
-}
-_root_rename()
-{
-    last_command="rename"
-
-    commands=()
-    commands+=("formula")
-
-}
-_create_formula()
-{
-    last_command="formula"
-
-    commands=()
-
-}
-_list_formula()
-{
-    last_command="formula"
-
-    commands=()
-
-}
-_list_credential()
-{
-    last_command="credential"
-
-    commands=()
-
-}
-_set_credential()
-{
-    last_command="credential"
-
-    commands=()
-
-}
-_root_add()
-{
-    last_command="add"
-
-    commands=()
-    commands+=("workspace")
-    commands+=("repo")
-
-}
-_add_workspace()
-{
-    last_command="workspace"
-
-    commands=()
-
-}
-_completion_powershell()
-{
-    last_command="powershell"
-
-    commands=()
-
-}
-_update_repo()
-{
-    last_command="repo"
-
-    commands=()
-
-}
-_show_formula-runner()
-{
-    last_command="formula-runner"
-
-    commands=()
-
-}
-_root_delete()
-{
-    last_command="delete"
-
-    commands=()
-    commands+=("workspace")
-    commands+=("repo")
-    commands+=("env")
-    commands+=("credential")
-    commands+=("formula")
-
-}
-_build_formula()
-{
-    last_command="formula"
-
-    commands=()
-
-}
 _rit_root()
 {
     last_command="root"
 
     commands=()
-    commands+=("list")
-    commands+=("delete")
-    commands+=("upgrade")
-    commands+=("rename")
     commands+=("set")
-    commands+=("update")
-    commands+=("add")
-    commands+=("init")
-    commands+=("show")
+    commands+=("delete")
     commands+=("metrics")
-    commands+=("help")
-    commands+=("completion")
-    commands+=("create")
-    commands+=("build")
     commands+=("tutorial")
+    commands+=("build")
+    commands+=("create")
+    commands+=("init")
+    commands+=("update")
+    commands+=("help")
+    commands+=("add")
+    commands+=("rename")
+    commands+=("show")
+    commands+=("completion")
+    commands+=("upgrade")
+    commands+=("list")
 
 }
-_set_env()
+_root_upgrade()
 {
-    last_command="env"
-
-    commands=()
-
-}
-_set_formula-runner()
-{
-    last_command="formula-runner"
-
-    commands=()
-
-}
-_set_repo-priority()
-{
-    last_command="repo-priority"
-
-    commands=()
-
-}
-_completion_bash()
-{
-    last_command="bash"
+    last_command="upgrade"
 
     commands=()
 
@@ -335,15 +40,10 @@ _root_set()
     commands+=("credential")
 
 }
-
-
-__rit_init_completion()
+_set_credential()
 {
-    COMPREPLY=()
-    _get_comp_words_by_ref "$@" cur prev words cword
-}
+    last_command="credential"
 
-__rit_index_of_word()
 {
     local w word=$1
     shift
@@ -414,5 +114,3 @@ __start_rit()
 
     __rit_handle_word
 }
-
-complete -F __start_rit rit
