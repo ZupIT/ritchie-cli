@@ -1,5 +1,4 @@
-Set envs, credentials, priorities for formula repositories and formulas runner
-defaults.
+Set envs, credentials, priorities for formula repositories and formulas runner defaults.
 
 Examples:
 rit set env
