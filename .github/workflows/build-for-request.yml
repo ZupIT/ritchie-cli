@@ -1,0 +1,23 @@
+name: build for request
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch: # Can be triggered manually through the ACTIONS tab on Github GUI.
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: golangci-lint install
+        run: |
+          download=https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
+          wget -O- -q $download |sudo sh -s -- -b /go/bin/ v1.31.0
+      - name: lint files
+        run: |
+          /go/bin/golangci-lint run --issues-exit-code=1 --timeout=5m -v ./...
