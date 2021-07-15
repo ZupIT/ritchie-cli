@@ -19,3 +19,16 @@ jobs:
       - name: lint files
         run: |
           /go/bin/golangci-lint run --issues-exit-code=1 --timeout=5m -v ./...
+  unit-test:
+    env:
+      TEST_RESULTS_DIR: bin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Install gotestsum
+        run: |
+          curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v0.4.2/gotestsum_0.4.2_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
+      - name: Run Unit Tests
+        run: |
+          mkdir -p ${{ env.TEST_RESULTS_DIR }}
+          . ./run-tests-ci.sh
