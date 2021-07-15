@@ -57,7 +57,7 @@ func Unzip(src string, dest string) error {
 				return err
 			}
 
-			_, err = io.CopyN(outputFile, zippedFile, 100000)
+			_, err = io.Copy(outputFile, zippedFile)
 			if err != nil {
 				return err
 			}
