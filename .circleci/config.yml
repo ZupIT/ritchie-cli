@@ -307,16 +307,6 @@ jobs:
             rit --version | grep "$RELEASE_VERSION"
 
 workflows:
-  release_trigger:
-    triggers:
-      - schedule:
-          cron: "0 13 * * 1"
-          filters:
-            branches:
-              only:
-                - beta
-    jobs:
-      - release_creator
 
   build-for-requests:
     jobs:
