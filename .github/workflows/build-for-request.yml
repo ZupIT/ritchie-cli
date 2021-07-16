@@ -32,13 +32,13 @@ jobs:
         run: |
           mkdir -p ${{ env.TEST_RESULTS_DIR }}
           . ./run-tests-ci.sh
-  - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        files: ./coverage1.xml,./coverage2.xml
-        directory: ${{ env.TEST_RESULTS_DIR }}
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        path_to_write_report: ./coverage/codecov_report.txt
-        verbose: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          files: ./coverage.txt
+          directory: ${{ env.TEST_RESULTS_DIR }}
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          path_to_write_report: ./coverage/codecov_report.txt
+          verbose: true
