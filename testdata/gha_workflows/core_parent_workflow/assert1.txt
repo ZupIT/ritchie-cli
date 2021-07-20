@@ -1,0 +1,10 @@
+Add a new repository of formulas or a new workspace
+
+Examples:
+rit add repo
+
+Available Commands:
+  repo        Add a repository
+  workspace   Add new workspace
+
+Use "rit <command> --help" for more information about a given command.

@@ -1,0 +1,10 @@
+Show current env and formula-runner default
+
+Examples:
+rit show env
+
+Available Commands:
+  env            Show current env
+  formula-runner Show the default formula runner
+
+Use "rit <command> --help" for more information about a given command.
