@@ -1,0 +1,9 @@
+Create a new formula.
+
+Examples:
+rit create formula
+
+Available Commands:
+  formula     Create a new formula
+
+Use "rit <command> --help" for more information about a given command.

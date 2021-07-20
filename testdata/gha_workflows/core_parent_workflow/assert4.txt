@@ -1,0 +1,13 @@
+Delete env, repositories, formulas, workspaces and credentials
+
+Examples:
+rit delete env
+
+Available Commands:
+  credential  Delete credential
+  env         Delete env for credentials
+  formula     Delete specific formula
+  repo        Delete a repository
+  workspace   Delete a workspace
+
+Use "rit <command> --help" for more information about a given command.
