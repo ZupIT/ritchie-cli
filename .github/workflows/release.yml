@@ -1,0 +1,38 @@
+name: Release
+
+# É possível usar algum filtro?
+# A action, em suma, será disparada quando uma nova tag for gerada0
+on: #/^release-.*/
+  workflow_dispatch:
+  # release:
+  #   types: [created, edited]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.14'
+      - name: get version
+        id: get_version
+        run: |
+          if [[ ${{ github.event.ref }} =~ /^release-.*/ ]]; then
+            echo ::set-output name=RELEASE_VERSION::$(echo ${{ github.event.ref }} | cut -d '-' -f 2-)
+          else
+            echo ::set-output name=RELEASE_VERSION::$(curl https://commons-repo.ritchiecli.io/stable.txt)
+          fi
+      - run: echo ${{ steps.get_version.outputs.RELEASE_VERSION }}
+    # a execução será em um container docker com imagem Go 1.14
+    # usando root e o diretório /workspace
+
+    # 1º: executar a função version do script 'routing.sh' para pegar a release atual
+    # 2º: configurar credentials da AWS/CIRCLECI
+    # 3º: rodar o comando make build-circle (faz o build para os 3 sistemas: linux, mac e win)
+    # 4º: roda a função version novamente para colocar o valor da release no arquivo release_version.txt
+    # 5º: coloca o arquivo na pasta dist (ela contém os caminhos: linux, darwin, windows, .txt)
+    # 6º: armazena resultado de tests (why?) e os arquivos gerados na pasta de testes (why²?)
+  # deb-pkg:
+  # rpm-pkg:
+  # win-pkg:
