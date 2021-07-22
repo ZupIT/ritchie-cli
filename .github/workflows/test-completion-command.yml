@@ -1,0 +1,156 @@
+name: Test Completion Command
+
+# TXT files used for ASSERT are located on the /testdata/gha_workflows directory.
+
+# To help you coding your workflow tests, you can use CAT commands to show each file you will compare on the workflow window on Github.
+
+# EXAMPLE:
+#   rit list workspace > check1.txt
+#   cat check1.txt
+#   cat testdata/gha_workflows/workspace_workflow/assert1.txt
+#   diff check1.txt testdata/gha_workflows/workspace_workflow/assert1.txt
+
+on:
+  workflow_dispatch: # Can be triggered manually through the ACTIONS tab on Github GUI.
+  push:
+    paths: # Will trigger on PUSH event that update at least one of those files.
+      - '**/autocomplete.go'
+      - '**/autocomplete_test.go'
+      - '**/cmd.go'
+      - '**/init_test.go'
+      - '**/init.go'
+      - '**/metrics.go'
+      - '**/metrics_test.go'
+      - '**/root_test.go'
+      - '**/root.go'
+      - '**/set_formula_runner_test.go'
+      - '**/set_formula_runner.go'
+      - '**/tutorial_test.go'
+      - '**/tutorial.go'
+      - '**/upgrade_test.go'
+      - '**/upgrade.go'
+      - 'testdata/gha_workflows/completion_workflow/**'
+      - '**/test-completion-command.yml'
+  pull_request:
+    paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
+      - '**/autocomplete.go'
+      - '**/autocomplete_test.go'
+      - '**/cmd.go'
+      - '**/init_test.go'
+      - '**/init.go'
+      - '**/metrics.go'
+      - '**/metrics_test.go'
+      - '**/root_test.go'
+      - '**/root.go'
+      - '**/set_formula_runner_test.go'
+      - '**/set_formula_runner.go'
+      - '**/tutorial_test.go'
+      - '**/tutorial.go'
+      - '**/upgrade_test.go'
+      - '**/upgrade.go'
+      - 'testdata/gha_workflows/completion_workflow/**'
+      - '**/test-completion-command.yml'
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Create binary from branch
+        run: |
+          cd $GITHUB_WORKSPACE
+          make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+      - name: RIT INIT command (1)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit init --sendMetrics="no" --addCommons="no" --runType="local"
+          assert_file_path: testdata/gha_workflows/global_workflow/assert1.txt
+          expected_result: PASSED
+      - name: RIT COMPLETION BASH command(2)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit completion bash
+          assert_file_path:  testdata/gha_workflows/completion_workflow/assert2.txt
+          expected_result: PASSED
+          specific_line: 1
+      - name: RIT COMPLETION ZSH command(3)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit completion zsh
+          assert_file_path: testdata/gha_workflows/completion_workflow/assert3.txt
+          expected_result: PASSED
+          specific_line: 1
+      - name: RIT COMPLETION FISH command(4)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit completion fish
+          assert_file_path: testdata/gha_workflows/completion_workflow/assert4.txt
+          expected_result: PASSED
+          specific_line: 1
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Create binary from branch
+        run: |
+          cd $GITHUB_WORKSPACE
+          make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+      - name: RIT INIT command (1)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit init --sendMetrics="no" --addCommons="no" --runType="local"
+          assert_file_path: testdata/gha_workflows/global_workflow/assert1.txt
+          expected_result: PASSED
+      - name: RIT COMPLETION BASH command(2)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit completion bash
+          assert_file_path: testdata/gha_workflows/completion_workflow/assert2.txt
+          expected_result: PASSED
+          specific_line: 1
+      - name: RIT COMPLETION ZSH command(3)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit completion zsh
+          assert_file_path: testdata/gha_workflows/completion_workflow/assert3.txt
+          expected_result: PASSED
+          specific_line: 1
+      - name: RIT COMPLETION FISH command(4)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit completion fish
+          assert_file_path: testdata/gha_workflows/completion_workflow/assert4.txt
+          expected_result: PASSED
+          specific_line: 1
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Create binary from branch
+        run: |
+          choco install make
+          make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
+          ls
+      - name: RIT INIT command(1)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: ./rit.exe init --sendMetrics="yes" --addCommons="no" --runType="local"
+          assert_file_path: testdata/gha_workflows/global_workflow/assert1_win.txt
+          expected_result: PASSED
+      - name: RIT COMPLETION POWERSHELL(2)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: ./rit.exe completion powershell
+          assert_file_path:  testdata/gha_workflows/completion_workflow/assert1.txt
+          expected_result: PASSED
