@@ -63,7 +63,12 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
-          rit init --sendMetrics="no" --addCommons="no" --runType="local"
+      - name: RIT INIT command (1)
+        uses: GuillaumeFalourd/test-cli-commands-action@v1
+        with:
+          command_line: rit init --sendMetrics="no" --addCommons="no" --runType="local"
+          assert_file_path: testdata/gha_workflows/global_workflow/assert1.txt
+          expected_result: PASSED
       - name: RIT COMPLETION BASH command(2)
         uses: GuillaumeFalourd/test-cli-commands-action@v1
         with:
