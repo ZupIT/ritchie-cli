@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
     branches:
-      - master
+      - main
   workflow_dispatch: # Can be triggered manually through the ACTIONS tab on Github GUI.
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p ${{ env.TEST_RESULTS_DIR }}
           . ./run-tests-ci.sh
-      - name: Upload coverage to Codecov
+      - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v1
         with:
           files: ./coverage.txt
