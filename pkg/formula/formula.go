@@ -102,10 +102,10 @@ type (
 	Inputs []Input
 
 	Config struct {
-		DockerIB             string   `json:"dockerImageBuilder"`
-		Inputs               Inputs   `json:"inputs"`
-		Volumes              []string `json:"dockerVolumes"`
-		RequireLatestVersion bool     `json:"requireLatestVersion"`
+		DockerIB             string   `json:"dockerImageBuilder" yaml:"dockerImageBuilder"`
+		Inputs               Inputs   `json:"inputs" yaml:"inputs"`
+		Volumes              []string `json:"dockerVolumes" yaml:"dockerVolumes"`
+		RequireLatestVersion bool     `json:"requireLatestVersion" yaml:"requireLatestVersion"`
 	}
 
 	// Definition type that represents a Formula
