@@ -158,10 +158,6 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 		}
 	}
 
-	if !pr.file.Exists(configPath) {
-		return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
-	}
-
 	configFile, err := pr.file.Read(configPath)
 	if err != nil {
 		return formula.Config{}, err
