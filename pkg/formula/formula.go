@@ -32,7 +32,8 @@ import (
 const (
 	ReposDir           = "repos"
 	TmpDir             = "tmp"
-	DefaultConfig      = "config.json"
+	DefaultConfigJSON  = "config.json"
+	DefaultConfigYAML  = "formula.yml"
 	PwdEnv             = "CURRENT_PWD"
 	CtxEnv             = "CONTEXT"
 	Env                = "ENVIRONMENT"
@@ -191,7 +192,11 @@ func (d *Definition) BinPath(fPath string) string {
 
 // ConfigPath builds the config path from formula path and config name
 func (d *Definition) ConfigPath(formulaPath string) string {
-	return filepath.Join(formulaPath, DefaultConfig)
+	return filepath.Join(formulaPath, DefaultConfigJSON)
+}
+
+func (d *Definition) ConfigYAMLPath(formulaPath string) string {
+	return filepath.Join(formulaPath, DefaultConfigYAML)
 }
 
 // FormulaName remove rit from formulaCmd
