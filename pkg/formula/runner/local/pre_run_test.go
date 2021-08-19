@@ -31,6 +31,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestPreRun(t *testing.T) {
@@ -336,6 +337,114 @@ func TestPreRun(t *testing.T) {
 	}
 }
 
+func TestPreRunYAML(t *testing.T) {
+	fileManager := stream.NewFileManager()
+	dirManager := stream.NewDirManager(fileManager)
+	tmpDir := os.TempDir()
+	ritHomeName := ".rit-pre-run-local"
+	ritHome := filepath.Join(tmpDir, ritHomeName)
+	reposPath := filepath.Join(ritHome, "repos")
+	repoPath := filepath.Join(reposPath, "commons")
+	repoPathOutdated := filepath.Join(reposPath, "commonsUpdated")
+
+	defer os.RemoveAll(ritHome)
+	_ = dirManager.Remove(ritHome)
+
+	createSaved := func(path string) {
+		_ = dirManager.Remove(path)
+		_ = dirManager.Create(path)
+	}
+	createSaved(repoPath)
+	createSaved(repoPathOutdated)
+
+	zipFile := filepath.Join("..", "..", "..", "..", "testdata", "ritchie-formulas-test.zip")
+	zipRepositories := filepath.Join("..", "..", "..", "..", "testdata", "repositories.zip")
+	_ = streams.Unzip(zipFile, repoPath)
+	_ = streams.Unzip(zipFile, repoPathOutdated)
+	_ = streams.Unzip(zipRepositories, reposPath)
+
+	var config formula.Config
+	_ = yaml.Unmarshal([]byte(configYAML), &config)
+
+	configWithLatestTagRequired := config
+	configWithLatestTagRequired.RequireLatestVersion = true
+
+	repoLister := repo.NewLister(ritHome, fileManager)
+	preRunChecker := runner.NewPreRunBuilderChecker(repoLister)
+
+	type in struct {
+		def        formula.Definition
+		makeBuild  formula.Builder
+		batBuild   formula.Builder
+		shellBuild formula.Builder
+		file       stream.FileReadExister
+		dir        stream.DirCreateListCopyRemover
+	}
+
+	type out struct {
+		want             formula.Setup
+		err              error
+		NonSpecificError bool
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		out  out
+	}{
+		{
+			name: "local build success",
+			in: in{
+				def: formula.Definition{Path: "testing/formulayml", RepoName: "commons"},
+				makeBuild: makeBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				batBuild: batBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				shellBuild: shellBuildMock{
+					build: func(formulaPath string) error {
+						return dirManager.Create(filepath.Join(formulaPath, "bin"))
+					},
+				},
+				file: fileManager,
+				dir:  dirManager,
+			},
+			out: out{
+				want: formula.Setup{
+					Config: config,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			in := tt.in
+			_ = dirManager.Remove(filepath.Join(in.def.FormulaPath(ritHome), "bin"))
+			preRun := NewPreRun(ritHome, in.makeBuild, in.batBuild, in.shellBuild, in.dir, in.file, preRunChecker)
+
+			got, err := preRun.PreRun(in.def)
+
+			if err != nil || tt.out.err != nil {
+				if tt.out.NonSpecificError {
+					assert.Contains(t, err.Error(), tt.out.err.Error())
+				} else {
+					assert.Equal(t, tt.out.err.Error(), err.Error())
+				}
+			}
+
+			assert.Equal(t, tt.out.want.Config, got.Config)
+
+			_ = os.Chdir(got.Pwd) // Return to test folder
+		})
+	}
+}
+
 type makeBuildMock struct {
 	build func(formulaPath string) error
 }
@@ -450,3 +559,33 @@ const configJSON = `{
     }
   ]
 }`
+
+const configYAML = `dockerImageBuilder: cimg/go:1.14
+dockerVolumes: []
+inputs:
+- cache:
+    active: true
+    newLabel: 'Type new value. '
+    qty: 3
+  label: 'Type your name: '
+  name: input_text
+  type: text
+- default: 'false'
+  items:
+  - 'false'
+  - 'true'
+  label: 'Have you ever used Ritchie? '
+  name: input_boolean
+  type: bool
+- default: everything
+  items:
+  - daily tasks
+  - workflows
+  - toils
+  - everything
+  label: 'What do you want to automate? '
+  name: input_list
+  type: text
+- label: 'Tell us a secret: '
+  name: input_password
+  type: password`
