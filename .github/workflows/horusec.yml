@@ -14,4 +14,4 @@ jobs:
         HORUSEC_CLI_REPOSITORY_AUTHORIZATION: ${{ secrets.HORUSEC_CLI_REPOSITORY_AUTHORIZATION }}
       run: |
         curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
-        horusec start -p . -e true -G true -u="https://api-horusec.zup.com.br" -n="Ritchie CLI"
+        horusec start -p . -e true -G true -u="https://api-horusec.zup.com.br" -n="RitchieCLI"
