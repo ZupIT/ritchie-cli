@@ -51,12 +51,13 @@ rit_install () {
 	chmod +x ./rit
 
 	INSTALL_PATH="/usr/local/bin"
+  [[ `whoami` == "root" ]] && SDFLAG="" || SDFLAG="sudo"
 
 	if [ ! -d "$INSTALL_PATH" ]; then
-		sudo mkdir -p $INSTALL_PATH
+		$SDFLAG mkdir -p $INSTALL_PATH
 	fi
 
-	sudo mv ./rit $INSTALL_PATH/rit
+	$SDFLAG mv ./rit $INSTALL_PATH/rit
 	$INSTALL_PATH/rit --version
 
 	idempotent_config
