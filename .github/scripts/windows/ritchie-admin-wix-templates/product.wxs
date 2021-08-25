@@ -26,8 +26,8 @@
          AdminImage="no"
          ReadOnly="yes"/>
 
-      <WixVariable Id="WixUIBannerBmp" Value="C:\workspace\docs\img\ritchie-banner.bmp" />
-      <WixVariable Id="WixUIDialogBmp" Value="C:\workspace\docs\img\ritchie-dialog.bmp" />
+      <WixVariable Id="WixUIBannerBmp" Value="D:\a\ritchie-cli\ritchie-cli\docs\img\ritchie-banner.bmp" />
+      <WixVariable Id="WixUIDialogBmp" Value="D:\a\ritchie-cli\ritchie-cli\docs\img\ritchie-dialog.bmp" />
 
       <Property Id="ARPHELPLINK" Value="$(var.InfoURL)" />
 
@@ -44,7 +44,7 @@
          <Directory Id="$(var.Program_Files)">
             <Directory Id="INSTALLDIR" Name="{{.Product}}">
                <Component Id="ApplicationFiles" Guid="{{.Files.GUID}}">
-                    <File Id="ApplicationFile0" Source="C:\workspace\workspace\dist\windows\rit.exe"/>
+                    <File Id="ApplicationFile0" Source="D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe"/>
                </Component>
             </Directory>
          </Directory>
