@@ -12,5 +12,5 @@
             "type": ""
         }
     ],
-    "postinst": "packaging/scripts/postinst.sh"
+    "postinst": ".github/scripts/postinst.sh"
 }
