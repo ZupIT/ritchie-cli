@@ -21,6 +21,8 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	flag "github.com/spf13/pflag"
 )
 
 const (
@@ -149,6 +151,11 @@ func UserHomeDir() string {
 }
 
 // RitchieHomeDir returns the home dir of the ritchie
+var flagRitchieHomeDir = flag.String("ritchie-home-dir", ritchieHomeName, "Use to set Ritchie Home Path other than " + ritchieHomeName)
 func RitchieHomeDir() string {
+	flag.Parse()
+	if *flagRitchieHomeDir != "" {
+		return filepath.Join(UserHomeDir(), *flagRitchieHomeDir)
+	}
 	return filepath.Join(UserHomeDir(), ritchieHomeName)
 }
