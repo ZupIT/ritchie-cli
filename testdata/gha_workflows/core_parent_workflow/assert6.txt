@@ -1,0 +1,12 @@
+Set envs, credentials, priorities for formula repositories and formulas runner defaults.
+
+Examples:
+rit set env
+
+Available Commands:
+  credential     Set credential
+  env            Set env
+  formula-runner Set the default formula runner
+  repo-priority  Set a repository priority
+
+Use "rit <command> --help" for more information about a given command.

@@ -7,9 +7,11 @@ jobs:
     name: horusec-security
     runs-on: ubuntu-latest
     steps:
-    - name: Check out code
+    - name: Checkout code
       uses: actions/checkout@v2
-    - name: Running Horusec Security
+    - name: security
+      env:
+        HORUSEC_CLI_REPOSITORY_AUTHORIZATION: ${{ secrets.HORUSEC_CLI_REPOSITORY_AUTHORIZATION }}
       run: |
         curl -fsSL https://raw.githubusercontent.com/ZupIT/horusec/master/deployments/scripts/install.sh | bash -s latest
-        horusec start -p="./" -e="true"       
+        horusec start -p . -e true -G true -u="https://api-horusec.zup.com.br" -n="RitchieCLI"

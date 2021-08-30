@@ -1,0 +1,10 @@
+Update repositories.
+
+Examples:
+rit update repo
+
+Available Commands:
+  repo        Update a repository.
+  workspace   Update a workspace
+
+Use "rit <command> --help" for more information about a given command.
