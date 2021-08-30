@@ -1,0 +1,254 @@
+name: Test Core Parent Commands
+
+on:
+  workflow_dispatch: # Can be triggered manually through the ACTIONS tab on Github GUI.
+  push:
+    paths: # Will trigger on PUSH event that update at least one of those files.
+      - '**/cmd.go'
+      - '**/add_test.go'
+      - '**/add.go'
+      - '**/autocomplete_test.go'
+      - '**/autocomplete.go'
+      - '**/delete_test.go'
+      - '**/delete.go'
+      - '**/create_test.go'
+      - '**/create.go'
+      - '**/list_test.go'
+      - '**/list.go'
+      - '**/rename_test.go'
+      - '**/rename.go'
+      - '**/set_test.go'
+      - '**/set.go'
+      - '**/show_test.go'
+      - '**/show.go'
+      - '**/update_test.go'
+      - '**/update.go'
+      - 'testdata/gha_workflows/core_parent_workflow/**'
+      - '**/test-core-parent-commands.yml'
+
+  pull_request:
+    paths: # Will trigger on PULL_REQUEST event that update at least one of those files.
+      - '**/cmd.go'
+      - '**/add_test.go'
+      - '**/add.go'
+      - '**/autocomplete_test.go'
+      - '**/autocomplete.go'
+      - '**/delete_test.go'
+      - '**/delete.go'
+      - '**/create_test.go'
+      - '**/create.go'
+      - '**/list_test.go'
+      - '**/list.go'
+      - '**/rename_test.go'
+      - '**/rename.go'
+      - '**/set_test.go'
+      - '**/set.go'
+      - '**/show_test.go'
+      - '**/show.go'
+      - '**/update_test.go'
+      - '**/update.go'
+      - 'testdata/gha_workflows/core_parent_workflow/**'
+      - '**/test-core-parent-commands.yml'
+
+jobs:
+  ubuntu:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-linux && sudo mv ./dist/linux/rit /usr/local/bin
+            rit init --sendMetrics="no" --addCommons="no" --runType="local"
+        - name: RIT ADD command (1)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit add
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert1.txt
+            expected_result: PASSED
+        - name: RIT COMPLETION command (2)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit completion
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert2.txt
+            expected_result: PASSED
+        - name: RIT CREATE command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit create
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT DELETE command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT LIST command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert5.txt
+            expected_result: PASSED
+        - name: RIT SET command (6)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit set
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert6.txt
+            expected_result: PASSED
+        - name: RIT SHOW command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit show
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert7.txt
+            expected_result: PASSED
+        - name: RIT UPDATE command (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit update
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert8.txt
+            expected_result: PASSED
+        - name: RIT RENAME command (9)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert9.txt
+            expected_result: PASSED
+
+  macos:
+      runs-on: macos-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
+        - name: Create binary from branch
+          run: |
+            cd $GITHUB_WORKSPACE
+            make build-mac && sudo mv ./dist/darwin/rit /usr/local/bin
+            rit init --sendMetrics="no" --addCommons="no" --runType="local"
+        - name: RIT ADD command (1)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit add
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert1.txt
+            expected_result: PASSED
+        - name: RIT COMPLETION command (2)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit completion
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert2.txt
+            expected_result: PASSED
+        - name: RIT CREATE command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit create
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT DELETE command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit delete
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT LIST command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert5.txt
+            expected_result: PASSED
+        - name: RIT SET command (6)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit set
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert6.txt
+            expected_result: PASSED
+        - name: RIT SHOW command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit show
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert7.txt
+            expected_result: PASSED
+        - name: RIT UPDATE command (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit update
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert8.txt
+            expected_result: PASSED
+        - name: RIT RENAME command (9)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit rename
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert9.txt
+            expected_result: PASSED
+
+  windows:
+      runs-on: windows-latest
+      steps:
+        - uses: actions/checkout@v2.3.4
+        - uses: actions/setup-node@v2
+          with:
+            node-version: '14'
+        - name: Create binary from branch
+          run: |
+            choco install make
+            make build-windows && move D:\a\ritchie-cli\ritchie-cli\dist\windows\rit.exe "D:\a\ritchie-cli\ritchie-cli"
+            ls
+            .\rit.exe init --sendMetrics="no" --addCommons="no" --runType="local"
+        - name: RIT ADD command (1)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe add
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert1.txt
+            expected_result: PASSED
+        - name: RIT COMPLETION command (2)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe completion
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert2.txt
+            expected_result: PASSED
+        - name: RIT CREATE command (3)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe create
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert3.txt
+            expected_result: PASSED
+        - name: RIT DELETE command (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe delete
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert4.txt
+            expected_result: PASSED
+        - name: RIT LIST command (5)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe list
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert5.txt
+            expected_result: PASSED
+        - name: RIT SET command (6)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe set
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert6.txt
+            expected_result: PASSED
+        - name: RIT SHOW command (7)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe show
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert7.txt
+            expected_result: PASSED
+        - name: RIT UPDATE command (8)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe update
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert8.txt
+            expected_result: PASSED
+        - name: RIT RENAME command (9)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe rename
+            assert_file_path: testdata/gha_workflows/core_parent_workflow/assert9.txt
+            expected_result: PASSED

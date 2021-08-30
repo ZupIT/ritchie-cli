@@ -1,0 +1,12 @@
+Add autocomplete for terminal, available for (zsh, bash, fish, powershell).
+
+Examples:
+rit completion zsh
+
+Available Commands:
+  bash        Add bash autocomplete for terminal, --help to know how to use
+  fish        Add fish autocomplete for terminal, --help to know how to use
+  powershell  Add powerShell autocomplete for terminal, --help to know how to use
+  zsh         Add zsh autocomplete for terminal, --help to know how to use
+
+Use "rit <command> --help" for more information about a given command.

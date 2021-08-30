@@ -1,0 +1,9 @@
+Rename a local formula.
+
+Examples:
+rit rename formula
+
+Available Commands:
+  formula     Rename a formula
+
+Use "rit <command> --help" for more information about a given command.
