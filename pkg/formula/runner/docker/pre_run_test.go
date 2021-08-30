@@ -31,6 +31,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/ZupIT/ritchie-cli/pkg/stream/streams"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestPreRun(t *testing.T) {
@@ -302,7 +303,8 @@ func TestPreRunYAML(t *testing.T) {
 	_ = streams.Unzip(zipRepositories, reposPath)
 
 	var config formula.Config
-	_ = json.Unmarshal([]byte(configYAML), &config)
+	_ = yaml.Unmarshal([]byte(configYAML), &config)
+
 	configWithLatestTagRequired := config
 	configWithLatestTagRequired.RequireLatestVersion = true
 
