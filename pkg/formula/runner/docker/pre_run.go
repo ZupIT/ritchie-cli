@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
+	"gopkg.in/yaml.v2"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
@@ -173,9 +174,16 @@ func (pr PreRunManager) buildFormula(formulaPath, dockerImg string, dockerVolume
 }
 
 func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
-	configPath := def.ConfigPath(formulaPath)
+	configPath := def.ConfigYAMLPath(formulaPath)
+	configFormat := "yml"
+
 	if !pr.file.Exists(configPath) {
-		return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
+		configPath = def.ConfigPath(formulaPath)
+		configFormat = "json"
+
+		if !pr.file.Exists(configPath) {
+			return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
+		}
 	}
 
 	configFile, err := pr.file.Read(configPath)
@@ -184,8 +192,14 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 	}
 
 	var formulaConfig formula.Config
-	if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
-		return formula.Config{}, err
+	if configFormat == "json" {
+		if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
+			return formula.Config{}, err
+		}
+	} else if configFormat == "yml" {
+		if err := yaml.Unmarshal(configFile, &formulaConfig); err != nil {
+			return formula.Config{}, err
+		}
 	}
 	return formulaConfig, nil
 }
