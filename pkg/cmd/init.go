@@ -38,7 +38,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-const CommonsRepoURL = "https://github.com/ZupIT/ritchie-formulas"
+const TemplatesRepoURL = "https://github.com/ZupIT/ritchie-templates.git"
 
 var (
 	addRepoInfo               = i18n.T("init.add.commons.repo.info")
@@ -162,7 +162,7 @@ func (in initCmd) runStdin() CommandRunnerFunc {
 			repo := formula.Repo{
 				Provider: "Github",
 				Name:     "commons",
-				Url:      CommonsRepoURL,
+				Url:      TemplatesRepoURL,
 				Priority: 0,
 			}
 
@@ -317,7 +317,7 @@ func (in *initCmd) runFlags(cmd *cobra.Command) (config.Configs, error) {
 			repo := formula.Repo{
 				Provider: "Github",
 				Name:     "commons",
-				Url:      CommonsRepoURL,
+				Url:      TemplatesRepoURL,
 				Priority: 0,
 			}
 			s := spinner.StartNew(i18n.T("init.adding.commons.repo"))
@@ -469,7 +469,7 @@ func (in initCmd) addCommonsRepo() error {
 	repo := formula.Repo{
 		Provider: "Github",
 		Name:     "commons",
-		Url:      CommonsRepoURL,
+		Url:      TemplatesRepoURL,
 		Priority: 0,
 	}
 
