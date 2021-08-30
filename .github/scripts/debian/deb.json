@@ -11,5 +11,5 @@
             "fperm": "0755"
         }
     ],
-    "postinst-file": "packaging/scripts/postinst.sh"
+    "postinst-file": ".github/scripts/postinst.sh"
 }
