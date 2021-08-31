@@ -119,7 +119,7 @@ func TestAddFormulaCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, tt.in.execMock, fileReadExisterMock{fileReaderMock{data: []byte(inputJson)}, fileExisterMock{exist: true}})
+			formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, tt.in.execMock, fileReaderMock{data: []byte(inputJson)})
 			rootCmd := &cobra.Command{Use: "rit"}
 			rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			got := formulaCmd.Add(rootCmd)
@@ -198,10 +198,6 @@ const inputJson = `{
 	]
 }`
 
-type fileReadExisterMock struct {
-	fileReaderMock
-	fileExisterMock
-}
 type fileReaderMock struct {
 	data []byte
 	err  error
@@ -209,12 +205,4 @@ type fileReaderMock struct {
 
 func (f fileReaderMock) Read(filepath string) ([]byte, error) {
 	return f.data, f.err
-}
-
-type fileExisterMock struct {
-	exist bool
-}
-
-func (f fileExisterMock) Exists(path string) bool {
-	return f.exist
 }
