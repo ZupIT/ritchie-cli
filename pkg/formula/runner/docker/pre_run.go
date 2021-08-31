@@ -18,7 +18,6 @@ package docker
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -32,7 +31,6 @@ import (
 	"time"
 
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
-	"gopkg.in/yaml.v2"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
@@ -42,9 +40,6 @@ import (
 )
 
 const (
-	loadConfigErrMsg = `Failed to load formula config file
-Try running rit update repo
-Config file path not found: %s`
 	dockerLegacyBinaryName = "docker"
 	dockerModernBinaryName = "com.docker.cli"
 )
@@ -97,7 +92,7 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	pwd, _ := os.Getwd()
 	formulaPath := def.FormulaPath(pr.ritchieHome)
 
-	config, err := pr.loadConfig(formulaPath, def)
+	config, err := runner.LoadConfigs(pr.file, formulaPath, def)
 	if err != nil {
 		return formula.Setup{}, err
 	}
@@ -171,37 +166,6 @@ func (pr PreRunManager) buildFormula(formulaPath, dockerImg string, dockerVolume
 	}
 
 	return nil
-}
-
-func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
-	configPath := def.ConfigYAMLPath(formulaPath)
-	configFormat := runner.ConfigYAMLFormat
-
-	if !pr.file.Exists(configPath) {
-		configPath = def.ConfigPath(formulaPath)
-		configFormat = runner.ConfigJSONFormat
-
-		if !pr.file.Exists(configPath) {
-			return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
-		}
-	}
-
-	configFile, err := pr.file.Read(configPath)
-	if err != nil {
-		return formula.Config{}, err
-	}
-
-	var formulaConfig formula.Config
-	if configFormat == runner.ConfigJSONFormat {
-		if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
-			return formula.Config{}, err
-		}
-	} else if configFormat == runner.ConfigYAMLFormat {
-		if err := yaml.Unmarshal(configFile, &formulaConfig); err != nil {
-			return formula.Config{}, err
-		}
-	}
-	return formulaConfig, nil
 }
 
 func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Definition) (string, error) {
