@@ -150,5 +150,9 @@ func UserHomeDir() string {
 
 // RitchieHomeDir returns the home dir of the ritchie
 func RitchieHomeDir() string {
+	newRitchieHomeName := os.Getenv("RITCHIE_HOME_DIR")
+	if newRitchieHomeName != "" {
+		return filepath.Join(UserHomeDir(), newRitchieHomeName)
+	}
 	return filepath.Join(UserHomeDir(), ritchieHomeName)
 }
