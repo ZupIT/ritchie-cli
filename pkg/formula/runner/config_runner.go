@@ -29,7 +29,11 @@ import (
 
 var _ formula.ConfigRunner = ConfigManager{}
 
-const FileName = "default-formula-runner"
+const (
+	FileName         = "default-formula-runner"
+	ConfigJSONFormat = "json"
+	ConfigYAMLFormat = "yml"
+)
 
 var ErrConfigNotFound = errors.New("you must configure your default formula execution method, run \"rit set formula-runner\" to set up")
 

@@ -147,11 +147,11 @@ func (pr PreRunManager) buildFormula(formulaPath string) error {
 
 func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
 	configPath := def.ConfigYAMLPath(formulaPath)
-	configFormat := "yml"
+	configFormat := runner.ConfigYAMLFormat
 
 	if !pr.file.Exists(configPath) {
 		configPath = def.ConfigPath(formulaPath)
-		configFormat = "json"
+		configFormat = runner.ConfigJSONFormat
 
 		if !pr.file.Exists(configPath) {
 			return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
@@ -164,11 +164,11 @@ func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (
 	}
 
 	var formulaConfig formula.Config
-	if configFormat == "json" {
+	if configFormat == runner.ConfigJSONFormat {
 		if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
 			return formula.Config{}, err
 		}
-	} else if configFormat == "yml" {
+	} else if configFormat == runner.ConfigYAMLFormat {
 		if err := yaml.Unmarshal(configFile, &formulaConfig); err != nil {
 			return formula.Config{}, err
 		}
