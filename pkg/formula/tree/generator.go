@@ -28,10 +28,11 @@ import (
 )
 
 const (
-	root       = "root"
-	configFile = "config.json"
-	FileName   = "tree.json"
-	Version    = "v2"
+	root           = "root"
+	configJSONFile = "config.json"
+	configYAMLFile = "formula.yml"
+	FileName       = "tree.json"
+	Version        = "v2"
 )
 
 type GeneratorManager struct {
@@ -127,9 +128,14 @@ func (ge GeneratorManager) subCommands(dirPath string, parentID api.CommandID, c
 			LongHelp: help.Long,
 		}
 
-		configFilePath := filepath.Join(formulaPath, configFile)
-		if ge.file.Exists(configFilePath) { // Case config.json exists, set cmd.Formula as true
+		configFilePath := filepath.Join(formulaPath, configYAMLFile)
+		if ge.file.Exists(configFilePath) { // Case formula.yml exists, set cmd.Formula as true
 			cmd.Formula = true
+		} else {
+			configFilePath = filepath.Join(formulaPath, configJSONFile)
+			if ge.file.Exists(configFilePath) { // Case config.json exists, set cmd.Formula as true
+				cmd.Formula = true
+			}
 		}
 
 		ge.strBuilder.Reset()

@@ -105,3 +105,11 @@ func TestConfigPath(t *testing.T) {
 
 	assert.Equal(t, got, want)
 }
+
+func TestConfigYMLPath(t *testing.T) {
+	want := filepath.Join(home, "repos", "commons", "scaffold", "coffee-java", "formula.yml")
+
+	got := def.ConfigYAMLPath(def.FormulaPath(home))
+
+	assert.Equal(t, got, want)
+}

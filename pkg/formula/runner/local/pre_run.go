@@ -17,8 +17,6 @@
 package local
 
 import (
-	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -31,10 +29,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/os/osutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
-)
-
-const (
-	loadConfigErrMsg = "Failed to load formula config file\nTry running rit update repo\nConfig file path not found: %s"
 )
 
 var _ formula.PreRunner = PreRunManager{}
@@ -73,7 +67,7 @@ func (pr PreRunManager) PreRun(def formula.Definition) (formula.Setup, error) {
 	pwd, _ := os.Getwd()
 	formulaPath := def.FormulaPath(pr.ritchieHome)
 
-	config, err := pr.loadConfig(formulaPath, def)
+	config, err := runner.LoadConfigs(pr.file, formulaPath, def)
 	if err != nil {
 		return formula.Setup{}, err
 	}
@@ -141,23 +135,6 @@ func (pr PreRunManager) buildFormula(formulaPath string) error {
 	}
 
 	return nil
-}
-
-func (pr PreRunManager) loadConfig(formulaPath string, def formula.Definition) (formula.Config, error) {
-	configPath := def.ConfigPath(formulaPath)
-	if !pr.file.Exists(configPath) {
-		return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
-	}
-
-	configFile, err := pr.file.Read(configPath)
-	if err != nil {
-		return formula.Config{}, err
-	}
-	var formulaConfig formula.Config
-	if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
-		return formula.Config{}, err
-	}
-	return formulaConfig, nil
 }
 
 func (pr PreRunManager) createWorkDir(home, formulaPath string, def formula.Definition) (string, error) {

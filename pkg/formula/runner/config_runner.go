@@ -19,17 +19,27 @@ package runner
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
+	"github.com/ZupIT/ritchie-cli/pkg/stream"
+	"gopkg.in/yaml.v2"
 )
 
 var _ formula.ConfigRunner = ConfigManager{}
 
-const FileName = "default-formula-runner"
+const (
+	FileName         = "default-formula-runner"
+	ConfigJSONFormat = "json"
+	ConfigYAMLFormat = "yml"
+	loadConfigErrMsg = `failed to load formula config file
+	try running rit update repo
+	config file path not found: %s`
+)
 
 var ErrConfigNotFound = errors.New("you must configure your default formula execution method, run \"rit set formula-runner\" to set up")
 
@@ -68,4 +78,34 @@ func (c ConfigManager) Find() (formula.RunnerType, error) {
 	}
 
 	return formula.RunnerType(runType), nil
+}
+
+func LoadConfigs(f stream.FileReadExister, formulaPath string, def formula.Definition) (formula.Config, error) {
+	configPath := def.ConfigYAMLPath(formulaPath)
+	configFormat := ConfigYAMLFormat
+
+	if !f.Exists(configPath) { // formula.yml
+		configPath = def.ConfigPath(formulaPath)
+		configFormat = ConfigJSONFormat
+		if !f.Exists(configPath) { // config.json
+			return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
+		}
+	}
+
+	configFile, err := f.Read(configPath)
+	if err != nil {
+		return formula.Config{}, err
+	}
+
+	var formulaConfig formula.Config
+	if configFormat == ConfigYAMLFormat { // formula.yml
+		if err := yaml.Unmarshal(configFile, &formulaConfig); err != nil {
+			return formula.Config{}, err
+		}
+	} else if configFormat == ConfigJSONFormat { // config.json
+		if err := json.Unmarshal(configFile, &formulaConfig); err != nil {
+			return formula.Config{}, err
+		}
+	}
+	return formulaConfig, nil
 }
