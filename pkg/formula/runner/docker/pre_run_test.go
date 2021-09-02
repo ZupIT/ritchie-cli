@@ -180,7 +180,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: false},
 			},
 			out: out{
-				err: fmt.Errorf(LoadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
+				err: fmt.Errorf(runner.LoadConfigErrMsg, filepath.Join(tmpDir, ritHomeName, "repos", "commons", "testing", "formula", "config.json")),
 			},
 		},
 		{
