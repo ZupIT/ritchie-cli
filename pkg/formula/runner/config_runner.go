@@ -36,7 +36,7 @@ const (
 	FileName         = "default-formula-runner"
 	ConfigJSONFormat = "json"
 	ConfigYAMLFormat = "yml"
-	loadConfigErrMsg = `failed to load formula config file
+	LoadConfigErrMsg = `failed to load formula config file
 	try running rit update repo
 	config file path not found: %s`
 )
