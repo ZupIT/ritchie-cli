@@ -88,7 +88,7 @@ func LoadConfigs(f stream.FileReadExister, formulaPath string, def formula.Defin
 		configPath = def.ConfigPath(formulaPath)
 		configFormat = ConfigJSONFormat
 		if !f.Exists(configPath) { // config.json
-			return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
+			return formula.Config{}, fmt.Errorf(LoadConfigErrMsg, configPath)
 		}
 	}
 
