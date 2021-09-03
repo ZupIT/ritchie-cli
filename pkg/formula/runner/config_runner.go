@@ -36,7 +36,7 @@ const (
 	FileName         = "default-formula-runner"
 	ConfigJSONFormat = "json"
 	ConfigYAMLFormat = "yml"
-	loadConfigErrMsg = `failed to load formula config file
+	LoadConfigErrMsg = `failed to load formula config file
 	try running rit update repo
 	config file path not found: %s`
 )
@@ -88,7 +88,7 @@ func LoadConfigs(f stream.FileReadExister, formulaPath string, def formula.Defin
 		configPath = def.ConfigPath(formulaPath)
 		configFormat = ConfigJSONFormat
 		if !f.Exists(configPath) { // config.json
-			return formula.Config{}, fmt.Errorf(loadConfigErrMsg, configPath)
+			return formula.Config{}, fmt.Errorf(LoadConfigErrMsg, configPath)
 		}
 	}
 
