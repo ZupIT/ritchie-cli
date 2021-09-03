@@ -41,14 +41,14 @@ const (
 	latestVersionMsg            = "Latest available version: %s"
 	versionMsg                  = "%s\n  Build date: %s\n  Built with: %s\n"
 	versionMsgWithLatestVersion = "%s\n  %s\n  Build date: %s\n  Built with: %s\n"
-	cmdUse                      = "rit"
 	cmdShortDescription         = "rit is a NoOps CLI"
-	cmdDescription              = `A CLI to create, store and share any kind of 
+	cmdDescription              = `A CLI to create, store and share any kind of
 automations, executing them through command lines.
 Complete documentation available at https://github.com/ZupIT/ritchie-cli`
 )
 
 var (
+	cmdUse    = "rit"
 	Version   = ""
 	BuildDate = "unknown"
 	MsgInit   = "To start using rit, you need to initialize rit first.\nCommand: rit init"
@@ -92,6 +92,11 @@ func NewRootCmd(
 	tree formula.TreeGenerator,
 	repo formula.RepositoryListWriter,
 ) *cobra.Command {
+	newRitchieCmdUse := os.Getenv("RITCHIE_CMD_USE")
+	if newRitchieCmdUse != "" {
+		cmdUse = newRitchieCmdUse
+	}
+
 	o := &rootCmd{
 		ritchieHome: ritchieHome,
 		dir:         dir,
