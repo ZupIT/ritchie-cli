@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - main
+      - v3
   workflow_dispatch: # Can be triggered manually through the ACTIONS tab on Github GUI.
 
 jobs:
