@@ -295,7 +295,7 @@ jobs:
 
   publish:
     needs:
-      - generate-release
+      # - generate-release
       - organize-artifacts
     runs-on: ubuntu-latest
     steps:
