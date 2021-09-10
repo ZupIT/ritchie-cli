@@ -128,6 +128,18 @@ jobs:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
             expected_result: PASSED
+        - name: RIT ADD REPO command (11)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit add repo --provider="Github" --name="templates" --repoUrl="https://github.com/ZupIT/ritchie-templates" --priority=1
+            contains: The \"templates\" repository was added with success, now you can use your formulas with the Ritchie!
+            expected_result: PASSED
+        - name: RIT LIST REPO command (12)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert6.txt
+            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
@@ -200,6 +212,18 @@ jobs:
           with:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED
+        - name: RIT ADD REPO command (11)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit add repo --provider=Github --name=templates --repoUrl=https://github.com/ZupIT/ritchie-templates --priority=1
+            contains: The \"templates\" repository was added with success, now you can use your formulas with the Ritchie!
+            expected_result: PASSED
+        - name: RIT LIST REPO command (12)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert6.txt
             expected_result: PASSED
 
   windows:
@@ -275,4 +299,17 @@ jobs:
           with:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert1.txt
+            expected_result: PASSED
+        - name: RIT ADD REPO command (11)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe add repo --provider=Github --name=templates --repoUrl=https://github.com/ZupIT/ritchie-templates --priority=1
+            contains: The \"templates\" repository was added with success, now you can use your formulas with the Ritchie!
+            expected_result: PASSED
+        - name: RIT LIST REPO command (12)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe list repo
+            assert_file_path: testdata/gha_workflows/repo_workflow/assert6.txt
+            specific_line: 4
             expected_result: PASSED

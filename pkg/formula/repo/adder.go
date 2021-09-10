@@ -28,6 +28,7 @@ import (
 )
 
 var ErrInvalidRepo = errors.New("the selected repository has no formulas")
+var ErrInvalidTemplateRepo = errors.New("cannot use 'src' as a template name")
 
 type AddManager struct {
 	ritHome string
@@ -84,7 +85,7 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 		return err
 	}
 
-	if err := ad.isValidRepo(repo, tree); err != nil {
+	if err := ad.isValidRepo(repo, tree, newRepoPath); err != nil {
 		return err
 	}
 
@@ -101,7 +102,17 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 	return nil
 }
 
-func (ad AddManager) isValidRepo(repo formula.Repo, tree formula.Tree) error {
+func (ad AddManager) isValidRepo(repo formula.Repo, tree formula.Tree, repoPath string) error {
+	repoPath = filepath.Join(repoPath, "templates")
+	isTemplateRepo, err := isTemplateRepo(repoPath)
+	if err != nil {
+		return err
+	}
+
+	if isTemplateRepo {
+		return nil
+	}
+
 	if len(tree.Commands) == 0 && !repo.IsLocal {
 		if err := ad.repo.Delete(repo.Name); err != nil {
 			return err
@@ -130,4 +141,56 @@ func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
 	repos = movePosition(repos, repo.Name, repo.Priority)
 
 	return repos
+}
+
+func isTemplateRepo(repoPath string) (bool, error) {
+	templatesRepo := false
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return templatesRepo, nil
+	}
+
+	for _, file := range files {
+		if file.Name() == "create_formula" {
+			templatesRepo, err = isValidTemplateRepo(repoPath)
+			if err != nil {
+				return templatesRepo, err
+			}
+		}
+	}
+
+	return templatesRepo, nil
+}
+
+func isValidTemplateRepo(repoPath string) (bool, error) {
+	repoPath = filepath.Join(repoPath, "create_formula")
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return false, err
+	}
+
+	for _, file := range files {
+		repoPath = filepath.Join(repoPath, file.Name())
+		err := checkTemplates(repoPath)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	return true, nil
+}
+
+func checkTemplates(repoPath string) error {
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.Name() == "src" {
+			return ErrInvalidTemplateRepo
+		}
+	}
+
+	return nil
 }
