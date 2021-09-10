@@ -1,7 +1,7 @@
 #!/bin/sh
 
 usage () {
-	echo "./install-v3.sh"
+	echo "./install.sh"
 }
 
 
