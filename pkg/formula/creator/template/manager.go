@@ -34,16 +34,21 @@ var (
 	templatePath = []string{"repos", "commons", "templates", "create_formula"}
 	errMsg       = `To create a new formula, the commons repository must contain the following structure: 
 %s
- └── languages
+ └── language 1
+ 	└── template 1
+	└── template 2
+ └── language 2
+ 	└── template 1
  └── root
 
-See example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`
+See example: [https://github.com/ZupIT/ritchie-templates]`
 )
 
 type Manager interface {
 	Languages() ([]string, error)
-	LangTemplateFiles(lang string) ([]File, error)
-	ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error)
+	Templates(lang string) ([]string, error)
+	TemplateFiles(lang, tpl string) ([]File, error)
+	ResolverNewPath(oldPath, newDir, lang, tpl, workspacePath string) (string, error)
 	Validate() error
 }
 
@@ -83,12 +88,32 @@ func (tm DefaultManager) Languages() ([]string, error) {
 	return result, nil
 }
 
-func (tm DefaultManager) LangTemplateFiles(lang string) ([]File, error) {
+func (tm DefaultManager) Templates(lang string) ([]string, error) {
 	tplD := tm.templateDir()
 
 	langDir := filepath.Join(tplD, languageDir, lang)
 
-	languageTpl, err := readDirRecursive(langDir)
+	dirs, err := ioutil.ReadDir(langDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []string
+	for _, d := range dirs {
+		if d.IsDir() {
+			result = append(result, d.Name())
+		}
+	}
+
+	return result, nil
+}
+
+func (tm DefaultManager) TemplateFiles(lang, tpl string) ([]File, error) {
+	tplD := tm.templateDir()
+
+	tplDir := filepath.Join(tplD, languageDir, lang, tpl)
+
+	templete, err := readDirRecursive(tplDir)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +124,7 @@ func (tm DefaultManager) LangTemplateFiles(lang string) ([]File, error) {
 		return nil, err
 	}
 
-	return append(languageTpl, rootTpl...), nil
+	return append(templete, rootTpl...), nil
 }
 
 func readDirRecursive(dir string) ([]File, error) {
@@ -125,17 +150,17 @@ func readDirRecursive(dir string) ([]File, error) {
 	return fileNames, nil
 }
 
-func (tm DefaultManager) ResolverNewPath(oldPath, formulaPath, lang, workspacePath string) (string, error) {
+func (tm DefaultManager) ResolverNewPath(oldPath, formulaPath, lang, tpl, workspacePath string) (string, error) {
 	tplD := tm.templateDir()
-	langTplPath := filepath.Join(tplD, languageDir, lang)
+	tplTypePath := filepath.Join(tplD, languageDir, lang, tpl)
 	rootTplPath := filepath.Join(tplD, rootDir)
 
 	if strings.Contains(oldPath, rootTplPath) {
 		return strings.Replace(oldPath, rootTplPath, workspacePath, 1), nil
 	}
 
-	if strings.Contains(oldPath, langTplPath) {
-		return strings.Replace(oldPath, langTplPath, formulaPath, 1), nil
+	if strings.Contains(oldPath, tplTypePath) {
+		return strings.Replace(oldPath, tplTypePath, formulaPath, 1), nil
 	}
 
 	return "", fmt.Errorf("fail to resolve new Path %s", oldPath)
