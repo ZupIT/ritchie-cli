@@ -57,6 +57,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 		tempLanguages    []string
 		tempLanguagesErr error
 		inputList        string
+		tempTemplates    []string
+		tempTemplatesErr error
 		inputListErr     error
 		wspaceList       formula.Workspaces
 		wspaceListErr    error
@@ -79,7 +81,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
-				inputList:     "go",
+				tempTemplates: []string{"helloWorld", "rest"},
+				inputList:     "helloWorld",
 			},
 		},
 		{
@@ -89,6 +92,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				wspaceAddErr:  workspace.ErrInvalidWorkspace,
 				inputBool:     true,
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				tempTemplates: []string{"helloWorld", "rest"},
 				dirCreate:     nil,
 			},
 		},
@@ -97,7 +101,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
-				inputList:     "go",
+				tempTemplates: []string{"helloWorld", "rest"},
+				inputList:     "helloWorld",
 				inputBool:     true,
 				wspaceAddErr:  workspace.ErrInvalidWorkspace,
 				dirCreate:     errors.New("failed to create dir"),
@@ -128,7 +133,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			want: errors.New("error on language func"),
 		},
 		{
-			name: "error on input list",
+			name: "error on input language list",
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "java", "c", "rust"},
@@ -137,11 +142,31 @@ func TestCreateFormulaCmd(t *testing.T) {
 			want: errors.New("error to list languages"),
 		},
 		{
+			name: "error on template manager func",
+			in: in{
+				inputTextVal:     "rit test test",
+				tempTemplatesErr: errors.New("error on template func"),
+			},
+			want: errors.New("error on template func"),
+		},
+		{
+			name: "error on input template list",
+			in: in{
+				inputTextVal:  "rit test test",
+				tempLanguages: []string{"go", "java", "c", "rust"},
+				tempTemplates: []string{"helloWorld", "rest"},
+				inputList:     "go",
+				inputListErr:  errors.New("error to list template"),
+			},
+			want: errors.New("error to list template"),
+		},
+		{
 			name: "list workspace error",
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
-				inputList:     "go",
+				tempTemplates: []string{"helloWorld", "rest"},
+				inputList:     "helloWorld",
 				wspaceListErr: errors.New("error to list workspaces"),
 			},
 			want: errors.New("error to list workspaces"),
@@ -150,10 +175,11 @@ func TestCreateFormulaCmd(t *testing.T) {
 			name: "error on workspace list with flags",
 			in: in{
 				tempLanguages: []string{"go", "java", "c", "rust"},
+				tempTemplates: []string{"helloWorld", "rest"},
 				wspaceListErr: errors.New("error to list workspaces"),
 			},
 			want:       errors.New("error to list workspaces"),
-			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=default"},
+			inputFlags: []string{"--name=rit test test", "--language=go", "--template=helloWorld", "--workspace=default"},
 		},
 		{
 			name: "success with new workspace in function FormulaWorkspaceInput",
@@ -168,6 +194,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				tempTemplates: []string{"helloWorld", "rest"},
 				inputList:     newWorkspace,
 				inputWspace:   "Invalid workspace",
 			},
@@ -178,7 +205,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
-				inputList:     "go",
+				tempTemplates: []string{"helloWorld", "rest"},
+				inputList:     "helloWorld",
 				wspaceAddErr:  errors.New("error to add workspace"),
 			},
 			want: errors.New("error to add workspace"),
@@ -188,7 +216,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 			in: in{
 				inputTextVal:  "rit test test",
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
-				inputList:     "go",
+				tempTemplates: []string{"helloWorld", "rest"},
+				inputList:     "helloWorld",
 				createErr:     errors.New("error to create formula"),
 			},
 			want: errors.New("error to create formula"),
@@ -200,8 +229,9 @@ func TestCreateFormulaCmd(t *testing.T) {
 					"Default": "C:\\Users\\mauri\\ritchie-formulas-local",
 				},
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				tempTemplates: []string{"helloWorld", "rest"},
 			},
-			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=Default"},
+			inputFlags: []string{"--name=rit test test", "--language=go", "--template=helloWorld", "--workspace=Default"},
 		},
 		{
 			name: "err invalidWorkspace",
@@ -211,7 +241,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 				},
 			},
 			want:       errors.New(InvalidWorkspace),
-			inputFlags: []string{"--name=rit test test", "--language=go", "--workspace=invalidWorkspace"},
+			inputFlags: []string{"--name=rit test test", "--language=go", "--template=helloWorld", "--workspace=invalidWorkspace"},
 		},
 		{
 			name: "err invalidLanguage",
@@ -219,7 +249,16 @@ func TestCreateFormulaCmd(t *testing.T) {
 				tempLanguages: []string{"go", "rust", "java", "kotlin"},
 			},
 			want:       errors.New("language not found"),
-			inputFlags: []string{"--name=rit test test", "--language=invalidLanguage", "--workspace=Default"},
+			inputFlags: []string{"--name=rit test test", "--language=invalidLanguage", "--template=helloWorld", "--workspace=Default"},
+		},
+		{
+			name: "err invalidTemplate",
+			in: in{
+				tempLanguages: []string{"go", "rust", "java", "kotlin"},
+				tempTemplates: []string{"helloWorld", "rest"},
+			},
+			want:       errors.New("template not found for this language"),
+			inputFlags: []string{"--name=rit test test", "--language=go", "--template=invalidTemplate", "--workspace=Default"},
 		},
 		{
 			name: "err empty formula command",
@@ -259,6 +298,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			templateManagerMock := new(mocks.TemplateManagerMock)
 			templateManagerMock.On("Validate").Return(tt.in.tempValErr)
 			templateManagerMock.On("Languages").Return(tt.in.tempLanguages, tt.in.tempLanguagesErr)
+			templateManagerMock.On("Templates", mock.Anything).Return(tt.in.tempTemplates, tt.in.tempTemplatesErr)
 
 			formulaCreatorMock := new(mocks.FormCreator)
 			formulaCreatorMock.On("Create", mock.Anything).Return(tt.in.createErr)
@@ -274,8 +314,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 			inputListMock := new(mocks.InputListMock)
 			inputListMock.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputList, tt.in.inputListErr)
 
-			inPath := &mocks.InputPathMock{}
-			inPath.On("Read", "Workspace path (e.g.: /home/user/github): ").Return(tt.in.inputPath, tt.in.inputPathErr)
+			inPathMock := &mocks.InputPathMock{}
+			inPathMock.On("Read", "Workspace path (e.g.: /home/user/github): ").Return(tt.in.inputPath, tt.in.inputPathErr)
 
 			tutorialMock := new(mocks.TutorialFindSetterMock)
 			tutorialMock.On("Find").Return(rtutorial.TutorialHolder{Current: "enabled"}, nil)
@@ -283,8 +323,8 @@ func TestCreateFormulaCmd(t *testing.T) {
 			treeMock := new(mocks.TreeManager)
 			treeMock.On("Check").Return([]api.CommandID{})
 
-			inputBoolM := new(mocks.InputBoolMock)
-			inputBoolM.On("Bool", InvalidWorkspace, []string{"no", "yes"}, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
+			inputBoolMock := new(mocks.InputBoolMock)
+			inputBoolMock.On("Bool", InvalidWorkspace, []string{"no", "yes"}, mock.Anything).Return(tt.in.inputBool, tt.in.inputBoolErr)
 
 			directoryMock := new(mocks.DirManagerMock)
 			directoryMock.On("Create", mock.Anything).Return(tt.in.dirCreate)
@@ -297,11 +337,11 @@ func TestCreateFormulaCmd(t *testing.T) {
 				inputTextMock,
 				inputTextValidatorMock,
 				inputListMock,
-				inPath,
+				inPathMock,
 				tutorialMock,
 				treeMock,
 				validator,
-				inputBoolM,
+				inputBoolMock,
 				directoryMock,
 			)
 			createFormulaCmd.SetArgs([]string{})
@@ -330,6 +370,7 @@ func TestCreateFormula(t *testing.T) {
 	cf := formula.Create{
 		FormulaCmd: "rit test test",
 		Lang:       "go",
+		Tpl:        "helloWorld",
 		Workspace: formula.Workspace{
 			Name: "default",
 			Dir:  workDir,

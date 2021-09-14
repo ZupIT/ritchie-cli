@@ -91,6 +91,7 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
         'rit;create;formula' {
             [CompletionResult]::new('--language', 'language', [CompletionResultType]::ParameterName, 'Select formula''s language (i.e: go, java, python [...])')
             [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'You must create your command based in this example [rit group verb noun]')
+            [CompletionResult]::new('--template', 'template', [CompletionResultType]::ParameterName, 'Select formula''s templete')
             [CompletionResult]::new('--workspace', 'workspace', [CompletionResultType]::ParameterName, 'Provide workspace name')
             break
         }

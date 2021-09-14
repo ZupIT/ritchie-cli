@@ -50,6 +50,7 @@ var (
 	InvalidWorkspace               = "the workspace path informed doesn't exist. Do you want to create it?"
 	flagName                       = "name"
 	flagLanguage                   = "language"
+	flagTemplate                   = "template"
 	flagWorkspace                  = "workspace"
 )
 
@@ -65,6 +66,12 @@ var createFormulaFlags = flags{
 		kind:        reflect.String,
 		defValue:    "",
 		description: "Select formula's language (i.e: go, java, python [...])",
+	},
+	{
+		name:        flagTemplate,
+		kind:        reflect.String,
+		defValue:    "",
+		description: "Select formula's templete",
 	},
 	{
 		name:        flagWorkspace,
@@ -185,6 +192,25 @@ func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 		}
 	}
 
+	template, err := cmd.Flags().GetString("template")
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	tplList, err := c.template.Templates(language)
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	for i := range tplList {
+		if strings.EqualFold(template, tplList[i]) {
+			template = tplList[i]
+			break
+		} else if i == len(tplList)-1 {
+			return formula.Create{}, errors.New("template not found for this language")
+		}
+	}
+
 	var workspace formula.Workspace
 	workspace.Name, err = cmd.Flags().GetString("workspace")
 	if err != nil {
@@ -207,6 +233,7 @@ func (c createFormulaCmd) runFlag(cmd *cobra.Command) (formula.Create, error) {
 	cf := formula.Create{
 		FormulaCmd:  formulaCmd,
 		Lang:        language,
+		Tpl:         template,
 		Workspace:   workspace,
 		FormulaPath: formulaPath,
 	}
@@ -235,6 +262,21 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 	lang, err := c.inList.List("Choose the language: ", languages)
 	if err != nil {
 		return formula.Create{}, err
+	}
+
+	templates, err := c.template.Templates(lang)
+	if err != nil {
+		return formula.Create{}, err
+	}
+
+	var tpl string
+	if len(templates) != 1 {
+		tpl, err = c.inList.List("Choose the template type: ", templates)
+		if err != nil {
+			return formula.Create{}, err
+		}
+	} else {
+		tpl = templates[0]
 	}
 
 	workspaces, err := c.workspace.List()
@@ -270,6 +312,7 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 	cf := formula.Create{
 		FormulaCmd:  formulaCmd,
 		Lang:        lang,
+		Tpl:         tpl,
 		Workspace:   wspace,
 		FormulaPath: formulaPath,
 	}

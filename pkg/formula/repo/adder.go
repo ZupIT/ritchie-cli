@@ -27,7 +27,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 )
 
-var ErrInvalidRepo = errors.New("the selected repository has no formulas")
+var ErrInvalidRepo = errors.New("the selected repository has no formulas and is not a valid templeta repo")
 var ErrInvalidTemplateRepo = errors.New("cannot use 'src' as a template name")
 
 type AddManager struct {
@@ -103,7 +103,6 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 }
 
 func (ad AddManager) isValidRepo(repo formula.Repo, tree formula.Tree, repoPath string) error {
-	repoPath = filepath.Join(repoPath, "templates")
 	isTemplateRepo, err := isTemplateRepo(repoPath)
 	if err != nil {
 		return err
@@ -144,46 +143,48 @@ func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
 }
 
 func isTemplateRepo(repoPath string) (bool, error) {
-	templatesRepo := false
+	isTemplateRepo := false
+	repoPath = filepath.Join(repoPath, "templates")
 	files, err := ioutil.ReadDir(repoPath)
 	if err != nil {
-		return templatesRepo, nil
+		return isTemplateRepo, nil
 	}
 
 	for _, file := range files {
 		if file.Name() == "create_formula" {
-			templatesRepo, err = isValidTemplateRepo(repoPath)
+			isTemplateRepo = true
+			err = isValidTemplateRepo(repoPath)
 			if err != nil {
-				return templatesRepo, err
+				return isTemplateRepo, err
 			}
 		}
 	}
 
-	return templatesRepo, nil
+	return isTemplateRepo, nil
 }
 
-func isValidTemplateRepo(repoPath string) (bool, error) {
-	repoPath = filepath.Join(repoPath, "create_formula")
+func isValidTemplateRepo(repoPath string) error {
+	repoPath = filepath.Join(repoPath, "create_formula", "languages")
 	files, err := ioutil.ReadDir(repoPath)
 	if err != nil {
-		return false, err
+		return ErrInvalidRepo
 	}
 
 	for _, file := range files {
-		repoPath = filepath.Join(repoPath, file.Name())
-		err := checkTemplates(repoPath)
+		err := checkTemplates(repoPath, file.Name())
 		if err != nil {
-			return false, err
+			return err
 		}
 	}
 
-	return true, nil
+	return nil
 }
 
-func checkTemplates(repoPath string) error {
+func checkTemplates(repoPath, lang string) error {
+	repoPath = filepath.Join(repoPath, lang)
 	files, err := ioutil.ReadDir(repoPath)
 	if err != nil {
-		return err
+		return ErrInvalidRepo
 	}
 
 	for _, file := range files {

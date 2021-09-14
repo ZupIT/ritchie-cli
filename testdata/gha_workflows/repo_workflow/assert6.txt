@@ -1,7 +1,7 @@
-PROVIDER	NAME         	CURRENT VERSION	PRIORITY	URL                                       	LATEST VERSION
-Github  	templates    	1.0.0          	1       	https://github.com/ZupIT/ritchie-templates	1.0.0               
+PROVIDER	NAME     	CURRENT VERSION	PRIORITY	URL                                       	LATEST VERSION
+Github  	templates	1.1.0          	0       	https://github.com/ZupIT/ritchie-templates	1.1.0         
 
-[1mThere are 1 repos[0m
+[1mThere is 1 repo[0m
 [1m
 [TUTORIAL][0m
 [1mTo update all repositories or delete an repository:[0m

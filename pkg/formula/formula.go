@@ -84,6 +84,7 @@ type (
 	Create struct {
 		FormulaCmd  string    `json:"formulaCmd"`
 		Lang        string    `json:"lang"`
+		Tpl         string    `json:"tpl"`
 		Workspace   Workspace `json:"workspace"`
 		FormulaPath string    `json:"formulaPath"`
 	}

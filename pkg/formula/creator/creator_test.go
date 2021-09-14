@@ -47,6 +47,7 @@ const (
 	langNode          = "node"
 	langPython        = "python"
 	langShell         = "bash shell"
+	tpl               = "helloWorld"
 )
 
 func TestCreator(t *testing.T) {
@@ -87,6 +88,7 @@ func TestCreator(t *testing.T) {
 				formCreate: formula.Create{
 					FormulaCmd: fCmdExists,
 					Lang:       langGo,
+					Tpl:        tpl,
 					Workspace:  formula.Workspace{Dir: resultDir},
 					FormulaPath: func() string {
 						fp := path.Join(resultDir, "/add/repo")
@@ -108,6 +110,7 @@ func TestCreator(t *testing.T) {
 				formCreate: formula.Create{
 					FormulaCmd:  fCmdCorrectGo,
 					Lang:        langGo,
+					Tpl:         tpl,
 					Workspace:   formula.Workspace{Dir: resultDir},
 					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_go"),
 				},
@@ -126,6 +129,7 @@ func TestCreator(t *testing.T) {
 				formCreate: formula.Create{
 					FormulaCmd:  fCmdCorrectJava,
 					Lang:        langJava,
+					Tpl:         tpl,
 					Workspace:   formula.Workspace{Dir: resultDir},
 					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_java"),
 				},
@@ -143,6 +147,7 @@ func TestCreator(t *testing.T) {
 				formCreate: formula.Create{
 					FormulaCmd:  fCmdCorrectNode,
 					Lang:        langNode,
+					Tpl:         tpl,
 					Workspace:   formula.Workspace{Dir: resultDir},
 					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_node"),
 				},
@@ -160,6 +165,7 @@ func TestCreator(t *testing.T) {
 				formCreate: formula.Create{
 					FormulaCmd:  fCmdCorrectPython,
 					Lang:        langPython,
+					Tpl:         tpl,
 					Workspace:   formula.Workspace{Dir: resultDir},
 					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_python"),
 				},
@@ -177,6 +183,7 @@ func TestCreator(t *testing.T) {
 				formCreate: formula.Create{
 					FormulaCmd:  fCmdCorrectShell,
 					Lang:        langShell,
+					Tpl:         tpl,
 					Workspace:   formula.Workspace{Dir: resultDir},
 					FormulaPath: path.Join(resultDir, "/scaffold/generate/test_shell"),
 				},
