@@ -22,7 +22,7 @@ function version {
 
 function caller {
 
-   elif expr "$1" : "metric_server" >/dev/null; then
+   if expr "$1" : "metric_server" >/dev/null; then
       version
       metric_server
    else
