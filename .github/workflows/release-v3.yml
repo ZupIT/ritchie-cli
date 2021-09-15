@@ -1,0 +1,363 @@
+name: Release V3
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release version (e.g.: 0.0.0)'
+        required: true
+
+env:
+  RELEASE_VERSION: ${{ github.event.inputs.tag }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  # generate-release:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2.3.4
+  #       with:
+  #         ref: v3
+
+  #     - name: Create release
+  #       uses: actions/create-release@v1
+  #       with:
+  #         tag_name: ${{ env.RELEASE_VERSION }}
+  #         release_name: Release ${{ env.RELEASE_VERSION }}
+  #         body: |
+  #           Changes in this release
+
+  #     - name: Generate changelog file
+  #       uses: dittrichlucas/changelog-generator@main
+  #       with:
+  #         token: ${{ env.GITHUB_TOKEN }}
+  #         repo: ${{ github.repository }}
+
+  #     - name: Check changelog file
+  #       run: cat CHANGELOG.md
+
+  #     - name: Create pull request
+  #       id: cpr
+  #       uses: peter-evans/create-pull-request@v3
+  #       with:
+  #         token: ${{ env.GITHUB_TOKEN }}
+  #         commit-message: "project/ci: update the changelog file with new release deliveries"
+  #         committer: GitHub <noreply@github.com>
+  #         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+  #         signoff: true
+  #         branch: release-${{ env.RELEASE_VERSION }}
+  #         delete-branch: true
+  #         title: "project/ci: generate the changelog file for the ${{ env.RELEASE_VERSION }} release"
+  #         body: |
+  #           Update the `CHANGELOG.md` file with the deliveries of the ${{ env.RELEASE_VERSION }} release
+  #         draft: false
+
+  #     - name: Check outputs
+  #       run: |
+  #         echo -e "\033[1;32mPull Request Number - \033[1;37m${{ steps.cpr.outputs.pull-request-number }}"
+  #         echo -e "\033[1;32mPull Request URL - \033[1;37m${{ steps.cpr.outputs.pull-request-url }}"
+
+  generate-release-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate release version file
+        run: |
+          mkdir -p dist
+          echo ${RELEASE_VERSION} > dist/release_version.txt
+
+      - name: Check file
+        run: cat dist/release_version.txt
+
+      - name: Upload release version file
+        uses: actions/upload-artifact@v2
+        with:
+          name: release-file
+          path: dist/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.14'
+
+      - name: Build
+        run: make build-linux
+
+      - name: Upload ritchie linux binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: bin-linux
+          path: dist/
+
+  build-mac:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.14'
+
+      - name: Build
+        run: make build-mac
+
+      - name: Upload ritchie mac binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: bin-mac
+          path: dist/
+
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
+
+      - name: Setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.14'
+
+      - name: Build
+        run: make build-windows
+
+      - name: Upload ritchie windows binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: bin-windows
+          path: dist/
+
+  deb:
+    needs:
+      - build-linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
+
+      - name: Download ritchie linux binary
+        uses: actions/download-artifact@v2
+        with:
+          name: bin-linux
+          path: dist
+
+      - name: Generate deb package
+        run: |
+          mkdir -p dist/installer
+          curl -fsSL https://raw.githubusercontent.com/mh-cbon/latest/master/install.sh | GH=mh-cbon/go-bin-deb sh -xe
+          go-bin-deb generate --file .github/scripts/debian/deb.json --version ${RELEASE_VERSION} -o dist/installer/ritchie_${RELEASE_VERSION}_linux_x86_64.deb -a amd64
+
+      - name: Upload ritchie debian installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: installer-deb
+          path: dist/installer/
+
+  rpm:
+    needs:
+      - build-linux
+    runs-on: ubuntu-latest
+    container:
+      image: centos:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
+
+      - name: Download ritchie linux binary
+        uses: actions/download-artifact@v2
+        with:
+          name: bin-linux
+          path: dist
+
+      - name: Setup dependencies
+        run: |
+          yum install -y git tar curl wget sudo make yum-utils device-mapper-persistent-data lvm2 rpm-build
+          yum clean all
+
+      - name: Generate rpm package
+        run: |
+          mkdir -p pkg-build/SPECS
+          mkdir -p dist/installer
+          curl -fsSL https://raw.githubusercontent.com/mh-cbon/latest/master/install.sh | GH=mh-cbon/go-bin-rpm sh -xe
+          go-bin-rpm generate-spec --file .github/scripts/rpm/rpm.json -a amd64 --version ${RELEASE_VERSION} > pkg-build/SPECS/ritchiecli.spec
+          go-bin-rpm generate --file .github/scripts/rpm/rpm.json -a amd64 --version ${RELEASE_VERSION} -o dist/installer/ritchie_${RELEASE_VERSION}_linux_x86_64.rpm
+
+      - name: Upload ritchie rpm installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: installer-rpm
+          path: dist/installer/
+
+  pkg:
+    needs:
+      - build-mac
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
+
+      - name: Download ritchie darwin binary
+        uses: actions/download-artifact@v2
+        with:
+          name: bin-mac
+          path: dist/
+
+      - name: Generate pkg
+        run: |
+          mkdir .github/scripts/mac-pkg/application
+          mv ./dist/darwin/rit ./.github/scripts/mac-pkg/application
+
+          cd ./.github/scripts/mac-pkg/
+
+          bash build-macos-x64.sh ritchie_${RELEASE_VERSION}_darwin_x86_64 ${RELEASE_VERSION}
+
+      - name: Upload ritchie pkg installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: installer-pkg
+          path: ./.github/scripts/mac-pkg/target/pkg
+
+  msi:
+    needs:
+      - build-windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
+
+      - name: Download ritchie windows binary
+        uses: actions/download-artifact@v2
+        with:
+          name: bin-windows
+          path: dist/
+
+      - name: Setup chocolatey
+        uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: -v
+
+      - name: Generate msi
+        shell: powershell
+        run: .\.github\scripts\windows\gen-win.ps1
+
+      - name: Upload ritchie windows installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: installer-windows
+          path: dist/installer
+
+  organize-artifacts:
+    needs:
+      - generate-release-file
+      - deb
+      - rpm
+      - msi
+      - pkg
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Organize files
+        run: |
+          mkdir ${RELEASE_VERSION}
+          mkdir ${RELEASE_VERSION}/installer
+
+          mv bin-linux/linux/ ${RELEASE_VERSION}
+          mv bin-mac/darwin/ ${RELEASE_VERSION}
+          mv bin-windows/windows/ ${RELEASE_VERSION}
+
+          mv installer-deb/*.deb ${RELEASE_VERSION}/installer
+          mv installer-pkg/*.pkg ${RELEASE_VERSION}/installer
+          mv installer-rpm/*.rpm ${RELEASE_VERSION}/installer
+          mv installer-windows/**/*.msi ${RELEASE_VERSION}/installer
+
+          mv release-file/*.txt ${RELEASE_VERSION}
+
+      - name: Check folders and files
+        run: |
+          sudo apt install tree
+          tree $GITHUB_WORKSPACE/${RELEASE_VERSION}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ${{ github.workspace }}/${{ env.RELEASE_VERSION }}
+
+  publish:
+    needs:
+      # - generate-release
+      - organize-artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release folder
+        run: mkdir $RELEASE_VERSION
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: artifacts
+          path: ${{ github.workspace }}/${{ env.RELEASE_VERSION }}
+
+      - name: Generate stable file
+        run: |
+          cp ${RELEASE_VERSION}/release_version.txt ${GITHUB_WORKSPACE}
+          mv release_version.txt stable.txt
+
+      - name: Check folders and files
+        run: |
+          sudo apt install tree
+          tree $GITHUB_WORKSPACE
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1
+
+      - name: Upload files
+        run: aws s3 sync --follow-symlinks $GITHUB_WORKSPACE s3://$AWS_S3_BUCKET_V3
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_V3 }}
+
+  # unix-smoke-test:
+  #   needs: publish
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Load release version
+  #       run: |
+  #         export RIT_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
+  #         echo
+  #         echo -e "\033[1;32mLatest version:\033[1;37m" $RIT_VERSION
+
+  #     - name: Install ritchie
+  #       run: curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+
+  #     - name: Verify Command
+  #       run: rit --version | grep "$RIT_VERSION"

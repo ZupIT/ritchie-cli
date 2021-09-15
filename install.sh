@@ -44,8 +44,8 @@ idempotent_config() {
 
 rit_install () {
 	echo "Downloading rit..."
-	STABLE_VERSION=$(curl -s https://commons-repo.ritchiecli.io/stable.txt)
-	curl -SLO "https://commons-repo.ritchiecli.io/${STABLE_VERSION}/${OPERATIONAL_SYSTEM}/rit"
+	STABLE_VERSION=$(curl -s https://v3.ritchiecli.io/stable.txt)
+	curl -SLO "https://v3.ritchiecli.io/${STABLE_VERSION}/${OPERATIONAL_SYSTEM}/rit"
 
 
 	chmod +x ./rit
