@@ -342,7 +342,7 @@ jobs:
           aws-region: sa-east-1
 
       - name: Upload files
-        run: aws s3 sync --follow-symlinks $GITHUB_WORKSPACE s3://$AWS_S3_BUCKET_V3
+        run: aws s3 sync --follow-symlinks $GITHUB_WORKSPACE s3://$AWS_S3_BUCKET
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_V3 }}
 
