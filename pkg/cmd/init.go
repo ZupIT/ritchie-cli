@@ -38,7 +38,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-const TemplatesRepoURL = "https://github.com/ZupIT/ritchie-templates.git"
+const TemplatesRepoURL = "https://github.com/ZupIT/ritchie-templates"
 
 var (
 	addRepoInfo               = i18n.T("init.add.commons.repo.info")
