@@ -337,8 +337,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
           aws-region: sa-east-1
 
       - name: Upload files
@@ -346,18 +346,18 @@ jobs:
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_V3 }}
 
-  # unix-smoke-test:
-  #   needs: publish
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Load release version
-  #       run: |
-  #         export RIT_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
-  #         echo
-  #         echo -e "\033[1;32mLatest version:\033[1;37m" $RIT_VERSION
+  unix-smoke-test:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load release version
+        run: |
+          export RIT_VERSION=$(curl https://v3.ritchiecli.io/stable.txt)
+          echo
+          echo -e "\033[1;32mLatest version:\033[1;37m" $RIT_VERSION
 
-  #     - name: Install ritchie
-  #       run: curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+      - name: Install ritchie
+        run: curl -fsSL https://v3.ritchiecli.io/install.sh | bash
 
-  #     - name: Verify Command
-  #       run: rit --version | grep "$RIT_VERSION"
+      - name: Verify Command
+        run: rit --version | grep "$RIT_VERSION"
