@@ -35,7 +35,7 @@ const (
 	// stableVersionFileCache is the file name to cache stableVersion
 	stableVersionFileCache = "stable-version-cache.json"
 
-	StableVersionURL = "https://commons-repo.ritchiecli.io/stable.txt"
+	StableVersionURL = "https://v3.ritchiecli.io/stable.txt"
 )
 
 type Manager struct {

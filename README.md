@@ -50,18 +50,18 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 #### Linux
 
 ```bash
-curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+curl -fsSL https://v3.ritchiecli.io/install.sh | bash
 ```
 
 #### MacOS
 
 ```bash
-curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+curl -fsSL https://v3.ritchiecli.io/install.sh | bash
 ```
 
 #### Windows
 
-- Download the installer from [ritchiecli.msi](https://commons-repo.ritchiecli.io/latest/ritchiecli.msi)
+- Download the installer from [ritchiecli.msi](https://v3.ritchiecli.io/latest/ritchiecli.msi)
 
 - Using Winget:
 
