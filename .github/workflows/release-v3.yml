@@ -1,4 +1,4 @@
-name: Release
+name: Release V3
 
 on:
   workflow_dispatch:
@@ -12,49 +12,51 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  generate-release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  # generate-release:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2.3.4
+  #       with:
+  #         ref: v3
 
-      - name: Create release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ env.RELEASE_VERSION }}
-          release_name: Release ${{ env.RELEASE_VERSION }}
-          body: |
-            Changes in this release
+  #     - name: Create release
+  #       uses: actions/create-release@v1
+  #       with:
+  #         tag_name: ${{ env.RELEASE_VERSION }}
+  #         release_name: Release ${{ env.RELEASE_VERSION }}
+  #         body: |
+  #           Changes in this release
 
-      - name: Generate changelog file
-        uses: dittrichlucas/changelog-generator@main
-        with:
-          token: ${{ env.GITHUB_TOKEN }}
-          repo: ${{ github.repository }}
+  #     - name: Generate changelog file
+  #       uses: dittrichlucas/changelog-generator@main
+  #       with:
+  #         token: ${{ env.GITHUB_TOKEN }}
+  #         repo: ${{ github.repository }}
 
-      - name: Check changelog file
-        run: cat CHANGELOG.md
+  #     - name: Check changelog file
+  #       run: cat CHANGELOG.md
 
-      - name: Create pull request
-        id: cpr
-        uses: peter-evans/create-pull-request@v3
-        with:
-          token: ${{ env.GITHUB_TOKEN }}
-          commit-message: "project/ci: update the changelog file with new release deliveries"
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          signoff: true
-          branch: release-${{ env.RELEASE_VERSION }}
-          delete-branch: true
-          title: "project/ci: generate the changelog file for the ${{ env.RELEASE_VERSION }} release"
-          body: |
-            Update the `CHANGELOG.md` file with the deliveries of the ${{ env.RELEASE_VERSION }} release
-          draft: false
+  #     - name: Create pull request
+  #       id: cpr
+  #       uses: peter-evans/create-pull-request@v3
+  #       with:
+  #         token: ${{ env.GITHUB_TOKEN }}
+  #         commit-message: "project/ci: update the changelog file with new release deliveries"
+  #         committer: GitHub <noreply@github.com>
+  #         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+  #         signoff: true
+  #         branch: release-${{ env.RELEASE_VERSION }}
+  #         delete-branch: true
+  #         title: "project/ci: generate the changelog file for the ${{ env.RELEASE_VERSION }} release"
+  #         body: |
+  #           Update the `CHANGELOG.md` file with the deliveries of the ${{ env.RELEASE_VERSION }} release
+  #         draft: false
 
-      - name: Check outputs
-        run: |
-          echo -e "\033[1;32mPull Request Number - \033[1;37m${{ steps.cpr.outputs.pull-request-number }}"
-          echo -e "\033[1;32mPull Request URL - \033[1;37m${{ steps.cpr.outputs.pull-request-url }}"
+  #     - name: Check outputs
+  #       run: |
+  #         echo -e "\033[1;32mPull Request Number - \033[1;37m${{ steps.cpr.outputs.pull-request-number }}"
+  #         echo -e "\033[1;32mPull Request URL - \033[1;37m${{ steps.cpr.outputs.pull-request-url }}"
 
   generate-release-file:
     runs-on: ubuntu-latest
@@ -77,7 +79,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
 
       - name: Setup golang
         uses: actions/setup-go@v2
@@ -97,7 +101,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
 
       - name: Setup golang
         uses: actions/setup-go@v2
@@ -117,7 +123,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
 
       - name: Setup golang
         uses: actions/setup-go@v2
@@ -139,7 +147,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
 
       - name: Download ritchie linux binary
         uses: actions/download-artifact@v2
@@ -167,7 +177,9 @@ jobs:
       image: centos:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
 
       - name: Download ritchie linux binary
         uses: actions/download-artifact@v2
@@ -200,7 +212,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
 
       - name: Download ritchie darwin binary
         uses: actions/download-artifact@v2
@@ -229,7 +243,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: v3
 
       - name: Download ritchie windows binary
         uses: actions/download-artifact@v2
@@ -295,7 +311,7 @@ jobs:
 
   publish:
     needs:
-      - generate-release
+      # - generate-release
       - organize-artifacts
     runs-on: ubuntu-latest
     steps:
@@ -328,7 +344,7 @@ jobs:
       - name: Upload files
         run: aws s3 sync --follow-symlinks $GITHUB_WORKSPACE s3://$AWS_S3_BUCKET
         env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_V3 }}
 
   unix-smoke-test:
     needs: publish
@@ -336,12 +352,12 @@ jobs:
     steps:
       - name: Load release version
         run: |
-          export RIT_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
+          export RIT_VERSION=$(curl https://v3.ritchiecli.io/stable.txt)
           echo
           echo -e "\033[1;32mLatest version:\033[1;37m" $RIT_VERSION
 
       - name: Install ritchie
-        run: curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
+        run: curl -fsSL https://v3.ritchiecli.io/install.sh | bash
 
       - name: Verify Command
         run: rit --version | grep "$RIT_VERSION"

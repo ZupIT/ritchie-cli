@@ -17,12 +17,12 @@ function metric_server {
 }
 
 function version {
-      export RELEASE_VERSION=$(curl https://commons-repo.ritchiecli.io/stable.txt)
+      export RELEASE_VERSION=$(curl https://v3.ritchiecli.io/stable.txt)
 }
 
 function caller {
 
-   elif expr "$1" : "metric_server" >/dev/null; then
+   if expr "$1" : "metric_server" >/dev/null; then
       version
       metric_server
    else
