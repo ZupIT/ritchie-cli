@@ -1,5 +1,5 @@
 PROVIDER	NAME	CURRENT VERSION	PRIORITY	URL                                           	LATEST VERSION
-Github  	demo	2.3.0          	0       	https://github.com/ZupIT/ritchie-formulas-demo	2.3.3
+Github  	demo	2.3.0          	0       	https://github.com/ZupIT/ritchie-formulas-demo	2.3.3         
 
 There is 1 repo
 
