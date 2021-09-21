@@ -135,7 +135,7 @@ jobs:
         - name: RIT ADD REPO ZIP command (11)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --version="2.2.0"
+            command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
             contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
 
@@ -214,7 +214,7 @@ jobs:
         - name: RIT ADD REPO ZIP command (11)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --version="2.2.0"
+            command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
             contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
 
@@ -295,6 +295,6 @@ jobs:
         - name: RIT ADD REPO ZIP command (11)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: ./rit.exe add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo" --version="2.2.0"
+            command_line: ./rit.exe add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
             contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
