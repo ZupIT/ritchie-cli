@@ -29,10 +29,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
 )
 
-const (
-	ErrVersionNotEmpty = "the version field must not be empty"
-	versionFlagName    = "version"
-)
+const versionFlagName = "version"
 
 var addRepoZipFlags = flags{
 	{
@@ -54,6 +51,8 @@ var addRepoZipFlags = flags{
 		description: "repository version",
 	},
 }
+
+var ErrVersionNotEmpty = errors.New("the version field must not be empty")
 
 type addRepoZipCmd struct {
 	repo formula.RepositoryAddLister
@@ -201,16 +200,14 @@ func (ar *addRepoZipCmd) resolveFlags(cmd *cobra.Command) (formula.Repo, error) 
 		return formula.Repo{}, errors.New(missingFlagText(versionFlagName))
 	}
 
-	repo := formula.Repo{
+	return formula.Repo{
 		Provider:      formula.RepoProvider("ZipRemote"),
 		Name:          formula.RepoName(name),
 		Version:       formula.RepoVersion(version),
 		Url:           repoUrl,
 		IsLocal:       true,
 		LatestVersion: formula.RepoVersion(version),
-	}
-
-	return repo, nil
+	}, nil
 }
 
 func (ar addRepoZipCmd) repoNameValidator(text interface{}) error {
@@ -225,7 +222,7 @@ func (ar addRepoZipCmd) repoNameValidator(text interface{}) error {
 func (ar addRepoZipCmd) repoVersionValidator(text interface{}) error {
 	in := text.(string)
 	if in == "" {
-		return errors.New(ErrVersionNotEmpty)
+		return ErrVersionNotEmpty
 	}
 
 	return nil

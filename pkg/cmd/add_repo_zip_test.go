@@ -124,7 +124,7 @@ func TestAddRepoZipCmd(t *testing.T) {
 			name:     "return error when the version field is empty",
 			repoName: "zipremote",
 			repoURL:  "https://provider.com/download-repo/repo-1.0.0.zip",
-			want:     errors.New(ErrVersionNotEmpty),
+			want:     ErrVersionNotEmpty,
 		},
 		{
 			name:        "return error for the url field",
