@@ -200,7 +200,7 @@ func TestPreRun(t *testing.T) {
 				file: fileManagerMock{exist: true, rBytes: []byte("error")},
 			},
 			out: out{
-				err: errors.New("invalid character 'e' looking for beginning of value"),
+				err: errors.New("yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `error` into formula.Config"),
 			},
 		},
 		{

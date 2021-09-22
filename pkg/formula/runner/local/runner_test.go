@@ -18,6 +18,7 @@ package local
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -128,7 +129,7 @@ func TestRun(t *testing.T) {
 			name:      "Pre run error",
 			def:       formula.Definition{Path: "testing/without-config", RepoName: "commons"},
 			inputType: 0,
-			want:      errors.New("Failed to load formula config file\nTry running rit update repo\nConfig file path not found: /tmp/.rit-runner-local/repos/commons/testing/without-config/config.json"),
+			want:      fmt.Errorf(runner.LoadConfigErrMsg, filepath.Join(ritHome, "repos", "commons", "testing", "without-config", "config.json")),
 		},
 		{
 			name:       "Post run error",

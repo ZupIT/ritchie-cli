@@ -61,7 +61,7 @@ func TestUpgradeUrl(t *testing.T) {
 				},
 				os: "windows",
 			},
-			want: "https://commons-repo.ritchiecli.io/1.0.0/windows/rit.exe",
+			want: "https://v3.ritchiecli.io/1.0.0/windows/rit.exe",
 		},
 		{
 			name: "Get url for when happening a error",

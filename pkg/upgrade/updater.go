@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	upgradeURLFormat = "https://commons-repo.ritchiecli.io/%s/%s/rit"
+	upgradeURLFormat = "https://v3.ritchiecli.io/%s/%s/rit"
 )
 
 type updater interface {
