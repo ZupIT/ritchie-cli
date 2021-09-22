@@ -250,10 +250,6 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 		return formula.Create{}, err
 	}
 
-	if err := c.template.Validate(); err != nil {
-		return formula.Create{}, err
-	}
-
 	languages, err := c.template.Languages()
 	if err != nil {
 		return formula.Create{}, err
@@ -271,12 +267,16 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 
 	var tpl string
 	if len(templates) != 1 {
-		tpl, err = c.inList.List("Choose the template type: ", templates)
+		tpl, err = c.inList.List("Choose the template: ", templates)
 		if err != nil {
 			return formula.Create{}, err
 		}
 	} else {
 		tpl = templates[0]
+	}
+
+	if err := c.template.Validate(lang, tpl); err != nil {
+		return formula.Create{}, err
 	}
 
 	workspaces, err := c.workspace.List()

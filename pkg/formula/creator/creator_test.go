@@ -43,10 +43,10 @@ const (
 	fCmdCorrectPython = "rit scaffold generate test_python"
 	fCmdCorrectShell  = "rit scaffold generate test_shell"
 	langGo            = "go"
-	langJava          = "java"
+	langJava          = "java11"
 	langNode          = "node"
-	langPython        = "python"
-	langShell         = "bash shell"
+	langPython        = "python3"
+	langShell         = "shell-bat"
 	tpl               = "helloWorld"
 )
 

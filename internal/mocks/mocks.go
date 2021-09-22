@@ -417,8 +417,8 @@ func (tm *TemplateManagerMock) ResolverNewPath(oldPath, newDir, lang, tpl, works
 	return args.String(0), args.Error(1)
 }
 
-func (tm *TemplateManagerMock) Validate() error {
-	args := tm.Called()
+func (tm *TemplateManagerMock) Validate(lang, tpl string) error {
+	args := tm.Called(lang, tpl)
 	return args.Error(0)
 }
 

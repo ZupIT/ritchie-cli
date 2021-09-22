@@ -41,6 +41,7 @@ var (
  	└── template 1
  └── root
 
+And the template must contain "build.bat" and "build.sh" files 
 See example: [https://github.com/ZupIT/ritchie-templates]`
 )
 
@@ -49,7 +50,7 @@ type Manager interface {
 	Templates(lang string) ([]string, error)
 	TemplateFiles(lang, tpl string) ([]File, error)
 	ResolverNewPath(oldPath, newDir, lang, tpl, workspacePath string) (string, error)
-	Validate() error
+	Validate(lang, tpl string) error
 }
 
 type File struct {
@@ -109,11 +110,16 @@ func (tm DefaultManager) Templates(lang string) ([]string, error) {
 }
 
 func (tm DefaultManager) TemplateFiles(lang, tpl string) ([]File, error) {
+	var tplDir string
 	tplD := tm.templateDir()
 
-	tplDir := filepath.Join(tplD, languageDir, lang, tpl)
+	if tpl == "src" {
+		tplDir = filepath.Join(tplD, languageDir, lang)
+	} else {
+		tplDir = filepath.Join(tplD, languageDir, lang, tpl)
+	}
 
-	templete, err := readDirRecursive(tplDir)
+	template, err := readDirRecursive(tplDir)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +130,7 @@ func (tm DefaultManager) TemplateFiles(lang, tpl string) ([]File, error) {
 		return nil, err
 	}
 
-	return append(templete, rootTpl...), nil
+	return append(template, rootTpl...), nil
 }
 
 func readDirRecursive(dir string) ([]File, error) {
@@ -166,13 +172,46 @@ func (tm DefaultManager) ResolverNewPath(oldPath, formulaPath, lang, tpl, worksp
 	return "", fmt.Errorf("fail to resolve new Path %s", oldPath)
 }
 
-func (tm DefaultManager) Validate() error {
+func (tm DefaultManager) Validate(lang, tpl string) error {
+	var tplDir string
 	tplDirPath := tm.templateDir()
 	tplLangPath := filepath.Join(tplDirPath, languageDir)
 	tplRootPath := filepath.Join(tplDirPath, rootDir)
 	invalidErr := fmt.Errorf(errMsg, tplDirPath)
-	if !tm.dir.Exists(tplDirPath) || !tm.dir.Exists(tplLangPath) || !tm.dir.Exists(tplRootPath) {
+
+	if tpl == "src" {
+		tplDir = filepath.Join(tplDirPath, languageDir, lang)
+	} else {
+		tplDir = filepath.Join(tplDirPath, languageDir, lang, tpl)
+	}
+
+	if !tm.dir.Exists(tplDirPath) || !tm.dir.Exists(tplLangPath) || !tm.dir.Exists(tplRootPath) || !isValidTemplate(tplDir) {
 		return invalidErr
 	}
 	return nil
+}
+
+func isValidTemplate(repoPath string) bool {
+	hasBuildBat := false
+	hasBuildSh := false
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return false
+	}
+
+	for _, file := range files {
+		if file.Name() == "build.bat" {
+			hasBuildBat = true
+		}
+		if file.Name() == "build.sh" {
+			hasBuildSh = true
+		}
+	}
+
+	if hasBuildBat && hasBuildSh {
+		return true
+	} else {
+		return false
+	}
+
 }

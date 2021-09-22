@@ -55,7 +55,7 @@ func (c CreateManager) Create(cf formula.Create) error {
 		return err
 	}
 
-	if err := c.tplM.Validate(); err != nil {
+	if err := c.tplM.Validate(cf.Lang, cf.Tpl); err != nil {
 		return err
 	}
 

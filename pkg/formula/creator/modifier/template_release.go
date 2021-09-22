@@ -23,7 +23,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 )
 
-const TemplateFormulasRepoURL = "https://github.com/ZupIT/ritchie-formulas"
+const TemplateFormulasRepoURL = "https://github.com/ZupIT/ritchie-templates"
 
 type TemplateRelease struct{}
 

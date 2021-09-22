@@ -296,7 +296,7 @@ func TestCreateFormulaCmd(t *testing.T) {
 			workspaceMock.On("UpdateHash", mock.Anything, mock.Anything).Return(nil)
 
 			templateManagerMock := new(mocks.TemplateManagerMock)
-			templateManagerMock.On("Validate").Return(tt.in.tempValErr)
+			templateManagerMock.On("Validate", mock.Anything, mock.Anything).Return(tt.in.tempValErr)
 			templateManagerMock.On("Languages").Return(tt.in.tempLanguages, tt.in.tempLanguagesErr)
 			templateManagerMock.On("Templates", mock.Anything).Return(tt.in.tempTemplates, tt.in.tempTemplatesErr)
 

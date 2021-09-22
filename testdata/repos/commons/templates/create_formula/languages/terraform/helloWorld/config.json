@@ -1,0 +1,81 @@
+{
+  "dockerImageBuilder": "ritclizup/rit-shell-bat-builder",
+  "inputs": [
+    {
+      "name": "aws_access_key_id",
+      "type": "CREDENTIAL_AWS_ACCESSKEYID"
+    },
+    {
+      "name": "aws_secret_access_key",
+      "type": "CREDENTIAL_AWS_SECRETACCESSKEY"
+    },
+    {
+      "default": "plan",
+      "items": [
+        "plan",
+        "apply",
+        "destroy"
+      ],
+      "label": "Action ",
+      "name": "action",
+      "required": true,
+      "type": "text"
+    },
+    {
+      "cache": {
+        "active": true,
+        "newLabel": "Type new value. ",
+        "qty": 3
+      },
+      "label": "Bucket name: ",
+      "name": "tf_var_bucket_name",
+      "tutorial": "Enter the name of the bucket you want to create",
+      "type": "text"
+    },
+    {
+      "default": "sa-east-1",
+      "items": [
+        "sa-east-1",
+        "us-east-2",
+        "us-east-1",
+        "us-west-1",
+        "us-west-2",
+        "af-south-1",
+        "ap-east-1",
+        "ap-south-1",
+        "ap-northeast-3",
+        "ap-northeast-2",
+        "ap-southeast-1",
+        "ap-southeast-2",
+        "ap-northeast-1",
+        "ca-central-1",
+        "eu-central-1",
+        "eu-west-1",
+        "eu-west-2",
+        "eu-south-1",
+        "eu-west-3",
+        "eu-north-1",
+        "me-south-1"
+      ],
+      "label": "Region: ",
+      "name": "tf_var_bucket_region",
+      "required": true,
+      "tutorial": "The region where AWS operations will take place. Examples are us-east-1, us-west-2, etc",
+      "type": "text"
+    },
+    {
+      "cache": {
+        "active": true,
+        "newLabel": "Type new value. ",
+        "qty": 3
+      },
+      "label": "S3 Bucket name: ",
+      "name": "backend_s3",
+      "required": false,
+      "tutorial": "Enter the name of the bucket where you want to store your state",
+      "type": "text"
+    }
+  ],
+  "template": "terraform",
+  "templateRelease": "{tag}"
+}

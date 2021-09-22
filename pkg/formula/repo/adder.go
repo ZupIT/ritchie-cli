@@ -28,7 +28,6 @@ import (
 )
 
 var ErrInvalidRepo = errors.New("the selected repository has no formulas and is not a valid templeta repo")
-var ErrInvalidTemplateRepo = errors.New("cannot use 'src' as a template name")
 
 type AddManager struct {
 	ritHome string
@@ -171,7 +170,7 @@ func isValidTemplateRepo(repoPath string) error {
 	}
 
 	for _, file := range files {
-		err := checkTemplates(repoPath, file.Name())
+		err := hasTemplates(repoPath, file.Name())
 		if err != nil {
 			return err
 		}
@@ -180,7 +179,7 @@ func isValidTemplateRepo(repoPath string) error {
 	return nil
 }
 
-func checkTemplates(repoPath, lang string) error {
+func hasTemplates(repoPath, lang string) error {
 	repoPath = filepath.Join(repoPath, lang)
 	files, err := ioutil.ReadDir(repoPath)
 	if err != nil {
@@ -188,10 +187,41 @@ func checkTemplates(repoPath, lang string) error {
 	}
 
 	for _, file := range files {
-		if file.Name() == "src" {
-			return ErrInvalidTemplateRepo
+		if file.Name() == "src" && file.IsDir() {
+			return isValidTemplate(repoPath)
+		} else if file.IsDir() {
+			tplPath := filepath.Join(repoPath, file.Name())
+			err := isValidTemplate(tplPath)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
+}
+
+func isValidTemplate(repoPath string) error {
+	hasBuildBat := false
+	hasBuildSh := false
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return ErrInvalidRepo
+	}
+
+	for _, file := range files {
+		if file.Name() == "build.bat" {
+			hasBuildBat = true
+		}
+		if file.Name() == "build.sh" {
+			hasBuildSh = true
+		}
+	}
+
+	if hasBuildBat && hasBuildSh {
+		return nil
+	} else {
+		return ErrInvalidRepo
+	}
+
 }
