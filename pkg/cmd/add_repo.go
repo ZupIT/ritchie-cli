@@ -181,7 +181,14 @@ func (ar *addRepoCmd) resolveInput(cmd *cobra.Command) (formula.Repo, error) {
 }
 
 func (ar *addRepoCmd) resolvePrompt() (formula.Repo, error) {
-	provider, err := ar.List("Select your provider:", ar.repoProviders.List())
+	providers := ar.repoProviders.List()
+	for key, value := range providers {
+		if value == "ZipRemote" {
+			providers = append(providers[:key], providers[key+1:]...)
+		}
+	}
+
+	provider, err := ar.List("Select your provider:", providers)
 	if err != nil {
 		return formula.Repo{}, err
 	}

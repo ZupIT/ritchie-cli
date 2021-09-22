@@ -47,6 +47,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git/bitbucket"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/git/gitlab"
+	"github.com/ZupIT/ritchie-cli/pkg/git/zipremote"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
@@ -96,11 +97,13 @@ func Build() *cobra.Command {
 	githubRepo := github.NewRepoManager(http.DefaultClient)
 	gitlabRepo := gitlab.NewRepoManager(http.DefaultClient)
 	bitbucketRepo := bitbucket.NewRepoManager(http.DefaultClient)
+	zipremoteRepo := zipremote.NewRepoManager(http.DefaultClient)
 
 	repoProviders := formula.NewRepoProviders()
 	repoProviders.Add("Github", formula.Git{Repos: githubRepo, NewRepoInfo: github.NewRepoInfo})
 	repoProviders.Add("Gitlab", formula.Git{Repos: gitlabRepo, NewRepoInfo: gitlab.NewRepoInfo})
 	repoProviders.Add("Bitbucket", formula.Git{Repos: bitbucketRepo, NewRepoInfo: bitbucket.NewRepoInfo})
+	repoProviders.Add("ZipRemote", formula.Git{Repos: zipremoteRepo, NewRepoInfo: zipremote.NewRepoInfo})
 
 	treeGen := tree.NewGenerator(dirManager, fileManager)
 
@@ -239,6 +242,7 @@ func Build() *cobra.Command {
 	setEnvCmd := cmd.NewSetEnvCmd(envFindSetter, inputText, inputList)
 	showEnvCmd := cmd.NewShowEnvCmd(envFinder)
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, credResolver, inputTextValidator, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, repoDetail)
+	addRepoZipCmd := cmd.NewAddRepoZipCmd(repoAddLister, inputTextValidator, inputURL, inputBool, tutorialFinder, treeChecker)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, inputBool, repoDeleter)
@@ -262,7 +266,7 @@ func Build() *cobra.Command {
 	listFormulaCmd := cmd.NewListFormulaCmd(repoLister, inputList, treeManager, tutorialFinder)
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
-	addCmd.AddCommand(addRepoCmd, addWorkspaceCmd)
+	addCmd.AddCommand(addRepoCmd, addRepoZipCmd, addWorkspaceCmd)
 	updateCmd.AddCommand(updateRepoCmd, updateWorkspaceCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteEnvCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)
