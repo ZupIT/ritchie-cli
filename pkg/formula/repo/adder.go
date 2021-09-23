@@ -52,7 +52,9 @@ func (ad AddManager) Add(repo formula.Repo) error {
 		latestTag := ad.repo.LatestTag(repo)
 		repo.LatestVersion = formula.RepoVersion(latestTag)
 		repo.UpdateCache()
+	}
 
+	if !repo.IsLocal || repo.Provider == "ZipRemote" {
 		if err := ad.repo.Create(repo); err != nil {
 			return err
 		}

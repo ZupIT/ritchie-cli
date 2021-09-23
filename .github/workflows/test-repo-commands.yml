@@ -18,6 +18,8 @@ on:
       - '**/add.go'
       - '**/add_repo_test.go'
       - '**/add_repo.go'
+      - '**/add_repo_zip_test.go'
+      - '**/add_repo_zip.go'
       - '**/cmd.go'
       - '**/delete_test.go'
       - '**/delete.go'
@@ -39,6 +41,8 @@ on:
       - '**/add.go'
       - '**/add_repo_test.go'
       - '**/add_repo.go'
+      - '**/add_repo_zip_test.go'
+      - '**/add_repo_zip.go'
       - '**/cmd.go'
       - '**/delete_test.go'
       - '**/delete.go'
@@ -139,6 +143,11 @@ jobs:
           with:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert6.txt
+        - name: RIT ADD REPO ZIP command (13)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
+            contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
 
   macos:
@@ -224,6 +233,11 @@ jobs:
           with:
             command_line: rit list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert6.txt
+        - name: RIT ADD REPO ZIP command (13)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
+            contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
 
   windows:
@@ -312,4 +326,9 @@ jobs:
             command_line: ./rit.exe list repo
             assert_file_path: testdata/gha_workflows/repo_workflow/assert6.txt
             specific_line: 4
+        - name: RIT ADD REPO ZIP command (13)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
+            contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
