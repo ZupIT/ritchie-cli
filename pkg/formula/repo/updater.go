@@ -77,12 +77,12 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 		repo.LatestVersion = formula.RepoVersion(latestTag)
 	} else if repo.Provider == ZipRemoteProvider {
 		repo.LatestVersion = version
+		repo.Url = url
 	}
 
 	repo.UpdateCache()
 	repo.Version = version
 	repo.TreeVersion = tree.Version
-	repo.Url = url
 
 	if err := up.repo.Create(*repo); err != nil {
 		return err
