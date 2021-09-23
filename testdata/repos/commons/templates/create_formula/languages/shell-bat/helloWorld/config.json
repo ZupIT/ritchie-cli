@@ -1,0 +1,52 @@
+{
+  "dockerImageBuilder": "ritclizup/rit-shell-bat-builder",
+  "inputs": [
+    {
+      "cache": {
+        "active": true,
+        "newLabel": "Type new value. ",
+        "qty": 3
+      },
+      "label": "Type your name: ",
+      "name": "rit_input_text",
+      "required": true,
+      "tutorial": "Your prefer name",
+      "type": "text"
+    },
+    {
+      "default": "false",
+      "items": [
+        "false",
+        "true"
+      ],
+      "label": "Have you ever used Ritchie? ",
+      "name": "rit_input_boolean",
+      "required": false,
+      "tutorial": "Choose one option",
+      "type": "bool"
+    },
+    {
+      "default": "everything",
+      "items": [
+        "daily tasks",
+        "workflows",
+        "toils",
+        "everything"
+      ],
+      "label": "What do you want to automate? ",
+      "name": "rit_input_list",
+      "required": false,
+      "tutorial": "Select what you want to automate with Ritchie",
+      "type": "text"
+    },
+    {
+      "label": "Tell us a secret: ",
+      "name": "rit_input_password",
+      "required": true,
+      "tutorial": "Type a secret",
+      "type": "password"
+    }
+  ],
+  "template": "shell-bat",
+  "templateRelease": "{tag}"
+}

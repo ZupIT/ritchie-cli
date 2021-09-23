@@ -55,7 +55,7 @@ func (c CreateManager) Create(cf formula.Create) error {
 		return err
 	}
 
-	if err := c.tplM.Validate(); err != nil {
+	if err := c.tplM.Validate(cf.Lang, cf.Tpl); err != nil {
 		return err
 	}
 
@@ -66,7 +66,7 @@ func (c CreateManager) Create(cf formula.Create) error {
 	fCmdName := cf.FormulaCmdName()
 
 	modifiers := modifier.NewModifiers(cf)
-	if err := c.generateFormulaFiles(cf.FormulaPath, cf.Lang, fCmdName, cf.Workspace.Dir, modifiers); err != nil {
+	if err := c.generateFormulaFiles(cf.FormulaPath, cf.Lang, cf.Tpl, fCmdName, cf.Workspace.Dir, modifiers); err != nil {
 		return err
 	}
 
@@ -84,6 +84,7 @@ func (c CreateManager) isValidCmd(fPath string) error {
 func (c CreateManager) generateFormulaFiles(
 	fPath,
 	lang,
+	tpl,
 	fCmdName,
 	workSpcPath string,
 	modifiers []modifier.Modifier,
@@ -97,23 +98,23 @@ func (c CreateManager) generateFormulaFiles(
 		return err
 	}
 
-	if err := c.applyLangTemplate(lang, fPath, workSpcPath, modifiers); err != nil {
+	if err := c.applyLangTemplate(lang, tpl, fPath, workSpcPath, modifiers); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string, modifiers []modifier.Modifier) error {
+func (c CreateManager) applyLangTemplate(lang, tpl, formulaPath, workspacePath string, modifiers []modifier.Modifier) error {
 
-	tFiles, err := c.tplM.LangTemplateFiles(lang)
+	tFiles, err := c.tplM.TemplateFiles(lang, tpl)
 	if err != nil {
 		return err
 	}
 
 	for _, f := range tFiles {
 		if f.IsDir {
-			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, workspacePath)
+			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, tpl, workspacePath) /// olhar
 			if err != nil {
 				return err
 			}
@@ -122,7 +123,7 @@ func (c CreateManager) applyLangTemplate(lang, formulaPath, workspacePath string
 				return err
 			}
 		} else {
-			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, workspacePath)
+			newPath, err := c.tplM.ResolverNewPath(f.Path, formulaPath, lang, tpl, workspacePath)
 			if err != nil {
 				return err
 			}
