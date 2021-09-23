@@ -237,7 +237,7 @@ func TestUpdateManager_Update(t *testing.T) {
 				repoAdder = NewUpdater(tt.in.ritHome, repoManagerMock, treeManager)
 			}
 
-			got := repoAdder.Update(tt.in.repo.Name, tt.in.repo.Version)
+			got := repoAdder.Update(tt.in.repo.Name, tt.in.repo.Version, tt.in.repo.Url)
 
 			if got != nil {
 				assert.EqualError(t, tt.want, got.Error())

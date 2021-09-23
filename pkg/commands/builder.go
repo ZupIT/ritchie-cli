@@ -244,6 +244,7 @@ func Build() *cobra.Command {
 	addRepoCmd := cmd.NewAddRepoCmd(repoAddLister, repoProviders, credResolver, inputTextValidator, inputURL, inputList, inputBool, inputInt, tutorialFinder, treeChecker, repoDetail)
 	addRepoZipCmd := cmd.NewAddRepoZipCmd(repoAddLister, inputTextValidator, inputURL, inputBool, tutorialFinder, treeChecker)
 	updateRepoCmd := cmd.NewUpdateRepoCmd(http.DefaultClient, repoListUpdater, repoProviders, inputText, inputPassword, inputURL, inputList, inputBool, inputInt)
+	updateRepoZipCmd := cmd.NewUpdateRepoZipCmd(repoListUpdater, inputTextValidator, inputURL, inputList)
 	listRepoCmd := cmd.NewListRepoCmd(repoLister, tutorialFinder)
 	deleteRepoCmd := cmd.NewDeleteRepoCmd(repoLister, inputList, inputBool, repoDeleter)
 	listWorkspaceCmd := cmd.NewListWorkspaceCmd(formulaWorkspace, tutorialFinder)
@@ -267,7 +268,7 @@ func Build() *cobra.Command {
 
 	autocompleteCmd.AddCommand(autocompleteZsh, autocompleteBash, autocompleteFish, autocompletePowerShell)
 	addCmd.AddCommand(addRepoCmd, addRepoZipCmd, addWorkspaceCmd)
-	updateCmd.AddCommand(updateRepoCmd, updateWorkspaceCmd)
+	updateCmd.AddCommand(updateRepoCmd, updateRepoZipCmd, updateWorkspaceCmd)
 	createCmd.AddCommand(createFormulaCmd)
 	deleteCmd.AddCommand(deleteEnvCmd, deleteRepoCmd, deleteFormulaCmd, deleteWorkspaceCmd, deleteCredentialCmd)
 	listCmd.AddCommand(listRepoCmd)

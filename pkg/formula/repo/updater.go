@@ -28,6 +28,8 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 )
 
+const ZipRemoteProvider = "ZipRemote"
+
 var ErrLocalRepo = errors.New("local repository cannot be updated")
 
 type UpdateManager struct {
@@ -48,7 +50,7 @@ func NewUpdater(
 	}
 }
 
-func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersion) error {
+func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersion, url string) error {
 	repos, err := up.repo.List()
 	if err != nil {
 		return err
@@ -66,15 +68,21 @@ func (up UpdateManager) Update(name formula.RepoName, version formula.RepoVersio
 		return fmt.Errorf("repository name %q was not found", name)
 	}
 
-	if repo.IsLocal {
+	if repo.IsLocal && repo.Provider != ZipRemoteProvider {
 		return ErrLocalRepo
 	}
 
-	latestTag := up.repo.LatestTag(*repo)
-	repo.LatestVersion = formula.RepoVersion(latestTag)
+	if repo.Provider != ZipRemoteProvider {
+		latestTag := up.repo.LatestTag(*repo)
+		repo.LatestVersion = formula.RepoVersion(latestTag)
+	} else if repo.Provider == ZipRemoteProvider {
+		repo.LatestVersion = version
+	}
+
 	repo.UpdateCache()
 	repo.Version = version
 	repo.TreeVersion = tree.Version
+	repo.Url = url
 
 	if err := up.repo.Create(*repo); err != nil {
 		return err
