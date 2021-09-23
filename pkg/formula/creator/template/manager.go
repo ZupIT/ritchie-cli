@@ -34,17 +34,23 @@ var (
 	templatePath = []string{"repos", "commons", "templates", "create_formula"}
 	errMsg       = `To create a new formula, the commons repository must contain the following structure: 
 %s
- └── languages
+ └── language 1
+ 	└── template 1
+	└── template 2
+ └── language 2
+ 	└── template 1
  └── root
 
-See example: [https://github.com/ZupIT/ritchie-formulas/blob/master/templates/create_formula/README.md]`
+And the template must contain "build.bat" and "build.sh" files 
+See example: [https://github.com/ZupIT/ritchie-templates]`
 )
 
 type Manager interface {
 	Languages() ([]string, error)
-	LangTemplateFiles(lang string) ([]File, error)
-	ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error)
-	Validate() error
+	Templates(lang string) ([]string, error)
+	TemplateFiles(lang, tpl string) ([]File, error)
+	ResolverNewPath(oldPath, newDir, lang, tpl, workspacePath string) (string, error)
+	Validate(lang, tpl string) error
 }
 
 type File struct {
@@ -83,12 +89,37 @@ func (tm DefaultManager) Languages() ([]string, error) {
 	return result, nil
 }
 
-func (tm DefaultManager) LangTemplateFiles(lang string) ([]File, error) {
+func (tm DefaultManager) Templates(lang string) ([]string, error) {
 	tplD := tm.templateDir()
 
 	langDir := filepath.Join(tplD, languageDir, lang)
 
-	languageTpl, err := readDirRecursive(langDir)
+	dirs, err := ioutil.ReadDir(langDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []string
+	for _, d := range dirs {
+		if d.IsDir() {
+			result = append(result, d.Name())
+		}
+	}
+
+	return result, nil
+}
+
+func (tm DefaultManager) TemplateFiles(lang, tpl string) ([]File, error) {
+	var tplDir string
+	tplD := tm.templateDir()
+
+	if tpl == "src" {
+		tplDir = filepath.Join(tplD, languageDir, lang)
+	} else {
+		tplDir = filepath.Join(tplD, languageDir, lang, tpl)
+	}
+
+	template, err := readDirRecursive(tplDir)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +130,7 @@ func (tm DefaultManager) LangTemplateFiles(lang string) ([]File, error) {
 		return nil, err
 	}
 
-	return append(languageTpl, rootTpl...), nil
+	return append(template, rootTpl...), nil
 }
 
 func readDirRecursive(dir string) ([]File, error) {
@@ -125,29 +156,62 @@ func readDirRecursive(dir string) ([]File, error) {
 	return fileNames, nil
 }
 
-func (tm DefaultManager) ResolverNewPath(oldPath, formulaPath, lang, workspacePath string) (string, error) {
+func (tm DefaultManager) ResolverNewPath(oldPath, formulaPath, lang, tpl, workspacePath string) (string, error) {
 	tplD := tm.templateDir()
-	langTplPath := filepath.Join(tplD, languageDir, lang)
+	tplTypePath := filepath.Join(tplD, languageDir, lang, tpl)
 	rootTplPath := filepath.Join(tplD, rootDir)
 
 	if strings.Contains(oldPath, rootTplPath) {
 		return strings.Replace(oldPath, rootTplPath, workspacePath, 1), nil
 	}
 
-	if strings.Contains(oldPath, langTplPath) {
-		return strings.Replace(oldPath, langTplPath, formulaPath, 1), nil
+	if strings.Contains(oldPath, tplTypePath) {
+		return strings.Replace(oldPath, tplTypePath, formulaPath, 1), nil
 	}
 
 	return "", fmt.Errorf("fail to resolve new Path %s", oldPath)
 }
 
-func (tm DefaultManager) Validate() error {
+func (tm DefaultManager) Validate(lang, tpl string) error {
+	var tplDir string
 	tplDirPath := tm.templateDir()
 	tplLangPath := filepath.Join(tplDirPath, languageDir)
 	tplRootPath := filepath.Join(tplDirPath, rootDir)
 	invalidErr := fmt.Errorf(errMsg, tplDirPath)
-	if !tm.dir.Exists(tplDirPath) || !tm.dir.Exists(tplLangPath) || !tm.dir.Exists(tplRootPath) {
+
+	if tpl == "src" {
+		tplDir = filepath.Join(tplDirPath, languageDir, lang)
+	} else {
+		tplDir = filepath.Join(tplDirPath, languageDir, lang, tpl)
+	}
+
+	if !tm.dir.Exists(tplDirPath) || !tm.dir.Exists(tplLangPath) || !tm.dir.Exists(tplRootPath) || !isValidTemplate(tplDir) {
 		return invalidErr
 	}
 	return nil
+}
+
+func isValidTemplate(repoPath string) bool {
+	hasBuildBat := false
+	hasBuildSh := false
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return false
+	}
+
+	for _, file := range files {
+		if file.Name() == "build.bat" {
+			hasBuildBat = true
+		}
+		if file.Name() == "build.sh" {
+			hasBuildSh = true
+		}
+	}
+
+	if hasBuildBat && hasBuildSh {
+		return true
+	} else {
+		return false
+	}
+
 }

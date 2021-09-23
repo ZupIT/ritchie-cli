@@ -1,0 +1,5 @@
+{
+  "require": {
+    "codedungeon/php-cli-colors": "~1.0"
+  }
+}

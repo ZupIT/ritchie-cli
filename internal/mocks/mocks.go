@@ -402,18 +402,23 @@ func (tm *TemplateManagerMock) Languages() ([]string, error) {
 	return args.Get(0).([]string), args.Error(1)
 }
 
-func (tm *TemplateManagerMock) LangTemplateFiles(lang string) ([]template.File, error) {
+func (tm *TemplateManagerMock) Templates(lang string) ([]string, error) {
 	args := tm.Called(lang)
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (tm *TemplateManagerMock) TemplateFiles(lang, tpl string) ([]template.File, error) {
+	args := tm.Called(lang, tpl)
 	return args.Get(0).([]template.File), args.Error(1)
 }
 
-func (tm *TemplateManagerMock) ResolverNewPath(oldPath, newDir, lang, workspacePath string) (string, error) {
-	args := tm.Called(oldPath, newDir, lang, workspacePath)
+func (tm *TemplateManagerMock) ResolverNewPath(oldPath, newDir, lang, tpl, workspacePath string) (string, error) {
+	args := tm.Called(oldPath, newDir, lang, tpl, workspacePath)
 	return args.String(0), args.Error(1)
 }
 
-func (tm *TemplateManagerMock) Validate() error {
-	args := tm.Called()
+func (tm *TemplateManagerMock) Validate(lang, tpl string) error {
+	args := tm.Called(lang, tpl)
 	return args.Error(0)
 }
 

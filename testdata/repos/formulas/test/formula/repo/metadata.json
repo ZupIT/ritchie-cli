@@ -1,0 +1,17 @@
+{
+  "execution": [
+    "local",
+    "docker"
+  ],
+  "os": {
+    "deps": [],
+    "support": [
+      "windows",
+      "mac",
+      "linux"
+    ]
+  },
+  "tags": [
+    "test", "formula", "repo"
+  ]
+}

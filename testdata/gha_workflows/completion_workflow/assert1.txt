@@ -37,6 +37,7 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
         }
         'rit;add' {
             [CompletionResult]::new('repo', 'repo', [CompletionResultType]::ParameterValue, 'Add a repository')
+            [CompletionResult]::new('repo-zip', 'repo-zip', [CompletionResultType]::ParameterValue, 'Add a repository by URL')
             [CompletionResult]::new('workspace', 'workspace', [CompletionResultType]::ParameterValue, 'Add new workspace')
             break
         }
@@ -47,6 +48,12 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
             [CompletionResult]::new('--repoUrl', 'repoUrl', [CompletionResultType]::ParameterName, 'repository url')
             [CompletionResult]::new('--tag', 'tag', [CompletionResultType]::ParameterName, 'repository tag version')
             [CompletionResult]::new('--token', 'token', [CompletionResultType]::ParameterName, 'access token')
+            break
+        }
+        'rit;add;repo-zip' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'repository name')
+            [CompletionResult]::new('--repoUrl', 'repoUrl', [CompletionResultType]::ParameterName, 'repository url')
+            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'repository version')
             break
         }
         'rit;add;workspace' {
@@ -91,6 +98,7 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
         'rit;create;formula' {
             [CompletionResult]::new('--language', 'language', [CompletionResultType]::ParameterName, 'Select formula''s language (i.e: go, java, python [...])')
             [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'You must create your command based in this example [rit group verb noun]')
+            [CompletionResult]::new('--template', 'template', [CompletionResultType]::ParameterName, 'Select formula''s templete')
             [CompletionResult]::new('--workspace', 'workspace', [CompletionResultType]::ParameterName, 'Provide workspace name')
             break
         }

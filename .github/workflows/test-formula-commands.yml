@@ -62,16 +62,18 @@ jobs:
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            command_line: rit create formula --name="rit functional test" --language="python3" --template="helloWorld" --workspace="Default"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert1.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT ADD REPO commons
-          run: rit add repo --provider="Github" --name="commons" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
+        - name: RIT INIT with commons repo
+          run: rit init --sendMetrics="no" --addCommons="yes" --runType="local"
+        - name: RIT ADD REPO formulas
+          run: rit add repo --provider="Github" --name="formulas" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
         - name: RIT CREATE FORMULA command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            command_line: rit create formula --name="rit functional test" --language="python3" --template="helloWorld" --workspace="Default"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
             expected_result: PASSED
             specific_line: 1
@@ -99,10 +101,10 @@ jobs:
             command_line: rit delete formula --workspace="Default" --formula="rit unexistent formula"
             contains: no such file or directory
             expected_result: PASSED
-        - name: RIT LIST FORMULA command (7)
+        - name: RIT LIST FORMULA formulas (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit list formula --name="commons"
+            command_line: rit list formula --name="formulas"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
@@ -123,16 +125,18 @@ jobs:
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            command_line: rit create formula --name="rit functional test" --language="python3" --template="helloWorld" --workspace="Default"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert1.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT ADD REPO commons
-          run: rit add repo --provider="Github" --name="commons" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
+        - name: RIT INIT with commons repo
+          run: rit init --sendMetrics="no" --addCommons="yes" --runType="local"
+        - name: RIT ADD REPO formulas
+          run: rit add repo --provider="Github" --name="formulas" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
         - name: RIT CREATE FORMULA command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit create formula --name="rit functional test" --language="python3" --workspace="Default"
+            command_line: rit create formula --name="rit functional test" --language="python3" --template="helloWorld" --workspace="Default"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
             expected_result: PASSED
             specific_line: 1
@@ -160,10 +164,10 @@ jobs:
             command_line: rit delete formula --workspace="Default" --formula="rit unexistent formula"
             contains: no such file or directory
             expected_result: PASSED
-        - name: RIT LIST FORMULA command (7)
+        - name: RIT LIST FORMULA formulas (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: rit list formula --name="commons"
+            command_line: rit list formula --name="formulas"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
@@ -185,16 +189,18 @@ jobs:
         - name: RIT CREATE FORMULA command (1)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: ./rit.exe create formula --name="rit functional test" --language="python3" --workspace="Default"
+            command_line: ./rit.exe create formula --name="rit functional test" --language="python3" --template="helloWorld" --workspace="Default"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert1.txt
             expected_result: PASSED
             specific_line: 1
-        - name: RIT ADD REPO commons
-          run: ./rit.exe add repo --provider="Github" --name="commons" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
+        - name: RIT INIT with commons repo
+          run: ./rit.exe init --sendMetrics="no" --addCommons="yes" --runType="local"
+        - name: RIT ADD REPO formulas
+          run: ./rit.exe add repo --provider="Github" --name="formulas" --repoUrl="https://github.com/ZupIT/ritchie-formulas" --priority=1
         - name: RIT CREATE FORMULA command (2)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: ./rit.exe create formula --name="rit functional test" --language="python3" --workspace="Default"
+            command_line: ./rit.exe create formula --name="rit functional test" --language="python3" --template="helloWorld" --workspace="Default"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert2.txt
             expected_result: PASSED
             specific_line: 1
@@ -222,10 +228,10 @@ jobs:
             command_line: ./rit.exe delete formula --workspace="Default" --formula="rit unexistent formula"
             contains: The system cannot find the path specified
             expected_result: PASSED
-        - name: RIT LIST FORMULA command (7)
+        - name: RIT LIST FORMULA formulas (7)
           uses: GuillaumeFalourd/test-cli-commands-action@v1
           with:
-            command_line: ./rit.exe list formula --name="commons"
+            command_line: ./rit.exe list formula --name="formulas"
             assert_file_path: testdata/gha_workflows/formula_workflow/assert6.txt
             expected_result: PASSED
             specific_line: 1
