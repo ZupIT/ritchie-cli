@@ -149,6 +149,12 @@ jobs:
             command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
             contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
             expected_result: PASSED
+        - name: RIT UPDATE REPO ZIP command (14)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit update repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.3.0.zip" --version="2.3.0"
+            contains: The \"zipremote\" repository was updated with success to version \"2.3.0\"
+            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
@@ -238,6 +244,12 @@ jobs:
           with:
             command_line: rit add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
             contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
+            expected_result: PASSED
+        - name: RIT UPDATE REPO ZIP command (14)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit update repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.3.0.zip" --version="2.3.0"
+            contains: The \"zipremote\" repository was updated with success to version \"2.3.0\"
             expected_result: PASSED
 
   windows:
@@ -331,4 +343,10 @@ jobs:
           with:
             command_line: ./rit.exe add repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.2.0.zip" --version="2.2.0"
             contains: The \"zipremote\" repository was added with success, now you can use your formulas with the Ritchie!
+            expected_result: PASSED
+        - name: RIT UPDATE REPO ZIP command (14)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe update repo-zip --name="zipremote" --repoUrl="https://github.com/ZupIT/ritchie-formulas-demo/archive/refs/tags/2.3.0.zip" --version="2.3.0"
+            contains: The \"zipremote\" repository was updated with success to version \"2.3.0\"
             expected_result: PASSED
