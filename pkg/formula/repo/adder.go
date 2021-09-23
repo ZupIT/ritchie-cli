@@ -27,7 +27,7 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 )
 
-var ErrInvalidRepo = errors.New("the selected repository has no formulas")
+var ErrInvalidRepo = errors.New("the selected repository has no formulas and is not a valid templeta repo")
 
 type AddManager struct {
 	ritHome string
@@ -86,7 +86,7 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 		return err
 	}
 
-	if err := ad.isValidRepo(repo, tree); err != nil {
+	if err := ad.isValidRepo(repo, tree, newRepoPath); err != nil {
 		return err
 	}
 
@@ -103,7 +103,16 @@ func (ad AddManager) treeGenerate(repo formula.Repo) error {
 	return nil
 }
 
-func (ad AddManager) isValidRepo(repo formula.Repo, tree formula.Tree) error {
+func (ad AddManager) isValidRepo(repo formula.Repo, tree formula.Tree, repoPath string) error {
+	isTemplateRepo, err := isTemplateRepo(repoPath)
+	if err != nil {
+		return err
+	}
+
+	if isTemplateRepo {
+		return nil
+	}
+
 	if len(tree.Commands) == 0 && !repo.IsLocal {
 		if err := ad.repo.Delete(repo.Name); err != nil {
 			return err
@@ -132,4 +141,89 @@ func setPriority(repo formula.Repo, repos formula.Repos) formula.Repos {
 	repos = movePosition(repos, repo.Name, repo.Priority)
 
 	return repos
+}
+
+func isTemplateRepo(repoPath string) (bool, error) {
+	isTemplateRepo := false
+	repoPath = filepath.Join(repoPath, "templates")
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return isTemplateRepo, nil
+	}
+
+	for _, file := range files {
+		if file.Name() == "create_formula" {
+			isTemplateRepo = true
+			err = isValidTemplateRepo(repoPath)
+			if err != nil {
+				return isTemplateRepo, err
+			}
+		}
+	}
+
+	return isTemplateRepo, nil
+}
+
+func isValidTemplateRepo(repoPath string) error {
+	repoPath = filepath.Join(repoPath, "create_formula", "languages")
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return ErrInvalidRepo
+	}
+
+	for _, file := range files {
+		err := hasTemplates(repoPath, file.Name())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func hasTemplates(repoPath, lang string) error {
+	repoPath = filepath.Join(repoPath, lang)
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return ErrInvalidRepo
+	}
+
+	for _, file := range files {
+		if file.Name() == "src" && file.IsDir() {
+			return isValidTemplate(repoPath)
+		} else if file.IsDir() {
+			tplPath := filepath.Join(repoPath, file.Name())
+			err := isValidTemplate(tplPath)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func isValidTemplate(repoPath string) error {
+	hasBuildBat := false
+	hasBuildSh := false
+	files, err := ioutil.ReadDir(repoPath)
+	if err != nil {
+		return ErrInvalidRepo
+	}
+
+	for _, file := range files {
+		if file.Name() == "build.bat" {
+			hasBuildBat = true
+		}
+		if file.Name() == "build.sh" {
+			hasBuildSh = true
+		}
+	}
+
+	if hasBuildBat && hasBuildSh {
+		return nil
+	} else {
+		return ErrInvalidRepo
+	}
+
 }

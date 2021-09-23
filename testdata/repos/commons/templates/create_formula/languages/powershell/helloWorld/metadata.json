@@ -1,0 +1,16 @@
+{
+  "execution": [
+    "local",
+    "docker"
+  ],
+  "os": {
+    "deps": [],
+    "support": [
+      "windows",
+      "linux"
+    ]
+  },
+  "tags": [
+    "#rit-replace{formulaTags}"
+  ]
+}

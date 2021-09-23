@@ -1,0 +1,24 @@
+{
+	"version": "v2",
+	"commands": {
+		"root_test": {
+			"parent": "root",
+			"usage": "test",
+			"help": "test commands",
+			"longHelp": "test commands"
+		},
+		"root_test_formula": {
+			"parent": "root_test",
+			"usage": "formula",
+			"help": "test formula commands",
+			"longHelp": "test formula commands"
+		},
+		"root_test_formula_repo": {
+			"parent": "root_test_formula",
+			"usage": "repo",
+			"help": "test formula repo formula",
+			"longHelp": "test formula repo formula",
+			"formula": true
+		}
+	}
+}

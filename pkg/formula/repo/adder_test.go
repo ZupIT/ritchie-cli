@@ -38,6 +38,10 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
+var (
+	testDataPath = filepath.Join("..", "..", "..", "testdata", "repos")
+)
+
 func TestAdd(t *testing.T) {
 	ritHome := filepath.Join(os.TempDir(), ".rit_add_repo")
 
@@ -367,4 +371,235 @@ type repositoryDeleterMock struct {
 
 func (c repositoryDeleterMock) Delete(repoName formula.RepoName) error {
 	return c.deleteMock(repoName)
+}
+
+func TestIsTemplateRepo(t *testing.T) {
+	formulasPath := filepath.Join(testDataPath, "formulas")
+	tplFormPath := filepath.Join(testDataPath, "tplForm")
+	tplPath := filepath.Join(testDataPath, "commons")
+	tplNotValidPath := filepath.Join(testDataPath, "tplNotValid")
+
+	type in struct {
+		path string
+	}
+
+	type want struct {
+		check bool
+		err   error
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want want
+	}{
+		{
+			name: "is not a template Repo 1",
+			in: in{
+				path: formulasPath,
+			},
+			want: want{
+				check: false,
+				err:   nil,
+			},
+		},
+		{
+			name: "is not a template Repo 2",
+			in: in{
+				path: tplFormPath,
+			},
+			want: want{
+				check: false,
+				err:   nil,
+			},
+		},
+		{
+			name: "is a template repo",
+			in: in{
+				path: tplPath,
+			},
+			want: want{
+				check: true,
+				err:   nil,
+			},
+		},
+		{
+			name: "error: has templates but is not valid",
+			in: in{
+				path: tplNotValidPath,
+			},
+			want: want{
+				check: true,
+				err:   ErrInvalidRepo,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := isTemplateRepo(tt.in.path)
+			assert.Equal(t, tt.want.check, got)
+			assert.Equal(t, tt.want.err, err)
+		})
+	}
+}
+
+func TestIsValidTemplateRepo(t *testing.T) {
+	tplPath := filepath.Join(testDataPath, "commons", "templates")
+	tplLangPath := filepath.Join(testDataPath, "tplLang", "templates")
+	tplNotValidPath := filepath.Join(testDataPath, "tplNotValid", "templates")
+
+	type in struct {
+		path string
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "is template repo",
+			in: in{
+				path: tplPath,
+			},
+			want: nil,
+		},
+		{
+			name: "error: is not a valid template repo",
+			in: in{
+				path: tplLangPath,
+			},
+			want: ErrInvalidRepo,
+		},
+		{
+			name: "error: does not have templates",
+			in: in{
+				path: tplNotValidPath,
+			},
+			want: ErrInvalidRepo,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isValidTemplateRepo(tt.in.path)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestHasTemplates(t *testing.T) {
+	tplPath := filepath.Join(testDataPath, "tplValid", "templates", "create_formula", "languages")
+
+	type in struct {
+		lang string
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "has templates 1",
+			in: in{
+				lang: "rust",
+			},
+			want: nil,
+		},
+		{
+			name: "has templates 2",
+			in: in{
+				lang: "csharp",
+			},
+			want: nil,
+		},
+		{
+			name: "error: does not have templates",
+			in: in{
+				lang: "crystal",
+			},
+			want: ErrInvalidRepo,
+		},
+		{
+			name: "error: has a no valid template 1",
+			in: in{
+				lang: "go",
+			},
+			want: ErrInvalidRepo,
+		},
+		{
+			name: "error: has a no valid template 2",
+			in: in{
+				lang: "perl",
+			},
+			want: ErrInvalidRepo,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := hasTemplates(tplPath, tt.in.lang)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestIsValidTemplate(t *testing.T) {
+	tplPath := filepath.Join(testDataPath, "tplValid", "templates", "create_formula", "languages")
+
+	type in struct {
+		lang string
+	}
+
+	tests := []struct {
+		name string
+		in   in
+		want error
+	}{
+		{
+			name: "is valid template",
+			in: in{
+				lang: "rust",
+			},
+			want: nil,
+		},
+		{
+			name: "error on path",
+			in: in{
+				lang: "java8",
+			},
+			want: ErrInvalidRepo,
+		},
+		{
+			name: "error: does not have the 'build.bat' file",
+			in: in{
+				lang: "ruby",
+			},
+			want: ErrInvalidRepo,
+		},
+		{
+			name: "error: does not have the 'build.sh' file",
+			in: in{
+				lang: "go",
+			},
+			want: ErrInvalidRepo,
+		},
+		{
+			name: "error: does not have the 'build.bat' and the 'build.sh' files",
+			in: in{
+				lang: "java11",
+			},
+			want: ErrInvalidRepo,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fullPath := filepath.Join(tplPath, tt.in.lang, "helloWorld")
+			got := isValidTemplate(fullPath)
+			assert.Equal(t, tt.want, got)
+		})
+	}
 }
