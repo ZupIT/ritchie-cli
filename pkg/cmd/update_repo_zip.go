@@ -27,15 +27,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
 
-/*
-	Regras:
-		- Todos os campos são de texto
-		- Quando informo ALL no update repo, qual deveria ser o comportamento?
-		- Validar:
-			- Se o repo existe no repositories.json (nome)
-			- Se a versão é diferente da informada no arquivo repositories.json
-*/
-
 var updateRepoZipFlags = flags{
 	{
 		name:        repoName,
