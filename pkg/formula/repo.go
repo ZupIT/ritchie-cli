@@ -133,7 +133,7 @@ type RepositoryLister interface {
 }
 
 type RepositoryUpdater interface {
-	Update(name RepoName, version RepoVersion) error
+	Update(name RepoName, version RepoVersion, url string) error
 }
 
 type RepositoryDeleter interface {

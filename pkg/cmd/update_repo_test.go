@@ -79,7 +79,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest2, *repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -106,7 +106,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest, *repoTest2}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -136,7 +136,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{}, someError
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -153,7 +153,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -177,7 +177,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -214,7 +214,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -241,7 +241,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return someError
 					},
 				},
@@ -268,7 +268,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest2, *repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -295,7 +295,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest2, *repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -322,7 +322,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{}, errors.New(missingFlagText(repoName))
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -339,7 +339,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return nil, errors.New(missingFlagText(repoVersion))
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						return nil
 					},
 				},
@@ -356,7 +356,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{*repoTest}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						var errorMsg = fmt.Sprintf("The version %q of repository %q was not found.\n", version, name)
 						return errors.New(errorMsg)
 					},
@@ -380,7 +380,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					list: func() (formula.Repos, error) {
 						return formula.Repos{}, nil
 					},
-					update: func(name formula.RepoName, version formula.RepoVersion) error {
+					update: func(name formula.RepoName, version formula.RepoVersion, url string) error {
 						var errorMsg = fmt.Sprintf("The repository %q was not found.\n", name)
 						return errors.New(errorMsg)
 					},

@@ -512,15 +512,15 @@ func (c ConfigRunnerMock) Find() (formula.RunnerType, error) {
 
 type RepositoryListUpdaterCustomMock struct {
 	list   func() (formula.Repos, error)
-	update func(name formula.RepoName, version formula.RepoVersion) error
+	update func(name formula.RepoName, version formula.RepoVersion, url string) error
 }
 
 func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
 	return m.list()
 }
 
-func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion) error {
-	return m.update(name, version)
+func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion, url string) error {
+	return m.update(name, version, url)
 }
 
 func createJSONEntry(v interface{}) string {

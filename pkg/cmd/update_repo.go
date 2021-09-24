@@ -34,7 +34,7 @@ const (
 	updateOptionAll     = "ALL"
 	repoName            = "name"
 	repoVersion         = "version"
-	successUpdate       = "The %q repository was updated with success to version %q\n"
+	successUpdate       = "\nThe %q repository was updated with success to version %q"
 )
 
 var updateRepoFlags = flags{
@@ -109,8 +109,7 @@ func (up updateRepoCmd) runCmd() CommandRunnerFunc {
 		}
 
 		for _, value := range reposToUpdate {
-			err := up.repo.Update(value.Name, value.Version)
-			if err != nil {
+			if err := up.repo.Update(value.Name, value.Version, value.Url); err != nil {
 				return err
 			}
 			s := fmt.Sprintf(successUpdate, value.Name, value.Version)
@@ -128,7 +127,7 @@ func (up updateRepoCmd) runStdin() CommandRunnerFunc {
 			return err
 		}
 
-		if err := up.repo.Update(r.Name, r.Version); err != nil {
+		if err := up.repo.Update(r.Name, r.Version, r.Url); err != nil {
 			return err
 		}
 
