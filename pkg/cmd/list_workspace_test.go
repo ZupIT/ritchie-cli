@@ -90,7 +90,6 @@ func TestListWorkspaceRunFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			lr := NewListWorkspaceCmd(tt.in.WorkspaceLister, finderTutorial)
-			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := lr.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("listWorkspaceCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
 			}

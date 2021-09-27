@@ -179,7 +179,6 @@ func TestNewDeleteRepo(t *testing.T) {
 				inputBoolMock,
 				repoDeleter,
 			)
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.in.args)
 
 			got := cmd.Execute()

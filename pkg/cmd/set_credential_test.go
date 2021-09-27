@@ -167,9 +167,6 @@ func TestSetCredentialCmd(t *testing.T) {
 				inputPassword,
 			)
 
-			// TODO: remove stdin flag after deprecation
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-
 			cmd.SetArgs(tt.args)
 			err := cmd.Execute()
 			if err != nil {

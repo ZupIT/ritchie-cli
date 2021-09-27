@@ -121,7 +121,7 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 		envFile,
 	}
 
-	if isatty.IsTerminal(os.Stdout.Fd()) && inputType != api.Stdin {
+	if isatty.IsTerminal(os.Stdout.Fd()) {
 		args = append(args, "-it")
 	}
 
@@ -138,7 +138,6 @@ func (ru RunManager) runDocker(setup formula.Setup, inputType api.TermInputType,
 
 	//nolint:gosec,lll
 	cmd := exec.Command(getDockerCmd(), args...) // Run command "docker run -env-file .env -v "$(pwd):/app" --name (randomId) (randomId)"
-	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

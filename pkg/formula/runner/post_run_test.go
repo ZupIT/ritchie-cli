@@ -97,22 +97,6 @@ func TestPostRun(t *testing.T) {
 			},
 			want: nil,
 		},
-		{
-			name: "input deprecated",
-			in: in{
-				setup: formula.Setup{
-					Config: formula.Config{
-						Inputs: formula.Inputs{
-							formula.Input{
-								Type: "dynamic",
-							},
-						},
-					},
-				},
-				docker: false,
-			},
-			want: nil,
-		},
 	}
 
 	for _, tt := range tests {

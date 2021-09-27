@@ -20,8 +20,6 @@ import (
 	"fmt"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/input"
-	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -29,9 +27,6 @@ type PostRunnerManager struct {
 	file stream.FileNewListMoveRemover
 	dir  stream.DirRemover
 }
-
-const deprecatedMsg = "\nWarning: dynamic input are deprecated and will no " +
-	"longer be supported in future versions\n"
 
 func NewPostRunner(file stream.FileNewListMoveRemover, dir stream.DirRemover) PostRunnerManager {
 	return PostRunnerManager{file: file, dir: dir}
@@ -55,22 +50,11 @@ func (po PostRunnerManager) PostRun(p formula.Setup, docker bool) error {
 		return err
 	}
 
-	po.deprecatedInput(p)
-
 	return nil
 }
 
 func (po PostRunnerManager) removeWorkDir(tmpDir string) {
 	if err := po.dir.Remove(tmpDir); err != nil {
 		fmt.Sprintln("Error in remove dir")
-	}
-}
-
-func (po PostRunnerManager) deprecatedInput(p formula.Setup) {
-	for _, in := range p.Config.Inputs {
-		if in.Type == input.DynamicType {
-			prompt.Warning(deprecatedMsg)
-			break
-		}
 	}
 }

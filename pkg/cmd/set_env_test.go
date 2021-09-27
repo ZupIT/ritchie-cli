@@ -139,8 +139,6 @@ func TestNewSetEnvCmd(t *testing.T) {
 			inputTextMock.On("Text", mock.Anything, mock.Anything, mock.Anything).Return(tt.in.inputText, tt.in.inputTextErr)
 
 			cmd := NewSetEnvCmd(envFindSetter, inputTextMock, inputListMock)
-			// TODO: remove stdin flag after  deprecation
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.in.args)
 
 			got := cmd.Execute()

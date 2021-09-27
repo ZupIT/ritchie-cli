@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"errors"
-	"os"
 	"reflect"
 
 	renv "github.com/ZupIT/ritchie-cli/pkg/env"
@@ -26,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
@@ -52,11 +50,6 @@ type setEnvCmd struct {
 	prompt.InputList
 }
 
-// setEnv type for stdin json decoder.
-type setEnv struct {
-	Env string `json:"env"`
-}
-
 func NewSetEnvCmd(
 	fs renv.FindSetter,
 	it prompt.InputText,
@@ -68,7 +61,7 @@ func NewSetEnvCmd(
 		Use:       "env",
 		Short:     "Set env",
 		Example:   "rit set env",
-		RunE:      RunFuncE(s.runStdin(), s.runCmd()),
+		RunE:      s.runCmd(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -95,25 +88,6 @@ func (s setEnvCmd) runCmd() CommandRunnerFunc {
 		return nil
 	}
 
-}
-
-func (s setEnvCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-
-		sc := setEnv{}
-
-		err := stdin.ReadJson(os.Stdin, &sc)
-		if err != nil {
-			return err
-		}
-
-		if _, err := s.env.Set(sc.Env); err != nil {
-			return err
-		}
-
-		prompt.Success(successMsg)
-		return nil
-	}
 }
 
 func (s *setEnvCmd) resolveInput(cmd *cobra.Command) (string, error) {

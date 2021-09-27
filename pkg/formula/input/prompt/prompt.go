@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
@@ -29,8 +28,6 @@ import (
 	"strings"
 
 	"github.com/spf13/pflag"
-
-	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -143,12 +140,6 @@ func (in InputManager) inputTypeToPrompt(items []string, i formula.Input) (strin
 			return "", fmt.Errorf(EmptyItems, i.Name)
 		}
 		return in.loadInputValList(items, i)
-	case input.DynamicType:
-		dl, err := in.dynamicList(i.RequestInfo)
-		if err != nil {
-			return "", err
-		}
-		return in.List(i.Label, dl, i.Tutorial)
 	case input.PathType:
 		if items != nil {
 			return in.loadInputValList(items, i)
@@ -282,53 +273,4 @@ func (in InputManager) textRegexValidator(input formula.Input, required bool) (s
 
 		return errors.New(input.Pattern.MismatchText)
 	})
-}
-
-func (in InputManager) dynamicList(info formula.RequestInfo) ([]string, error) {
-	body, err := makeRequest(info)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := findValues(info.JsonPath, body)
-	if err != nil {
-		return nil, err
-	}
-	return list, nil
-}
-
-func makeRequest(info formula.RequestInfo) (interface{}, error) {
-	response, err := http.Get(info.Url)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode < 200 || response.StatusCode > 299 {
-		return nil, fmt.Errorf("dynamic list request got http status %d expecting some 2xx range", response.StatusCode)
-	}
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	requestData := interface{}(nil)
-
-	if err := json.Unmarshal(body, &requestData); err != nil {
-		return nil, err
-	}
-
-	return requestData, nil
-}
-
-func findValues(jsonPath string, requestData interface{}) ([]string, error) {
-	dynamicOptions, err := jsonpath.Get(jsonPath, requestData)
-	if err != nil {
-		return nil, err
-	}
-	dynamicOptionsStr := fmt.Sprintf("%v", dynamicOptions)
-	dynamicOptionsArr := strings.Split(dynamicOptionsStr, " ")
-
-	return dynamicOptionsArr, nil
 }

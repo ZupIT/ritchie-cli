@@ -239,22 +239,11 @@ func (f FormulaCommand) addInputFlags(def formula.Definition, flags *pflag.FlagS
 
 func inputResolver(cmd *cobra.Command) api.TermInputType {
 	switch {
-	case isInputStdin():
-		return api.Stdin
 	case isInputFlag(cmd):
 		return api.Flag
 	default:
 		return api.Prompt
 	}
-}
-
-func isInputStdin() bool {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return false
-	}
-
-	return stat.Size() > 0
 }
 
 func isInputFlag(cmd *cobra.Command) bool {

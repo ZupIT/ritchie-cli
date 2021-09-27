@@ -22,7 +22,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -43,12 +42,11 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 	runnerFile := filepath.Join(ritHome, runner.FileName)
 
 	var tests = []struct {
-		name       string
-		args       []string
-		inputStdin string
-		runner     string
-		listErr    error
-		err        error
+		name    string
+		args    []string
+		runner  string
+		listErr error
+		err     error
 	}{
 		{
 			name:   "success prompt set formula run",
@@ -76,18 +74,6 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 			args: []string{"--runner=invalid"},
 			err:  ErrInvalidRunType,
 		},
-		{
-			name:       "success on stdin",
-			args:       []string{},
-			inputStdin: "{\"runType\": \"local\"}\n",
-			runner:     formula.LocalRun.String(),
-		},
-		{
-			name:       "fail with stdin wrong runner",
-			args:       []string{},
-			inputStdin: "{\"runType\": \"invalid\"}\n",
-			err:        ErrInvalidRunType,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -99,11 +85,6 @@ func TestSetFormulaRunnerCmd(t *testing.T) {
 
 			cmd := NewSetFormulaRunnerCmd(configManager, inputList)
 			cmd.SetArgs(tt.args)
-
-			cmd.PersistentFlags().Bool("stdin", tt.inputStdin != "", "input by stdin")
-
-			newReader := strings.NewReader(tt.inputStdin)
-			cmd.SetIn(newReader)
 
 			err := cmd.Execute()
 

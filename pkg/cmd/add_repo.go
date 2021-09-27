@@ -30,7 +30,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/tree"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
@@ -133,7 +132,7 @@ func NewAddRepoCmd(
 		Use:       "repo",
 		Short:     "Add a repository",
 		Example:   "rit add repo",
-		RunE:      RunFuncE(addRepo.runStdin(), addRepo.runFormula()),
+		RunE:      addRepo.runFormula(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -360,45 +359,6 @@ func printConflictingCommandsWarning(conflictingCommands []api.CommandID) {
 	msg := fmt.Sprintf("There's a total of %d formula conflicting commands, like:\n %s", len(conflictingCommands), lastCommand)
 	msg = prompt.Yellow(msg)
 	fmt.Println(msg)
-}
-
-func (ar addRepoCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		r := formula.Repo{}
-
-		err := stdin.ReadJson(cmd.InOrStdin(), &r)
-		if err != nil {
-			return err
-		}
-
-		if r.EmptyVersion() {
-			latestTag := ar.detail.LatestTag(r)
-			r.Version = formula.RepoVersion(latestTag)
-		}
-
-		repos, _ := ar.repo.List()
-		if existsRepo(r.Url, r.Version.String(), repos) {
-			prompt.Info(messageExisting)
-			return nil
-		}
-
-		if err := ar.repo.Add(r); err != nil {
-			return err
-		}
-
-		successMsg := fmt.Sprintf(
-			"The %q repository was added with success, now you can use your formulas with the Ritchie!",
-			r.Name,
-		)
-		prompt.Success(successMsg)
-
-		tutorialHolder, err := ar.tutorial.Find()
-		if err != nil {
-			return err
-		}
-		tutorialAddRepo(tutorialHolder.Current)
-		return nil
-	}
 }
 
 func (ar addRepoCmd) repoNameValidator(text interface{}) error {

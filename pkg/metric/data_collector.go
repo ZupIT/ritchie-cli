@@ -34,7 +34,7 @@ var (
 	_                Collector = DataCollectorManager{}
 	CommonsRepoAdded           = ""
 	RepoName                   = ""
-	regexCoreFlag              = regexp.MustCompile(`--docker|--local|--stdin|--version|--verbose|--default|--help`)
+	regexCoreFlag              = regexp.MustCompile(`--docker|--local|--version|--verbose|--default|--help`)
 	//regexFlag                  = regexp.MustCompile("--(.*)=")
 )
 

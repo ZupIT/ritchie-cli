@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/internal/mocks"
@@ -70,7 +69,6 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 		treeCmd        string
 		wspacePath     string
 		repoPath       string
-		stdin          string
 		args           []string
 		delete         bool
 		nested         bool
@@ -107,16 +105,6 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 			delete:         true,
 			nested:         true,
 			want:           nil,
-		},
-		{
-			name:       "run with success when the execution type is stdin",
-			workspaces: workspaces,
-			stdin:      `{"workspace_path":"/tmp/rit-delete-formula/ritchie-formulas-local","formula":"rit testing delete-formula"}`,
-			treeCmd:    "root_testing_delete-formula",
-			wspacePath: repoPathWS,
-			repoPath:   repoPathLocalDefault,
-			delete:     true,
-			want:       nil,
 		},
 		{
 			name:       "run with success when the execution type is flag",
@@ -314,14 +302,6 @@ func TestNewDeleteFormulaCmd(t *testing.T) {
 				treeGen,
 				fileManager,
 			)
-
-			if tt.stdin != "" {
-				newReader := strings.NewReader(tt.stdin)
-				cmd.SetIn(newReader)
-				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
-			} else {
-				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			}
 
 			cmd.SetArgs(tt.args)
 			got := cmd.Execute()

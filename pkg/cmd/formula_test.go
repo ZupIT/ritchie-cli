@@ -93,13 +93,6 @@ func TestAddFormulaCommand(t *testing.T) {
 			},
 		},
 		{
-			name: "success stdin",
-			in: in{
-				execMock: FormulaExecutorMock{},
-				args:     []string{"mock", "test", "--stdin"},
-			},
-		},
-		{
 			name: "invalid flags",
 			in: in{
 				execMock: FormulaExecutorMock{},
@@ -121,7 +114,6 @@ func TestAddFormulaCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			formulaCmd := NewFormulaCommand(api.CoreCmds, treeMock, tt.in.execMock, fileReaderMock{data: []byte(inputJson)})
 			rootCmd := &cobra.Command{Use: "rit"}
-			rootCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			got := formulaCmd.Add(rootCmd)
 			if got != nil {
 				t.Errorf("Add got %v, want nil", got)

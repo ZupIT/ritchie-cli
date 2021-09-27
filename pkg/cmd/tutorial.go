@@ -25,7 +25,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 type tutorialCmd struct {
@@ -56,7 +55,7 @@ func NewTutorialCmd(il prompt.InputList, tt rtutorial.FindSetter) *cobra.Command
 		Use:       "tutorial",
 		Short:     "Enable or disable the tutorial",
 		Long:      "Enable or disable the tutorial",
-		RunE:      RunFuncE(o.runStdin(), o.runFormula()),
+		RunE:      o.runFormula(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -116,24 +115,4 @@ func (t *tutorialCmd) resolvePrompt() (string, error) {
 		return "", err
 	}
 	return response, nil
-}
-
-func (t *tutorialCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		obj := struct {
-			Tutorial string `json:"tutorial"`
-		}{}
-
-		if err := stdin.ReadJson(cmd.InOrStdin(), &obj); err != nil {
-			return err
-		}
-
-		if _, err := t.tutorial.Set(obj.Tutorial); err != nil {
-			return err
-		}
-
-		prompt.Success("Tutorial " + obj.Tutorial + "!")
-
-		return nil
-	}
 }

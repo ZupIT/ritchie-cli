@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"reflect"
 	"strings"
 
@@ -27,7 +26,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
@@ -90,7 +88,7 @@ func NewSetCredentialCmd(
 		Use:       "credential",
 		Short:     "Set credential",
 		Long:      `Set credentials for Github, Gitlab, AWS, UserPass, etc.`,
-		RunE:      RunFuncE(s.runStdin(), s.runFormula()),
+		RunE:      s.runFormula(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -233,30 +231,4 @@ func (s *setCredentialCmd) resolveFlags(cmd *cobra.Command) (credential.Detail, 
 		Service:    provider,
 		Credential: credentialMap,
 	}, nil
-}
-
-func (s setCredentialCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		cred, err := s.stdinResolver()
-		if err != nil {
-			return err
-		}
-
-		if err := s.Set(cred); err != nil {
-			return err
-		}
-
-		prompt.Success(fmt.Sprintf("%s credential saved!", strings.Title(cred.Service)))
-		prompt.Info("Check your credentials using rit list credential")
-		return nil
-	}
-}
-
-func (s setCredentialCmd) stdinResolver() (credential.Detail, error) {
-	var credDetail credential.Detail
-
-	if err := stdin.ReadJson(os.Stdin, &credDetail); err != nil {
-		return credDetail, err
-	}
-	return credDetail, nil
 }

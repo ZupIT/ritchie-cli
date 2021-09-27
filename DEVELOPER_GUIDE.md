@@ -63,7 +63,7 @@ the organisation of the commands!
 
 #### Functional
 
-Currently, we have two main ways of running formulas. Formulas can be run interactively or via stdin. This folder
+Currently, we have two main ways of running formulas. Formulas can be run interactively or via flags. This folder
 contains the files to run formulas on the different supported OSes and with different input formats.
 
 #### Packaging
@@ -91,7 +91,6 @@ and running formulas
 * prompt: Ritchie's adaptations on the `survey` module for user input.
 * rtutorial: basic implementation of tutorial texts. Tutorial are helper texts that can be added to each command
 to provide the user with more context on that action.
-* stdin: JSON stdin parser
 * upgrade: manages and performs upgrades on Ritchie
 * version: manages and resolves Ritchie's versioning
 
@@ -158,7 +157,6 @@ A typical test has the following structure
 ```
 
 > Note: we are currently reviewing how our tests are written, we are trying to make a more assertive test framework
->on Ritchie cli, such as simulating the user input via stdin instead of mocking it, so these practices might change.
 
 ### Functional Tests
 

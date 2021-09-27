@@ -137,7 +137,6 @@ func TestListRepoRunFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			lr := NewListRepoCmd(tt.in.RepositoryLister, tt.in.Tutorial)
-			lr.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if err := lr.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("setCredentialCmd_runPrompt() error = %v, wantErr %v", err, tt.wantErr)
 			}

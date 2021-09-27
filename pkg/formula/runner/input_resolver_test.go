@@ -29,7 +29,6 @@ import (
 func TestInputResolver(t *testing.T) {
 	types := formula.TermInputTypes{
 		api.Prompt: inputRunnerMock{},
-		api.Stdin:  inputRunnerMock{},
 		api.Flag:   inputRunnerMock{},
 	}
 

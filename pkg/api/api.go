@@ -116,14 +116,12 @@ type TermInputType int
 const (
 	// Prompt input
 	Prompt TermInputType = iota
-	// Stdin input
-	Stdin
 	// Flag input
 	Flag
 )
 
 func (t TermInputType) String() string {
-	return [...]string{"Prompt", "Stdin", "Flag"}[t]
+	return [...]string{"Prompt", "Flag"}[t]
 }
 
 // ToLower converts the input type to lower case

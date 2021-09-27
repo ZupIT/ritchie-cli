@@ -22,7 +22,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
@@ -66,11 +65,10 @@ func TestUpdateRepoRun(t *testing.T) {
 		Repos  git.Repositories
 	}
 	var tests = []struct {
-		name       string
-		in         in
-		wantErr    error
-		inputStdin string
-		inputFlag  []string
+		name      string
+		in        in
+		wantErr   error
+		inputFlag []string
 	}{
 		{
 			name: "success case update someRepo1",
@@ -96,8 +94,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    nil,
-			inputStdin: createJSONEntry(repoTest),
+			wantErr: nil,
 		},
 		{
 			name: "success case update ALL",
@@ -126,8 +123,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    nil,
-			inputStdin: "",
+			wantErr: nil,
 		},
 		{
 			name: "fails when repo list returns an error",
@@ -143,8 +139,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				inList: inputListMock{},
 				Repos:  defaultGitRepositoryMock,
 			},
-			wantErr:    someError,
-			inputStdin: "",
+			wantErr: someError,
 		},
 		{
 			name: "fails when question about select repo returns an error",
@@ -167,8 +162,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    someError,
-			inputStdin: "",
+			wantErr: someError,
 		},
 		{
 			name: "fails when repos tags returns an error",
@@ -204,8 +198,7 @@ func TestUpdateRepoRun(t *testing.T) {
 					},
 				},
 			},
-			wantErr:    someError,
-			inputStdin: "",
+			wantErr: someError,
 		},
 		{
 			name: "fails when question about select version returns an error",
@@ -231,8 +224,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    someError,
-			inputStdin: "",
+			wantErr: someError,
 		},
 		{
 			name: "fails when repo update returns an error",
@@ -258,8 +250,7 @@ func TestUpdateRepoRun(t *testing.T) {
 				},
 				Repos: defaultGitRepositoryMock,
 			},
-			wantErr:    someError,
-			inputStdin: createJSONEntry(repoTest),
+			wantErr: someError,
 		},
 		{
 			name: "success with flags",
@@ -404,16 +395,8 @@ func TestUpdateRepoRun(t *testing.T) {
 			newUpdateRepo := NewUpdateRepoCmd(server.Client(), tt.in.repo, repoProviders, inputTextMock{}, inputPasswordMock{}, inputURLMock{}, tt.in.inList, inputTrueMock{}, inputIntMock{})
 			newUpdateRepo.SetArgs([]string{})
 
-			if len(tt.inputStdin) != 0 {
-				newUpdateRepo.PersistentFlags().Bool("stdin", true, "input by stdin")
-				newReader := strings.NewReader(tt.inputStdin)
-				newUpdateRepo.SetIn(newReader)
-			} else if len(tt.inputFlag) > 0 {
-				newUpdateRepo.PersistentFlags().Bool("stdin", false, "input by stdin")
+			if len(tt.inputFlag) > 0 {
 				newUpdateRepo.SetArgs(tt.inputFlag)
-			} else {
-				newUpdateRepo.PersistentFlags().Bool("stdin", false, "input by stdin")
-				newUpdateRepo.SetArgs([]string{})
 			}
 
 			out := newUpdateRepo.Execute()

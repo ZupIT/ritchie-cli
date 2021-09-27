@@ -31,7 +31,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo/repoutil"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 )
 
@@ -54,11 +53,6 @@ var (
 )
 
 type (
-	deleteFormulaStdin struct {
-		WorkspacePath string `json:"workspace_path"`
-		Formula       string `json:"formula"`
-	}
-
 	deleteFormula struct {
 		Workspace formula.Workspace
 		Formula   []string
@@ -122,7 +116,7 @@ func NewDeleteFormulaCmd(
 		Use:       "formula",
 		Short:     "Delete specific formula",
 		Example:   "rit delete formula",
-		RunE:      RunFuncE(d.runStdin(), d.runCmd()),
+		RunE:      d.runCmd(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -163,52 +157,6 @@ func (d deleteFormulaCmd) runCmd() CommandRunnerFunc {
 		}
 
 		prompt.Success("Formula successfully deleted!")
-
-		return nil
-	}
-}
-
-func (d deleteFormulaCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		deleteStdin := deleteFormulaStdin{}
-
-		if err := stdin.ReadJson(cmd.InOrStdin(), &deleteStdin); err != nil {
-			return err
-		}
-
-		// rit my amazing formula -> ['my', 'amazing', 'formula']
-		groups, err := getGroupsFromFormulaName(deleteStdin.Formula)
-		if err != nil {
-			return err
-		}
-
-		// Delete formula on user workspace
-		if err := d.deleteFormula(deleteStdin.WorkspacePath, groups, 0); err != nil {
-			return err
-		}
-
-		workspaces, err := d.workspace.List()
-		if err != nil {
-			return err
-		}
-
-		var wspace string
-		for workspaceName, path := range workspaces {
-			if strings.EqualFold(path, deleteStdin.WorkspacePath) {
-				wspace = workspaceName
-			}
-		}
-
-		wspaceName := repoutil.LocalName(wspace)
-		ritchieLocalWorkspace := filepath.Join(d.ritchieHomeDir, "repos", wspaceName.String())
-		if d.formulaExistsInWorkspace(ritchieLocalWorkspace, groups) {
-			if err := d.deleteFormula(ritchieLocalWorkspace, groups, 0); err != nil {
-				return err
-			}
-			if err := d.recreateTreeJSON(ritchieLocalWorkspace); err != nil {
-				return err
-			}
-		}
 
 		return nil
 	}
