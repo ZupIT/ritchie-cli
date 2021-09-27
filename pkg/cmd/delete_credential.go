@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"io"
 	"reflect"
 
 	"github.com/spf13/cobra"
@@ -11,7 +10,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/credential"
 	"github.com/ZupIT/ritchie-cli/pkg/env"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 type inputDeleteCredential struct {
@@ -25,11 +23,6 @@ type deleteCredentialCmd struct {
 	env.Finder
 	prompt.InputBool
 	prompt.InputList
-}
-
-// deleteCredential type for stdin json decoder
-type deleteCredential struct {
-	Provider string `json:"provider"`
 }
 
 var deleteCredentialFlags = flags{
@@ -61,7 +54,7 @@ func NewDeleteCredentialCmd(
 		Use:       "credential",
 		Short:     "Delete credential",
 		Long:      `Delete credential from current env`,
-		RunE:      RunFuncE(s.runStdin(), s.runFormula()),
+		RunE:      s.runFormula(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -139,54 +132,6 @@ func (d *deleteCredentialCmd) resolveFlags(cmd *cobra.Command) (inputDeleteCrede
 	}
 
 	return inputDeleteCredential{provider}, nil
-}
-
-// TODO: remove upon stdin deprecation
-func (d deleteCredentialCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		dc, err := d.stdinResolver(cmd.InOrStdin())
-		if err != nil {
-			return err
-		}
-
-		curEnv, err := d.currentEnv()
-		if err != nil {
-			return err
-		}
-
-		data, err := d.ReadCredentialsValueInEnv(d.CredentialsPath(), curEnv)
-		if err != nil {
-			return err
-		}
-
-		mustDelete := false
-		for _, c := range data {
-			if c.Provider == dc.Provider {
-				mustDelete = true
-			}
-		}
-
-		if !mustDelete {
-			prompt.Error("You do not have credentials defined for this provider!")
-			return nil
-		}
-
-		if err := d.Delete(dc.Provider); err != nil {
-			return err
-		}
-
-		successMessage()
-		return nil
-	}
-}
-
-func (d deleteCredentialCmd) stdinResolver(reader io.Reader) (deleteCredential, error) {
-	dc := deleteCredential{}
-
-	if err := stdin.ReadJson(reader, &dc); err != nil {
-		return dc, err
-	}
-	return dc, nil
 }
 
 func (d deleteCredentialCmd) currentEnv() (string, error) {

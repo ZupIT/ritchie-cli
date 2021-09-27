@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,11 +37,7 @@ type fieldsTestDeleteCredentialCmd struct {
 
 const provider = "github"
 
-// TODO: remove upon stdin deprecation, reduce dependencies
 func TestDeleteCredential(t *testing.T) {
-	stdinTest := &deleteCredential{
-		Provider: "github",
-	}
 
 	deleteSuccess := credDeleteMock{
 		deleteMock: func() error {
@@ -51,10 +46,9 @@ func TestDeleteCredential(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		wantErr    string
-		fields     fieldsTestDeleteCredentialCmd
-		inputStdin string
+		name    string
+		wantErr string
+		fields  fieldsTestDeleteCredentialCmd
 	}{
 		{
 			name:    "execute with success",
@@ -77,7 +71,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputTrueMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
 			name:    "error on find env",
@@ -93,7 +86,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputTrueMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
 			name:    "error to read credentials value",
@@ -116,7 +108,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputTrueMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
 			name:    "error when there are no credentials in the env",
@@ -139,7 +130,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputTrueMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: "",
 		},
 		{
 			name:    "error on input list",
@@ -162,7 +152,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputTrueMock{},
 				inputList: inputListErrorMock{},
 			},
-			inputStdin: "",
 		},
 		{
 			name:    "error on input bool",
@@ -185,7 +174,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputBoolErrorMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: "",
 		},
 		{
 			name:    "cancel when input bool is false",
@@ -208,7 +196,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputFalseMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: "",
 		},
 		{
 			name:    "error on Delete",
@@ -235,7 +222,6 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputTrueMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: createJSONEntry(stdinTest),
 		},
 		{
 			name:    "error different provider",
@@ -258,38 +244,20 @@ func TestDeleteCredential(t *testing.T) {
 				inputBool: inputTrueMock{},
 				inputList: inputListMock{},
 			},
-			inputStdin: createJSONEntry(stdinTest),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			deleteCredentialCmd := NewDeleteCredentialCmd(tt.fields.credDelete, tt.fields.reader, tt.fields.envFinder, tt.fields.inputBool, tt.fields.inputList)
-			deleteCredentialStdin := NewDeleteCredentialCmd(tt.fields.credDelete, tt.fields.reader, tt.fields.envFinder, tt.fields.inputBool, tt.fields.inputList)
 
-			deleteCredentialCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			deleteCredentialStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
 			deleteCredentialCmd.SetArgs([]string{})
-			deleteCredentialStdin.SetArgs([]string{})
-
-			newReader := strings.NewReader(tt.inputStdin)
-			deleteCredentialStdin.SetIn(newReader)
 
 			err := deleteCredentialCmd.Execute()
 			if err != nil {
 				require.Equal(t, err.Error(), tt.wantErr)
 			} else {
 				require.Empty(t, tt.wantErr)
-			}
-
-			itsTestCaseWithStdin := tt.inputStdin != ""
-			err = deleteCredentialStdin.Execute()
-			if itsTestCaseWithStdin {
-				if err != nil {
-					require.Equal(t, err.Error(), tt.wantErr)
-				} else {
-					require.Empty(t, tt.wantErr)
-				}
 			}
 		})
 	}
@@ -370,8 +338,6 @@ func TestDeleteCredentialFormula(t *testing.T) {
 			boolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputBoolResult, nil)
 
 			cmd := NewDeleteCredentialCmd(credDeleter, credSettings, ctxFinder, boolMock, listMock)
-			// TODO: remove stdin flag after  deprecation
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.args)
 
 			err = cmd.Execute()

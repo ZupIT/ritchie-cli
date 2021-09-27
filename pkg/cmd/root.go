@@ -120,7 +120,6 @@ func NewRootCmd(
 		ValidArgs:          []string{""},
 		Args:               cobra.OnlyValidArgs,
 	}
-	cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 	return cmd
 }
 

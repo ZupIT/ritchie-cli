@@ -33,7 +33,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/validator"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/rtutorial"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
@@ -134,7 +133,7 @@ func NewCreateFormulaCmd(
 		Use:       "formula",
 		Short:     "Create a new formula",
 		Example:   "rit create formula",
-		RunE:      RunFuncE(c.runStdin(), c.runCmd()),
+		RunE:      c.runCmd(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -321,27 +320,6 @@ func (c createFormulaCmd) runPrompt() (formula.Create, error) {
 	printConflictingCommandsWarning(check)
 
 	return cf, err
-}
-
-func (c createFormulaCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-
-		var cf formula.Create
-
-		if err := stdin.ReadJson(os.Stdin, &cf); err != nil {
-			return err
-		}
-
-		if err := c.validator.FormulaCommmandValidator(cf.FormulaCmd); err != nil {
-			return err
-		}
-
-		if err := c.create(cf); err != nil {
-			return err
-		}
-
-		return nil
-	}
 }
 
 func (c createFormulaCmd) create(cf formula.Create) error {

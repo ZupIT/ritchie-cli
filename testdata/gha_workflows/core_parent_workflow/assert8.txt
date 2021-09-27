@@ -5,6 +5,7 @@ rit update repo
 
 Available Commands:
   repo        Update a repository.
+  repo-zip    Update a repository by URL.
   workspace   Update a workspace
 
 Use "rit <command> --help" for more information about a given command.

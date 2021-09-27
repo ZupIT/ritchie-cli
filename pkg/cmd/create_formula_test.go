@@ -345,8 +345,6 @@ func TestCreateFormulaCmd(t *testing.T) {
 				directoryMock,
 			)
 			createFormulaCmd.SetArgs([]string{})
-			// TODO: remove it after being deprecated
-			createFormulaCmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			if len(tt.inputFlags) > 1 {
 				createFormulaCmd.SetArgs(tt.inputFlags)
 			}

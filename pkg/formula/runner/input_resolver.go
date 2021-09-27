@@ -39,9 +39,6 @@ func (r Resolver) Resolve(inType api.TermInputType) (formula.InputRunner, error)
 	if inputRunner == nil {
 		return nil, ErrInputNotRecognized
 	}
-	if inType == api.Stdin {
-		prompt.Warning("stdin input is deprecated. Please use flags for programatic formula execution")
-	}
 
 	return inputRunner, nil
 }

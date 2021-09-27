@@ -26,7 +26,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
@@ -91,7 +90,7 @@ func NewUpdateRepoCmd(
 		Use:       "repo",
 		Short:     "Update a repository.",
 		Example:   "rit update repo",
-		RunE:      RunFuncE(updateRepo.runStdin(), updateRepo.runCmd()),
+		RunE:      updateRepo.runCmd(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -115,25 +114,6 @@ func (up updateRepoCmd) runCmd() CommandRunnerFunc {
 			s := fmt.Sprintf(successUpdate, value.Name, value.Version)
 			prompt.Success(s)
 		}
-		return nil
-	}
-}
-
-func (up updateRepoCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		r := formula.Repo{}
-
-		if err := stdin.ReadJson(cmd.InOrStdin(), &r); err != nil {
-			return err
-		}
-
-		if err := up.repo.Update(r.Name, r.Version, r.Url); err != nil {
-			return err
-		}
-
-		s := fmt.Sprintf(successUpdate, r.Name, r.Version)
-		prompt.Success(s)
-
 		return nil
 	}
 }

@@ -36,7 +36,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/deleter"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
 	fprompt "github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner/docker"
@@ -154,11 +153,9 @@ func Build() *cobra.Command {
 	postRunner := runner.NewPostRunner(fileManager, dirManager)
 
 	promptInManager := fprompt.NewInputManager(credResolver, inputList, inputText, inputTextValidator, inputTextDefault, inputBool, inputPassword, inputMultiselect, inputAutocomplete)
-	stdinInManager := stdin.NewInputManager(credResolver)
 	flagInManager := flag.NewInputManager(credResolver)
 	termInputTypes := formula.TermInputTypes{
 		api.Prompt: promptInManager,
-		api.Stdin:  stdinInManager,
 		api.Flag:   flagInManager,
 	}
 

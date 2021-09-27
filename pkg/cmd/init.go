@@ -28,7 +28,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/git"
 	"github.com/ZupIT/ritchie-cli/pkg/git/github"
 	"github.com/ZupIT/ritchie-cli/pkg/metric"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/kaduartur/go-cli-spinner/pkg/spinner"
 	"github.com/spf13/cobra"
@@ -83,12 +82,6 @@ var initFlags = flags{
 	},
 }
 
-type initStdin struct {
-	AddCommons  bool   `json:"addCommons"`
-	SendMetrics bool   `json:"sendMetrics"`
-	RunType     string `json:"runType"`
-}
-
 type initCmd struct {
 	repo     formula.RepositoryAdder
 	git      git.Repositories
@@ -128,104 +121,13 @@ func NewInitCmd(
 		Use:       "init",
 		Short:     i18n.T("init.cmd.description"),
 		Long:      i18n.T("init.cmd.description"),
-		RunE:      RunFuncE(o.runStdin(), o.runCmd()),
+		RunE:      o.runCmd(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
 	cmd.LocalFlags()
 	addReservedFlags(cmd.Flags(), initFlags)
 	return cmd
-}
-
-func (in initCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		init := initStdin{}
-
-		if err := stdin.ReadJson(cmd.InOrStdin(), &init); err != nil {
-			return err
-		}
-
-		in.welcome()
-
-		sendMetrics := "no"
-		if init.SendMetrics {
-			sendMetrics = "yes"
-		}
-
-		if err := in.file.Write(metric.FilePath, []byte(sendMetrics)); err != nil {
-			return err
-		}
-
-		if !init.AddCommons {
-			in.commonsWarning()
-		} else {
-			repo := formula.Repo{
-				Provider: "Github",
-				Name:     "commons",
-				Url:      TemplatesRepoURL,
-				Priority: 0,
-			}
-
-			s := spinner.StartNew(i18n.T("init.adding.commons.repo"))
-
-			repoInfo := github.NewRepoInfo(repo.Url, repo.Token)
-			tag, err := in.git.LatestTag(repoInfo)
-			if err != nil {
-				s.Error(ErrInitCommonsRepo)
-				fmt.Println(addRepoMsg)
-			}
-
-			repo.Version = formula.RepoVersion(tag.Name)
-
-			if err := in.repo.Add(repo); err != nil {
-				s.Error(ErrInitCommonsRepo)
-				fmt.Println(addRepoMsg)
-				return nil
-			}
-
-			in.commonsSuccess(s)
-		}
-
-		runType := formula.DefaultRun
-		for i := range formula.RunnerTypes {
-			if formula.RunnerTypes[i] == init.RunType {
-				runType = formula.RunnerType(i)
-				break
-			}
-		}
-
-		if runType == formula.DefaultRun {
-			return ErrInvalidRunType
-		}
-
-		if err := in.config.Create(runType); err != nil {
-			return err
-		}
-
-		if runType == formula.LocalRun {
-			in.warning()
-			fmt.Print(FormulaLocalRunWarning)
-		}
-
-		configs := config.Configs{
-			Language: "English",
-			Metrics:  sendMetrics,
-			RunType:  runType,
-			Tutorial: tutorialStatusEnabled,
-		}
-
-		if err := in.ritConfig.Write(configs); err != nil {
-			return err
-		}
-
-		in.initSuccess()
-
-		if err := in.tutorialInit(); err != nil {
-			return err
-		}
-
-		return nil
-	}
 }
 
 func (in initCmd) runCmd() CommandRunnerFunc {

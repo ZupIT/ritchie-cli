@@ -20,7 +20,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -81,8 +80,6 @@ func TestTutorialCmd(t *testing.T) {
 			inputList := &mocks.InputListMock{}
 			inputList.On("List", mock.Anything, mock.Anything, mock.Anything).Return(tutorialStatusEnabled, tt.listErr)
 			cmd := NewTutorialCmd(inputList, tutorialFindSetter)
-
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.args)
 
 			err := cmd.Execute()
@@ -95,38 +92,4 @@ func TestTutorialCmd(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestNewTutorialStdin(t *testing.T) {
-	cmd := NewTutorialCmd(inputListMock{}, TutorialFindSetterMock{})
-	cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
-	cmd.SetArgs([]string{})
-
-	input := "{\"tutorial\": \"enabled\"}\n"
-	newReader := strings.NewReader(input)
-	cmd.SetIn(newReader)
-
-	if cmd == nil {
-		t.Errorf("NewTutorialCmd got %v", cmd)
-	}
-
-	if err := cmd.Execute(); err != nil {
-		t.Errorf("%s = %v, want %v", cmd.Use, err, nil)
-	}
-}
-
-func TestTutorialRunOnlyStdin(t *testing.T) {
-	t.Run("Error when readJson returns err", func(t *testing.T) {
-		wantErr := true
-
-		cmdStdin := NewTutorialCmd(inputListMock{}, TutorialFindSetterMock{})
-		cmdStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
-
-		newReader := strings.NewReader("{\"tutorial\": 1}\n")
-		cmdStdin.SetIn(newReader)
-
-		if err := cmdStdin.Execute(); (err != nil) != wantErr {
-			t.Errorf("cmd_runStdin() error = %v, wantErr %v", err, wantErr)
-		}
-	})
 }

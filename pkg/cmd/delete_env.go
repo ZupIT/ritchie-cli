@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"reflect"
 
 	"github.com/ZupIT/ritchie-cli/pkg/env"
@@ -27,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const (
@@ -55,11 +53,6 @@ type deleteEnvCmd struct {
 	prompt.InputList
 }
 
-// deleteEnv type for stdin json decoder.
-type deleteEnv struct {
-	Env string `json:"env"`
-}
-
 func NewDeleteEnvCmd(
 	fr env.FindRemover,
 	ib prompt.InputBool,
@@ -71,7 +64,7 @@ func NewDeleteEnvCmd(
 		Use:       "env",
 		Short:     "Delete env for credentials",
 		Example:   "rit delete env",
-		RunE:      RunFuncE(d.runStdin(), d.runFormula()),
+		RunE:      d.runFormula(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -95,33 +88,6 @@ func (d *deleteEnvCmd) runFormula() CommandRunnerFunc {
 		}
 
 		if _, err := d.env.Remove(env); err != nil {
-			return err
-		}
-
-		prompt.Success(DeleteEnvSuccessMsg)
-		return nil
-	}
-}
-
-// TODO: remove upon stdin deprecation
-func (d deleteEnvCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		envHolder, err := d.env.Find()
-		if err != nil {
-			return err
-		}
-
-		if len(envHolder.All) <= 0 {
-			prompt.Error(NoDefinedEnvsMsg)
-			return nil
-		}
-
-		dc := deleteEnv{}
-		if err = stdin.ReadJson(os.Stdin, &dc); err != nil {
-			return err
-		}
-
-		if _, err := d.env.Remove(dc.Env); err != nil {
 			return err
 		}
 

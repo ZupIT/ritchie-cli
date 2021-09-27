@@ -17,7 +17,6 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
     ) -join ';'
     $completions = @(switch ($command) {
         'rit' {
-            [CompletionResult]::new('--stdin', 'stdin', [CompletionResultType]::ParameterName, 'input by stdin')
             [CompletionResult]::new('add', 'add', [CompletionResultType]::ParameterValue, 'Add repositories and workspaces')
             [CompletionResult]::new('build', 'build', [CompletionResultType]::ParameterValue, 'Build formulas')
             [CompletionResult]::new('completion', 'completion', [CompletionResultType]::ParameterValue, 'Add autocomplete for terminal (zsh, bash, fish, powershell)')
@@ -69,7 +68,6 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
             break
         }
         'rit;completion' {
-            [CompletionResult]::new('--stdin', 'stdin', [CompletionResultType]::ParameterName, 'input by stdin')
             [CompletionResult]::new('bash', 'bash', [CompletionResultType]::ParameterValue, 'Add bash autocomplete for terminal, --help to know how to use')
             [CompletionResult]::new('fish', 'fish', [CompletionResultType]::ParameterValue, 'Add fish autocomplete for terminal, --help to know how to use')
             [CompletionResult]::new('powershell', 'powershell', [CompletionResultType]::ParameterValue, 'Add powerShell autocomplete for terminal, --help to know how to use')
@@ -85,7 +83,6 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
         'rit;completion;powershell' {
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'help for powershell')
             [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'help for powershell')
-            [CompletionResult]::new('--stdin', 'stdin', [CompletionResultType]::ParameterName, 'input by stdin')
             break
         }
         'rit;completion;zsh' {
@@ -227,11 +224,18 @@ Register-ArgumentCompleter -Native -CommandName 'rit' -ScriptBlock {
         }
         'rit;update' {
             [CompletionResult]::new('repo', 'repo', [CompletionResultType]::ParameterValue, 'Update a repository.')
+            [CompletionResult]::new('repo-zip', 'repo-zip', [CompletionResultType]::ParameterValue, 'Update a repository by URL.')
             [CompletionResult]::new('workspace', 'workspace', [CompletionResultType]::ParameterValue, 'Update a workspace')
             break
         }
         'rit;update;repo' {
             [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'repository name')
+            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'repository version')
+            break
+        }
+        'rit;update;repo-zip' {
+            [CompletionResult]::new('--name', 'name', [CompletionResultType]::ParameterName, 'repository name')
+            [CompletionResult]::new('--repoUrl', 'repoUrl', [CompletionResultType]::ParameterName, 'repository url')
             [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'repository version')
             break
         }

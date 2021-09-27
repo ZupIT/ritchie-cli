@@ -17,7 +17,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 
@@ -521,9 +520,4 @@ func (m RepositoryListUpdaterCustomMock) List() (formula.Repos, error) {
 
 func (m RepositoryListUpdaterCustomMock) Update(name formula.RepoName, version formula.RepoVersion, url string) error {
 	return m.update(name, version, url)
-}
-
-func createJSONEntry(v interface{}) string {
-	s, _ := json.Marshal(v)
-	return string(s)
 }

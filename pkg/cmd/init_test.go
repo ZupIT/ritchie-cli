@@ -19,7 +19,6 @@ package cmd
 import (
 	"errors"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,11 +52,10 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		in         in
-		wantErr    error
-		inputStdin string
-		inputFlag  []string
+		name      string
+		in        in
+		wantErr   error
+		inputFlag []string
 	}{
 		{
 			name: "success to add commons repo and accept to send metrics",
@@ -66,7 +64,6 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
 				inList:         LocalRunType,
 			},
-			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"local\"}\n",
 		},
 		{
 			name: "success when not add commons and not accept to send metrics",
@@ -85,7 +82,6 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				},
 				inList: DockerRunType,
 			},
-			inputStdin: "{\"addCommons\": false,\"sendMetrics\": false, \"runType\": \"docker\" }\n",
 		},
 		{
 			name: "warning when call git.LatestTag",
@@ -94,7 +90,6 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
 				inList:         DockerRunType,
 			},
-			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"docker\"}\n",
 		},
 		{
 			name: "warning when call repo.Add",
@@ -104,8 +99,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
 				inList:         LocalRunType,
 			},
-			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
-			inputFlag:  []string{"--sendMetrics=yes", "--addCommons=yes", "--runType=local"},
+			inputFlag: []string{"--sendMetrics=yes", "--addCommons=yes", "--runType=local"},
 		},
 		{
 			name: "find tutorial error",
@@ -114,8 +108,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				tutorialErr: errors.New("error to find tutorial"),
 				inList:      LocalRunType,
 			},
-			wantErr:    errors.New("error to find tutorial"),
-			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
+			wantErr: errors.New("error to find tutorial"),
 		},
 		{
 			name: "error in select response of metrics",
@@ -150,8 +143,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				fileWriteErr:   errors.New("error to write metric file"),
 				inList:         LocalRunType,
 			},
-			wantErr:    errors.New("error to write metric file"),
-			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
+			wantErr: errors.New("error to write metric file"),
 		},
 		{
 			name: "error to create runner config",
@@ -161,8 +153,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				configRunErr:   errors.New("error to create runner config"),
 				inList:         LocalRunType,
 			},
-			wantErr:    errors.New("error to create runner config"),
-			inputStdin: "{\"addCommons\": true, \"sendMetrics\": false, \"runType\": \"local\"}\n",
+			wantErr: errors.New("error to create runner config"),
 		},
 		{
 			name: "error to select response of commons repo",
@@ -181,16 +172,6 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 			wantErr: errors.New("error to select commons repo response"),
 		},
 		{
-			name: "error stdin invalid formula run type",
-			in: in{
-				gitTag:         git.Tag{Name: "1.0.0"},
-				tutorialHolder: rtutorial.TutorialHolder{Current: rtutorial.DefaultTutorial},
-				inList:         "invalid",
-			},
-			wantErr:    ErrInvalidRunType,
-			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"invalid\"}\n",
-		},
-		{
 			name: "error to write ritchie configs",
 			in: in{
 				gitTag:         git.Tag{Name: "1.0.0"},
@@ -198,8 +179,7 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				inList:         LocalRunType,
 				ritConfigErr:   errors.New("error to write ritchie configs"),
 			},
-			wantErr:    errors.New("error to write ritchie configs"),
-			inputStdin: "{\"addCommons\": true,\"sendMetrics\": true, \"runType\": \"local\"}\n",
+			wantErr: errors.New("error to write ritchie configs"),
 		},
 		{
 			name: "success with flags, add commons and send metrics",
@@ -296,17 +276,6 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				metricSender,
 				ritConfigMock,
 			)
-			initStdin := NewInitCmd(
-				repoMock,
-				gitMock,
-				tutorialMock,
-				configRunnerMock,
-				fileMock,
-				inListMock,
-				inBoolMock,
-				metricSender,
-				ritConfigMock,
-			)
 
 			initFlag := NewInitCmd(
 				repoMock,
@@ -320,24 +289,10 @@ func Test_initCmd_runAnyEntry(t *testing.T) {
 				ritConfigMock,
 			)
 
-			initPrompt.PersistentFlags().Bool("stdin", false, "input by stdin")
-			initStdin.PersistentFlags().Bool("stdin", true, "input by stdin")
-			initFlag.PersistentFlags().Bool("stdin", false, "input by stdin")
 			initFlag.SetArgs(tt.inputFlag)
-
-			newReader := strings.NewReader(tt.inputStdin)
-			initStdin.SetIn(newReader)
 
 			got := initPrompt.Execute()
 			assert.Equal(t, tt.wantErr, got)
-
-			if tt.inputStdin != "" {
-				gotStdin := initStdin.Execute()
-				assert.Equal(t, tt.wantErr, gotStdin)
-			} else if len(tt.inputFlag) != 0 {
-				gotFlag := initFlag.Execute()
-				assert.Equal(t, tt.wantErr, gotFlag)
-			}
 		})
 	}
 }

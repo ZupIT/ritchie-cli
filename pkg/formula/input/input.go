@@ -19,7 +19,6 @@ const (
 	BoolType                  = "bool"
 	PassType                  = "password"
 	PathType                  = "path"
-	DynamicType               = "dynamic"
 	MultiselectType           = "multiselect"
 	MultiselectSeparator      = "|"
 	InputConditionalSeparator = "|"

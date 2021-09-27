@@ -32,7 +32,6 @@ import (
 	"github.com/ZupIT/ritchie-cli/pkg/formula/builder"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/flag"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/input/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/formula/input/stdin"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/repo"
 	"github.com/ZupIT/ritchie-cli/pkg/formula/runner"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
@@ -94,12 +93,10 @@ func TestRun(t *testing.T) {
 	preRunner := NewPreRun(ritHome, makeBuilder, batBuilder, shellBuilder, dirManager, fileManager, preRunChecker)
 	pInputRunner := prompt.NewInputManager(cred, iList, iText, iTextValidator, iTextDefault,
 		iBool, iPass, iMultselect, inPath)
-	sInputRunner := stdin.NewInputManager(cred)
 	fInputRunner := flag.NewInputManager(cred)
 
 	types := formula.TermInputTypes{
 		api.Prompt: pInputRunner,
-		api.Stdin:  sInputRunner,
 		api.Flag:   fInputRunner,
 	}
 	inputResolver := runner.NewInputResolver(types)

@@ -23,12 +23,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/ZupIT/ritchie-cli/pkg/api"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 )
-
-const stdinWarning = "stdin commands are deprecated and will no longer be supported in future versions. Please use" +
-	" flags for programatic formula execution"
 
 const (
 	nameFlagName     = "name"
@@ -67,22 +63,6 @@ func addReservedFlags(flags *pflag.FlagSet, flagsToAdd flags) {
 			warning := fmt.Sprintf("The %q type is not supported for the %q flag", flag.kind.String(), flag.name)
 			prompt.Warning(warning)
 		}
-	}
-}
-
-// RunFuncE delegates to stdinFunc if --stdin flag is passed otherwise delegates to promptFunc.
-func RunFuncE(stdinFunc, promptFunc CommandRunnerFunc) CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		stdin, err := cmd.Flags().GetBool(api.Stdin.ToLower())
-		if err != nil {
-			return err
-		}
-
-		if stdin {
-			prompt.Warning(stdinWarning)
-			return stdinFunc(cmd, args)
-		}
-		return promptFunc(cmd, args)
 	}
 }
 

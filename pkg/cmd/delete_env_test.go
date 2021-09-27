@@ -128,8 +128,6 @@ func TestNewDeleteEnv(t *testing.T) {
 			boolMock.On("Bool", mock.Anything, mock.Anything, mock.Anything).Return(tt.inputBoolResult, tt.inputBoolError)
 
 			cmd := NewDeleteEnvCmd(envFindRemover, boolMock, listMock)
-			// TODO: remove stdin flag after  deprecation
-			cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
 			cmd.SetArgs(tt.args)
 
 			err := cmd.Execute()

@@ -26,7 +26,6 @@ import (
 
 	"github.com/ZupIT/ritchie-cli/pkg/formula"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
-	"github.com/ZupIT/ritchie-cli/pkg/stdin"
 )
 
 const runnerFlagName = "runner"
@@ -52,7 +51,7 @@ func NewSetFormulaRunnerCmd(c formula.ConfigRunner, i prompt.InputList) *cobra.C
 		Use:       "formula-runner",
 		Short:     "Set the default formula runner",
 		Example:   "rit set formula-runner",
-		RunE:      RunFuncE(s.runStdin(), s.runFormula()),
+		RunE:      s.runFormula(),
 		ValidArgs: []string{""},
 		Args:      cobra.OnlyValidArgs,
 	}
@@ -116,41 +115,4 @@ func (c *setFormulaRunnerCmd) resolveRunner(runner string) (formula.RunnerType, 
 	}
 
 	return formula.DefaultRun, ErrInvalidRunType
-}
-
-// TODO: Remove stdin after deprecation
-func (c *setFormulaRunnerCmd) runStdin() CommandRunnerFunc {
-	return func(cmd *cobra.Command, args []string) error {
-		stdinData := struct {
-			RunType string `json:"runType"`
-		}{}
-
-		if err := stdin.ReadJson(cmd.InOrStdin(), &stdinData); err != nil {
-			return err
-		}
-
-		runType := formula.DefaultRun
-		for i := range formula.RunnerTypes {
-			if formula.RunnerTypes[i] == stdinData.RunType {
-				runType = formula.RunnerType(i)
-				break
-			}
-		}
-
-		if runType == formula.DefaultRun {
-			return ErrInvalidRunType
-		}
-
-		if err := c.config.Create(runType); err != nil {
-			return err
-		}
-
-		prompt.Success("The default formula runner has been successfully configured!")
-
-		if runType == formula.LocalRun {
-			prompt.Warning(FormulaLocalRunWarning)
-		}
-
-		return nil
-	}
 }

@@ -210,21 +210,6 @@ func TestAddRepoCmd(t *testing.T) {
 			want: someError,
 		},
 		{
-			name: "run with success when input is stdin",
-			args: []string{},
-			fields: fields{
-				stdin: `{"provider": "github", "name": "repo-name", "version": "0.0.0", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
-			},
-		},
-		{
-			name: "run with success when input is stdin and version is not informed",
-			args: []string{},
-			fields: fields{
-				stdin:           `{"provider": "github", "name": "repo-name", "version": "", "url": "https://url.com/repo", "token,omitempty": "", "priority": 5, "isLocal": false}\n`,
-				detailLatestTag: "1.0.0",
-			},
-		},
-		{
 			name: "return error when user add a repo existent",
 			args: []string{},
 			fields: fields{
@@ -326,14 +311,6 @@ func TestAddRepoCmd(t *testing.T) {
 				detailMock,
 			)
 
-			if fields.stdin != "" {
-				newReader := strings.NewReader(fields.stdin)
-				cmd.SetIn(newReader)
-				cmd.PersistentFlags().Bool("stdin", true, "input by stdin")
-			} else {
-				cmd.PersistentFlags().Bool("stdin", false, "input by stdin")
-			}
-
 			cmd.SetArgs(tt.args)
 			got := cmd.Execute()
 
@@ -373,7 +350,6 @@ type fields struct {
 	InputURL           returnWithStringErr
 	InputList          []returnOfInputList
 	InputBool          returnOfInputBool
-	stdin              string
 	detailLatestTag    string
 	tutorialStatus     returnWithStringErr
 	credResolver       returnWithStringErr
@@ -387,7 +363,6 @@ func getFields(testFields fields) fields {
 		InputURL:           returnWithStringErr{},
 		InputBool:          returnOfInputBool{},
 		InputList:          []returnOfInputList{},
-		stdin:              "",
 		detailLatestTag:    "",
 		tutorialStatus:     returnWithStringErr{},
 		credResolver:       returnWithStringErr{},
@@ -401,7 +376,6 @@ func getFields(testFields fields) fields {
 		InputBool:          returnOfInputBool{true, nil},
 		InputList:          []returnOfInputList{{response: "Github", err: nil}},
 		tutorialStatus:     returnWithStringErr{"disabled", nil},
-		stdin:              "",
 		detailLatestTag:    "",
 		credResolver:       returnWithStringErr{"token", nil},
 		gitRepoTag:         returnOfGitRepoTag{git.Tags{git.Tag{Name: "1.0.0"}}, nil},
@@ -429,10 +403,6 @@ func getFields(testFields fields) fields {
 
 	if testFields.tutorialStatus != fieldsNil.tutorialStatus {
 		fields.tutorialStatus = testFields.tutorialStatus
-	}
-
-	if testFields.stdin != fieldsNil.stdin {
-		fields.stdin = testFields.stdin
 	}
 
 	if testFields.detailLatestTag != fieldsNil.detailLatestTag {
