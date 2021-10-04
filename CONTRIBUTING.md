@@ -98,4 +98,4 @@ make functional-test:<name-of-test>
 
 ## Hacktoberfest
 
-If you want to contribute with something thay doesn't have any ISSUE yet, you can create a new detailed ISSUE [here](https://github.com/ZupIT/ritchie-cli/issues/new/choose) for our team to evaluate, and they will eventually add a Hackoberfest label to allow you to participate in the event for resolving this ISSUE.
+If you want to contribute with something that doesn't have any ISSUE yet, you can create a new detailed ISSUE [here](https://github.com/ZupIT/ritchie-cli/issues/new/choose) for our team to evaluate, and they will eventually add a Hacktoberfest label to allow you to participate in the event for resolving this ISSUE.
