@@ -216,6 +216,7 @@ func Build() *cobra.Command {
 	metricsCmd := cmd.NewMetricsCmd(fileManager, inputList)
 	tutorialCmd := cmd.NewTutorialCmd(inputList, tutorialFindSetter)
 	renameCmd := cmd.NewRenameCmd()
+	uninstallCmd := cmd.NewUninstallCmd(inputBool, fileManager)
 
 	// level 2
 	setCredentialCmd := cmd.NewSetCredentialCmd(
@@ -289,6 +290,7 @@ func Build() *cobra.Command {
 				createCmd,
 				deleteCmd,
 				initCmd,
+				uninstallCmd,
 				listCmd,
 				setCmd,
 				showCmd,
