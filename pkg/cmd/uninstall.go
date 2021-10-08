@@ -5,29 +5,29 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/ZupIT/ritchie-cli/internal/pkg/config"
 	"github.com/ZupIT/ritchie-cli/pkg/prompt"
 	"github.com/ZupIT/ritchie-cli/pkg/stream"
 	"github.com/spf13/cobra"
 )
 
-var (
-	ErrCannotUninstall = errors.New("cannot remove rit")
-)
-
 // uninstallCmd type for uninstall command.
 type uninstallCmd struct {
-	inBool prompt.InputBool
-	file   stream.FileRemover
+	inBool        prompt.InputBool
+	file          stream.FileRemover
+	configDeleter config.Deleter
 }
 
 // NewUninstallCmd creates a new cmd instance.
 func NewUninstallCmd(
 	inBool prompt.InputBool,
 	file stream.FileRemover,
+	configDeleter config.Deleter,
 ) *cobra.Command {
 	c := uninstallCmd{
-		inBool: inBool,
-		file:   file,
+		inBool:        inBool,
+		file:          file,
+		configDeleter: configDeleter,
 	}
 
 	cmd := &cobra.Command{
@@ -40,19 +40,18 @@ func NewUninstallCmd(
 	}
 
 	cmd.LocalFlags()
-
 	return cmd
 }
 
 func (c uninstallCmd) runPrompt() CommandRunnerFunc {
 	return func(cmd *cobra.Command, args []string) error {
-		sure, err := c.inBool.Bool("Are you sure", []string{"yes", "no"})
+		sure, err := c.inBool.Bool("This will remove rit from your computer, are you sure about that?", []string{"yes", "no"})
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		if sure {
-			if err := c.uninstall(); err != nil {
+			if err := c.uninstall(runtime.GOOS); err != nil {
 				fmt.Println(err)
 			}
 		}
@@ -61,19 +60,36 @@ func (c uninstallCmd) runPrompt() CommandRunnerFunc {
 	}
 }
 
-func (c uninstallCmd) uninstall() error {
-	switch runtime.GOOS {
+func (c uninstallCmd) uninstall(os string) error {
+	switch os {
 	case "windows":
 		fmt.Println("later")
 	default:
-		if err := c.file.Remove("/usr/local/bin/rit"); err != nil {
-			return errors.New(
-				"Fail to uninstall\n" +
-					"Please try running this command again as root/Administrator\n" +
-					"Example: sudo rit uninstall",
-			)
+		if err := c.removeBin(); err != nil {
+			return err
+		}
+		if err := c.removeRitConfig(); err != nil {
+			return err
 		}
 	}
 
+	return nil
+}
+
+func (c uninstallCmd) removeBin() error {
+	if err := c.file.Remove("/usr/local/bin/rit"); err != nil {
+		return errors.New(
+			"Fail to uninstall\n" +
+				"Please try running this command again as root/Administrator\n" +
+				"Example: sudo rit uninstall",
+		)
+	}
+	return nil
+}
+
+func (c uninstallCmd) removeRitConfig() error {
+	if err := c.configDeleter.Delete(); err != nil {
+		return err
+	}
 	return nil
 }

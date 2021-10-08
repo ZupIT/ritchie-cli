@@ -45,6 +45,11 @@ type Writer interface {
 	Write(configs Configs) error
 }
 
+type Deleter interface {
+	Delete() error
+}
+
+
 type Configs struct {
 	Language string             `toml:"language"`
 	Tutorial string             `toml:"tutorial"`
@@ -104,4 +109,12 @@ func (m Manager) Read() (Configs, error) {
 	}
 
 	return c, nil
+}
+
+// Delete
+func (m Manager) Delete() error {
+	if err := os.Remove(m.ConfigsPath); err != nil {
+		return err
+	}
+	return nil
 }
