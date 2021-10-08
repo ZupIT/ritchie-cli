@@ -15,19 +15,19 @@ import (
 type uninstallCmd struct {
 	inBool        prompt.InputBool
 	file          stream.FileRemover
-	configDeleter config.Deleter
+	configManager config.Manager
 }
 
 // NewUninstallCmd creates a new cmd instance.
 func NewUninstallCmd(
 	inBool prompt.InputBool,
 	file stream.FileRemover,
-	configDeleter config.Deleter,
+	configDeleter config.Manager,
 ) *cobra.Command {
 	c := uninstallCmd{
 		inBool:        inBool,
 		file:          file,
-		configDeleter: configDeleter,
+		configManager: configDeleter,
 	}
 
 	cmd := &cobra.Command{
@@ -88,7 +88,7 @@ func (c uninstallCmd) removeBin() error {
 }
 
 func (c uninstallCmd) removeRitConfig() error {
-	if err := c.configDeleter.Delete(); err != nil {
+	if err := c.configManager.Delete(); err != nil {
 		return err
 	}
 	return nil
