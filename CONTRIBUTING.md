@@ -4,7 +4,24 @@
 
 This is Ritchie contributing guide. Please read the following sections to learn how to ask questions and how to work on something. We value your contributions, and we want to make it as easy as possible for you to work in this repository.
 
-## **Getting started**
+## **Table of contents**
+
+1. [**Before you contribute**](#Before-you-contribute)
+    1. [**Code of Conduct**](#Code-of-Conduct)
+    2. [**Legal**](#Legal)
+3. [**Prerequisites**](#Prerequisites)
+    1. [**Developer Certificate of Origin - DCO**](#Developer-Certificate-of-Origin-DCO)
+    2. [**Choose a branch**](#Choose-a-branch)
+    3. [**Check out the guidelines**](#Check-out-the-guidelines)
+4. [**How to contribute?**](#How-to-contribute?)
+    1. [**Add new feature, bugfixing or improvement**](#Add-new-feature-bugfixing-or-improvement)
+    2. [**Pull request guidelines**](#Pull-request-guidelines)
+    3. [**Pull request review guidelines**](#Pull-request-review-guidelines)
+    4. [**Collaborate on a pull request**](#Collaborate-on-a-pull-request)
+    5. [**Tests guide**](#Tests-guide)
+    6. [**Opening a new issue**](#Opening-a-new-issue)
+5. [**Community**](#Community)
+
 
 ### **Before you contribute**
 
@@ -12,7 +29,7 @@ This is Ritchie contributing guide. Please read the following sections to learn 
 Please follow the [**Code of Conduct**](https://github.com/ZupIT/ritchie-cli/blob/master/CODE_OF_CONDUCT.md) in all your interactions with our project.
 
 ### **Legal**
-- Ritchie is licensed over [**ASL - Apache License**](https://github.com/ZupIT/charlescd/blob/main/LICENSE), version 2, so new files must have the ASL version 2 header, for more information, please check out [**Apache license**](https://www.apache.org/licenses/LICENSE-2.0).
+- Ritchie is licensed over [**ASL - Apache License**](https://github.com/ZupIT/charlescd/blob/main/LICENSE), version 2, so new files must have the ASL version 2 header. For more information, please check out [**Apache license**](https://www.apache.org/licenses/LICENSE-2.0).
 
 - All contributions are subject to the [**Developer Certificate of Origin (DCO)**](https://developercertificate.org). 
 When you commit, use the ```**-s** ``` option to include the Signed-off-by line at the end of the commit log message.
@@ -42,7 +59,7 @@ $ git commit -s -m "This is my commit message"
 ### **Choose a branch**
 One of the first things to decide is which branch to base your work on. If you get confused, just ask and we will help you. If a reviewer realizes you have based your work on the wrong branch, we'll let you know so that you can rebase it.
 
-### **Check out guidelines**
+### **Check out the guidelines**
 To contribute code to Ritchie projects, see the
 - [**Ritchie Community Guidelines**](https://docs.ritchiecli.io/faq#community)
 - [**Open source contribution guidelines**](https://opensource.guide/how-to-contribute/)
@@ -83,7 +100,7 @@ know**](https://forum.zup.com.br/c/en/9).
 
 ### **Pull request review guidelines**
 
-If you want to contribute on the quality of the incoming code, try to follow these suggestions for a happy community :smile:
+If you want to contribute on the quality of the incoming code, we would appreciate if you follow these suggestions: :smile:
 
 - Be suggestive, never impose a correction or criticize your peer. Instead of "change this code", go for "what do you think about implementing it this way?"
 

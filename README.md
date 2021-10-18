@@ -33,7 +33,7 @@ This repository contains the CLI core, which can execute **formulas** stored ins
 
 In Ritchie's context, **a formula is a script** that can be executed automatically or interactively through a command line.
 
-Adapting an existing script to Ritchie structure allows you to run it **locally** or through **Docker**, and to share it on a **Git** repository.
+Adapting an existing script to Ritchie structure allows you to run it **locally** or through **Docker**, and to share it on a **Git repository**.
 
 <img class="special-img-class" src="/docs/img/formulas-explanation.png" alt="Formulas explanation"/>
 
@@ -61,7 +61,7 @@ curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
 
 #### Windows
 
-- Download the installer from [ritchiecli.msi](https://commons-repo.ritchiecli.io/latest/ritchiecli.msi)
+- Download the installer from [**ritchiecli.msi**](https://commons-repo.ritchiecli.io/latest/ritchiecli.msi)
 
 - Using Winget:
 
@@ -69,7 +69,7 @@ curl -fsSL https://commons-repo.ritchiecli.io/install.sh | bash
 winget install Ritchie-CLI
 ```
 
-You can also download rit **packages** or **specific versions** according to the OS [on the documentation](https://docs.ritchiecli.io/getting-started/install-cli)
+You can also download rit **packages** or **specific versions** according to the OS [**on the documentation**](https://docs.ritchiecli.io/getting-started/install-cli)
 
 ### 2️⃣ **Initialize rit locally**
 
@@ -80,7 +80,7 @@ rit init
 ***Note**: You need to import the **commons** repository to be able to create formulas.*
 
 - **Sharing metrics anonymously** will help us improving the tool.
-For any question, check our [**privacy policy**](https://www.zup.com.br/politica-de-privacidade/politica-ritchie#politicas).*
+For any question, check our [**privacy policy**](https://www.zup.com.br/politica-de-privacidade/politica-ritchie#politicas). 
 
 ### 3️⃣ **Add your first formulas repository**
 
@@ -100,7 +100,7 @@ Execute the "hello-world" formula through the command line below:
 rit demo hello-world
 ```
 
-***Note**: This formula has been implemented using **Golang**, so to use it **locally** you'll need Golang to be installed on your machine. If you don't have or don't want to install Golang, you can use the same command with **Docker**:*
+**Note**: This formula has been implemented using **Golang**, so to use it **locally** you'll need Golang to be installed on your machine. If you don't have or don't want to install Golang, you can use the same command with **Docker**:
 
 ```bash
 rit demo hello-world --docker
@@ -119,7 +119,7 @@ rit demo hello-world --docker
 
 Feel free to use, recommend improvements, or contribute to new implementations.
 
-Check out our [**contributing guide**](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md) to learn about our development process, how to suggest bugfixes and improvements. 
+Check out our [**contributing guide**](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md) to learn about our development process, how to suggest bug fixes and improvements. 
 
 Check out other guides:
 
@@ -154,7 +154,7 @@ $ git commit -s -m "This is my commit message"
 ```
 $ git commit -m “My signed commit” Signed-off-by: username <email address>
 ```
-Note: For this option, your e-mail must be the same in registered in GitHub. 
+ **Note:** For this option, your e-mail must be the same in registered in GitHub. 
 
 ## **License**
  [**Apache License 2.0**](https://github.com/ZupIT/charlescd/blob/main/LICENSE).
