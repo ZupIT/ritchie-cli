@@ -83,6 +83,12 @@ jobs:
             command_line: rit show env
             assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED
+        - name: RIT SET ENV command ERROR (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit set env --flag=test
+            assert_file_path: testdata/gha_workflows/env_workflow/assert3.txt
+            expected_result: PASSED
 
   macos:
       runs-on: macos-latest
@@ -118,7 +124,13 @@ jobs:
             command_line: rit show env
             assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
             expected_result: PASSED
-
+        - name: RIT SET ENV command ERROR (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: rit set env --flag=test
+            assert_file_path: testdata/gha_workflows/env_workflow/assert3.txt
+            expected_result: PASSED
+            
   windows:
       runs-on: windows-latest
       steps:
@@ -153,4 +165,10 @@ jobs:
           with:
             command_line: ./rit.exe show env
             assert_file_path: testdata/gha_workflows/env_workflow/assert1.txt
+            expected_result: PASSED
+        - name: RIT SET ENV command ERROR (4)
+          uses: GuillaumeFalourd/test-cli-commands-action@v1
+          with:
+            command_line: ./rit.exe set env --flag=test
+            assert_file_path: testdata/gha_workflows/env_workflow/assert3.txt
             expected_result: PASSED
