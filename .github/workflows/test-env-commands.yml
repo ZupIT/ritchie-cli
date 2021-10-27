@@ -89,6 +89,7 @@ jobs:
             command_line: rit set env --flag=test
             assert_file_path: testdata/gha_workflows/env_workflow/assert3.txt
             expected_result: PASSED
+            specific_line: 1
 
   macos:
       runs-on: macos-latest
@@ -130,6 +131,7 @@ jobs:
             command_line: rit set env --flag=test
             assert_file_path: testdata/gha_workflows/env_workflow/assert3.txt
             expected_result: PASSED
+            specific_line: 1
             
   windows:
       runs-on: windows-latest
@@ -172,3 +174,4 @@ jobs:
             command_line: ./rit.exe set env --flag=test
             assert_file_path: testdata/gha_workflows/env_workflow/assert3.txt
             expected_result: PASSED
+            specific_line: 1
