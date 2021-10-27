@@ -6,33 +6,34 @@ This is Ritchie contributing guide. Please read the following sections to learn 
 
 ## **Table of contents**
 
-1. [**Before you contribute**](#Before-you-contribute)
-    1. [**Code of Conduct**](#Code-of-Conduct)
-    2. [**Legal**](#Legal)
-3. [**Prerequisites**](#Prerequisites)
-    1. [**Developer Certificate of Origin - DCO**](#Developer-Certificate-of-Origin-DCO)
-    2. [**Choose a branch**](#Choose-a-branch)
-    3. [**Check out the guidelines**](#Check-out-the-guidelines)
-4. [**How to contribute?**](#How-to-contribute?)
-    1. [**Add new feature, bugfixing or improvement**](#Add-new-feature-bugfixing-or-improvement)
-    2. [**Pull request guidelines**](#Pull-request-guidelines)
-    3. [**Pull request review guidelines**](#Pull-request-review-guidelines)
-    4. [**Collaborate on a pull request**](#Collaborate-on-a-pull-request)
-    5. [**Tests guide**](#Tests-guide)
-    6. [**Opening a new issue**](#Opening-a-new-issue)
-5. [**Community**](#Community)
+### 1. [**Before you contribute**](#Before-you-contribute)
+> #### i. [**Code of Conduct**](#Code-of-Conduct)
+> #### ii. [**Legal**](#Legal)
+### 2. [**Prerequisites**](#Prerequisites)
+> #### i. [**Developer Certificate of Origin - DCO**](#Developer-Certificate-of-Origin-DCO)
+> #### ii.  [**Choose a branch**](#Choose-a-branch)
+> #### iii. [**Check out the guidelines**](#Check-out-the-guidelines)
+### 3. [**How to contribute?**](#How-to-contribute?)
+> #### i. [**Add new feature, bugfixing or improvement**](#Add-new-feature-bugfixing-or-improvement)
+> #### ii. [**Pull request guidelines**](#Pull-request-guidelines)
+> #### iii. [**Pull request review guidelines**](#Pull-request-review-guidelines)
+> #### iv. [**Collaborate on a pull request**](#Collaborate-on-a-pull-request)
+> #### v. [**Tests guide**](#Tests-guide)
+> #### vi. [**Opening a new issue**](#Opening-a-new-issue)
+### 4. [**Community**](#Community)
 
 
-### **Before you contribute**
+
+## **Before you contribute**
 
 ### **Code of Conduct**
 Please follow the [**Code of Conduct**](https://github.com/ZupIT/ritchie-cli/blob/master/CODE_OF_CONDUCT.md) in all your interactions with our project.
 
 ### **Legal**
-- Ritchie is licensed over [**ASL - Apache License**](https://github.com/ZupIT/charlescd/blob/main/LICENSE), version 2, so new files must have the ASL version 2 header. For more information, please check out [**Apache license**](https://www.apache.org/licenses/LICENSE-2.0).
+- Ritchie is licensed over [**ASF - Apache License**](https://github.com/ZupIT/charlescd/blob/main/LICENSE), version 2, so new files must have the ASL version 2 header. For more information, please check out [**Apache license**](https://www.apache.org/licenses/LICENSE-2.0).
 
 - All contributions are subject to the [**Developer Certificate of Origin (DCO)**](https://developercertificate.org). 
-When you commit, use the ```**-s** ``` option to include the Signed-off-by line at the end of the commit log message.
+When you commit, use the ```**-s -S** ``` option to include the Signed-off-by line at the end of the commit log message.
 
 ## **Prerequisites**
 Check out the requisites before contributing to Ritchie:
@@ -41,21 +42,31 @@ Check out the requisites before contributing to Ritchie:
 
  This is a security layer for the project and for the developers. It is mandatory.
  
- There are two ways to use DCO, see them below: 
+ Follow one of these two methods to add DCO to your commits:
  
 **1. Command line**
  Follow the steps: 
- **Step 1:** Check out your local git:
+ **Step 1:** Configure your local git environment adding the same name and e-mail configured at your GitHub account. It helps to sign commits manually during reviews and suggestions.
 
  ```
 git config --global user.name “Name”
 git config --global user.email “email@domain.com.br”
 ```
-**Step 2:** When you commit, add the sigoff via `-s` flag:
+**Step 2:** Add the Signed-off-by line with the `'-s -S'` flag in the git commit command:
 
 ```
-$ git commit -s -m "This is my commit message"
+$ git commit -s -S -m "This is my commit message"
 ```
+**2. GitHub website**
+You can also manually sign your commits during GitHub reviews and suggestions, follow the steps below: 
+
+**Step 1:** When the commit changes box opens, manually type or paste your signature in the comment box, see the example:
+
+```
+$ git commit -m “My signed commit” Signed-off-by: username <email address>
+```
+For this method, your name and e-mail must be the same registered to your GitHub account.
+
 ### **Choose a branch**
 One of the first things to decide is which branch to base your work on. If you get confused, just ask and we will help you. If a reviewer realizes you have based your work on the wrong branch, we'll let you know so that you can rebase it.
 
@@ -63,6 +74,7 @@ One of the first things to decide is which branch to base your work on. If you g
 To contribute code to Ritchie projects, see the
 - [**Ritchie Community Guidelines**](https://docs.ritchiecli.io/faq#community)
 - [**Open source contribution guidelines**](https://opensource.guide/how-to-contribute/)
+
 ## **How to contribute?** 
 See the guidelines to submit your changes: 
 

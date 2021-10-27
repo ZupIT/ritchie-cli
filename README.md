@@ -6,22 +6,21 @@
 
 # **Table of contents**
 
-- [**What is Ritchie?**](https://github.com/ZupIT/ritchie-cli#what-is-ritchie)
-  - [**A customizable CLI automation tool**](https://github.com/ZupIT/ritchie-cli#a-customizable-cli-automation-tool)
-- [**Usage**](https://github.com/ZupIT/ritchie-cli#usage) 
-- [**Getting Started**](https://github.com/ZupIT/ritchie-cli#-getting-started-)
-  - [**Install rit latest version**](https://github.com/ZupIT/ritchie-cli#1%EF%B8%8F⃣-install-rit-latest-version)
-  - [**Initialize rit locally**](https://github.com/ZupIT/ritchie-cli#2%EF%B8%8F⃣-initialize-rit-locally)
-  - [**Add your first formulas repository**](https://github.com/ZupIT/ritchie-cli#3%EF%B8%8F⃣-add-your-first-formulas-repository)
-  - [**Run the Hello World formula**](https://github.com/ZupIT/ritchie-cli#4%EF%B8%8F⃣-run-the-hello-world-formula)
-- [**Cheat Sheet**](https://github.com/ZupIT/ritchie-cli#-cheat-sheet)
-- [**Documentation**](https://github.com/ZupIT/ritchie-cli#-documentation)
-- [**Contributing**](https://github.com/ZupIT/ritchie-cli#-contributing)
-- [**License**](https://github.com/ZupIT/ritchie-cli#-license)
-- [**Community**](https://github.com/ZupIT/ritchie-cli#-community)
-  - [**Zup Open Source forum**](https://github.com/ZupIT/ritchie-cli#zup-open-source-forum)
+### 1. [**About**](https://github.com/ZupIT/ritchie-cli#what-is-ritchie)
+>#### i. [**A customizable CLI automation tool**](https://github.com/ZupIT/ritchie-cli#a-customizable-cli-automation-tool)
+### 2. [**Getting Started**](https://github.com/ZupIT/ritchie-cli#-getting-started-)
+>#### i. [**Installation**](https://github.com/ZupIT/ritchie-cli#1%EF%B8%8F⃣-install-rit-latest-version)
+>#### ii. [**Initialize rit locally**](https://github.com/ZupIT/ritchie-cli#2%EF%B8%8F⃣-initialize-rit-locally)
+>#### iii. [**Add your first formulas repository**](https://github.com/ZupIT/ritchie-cli#3%EF%B8%8F⃣-add-your-first-formulas-repository)
+>#### iv. [**Run the Hello World formula**](https://github.com/ZupIT/ritchie-cli#4%EF%B8%8F⃣-run-the-hello-world-formula)
+>#### v. [**Usage**](https://github.com/ZupIT/ritchie-cli#usage) 
+### 3. [**Cheat Sheet**](https://github.com/ZupIT/ritchie-cli#-cheat-sheet)
+### 4. [**Documentation**](https://github.com/ZupIT/ritchie-cli#-documentation)
+### 5. [**Contributing**](https://github.com/ZupIT/ritchie-cli#-contributing)
+### 6. [**License**](https://github.com/ZupIT/ritchie-cli#-license)
+### 7. [**Community**](https://github.com/ZupIT/ritchie-cli#-community)
 
-# **What is Ritchie?** 
+# **About** 
 ### All your automations in one place
 
 **Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, executing them through command lines.
@@ -37,14 +36,9 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 
 <img class="special-img-class" src="/docs/img/formulas-explanation.png" alt="Formulas explanation"/>
 
-## **Usage**
 
-<p align="center">
-  <a rel="noopener" target="_blank"><img width="600px" src="https://user-images.githubusercontent.com/22433243/121724504-54c92f00-cabe-11eb-9add-9750a107721c.gif" alt="gif containing the command demonstration"></a>
-</p>
-
-## 🚀  **Getting started** 🤖
-
+## 🚀  **Getting started** 
+### Installation
 ### 1️⃣  **Install rit latest version**
 
 #### Linux
@@ -106,6 +100,11 @@ rit demo hello-world
 rit demo hello-world --docker
 ```
 
+## **Usage**
+
+<p align="center">
+  <a rel="noopener" target="_blank"><img width="600px" src="https://user-images.githubusercontent.com/22433243/121724504-54c92f00-cabe-11eb-9add-9750a107721c.gif" alt="gif containing the command demonstration"></a>
+</p>
 
 ## **Cheat Sheet**
 
@@ -133,28 +132,30 @@ Check out other guides:
 
  This is a security layer for the project and for the developers. It is mandatory.
  
- There are two ways to use DCO, see them below: 
+ Follow one of these two methods to add DCO to your commits:
  
 **1. Command line**
  Follow the steps: 
- **Step 1:** Check out your local git:
+ **Step 1:** Configure your local git environment adding the same name and e-mail configured at your GitHub account. It helps to sign commits manually during reviews and suggestions.
 
  ```
 git config --global user.name “Name”
 git config --global user.email “email@domain.com.br”
 ```
-**Step 2:** When you commit, add the sigoff via `-s` flag:
+**Step 2:** Add the Signed-off-by line with the `'-s -S'` flag in the git commit command:
 
 ```
-$ git commit -s -m "This is my commit message"
+$ git commit -s -S -m "This is my commit message"
 ```
 **2. GitHub website**
+You can also manually sign your commits during GitHub reviews and suggestions, follow the steps below: 
 
-**Step 1:** When the commit changes box opens, add 
+**Step 1:** When the commit changes box opens, manually type or paste your signature in the comment box, see the example:
+
 ```
 $ git commit -m “My signed commit” Signed-off-by: username <email address>
 ```
- **Note:** For this option, your e-mail must be the same in registered in GitHub. 
+For this method, your name and e-mail must be the same registered to your GitHub account.
 
 ## **License**
  [**Apache License 2.0**](https://github.com/ZupIT/charlescd/blob/main/LICENSE).
@@ -163,10 +164,7 @@ $ git commit -m “My signed commit” Signed-off-by: username <email address>
 
 Feel free to reach out to us at:
 
-### [**Zup Open Source Forum**](https://forum.zup.com.br/c/en/9)
+If you have any questions or ideas, let's chat in our [**Zup Open Source Forum**](https://forum.zup.com.br/c/en/9).
 
-[![Zup forum](/docs/img/zup-forum-topics.png)](https://forum.zup.com.br/c/en/9)
 
-- Check out other [**Zup Open Source Projects**](https://opensource.zup.com.br)
 
-[![Zup open source](/docs/img/zup-open-source.png)](https://opensource.zup.com.br)
