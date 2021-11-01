@@ -30,7 +30,7 @@ This is Ritchie contributing guide. Please read the following sections to learn 
 Please follow the [**Code of Conduct**](https://github.com/ZupIT/ritchie-cli/blob/master/CODE_OF_CONDUCT.md) in all your interactions with our project.
 
 ### **Legal**
-- Ritchie is licensed over [**ASF - Apache License**](https://github.com/ZupIT/charlescd/blob/main/LICENSE), version 2, so new files must have the ASL version 2 header. For more information, please check out [**Apache license**](https://www.apache.org/licenses/LICENSE-2.0).
+- Ritchie is licensed over [**ASF - Apache License**](https://github.com/ZupIT/ritchie-cli/blob/main/LICENSE), version 2, so new files must have the ASL version 2 header. For more information, please check out [**Apache license**](https://www.apache.org/licenses/LICENSE-2.0).
 
 - All contributions are subject to the [**Developer Certificate of Origin (DCO)**](https://developercertificate.org). 
 When you commit, use the ```**-s -S** ``` option to include the Signed-off-by line at the end of the commit log message.

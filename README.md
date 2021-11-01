@@ -7,7 +7,6 @@
 # **Table of contents**
 
 ### 1. [**About**](https://github.com/ZupIT/ritchie-cli#what-is-ritchie)
->#### i. [**A customizable CLI automation tool**](https://github.com/ZupIT/ritchie-cli#a-customizable-cli-automation-tool)
 ### 2. [**Getting Started**](https://github.com/ZupIT/ritchie-cli#-getting-started-)
 >#### i. [**Installation**](https://github.com/ZupIT/ritchie-cli#1%EF%B8%8F⃣-install-rit-latest-version)
 >#### ii. [**Initialize rit locally**](https://github.com/ZupIT/ritchie-cli#2%EF%B8%8F⃣-initialize-rit-locally)
@@ -16,9 +15,10 @@
 >#### v. [**Usage**](https://github.com/ZupIT/ritchie-cli#usage) 
 ### 3. [**Cheat Sheet**](https://github.com/ZupIT/ritchie-cli#-cheat-sheet)
 ### 4. [**Documentation**](https://github.com/ZupIT/ritchie-cli#-documentation)
-### 5. [**Contributing**](https://github.com/ZupIT/ritchie-cli#-contributing)
-### 6. [**License**](https://github.com/ZupIT/ritchie-cli#-license)
-### 7. [**Community**](https://github.com/ZupIT/ritchie-cli#-community)
+### 5. [**Code of Conduct**](https://github.com/ZupIT/ritchie-cli/blob/main/CODE_OF_CONDUCT.md)
+### 6. [**Contributing**](https://github.com/ZupIT/ritchie-cli#-contributing)
+### 7. [**License**](https://github.com/ZupIT/ritchie-cli#-license)
+### 8. [**Community**](https://github.com/ZupIT/ritchie-cli#-community)
 
 # **About** 
 ### All your automations in one place
@@ -38,7 +38,8 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 
 
 ## 🚀  **Getting started** 
-### Installation
+
+### **Installation**
 ### 1️⃣  **Install rit latest version**
 
 #### Linux
@@ -112,7 +113,8 @@ rit demo hello-world --docker
 
 ## 📚 [**Documentation**](https://docs.ritchiecli.io)
 
-[![Documentation](/docs/img/documentation-ritchie.png)](https://docs.ritchiecli.io)
+You can find Ritchie's documentation on our [**website**](https://docs.ritchiecli.io).
+
 
 ## 🤝 **Contributing**
 
@@ -126,7 +128,7 @@ Check out other guides:
 
 - [**Developer Guide**](https://github.com/ZupIT/ritchie-cli/blob/master/DEVELOPER_GUIDE.md)
 
-- [**Documentation repository**](https://github.com/ZupIT/docs-ritchie)
+- [**Documentation repository**](https://github.com/ZupIT/ritchie-docs)
 
 ### **Developer Certificate of Origin - DCO**
 
@@ -157,8 +159,11 @@ $ git commit -m “My signed commit” Signed-off-by: username <email address>
 ```
 For this method, your name and e-mail must be the same registered to your GitHub account.
 
+## **Code of Conduct**
+Please follow the [**Code of Conduct**](https://github.com/ZupIT/ritchie-cli/blob/main/CODE_OF_CONDUCT.md) in all your interactions with our project.
+
 ## **License**
- [**Apache License 2.0**](https://github.com/ZupIT/charlescd/blob/main/LICENSE).
+ [**Apache License 2.0**](https://github.com/ZupIT/ritchie-cli/blob/main/LICENSE).
 
 ## **Community**
 
