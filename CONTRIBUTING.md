@@ -71,7 +71,7 @@ For this method, your name and e-mail must be the same registered to your GitHub
 One of the first things to decide is which branch to base your work on. If you get confused, just ask and we will help you. If a reviewer realizes you have based your work on the wrong branch, we'll let you know so that you can rebase it.
 
 ### **Check out the guidelines**
-To contribute code to Ritchie projects, see the
+If you want to contribute code to Ritchie projects, check out:
 - [**Ritchie Community Guidelines**](https://docs.ritchiecli.io/faq#community)
 - [**Open source contribution guidelines**](https://opensource.guide/how-to-contribute/)
 
