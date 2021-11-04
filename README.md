@@ -121,9 +121,9 @@ Check out our [**contributing guide**](https://github.com/ZupIT/ritchie-cli/blob
 
 Check out other guides:
 
-- [**Security**](https://github.com/ZupIT/ritchie-cli/blob/master/SECURITY.md)
+- [**Security**](https://github.com/ZupIT/ritchie-cli/blob/main/SECURITY.md)
 
-- [**Developer Guide**](https://github.com/ZupIT/ritchie-cli/blob/master/DEVELOPER_GUIDE.md)
+- [**Developer Guide**](https://github.com/ZupIT/ritchie-cli/blob/main/DEVELOPER_GUIDE.md)
 
 - [**Documentation repository**](https://github.com/ZupIT/ritchie-docs)
 
