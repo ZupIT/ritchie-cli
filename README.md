@@ -76,7 +76,7 @@ rit init
 
 ### 3️⃣ **Add your first formulas repository**
 
-To access the [**"hello-world" formula**]((https://github.com/ZupIT/ritchie-formulas-demo/tree/master/demo/hello-world)), you need to add the [**ritchie-formulas-demo**](https://github.com/ZupIT/ritchie-formulas-demo) repository locally.
+To access the [**"hello-world" formula**](https://github.com/ZupIT/ritchie-formulas-demo/tree/main/demo/hello-world), you need to add the [**ritchie-formulas-demo**](https://github.com/ZupIT/ritchie-formulas-demo) repository locally.
 
 To do so, you can use the **`rit add repo`** command **manually** on your terminal, or execute the command line below with **input flags**:
 
@@ -117,7 +117,7 @@ You can find Ritchie's documentation on our [**website**](https://docs.ritchiecl
 
 Feel free to use, recommend improvements, or contribute to new implementations.
 
-Check out our [**contributing guide**](https://github.com/ZupIT/ritchie-cli/blob/master/CONTRIBUTING.md) to learn about our development process, how to suggest bug fixes and improvements. 
+Check out our [**contributing guide**](https://github.com/ZupIT/ritchie-cli/blob/main/CONTRIBUTING.md) to learn about our development process, how to suggest bug fixes and improvements. 
 
 Check out other guides:
 
