@@ -2,7 +2,7 @@
 
 # **Contributing Guide**
 
-This is Ritchie contributing guide. Please read the following sections to learn how to ask questions and how to work on something. We value your contributions, and we want to make it as easy as possible for you to work in this repository.
+This is Ritchie's contributing guide. Please read the following sections to learn how to ask questions and how to work on something. We value your contributions, and we want to make it as easy as possible for you to work in this repository.
 
 ## **Table of contents**
 
