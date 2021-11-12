@@ -337,27 +337,32 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_OSCLI_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_OSCLI_PROD }}
           aws-region: sa-east-1
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_OSCLI_PROD }}
+          role-session-name: OsCliProd
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID_OSCLI_PROD }}
 
       - name: Upload files
-        run: aws s3 sync --follow-symlinks $GITHUB_WORKSPACE s3://$AWS_S3_BUCKET
+        run: aws s3 sync --follow-symlinks --cache-control max-age=0,no-cache,no-store,must-revalidate $GITHUB_WORKSPACE s3://$AWS_S3_BUCKET/ritchie
         env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_V3 }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_OSCLI_PROD }}
 
-  unix-smoke-test:
-    needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: Load release version
-        run: |
-          export RIT_VERSION=$(curl https://v3.ritchiecli.io/stable.txt)
-          echo
-          echo -e "\033[1;32mLatest version:\033[1;37m" $RIT_VERSION
+#   unix-smoke-test:
+#     needs: publish
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Load release version
+#         run: |
+#           export RIT_VERSION=$(curl https://v3.ritchiecli.io/stable.txt)
+#           echo
+#           echo -e "\033[1;32mLatest version:\033[1;37m" $RIT_VERSION
 
-      - name: Install ritchie
-        run: curl -fsSL https://v3.ritchiecli.io/install.sh | bash
+#       - name: Install ritchie
+#         run: curl -fsSL https://v3.ritchiecli.io/install.sh | bash
 
-      - name: Verify Command
-        run: rit --version | grep "$RIT_VERSION"
+#       - name: Verify Command
+#         run: rit --version | grep "$RIT_VERSION"
