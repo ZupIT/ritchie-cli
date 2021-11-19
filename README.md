@@ -6,24 +6,22 @@
 
 # **Table of contents**
 
-### 1. [**About**](https://github.com/ZupIT/ritchie-cli#what-is-ritchie)
-### 2. [**Getting Started**](https://github.com/ZupIT/ritchie-cli#-getting-started-)
->#### i. [**Installation**](https://github.com/ZupIT/ritchie-cli#1%EF%B8%8F⃣-install-rit-latest-version)
->#### ii. [**Initialize rit locally**](https://github.com/ZupIT/ritchie-cli#2%EF%B8%8F⃣-initialize-rit-locally)
->#### iii. [**Add your first formulas repository**](https://github.com/ZupIT/ritchie-cli#3%EF%B8%8F⃣-add-your-first-formulas-repository)
->#### iv. [**Run the Hello World formula**](https://github.com/ZupIT/ritchie-cli#4%EF%B8%8F⃣-run-the-hello-world-formula)
->#### v. [**Usage**](https://github.com/ZupIT/ritchie-cli#usage) 
-### 3. [**Cheat Sheet**](https://github.com/ZupIT/ritchie-cli#-cheat-sheet)
-### 4. [**Documentation**](https://github.com/ZupIT/ritchie-cli#-documentation)
-### 5. [**Code of Conduct**](https://github.com/ZupIT/ritchie-cli/blob/main/CODE_OF_CONDUCT.md)
-### 6. [**Contributing**](https://github.com/ZupIT/ritchie-cli#-contributing)
-### 7. [**License**](https://github.com/ZupIT/ritchie-cli#-license)
-### 8. [**Community**](https://github.com/ZupIT/ritchie-cli#-community)
+### 1. [**About**](#about)
+### 2. [**Getting Started**](#getting-started)
+>#### 2.1. [**Installation**](#installation)
+>#### 2.2 [**Initialize rit locally**](#initialize-rit-locally)
+>#### 2.3. [**Add your first formulas repository**](#add-your-first-formulas-repository)
+>#### 2.4. [**Run the Hello World formula**](#run-the-hello-world-formula)
+>#### 2.5. [**Usage**](#usage) 
+### 3. [**Cheat Sheet**](#cheat-sheet)
+### 4. [**Documentation**](#documentation)
+### 5. [**Code of Conduct**](#code-of-conduct)
+### 6. [**Contributing**](#contributing)
+### 7. [**License**](#license)
+### 8. [**Community**](#community)
 
 # **About** 
-### All your automations in one place
-
-**Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automations, executing them through command lines.
+**Ritchie CLI** is an open source project that allows to **create**, **store** and **share** automation, you execute them through command lines.
 
 
 ###  **A customizable CLI automation tool**
@@ -37,7 +35,7 @@ Adapting an existing script to Ritchie structure allows you to run it **locally*
 <img class="special-img-class" src="/docs/img/formulas-explanation.png" alt="Formulas explanation"/>
 
 
-## 🚀  **Getting started** 
+## **Getting started** 
 
 ### **Installation**
 ### 1️⃣  **Install rit latest version**
@@ -108,12 +106,12 @@ rit demo hello-world --docker
 
 <img class="special-img-class" src="/docs/img/cheatsheet.png"  alt="Ritchie CLI Cheat Sheet"/>
 
-## 📚 [**Documentation**](https://docs.ritchiecli.io)
+## [**Documentation**](https://docs.ritchiecli.io)
 
 You can find Ritchie's documentation on our [**website**](https://docs.ritchiecli.io).
 
 
-## 🤝 **Contributing**
+## **Contributing**
 
 Feel free to use, recommend improvements, or contribute to new implementations.
 
@@ -163,10 +161,7 @@ Please follow the [**Code of Conduct**](https://github.com/ZupIT/ritchie-cli/blo
  [**Apache License 2.0**](https://github.com/ZupIT/ritchie-cli/blob/main/LICENSE).
 
 ## **Community**
-
-Feel free to reach out to us at:
-
-If you have any questions or ideas, let's chat in our [**Zup Open Source Forum**](https://forum.zup.com.br/c/en/9).
+Do you have any question or suggestion about Ritchie CLI? Let's chat in our [**forum**](https://forum.zup.com.br/c/en/9).
 
 
 
