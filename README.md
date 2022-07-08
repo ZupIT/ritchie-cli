@@ -1,3 +1,5 @@
+# The Ritchie CLI project has been archived by Zup Innovation. It might start again eventually; however, we won't deliver support for now.
+
 <!---[![CircleCI](https://circleci.com/gh/ZupIT/ritchie-cli/tree/master.svg?style=svg)](https://circleci.com/gh/ZupIT/ritchie-cli) -->
 [![codecov](https://codecov.io/gh/ZupIT/ritchie-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/ZupIT/ritchie-cli)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -128,9 +130,9 @@ Check out other guides:
 ### **Developer Certificate of Origin - DCO**
 
  This is a security layer for the project and for the developers. It is mandatory.
- 
+
  Follow one of these two methods to add DCO to your commits:
- 
+
 **1. Command line**
  Follow the steps: 
  **Step 1:** Configure your local git environment adding the same name and e-mail configured at your GitHub account. It helps to sign commits manually during reviews and suggestions.
@@ -138,7 +140,7 @@ Check out other guides:
  ```
 git config --global user.name “Name”
 git config --global user.email “email@domain.com.br”
-```
+ ```
 **Step 2:** Add the Signed-off-by line with the `'-s -S'` flag in the git commit command:
 
 ```
